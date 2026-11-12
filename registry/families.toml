@@ -31,7 +31,7 @@ signature = [
     ".body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload",
     ".signers[].key:ed25519_signed_payload",
 ]
-source_classes = ["local-core", "testnet-history"]
+source_classes = ["local-core", "testnet-history", "synthetic"]
 fields = [
     "signer_key.signed_payload.payload",
     "op.set_options.signer",
@@ -62,7 +62,7 @@ signature = [
     ".body:account_merge:muxed_ed25519",
     ".body:clawback.from:muxed_ed25519",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = [
     "tx.source_account",
     "tx.source_account.mux_id",
@@ -135,7 +135,7 @@ signature = [
     "ScAddress:muxed_contract",
     ".args[]:address:muxed_contract",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = ["op.invoke_host_function.invoke_contract.args"]
 linked_issues = ["https://github.com/stellar/wallet-backend/pull/792"]
 priority = 3
@@ -211,7 +211,7 @@ signature = [
     "TrustLineEntryV1Ext:v2",
     "ChangeTrustResult:malformed",
 ]
-source_classes = ["local-core", "testnet-history"]
+source_classes = ["local-core", "testnet-history", "synthetic"]
 fields = [
     "op.change_trust.line",
     "op.change_trust.line.liquidity_pool",
@@ -294,7 +294,7 @@ caps = ["CAP-0019"]
 protocol_introduced = 13
 protocol_valid = { min = 13 }
 signature = ["Memo:text"]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = ["tx.memo.type", "tx.memo.text"]
 linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1823"]
 priority = 9
@@ -316,7 +316,7 @@ signature = [
     "ScAddress:claimable_balance",
     "ScAddress:liquidity_pool",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = [
     "op.payment.destination.mux_id",
     "op.path_payment.destination.mux_id",
@@ -341,7 +341,7 @@ signature = [
     "TransactionResultResult:tx_fee_bump_inner_failed",
     ".fee_source:muxed_ed25519",
 ]
-source_classes = ["local-core", "mainnet-history"]
+source_classes = ["local-core", "mainnet-history", "synthetic"]
 fields = [
     "tx.envelope.type",
     "feebump.fee_source",
@@ -385,7 +385,7 @@ signature = [
     "TxSetComponent:txset_comp_txs_maybe_discounted_fee",
     "LedgerCloseMeta:v1",
 ]
-source_classes = ["local-core", "mainnet-history"]
+source_classes = ["local-core", "mainnet-history", "synthetic"]
 fields = []
 linked_issues = []
 priority = 12
@@ -457,7 +457,7 @@ signature = [
     "ClaimPredicate:before_relative_time",
     "CreateClaimableBalanceResult:malformed",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = [
     "op.create_claimable_balance.claimants.destination",
     "op.create_claimable_balance.claimants.predicate",
@@ -480,7 +480,7 @@ signature = [
     ".extra_signers#max",
     "AccountEntryExtensionV2Ext:v3",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = [
     "tx.cond.type",
     "tx.cond.time_bounds",
@@ -569,7 +569,7 @@ signature = [
     "ContractDataDurability=temporary",
     "ContractEventType=contract",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = [
     "tx.ext",
     "tx.soroban.resource_fee",
@@ -761,7 +761,7 @@ signature = [
     "ClaimAtom:order_book",
     "AccountMergeResult:dest_full",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "synthetic"]
 fields = ["op.manage_offer.offer_id", "op.manage_offer.assets_amount_price"]
 linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1785"]
 priority = 14
