@@ -1,0 +1,88 @@
+# upstream sightings the conformance runner must reproduce (plan R14). each row names the
+# corpus entries that carry the sighting's literal inputs, optionally only some of their ops,
+# and the versions before and after the fix. `shapekit conformance reproduce` fails unless
+# every row fails on each `fail` version and passes on each `pass` version. an unsupported or
+# errored check makes a cell inconclusive, which also fails the command.
+#
+# a row fails on a version when at least one counted check diverges, and passes when every
+# counted check passes.
+
+schema = 1
+
+[[reproduction]]
+id = "js-1766-issuer-order"
+sighting = "js-stellar-sdk#1766: Asset.compare ordered issuers by strkey text instead of key bytes"
+link = "https://github.com/stellar/js-stellar-sdk/pull/1766"
+sdk = "js"
+entries = ["cap38.liquidity-pools.synth-assets-js1766-issuers"]
+ops = ["asset_order"]
+fail = ["16.3.0", "17.2.0"]
+pass = ["16.3.1", "17.2.1"]
+
+[[reproduction]]
+id = "js-1766-map-key-order"
+sighting = "js-stellar-sdk#1766: scvSortedMap sorted ScMap keys in a different order from the soroban host"
+link = "https://github.com/stellar/js-stellar-sdk/pull/1766"
+sdk = "js"
+entries = [
+  "soroban.scval-shapes.synth-map-keys-bytes",
+  "soroban.scval-shapes.synth-map-keys-i128",
+  "soroban.scval-shapes.synth-map-keys-mixed-types",
+  "soroban.scval-shapes.synth-map-keys-symbols",
+]
+ops = ["map_sort"]
+fail = ["17.2.0"]
+pass = ["17.2.1"]
+
+[[reproduction]]
+id = "js-1785-non-canonical-ids"
+sighting = "js-stellar-sdk#1785: muxed and offer ids accepted in non-canonical text and unsafe numbers"
+link = "https://github.com/stellar/js-stellar-sdk/issues/1785"
+sdk = "js"
+entries = [
+  "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+  "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+]
+ops = ["id_parse"]
+fail = ["17.2.1"]
+pass = ["17.3.0"]
+
+[[reproduction]]
+id = "js-1789-colliding-map-keys"
+sighting = "js-stellar-sdk#1789: scValToNative merged map keys that collide as native keys"
+link = "https://github.com/stellar/js-stellar-sdk/issues/1789"
+sdk = "js"
+entries = ["soroban.scval-shapes.synth-map-js1789-u32-symbol"]
+ops = ["to_native"]
+fail = ["17.2.1"]
+pass = ["17.3.0"]
+
+[[reproduction]]
+id = "go-asset-less-than"
+sighting = "go-stellar-sdk xdr.Asset.LessThan ordered issuers by strkey text instead of key bytes"
+link = "https://github.com/stellar/go-stellar-sdk/releases/tag/v0.7.2"
+sdk = "go"
+entries = ["cap38.liquidity-pools.synth-assets-js1766-issuers"]
+ops = ["asset_order"]
+fail = ["v0.7.1"]
+pass = ["v0.7.2"]
+
+# the advisory is a json-to-xdr flaw: 28.0.0 reads a ScSpecFunctionV0 with two outputs from
+# json (the xdr allows one) and writes bytes no decoder accepts. the corpus entry holds those
+# bytes, which every version refuses to decode; the probe sends the advisory's json through
+# encode_json, the only op that reaches the flaw.
+[[reproduction]]
+id = "rust-ghsa-3xhm-p452-9wjh"
+sighting = "rs-stellar-xdr GHSA-3xhm-p452-9wjh: JSON deserialization ignored VecM maximum lengths"
+link = "https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh"
+sdk = "rust"
+entries = ["soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2"]
+fail = ["28.0.0"]
+pass = ["28.0.1"]
+
+[[reproduction.probe]]
+name = "advisory-json"
+op = "encode_json"
+request = { type = "ScSpecFunctionV0", json = { doc = "", name = "f", inputs = [], outputs = ["u32", "u32"] } }
+expect = "rejected"
+source = "GHSA-3xhm-p452-9wjh: ScSpecFunctionV0.outputs is ScSpecTypeDef outputs<1>, so a value with two outputs is not representable and must be refused; 28.0.0 encoded it to AAAAAAAAAAFmAAAAAAAAAAAAAAIAAAAEAAAABA=="

@@ -1,0 +1,810 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/testee-protocol.schema.json",
+  "title": "shapekit testee protocol, version 1",
+  "description": "One JSON object per line over stdin (requests) and stdout (responses). See docs/testee-protocol.md.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Request"
+    },
+    {
+      "$ref": "#/$defs/Response"
+    }
+  ],
+  "$defs": {
+    "AssetOrderRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "asset_order"
+        },
+        "a": {
+          "$ref": "#/$defs/Base64"
+        },
+        "b": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "a",
+        "b"
+      ]
+    },
+    "AssetOrderResult": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "enum": [
+            -1,
+            0,
+            1
+          ]
+        }
+      },
+      "required": [
+        "order"
+      ]
+    },
+    "Base64": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+    },
+    "DecodeEncodeRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "decode_encode"
+        },
+        "type": {
+          "$ref": "#/$defs/XdrType"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        },
+        "depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "len_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "type",
+        "xdr",
+        "depth_limit",
+        "len_limit"
+      ]
+    },
+    "DecodeJsonRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "decode_json"
+        },
+        "type": {
+          "$ref": "#/$defs/XdrType"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        },
+        "depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "len_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "type",
+        "xdr",
+        "depth_limit",
+        "len_limit"
+      ]
+    },
+    "EncodeJsonRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "encode_json"
+        },
+        "type": {
+          "$ref": "#/$defs/XdrType"
+        },
+        "json": {}
+      },
+      "required": [
+        "id",
+        "op",
+        "type",
+        "json"
+      ]
+    },
+    "HelloRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "hello"
+        }
+      },
+      "required": [
+        "id",
+        "op"
+      ]
+    },
+    "HelloResult": {
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "const": 1
+        },
+        "sdk": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sdk_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "components": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "ops": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "decode_encode",
+              "decode_json",
+              "encode_json",
+              "strkey_decode",
+              "strkey_encode",
+              "asset_order",
+              "pool_id",
+              "map_sort",
+              "map_validate",
+              "id_parse",
+              "to_native"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "decode_limits": {
+          "enum": [
+            "honoured",
+            "ignored"
+          ]
+        }
+      },
+      "required": [
+        "protocol",
+        "sdk",
+        "sdk_version",
+        "components",
+        "ops",
+        "decode_limits"
+      ]
+    },
+    "Id": {
+      "type": "string"
+    },
+    "IdParseRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "id_parse"
+        },
+        "kind": {
+          "enum": [
+            "muxed",
+            "offer"
+          ]
+        },
+        "input": {
+          "type": [
+            "string",
+            "number"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "kind",
+        "input"
+      ]
+    },
+    "IdParseResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(0|-?[1-9][0-9]*)$"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "JsonResult": {
+      "type": "object",
+      "properties": {
+        "json": {}
+      },
+      "required": [
+        "json"
+      ]
+    },
+    "MapSortRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "map_sort"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "$ref": "#/$defs/Base64"
+              },
+              "val": {
+                "$ref": "#/$defs/Base64"
+              }
+            },
+            "required": [
+              "key",
+              "val"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "entries"
+      ]
+    },
+    "MapValidateRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "map_validate"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "xdr"
+      ]
+    },
+    "MapValidateResult": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "valid"
+      ]
+    },
+    "Native": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "map"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "$ref": "#/$defs/Native"
+                  },
+                  "value": {
+                    "$ref": "#/$defs/Native"
+                  }
+                },
+                "required": [
+                  "key",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "type",
+            "entries"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "array"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Native"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "bytes"
+            },
+            "value": {
+              "$ref": "#/$defs/Base64"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "integer"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^(0|-?[1-9][0-9]*)$"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "bool"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "null"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "object"
+            },
+            "class": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "class",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "PoolIdRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "pool_id"
+        },
+        "a": {
+          "$ref": "#/$defs/Base64"
+        },
+        "b": {
+          "$ref": "#/$defs/Base64"
+        },
+        "fee": {
+          "type": "integer",
+          "minimum": -2147483648,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "a",
+        "b",
+        "fee"
+      ]
+    },
+    "PoolIdResult": {
+      "type": "object",
+      "properties": {
+        "pool_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "pool_id"
+      ]
+    },
+    "Request": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HelloRequest"
+        },
+        {
+          "$ref": "#/$defs/DecodeEncodeRequest"
+        },
+        {
+          "$ref": "#/$defs/DecodeJsonRequest"
+        },
+        {
+          "$ref": "#/$defs/EncodeJsonRequest"
+        },
+        {
+          "$ref": "#/$defs/StrkeyDecodeRequest"
+        },
+        {
+          "$ref": "#/$defs/StrkeyEncodeRequest"
+        },
+        {
+          "$ref": "#/$defs/AssetOrderRequest"
+        },
+        {
+          "$ref": "#/$defs/PoolIdRequest"
+        },
+        {
+          "$ref": "#/$defs/MapSortRequest"
+        },
+        {
+          "$ref": "#/$defs/MapValidateRequest"
+        },
+        {
+          "$ref": "#/$defs/IdParseRequest"
+        },
+        {
+          "$ref": "#/$defs/ToNativeRequest"
+        }
+      ]
+    },
+    "Response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Id"
+            },
+            "status": {
+              "const": "ok"
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/HelloResult"
+                },
+                {
+                  "$ref": "#/$defs/XdrResult"
+                },
+                {
+                  "$ref": "#/$defs/JsonResult"
+                },
+                {
+                  "$ref": "#/$defs/StrkeyDecodeResult"
+                },
+                {
+                  "$ref": "#/$defs/StrkeyEncodeResult"
+                },
+                {
+                  "$ref": "#/$defs/AssetOrderResult"
+                },
+                {
+                  "$ref": "#/$defs/PoolIdResult"
+                },
+                {
+                  "$ref": "#/$defs/MapValidateResult"
+                },
+                {
+                  "$ref": "#/$defs/IdParseResult"
+                },
+                {
+                  "$ref": "#/$defs/ToNativeResult"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "status",
+            "result"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Id"
+            },
+            "status": {
+              "const": "error"
+            },
+            "error": {
+              "type": "object",
+              "properties": {
+                "class": {
+                  "enum": [
+                    "rejected",
+                    "panic",
+                    "bad-request",
+                    "internal"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "class",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "status",
+            "error"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/Id"
+            },
+            "status": {
+              "const": "unsupported"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "id",
+            "status",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StrkeyDecodeRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "strkey_decode"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "text"
+      ]
+    },
+    "StrkeyDecodeResult": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/StrkeyKind"
+        },
+        "payload": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "kind",
+        "payload"
+      ]
+    },
+    "StrkeyEncodeRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "strkey_encode"
+        },
+        "kind": {
+          "$ref": "#/$defs/StrkeyKind"
+        },
+        "payload": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "kind",
+        "payload"
+      ]
+    },
+    "StrkeyEncodeResult": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    },
+    "StrkeyKind": {
+      "enum": [
+        "account",
+        "muxed_account",
+        "seed",
+        "pre_auth_tx",
+        "hash_x",
+        "signed_payload",
+        "contract",
+        "liquidity_pool",
+        "claimable_balance",
+        "muxed_contract"
+      ]
+    },
+    "ToNativeRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "to_native"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "xdr"
+      ]
+    },
+    "ToNativeResult": {
+      "type": "object",
+      "properties": {
+        "native": {
+          "$ref": "#/$defs/Native"
+        }
+      },
+      "required": [
+        "native"
+      ]
+    },
+    "XdrResult": {
+      "type": "object",
+      "properties": {
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "xdr"
+      ]
+    },
+    "XdrType": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*$"
+    }
+  }
+}
