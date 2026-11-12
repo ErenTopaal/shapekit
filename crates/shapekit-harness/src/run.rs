@@ -49,7 +49,9 @@ impl Default for Timeouts {
             describe: Duration::from_secs(60),
             start: Duration::from_secs(30 * 60),
             advance: Duration::from_secs(120),
-            status: Duration::from_secs(60),
+            // a status answer reads the target's store and its container state; on a host
+            // with a load average near 200 the wallet-backend adapter took over 60 s
+            status: Duration::from_secs(300),
             export: Duration::from_secs(10 * 60),
             stop: Duration::from_secs(5 * 60),
             bootstrap: Duration::from_secs(10 * 60),
@@ -260,6 +262,18 @@ fn drive(
                 file.oracle_vocab_version
             );
         }
+        if let Some(tx) = file
+            .ledgers
+            .iter()
+            .flat_map(|l| &l.transactions)
+            .find(|t| t.events.is_none())
+        {
+            bail!(
+                "{} does not say which events the meta of {} can carry; run `shapekit oracle run`",
+                e.oracle_file.display(),
+                tx.hash
+            );
+        }
         oracles.push(file);
     }
     let wanted: HashSet<String> = oracles
@@ -270,6 +284,7 @@ fn drive(
 
     let mut adapter = Adapter::spawn(&opts.adapter, &opts.logs.join(log_name(job, "adapter")))?;
     let outcome = drive_adapter(ctx, opts, &chain, &wanted, &mut adapter, describe_out);
+    ctx.result.notes.append(&mut adapter.late_answers);
     ctx.result.adapter_exit = adapter.finish(Duration::from_secs(30));
     let (stop, records) = outcome?;
     let describe = describe_out.as_ref().expect("set before any ledger ran");

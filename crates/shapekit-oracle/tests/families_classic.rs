@@ -1728,3 +1728,212 @@ fn classic_memo_bytes_keep_their_raw_bytes() {
         }
     }
 }
+
+/// classic.failed-tx: one failing transaction per apply-time result code, each from the source
+/// the recipe names, with as many operations as it submitted (three for the revocations
+/// inside poor's sponsorship of holder). Core charges the base fee per operation and keeps
+/// none of the operations' changes.
+#[test]
+fn classic_failed_tx_codes_charge_the_fee_and_change_nothing() {
+    let fam = "classic.failed-tx";
+    let mut cases: Vec<(String, &str, i128)> = Vec::new();
+    for (slug, role) in [
+        ("payment-line-full", "holder"),
+        ("payment-no-trust", "holder"),
+        ("payment-not-authorized", "holder"),
+        ("payment-src-no-trust", "plain"),
+        ("payment-src-not-authorized", "deauth"),
+        ("path-receive-no-destination", "holder"),
+        ("path-receive-no-trust", "holder"),
+        ("path-receive-not-authorized", "holder"),
+        ("path-receive-line-full", "holder"),
+        ("path-receive-src-no-trust", "plain"),
+        ("path-receive-src-not-authorized", "deauth"),
+        ("path-receive-underfunded", "holder"),
+        ("path-receive-too-few-offers", "holder"),
+        ("path-receive-offer-cross-self", "trader"),
+        ("path-send-no-destination", "holder"),
+        ("path-send-no-trust", "holder"),
+        ("path-send-not-authorized", "holder"),
+        ("path-send-line-full", "holder"),
+        ("path-send-src-no-trust", "plain"),
+        ("path-send-src-not-authorized", "deauth"),
+        ("path-send-underfunded", "holder"),
+        ("path-send-too-few-offers", "holder"),
+        ("path-send-offer-cross-self", "trader"),
+        ("path-send-under-destmin", "holder"),
+        ("create-account-already-exist", "holder"),
+        ("create-account-low-reserve", "holder"),
+        ("create-account-underfunded", "poor"),
+        ("merge-has-sub-entries", "holder"),
+        ("merge-immutable-set", "immutable"),
+        ("merge-is-sponsor", "sponsor"),
+        ("merge-no-account", "plain"),
+        ("manage-data-name-not-found", "plain"),
+        ("manage-data-low-reserve", "poor"),
+        ("set-options-invalid-inflation", "plain"),
+        ("set-options-cant-change", "immutable"),
+        ("set-options-auth-revocable-required", "plain"),
+        ("set-options-low-reserve", "poor"),
+        ("change-trust-cannot-delete", "lp"),
+        ("change-trust-invalid-limit", "plain"),
+        ("change-trust-low-reserve", "poor"),
+        ("change-trust-no-issuer", "plain"),
+        ("change-trust-not-auth-maintain-liabilities", "unauth"),
+        ("change-trust-trust-line-missing", "plain"),
+        ("allow-trust-cant-revoke", "issuer-open"),
+        ("allow-trust-no-trust-line", "issuer-auth"),
+        ("set-trust-line-flags-cant-revoke", "issuer-open"),
+        ("set-trust-line-flags-invalid-state", "issuer-auth"),
+        ("set-trust-line-flags-no-trust-line", "issuer-auth"),
+        ("claim-does-not-exist", "plain"),
+        ("claim-no-trust", "plain"),
+        ("claim-line-full", "full"),
+        ("claim-not-authorized", "unauth"),
+        ("create-claimable-balance-low-reserve", "poor"),
+        ("create-claimable-balance-not-authorized", "deauth"),
+        ("create-claimable-balance-underfunded", "poor"),
+        ("clawback-claimable-balance-does-not-exist", "issuer-auth"),
+        (
+            "clawback-claimable-balance-not-clawback-enabled",
+            "issuer-open",
+        ),
+        ("clawback-claimable-balance-not-issuer", "issuer-auth"),
+        ("clawback-no-trust", "issuer-auth"),
+        ("clawback-underfunded", "issuer-auth"),
+        ("deposit-no-trust", "plain"),
+        ("deposit-not-authorized", "deauth"),
+        ("deposit-underfunded", "lp-capped"),
+        ("deposit-bad-price", "lp-capped"),
+        ("deposit-line-full", "lp-capped"),
+        ("deposit-pool-full", "whale"),
+        ("withdraw-no-trust", "plain"),
+        ("withdraw-underfunded", "lp"),
+        ("withdraw-under-minimum", "lp"),
+        ("withdraw-line-full", "lp"),
+        ("revoke-does-not-exist", "plain"),
+        ("revoke-low-reserve", "sponsor"),
+        ("revoke-not-sponsor", "plain"),
+        ("revoke-only-transferable", "holder"),
+        ("path-receive-exceeded-work-limit", "holder"),
+    ] {
+        cases.push((slug.to_string(), role, 1));
+    }
+    for op in ["sell", "buy"] {
+        for (s, role) in [
+            ("buy-no-trust", "plain"),
+            ("buy-not-authorized", "unauth"),
+            ("cross-self", "trader"),
+            ("line-full", "full"),
+            ("low-reserve", "poor"),
+            ("not-found", "holder"),
+            ("sell-no-trust", "plain"),
+            ("sell-not-authorized", "deauth"),
+            ("underfunded", "poor"),
+        ] {
+            cases.push((format!("manage-{op}-{s}"), role, 1));
+        }
+    }
+    cases.push(("allow-trust-low-reserve".into(), "holder", 3));
+    cases.push(("set-trust-line-flags-low-reserve".into(), "holder", 3));
+    for n in NETWORKS {
+        for (slug, role, ops) in &cases {
+            let ctx = format!("{slug} {n}");
+            let tx = only_tx(fam, &format!("{fam}.p30-{slug}"), n);
+            assert!(!tx.successful, "{ctx}");
+            assert_eq!(tx.result, "tx_failed", "{ctx}");
+            assert_eq!(tx.fee.source, account(fam, role), "{ctx}");
+            assert_eq!(tx.fee.charged.0, ops * BASE_FEE, "{ctx}");
+            assert!(op_changes(&tx).is_empty(), "{ctx}: {:?}", op_changes(&tx));
+        }
+    }
+}
+
+/// classic.failed-tx: the three pairs whose later transaction fails only because the earlier
+/// one, applied first in the same ledger, changed a signer, the thresholds or the sequence
+/// ledger of the account it relies on.
+#[test]
+fn classic_failed_tx_ordered_pairs_fail_the_later_transaction() {
+    let fam = "classic.failed-tx";
+    for n in NETWORKS {
+        for (slug, want) in [
+            ("op-bad-auth", "tx_failed"),
+            ("tx-bad-auth-extra", "tx_bad_auth_extra"),
+            ("tx-bad-min-seq-gap", "tx_bad_min_seq_age_or_gap"),
+        ] {
+            let ctx = format!("{slug} {n}");
+            let l = entry_ledger(fam, &format!("{fam}.p30-{slug}"), n);
+            assert_eq!(l.transactions.len(), 2, "{ctx}");
+            let first = l.transactions.iter().find(|t| t.apply_index == 0).unwrap();
+            let second = l.transactions.iter().find(|t| t.apply_index == 1).unwrap();
+            assert!(first.successful, "{ctx}");
+            assert_eq!(
+                first.fee.source,
+                account(fam, &format!("{slug}-first")),
+                "{ctx}"
+            );
+            assert!(!second.successful, "{ctx}");
+            assert_eq!(second.result, want, "{ctx}");
+            let source = if slug == "op-bad-auth" {
+                "second"
+            } else {
+                "target"
+            };
+            assert_eq!(
+                second.fee.source,
+                account(fam, &format!("{slug}-{source}")),
+                "{ctx}"
+            );
+        }
+    }
+}
+
+/// cap15.fee-bump: the inner failures apply alone can give. The payer is charged for the
+/// inner operation and the bump; the earlier transaction of each pair succeeds.
+#[test]
+fn cap15_inner_apply_time_failures() {
+    let fam = "cap15.fee-bump";
+    let payer = account(fam, "payer");
+    for n in NETWORKS {
+        for (slug, paired) in [
+            ("inner-bad-auth", true),
+            ("inner-bad-seq", true),
+            ("inner-bad-auth-extra", true),
+            ("inner-bad-min-seq-gap", true),
+            ("inner-bad-sponsorship", false),
+        ] {
+            let ctx = format!("{slug} {n}");
+            let l = entry_ledger(fam, &format!("{fam}.p30-{slug}"), n);
+            assert_eq!(l.transactions.len(), if paired { 2 } else { 1 }, "{ctx}");
+            let bumped = l
+                .transactions
+                .iter()
+                .find(|t| t.apply_index == l.transactions.len() as u32 - 1)
+                .unwrap();
+            assert!(!bumped.successful, "{ctx}");
+            assert_eq!(bumped.result, "tx_fee_bump_inner_failed", "{ctx}");
+            assert!(bumped.inner_hash.is_some(), "{ctx}");
+            assert_eq!(bumped.fee.source, payer, "{ctx}");
+            assert_eq!(bumped.fee.charged.0, 2 * BASE_FEE, "{ctx}");
+            if paired {
+                let first = l.transactions.iter().find(|t| t.apply_index == 0).unwrap();
+                assert!(first.successful, "{ctx}");
+            }
+        }
+    }
+}
+
+/// classic.max-length: a 21st signer on multisig fails and changes nothing.
+#[test]
+fn classic_max_length_21st_signer_fails() {
+    let fam = "classic.max-length";
+    let multisig = account(fam, "multisig");
+    for n in NETWORKS {
+        let tx = only_tx(fam, &format!("{fam}.p30-signer-21-too-many"), n);
+        assert!(!tx.successful, "{n}");
+        assert_eq!(tx.result, "tx_failed", "{n}");
+        assert_eq!(tx.fee.source, multisig, "{n}");
+        assert_eq!(tx.fee.charged.0, BASE_FEE, "{n}");
+        assert!(op_changes(&tx).is_empty(), "{n}");
+    }
+}

@@ -50,6 +50,10 @@ pub struct Common {
     /// Seconds the adapter may take to answer start (it may build images).
     #[arg(long, default_value_t = 1800)]
     start_timeout: u64,
+    /// Seconds the adapter may take to answer one status request. A late answer ends the
+    /// chain, so this is sized for a heavily loaded host, not for a quiet one.
+    #[arg(long, default_value_t = 300)]
+    status_timeout: u64,
     /// Bind the replay server to 127.0.0.1 and create no docker network, for targets that
     /// run as host processes.
     #[arg(long)]
@@ -150,6 +154,7 @@ fn options(c: &Common, adapter: Vec<String>, logs: PathBuf) -> Result<RunOptions
             ledger: Duration::from_secs(c.ledger_timeout),
             bootstrap: Duration::from_secs(c.bootstrap_timeout),
             start: Duration::from_secs(c.start_timeout),
+            status: Duration::from_secs(c.status_timeout),
             ..Timeouts::default()
         },
         docker: !c.no_docker,

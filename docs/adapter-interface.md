@@ -206,7 +206,7 @@ target stores: `kind`, the claimed fields, optionally `scope` and `op_index`, an
 
 Values use the vocabulary's encodings exactly: amounts, balances, limits, ids and sequence
 numbers as decimal strings (`"-100"`), 32-bit values as JSON integers, assets as `native` or
-`CODE:ISSUER` (SEP-11), pool-share trustline assets as `pool-share:<hex pool id>`, hashes and
+`CODE:ISSUER` (SEP-11), pool-share trustline assets as `pool-share:<L strkey of the pool id>`, hashes and
 XDR as lowercase hex or base64 as the field's description says, signers as full strkeys
 including `P...` signed-payload signers and their payload.
 
@@ -504,7 +504,8 @@ What the oracle says each transaction changed, read only from `LedgerCloseMeta`,
   with its payload).
 - Amounts, balances, limits, ids and sequence numbers are decimal strings; flags, weights,
   thresholds and ledger numbers are JSON integers.
-- Assets are `native` or `CODE:ISSUER`; trustline assets may also be `pool-share:<hex>`.
+- Assets are `native` or `CODE:ISSUER`; trustline assets may also be `pool-share:<L strkey>`,
+  the pool id in its CAP-38 `L` strkey form. Pools are named by the same `L` strkey everywhere.
 - `action` is `created`, `updated`, `removed` or `restored`.
 
 The oracle file of an entry is `{"oracle_vocab_version", "network_passphrase", "ledgers":
@@ -551,7 +552,7 @@ A change in what an address holds of an asset: account native balance, trustline
 | field | type | always present | meaning |
 |---|---|---|---|
 | `account` | string | yes |  |
-| `asset` | string | yes |  |
+| `asset` | string | yes | `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey (CAP-38 form, not hex) for a pool-share trustline. |
 | `flags` | integer (uint32) | yes |  |
 | `limit` | decimal string | yes |  |
 
@@ -560,7 +561,7 @@ A change in what an address holds of an asset: account native balance, trustline
 | field | type | always present | meaning |
 |---|---|---|---|
 | `account` | string | yes |  |
-| `asset` | string | yes |  |
+| `asset` | string | yes | `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey (CAP-38 form, not hex) for a pool-share trustline. |
 
 ### `trustline-flags`
 
@@ -568,7 +569,7 @@ A change in what an address holds of an asset: account native balance, trustline
 |---|---|---|---|
 | `account` | string | yes |  |
 | `after` | integer (uint32) | yes |  |
-| `asset` | string | yes |  |
+| `asset` | string | yes | `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey (CAP-38 form, not hex) for a pool-share trustline. |
 | `before` | integer (uint32) | yes |  |
 
 ### `trustline-limit`
@@ -577,7 +578,7 @@ A change in what an address holds of an asset: account native balance, trustline
 |---|---|---|---|
 | `account` | string | yes |  |
 | `after` | decimal string | yes |  |
-| `asset` | string | yes |  |
+| `asset` | string | yes | `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey (CAP-38 form, not hex) for a pool-share trustline. |
 | `before` | decimal string | yes |  |
 
 ### `signer-added`
@@ -707,7 +708,7 @@ A pool-share trustline balance.
 | `after` | decimal string | yes |  |
 | `before` | decimal string | yes |  |
 | `delta` | decimal string | yes |  |
-| `pool` | string | yes |  |
+| `pool` | string | yes | The pool id as an `L` strkey. |
 
 ### `liquidity-pool`
 
@@ -716,7 +717,7 @@ A pool-share trustline balance.
 | `action` | `"created"` / `"updated"` / `"removed"` / `"restored"` | yes |  |
 | `asset_a` | string | yes |  |
 | `asset_b` | string | yes |  |
-| `pool` | string | yes |  |
+| `pool` | string | yes | The pool id as an `L` strkey. |
 | `reserve_a_after` | decimal string | yes |  |
 | `reserve_a_before` | decimal string | yes |  |
 | `reserve_b_after` | decimal string | yes |  |

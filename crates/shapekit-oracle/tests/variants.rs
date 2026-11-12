@@ -16,7 +16,7 @@
 //! - `L...` and `B...` pool and claimable balance ids, which hash assets and operation ids
 //!   that can name the root or a contract.
 //!
-//! Strings that hold such values inside (an asset `CODE:G...`, `pool-share:<hex>`, entry
+//! Strings that hold such values inside (an asset `CODE:G...`, `pool-share:L...`, entry
 //! descriptions) are compared token by token. Base64 XDR (`key_xdr`, `data_xdr`,
 //! `topics_xdr`) and long hex XDR tokens are compared as bytes after every bound value's raw
 //! 32 bytes are replaced by its placeholder, so an embedded contract id is masked and

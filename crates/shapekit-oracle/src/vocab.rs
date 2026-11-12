@@ -156,22 +156,30 @@ pub enum Change {
     },
     TrustlineCreated {
         account: String,
+        /// `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey
+        /// (CAP-38 form, not hex) for a pool-share trustline.
         asset: String,
         limit: Int,
         flags: u32,
     },
     TrustlineRemoved {
         account: String,
+        /// `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey
+        /// (CAP-38 form, not hex) for a pool-share trustline.
         asset: String,
     },
     TrustlineFlags {
         account: String,
+        /// `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey
+        /// (CAP-38 form, not hex) for a pool-share trustline.
         asset: String,
         before: u32,
         after: u32,
     },
     TrustlineLimit {
         account: String,
+        /// `native`, `CODE:ISSUER`, or `pool-share:` followed by the pool id as an `L` strkey
+        /// (CAP-38 form, not hex) for a pool-share trustline.
         asset: String,
         before: Int,
         after: Int,
@@ -262,12 +270,14 @@ pub enum Change {
     /// A pool-share trustline balance.
     PoolShares {
         account: String,
+        /// The pool id as an `L` strkey.
         pool: String,
         before: Int,
         after: Int,
         delta: Int,
     },
     LiquidityPool {
+        /// The pool id as an `L` strkey.
         pool: String,
         action: Action,
         asset_a: String,
@@ -432,6 +442,38 @@ pub struct TxFacts {
     pub participants: Vec<Participant>,
     pub changes: Vec<StateChange>,
     pub declared: Declared,
+    /// Which events the transaction's meta can carry, so a reader knows when the absence of
+    /// a `token-event` or `contract-event` is a fact and when the meta format simply has no
+    /// place for it. Absent only in files written before the field existed; readers must not
+    /// guess a coverage for those.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub events: Option<EventCoverage>,
+}
+
+/// What a transaction's meta format records as events (CAP-67 changed this in protocol 23).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum EventCoverage {
+    /// `TransactionMeta` v4: every operation's events, classic ones included, and the
+    /// transaction-level fee events. Absence of an event is meaningful at every scope.
+    Unified,
+    /// `TransactionMeta` v3 of a Soroban transaction: only the invoked contract's own events,
+    /// at operation scope. No fee events and no events for classic operations.
+    SorobanOperation,
+    /// `TransactionMeta` v0 to v3 without Soroban meta: no events at all. Transfers, fees and
+    /// other token movements happened but the meta has no event for them.
+    None,
+}
+
+impl EventCoverage {
+    /// Whether the meta would show an event raised at `scope`, if there was one.
+    pub fn covers(self, scope: ChangeScope) -> bool {
+        match self {
+            EventCoverage::Unified => true,
+            EventCoverage::SorobanOperation => scope == ChangeScope::Operation,
+            EventCoverage::None => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -470,6 +512,8 @@ pub fn asset_id(asset: &Asset) -> String {
     }
 }
 
+/// As [`asset_id`], plus `pool-share:<L strkey>` for a pool-share trustline: `PoolId`'s
+/// display form in stellar-xdr is the CAP-38 strkey.
 pub fn trustline_asset_id(asset: &TrustLineAsset) -> String {
     match asset {
         TrustLineAsset::Native => "native".into(),

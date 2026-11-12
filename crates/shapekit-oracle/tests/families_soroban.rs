@@ -566,6 +566,20 @@ fn cap46_config_upgrades_name_the_settings() {
             upgrade_settings(&l.upgrades[0]),
             vec![(Action::Updated, "contract_execution_lanes".to_string())]
         );
+
+        // the classic header upgrades the recipe arms together in the last ledger
+        let l = entry_ledger(fam, &format!("{fam}.p30-header-upgrades"), n);
+        assert!(l.transactions.is_empty(), "{n}");
+        let got: Vec<&serde_json::Value> = l.upgrades.iter().map(|u| &u.upgrade).collect();
+        for want in [
+            serde_json::json!({"base_fee": 200}),
+            serde_json::json!({"base_reserve": 50_000_000}),
+            serde_json::json!({"max_tx_set_size": 1000}),
+            serde_json::json!({"flags": 1}),
+        ] {
+            assert!(got.contains(&&want), "{n}: {want} not in {got:?}");
+        }
+        assert_eq!(got.len(), 4, "{n}");
     }
 }
 

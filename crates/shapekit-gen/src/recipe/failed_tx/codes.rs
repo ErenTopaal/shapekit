@@ -1685,7 +1685,12 @@ fn work_limit(ctx: &mut ChainCtx, w: &World) -> Result<()> {
     for (maker, txs) in &makers {
         ok(ctx, maker, mine(vec![trust(&crw)?]), &[])?;
         let units = (txs * PER_TX) as i64;
-        ok(ctx, &k.issuer_open, mine(vec![pay(maker, &crw, units * UNIT)]), &[])?;
+        ok(
+            ctx,
+            &k.issuer_open,
+            mine(vec![pay(maker, &crw, units * UNIT)]),
+            &[],
+        )?;
         for _ in 0..*txs {
             let ops = (0..PER_TX)
                 .map(|_| sell(&crw, &Asset::Native, UNIT, ONE, 0))

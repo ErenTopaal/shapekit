@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use shapekit_oracle::vocab::TxFacts;
+use shapekit_oracle::vocab::{ChangeScope, EventCoverage, TxFacts};
 
 use crate::protocol::{ChangeClaim, Claims, TxRecord, Unmapped};
 
@@ -117,6 +117,10 @@ pub struct TxComparison {
     pub unmapped: Vec<Unmapped>,
     /// Protocol oddities in the export that do not change the verdict, for triage.
     pub notes: Vec<String>,
+    /// Claimed facts the meta of this transaction cannot show, so neither the oracle's nor
+    /// the export's side of them was compared (see [`uncomparable_claims`]).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub not_comparable: Vec<String>,
 }
 
 /// The fields that identify one change of a kind, so an exported change with other values
@@ -185,6 +189,52 @@ fn key_of(m: &Map<String, Value>, kind: &str, claim: &ChangeClaim) -> Vec<Value>
         .collect()
 }
 
+/// Kinds the oracle reads only from events.
+pub const EVENT_KINDS: &[&str] = &["token-event", "contract-event"];
+
+/// The change scope an event of `stage` lands in, as the oracle assigns it.
+fn stage_scope(stage: &str) -> Option<ChangeScope> {
+    match stage {
+        "before-all-txs" => Some(ChangeScope::FeeProcessing),
+        "operation" => Some(ChangeScope::Operation),
+        "after-tx" => Some(ChangeScope::TxAfter),
+        "after-all-txs" => Some(ChangeScope::PostApplyFee),
+        _ => None,
+    }
+}
+
+/// Indexes of the event claims the transaction's meta cannot show. A claim on an event kind
+/// is comparable only when the meta's event coverage includes every scope the claim can
+/// match: the scopes of the stages its `where` lists, or every event scope when it does not
+/// restrict `stage`. Without this, a target that derives transfers from operations looks
+/// wrong on a v3 classic transaction, whose meta has no events at all (CAP-67 started
+/// classic events in protocol 23), when nothing about the target can be judged there.
+pub fn uncomparable_claims(coverage: EventCoverage, claims: &Claims) -> Vec<usize> {
+    const ALL: [ChangeScope; 4] = [
+        ChangeScope::FeeProcessing,
+        ChangeScope::Operation,
+        ChangeScope::TxAfter,
+        ChangeScope::PostApplyFee,
+    ];
+    claims
+        .changes
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| EVENT_KINDS.contains(&c.kind.as_str()))
+        .filter(|(_, c)| {
+            let scopes: Vec<ChangeScope> = match c.filter.get("stage") {
+                Some(stages) => stages
+                    .iter()
+                    .filter_map(|v| v.as_str().and_then(stage_scope))
+                    .collect(),
+                None => ALL.to_vec(),
+            };
+            scopes.iter().any(|s| !coverage.covers(*s))
+        })
+        .map(|(i, _)| i)
+        .collect()
+}
+
 /// The first claim of `kind` whose filter the change satisfies.
 fn claim_for(claims: &Claims, kind: &str, m: &Map<String, Value>, exported: bool) -> Option<usize> {
     claims
@@ -207,6 +257,28 @@ pub fn compare_tx(
         tx: tx.clone(),
         ..TxComparison::default()
     };
+    // run.rs refuses oracle files without coverage, so None only reaches here from callers
+    // that build facts by hand; those get the old behaviour of comparing everything
+    let skipped = oracle
+        .events
+        .map(|c| uncomparable_claims(c, claims))
+        .unwrap_or_default();
+    for i in &skipped {
+        let c = &claims.changes[*i];
+        out.not_comparable.push(format!(
+            "{}{}: the meta of {tx} carries {} events, so this claim cannot be checked here",
+            c.kind,
+            if c.filter.is_empty() {
+                String::new()
+            } else {
+                format!(" where {}", serde_json::to_string(&c.filter).unwrap_or_default())
+            },
+            match oracle.events {
+                Some(EventCoverage::SorobanOperation) => "only the invoked contract's operation",
+                _ => "no",
+            }
+        ));
+    }
     let problem = |kind, fact: &str, detail: String, expected, got| Problem {
         kind,
         tx: tx.clone(),
@@ -241,7 +313,9 @@ pub fn compare_tx(
             unreachable!("a state change serialises as an object")
         };
         let kind = field(&m, "kind").as_str().unwrap_or("").to_owned();
-        if let Some(i) = claim_for(claims, &kind, &m, false) {
+        if let Some(i) = claim_for(claims, &kind, &m, false)
+            && !skipped.contains(&i)
+        {
             expected.entry(i).or_default().push(m);
         }
     }
@@ -388,6 +462,7 @@ pub fn compare_tx(
             }
         }
         match claim_for(claims, &c.kind, &c.fields, true) {
+            Some(i) if skipped.contains(&i) => {}
             Some(i) => got.entry(i).or_default().push(c.fields.clone()),
             None => out.notes.push(format!(
                 "exported a {} that no claim covers: {}",
@@ -507,10 +582,12 @@ pub fn verdict_of(comparisons: Vec<TxComparison>) -> EntryVerdict {
     let mut problems = Vec::new();
     let mut unmapped = Vec::new();
     let mut notes = Vec::new();
+    let mut not_comparable = Vec::new();
     for c in comparisons {
         problems.extend(c.problems);
         unmapped.extend(c.unmapped);
         notes.extend(c.notes);
+        not_comparable.extend(c.not_comparable);
     }
     let has = |k: ProblemKind| problems.iter().any(|p| p.kind == k);
     let count = |k: ProblemKind| problems.iter().filter(|p| p.kind == k).count();
@@ -540,6 +617,17 @@ pub fn verdict_of(comparisons: Vec<TxComparison>) -> EntryVerdict {
             format!(
                 "{} of {in_scope} in-scope fact(s) missing",
                 count(ProblemKind::Dropped)
+            ),
+        )
+    } else if !not_comparable.is_empty() {
+        // a pass would claim the event facts were checked; they were not
+        (
+            Verdict::OutOfScope,
+            None,
+            format!(
+                "{in_scope} comparable fact(s) match, but {} claim(s) cannot be checked because the meta has no place for those events: {}",
+                not_comparable.len(),
+                not_comparable.join("; ")
             ),
         )
     } else if in_scope == 0 {

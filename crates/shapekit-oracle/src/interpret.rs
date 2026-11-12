@@ -456,7 +456,16 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
         participants: parts.into_vec(),
         changes,
         declared: declared(tx.envelope),
+        events: Some(event_coverage(tx.meta)),
     })
+}
+
+fn event_coverage(meta: &stellar_xdr::TransactionMeta) -> EventCoverage {
+    match meta {
+        stellar_xdr::TransactionMeta::V4(_) => EventCoverage::Unified,
+        stellar_xdr::TransactionMeta::V3(m) if m.soroban_meta.is_some() => EventCoverage::SorobanOperation,
+        _ => EventCoverage::None,
+    }
 }
 
 // the order of entries inside one change list is not meaningful (core release builds emit

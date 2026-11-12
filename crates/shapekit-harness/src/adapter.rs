@@ -3,6 +3,7 @@
 
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
+use std::collections::HashSet;
 use std::path::Path;
 use std::process::{Child, ChildStdin, Command as Process, Stdio};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, sync_channel};
@@ -57,6 +58,10 @@ pub struct Adapter {
     lines: Receiver<Line>,
     next_id: u64,
     reader: Option<std::thread::JoinHandle<()>>,
+    /// Requests the harness stopped waiting for, whose answers may still arrive.
+    abandoned: HashSet<String>,
+    /// Lines of abandoned requests that arrived later and were skipped, for the report.
+    pub late_answers: Vec<String>,
 }
 
 fn cmd_name(c: &Command) -> &'static str {
@@ -123,6 +128,8 @@ impl Adapter {
             lines: rx,
             next_id: 0,
             reader: Some(reader),
+            abandoned: HashSet::new(),
+            late_answers: Vec::new(),
         })
     }
 
@@ -157,12 +164,51 @@ impl Adapter {
         "still running with stdout closed".into()
     }
 
-    /// Reads the next response line for `id`.
+    /// Reads the next response line for `id`. A line that answers a request this adapter
+    /// gave up on (see `abandoned`) is skipped, so an answer that arrives after its timeout,
+    /// while the harness is already waiting on the next request (in practice `stop`), is not
+    /// a protocol violation. Any other foreign id still is.
     fn next(&mut self, cmd: &str, id: &str, deadline: Instant) -> Result<Response, AdapterFailure> {
+        loop {
+            let resp = self.next_line(cmd, id, deadline)?;
+            if resp.id == id {
+                return Ok(resp);
+            }
+            if self.abandoned.contains(&resp.id) {
+                let last = !matches!(resp.body, ResponseBody::Record { .. });
+                if last {
+                    self.abandoned.remove(&resp.id);
+                }
+                self.late_answers.push(format!(
+                    "a {} line for abandoned request {} arrived while waiting on {cmd}",
+                    match resp.body {
+                        ResponseBody::Ok { .. } => "final ok",
+                        ResponseBody::Error { .. } => "final error",
+                        ResponseBody::Record { .. } => "record",
+                    },
+                    resp.id
+                ));
+                continue;
+            }
+            return Err(AdapterFailure::Protocol {
+                cmd: cmd.into(),
+                message: format!("response id {:?}, the open request is {id:?}", resp.id),
+            });
+        }
+    }
+
+    fn next_line(
+        &mut self,
+        cmd: &str,
+        id: &str,
+        deadline: Instant,
+    ) -> Result<Response, AdapterFailure> {
         let wait = deadline.saturating_duration_since(Instant::now());
         let line = match self.lines.recv_timeout(wait) {
             Ok(l) => l,
             Err(RecvTimeoutError::Timeout) => {
+                // its answer may still come; the next request must not choke on it
+                self.abandoned.insert(id.to_owned());
                 return Err(AdapterFailure::Timeout {
                     cmd: cmd.into(),
                     waited: wait,
@@ -189,12 +235,6 @@ impl Adapter {
             let shown: String = text.chars().take(300).collect();
             protocol(format!("not a response line ({e}): {shown}"))
         })?;
-        if resp.id != id {
-            return Err(protocol(format!(
-                "response id {:?}, the open request is {id:?}",
-                resp.id
-            )));
-        }
         Ok(resp)
     }
 
