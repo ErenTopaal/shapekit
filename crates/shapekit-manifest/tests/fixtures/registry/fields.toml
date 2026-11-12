@@ -1,0 +1,14 @@
+schema_version = 1
+
+[[field]]
+id = "tx.extra-signers"
+xdr_path = "TransactionV1Envelope.tx.cond.v2.extra_signers"
+validated_by_core = "partial"
+checks = "at most two, no duplicates, signed payloads not empty"
+protocol_min = 19
+risk = "an indexer that trusts a payload length can truncate it"
+handling = "store the full payload"
+go_accessors = ["xdr.Preconditions.V2.ExtraSigners"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "100-140" },
+]

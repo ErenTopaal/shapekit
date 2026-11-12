@@ -1,0 +1,24 @@
+schema_version = 1
+
+[[limit]]
+id = "xdr-depth"
+applies_to = "every xdr decode"
+recommended = 500
+unit = "levels"
+derived_from = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host.rs", symbol = "DEFAULT_XDR_RW_LIMITS", value = 500 },
+]
+rationale = "matches the host read limit"
+
+[[limit]]
+id = "xdr.envelope.len"
+applies_to = "envelope decode"
+recommended = 132096
+unit = "bytes"
+network_setting = true
+protocol_min = 20
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 5694341 },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated.rs", symbol = "Limits", value = "1012", measured_with = "binary search over depth" },
+]
+rationale = "network setting"

@@ -1,0 +1,29 @@
+schema_version = 1
+
+[[cap]]
+id = "CAP-0040"
+title = "Signed payload signer"
+status = "Final"
+protocol = 19
+xdr_additions = ["SIGNER_KEY_TYPE_ED25519_SIGNED_PAYLOAD"]
+indexer_visible = true
+source = { path = "core/cap-0040.md", xdr_diff = "v18.0...v19.0" }
+
+[[cap]]
+id = "CAP-0059"
+title = "BLS12-381 host functions"
+status = "Final"
+protocol = 22
+xdr_additions = []
+indexer_visible = false
+reason = "adds cost types only, no shape an indexer reads"
+source = { path = "core/cap-0059.md" }
+
+[[cap]]
+id = "CAP-0089"
+title = "Draft for a later protocol"
+status = "Draft"
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/cap-0089.md" }
+notes = "no protocol yet, so no family is required"

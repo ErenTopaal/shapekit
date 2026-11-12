@@ -40,7 +40,7 @@ fn invalid_file_fails_before_any_network_call() {
 }
 
 #[test]
-fn only_pins_verify_is_registered() {
+fn registered_commands() {
     let out = shapekit(&["--help"]);
     let help = String::from_utf8_lossy(&out.stdout);
     let commands: Vec<&str> = help
@@ -53,7 +53,7 @@ fn only_pins_verify_is_registered() {
         .lines()
         .filter_map(|l| l.split_whitespace().next())
         .collect();
-    assert_eq!(commands, ["pins", "help"]);
+    assert_eq!(commands, ["pins", "registry", "manifest", "help"]);
 }
 
 #[test]

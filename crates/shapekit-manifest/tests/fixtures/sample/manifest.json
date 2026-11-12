@@ -1,0 +1,133 @@
+{
+  "corpus_version": "0.1.0",
+  "entries": [
+    {
+      "caps": [
+        "CAP-0015"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "cap15.fee-bump",
+      "fields_exercised": [
+        "tx.extra-signers"
+      ],
+      "flags": [],
+      "id": "cap15.fee-bump.testnet-5694308-soroban",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "fee-bump wrapping a soroban invocation, taken from testnet ledger 5694308",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 30,
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "testnet-history",
+        "ledger_seq": 5694308,
+        "provenance_url": "https://soroban-testnet.stellar.org",
+        "tx_index": 1
+      },
+      "synthetic": false,
+      "variants": {
+        "testnet": {
+          "network_passphrase": "Test SDF Network ; September 2015",
+          "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.testnet-5694308-soroban/testnet.xdr",
+          "xdr_sha256": "393dc289db4a0ba208d00b6d0b14a63a210d1b9fa5cce6bde71964b306d58a88"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "cap27.strkey-forms",
+      "fields_exercised": [],
+      "flags": [
+        "issuer-order-differs"
+      ],
+      "id": "cap27.strkey-forms.issuer-order-pair",
+      "kind": "strkey",
+      "linked_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1766"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/strkey/cap27.strkey-forms.issuer-order-pair.json",
+        "sha256": "89f149955490d5f8c76acfc78e2b56fb3fdec582f9508d25504becf7d8570b7c"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "cap46.scval-nesting",
+      "fields_exercised": [],
+      "flags": [],
+      "id": "cap46.scval-nesting.testnet-5694308-return",
+      "kind": "xdr",
+      "linked_issues": [],
+      "passphrase_dependent": false,
+      "protocol": {
+        "generated_at": 30,
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "testnet-history",
+        "ledger_seq": 5694308,
+        "provenance_url": "https://soroban-testnet.stellar.org"
+      },
+      "synthetic": false,
+      "variants": {
+        "testnet": {
+          "expected_json_file": "entries/cap46.scval-nesting/cap46.scval-nesting.testnet-5694308-return/testnet.expected.json",
+          "expected_json_sha256": "865e1ee5f012ded204c936532929e81d4ad8308fe59c98c86157a11265104ad8",
+          "network_passphrase": "Test SDF Network ; September 2015",
+          "xdr_file": "entries/cap46.scval-nesting/cap46.scval-nesting.testnet-5694308-return/testnet.xdr",
+          "xdr_sha256": "8d4a669d9853705cca6942426f3c66481d81aee452098b81c6da1f92d1985db0"
+        }
+      },
+      "xdr_type": "ScVal"
+    }
+  ],
+  "generated_with": {
+    "core_image": {
+      "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51",
+      "repository": "stellar/stellar-core",
+      "tag": "30.0.0-3642.0e49751aa.noble"
+    },
+    "soroban_env_host": "30.0.0",
+    "stellar_xdr": "30.0.0",
+    "xdr_definitions": {
+      "commit": "4f524bbac80c781c06e4fb5fc93a2d0d331d6705",
+      "tag": "v30.0"
+    }
+  },
+  "protocol_tiers": [
+    30
+  ],
+  "schema_version": 1
+}

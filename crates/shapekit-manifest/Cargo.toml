@@ -1,7 +1,22 @@
 [package]
 name = "shapekit-manifest"
+description = "Corpus manifest types and validation, and the XDR toolkit every corpus check uses."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[dependencies]
+hex.workspace = true
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+shapekit-registry.workspace = true
+stellar-xdr.workspace = true
+thiserror.workspace = true
+walkdir.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,13 @@
+schema_version = 1
+
+[[family]]
+id = "cap40.signed-payload-signer"
+title = "Signed payload signers"
+caps = ["CAP-0040"]
+protocol_introduced = 19
+protocol_valid = { min = 19 }
+signature = ["SignerKey:ed25519_signed_payload"]
+source_classes = ["local-core", "testnet-history"]
+fields = ["tx.extra-signers"]
+linked_issues = ["https://github.com/stellar/wallet-backend/pull/729"]
+priority = 1

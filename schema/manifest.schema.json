@@ -1,0 +1,501 @@
+{
+  "$defs": {
+    "CoreImage": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "DecodeExpectation": {
+      "enum": [
+        "must-accept",
+        "must-reject",
+        "implementation-defined"
+      ],
+      "type": "string"
+    },
+    "Entry": {
+      "additionalProperties": false,
+      "properties": {
+        "caps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "expected": {
+          "$ref": "#/$defs/Expected"
+        },
+        "family": {
+          "type": "string"
+        },
+        "fields_exercised": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "flags": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "`<family>.<slug>`.",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntryKind"
+        },
+        "lcm_version": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "linked_issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "passphrase_dependent": {
+          "type": "boolean"
+        },
+        "protocol": {
+          "$ref": "#/$defs/EntryProtocol"
+        },
+        "source": {
+          "$ref": "#/$defs/Source"
+        },
+        "synthetic": {
+          "type": "boolean"
+        },
+        "tx_meta_version": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "variants": {
+          "$ref": "#/$defs/Variants",
+          "description": "The bytes per network. Only `kind = xdr` entries have variants."
+        },
+        "vector": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FileRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The vector file of a non-xdr entry. Filled in by `shapekit manifest build`, never\nwritten inside the vector file itself."
+        },
+        "xdr_type": {
+          "description": "The `stellar-xdr` type name of every variant's bytes. Required for `kind = xdr`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "family",
+        "caps",
+        "protocol",
+        "source",
+        "synthetic",
+        "passphrase_dependent",
+        "expected"
+      ],
+      "type": "object"
+    },
+    "EntryKind": {
+      "enum": [
+        "xdr",
+        "ordering",
+        "strkey",
+        "textual-id",
+        "native-projection"
+      ],
+      "type": "string"
+    },
+    "EntryProtocol": {
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": {
+          "description": "The protocol the bytes were produced at; absent for vectors that have no protocol.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "introduced": {
+          "description": "The protocol that introduced the shape.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "valid_max": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "valid_min": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "introduced",
+        "valid_min"
+      ],
+      "type": "object"
+    },
+    "Expected": {
+      "additionalProperties": false,
+      "properties": {
+        "decode": {
+          "$ref": "#/$defs/DecodeExpectation"
+        },
+        "roundtrip": {
+          "description": "Whether decoding and re-encoding must give back the same bytes.",
+          "type": "boolean"
+        },
+        "validity": {
+          "$ref": "#/$defs/Validity"
+        }
+      },
+      "required": [
+        "validity",
+        "decode",
+        "roundtrip"
+      ],
+      "type": "object"
+    },
+    "FileRef": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "GeneratedWith": {
+      "additionalProperties": false,
+      "description": "The exact upstream stack the corpus was produced with.",
+      "properties": {
+        "core_image": {
+          "$ref": "#/$defs/CoreImage"
+        },
+        "soroban_env_host": {
+          "type": "string"
+        },
+        "stellar_xdr": {
+          "description": "Version of the `stellar-xdr` crate that decoded and checked every entry.",
+          "type": "string"
+        },
+        "xdr_definitions": {
+          "$ref": "#/$defs/XdrDefinitions"
+        }
+      },
+      "required": [
+        "stellar_xdr",
+        "xdr_definitions",
+        "core_image",
+        "soroban_env_host"
+      ],
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "chain": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "class": {
+          "$ref": "#/$defs/SourceClassSchema"
+        },
+        "ledger_seq": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "provenance_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "recipe": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tx_hash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tx_index": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "upstream": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Upstream"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "class"
+      ],
+      "type": "object"
+    },
+    "SourceClassSchema": {
+      "enum": [
+        "core-golden",
+        "local-core",
+        "testnet-history",
+        "mainnet-history",
+        "synthetic"
+      ],
+      "type": "string"
+    },
+    "Upstream": {
+      "additionalProperties": false,
+      "description": "A file taken from an upstream repository, such as a core golden.",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "repo": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repo",
+        "ref",
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "Validity": {
+      "enum": [
+        "valid",
+        "invalid-by-core",
+        "not-emittable"
+      ],
+      "type": "string"
+    },
+    "Variant": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_json_file": {
+          "description": "SEP-51 XDR-JSON of the decoded value, as `to_xdr_json` writes it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expected_json_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "network_passphrase": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "oracle_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "oracle_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "xdr_file": {
+          "type": "string"
+        },
+        "xdr_sha256": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "xdr_file",
+        "xdr_sha256"
+      ],
+      "type": "object"
+    },
+    "Variants": {
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Variant"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Bytes that do not depend on a network passphrase, or that were produced under a\npassphrase that is neither testnet nor mainnet (core goldens)."
+        },
+        "mainnet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Variant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "testnet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Variant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "XdrDefinitions": {
+      "additionalProperties": false,
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "commit"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The corpus manifest: a header and every entry, sorted by id. All file paths are relative\nto the directory holding `manifest.json` and use forward slashes.",
+  "properties": {
+    "corpus_version": {
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/Entry"
+      },
+      "type": "array"
+    },
+    "generated_with": {
+      "$ref": "#/$defs/GeneratedWith"
+    },
+    "protocol_tiers": {
+      "description": "Every protocol some entry was generated at, ascending.",
+      "items": {
+        "format": "uint32",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "corpus_version",
+    "generated_with",
+    "protocol_tiers",
+    "entries"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

@@ -1,0 +1,37 @@
+schema_version = 1
+
+[[family]]
+id = "cap15.fee-bump"
+title = "Fee-bump envelopes"
+caps = ["CAP-0015"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = ["TransactionEnvelope:tx_fee_bump"]
+source_classes = ["local-core", "testnet-history"]
+fields = ["tx.extra-signers"]
+linked_issues = []
+priority = 2
+
+[[family]]
+id = "cap46.scval-nesting"
+title = "Nested ScVal containers"
+caps = ["CAP-0046-01"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = ["ScVal:vec[]:vec"]
+source_classes = ["testnet-history"]
+fields = []
+linked_issues = []
+priority = 3
+
+[[family]]
+id = "cap27.strkey-forms"
+title = "Account strkey forms"
+caps = ["CAP-0027"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = ["MuxedAccount:ed25519"]
+source_classes = ["synthetic"]
+fields = []
+linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1766"]
+priority = 1
