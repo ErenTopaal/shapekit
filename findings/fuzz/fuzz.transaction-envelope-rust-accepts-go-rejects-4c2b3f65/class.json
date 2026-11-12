@@ -1,0 +1,26 @@
+{
+  "count": 336,
+  "first_seen": {
+    "iteration": 147467,
+    "origin": "seed-mutation",
+    "worker": 0
+  },
+  "go": {
+    "error": "xdr.UnmarshalWithOptions: decoding TransactionV1Envelope: decoding Transaction: decoding TransactionExt: decoding SorobanTransactionData: decoding SorobanResources: decoding LedgerFootprint: decoding LedgerKey: decoding LedgerKeyContractData: decoding ScVal: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '-5'",
+    "verdict": "reject"
+  },
+  "go_testee": "go@v0.8.0",
+  "id": "fuzz.transaction-envelope-rust-accepts-go-rejects-4c2b3f65",
+  "kind": "rust-accepts-go-rejects",
+  "minimize_calls": 102,
+  "original_len": 168,
+  "run_seed": 20261112,
+  "rust": {
+    "reencoded_len": 168,
+    "reencoded_sha256": "e034d2bc414d14069bd12eb6f137971bab9b37357dc0a45255bf362bc2ffdbcc",
+    "verdict": "accept"
+  },
+  "signature": "TransactionEnvelope|rust-accepts-go-rejects|rust:ok|go:decoding Bool: xdr:DecodeBool: bool not N or N - read: '_'",
+  "stellar_xdr": "30.0.0",
+  "xdr_type": "TransactionEnvelope"
+}

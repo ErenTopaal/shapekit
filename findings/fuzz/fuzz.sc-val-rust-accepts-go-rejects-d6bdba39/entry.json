@@ -1,0 +1,34 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "implementation-defined",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "fuzz",
+  "fields_exercised": [],
+  "flags": [
+    "differential-fuzz",
+    "rust-accepts-go-rejects"
+  ],
+  "id": "fuzz.sc-val-rust-accepts-go-rejects-d6bdba39",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "differential fuzz reproducer, minimised to 8 bytes from 8. stellar-xdr 30.0.0 accepts, re-encodes to 8 bytes that differ from the input; go-stellar-sdk (go@v0.8.0) rejects: xdr.UnmarshalWithOptions: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '2'. both decoded with depth 1000 and the input length as length limit. expected: implementation-defined: stellar-xdr reads these bytes but writes different ones back, so they are not canonical and no conforming encoder emits them. first seen: worker 2 iteration 207 (pool-mutation), 63408 inputs in this class during the run.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 30,
+    "valid_min": 30
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "fuzz.sc-val-rust-accepts-go-rejects-d6bdba39/any.xdr",
+      "xdr_sha256": "cd04a4754498e06db5a13c5f371f1f04ff6d2470f24aa9bd886540e5dce77f70"
+    }
+  },
+  "xdr_type": "ScVal"
+}

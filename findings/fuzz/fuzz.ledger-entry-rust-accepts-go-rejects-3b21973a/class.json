@@ -1,0 +1,26 @@
+{
+  "count": 2227,
+  "first_seen": {
+    "iteration": 16849,
+    "origin": "arbitrary-mutation",
+    "worker": 3
+  },
+  "go": {
+    "error": "xdr.UnmarshalWithOptions: decoding LedgerEntryData: decoding ConfigSettingEntry: decoding EvictionIterator: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '1100000000'",
+    "verdict": "reject"
+  },
+  "go_testee": "go@v0.8.0",
+  "id": "fuzz.ledger-entry-rust-accepts-go-rejects-3b21973a",
+  "kind": "rust-accepts-go-rejects",
+  "minimize_calls": 23,
+  "original_len": 32,
+  "run_seed": 20261112,
+  "rust": {
+    "reencoded_len": 32,
+    "reencoded_sha256": "5d4bd3c6d777e1f91b2eafda7f66e328c51a1444ea9aaff72656aa6931243443",
+    "verdict": "accept"
+  },
+  "signature": "LedgerEntry|rust-accepts-go-rejects|rust:ok|go:decoding Bool: xdr:DecodeBool: bool not N or N - read: '_'",
+  "stellar_xdr": "30.0.0",
+  "xdr_type": "LedgerEntry"
+}

@@ -1,0 +1,14 @@
+# differential fuzz classes that are triaged already (docs/differential-fuzzing.md).
+# format: <class-id> <issue draft or reason>. a listed class is counted but does not fail the run.
+#
+# stellar-xdr reads a bool word other than 0 or 1 (as false; core's xdrpp reads it as true),
+# go-stellar-sdk refuses it. one root cause, one class per fuzzed type that carries a bool.
+# corpus entry: soroban.scval-shapes.synth-bool-value-2
+fuzz.contract-event-rust-accepts-go-rejects-87ef0c1b findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.ledger-close-meta-rust-accepts-go-rejects-72079e36 findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.ledger-entry-rust-accepts-go-rejects-3b21973a findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.sc-val-rust-accepts-go-rejects-d6bdba39 findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.soroban-authorization-entry-rust-accepts-go-rejects-4429b1c0 findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.transaction-envelope-rust-accepts-go-rejects-4c2b3f65 findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.transaction-result-meta-rust-accepts-go-rejects-eae5f26b findings/issues/fuzz-rust-bool-non-canonical.md
+fuzz.transaction-result-meta-v1-rust-accepts-go-rejects-a2517a17 findings/issues/fuzz-rust-bool-non-canonical.md

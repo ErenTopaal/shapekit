@@ -4,6 +4,7 @@ mod capture_cmd;
 mod conformance_cmd;
 mod coverage_cmd;
 mod findings_cmd;
+mod fuzz_cmd;
 mod gen_cmd;
 mod golden_cmd;
 mod guide_cmd;
@@ -111,6 +112,9 @@ enum Command {
         #[command(subcommand)]
         command: findings_cmd::FindingsCommand,
     },
+    /// Differential decode and re-encode fuzzing, stellar-xdr in process against the go
+    /// testee, seeded from the corpus.
+    Fuzz(fuzz_cmd::FuzzArgs),
     /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
     Coverage(coverage_cmd::CoverageArgs),
     /// The corpus as a release asset.
@@ -508,6 +512,7 @@ fn main() -> ExitCode {
         Command::Serve(args) => serve_cmd::run(args),
         Command::Harness { command } => harness_cmd::run(command),
         Command::Findings { command } => findings_cmd::run(command),
+        Command::Fuzz(args) => fuzz_cmd::run(args),
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
     };

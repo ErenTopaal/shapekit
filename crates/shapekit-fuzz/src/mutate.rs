@@ -105,7 +105,11 @@ fn mutate_once(rng: &mut Rng, data: &mut Vec<u8>, donor: Option<&[u8]>) {
             if let Some(o) = word_offset(rng, len) {
                 let w = u32::from_be_bytes(data[o..o + 4].try_into().expect("four bytes"));
                 let d = rng.below(5) as u32 + 1;
-                let w = if rng.chance(50) { w.wrapping_add(d) } else { w.wrapping_sub(d) };
+                let w = if rng.chance(50) {
+                    w.wrapping_add(d)
+                } else {
+                    w.wrapping_sub(d)
+                };
                 data[o..o + 4].copy_from_slice(&w.to_be_bytes());
             }
         }
@@ -128,7 +132,11 @@ fn mutate_once(rng: &mut Rng, data: &mut Vec<u8>, donor: Option<&[u8]>) {
             }
         }
         8 => {
-            let at = if len >= 4 { rng.below(len / 4 + 1) * 4 } else { 0 };
+            let at = if len >= 4 {
+                rng.below(len / 4 + 1) * 4
+            } else {
+                0
+            };
             let n = 4 * (1 + rng.below(4));
             let mut ins = vec![0u8; n];
             if rng.chance(50) {
@@ -141,13 +149,13 @@ fn mutate_once(rng: &mut Rng, data: &mut Vec<u8>, donor: Option<&[u8]>) {
             data.truncate(cut);
         }
         10 => {
-            if let (Some(d), Some(o)) = (donor, word_offset(rng, len)) {
-                if d.len() >= 4 {
-                    let from = rng.below(d.len() / 4) * 4;
-                    let n = 1 + rng.below(((d.len() - from) / 4).min(32));
-                    let end = (o + n * 4).min(len);
-                    data.splice(o..end, d[from..from + n * 4].iter().copied());
-                }
+            if let (Some(d), Some(o)) = (donor, word_offset(rng, len))
+                && d.len() >= 4
+            {
+                let from = rng.below(d.len() / 4) * 4;
+                let n = 1 + rng.below(((d.len() - from) / 4).min(32));
+                let end = (o + n * 4).min(len);
+                data.splice(o..end, d[from..from + n * 4].iter().copied());
             }
         }
         _ => {
@@ -176,8 +184,8 @@ mod tests {
     #[test]
     fn mutation_is_deterministic_and_terminates_on_empty_input() {
         let mut out = Vec::new();
-        for seed in 0..2 {
-            let mut rng = Rng::new(seed % 1);
+        for _ in 0..2 {
+            let mut rng = Rng::new(42);
             let mut data = Vec::new();
             for _ in 0..1000 {
                 mutate(&mut rng, &mut data, Some(&[0, 0, 0, 1, 0, 0, 0, 2]));

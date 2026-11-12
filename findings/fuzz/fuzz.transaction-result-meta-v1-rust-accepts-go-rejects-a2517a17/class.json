@@ -1,0 +1,26 @@
+{
+  "count": 1463,
+  "first_seen": {
+    "iteration": 1448,
+    "origin": "seed-mutation",
+    "worker": 3
+  },
+  "go": {
+    "error": "xdr.UnmarshalWithOptions: decoding TransactionMeta: decoding TransactionMetaV3: decoding SorobanTransactionMeta: decoding ScVal: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '11'",
+    "verdict": "reject"
+  },
+  "go_testee": "go@v0.8.0",
+  "id": "fuzz.transaction-result-meta-v1-rust-accepts-go-rejects-a2517a17",
+  "kind": "rust-accepts-go-rejects",
+  "minimize_calls": 58,
+  "original_len": 104,
+  "run_seed": 20261112,
+  "rust": {
+    "reencoded_len": 104,
+    "reencoded_sha256": "7a71cda6ecb1d8df2d7fb0895f5c10ed6dad106bb43e5618bc74e90d2ee0749e",
+    "verdict": "accept"
+  },
+  "signature": "TransactionResultMetaV1|rust-accepts-go-rejects|rust:ok|go:decoding Bool: xdr:DecodeBool: bool not N or N - read: '_'",
+  "stellar_xdr": "30.0.0",
+  "xdr_type": "TransactionResultMetaV1"
+}

@@ -1,0 +1,26 @@
+{
+  "count": 26490,
+  "first_seen": {
+    "iteration": 233,
+    "origin": "pool-mutation",
+    "worker": 1
+  },
+  "go": {
+    "error": "xdr.UnmarshalWithOptions: decoding ContractEventBody: decoding ContractEventV0: decoding ScVal: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '127'",
+    "verdict": "reject"
+  },
+  "go_testee": "go@v0.8.0",
+  "id": "fuzz.contract-event-rust-accepts-go-rejects-87ef0c1b",
+  "kind": "rust-accepts-go-rejects",
+  "minimize_calls": 13,
+  "original_len": 28,
+  "run_seed": 20261112,
+  "rust": {
+    "reencoded_len": 28,
+    "reencoded_sha256": "3addfb141cd7c9c4c6543a82191a3707ac29c7a041217782e61d4d91c691aee8",
+    "verdict": "accept"
+  },
+  "signature": "ContractEvent|rust-accepts-go-rejects|rust:ok|go:decoding Bool: xdr:DecodeBool: bool not N or N - read: '_'",
+  "stellar_xdr": "30.0.0",
+  "xdr_type": "ContractEvent"
+}

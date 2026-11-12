@@ -107,11 +107,11 @@ pub fn nested_seeds(ty: FuzzType, bytes: &[u8]) -> Vec<(FuzzType, Vec<u8>)> {
             }
         }
         FuzzType::LedgerEntry => {
-            if let Ok(entry) = x::LedgerEntry::from_xdr(bytes, limits) {
-                if let x::LedgerEntryData::ContractData(cd) = &entry.data {
-                    push(&mut out, FuzzType::ScVal, &cd.key);
-                    push(&mut out, FuzzType::ScVal, &cd.val);
-                }
+            if let Ok(entry) = x::LedgerEntry::from_xdr(bytes, limits)
+                && let x::LedgerEntryData::ContractData(cd) = &entry.data
+            {
+                push(&mut out, FuzzType::ScVal, &cd.key);
+                push(&mut out, FuzzType::ScVal, &cd.val);
             }
         }
         _ => {}

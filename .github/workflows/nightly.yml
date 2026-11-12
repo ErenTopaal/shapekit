@@ -265,3 +265,45 @@ jobs:
           name: harness-reproduce
           path: harness-reproduce/
           retention-days: 30
+
+  fuzz:
+    # beyond-rfp: corpus-seeded differential fuzzing, stellar-xdr in process against the go
+    # testee (docs/differential-fuzzing.md). a disagreement class missing from
+    # findings/fuzz/known-classes.txt fails the job, and so does a stored reproducer that no
+    # longer lands in its class. the seed is the date, so a failure replays from the log
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: fuzz
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          seed=$(date -u +%Y%m%d)
+          echo "seed $seed"
+          "$RUNNER_TEMP/bin/shapekit" fuzz --seconds 1500 --seed "$seed" --jobs 4 \
+            --out fuzz-out --findings fuzz-out/new
+      - name: replay stored reproducers
+        if: ${{ !cancelled() }}
+        # the fuzz step built the go testee
+        run: |
+          "$RUNNER_TEMP/bin/shapekit" fuzz --replay findings/fuzz --no-build
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f fuzz-out/FUZZ.md ]; then cat fuzz-out/FUZZ.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: fuzz
+          path: fuzz-out/
+          retention-days: 30

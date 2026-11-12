@@ -1,0 +1,26 @@
+{
+  "count": 1302,
+  "first_seen": {
+    "iteration": 6045,
+    "origin": "seed-mutation",
+    "worker": 0
+  },
+  "go": {
+    "error": "xdr.UnmarshalWithOptions: decoding LedgerCloseMetaV0: decoding TransactionResultMeta: decoding TransactionMeta: decoding TransactionMetaV2: decoding LedgerEntryChanges: decoding LedgerEntryChange: decoding LedgerEntry: decoding LedgerEntryData: decoding ContractDataEntry: decoding ScVal: decoding Bool: xdr:DecodeBool: bool not 0 or 1 - read: '8388608'",
+    "verdict": "reject"
+  },
+  "go_testee": "go@v0.8.0",
+  "id": "fuzz.ledger-close-meta-rust-accepts-go-rejects-72079e36",
+  "kind": "rust-accepts-go-rejects",
+  "minimize_calls": 465,
+  "original_len": 568,
+  "run_seed": 20261112,
+  "rust": {
+    "reencoded_len": 560,
+    "reencoded_sha256": "bd5fdef80d35116a6972ad592142b3ca9e8cfd0f9edccbbf89a44a4ce64fe116",
+    "verdict": "accept"
+  },
+  "signature": "LedgerCloseMeta|rust-accepts-go-rejects|rust:ok|go:decoding Bool: xdr:DecodeBool: bool not N or N - read: '_'",
+  "stellar_xdr": "30.0.0",
+  "xdr_type": "LedgerCloseMeta"
+}
