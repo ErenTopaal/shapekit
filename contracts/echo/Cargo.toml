@@ -15,3 +15,7 @@ soroban-sdk.workspace = true
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+# set only by contracts/legacy/p22, whose soroban-sdk 22 lacks events::Event
+sdk22 = []

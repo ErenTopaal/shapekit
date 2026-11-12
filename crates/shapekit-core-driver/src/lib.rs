@@ -10,5 +10,6 @@ pub mod node;
 pub mod recorder;
 pub mod settings;
 pub mod sim;
+pub mod sim_legacy;
 pub mod smoke;
 pub mod tx;

@@ -1,0 +1,17 @@
+[package]
+name = "auth_tree"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99.1"
+license = "Apache-2.0"
+publish = false
+
+# same source as contracts/auth_tree, built against an older soroban-sdk
+[lib]
+path = "../../../auth_tree/src/lib.rs"
+crate-type = ["cdylib"]
+doctest = false
+test = false
+
+[dependencies]
+soroban-sdk.workspace = true

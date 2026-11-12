@@ -1,19 +1,23 @@
 //! Puts caller-chosen values into ledger entries, events and return values.
 #![no_std]
 
-use soroban_sdk::{
-    Env, Symbol, Val, Vec, contract, contractimpl, events::Event, symbol_short, vec,
-};
+use soroban_sdk::{Env, Symbol, Val, Vec, contract, contractimpl, symbol_short, vec};
+
+#[cfg(not(feature = "sdk22"))]
+use soroban_sdk::events::Event;
 
 const LAST: Symbol = symbol_short!("last");
 
 // a hand-written event so the caller decides the exact topics and data;
-// the contractevent macro would wrap data in a map and fix the topic types
+// the contractevent macro would wrap data in a map and fix the topic types.
+// soroban-sdk 22 has neither, its `publish` makes the same host call
+#[cfg(not(feature = "sdk22"))]
 struct Raw {
     topics: Vec<Val>,
     data: Val,
 }
 
+#[cfg(not(feature = "sdk22"))]
 impl Event for Raw {
     fn topics(&self, _env: &Env) -> Vec<Val> {
         self.topics.clone()
@@ -34,10 +38,13 @@ impl Echo {
     pub fn echo(env: Env, value: Val) -> Val {
         env.storage().persistent().set(&LAST, &value);
         let topics = vec![&env, LAST.to_val()];
+        #[cfg(not(feature = "sdk22"))]
         env.events().publish_event(&Raw {
             topics,
             data: value,
         });
+        #[cfg(feature = "sdk22")]
+        env.events().publish(topics, value);
         value
     }
 
@@ -45,7 +52,10 @@ impl Echo {
     /// 30.0.0 records topics without checking their types, so vec and map
     /// topics reach the ledger even though the sdk docs advise against them.
     pub fn emit(env: Env, topics: Vec<Val>, data: Val) {
+        #[cfg(not(feature = "sdk22"))]
         env.events().publish_event(&Raw { topics, data });
+        #[cfg(feature = "sdk22")]
+        env.events().publish(topics, data);
     }
 
     /// Stores `value` under `key` in temporary storage, for entries that

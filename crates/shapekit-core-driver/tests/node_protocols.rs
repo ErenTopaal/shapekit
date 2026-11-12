@@ -20,7 +20,8 @@ use shapekit_core_driver::contracts::{
     CONTRACTS_INTERFACE_PROTOCOL, ECHO_WASM, interface_protocol,
 };
 use shapekit_core_driver::keys::{account_address, root_key};
-use shapekit_core_driver::sim::{SimError, Simulator};
+use shapekit_core_driver::sim::SimError;
+use shapekit_core_driver::sim_legacy::{AnySimulator, SIMULATED_PROTOCOLS};
 use shapekit_core_driver::tx::{contract_id_from_address, contract_preimage};
 use stellar_xdr::{
     ContractDataDurability, ContractEventBody, ContractExecutable, ContractId,
@@ -79,8 +80,8 @@ fn minimal_echo_wasm(protocol: u32) -> Vec<u8> {
 #[derive(Debug, PartialEq, Eq)]
 enum Pricing {
     Simulated,
-    /// soroban-simulation 30.0.0 could not load the network config at this
-    /// protocol; the reason is kept and the resources were set by hand.
+    /// no soroban-simulation release for this protocol is linked; the
+    /// reason is kept and the resources were set by hand.
     ByHand(String),
 }
 
@@ -190,7 +191,7 @@ fn run(protocol: u32) -> Outcome {
     let nid = *chain.network_id();
 
     let ctx = chain.node().ledger_context().unwrap();
-    let sim_setup = Simulator::new(chain.node().snapshot().unwrap(), &ctx).err();
+    let sim_setup = AnySimulator::new(chain.node().snapshot().unwrap(), &ctx).err();
 
     // simulation, at the ledger's protocol, of the sdk 29 wasm
     let upload = HostFunction::UploadContractWasm(ECHO_WASM.to_vec().try_into().unwrap());
@@ -198,7 +199,14 @@ fn run(protocol: u32) -> Outcome {
         Err(ChainError::Sim(SimError::InvocationFailed {
             error,
             diagnostic_events,
-        })) => format!("{error}; {} diagnostic events", diagnostic_events.len()),
+        })) => {
+            let mut texts = Vec::new();
+            for e in &diagnostic_events {
+                let ContractEventBody::V0(body) = &e.event.body;
+                strings(&body.data, &mut texts);
+            }
+            format!("{error}; {texts:?}")
+        }
         Ok(_) => "simulation succeeded".to_owned(),
         Err(e) => format!("simulation setup failed: {e}"),
     };
@@ -331,15 +339,26 @@ fn soroban_on_older_protocols() {
             assert_eq!(o.echo_simulation, "simulation succeeded", "protocol {p}");
             assert_eq!(o.echo_applied, "txSUCCESS", "protocol {p}");
         }
-        // the release soroban-simulation 30.0.0 host runs protocol 30 only
+        // each release host runs one protocol; sim_legacy links 22, 24
+        // and 28 beside 30, and nothing for 26
+        let simulated = SIMULATED_PROTOCOLS.contains(&p);
         assert_eq!(
             o.minimal_pricing == Pricing::Simulated,
-            p == 30,
+            simulated,
             "protocol {p}"
         );
-        if p != 30 {
+        if !simulated {
             assert!(
-                o.echo_simulation.contains("only runs ledger protocol 30"),
+                o.echo_simulation
+                    .contains("no simulator for ledger protocol"),
+                "protocol {p}: {}",
+                o.echo_simulation
+            );
+        } else if p < CONTRACTS_INTERFACE_PROTOCOL {
+            // the older host refuses the sdk 29 wasm in simulation already
+            assert!(
+                o.echo_simulation
+                    .contains("contract protocol number is newer than host"),
                 "protocol {p}: {}",
                 o.echo_simulation
             );

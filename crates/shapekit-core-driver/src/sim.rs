@@ -133,20 +133,54 @@ pub enum SimError {
         "soroban-env-host {host} only runs ledger protocol {host}, the ledger runs {ledger} (Host::check_ledger_protocol_supported); older protocols need hand-set resources or a matching soroban-simulation"
     )]
     UnsupportedProtocol { ledger: u32, host: u32 },
+    #[error(
+        "no simulator for ledger protocol {ledger}; simulation runs at protocols {supported:?}, each with the soroban-env-host release core applies it with"
+    )]
+    NoSimulator { ledger: u32, supported: Vec<u32> },
+    #[error("{what} is not available at protocol {protocol}")]
+    NotAtProtocol { protocol: u32, what: String },
+    #[error("converting {what} between stellar-xdr releases: {error}")]
+    Convert { what: &'static str, error: String },
 }
 
 /// Snapshot source over a fetcher. Results are cached for the lifetime of the
 /// simulator, which matches the single-ledger view simulation assumes. The
 /// host only sees a generic storage error when a fetch fails, so the real
 /// error is kept here and surfaced after the run.
-struct FetchingSnapshot {
+pub(crate) struct FetchingSnapshot {
     fetcher: Box<dyn SnapshotFetcher>,
     cache: RefCell<BTreeMap<LedgerKey, Option<FetchedEntry>>>,
     failure: RefCell<Option<SimError>>,
 }
 
 impl FetchingSnapshot {
-    fn prefetch(&self, keys: &[LedgerKey]) -> Result<(), SimError> {
+    pub(crate) fn new(fetcher: Box<dyn SnapshotFetcher>) -> Self {
+        Self {
+            fetcher,
+            cache: RefCell::new(BTreeMap::new()),
+            failure: RefCell::new(None),
+        }
+    }
+
+    /// The entry for `key`, fetched on first use. On failure the error is
+    /// kept for [`Self::take_failure`] and `None` is returned.
+    pub(crate) fn lookup(&self, key: &LedgerKey) -> Option<Option<FetchedEntry>> {
+        if let Err(e) = self.prefetch(std::slice::from_ref(key)) {
+            self.record_failure(e);
+            return None;
+        }
+        self.cache.borrow().get(key).cloned()
+    }
+
+    /// Keeps the first failure of a run; later ones are consequences of it.
+    pub(crate) fn record_failure(&self, e: SimError) {
+        let mut slot = self.failure.borrow_mut();
+        if slot.is_none() {
+            *slot = Some(e);
+        }
+    }
+
+    pub(crate) fn prefetch(&self, keys: &[LedgerKey]) -> Result<(), SimError> {
         let missing: Vec<LedgerKey> = {
             let cache = self.cache.borrow();
             keys.iter()
@@ -181,26 +215,17 @@ impl FetchingSnapshot {
         Ok(())
     }
 
-    fn take_failure(&self) -> Option<SimError> {
+    pub(crate) fn take_failure(&self) -> Option<SimError> {
         self.failure.borrow_mut().take()
     }
 }
 
 impl SnapshotSource for FetchingSnapshot {
     fn get(&self, key: &Rc<LedgerKey>) -> Result<Option<EntryWithLiveUntil>, HostError> {
-        if let Err(e) = self.prefetch(std::slice::from_ref(key.as_ref())) {
-            let mut slot = self.failure.borrow_mut();
-            if slot.is_none() {
-                *slot = Some(e);
-            }
+        let Some(found) = self.lookup(key.as_ref()) else {
             return Err((ScErrorType::Storage, ScErrorCode::InternalError).into());
-        }
-        let cache = self.cache.borrow();
-        Ok(cache
-            .get(key.as_ref())
-            .cloned()
-            .flatten()
-            .map(|f| (Rc::new(f.entry), f.live_until_ledger_seq)))
+        };
+        Ok(found.map(|f| (Rc::new(f.entry), f.live_until_ledger_seq)))
     }
 }
 
@@ -272,11 +297,7 @@ impl Simulator {
                 host,
             });
         }
-        let snapshot = Rc::new(FetchingSnapshot {
-            fetcher: Box::new(fetcher),
-            cache: RefCell::new(BTreeMap::new()),
-            failure: RefCell::new(None),
-        });
+        let snapshot = Rc::new(FetchingSnapshot::new(Box::new(fetcher)));
         let loaded = NetworkConfig::load_from_snapshot(snapshot.as_ref());
         if let Some(e) = snapshot.take_failure() {
             return Err(e);

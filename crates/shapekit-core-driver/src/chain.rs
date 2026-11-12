@@ -19,7 +19,8 @@ use crate::keys::{account_address, account_id, muxed_account, network_id};
 use crate::node::{CoreNode, NodeError, SubmitStatus};
 use crate::recorder::{ChainRecorder, ChainSummary, FIRST_LEDGER, RecorderError};
 use crate::settings::{NetworkSettings, PreparedUpgrade, SettingsError};
-use crate::sim::{AuthMode, SimError, Simulator};
+use crate::sim::{AuthMode, SimError};
+use crate::sim_legacy::AnySimulator;
 use crate::tx::{
     BASE_FEE, TransactionBuilder, TxError, assemble_soroban, contract_id_from_address,
     contract_preimage, envelope_hash, sign_transaction,
@@ -294,16 +295,17 @@ impl ChainDriver {
         )?))
     }
 
-    /// Simulates `host_function` against the last closed ledger and returns
-    /// the assembled, signed transaction. Only source-account authorization
-    /// is supported: anything else would need more signers.
+    /// Simulates `host_function` against the last closed ledger, with the
+    /// host for the ledger's protocol, and returns the assembled, signed
+    /// transaction. Only source-account authorization is supported: anything
+    /// else would need more signers.
     pub fn soroban(
         &self,
         source: &SigningKey,
         host_function: HostFunction,
     ) -> Result<TransactionEnvelope, ChainError> {
         let ctx = self.node.ledger_context()?;
-        let sim = Simulator::new(self.node.snapshot()?, &ctx)?;
+        let sim = AnySimulator::new(self.node.snapshot()?, &ctx)?;
         let source_id = account_id(&source.verifying_key());
         let r = sim.simulate_invoke(
             host_function.clone(),

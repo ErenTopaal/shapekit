@@ -1,0 +1,21 @@
+[package]
+name = "echo"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99.1"
+license = "Apache-2.0"
+publish = false
+
+# same source as contracts/echo, built against an older soroban-sdk
+[lib]
+path = "../../../echo/src/lib.rs"
+crate-type = ["cdylib"]
+doctest = false
+test = false
+
+[dependencies]
+soroban-sdk.workspace = true
+
+[features]
+# declared so the shared source's cfg is known; only p22 turns it on
+sdk22 = []
