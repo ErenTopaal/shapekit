@@ -1,0 +1,989 @@
+schema_version = 1
+
+[[cap]]
+id = "CAP-0001"
+title = "Bump Sequence"
+status = "Final"
+protocol = 10
+xdr_additions = ["BumpSequenceOp", "BUMP_SEQUENCE", "BumpSequenceResult", "BumpSequenceResultCode", "BUMP_SEQUENCE_BAD_SEQ", "ACCOUNT_MERGE_SEQNUM_TOO_FAR", "opNOT_SUPPORTED", "TransactionMetaV1"]
+indexer_visible = true
+source = { path = "core/cap-0001.md" }
+notes = "op type name BUMP_SEQUENCE is not in this CAP's text; it is in the OperationType listing of CAP-0024. SequenceNumber becomes signed int64. xdr commit 0acd79f"
+
+[[cap]]
+id = "CAP-0002"
+title = "Transaction level signature verification"
+status = "Final"
+protocol = 10
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/cap-0002.md" }
+notes = "no new XDR; signature checks and one-time signer removal move into the transaction-level changes applied before operations, so they land in tx-level meta, and some previously failing txs now succeed"
+
+[[cap]]
+id = "CAP-0003"
+title = "Asset-backed offers"
+status = "Final"
+protocol = 10
+xdr_additions = ["Liabilities", "AccountEntry.ext.v1", "TrustLineEntry.ext.v1", "ACCOUNT_MERGE_DEST_FULL"]
+indexer_visible = true
+source = { path = "core/cap-0003.md" }
+notes = "at v30.0 AccountEntry.ext.v1 is AccountEntryExtensionV1. xdr commit d9e8d0d"
+
+[[cap]]
+id = "CAP-0004"
+title = "Improved Rounding for Cross Offer"
+status = "Final"
+protocol = 10
+xdr_additions = []
+indexer_visible = false
+reason = "offer-crossing rounding arithmetic only; results and meta keep existing shapes"
+source = { path = "core/cap-0004.md" }
+
+[[cap]]
+id = "CAP-0005"
+title = "Throttling and transaction pricing improvements"
+status = "Final"
+protocol = 11
+xdr_additions = []
+indexer_visible = false
+reason = "fee and transaction set selection only; the CAP states no changes in XDR"
+source = { path = "core/cap-0005.md" }
+
+[[cap]]
+id = "CAP-0006"
+title = "Add ManageBuyOffer Operation"
+status = "Final"
+protocol = 11
+xdr_additions = ["ManageBuyOfferOp", "MANAGE_BUY_OFFER", "ManageBuyOfferResult", "ManageBuyOfferResultCode", "MANAGE_SELL_OFFER", "ManageSellOfferOp", "ManageSellOfferResult"]
+indexer_visible = true
+source = { path = "core/cap-0006.md" }
+notes = "also renames MANAGE_OFFER, ManageOfferOp, ManageOfferResult to the sell-offer names (binary compatible). xdr commit 7c83e6e"
+
+[[cap]]
+id = "CAP-0007"
+title = "Deterministic Account Creation"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed CreateDeterministicAccountOp is absent at v30.0"
+source = { path = "core/cap-0007.md" }
+
+[[cap]]
+id = "CAP-0008"
+title = "Self Identified Pre-Auth Transaction"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_PRE_AUTH_SELF_TX is absent at v30.0"
+source = { path = "core/cap-0008.md" }
+
+[[cap]]
+id = "CAP-0009"
+title = "Linear/Exterior Immutable Accounts"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol"
+source = { path = "core/cap-0009.md" }
+
+[[cap]]
+id = "CAP-0010"
+title = "Fee Bump Account"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed BumpFeeOp is absent at v30.0"
+source = { path = "core/cap-0010.md" }
+
+[[cap]]
+id = "CAP-0011"
+title = "Relative Account Freeze"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_TIMEOUT is absent at v30.0"
+source = { path = "core/cap-0011.md" }
+
+[[cap]]
+id = "CAP-0012"
+title = "Deterministic accounts and creatorTxID"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed CreateDetAccountOp is absent at v30.0"
+source = { path = "core/cap-0012.md" }
+
+[[cap]]
+id = "CAP-0013"
+title = "Change Trustlines to Balances"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed AddBalanceOp is absent at v30.0"
+source = { path = "core/cap-0013.md" }
+
+[[cap]]
+id = "CAP-0014"
+title = "Adversarial Transaction Set Ordering"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol"
+source = { path = "core/cap-0014.md" }
+
+[[cap]]
+id = "CAP-0015"
+title = "Fee-Bump Transactions"
+status = "Final"
+protocol = 13
+xdr_additions = ["ENVELOPE_TYPE_TX_FEE_BUMP", "FeeBumpTransaction", "FeeBumpTransactionEnvelope", "TransactionEnvelope.feeBump", "TransactionV1Envelope", "TransactionV0", "TransactionV0Envelope", "InnerTransactionResult", "InnerTransactionResultPair", "txFEE_BUMP_INNER_SUCCESS", "txFEE_BUMP_INNER_FAILED", "txNOT_SUPPORTED"]
+indexer_visible = true
+source = { path = "core/cap-0015.md" }
+notes = "CAP shows feeSource as AccountID; CAP-0027 later made it MuxedAccount (xdr commit 286018e). xdr commit 09efec4"
+
+[[cap]]
+id = "CAP-0016"
+title = "Cosigned assets: NopOp and COAUTHORIZED_FLAG"
+status = "Rejected (In favor of CAP-0018)"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol (in favour of CAP-0018); proposed COAUTHORIZED_FLAG and NopOp are absent at v30.0"
+source = { path = "core/cap-0016.md" }
+
+[[cap]]
+id = "CAP-0017"
+title = "Update LastModifiedLedgerSeq If and Only If LedgerEntry is Modified"
+status = "Accepted"
+xdr_additions = []
+indexer_visible = false
+reason = "Accepted but protocol TBD, not implemented; would only change lastModifiedLedgerSeq update rules, no XDR"
+source = { path = "core/cap-0017.md" }
+
+[[cap]]
+id = "CAP-0018"
+title = "Fine-Grained Control of Authorization"
+status = "Final"
+protocol = 13
+xdr_additions = ["AUTHORIZED_TO_MAINTAIN_LIABILITIES_FLAG", "MASK_TRUSTLINE_FLAGS_V13", "AllowTrustOp.authorize"]
+indexer_visible = true
+source = { path = "core/cap-0018.md" }
+notes = "CAP text sets MASK_TRUSTLINE_FLAGS = 3; at v30.0 MASK_TRUSTLINE_FLAGS is 1 and MASK_TRUSTLINE_FLAGS_V13 is 3. authorize changes from bool to uint32. xdr commit 01b6a94"
+
+[[cap]]
+id = "CAP-0019"
+title = "Future-upgradable TransactionEnvelope type"
+status = "Final"
+protocol = 13
+xdr_additions = ["ENVELOPE_TYPE_TX_V0", "TransactionV0", "TransactionEnvelope.v0", "TransactionEnvelope.v1"]
+indexer_visible = true
+source = { path = "core/cap-0019.md" }
+notes = "CAP names ENVELOPE_TYPE_TX0 and Transaction0; the v30.0 names come from CAP-0015"
+
+[[cap]]
+id = "CAP-0020"
+title = "Bucket Initial Entries"
+status = "Final"
+protocol = 11
+xdr_additions = ["METAENTRY", "INITENTRY", "BucketMetadata", "BucketEntry.metaEntry"]
+indexer_visible = false
+reason = "bucket list format only; BucketEntry is not reachable from LedgerCloseMeta or TransactionEnvelope"
+source = { path = "core/cap-0020.md" }
+notes = "CAP text says protocol TBD in its body; header says 11. xdr commit f6f0bf1"
+
+[[cap]]
+id = "CAP-0021"
+title = "Preconditions: Generalized transaction preconditions"
+status = "Final"
+protocol = 19
+xdr_additions = ["PreconditionsV2", "Preconditions", "PreconditionType", "PRECOND_NONE", "PRECOND_TIME", "PRECOND_V2", "LedgerBounds", "Duration", "ExtensionPoint", "Transaction.cond", "AccountEntryExtensionV3", "txBAD_MIN_SEQ_AGE_OR_GAP", "txMALFORMED"]
+indexer_visible = true
+source = { path = "core/cap-0021.md" }
+notes = "v19 is the earliest stellar-xdr tag, so no tag diff; xdr commit 2ce5e0f. extraSigners<2> is in PreconditionsV2"
+
+[[cap]]
+id = "CAP-0022"
+title = "Invalid transactions must have no effects"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol"
+source = { path = "core/cap-0022.md" }
+
+[[cap]]
+id = "CAP-0023"
+title = "Two-Part Payments with ClaimableBalanceEntry"
+status = "Final"
+protocol = 14
+xdr_additions = ["CLAIMABLE_BALANCE", "ClaimableBalanceEntry", "ClaimPredicate", "ClaimPredicateType", "CLAIM_PREDICATE_UNCONDITIONAL", "CLAIM_PREDICATE_AND", "CLAIM_PREDICATE_OR", "CLAIM_PREDICATE_NOT", "CLAIM_PREDICATE_BEFORE_ABSOLUTE_TIME", "CLAIM_PREDICATE_BEFORE_RELATIVE_TIME", "Claimant", "ClaimantType", "CLAIMANT_TYPE_V0", "ClaimableBalanceID", "ClaimableBalanceIDType", "CLAIMABLE_BALANCE_ID_TYPE_V0", "CREATE_CLAIMABLE_BALANCE", "CLAIM_CLAIMABLE_BALANCE", "CreateClaimableBalanceOp", "ClaimClaimableBalanceOp", "CreateClaimableBalanceResult", "ClaimClaimableBalanceResult", "ENVELOPE_TYPE_OP_ID", "HashIDPreimage.operationID"]
+indexer_visible = true
+source = { path = "core/cap-0023.md" }
+notes = "CAP names a union OperationID; at v30.0 it is the operationID arm of HashIDPreimage. ClaimableBalanceID moved to Stellar-types.x in v23.0. xdr commit 583e6e2"
+
+[[cap]]
+id = "CAP-0024"
+title = "Make PathPayment Symmetrical"
+status = "Final"
+protocol = 12
+xdr_additions = ["PATH_PAYMENT_STRICT_RECEIVE", "PATH_PAYMENT_STRICT_SEND", "PathPaymentStrictReceiveOp", "PathPaymentStrictSendOp", "PathPaymentStrictReceiveResult", "PathPaymentStrictSendResult", "PathPaymentStrictSendResultCode", "PATH_PAYMENT_STRICT_SEND_UNDER_DESTMIN"]
+indexer_visible = true
+source = { path = "core/cap-0024.md" }
+notes = "renames PATH_PAYMENT to PATH_PAYMENT_STRICT_RECEIVE and adds strict send. xdr commit 192039c"
+
+[[cap]]
+id = "CAP-0025"
+title = "Remove Bucket Shadowing"
+status = "Final"
+protocol = 12
+xdr_additions = []
+indexer_visible = false
+reason = "bucket merge semantics and history archive publishing only; no XDR change"
+source = { path = "core/cap-0025.md" }
+
+[[cap]]
+id = "CAP-0026"
+title = "Disable Inflation Mechanism"
+status = "Final"
+protocol = 12
+xdr_additions = []
+indexer_visible = false
+reason = "INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape"
+source = { path = "core/cap-0026.md" }
+
+[[cap]]
+id = "CAP-0027"
+title = "First-class multiplexed accounts"
+status = "Final"
+protocol = 13
+xdr_additions = ["MuxedAccount", "KEY_TYPE_MUXED_ED25519", "MuxedAccount.med25519", "PaymentOp.destination", "PathPaymentStrictReceiveOp.destination", "PathPaymentStrictSendOp.destination", "Operation.sourceAccount", "Transaction.sourceAccount", "FeeBumpTransaction.feeSource"]
+indexer_visible = true
+source = { path = "core/cap-0027.md" }
+notes = "listed fields changed from AccountID to MuxedAccount (also ACCOUNT_MERGE destination). xdr commits de3e6a5, 286018e"
+
+[[cap]]
+id = "CAP-0028"
+title = "Clear pre-auth transaction signer on failed transactions"
+status = "Final"
+protocol = 13
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/cap-0028.md" }
+notes = "no new XDR; pre-auth signers are now removed for every tx that reaches apply, including failed ones, so failed txs can change AccountEntry signers"
+
+[[cap]]
+id = "CAP-0029"
+title = "AllowTrust when not AUTH_REQUIRED"
+status = "Final"
+protocol = 16
+xdr_additions = []
+indexer_visible = false
+reason = "relaxes ALLOW_TRUST authorization rules; the specification defines no XDR change and results and meta keep existing shapes"
+source = { path = "core/cap-0029.md" }
+
+[[cap]]
+id = "CAP-0030"
+title = "Remove NO_ISSUER Operation Results"
+status = "Final"
+protocol = 13
+xdr_additions = []
+indexer_visible = false
+reason = "operations stop returning *_NO_ISSUER codes (except ChangeTrust); no new XDR or meta shape"
+source = { path = "core/cap-0030.md" }
+
+[[cap]]
+id = "CAP-0031"
+title = "Sponsored Reserve"
+status = "Rejected (In favor of CAP-0033)"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol (in favour of CAP-0033); proposed SponsorshipEntry is absent at v30.0"
+source = { path = "core/cap-0031.md" }
+
+[[cap]]
+id = "CAP-0032"
+title = "Trustline Preauthorization"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed PreauthorizationEntry is absent at v30.0"
+source = { path = "core/cap-0032.md" }
+
+[[cap]]
+id = "CAP-0033"
+title = "Sponsored Reserve"
+status = "Final"
+protocol = 14
+xdr_additions = ["SponsorshipDescriptor", "AccountEntryExtensionV1", "AccountEntryExtensionV2", "LedgerEntryExtensionV1", "LedgerEntry.ext.v1", "BEGIN_SPONSORING_FUTURE_RESERVES", "END_SPONSORING_FUTURE_RESERVES", "REVOKE_SPONSORSHIP", "BeginSponsoringFutureReservesOp", "RevokeSponsorshipOp", "RevokeSponsorshipType", "REVOKE_SPONSORSHIP_LEDGER_ENTRY", "REVOKE_SPONSORSHIP_SIGNER", "BeginSponsoringFutureReservesResult", "EndSponsoringFutureReservesResult", "RevokeSponsorshipResult", "ACCOUNT_MERGE_IS_SPONSOR", "txBAD_SPONSORSHIP"]
+indexer_visible = true
+source = { path = "core/cap-0033.md" }
+notes = "header reads protocol 14/15; protocol here is the first of the two. xdr commit fa1e125"
+
+[[cap]]
+id = "CAP-0034"
+title = "Preserve Transaction-Set/Close-Time Affinity During Nomination"
+status = "Final"
+protocol = 14
+xdr_additions = []
+indexer_visible = false
+reason = "the CAP states no XDR changes; affects closeTime handling during nomination only"
+source = { path = "core/cap-0034.md" }
+
+[[cap]]
+id = "CAP-0035"
+title = "Asset Clawback"
+status = "Final"
+protocol = 17
+xdr_additions = ["AUTH_CLAWBACK_ENABLED_FLAG", "MASK_ACCOUNT_FLAGS_V17", "TRUSTLINE_CLAWBACK_ENABLED_FLAG", "MASK_TRUSTLINE_FLAGS_V17", "ClaimableBalanceFlags", "CLAIMABLE_BALANCE_CLAWBACK_ENABLED_FLAG", "MASK_CLAIMABLE_BALANCE_FLAGS", "ClaimableBalanceEntryExtensionV1", "CLAWBACK", "CLAWBACK_CLAIMABLE_BALANCE", "SET_TRUST_LINE_FLAGS", "ClawbackOp", "ClawbackClaimableBalanceOp", "SetTrustLineFlagsOp", "ClawbackResult", "ClawbackClaimableBalanceResult", "SetTrustLineFlagsResult", "SET_OPTIONS_AUTH_REVOCABLE_REQUIRED", "AssetCode"]
+indexer_visible = true
+source = { path = "core/cap-0035.md" }
+notes = "CAP names the masks MASK_ACCOUNT_FLAGS_V16 and MASK_TRUSTLINE_FLAGS_V16; v30.0 names end in _V17. xdr commits 3a3c22f, 3fd5ae0"
+
+[[cap]]
+id = "CAP-0036"
+title = "Claimable Balance Clawback"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed CLAIM_CLAIMABLE_BALANCE_NOT_ISSUER is absent at v30.0"
+source = { path = "core/cap-0036.md" }
+
+[[cap]]
+id = "CAP-0037"
+title = "Automated Market Makers"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed LiquidityStakeEntry and DepositPoolLiquidityOp are absent at v30.0"
+source = { path = "core/cap-0037.md" }
+
+[[cap]]
+id = "CAP-0038"
+title = "Automated Market Makers"
+status = "Final"
+protocol = 18
+xdr_additions = ["PoolID", "ASSET_TYPE_POOL_SHARE", "LIQUIDITY_POOL", "LiquidityPoolType", "LIQUIDITY_POOL_CONSTANT_PRODUCT", "TrustLineAsset", "TrustLineEntryExtensionV2", "LiquidityPoolConstantProductParameters", "LiquidityPoolEntry", "LiquidityPoolParameters", "ChangeTrustAsset", "LIQUIDITY_POOL_FEE_V18", "LIQUIDITY_POOL_DEPOSIT", "LIQUIDITY_POOL_WITHDRAW", "LiquidityPoolDepositOp", "LiquidityPoolWithdrawOp", "LiquidityPoolDepositResult", "LiquidityPoolWithdrawResult", "ENVELOPE_TYPE_POOL_REVOKE_OP_ID", "HashIDPreimage.revokeID", "ClaimAtom", "ClaimAtomType", "CLAIM_ATOM_TYPE_V0", "CLAIM_ATOM_TYPE_ORDER_BOOK", "CLAIM_ATOM_TYPE_LIQUIDITY_POOL", "ClaimOfferAtomV0", "ClaimLiquidityAtom", "LedgerHeaderFlags", "DISABLE_LIQUIDITY_POOL_TRADING_FLAG", "DISABLE_LIQUIDITY_POOL_DEPOSIT_FLAG", "DISABLE_LIQUIDITY_POOL_WITHDRAWAL_FLAG", "LedgerHeaderExtensionV1", "LEDGER_UPGRADE_FLAGS", "CHANGE_TRUST_CANNOT_DELETE", "CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES"]
+indexer_visible = true
+source = { path = "core/cap-0038.md" }
+notes = "PoolID moved to Stellar-types.x in v23.0. revoking authorization on a trustline can create claimable balances keyed by the pool revoke op ID. xdr commits b73fcf2..02c23fb"
+
+[[cap]]
+id = "CAP-0039"
+title = "Not Auth Revocable Trustlines"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed AUTH_NOT_REVOCABLE_FLAG is absent at v30.0"
+source = { path = "core/cap-0039.md" }
+
+[[cap]]
+id = "CAP-0040"
+title = "Signed-Payload: Ed25519 Signed Payload Signer for Atomic Transaction Signature Disclosure"
+status = "Final"
+protocol = 19
+xdr_additions = ["KEY_TYPE_ED25519_SIGNED_PAYLOAD", "SIGNER_KEY_TYPE_ED25519_SIGNED_PAYLOAD", "SignerKey.ed25519SignedPayload"]
+indexer_visible = true
+source = { path = "core/cap-0040.md" }
+notes = "payload is opaque<64>. v19 is the earliest stellar-xdr tag, so no tag diff; xdr commit 480ab55"
+
+[[cap]]
+id = "CAP-0041"
+title = "Concurrent Transactions"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed txMISSING_MEMO and txDUPLICATE are absent at v30.0"
+source = { path = "core/cap-0041.md" }
+
+[[cap]]
+id = "CAP-0042"
+title = "Multi-Part Transaction Sets"
+status = "Final"
+protocol = 20
+xdr_additions = ["GeneralizedTransactionSet", "TransactionSetV1", "TransactionPhase", "TxSetComponent", "TxSetComponentType", "TXSET_COMP_TXS_MAYBE_DISCOUNTED_FEE", "TransactionHistoryEntry.ext.generalizedTxSet", "LedgerCloseMetaV1", "LedgerCloseMeta.v1"]
+indexer_visible = true
+source = { path = "core/cap-0042.md", xdr_diff = "v19..v20" }
+notes = "the core README lists protocol '-'; the CAP header says 20"
+
+[[cap]]
+id = "CAP-0043"
+title = "ECDSA Signers with P-256 and secp256k1 Curves"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed KEY_TYPE_ECDSA_P256 is absent at v30.0"
+source = { path = "core/cap-0043.md" }
+
+[[cap]]
+id = "CAP-0044"
+title = "SPEEDEX - Configuration"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed SpeedexConfigurationEntry is absent at v30.0"
+source = { path = "core/cap-0044.md" }
+
+[[cap]]
+id = "CAP-0045"
+title = "SPEEDEX - Pricing"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol"
+source = { path = "core/cap-0045.md" }
+
+[[cap]]
+id = "CAP-0046"
+title = "Soroban smart contract system overview"
+status = "Final"
+protocol = 20
+xdr_additions = ["CONTRACT_DATA", "CONTRACT_CODE", "CONFIG_SETTING", "TTL", "INVOKE_HOST_FUNCTION", "EXTEND_FOOTPRINT_TTL", "RESTORE_FOOTPRINT", "InvokeHostFunctionOp", "ExtendFootprintTTLOp", "RestoreFootprintOp", "SorobanTransactionData", "SorobanResources", "LedgerFootprint", "Transaction.ext.sorobanData", "TransactionMetaV3", "SorobanTransactionMeta", "ContractEvent", "DiagnosticEvent", "InvokeHostFunctionSuccessPreImage", "LEDGER_UPGRADE_CONFIG", "LEDGER_UPGRADE_MAX_SOROBAN_TX_SET_SIZE", "txSOROBAN_INVALID"]
+indexer_visible = true
+source = { path = "core/cap-0046.md", xdr_diff = "v19..v20" }
+notes = "overview XDR predates renames: BUMP_FOOTPRINT_EXPIRATION/BumpFootprintExpirationOp became EXTEND_FOOTPRINT_TTL/ExtendFootprintTTLOp, EXPIRATION_EXTENSION became TTL/TTLEntry, txSOROBAN_RESOURCE_LIMIT_EXCEEDED (-17) became txSOROBAN_INVALID. its LedgerCloseMetaV2 is not the v23.0 LedgerCloseMetaV2"
+
+[[cap]]
+id = "CAP-0046-01"
+title = "Soroban Runtime Environment"
+status = "Final"
+protocol = 20
+xdr_additions = ["SCVal", "SCValType", "SCError", "SCErrorType", "SCErrorCode", "SCMap", "SCMapEntry", "SCVec", "SCSymbol", "SCSYMBOL_LIMIT", "SCEnvMetaEntry", "SC_ENV_META_KIND_INTERFACE_VERSION"]
+indexer_visible = true
+source = { path = "core/cap-0046-01.md", xdr_diff = "v19..v20" }
+notes = "CAP points to the CAP-0046 overview for the XDR listing; identifiers here are the ones this CAP's text names"
+
+[[cap]]
+id = "CAP-0046-02"
+title = "Smart Contract Lifecycle"
+status = "Final"
+protocol = 20
+xdr_additions = ["HOST_FUNCTION_TYPE_CREATE_CONTRACT", "HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM", "HostFunction", "CreateContractArgs", "ContractIDPreimage", "CONTRACT_ID_PREIMAGE_FROM_ADDRESS", "CONTRACT_ID_PREIMAGE_FROM_ASSET", "ContractExecutable", "ContractCodeEntry", "SCContractInstance", "SCV_LEDGER_KEY_CONTRACT_INSTANCE", "ENVELOPE_TYPE_CONTRACT_ID"]
+indexer_visible = true
+source = { path = "core/cap-0046-02.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-03"
+title = "Smart Contract Host Functions"
+status = "Final"
+protocol = 20
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; its XDR section defers to CAP-0046-01"
+source = { path = "core/cap-0046-03.md" }
+
+[[cap]]
+id = "CAP-0046-05"
+title = "Smart Contract Data"
+status = "Final"
+protocol = 20
+xdr_additions = ["CONTRACT_DATA", "ContractDataEntry", "ContractDataDurability", "TEMPORARY", "PERSISTENT", "LedgerKey.contractData"]
+indexer_visible = true
+source = { path = "core/cap-0046-05.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-06"
+title = "Smart Contract Standardized Asset (Stellar Asset Contract)"
+status = "Final"
+protocol = 20
+xdr_additions = ["CONTRACT_ID_PREIMAGE_FROM_ASSET", "CONTRACT_EXECUTABLE_STELLAR_ASSET", "ENVELOPE_TYPE_CONTRACT_ID"]
+indexer_visible = true
+source = { path = "core/cap-0046-06.md", xdr_diff = "v19..v20" }
+notes = "Stellar Asset Contract; its events are SCVal-shaped ContractEvents. CAP text says CONTRACT_EXECUTABLE_TOKEN; v30.0 name is CONTRACT_EXECUTABLE_STELLAR_ASSET"
+
+[[cap]]
+id = "CAP-0046-07"
+title = "Fee and resource model in smart contracts"
+status = "Final"
+protocol = 20
+xdr_additions = ["SorobanResources", "SorobanTransactionData", "SorobanTransactionData.resourceFee", "ConfigSettingContractExecutionLanesV0", "ConfigSettingContractComputeV0", "ConfigSettingContractLedgerCostV0", "ConfigSettingContractHistoricalDataV0", "ConfigSettingContractEventsV0", "ConfigSettingContractBandwidthV0"]
+indexer_visible = true
+source = { path = "core/cap-0046-07.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-08"
+title = "Smart Contract Events"
+status = "Final"
+protocol = 20
+xdr_additions = ["ContractEvent", "ContractEventType", "SYSTEM", "CONTRACT", "DIAGNOSTIC", "DiagnosticEvent", "SorobanTransactionMeta", "TransactionMetaV3", "TransactionMeta.v3"]
+indexer_visible = true
+source = { path = "core/cap-0046-08.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-09"
+title = "Network Configuration Ledger Entries"
+status = "Final"
+protocol = 20
+xdr_additions = ["ConfigSettingEntry", "ConfigSettingID", "ConfigUpgradeSet", "ConfigUpgradeSetKey", "CONFIG_SETTING", "LEDGER_UPGRADE_CONFIG", "LEDGER_UPGRADE_MAX_SOROBAN_TX_SET_SIZE"]
+indexer_visible = true
+source = { path = "core/cap-0046-09.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-10"
+title = "Smart Contract Budget Metering"
+status = "Final"
+protocol = 20
+xdr_additions = ["ContractCostType", "ContractCostParamEntry", "ContractCostParams", "CONFIG_SETTING_CONTRACT_COST_PARAMS_CPU_INSTRUCTIONS", "CONFIG_SETTING_CONTRACT_COST_PARAMS_MEMORY_BYTES"]
+indexer_visible = true
+source = { path = "core/cap-0046-10.md", xdr_diff = "v19..v20" }
+notes = "visible only as CONFIG_SETTING ledger entries holding cost params (upgrade meta); ContractCostType itself is a vector index and is never serialized"
+
+[[cap]]
+id = "CAP-0046-11"
+title = "Soroban Authorization Framework"
+status = "Final"
+protocol = 20
+xdr_additions = ["SorobanAuthorizationEntry", "SorobanCredentials", "SorobanCredentialsType", "SOROBAN_CREDENTIALS_SOURCE_ACCOUNT", "SOROBAN_CREDENTIALS_ADDRESS", "SorobanAddressCredentials", "SorobanAuthorizedInvocation", "SorobanAuthorizedFunction", "SorobanAuthorizedFunctionType", "SOROBAN_AUTHORIZED_FUNCTION_TYPE_CONTRACT_FN", "SOROBAN_AUTHORIZED_FUNCTION_TYPE_CREATE_CONTRACT_HOST_FN", "SCAddress", "SC_ADDRESS_TYPE_ACCOUNT", "SC_ADDRESS_TYPE_CONTRACT", "ENVELOPE_TYPE_SOROBAN_AUTHORIZATION", "SCNonceKey", "SCV_LEDGER_KEY_NONCE", "InvokeHostFunctionOp.auth"]
+indexer_visible = true
+source = { path = "core/cap-0046-11.md", xdr_diff = "v19..v20" }
+
+[[cap]]
+id = "CAP-0046-12"
+title = "Soroban State Archival Interface"
+status = "Final"
+protocol = 20
+xdr_additions = ["TTL", "TTLEntry", "ContractDataDurability", "LedgerCloseMetaV1.evictedKeys", "StateArchivalSettings", "EvictionIterator", "CONFIG_SETTING_STATE_ARCHIVAL", "CONFIG_SETTING_EVICTION_ITERATOR", "ExtendFootprintTTLOp", "RestoreFootprintOp"]
+indexer_visible = true
+source = { path = "core/cap-0046-12.md", xdr_diff = "v19..v20" }
+notes = "CAP names LedgerCloseMetaV1 fields evictedTemporaryLedgerKeys and evictedPersistentLedgerEntries; v30.0 names are evictedKeys and unused"
+
+[[cap]]
+id = "CAP-0048"
+title = "Smart Contract Asset Interoperability"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed AllowanceEntry is absent at v30.0"
+source = { path = "core/cap-0048.md" }
+
+[[cap]]
+id = "CAP-0049"
+title = "Smart Contract Asset Interoperability with Wrapper"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed WrappedBalanceEntry is absent at v30.0"
+source = { path = "core/cap-0049.md" }
+
+[[cap]]
+id = "CAP-0050"
+title = "Smart Contract Interactions"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed InvokeContractTransactionEnvelope is absent at v30.0"
+source = { path = "core/cap-0050.md" }
+
+[[cap]]
+id = "CAP-0051"
+title = "Smart Contract Host Functionality: Secp256r1 Verification"
+status = "Final"
+protocol = 21
+xdr_additions = ["VerifyEcdsaSecp256r1Sig", "Sec1DecodePointUncompressed", "DecodeEcdsaCurve256Sig"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; plus ContractCostType values, which are never serialized"
+source = { path = "core/cap-0051.md", xdr_diff = "v20.1..v21.0" }
+notes = "CAP text names only verify_sig_ecdsa_secp256r1; the cost types come from the tag diff, which also renames ComputeEcdsaSecp256k1Sig (15) to DecodeEcdsaCurve256Sig"
+
+[[cap]]
+id = "CAP-0052"
+title = "Smart Contract Host Functionality: Base64 Encoding/Decoding"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol"
+source = { path = "core/cap-0052.md" }
+
+[[cap]]
+id = "CAP-0053"
+title = "Separate host functions to extend the TTL for contract instance and contract code"
+status = "Final"
+protocol = 21
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; no XDR section"
+source = { path = "core/cap-0053.md" }
+
+[[cap]]
+id = "CAP-0054"
+title = "Soroban refined VM instantiation cost model"
+status = "Final"
+protocol = 21
+xdr_additions = ["ContractCodeCostInputs", "ContractCodeEntry.ext.v1", "ParseWasmInstructions", "ParseWasmFunctions", "ParseWasmGlobals", "ParseWasmTableEntries", "ParseWasmTypes", "ParseWasmDataSegments", "ParseWasmElemSegments", "ParseWasmImports", "ParseWasmExports", "ParseWasmDataSegmentBytes", "InstantiateWasmInstructions", "InstantiateWasmFunctions", "InstantiateWasmGlobals", "InstantiateWasmTableEntries", "InstantiateWasmTypes", "InstantiateWasmDataSegments", "InstantiateWasmElemSegments", "InstantiateWasmImports", "InstantiateWasmExports", "InstantiateWasmDataSegmentBytes"]
+indexer_visible = true
+source = { path = "core/cap-0054.md", xdr_diff = "v20.1..v21.0" }
+notes = "ContractCodeEntry gains ext v1 with cost inputs; re-uploading existing wasm can now rewrite its ContractCodeEntry. CAP text lists nMemoryPages; v21.0 has ext and nDataSegmentBytes instead"
+
+[[cap]]
+id = "CAP-0055"
+title = "Soroban streamlined linking"
+status = "Final"
+protocol = 21
+xdr_additions = []
+indexer_visible = false
+reason = "the CAP states no XDR changes beyond CAP-0054; linking cost behaviour only"
+source = { path = "core/cap-0055.md" }
+
+[[cap]]
+id = "CAP-0056"
+title = "Soroban intra-transaction module caching"
+status = "Final"
+protocol = 21
+xdr_additions = []
+indexer_visible = false
+reason = "the CAP states no XDR changes beyond CAP-0054; intra-transaction module caching only"
+source = { path = "core/cap-0056.md" }
+
+[[cap]]
+id = "CAP-0057"
+title = "State Archival Persistent Entry Eviction"
+status = "Draft"
+protocol = 23
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; its proposed archival proof and cold archive XDR was added in v21.1..v22.0 and removed in v22.0..v23.0, absent at v30.0"
+source = { path = "core/cap-0057.md" }
+
+[[cap]]
+id = "CAP-0058"
+title = "Constructors for Soroban contracts"
+status = "Final"
+protocol = 22
+xdr_additions = ["HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2", "CreateContractArgsV2", "HostFunction.createContractV2", "SOROBAN_AUTHORIZED_FUNCTION_TYPE_CREATE_CONTRACT_V2_HOST_FN", "SorobanAuthorizedFunction.createContractV2HostFn"]
+indexer_visible = true
+source = { path = "core/cap-0058.md", xdr_diff = "v21.1..v22.0" }
+
+[[cap]]
+id = "CAP-0059"
+title = "Host functions for BLS12-381"
+status = "Final"
+protocol = 22
+xdr_additions = ["Bls12381EncodeFp", "Bls12381DecodeFp", "Bls12381G1CheckPointOnCurve", "Bls12381G1CheckPointInSubgroup", "Bls12381G2CheckPointOnCurve", "Bls12381G2CheckPointInSubgroup", "Bls12381G1ProjectiveToAffine", "Bls12381G2ProjectiveToAffine", "Bls12381G1Add", "Bls12381G1Mul", "Bls12381G1Msm", "Bls12381MapFpToG1", "Bls12381HashToG1", "Bls12381G2Add", "Bls12381G2Mul", "Bls12381G2Msm", "Bls12381MapFp2ToG2", "Bls12381HashToG2", "Bls12381Pairing", "Bls12381FrFromU256", "Bls12381FrToU256", "Bls12381FrAddSub", "Bls12381FrMul", "Bls12381FrPow", "Bls12381FrInv"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes"
+source = { path = "core/cap-0059.md", xdr_diff = "v21.1..v22.0" }
+notes = "CAP text lists Bls12381G1Validate and Bls12381G2Validate; v22.0 has CheckPointOnCurve and CheckPointInSubgroup pairs instead"
+
+[[cap]]
+id = "CAP-0060"
+title = "Update to Wasmi register machine"
+status = "Accepted"
+protocol = 22
+xdr_additions = []
+indexer_visible = false
+reason = "Wasmi interpreter update; the CAP states no XDR changes"
+source = { path = "core/cap-0060.md" }
+
+[[cap]]
+id = "CAP-0061"
+title = "Smart Contract Standardized Asset (Stellar Asset Contract) Extension: Memo"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol"
+source = { path = "core/cap-0061.md" }
+
+[[cap]]
+id = "CAP-0062"
+title = "Soroban Live State Prioritization"
+status = "Final"
+protocol = 23
+xdr_additions = ["LEDGER_ENTRY_RESTORED", "LedgerEntryChange.restored", "LedgerCloseMetaV1.evictedKeys", "BucketListType", "HOT_ARCHIVE", "HotArchiveBucketEntry", "HotArchiveBucketEntryType"]
+indexer_visible = true
+source = { path = "core/cap-0062.md", xdr_diff = "v22.0..v23.0" }
+notes = "CAP names LEDGER_ENTRY_RESTORE and evictedLedgerKeys; v30.0 names are LEDGER_ENTRY_RESTORED and evictedKeys. evicted PERSISTENT keys and RestoreFootprint restores now appear in meta. hot archive types are bucket-only"
+
+[[cap]]
+id = "CAP-0063"
+title = "Parallelism-friendly Transaction Scheduling"
+status = "Final"
+protocol = 23
+xdr_additions = ["ParallelTxsComponent", "DependentTxCluster", "ParallelTxExecutionStage", "TransactionPhase.parallelTxsComponent", "TransactionResultMetaV1", "TransactionResultMetaV1.postTxApplyFeeProcessing", "LedgerCloseMetaV2", "LedgerCloseMeta.v2", "ConfigSettingContractParallelComputeV0", "CONFIG_SETTING_CONTRACT_PARALLEL_COMPUTE_V0"]
+indexer_visible = true
+source = { path = "core/cap-0063.md", xdr_diff = "v22.0..v23.0" }
+notes = "CAP renames TransactionResultMeta to TransactionResultMetaV0; v30.0 keeps the name TransactionResultMeta"
+
+[[cap]]
+id = "CAP-0064"
+title = "Memo Authorization for Soroban"
+status = "Rejected"
+xdr_additions = []
+indexer_visible = false
+reason = "Rejected; not implemented in any protocol; proposed SorobanAddressCredentialsV2 is absent at v30.0"
+source = { path = "core/cap-0064.md" }
+notes = "SOROBAN_CREDENTIALS_ADDRESS_V2 exists at v30.0 but comes from CAP-0071-02"
+
+[[cap]]
+id = "CAP-0065"
+title = "Reusable module cache"
+status = "Final"
+protocol = 23
+xdr_additions = []
+indexer_visible = false
+reason = "the CAP states no XDR changes; cross-ledger module cache only"
+source = { path = "core/cap-0065.md" }
+
+[[cap]]
+id = "CAP-0066"
+title = "Soroban In-memory Read Resource"
+status = "Final"
+protocol = 23
+xdr_additions = ["SorobanResourcesExtV0", "SorobanTransactionData.ext.resourceExt", "SorobanResources.diskReadBytes", "ConfigSettingContractLedgerCostExtV0", "CONFIG_SETTING_CONTRACT_LEDGER_COST_EXT_V0", "LedgerCloseMetaV1.evictedKeys", "LedgerCloseMetaV1.unused"]
+indexer_visible = true
+source = { path = "core/cap-0066.md", xdr_diff = "v22.0..v23.0" }
+notes = "readBytes renamed diskReadBytes. CAP lists CONFIG_SETTING_CONTRACT_LEDGER_COST_EXT_V0 = 14 and feeWrite1KB as uint32; v30.0 has 15 and int64"
+
+[[cap]]
+id = "CAP-0067"
+title = "Unified Asset Events"
+status = "Final"
+protocol = 23
+xdr_additions = ["SC_ADDRESS_TYPE_MUXED_ACCOUNT", "SC_ADDRESS_TYPE_CLAIMABLE_BALANCE", "SC_ADDRESS_TYPE_LIQUIDITY_POOL", "MuxedEd25519Account", "SCAddress.muxedAccount", "SCAddress.claimableBalanceId", "SCAddress.liquidityPoolId", "TransactionMetaV4", "TransactionMeta.v4", "OperationMetaV2", "SorobanTransactionMetaV2", "TransactionEvent", "TransactionEventStage", "TRANSACTION_EVENT_STAGE_BEFORE_ALL_TXS", "TRANSACTION_EVENT_STAGE_AFTER_TX", "TRANSACTION_EVENT_STAGE_AFTER_ALL_TXS"]
+indexer_visible = true
+source = { path = "core/cap-0067.md", xdr_diff = "v22.0..v23.0" }
+notes = "classic ops emit transfer, mint, burn, clawback, set_authorized and fee events; admin dropped from SAC mint, clawback, set_authorized topics; transfer and mint data becomes a map with to_muxed_id when muxed info is present; emission is behind a flag"
+
+[[cap]]
+id = "CAP-0068"
+title = "Host function for getting  executable for `Address`"
+status = "Final"
+protocol = 23
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states no new cost types"
+source = { path = "core/cap-0068.md" }
+
+[[cap]]
+id = "CAP-0069"
+title = "String/Bytes conversion host functions"
+status = "Final"
+protocol = 23
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states no new cost types"
+source = { path = "core/cap-0069.md" }
+
+[[cap]]
+id = "CAP-0070"
+title = "Configurable SCP Timing Parameters"
+status = "Final"
+protocol = 23
+xdr_additions = ["ConfigSettingSCPTiming", "CONFIG_SETTING_SCP_TIMING", "ConfigSettingEntry.contractSCPTiming"]
+indexer_visible = true
+source = { path = "core/cap-0070.md", xdr_diff = "v22.0..v23.0" }
+notes = "visible only as a CONFIG_SETTING ledger entry in upgrade meta"
+
+[[cap]]
+id = "CAP-0071"
+title = "Authentication delegation and address-bound Soroban credentials"
+status = "Final"
+protocol = 27
+xdr_additions = ["ENVELOPE_TYPE_SOROBAN_AUTHORIZATION_WITH_ADDRESS", "HashIDPreimage.sorobanAuthorizationWithAddress", "SorobanDelegateSignature", "SorobanAddressCredentialsWithDelegates", "SOROBAN_CREDENTIALS_ADDRESS_V2", "SOROBAN_CREDENTIALS_ADDRESS_WITH_DELEGATES", "SorobanCredentials.addressV2", "SorobanCredentials.addressWithDelegates"]
+indexer_visible = true
+source = { path = "core/cap-0071.md", xdr_diff = "v26.0..v27.0" }
+notes = "the CAP diff base cff714a5 is the v26.0 tag commit; split into CAP-0071-01 and CAP-0071-02"
+
+[[cap]]
+id = "CAP-0071-01"
+title = "Authentication delegation for custom accounts"
+status = "Final"
+protocol = 27
+xdr_additions = ["ENVELOPE_TYPE_SOROBAN_AUTHORIZATION_WITH_ADDRESS", "SorobanDelegateSignature", "SorobanAddressCredentialsWithDelegates", "SOROBAN_CREDENTIALS_ADDRESS_WITH_DELEGATES"]
+indexer_visible = true
+source = { path = "core/cap-0071-01.md", xdr_diff = "v26.0..v27.0" }
+notes = "SorobanDelegateSignature is recursive (nestedDelegates<>)"
+
+[[cap]]
+id = "CAP-0071-02"
+title = "Address-bound Soroban address credentials"
+status = "Final"
+protocol = 27
+xdr_additions = ["SOROBAN_CREDENTIALS_ADDRESS_V2", "SorobanCredentials.addressV2"]
+indexer_visible = true
+source = { path = "core/cap-0071-02.md", xdr_diff = "v26.0..v27.0" }
+
+[[cap]]
+id = "CAP-0072"
+title = "Contract signers for Stellar accounts"
+status = "Draft"
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_SC_DELEGATED is absent at v30.0"
+source = { path = "core/cap-0072.md" }
+
+[[cap]]
+id = "CAP-0073"
+title = "Allow SAC to create G-account balances"
+status = "Final"
+protocol = 26
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/cap-0073.md" }
+notes = "no new XDR. SAC trust(address) creates an i64::MAX trustline and emits no event; SAC XLM transfer or transfer_from to a missing G-address creates the AccountEntry (muxed destinations use their G part)"
+
+[[cap]]
+id = "CAP-0074"
+title = "Host functions for BN254"
+status = "Final"
+protocol = 25
+xdr_additions = ["Bn254EncodeFp", "Bn254DecodeFp", "Bn254G1CheckPointOnCurve", "Bn254G2CheckPointOnCurve", "Bn254G2CheckPointInSubgroup", "Bn254G1ProjectiveToAffine", "Bn254G1Add", "Bn254G1Mul", "Bn254Pairing", "Bn254FrFromU256"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes"
+source = { path = "core/cap-0074.md", xdr_diff = "v24.0..v25.0" }
+
+[[cap]]
+id = "CAP-0075"
+title = "Cryptographic Primitives for Poseidon/Poseidon2 Hash Functions"
+status = "Final"
+protocol = 25
+xdr_additions = ["Bn254FrToU256", "Bn254FrAddSub", "Bn254FrMul", "Bn254FrPow", "Bn254FrInv"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes"
+source = { path = "core/cap-0075.md", xdr_diff = "v24.0..v25.0" }
+
+[[cap]]
+id = "CAP-0076"
+title = "P23 State Archival bug remediation"
+status = "Final"
+protocol = 24
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/cap-0076.md", xdr_diff = "v23.0..v24.0" }
+notes = "no XDR change (v23.0 and v24.0 are the same commit). upgrade ledger adds 31879035 stroops to header feePool with no matching meta; amended hot archive entries show up only when later restored"
+
+[[cap]]
+id = "CAP-0077"
+title = "Freeze Ledger Entries via Network Configuration"
+status = "Final"
+protocol = 26
+xdr_additions = ["EncodedLedgerKey", "FrozenLedgerKeys", "FrozenLedgerKeysDelta", "FreezeBypassTxs", "FreezeBypassTxsDelta", "CONFIG_SETTING_FROZEN_LEDGER_KEYS", "CONFIG_SETTING_FROZEN_LEDGER_KEYS_DELTA", "CONFIG_SETTING_FREEZE_BYPASS_TXS", "CONFIG_SETTING_FREEZE_BYPASS_TXS_DELTA", "CLAIM_CLAIMABLE_BALANCE_TRUSTLINE_FROZEN", "LIQUIDITY_POOL_DEPOSIT_TRUSTLINE_FROZEN", "LIQUIDITY_POOL_WITHDRAW_TRUSTLINE_FROZEN", "txFROZEN_KEY_ACCESSED"]
+indexer_visible = true
+source = { path = "core/cap-0077.md", xdr_diff = "v25.0..v26.0" }
+
+[[cap]]
+id = "CAP-0078"
+title = "Host functions for performing limited TTL extensions"
+status = "Final"
+protocol = 26
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; no XDR section and the v25.0..v26.0 diff has nothing attributable to it"
+source = { path = "core/cap-0078.md" }
+
+[[cap]]
+id = "CAP-0079"
+title = "Host functions for muxed address strkey conversions"
+status = "Final"
+protocol = 26
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states metering uses existing cost types"
+source = { path = "core/cap-0079.md" }
+
+[[cap]]
+id = "CAP-0080"
+title = "Host functions for efficient ZK BN254 use cases"
+status = "Final"
+protocol = 26
+xdr_additions = ["Bn254G1Msm"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes"
+source = { path = "core/cap-0080.md", xdr_diff = "v25.0..v26.0" }
+
+[[cap]]
+id = "CAP-0081"
+title = "TTL-Ordered Eviction"
+status = "Accepted"
+xdr_additions = []
+indexer_visible = false
+reason = "Accepted but protocol TBD, not implemented"
+source = { path = "core/cap-0081.md" }
+notes = "proposed CONFIG_SETTING_MAX_TEMP_ENTRIES_TO_EVICT is absent at v30.0, and value 17 is now CONFIG_SETTING_FROZEN_LEDGER_KEYS"
+
+[[cap]]
+id = "CAP-0082"
+title = "Checked 256-bit integer arithmetic host functions"
+status = "Final"
+protocol = 26
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states no XDR changes and reuses existing cost types"
+source = { path = "core/cap-0082.md" }
+
+[[cap]]
+id = "CAP-0083"
+title = "Allow validators to vote to drop the transaction set from the current ledger"
+status = "Final"
+protocol = 28
+xdr_additions = ["STELLAR_VALUE_EMPTY_TX_SET", "StellarValue.ext.proposedValue"]
+indexer_visible = true
+source = { path = "core/cap-0083.md", xdr_diff = "v26.0..v28.0" }
+notes = "added under #ifdef CAP_0083 in v27.0, unconditional in v28.0. ledgers with this value type are empty ledgers"
+
+[[cap]]
+id = "CAP-0084"
+title = "Muxed Contract Addresses"
+status = "Implemented"
+protocol = 30
+xdr_additions = ["SC_ADDRESS_TYPE_MUXED_CONTRACT", "MuxedContract", "SCAddress.muxedContract"]
+indexer_visible = true
+source = { path = "core/cap-0084.md", xdr_diff = "v27.0..v30.0" }
+notes = "added under #ifdef CAP_0084_MUXED_CONTRACT in v28.0, unconditional in v30.0. strkey prefix W (22 << 3); SAC transfer and mint events carry to_muxed_id as SCV_U64"
+
+[[cap]]
+id = "CAP-0085"
+title = "Externally managed contract executables"
+status = "Final"
+protocol = 28
+xdr_additions = ["CONTRACT_EXECUTABLE_EXTERNAL_REF", "ContractExecutableExternalRef", "ContractExecutable.external_ref", "SCV_EXECUTABLE_TAG", "SCVal.executable_tag"]
+indexer_visible = true
+source = { path = "core/cap-0085.md", xdr_diff = "v27.0..v28.0" }
+notes = "CAP diff wraps these in #ifdef CAP_0085; unconditional at v28.0"
+
+[[cap]]
+id = "CAP-0086"
+title = "Host functions for sparse Symbol-keyed map creation and unpacking"
+status = "Final"
+protocol = 28
+xdr_additions = []
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states metering uses existing primitives"
+source = { path = "core/cap-0086.md" }
+
+[[cap]]
+id = "CAP-0087"
+title = "Host functions for ML-DSA signature verification"
+status = "Implemented"
+protocol = 30
+xdr_additions = ["MlDsa44DecodeVerifyingKey", "MlDsa65DecodeVerifyingKey", "MlDsa87DecodeVerifyingKey", "MlDsa44DecodeSignature", "MlDsa65DecodeSignature", "MlDsa87DecodeSignature", "VerifyMlDsa44Sig", "VerifyMlDsa65Sig", "VerifyMlDsa87Sig"]
+indexer_visible = false
+reason = "host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes"
+source = { path = "core/cap-0087.md", xdr_diff = "v28.0..v30.0" }
+
+[[cap]]
+id = "CAP-0088"
+title = "Millisecond-Resolution Close Times"
+status = "Implemented"
+protocol = 30
+xdr_additions = ["STELLAR_VALUE_SIGNED_MS", "STELLAR_VALUE_EMPTY_TX_SET_MS", "TimePointMs", "StellarValue.ext.signedMsValue", "StellarValue.ext.proposedMsValue"]
+indexer_visible = true
+source = { path = "core/cap-0088.md", xdr_diff = "v28.0..v30.0" }
+notes = "CAP diff wraps these in #ifdef MS_CLOSE_TIME; unconditional at v30.0. closeTime == closeTimeMs / 1000"
+
+[[cap]]
+id = "CAP-0089"
+title = "Host functions for invoker-less authorization"
+status = "Draft"
+protocol = 31
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; the CAP has no XDR section"
+source = { path = "core/cap-0089.md" }
+
+[[cap]]
+id = "CAP-0090"
+title = "Custom signature payload for account contracts"
+status = "Draft"
+protocol = 31
+xdr_additions = []
+indexer_visible = false
+reason = "Draft; not implemented in any protocol; proposed SorobanAddressCredentialsV3 and SOROBAN_CREDENTIALS_ADDRESS_V3 are absent at v30.0"
+source = { path = "core/cap-0090.md" }
