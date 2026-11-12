@@ -266,3 +266,73 @@ fn schema_source_classes_match_the_registry() {
         assert!(text.contains(&format!("\"{class}\"")), "{class}");
     }
 }
+
+#[test]
+fn normalization_is_only_for_local_core() {
+    let (dir, mut manifest) = sample();
+    manifest.entries[0].source.normalization =
+        Some(shapekit_manifest::Normalization::CoreNormalizeMeta);
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(p[0].contains("only recorded for local-core"), "{p:#?}");
+}
+
+#[test]
+fn refused_local_core_entries_carry_cores_result() {
+    use shapekit_manifest::{CoreRejection, RejectionStage, Validity};
+    use stellar_xdr::{Limits, TransactionResult, TransactionResultExt, WriteXdr};
+
+    let malformed = TransactionResult {
+        fee_charged: 100,
+        result: stellar_xdr::TransactionResultResult::TxMalformed,
+        ext: TransactionResultExt::V0,
+    }
+    .to_xdr_base64(Limits::none())
+    .unwrap();
+    let local = |manifest: &mut Manifest| {
+        let e = &mut manifest.entries[0];
+        e.source.class = shapekit_registry::SourceClass::LocalCore;
+        e.source.recipe = Some("cap15.fee-bump".into());
+        e.source.chain = Some("cap15.fee-bump.p30".into());
+        e.expected.validity = Validity::InvalidByCore;
+    };
+
+    let (dir, mut manifest) = sample();
+    local(&mut manifest);
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(p[0].contains("needs source.core_rejection"), "{p:#?}");
+
+    let (dir, mut manifest) = sample();
+    local(&mut manifest);
+    manifest.entries[0].source.core_rejection = Some(CoreRejection {
+        stage: RejectionStage::Submit,
+        result_code: "tx_bad_auth".into(),
+        result_xdr: malformed.clone(),
+    });
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(p[0].contains("result_xdr holds tx_malformed"), "{p:#?}");
+
+    let (dir, mut manifest) = sample();
+    local(&mut manifest);
+    manifest.entries[0].source.core_rejection = Some(CoreRejection {
+        stage: RejectionStage::Submit,
+        result_code: "tx_malformed".into(),
+        result_xdr: malformed.clone(),
+    });
+    assert_eq!(problems(&manifest, dir.path()), Vec::<String>::new());
+
+    // a rejection on an entry core accepted contradicts it
+    let (dir, mut manifest) = sample();
+    manifest.entries[0].source.core_rejection = Some(CoreRejection {
+        stage: RejectionStage::Submit,
+        result_code: "tx_malformed".into(),
+        result_xdr: malformed,
+    });
+    let p = problems(&manifest, dir.path());
+    assert!(
+        p.iter().any(|m| m.contains("not invalid-by-core")),
+        "{p:#?}"
+    );
+}

@@ -131,6 +131,43 @@ pub struct Source {
     pub upstream: Option<Upstream>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub provenance_url: Option<String>,
+    /// How the stored bytes were reordered from what core wrote. Set on local-core entries
+    /// that carry meta, whose change lists core emits in a per-process order.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub normalization: Option<Normalization>,
+    /// What core answered when the bytes were submitted, for envelopes core refused.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub core_rejection: Option<CoreRejection>,
+}
+
+/// Ordering rules applied to recorded meta before it is stored.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum Normalization {
+    /// The order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp) gives change
+    /// lists before it compares goldens. Only order changes; the bytes core wrote are a
+    /// permutation of the stored ones.
+    CoreNormalizeMeta,
+}
+
+/// Core's refusal of an envelope: where it happened and the `TransactionResult` it returned.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct CoreRejection {
+    pub stage: RejectionStage,
+    /// The XDR-JSON arm name of the result, for example `tx_malformed` or `tx_failed`.
+    pub result_code: String,
+    /// The `TransactionResult` core returned, base64 XDR.
+    pub result_xdr: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum RejectionStage {
+    /// Refused by the `tx` endpoint, so the envelope never reached a ledger.
+    Submit,
+    /// Included in a ledger and failed there.
+    Apply,
 }
 
 // mirrors shapekit_registry::SourceClass for the schema, which the registry crate does not

@@ -20,6 +20,29 @@
       ],
       "type": "object"
     },
+    "CoreRejection": {
+      "additionalProperties": false,
+      "description": "Core's refusal of an envelope: where it happened and the `TransactionResult` it returned.",
+      "properties": {
+        "result_code": {
+          "description": "The XDR-JSON arm name of the result, for example `tx_malformed` or `tx_failed`.",
+          "type": "string"
+        },
+        "result_xdr": {
+          "description": "The `TransactionResult` core returned, base64 XDR.",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/RejectionStage"
+        }
+      },
+      "required": [
+        "stage",
+        "result_code",
+        "result_xdr"
+      ],
+      "type": "object"
+    },
     "DecodeExpectation": {
       "enum": [
         "must-accept",
@@ -252,6 +275,30 @@
       ],
       "type": "object"
     },
+    "Normalization": {
+      "description": "Ordering rules applied to recorded meta before it is stored.",
+      "oneOf": [
+        {
+          "const": "core-normalize-meta",
+          "description": "The order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp) gives change\nlists before it compares goldens. Only order changes; the bytes core wrote are a\npermutation of the stored ones.",
+          "type": "string"
+        }
+      ]
+    },
+    "RejectionStage": {
+      "oneOf": [
+        {
+          "const": "submit",
+          "description": "Refused by the `tx` endpoint, so the envelope never reached a ledger.",
+          "type": "string"
+        },
+        {
+          "const": "apply",
+          "description": "Included in a ledger and failed there.",
+          "type": "string"
+        }
+      ]
+    },
     "Source": {
       "additionalProperties": false,
       "properties": {
@@ -264,6 +311,17 @@
         "class": {
           "$ref": "#/$defs/SourceClassSchema"
         },
+        "core_rejection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CoreRejection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What core answered when the bytes were submitted, for envelopes core refused."
+        },
         "ledger_seq": {
           "format": "uint32",
           "minimum": 0,
@@ -271,6 +329,17 @@
             "integer",
             "null"
           ]
+        },
+        "normalization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Normalization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the stored bytes were reordered from what core wrote. Set on local-core entries\nthat carry meta, whose change lists core emits in a per-process order."
         },
         "provenance_url": {
           "type": [

@@ -75,3 +75,16 @@ fn sorted(value: &Value) -> Value {
         other => other.clone(),
     }
 }
+
+/// The XDR-JSON arm name of a transaction result, `tx_malformed` or `tx_failed` for example:
+/// the bare string of a void arm, the single key of an arm with a value.
+pub fn result_code(result: &stellar_xdr::TransactionResult) -> Result<String, ToolkitError> {
+    match serde_json::to_value(&result.result).map_err(ToolkitError::Json)? {
+        Value::String(s) => Ok(s),
+        Value::Object(map) if map.len() == 1 => Ok(map.keys().next().cloned().unwrap_or_default()),
+        other => Err(ToolkitError::Shape {
+            path: "TransactionResult.result".into(),
+            message: format!("expected a union arm, got {other}"),
+        }),
+    }
+}

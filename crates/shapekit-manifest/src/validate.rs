@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::path::{Component, Path};
 
 use shapekit_registry::{Problem, Registry, SourceClass};
-use stellar_xdr::Limits;
+use stellar_xdr::{Limits, ReadXdr};
 
 use crate::model::*;
 use crate::{sha256_hex, xdr};
@@ -180,6 +180,57 @@ impl Checker<'_> {
             && !is_sha256(&up.sha256)
         {
             self.problem("source.upstream.sha256 is not 64 lowercase hex characters");
+        }
+        self.normalization();
+        self.core_rejection();
+    }
+
+    fn normalization(&mut self) {
+        let e = self.entry;
+        let local = e.source.class == SourceClass::LocalCore;
+        if e.source.normalization.is_some() && !local {
+            self.problem("source.normalization is only recorded for local-core entries");
+        }
+        let carries_meta = e
+            .xdr_type
+            .as_deref()
+            .is_some_and(|t| META_TYPES.contains(&t));
+        if local && carries_meta && e.source.normalization.is_none() {
+            self.problem(
+                "a local-core entry carrying meta needs source.normalization, core orders its change lists per process",
+            );
+        }
+    }
+
+    fn core_rejection(&mut self) {
+        let e = self.entry;
+        let invalid = e.expected.validity == Validity::InvalidByCore;
+        let Some(r) = &e.source.core_rejection else {
+            if invalid && e.source.class == SourceClass::LocalCore {
+                self.problem("an invalid-by-core local-core entry needs source.core_rejection");
+            }
+            return;
+        };
+        if !invalid {
+            self.problem(
+                "source.core_rejection is set but expected.validity is not invalid-by-core",
+            );
+        }
+        let limits = Limits {
+            depth: DECODE_DEPTH,
+            len: r.result_xdr.len(),
+        };
+        let decoded = stellar_xdr::TransactionResult::from_xdr_base64(&r.result_xdr, limits)
+            .map_err(|e| e.to_string());
+        match decoded.and_then(|t| xdr::result_code(&t).map_err(|e| e.to_string())) {
+            Ok(code) if code == r.result_code => {}
+            Ok(code) => self.problem(format!(
+                "source.core_rejection.result_code is {} but result_xdr holds {code}",
+                r.result_code
+            )),
+            Err(err) => self.problem(format!(
+                "source.core_rejection.result_xdr is not a TransactionResult: {err}"
+            )),
         }
     }
 
@@ -400,6 +451,14 @@ impl Checker<'_> {
         }
     }
 }
+
+/// Types whose bytes hold ledger-entry change lists.
+const META_TYPES: [&str; 4] = [
+    "LedgerCloseMeta",
+    "TransactionMeta",
+    "TransactionResultMeta",
+    "TransactionResultMetaV1",
+];
 
 fn is_sha256(s: &str) -> bool {
     s.len() == 64 && s.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))

@@ -1,7 +1,7 @@
 [workspace]
 resolver = "3"
 members = ["crates/*"]
-exclude = ["contracts"]
+exclude = ["contracts", "testees"]
 
 [workspace.package]
 version = "0.1.0"
@@ -14,10 +14,20 @@ publish = false
 ed25519-dalek = "3.0.0"
 soroban-env-host = "30.0.0"
 soroban-simulation = "30.0.0"
+# older hosts for chains below protocol 30, see crates/shapekit-core-driver/src/sim_legacy.rs
+soroban-env-host-p22 = { package = "soroban-env-host", version = "=22.1.4" }
+soroban-simulation-p22 = { package = "soroban-simulation", version = "=22.1.4" }
+soroban-env-host-p24 = { package = "soroban-env-host", version = "=24.0.0" }
+soroban-simulation-p24 = { package = "soroban-simulation", version = "=24.0.0" }
+soroban-env-host-p28 = { package = "soroban-env-host", version = "=28.0.2" }
+soroban-simulation-p28 = { package = "soroban-simulation", version = "=28.0.2" }
 stellar-strkey = "1.0.0"
 anyhow = "1.0.104"
+base64 = "0.23.1"
 clap = { version = "4.6.7", features = ["derive"] }
 hex = "0.4.3"
+jsonschema = { version = "0.60.2", default-features = false }
+nix = { version = "0.31.3", default-features = false }
 reqwest = { version = "0.13.5", features = ["blocking"] }
 schemars = "1.2.3"
 serde = { version = "1.0.229", features = ["derive"] }
@@ -28,5 +38,10 @@ tempfile = "3.27.0"
 thiserror = "2.0.21"
 toml = "1.2.1"
 walkdir = "2.5.0"
+zstd = "0.14.3"
+shapekit-core-driver = { path = "crates/shapekit-core-driver" }
+shapekit-conformance = { path = "crates/shapekit-conformance" }
 shapekit-manifest = { path = "crates/shapekit-manifest" }
 shapekit-registry = { path = "crates/shapekit-registry" }
+shapekit-gen = { path = "crates/shapekit-gen" }
+shapekit-oracle = { path = "crates/shapekit-oracle" }
