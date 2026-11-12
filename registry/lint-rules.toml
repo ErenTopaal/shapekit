@@ -1,0 +1,28 @@
+# the three indexerlint rules. ids, names and descriptions must match
+# lint/rules/rules.go byte for byte; the guide checklist is rendered from
+# the checklist text below so the linter and the guide name each rule the
+# same way.
+
+schema_version = 1
+
+[[rule]]
+id = "IDX001"
+name = "unvalidated-field-trusted"
+description = "a transaction field that stellar-core does not validate is trusted without a check"
+rationale = "Core accepts several envelope fields without checking their content: memo text is bounded only by its 28-byte XDR length and need not be UTF-8, muxed accounts do not exist on the ledger, so a mux ID names nothing the network tracks, and a declared Soroban auth entry or footprint key says what a transaction asked for, not what it did. An auth entry that no require_auth call matches is never verified, and a declared create-contract invocation may never run. Indexers that store these values as text, key rows by them or report them as effects write data the network never confirmed; wallet-backend#746 derives contract-creation state changes from declared auth entries in exactly this way."
+checklist = "Before you store, key, display or convert to text any field listed as not validated in the field table, validate it yourself (length, encoding, range) or confirm it against what the transaction meta and events say actually happened."
+fields_registry = "registry/fields.toml"
+
+[[rule]]
+id = "IDX002"
+name = "missing-depth-or-size-cap"
+description = "a recursive or length-prefixed xdr structure is walked or decoded without a depth or size cap"
+rationale = "ScVal, SorobanAuthorizedInvocation and ClaimPredicate are recursive, and SCVec, SCMap, SCBytes, SCString and the auth entry and sub-invocation lists carry no XDR length bound. Core bounds envelope depth at 1000 and the host bounds the ScVals it writes at 100 levels, but the host never limits auth tree depth, so a declared tree can nest about 493 levels and hold up to 2540 nodes inside one valid transaction. A decoder run without limits, a recursive walk without a depth counter, or an allocation sized by a decoded length can exhaust the stack or the heap on a single transaction and stop ingestion; unbounded authorization trees halted wallet-backend, and rs-stellar-xdr#581 fixed capacity reserved from an untrusted VecM length. registry/caps-limits.toml gives each cap and the upstream constant it comes from."
+checklist = "Decode external XDR with an explicit depth limit and a length limit no larger than the input buffer, carry a depth counter through every recursive walk of ScVal, auth invocation and claim predicate trees, and check each decoded length against the cap in the caps table before allocating or iterating."
+
+[[rule]]
+id = "IDX003"
+name = "participants-from-envelope"
+description = "participants are derived from the transaction envelope instead of meta changes or events"
+rationale = "The envelope names who a transaction meant to touch, not who it touched. Failed transactions keep their envelopes, payments to muxed (M) addresses resolve to a base G account, sponsorship, clawback, SAC transfers and contract calls change accounts that no envelope field names, and declared auth addresses may never be used. Participant sets built from source accounts, operation destinations or auth entries are therefore both incomplete and over-inclusive. Ledger entry changes in the transaction meta and the protocol 23 and later unified events record what actually changed."
+checklist = "Build each transaction's participant set from the ledger entry changes (fee changes included) and events in its meta, and treat accounts named only in the envelope as declared intent, not participation."

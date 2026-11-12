@@ -1,0 +1,449 @@
+# recommended depth, length and count caps for indexers.
+#
+# every value is equal to an upstream constant or network setting, or is
+# derived from cited values with the arithmetic shown in rationale. the
+# guiding rule: a cap equals the tightest bound the network guarantees, so it
+# never refuses data that core could have put in a ledger. anything above it
+# is malformed or hostile input and should be skipped and counted, not halt
+# ingestion.
+#
+# derived_from entries take one of three forms:
+#   source code:      repo, ref, path, symbol, value
+#   network setting:  network, rpc, setting, value, read_at, ledger
+#   measurement:      repo, ref, path, symbol, value, measured_with
+# a measurement runs the cited crate's own decoder (stellar-xdr 30.0.0 with
+# explicit Limits) and binary-searches the smallest depth that still decodes.
+#
+# optional keys:
+#   network_setting = true  the value comes from a CONFIG_SETTING ledger entry
+#                           and moves when validators vote a config upgrade;
+#                           re-read it (getLedgerEntries on the CONFIG_SETTING
+#                           key) rather than hardcoding it.
+#   protocol_min            the cap holds only for ledgers at or above this
+#                           protocol version.
+
+schema_version = 1
+
+# xdr decode limits
+
+[[limit]]
+id = "xdr.envelope.depth"
+applies_to = "TransactionEnvelope decode (Limits.depth in rs-stellar-xdr, equivalent recursion guard elsewhere)"
+recommended = 1000
+unit = "levels"
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol (rustDepthLimit)", value = "1000" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol (xdr::check_xdr_depth before protocol 28)", value = "500" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/rust/src/soroban_proto_any.rs", symbol = "can_parse_transaction (Limits { depth: depth_limit, len: xdr.data.len() })", value = "depth_limit" },
+]
+rationale = "From protocol 28 core rejects with txMALFORMED any envelope that the Rust XDR parser cannot read at depth 1000, so no ledger at protocol 28 or later holds a deeper envelope. Before protocol 28 core applied the xdrpp depth checker at 500, which counts every struct, union, vector and optional as one level. The Rust decoder also counts typedef newtypes, and the measured cost of the deepest recursions is 4 Rust levels per 3 xdrpp levels for nested ScVec and 2 per 2 for auth invocations, which keeps those envelopes inside 1000 as well. Decoders that leave depth unlimited (for example Limits::none(), which the stellar-xdr CLI decode command uses) can overflow the stack on hostile input."
+
+[[limit]]
+id = "xdr.envelope.len"
+applies_to = "TransactionEnvelope decode (Limits.len), and any buffer allocated for one envelope"
+recommended = 132096
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources (getSize() > txMaxSizeBytes)", value = "txMaxSizeBytes" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/overlay/Peer.h", symbol = "MAX_CLASSIC_TX_SIZE_BYTES", value = "102400" },
+]
+rationale = "Soroban envelopes are rejected when xdr_size(envelope) exceeds txMaxSizeBytes, 132096 on both networks. Classic envelopes are held to MAX_CLASSIC_TX_SIZE_BYTES = 100 * 1024 = 102400 by the overlay flood limit; every classic operation also has only fixed-size or XDR-bounded fields. The cap is max(132096, 102400) = 132096. Pass the actual input length as Limits.len when it is smaller, which is what core does in can_parse_transaction."
+
+[[limit]]
+id = "xdr.meta.depth"
+applies_to = "LedgerCloseMeta decode (Limits.depth), including the transaction set it carries"
+recommended = 1012
+unit = "levels"
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol (rustDepthLimit)", value = "1000" },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/ledger_close_meta_v2.rs", symbol = "LedgerCloseMeta::V2 -> GeneralizedTransactionSet -> TransactionPhase::V1 -> ParallelTxsComponent -> DependentTxCluster -> TransactionEnvelope", value = "12 levels above the envelope", measured_with = "depthprobe: deepest valid envelope (997) decodes alone at 997 and inside LedgerCloseMeta V2 at 1009" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/budget/limits.rs", symbol = "DEFAULT_HOST_DEPTH_LIMIT", value = "100" },
+]
+rationale = "The deepest part of a ledger is an envelope in its transaction set. Envelopes are bounded at depth 1000 (xdr.envelope.depth) and the parallel Soroban phase of a LedgerCloseMeta V2 adds 12 levels above the envelope (measured), so 1000 + 12 = 1012. Host-produced values in transaction meta are shallower: at most 100 ScVal levels at 5 decode levels per ScMap level, 500 levels plus the meta prefix. Ten recent testnet and mainnet ledgers decoded at depths 41 to 53."
+
+[[limit]]
+id = "xdr.meta.len"
+applies_to = "LedgerCloseMeta decode (Limits.len) from a datastore file, RPC getLedgers or a captive-core stream"
+recommended = 33554432
+unit = "bytes"
+derived_from = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/budget/limits.rs", symbol = "DEFAULT_XDR_RW_LIMITS.len", value = "32 * 1024 * 1024" },
+]
+rationale = "No network setting bounds the size of a whole LedgerCloseMeta. Set Limits.len to the length of the buffer being decoded, as soroban-env-host does in metered_from_xdr, and refuse buffers above 32 * 1024 * 1024 = 33554432 bytes, the host's last-resort XDR length ceiling. For scale, ten mainnet ledgers read on 2026-11-12 (65441894 to 65441903) were 1.49 MB to 2.49 MB."
+
+# scval
+
+[[limit]]
+id = "scval.depth"
+applies_to = "nested ScVal traversal and native conversion (ScVec, ScMap) for values from transaction meta: contract events, contract data and code entries, return values, diagnostic events"
+recommended = 100
+unit = "levels"
+derived_from = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/budget/limits.rs", symbol = "DEFAULT_HOST_DEPTH_LIMIT", value = "100" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/conversion.rs", symbol = "Host::from_host_val and Host::to_host_val (with_limited_depth per nested Val)", value = "one level per ScVal" },
+]
+rationale = "Every ScVal the host writes is produced by from_host_val, which enters one budget depth level per nested value and fails with ExceededLimit past DEFAULT_HOST_DEPTH_LIMIT = 100. Values the host emitted therefore nest at most 100 deep. Use this cap for recursive walks and native conversion of meta-borne ScVals."
+
+[[limit]]
+id = "scval.depth.envelope"
+applies_to = "nested ScVal traversal for values read from a transaction envelope (InvokeContractArgs.args, constructor args, auth invocation args)"
+recommended = 246
+unit = "levels"
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol (rustDepthLimit)", value = "1000" },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/sc_val.rs", symbol = "ReadXdr for ScVal, Option<ScVec>, ScVec, VecM (one with_limited_depth each)", value = "4 levels per ScVec nesting, 5 per ScMap nesting", measured_with = "depthprobe: largest ScVec nesting in an InvokeContract argument that decodes at depth 1000" },
+]
+rationale = "Envelope arguments are only bounded by the envelope depth check, not by the host. Nesting through ScVec costs 4 decode levels and through ScMap 5, so an InvokeHostFunction argument can nest at most 246 ScVec levels (measured; (1000 - envelope prefix) / 4) or 197 ScMap levels inside a valid envelope. The host refuses to convert anything past 100 levels, so such a transaction fails, but it is still in the ledger with its arguments. Walk envelope arguments with this bound, and treat anything between 101 and 246 levels as a value the contract never saw."
+
+[[limit]]
+id = "scval.vec.len"
+applies_to = "ScVec element count, and any allocation sized by a decoded ScVec length"
+recommended = 33024
+unit = "elements"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/sc_val.rs", symbol = "ScVal::Void encoding", value = "4 bytes", measured_with = "depthprobe: ScVal::Void.to_xdr()" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "typedef SCVal SCVec<>", value = "unbounded" },
+]
+rationale = "SCVec<> has no XDR bound. The largest ScVal container any ledger holds is in a Soroban envelope (contract data entries are capped at 65536 bytes and events plus return value at 16384, both smaller). The smallest element is ScVal::Void at 4 bytes, so a vector inside a 132096-byte envelope has at most 132096 / 4 = 33024 elements. Check the decoded length against this before reserving capacity (the bug fixed in rs-stellar-xdr#581)."
+
+[[limit]]
+id = "scval.map.len"
+applies_to = "ScMap entry count, and any allocation sized by a decoded ScMap length"
+recommended = 16512
+unit = "entries"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/sc_map_entry.rs", symbol = "ScMapEntry { key: Void, val: Void } encoding", value = "8 bytes", measured_with = "depthprobe: ScMapEntry.to_xdr()" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "typedef SCMapEntry SCMap<>", value = "unbounded" },
+]
+rationale = "SCMap<> has no XDR bound. The smallest entry is two ScVal::Void values, 8 bytes, so a map inside a 132096-byte envelope has at most 132096 / 8 = 16512 entries."
+
+[[limit]]
+id = "scval.bytes.len"
+applies_to = "ScBytes and ScString length (SCV_BYTES, SCV_STRING), and any buffer or text column sized by one"
+recommended = 132096
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 65441861 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_DATA_ENTRY_SIZE_BYTES", value = "65536", read_at = "2026-11-12", ledger = 65441861 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EVENTS_V0.txMaxContractEventsSizeBytes", value = "16384", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "typedef opaque SCBytes<>; typedef string SCString<>", value = "unbounded" },
+]
+rationale = "SCBytes<> and SCString<> have no XDR bound. A byte string lives in an envelope (at most txMaxSizeBytes = 132096), a contract data entry (at most 65536) or an event or return value (at most 16384 in total), so max(132096, 65536, 16384) = 132096. SCString is not required to be UTF-8; store it as bytes or validate before converting."
+
+[[limit]]
+id = "scval.symbol.len"
+applies_to = "ScSymbol length (SCV_SYMBOL, function names, event topics)"
+recommended = 32
+unit = "bytes"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "SCSYMBOL_LIMIT", value = "32" },
+]
+rationale = "typedef string SCSymbol<SCSYMBOL_LIMIT> with SCSYMBOL_LIMIT = 32."
+
+# soroban authorization
+
+[[limit]]
+id = "auth.invocation.depth"
+applies_to = "SorobanAuthorizedInvocation tree walk (subInvocations recursion) in declared auth entries"
+recommended = 493
+unit = "levels"
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol (rustDepthLimit)", value = "1000" },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/soroban_authorized_invocation.rs", symbol = "ReadXdr for SorobanAuthorizedInvocation and VecM (one with_limited_depth each)", value = "2 levels per invocation", measured_with = "depthprobe: deepest single-chain invocation tree in an InvokeHostFunction auth entry that decodes at depth 1000" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizedInvocation::from_xdr (recursion without a depth limiter)", value = "no host depth check" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/frame.rs", symbol = "with_frame_and_initial_mem_charge (context stack >= DEFAULT_HOST_DEPTH_LIMIT)", value = "100" },
+]
+rationale = "The XDR declares subInvocations<> without a bound and the host converts the tree recursively without a depth limiter, so the only bound is the envelope depth check. Each nesting costs 2 decode levels, and a single chain in an auth entry reaches 493 levels before the envelope exceeds depth 1000 (measured). The host's call stack is capped at DEFAULT_HOST_DEPTH_LIMIT = 100 frames, so only the top 100 levels can ever match a real call; deeper nodes are declared but never authorized, and a transaction carrying them can still succeed. This is the unbounded authorization tree that halted wallet-backend ingestion."
+
+[[limit]]
+id = "auth.invocation.nodes"
+applies_to = "total SorobanAuthorizedInvocation nodes across all auth entries of one transaction"
+recommended = 2540
+unit = "nodes"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_BANDWIDTH_V0.txMaxSizeBytes", value = "132096", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/soroban_authorized_invocation.rs", symbol = "minimal node: ContractFn, ScAddress::Contract, empty symbol, no args, no children", value = "52 bytes", measured_with = "depthprobe: encoded size difference per added node is 56 bytes with a 1-byte symbol (4 bytes of padded name), so 52 with an empty symbol" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "typedef SorobanAuthorizationEntry SorobanAuthorizationEntries<>; SorobanAuthorizedInvocation subInvocations<>", value = "unbounded" },
+]
+rationale = "Neither the entry list nor subInvocations has an XDR bound, so the tree size is bounded only by the envelope size. The smallest node is 4 (function type) + 36 (contract address) + 4 (empty symbol) + 4 (args length) + 4 (subInvocations length) = 52 bytes, so a 132096-byte envelope holds at most floor(132096 / 52) = 2540 nodes. Count nodes during the walk and stop at this cap; do not allocate per declared child before checking it."
+
+# events
+
+[[limit]]
+id = "events.contract.bytes_per_tx"
+applies_to = "total encoded size of contract events plus the return value of one Soroban transaction"
+recommended = 16384
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_EVENTS_V0.txMaxContractEventsSizeBytes", value = "16384", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EVENTS_V0.txMaxContractEventsSizeBytes", value = "16384", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionApplyHelper (mEmitEventByte > txMaxContractEventsSizeBytes)", value = "INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED" },
+]
+rationale = "Core sums the encoded size of every contract event and then the return value, and fails the operation with INVOKE_HOST_FUNCTION_RESOURCE_LIMIT_EXCEEDED once the sum passes txMaxContractEventsSizeBytes = 16384. Diagnostic events are not counted."
+
+[[limit]]
+id = "events.contract.per_tx"
+applies_to = "number of contract events (type CONTRACT or SYSTEM) in one Soroban transaction's meta"
+recommended = 682
+unit = "events"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EVENTS_V0.txMaxContractEventsSizeBytes", value = "16384", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/rs-stellar-xdr", ref = "v30.0.0", path = "src/generated/contract_event.rs", symbol = "minimal ContractEvent (no contract id, no topics, void data)", value = "24 bytes", measured_with = "depthprobe: ContractEvent.to_xdr()" },
+]
+rationale = "The smallest ContractEvent encodes to 24 bytes: ext 4, absent contractID 4, type 4, body arm 4, empty topics 4, void data 4. floor(16384 / 24) = 682. Classic operation events added by CAP-67 are not counted against this setting; bound them through the operation count and offers crossed instead."
+
+[[limit]]
+id = "events.contract.per_ledger"
+applies_to = "number of contract events across all Soroban transactions of one ledger"
+recommended = 1364000
+unit = "events"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EXECUTION_LANES.ledgerMaxTxCount", value = "2000", read_at = "2026-11-12", ledger = 65441861 },
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_EXECUTION_LANES.ledgerMaxTxCount", value = "2000", read_at = "2026-11-12", ledger = 5694341 },
+]
+rationale = "ledgerMaxTxCount is the maximum number of Soroban transactions per ledger (2000 on both networks). 2000 transactions * 682 events (events.contract.per_tx) = 1364000."
+
+[[limit]]
+id = "events.contract.bytes_per_ledger"
+applies_to = "total encoded contract event and return value bytes across one ledger"
+recommended = 32768000
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EXECUTION_LANES.ledgerMaxTxCount", value = "2000", read_at = "2026-11-12", ledger = 65441861 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EVENTS_V0.txMaxContractEventsSizeBytes", value = "16384", read_at = "2026-11-12", ledger = 65441861 },
+]
+rationale = "2000 Soroban transactions * 16384 bytes = 32768000 bytes."
+
+# soroban resources
+
+[[limit]]
+id = "soroban.footprint.entries"
+applies_to = "read-only plus read-write footprint keys in SorobanTransactionData of one transaction"
+recommended = 400
+unit = "ledger keys"
+network_setting = true
+protocol_min = 23
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_LEDGER_COST_EXT_V0.txMaxFootprintEntries", value = "400", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_LEDGER_COST_EXT_V0.txMaxFootprintEntries", value = "400", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources (totalReads > txMaxFootprintEntries from protocol 23)", value = "txMaxFootprintEntries" },
+]
+rationale = "From protocol 23 core rejects a transaction whose total footprint exceeds txMaxFootprintEntries = 400. Before protocol 23 the bound was txMaxDiskReadEntries over the whole footprint; that setting reads 200 today, and core initialised txMaxFootprintEntries from it at the protocol 23 upgrade (initialLedgerCostExtEntry). Past values of txMaxDiskReadEntries were not read for this registry, so for ledgers before protocol 23 re-derive the cap from the setting in force at that ledger."
+
+[[limit]]
+id = "soroban.footprint.write_entries"
+applies_to = "read-write footprint keys of one transaction (bounds ledger entry changes it can write)"
+recommended = 200
+unit = "ledger keys"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_LEDGER_COST_V0.txMaxWriteLedgerEntries", value = "200", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources (writeEntries.size() > txMaxWriteLedgerEntries)", value = "txMaxWriteLedgerEntries" },
+]
+rationale = "Core rejects a Soroban transaction with more read-write footprint keys than txMaxWriteLedgerEntries = 200."
+
+[[limit]]
+id = "soroban.contract_data.entry_bytes"
+applies_to = "encoded size of one CONTRACT_DATA ledger entry in meta changes"
+recommended = 65536
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_DATA_ENTRY_SIZE_BYTES", value = "65536", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_DATA_ENTRY_SIZE_BYTES", value = "65536", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateContractLedgerEntry (maxContractDataEntrySizeBytes < entrySize)", value = "maxContractDataEntrySizeBytes" },
+]
+rationale = "Core refuses to write a contract data entry larger than contractDataEntrySizeBytes = 65536."
+
+[[limit]]
+id = "soroban.contract_data.key_bytes"
+applies_to = "encoded size of one CONTRACT_DATA ledger key (footprint keys and meta)"
+recommended = 250
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_DATA_KEY_SIZE_BYTES", value = "250", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources (xdr_size(key) > maxContractDataKeySizeBytes)", value = "maxContractDataKeySizeBytes" },
+]
+rationale = "Core rejects a footprint key larger than contractDataKeySizeBytes = 250."
+
+[[limit]]
+id = "soroban.contract_code.bytes"
+applies_to = "Wasm byte length in upload envelopes and CONTRACT_CODE entries"
+recommended = 131072
+unit = "bytes"
+network_setting = true
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_MAX_SIZE_BYTES", value = "131072", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_MAX_SIZE_BYTES", value = "131072", read_at = "2026-11-12", ledger = 65441861 },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateContractLedgerEntry (maxContractSizeBytes < entrySize)", value = "maxContractSizeBytes" },
+]
+rationale = "Core refuses Wasm larger than contractMaxSizeBytes = 131072."
+
+[[limit]]
+id = "soroban.txs.per_ledger"
+applies_to = "Soroban transactions in one ledger"
+recommended = 2000
+unit = "transactions"
+network_setting = true
+derived_from = [
+  { network = "testnet", rpc = "https://soroban-testnet.stellar.org", setting = "CONFIG_SETTING_CONTRACT_EXECUTION_LANES.ledgerMaxTxCount", value = "2000", read_at = "2026-11-12", ledger = 5694341 },
+  { network = "mainnet", rpc = "https://mainnet.sorobanrpc.com", setting = "CONFIG_SETTING_CONTRACT_EXECUTION_LANES.ledgerMaxTxCount", value = "2000", read_at = "2026-11-12", ledger = 65441861 },
+]
+rationale = "ledgerMaxTxCount is defined in Stellar-contract-config-setting.x as the maximum number of Soroban transactions per ledger."
+
+# indexer-side state
+
+[[limit]]
+id = "state_changes.per_tx.query"
+applies_to = "state change rows materialised per transaction when serving an account-history page (query time only, never at ingestion)"
+recommended = 2000
+unit = "rows"
+derived_from = [
+  { repo = "stellar/wallet-backend", ref = "5c780dd8cee2c1b9b1aec49e84928e33de1be394", path = "internal/data/statechanges.go", symbol = "maxAccountStateChangesPerToID", value = "2000" },
+]
+rationale = "wallet-backend PR #757 bounds BatchGetAccountStateChangesByToIDs at 2000 rows per transaction with a ROW_NUMBER window; its comment calls the value a ceiling chosen from mainnet data. It is not a protocol bound: rows beyond it are dropped from the page, so apply it only to serving and keep every row at ingestion. The 4096 figure that circulates for this PR is the TOID operation-index range used by the operations loader (internal/data/operations.go), not a state-change cap."
+
+# claimable balances, paths, offers
+
+[[limit]]
+id = "claim_predicate.depth"
+applies_to = "ClaimPredicate recursion (and, or, not) in CreateClaimableBalance operations and ClaimableBalanceEntry"
+recommended = 4
+unit = "levels"
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "validatePredicate (depth > 4 fails; called with depth 1)", value = "4" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "ClaimPredicate andPredicates<2>, orPredicates<2>, notPredicate*", value = "2 children" },
+]
+rationale = "Core starts validatePredicate at depth 1 and fails CreateClaimableBalance when depth exceeds 4, so a stored predicate has at most 4 levels and, with at most 2 children per node, at most 2^4 - 1 = 15 nodes. A failed CreateClaimableBalance still carries a deeper predicate in its envelope, which is bounded only by xdr.envelope.depth."
+
+[[limit]]
+id = "claimants.per_balance"
+applies_to = "claimants in CreateClaimableBalanceOp and ClaimableBalanceEntry"
+recommended = 10
+unit = "claimants"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "ClaimableBalanceEntry claimants<10>", value = "10" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "CreateClaimableBalanceOp claimants<10>", value = "10" },
+]
+rationale = "XDR bound."
+
+[[limit]]
+id = "path.len"
+applies_to = "intermediate assets in PathPaymentStrictReceive and PathPaymentStrictSend"
+recommended = 5
+unit = "assets"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "PathPaymentStrictReceiveOp path<5>, PathPaymentStrictSendOp path<5>", value = "5" },
+]
+rationale = "XDR bound. The full conversion path is the send asset, up to 5 hops and the destination asset."
+
+[[limit]]
+id = "offers.crossed.per_op"
+applies_to = "order-book claim atoms in one ManageOffer or path payment operation result, summed over all hops"
+recommended = 1000
+unit = "offers"
+protocol_min = 11
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "MAX_OFFERS_TO_CROSS", value = "1000" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictSendOpFrame.cpp", symbol = "maxOffersToCross (one budget for the whole operation, decremented per hop)", value = "1000" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OfferExchange.cpp", symbol = "convertWithOffers (maxOffersToCross == INT64_MAX before protocol version 11)", value = "unbounded before protocol 11" },
+]
+rationale = "From protocol 11 an operation crosses at most MAX_OFFERS_TO_CROSS = 1000 offers across all of its hops. Before protocol 11 there was no limit, so do not apply this cap to older ledgers."
+
+# transaction shape
+
+[[limit]]
+id = "tx.operations"
+applies_to = "operations in one transaction"
+recommended = 100
+unit = "operations"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "MAX_OPS_PER_TX", value = "100" },
+]
+rationale = "Transaction and TransactionV0 declare operations<MAX_OPS_PER_TX> with MAX_OPS_PER_TX = 100. A Soroban transaction has exactly one operation."
+
+[[limit]]
+id = "tx.signatures"
+applies_to = "DecoratedSignature entries in one envelope signature list"
+recommended = 20
+unit = "signatures"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "TransactionV0Envelope, TransactionV1Envelope, FeeBumpTransactionEnvelope signatures<20>", value = "20" },
+]
+rationale = "XDR bound per signature list. A fee-bump envelope has its own list and the inner envelope's, so up to 2 * 20 = 40 signatures in total."
+
+[[limit]]
+id = "tx.extra_signers"
+applies_to = "PreconditionsV2.extraSigners"
+recommended = 2
+unit = "signer keys"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "PreconditionsV2 extraSigners<2>", value = "2" },
+]
+rationale = "XDR bound (CAP-21)."
+
+[[limit]]
+id = "tx.memo_text.len"
+applies_to = "MEMO_TEXT bytes"
+recommended = 28
+unit = "bytes"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Memo text<28>", value = "28" },
+]
+rationale = "XDR bound. The bound is in bytes, not characters, and the bytes are not required to be UTF-8; store them as bytes or validate before converting to text."
+
+[[limit]]
+id = "signer.signed_payload.len"
+applies_to = "payload of an ED25519_SIGNED_PAYLOAD signer key (strkey P)"
+recommended = 64
+unit = "bytes"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-types.x", symbol = "SignerKey ed25519SignedPayload payload<64>", value = "64" },
+]
+rationale = "XDR bound (CAP-40). A signed-payload signer is therefore up to 32 + 4 + 64 = 100 bytes of key material, which does not fit a 32-byte account column."
+
+[[limit]]
+id = "account.signers"
+applies_to = "signers on one AccountEntry and its signerSponsoringIDs"
+recommended = 20
+unit = "signers"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "MAX_SIGNERS", value = "20" },
+]
+rationale = "AccountEntry signers<MAX_SIGNERS> and AccountEntryExtensionV2 signerSponsoringIDs<MAX_SIGNERS> with MAX_SIGNERS = 20."
+
+[[limit]]
+id = "account.subentries"
+applies_to = "numSubEntries of one account (trustlines, offers, data entries, signers)"
+recommended = 1000
+unit = "subentries"
+protocol_min = 11
+derived_from = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "ACCOUNT_SUBENTRY_LIMIT", value = "1000" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SponsorshipUtils.cpp", symbol = "numSubEntries > getAccountSubEntryLimit() - mult, from FIRST_PROTOCOL_SUPPORTING_OPERATION_LIMITS", value = "protocol 11" },
+]
+rationale = "From protocol 11 (FIRST_PROTOCOL_SUPPORTING_OPERATION_LIMITS) core refuses to add subentries that would take an account past ACCOUNT_SUBENTRY_LIMIT = 1000. Older ledgers had no such limit."
+
+[[limit]]
+id = "ledger.upgrades"
+applies_to = "UpgradeType entries in StellarValue.upgrades"
+recommended = 6
+unit = "upgrades"
+derived_from = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger.x", symbol = "StellarValue upgrades<6>; typedef opaque UpgradeType<128>", value = "6 entries of at most 128 bytes" },
+]
+rationale = "XDR bound: at most 6 upgrades per ledger, each at most 128 bytes."
