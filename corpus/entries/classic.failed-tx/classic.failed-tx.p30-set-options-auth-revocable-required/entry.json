@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.set_options.thresholds_and_flags"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-set-options-auth-revocable-required",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "set options setting AUTH_CLAWBACK_ENABLED without AUTH_REVOCABLE (core: set_options.auth_revocable_required)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 145,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-auth-revocable-required/mainnet.expected.json",
+      "expected_json_sha256": "8bbe6c80ff8d1a27d2e2212c18a266cf888d36060925d1eba5c51ce6a33496c9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-auth-revocable-required/mainnet.xdr",
+      "xdr_sha256": "08c68986c4623b48ccd51c80582208223b8458f38a152eca2cfd95a3360a9e05"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-auth-revocable-required/testnet.expected.json",
+      "expected_json_sha256": "3d41e1f876d6e66a002406298092e794d1a9084ea12f4a08a427a34de14efe7e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-auth-revocable-required/testnet.xdr",
+      "xdr_sha256": "bda48f9a39c288e9017be21641619e4d18d37ab1f5f25cbe5e7ce10b6d6334cb"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

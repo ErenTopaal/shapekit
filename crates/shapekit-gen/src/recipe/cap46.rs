@@ -10,6 +10,7 @@
 //! | 2      | protocol upgrade                                         |
 //! | 3 to 6 | testnet Soroban settings, ledger 6 is the config upgrade |
 //! | 7      | `maxsorobantxsetsize` upgrade                            |
+//! | 8      | `basefee`, `basereserve`, `maxtxsetsize` and `flags`     |
 //!
 //! Also holds the config upgrade helpers the other settings-driven recipes
 //! (cap63, cap66, cap70, cap77) share.
@@ -19,7 +20,8 @@ use ed25519_dalek::SigningKey;
 use shapekit_core_driver::settings::{NetworkSettings, PreparedUpgrade};
 use stellar_xdr::{
     ConfigSettingEntry, ConfigSettingId, ConfigUpgradeSet, LedgerCloseMeta, LedgerEntryChange,
-    LedgerEntryData, LedgerKey, LedgerKeyConfigSetting, LedgerUpgrade,
+    LedgerEntryData, LedgerHeaderExt, LedgerHeaderExtensionV1, LedgerHeaderExtensionV1Ext,
+    LedgerKey, LedgerKeyConfigSetting, LedgerUpgrade,
 };
 
 use super::{ChainCtx, Recipe, Selector, Spec};
@@ -29,6 +31,15 @@ pub const FAMILY: &str = "cap46.config-upgrades";
 /// The new Soroban transaction set size. Testnet's execution lanes setting
 /// allows 2000 transactions per ledger; any other value makes core apply it.
 const MAX_SOROBAN_TX_SET_SIZE: u32 = 1000;
+
+/// Header upgrades of the last ledger, each away from core's genesis value
+/// (`GENESIS_LEDGER_BASE_FEE` 100, `GENESIS_LEDGER_BASE_RESERVE` 10 XLM,
+/// `GENESIS_LEDGER_MAX_TX_SIZE` 100, no flags).
+const BASE_FEE: u32 = 200;
+const BASE_RESERVE: u32 = 50_000_000;
+const MAX_TX_SET_SIZE: u32 = 1000;
+/// DISABLE_LIQUIDITY_POOL_TRADING_FLAG, the lowest LedgerHeaderFlags bit.
+const HEADER_FLAGS: u32 = 1;
 
 pub struct ConfigUpgrades {
     pub protocol: u32,
@@ -189,6 +200,56 @@ impl Recipe for ConfigUpgrades {
             Selector::Ledger(seq),
             Spec::new(
                 "a ledger upgrade of the maximum Soroban transaction set size, which core applies by rewriting the execution lanes config setting entry in the upgrade meta",
+            ),
+        )?;
+
+        // the classic header upgrades in one ledger; a non-zero flags
+        // upgrade switches the header to extension v1 for good
+        // (setLedgerHeaderFlag, Upgrades.cpp, stellar-core v30.0.0)
+        let want = [
+            LedgerUpgrade::BaseFee(BASE_FEE),
+            LedgerUpgrade::BaseReserve(BASE_RESERVE),
+            LedgerUpgrade::MaxTxSetSize(MAX_TX_SET_SIZE),
+            LedgerUpgrade::Flags(HEADER_FLAGS),
+        ];
+        let (fee, reserve, size, flags) = (
+            BASE_FEE.to_string(),
+            BASE_RESERVE.to_string(),
+            MAX_TX_SET_SIZE.to_string(),
+            HEADER_FLAGS.to_string(),
+        );
+        let seq = ctx.driver().close_with_upgrades(&[
+            ("basefee", &fee),
+            ("basereserve", &reserve),
+            ("maxtxsetsize", &size),
+            ("flags", &flags),
+        ])?;
+        let lcm = ctx.driver().last_meta();
+        let applied = shapekit_core_driver::chain::upgrades(lcm);
+        ensure!(
+            applied.len() == want.len() && want.iter().all(|u| applied.contains(u)),
+            "ledger {seq} should hold the base fee, base reserve, max tx set size and flags upgrades, has {applied:?}"
+        );
+        let LedgerCloseMeta::V2(m) = lcm else {
+            bail!("ledger {seq} is not a v2 ledger close meta");
+        };
+        let header = &m.ledger_header.header;
+        ensure!(
+            header.base_fee == BASE_FEE
+                && header.base_reserve == BASE_RESERVE
+                && header.max_tx_set_size == MAX_TX_SET_SIZE
+                && header.ext
+                    == LedgerHeaderExt::V1(LedgerHeaderExtensionV1 {
+                        flags: HEADER_FLAGS,
+                        ext: LedgerHeaderExtensionV1Ext::V0,
+                    }),
+            "ledger {seq}'s header does not carry the upgraded values: {header:?}"
+        );
+        ctx.capture(
+            "header-upgrades",
+            Selector::Ledger(seq),
+            Spec::new(
+                "a ledger applying base fee, base reserve, max tx set size and flags upgrades together; the flags upgrade (1, liquidity pool trading disabled) moves the header to extension v1",
             ),
         )
     }

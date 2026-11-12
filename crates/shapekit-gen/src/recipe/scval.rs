@@ -29,7 +29,7 @@ use shapekit_core_driver::sim::SimError;
 use stellar_xdr::{
     ContractId, Duration, HostFunction, Int128Parts, Int256Parts, InvokeContractArgs,
     InvokeHostFunctionResult, OperationResult, OperationResultTr, ScAddress, ScBytes, ScError,
-    ScMap, ScMapEntry, ScString, ScSymbol, ScVal, ScVec, SorobanAuthorizationEntry,
+    ScErrorCode, ScMap, ScMapEntry, ScString, ScSymbol, ScVal, ScVec, SorobanAuthorizationEntry,
     SorobanTransactionData, TimePoint, TransactionEnvelope, TransactionExt,
     TransactionResultResult, UInt128Parts, UInt256Parts,
 };
@@ -273,6 +273,19 @@ fn mixed_key_entries(addr: ScAddress) -> Result<Vec<ScMapEntry>> {
     ];
     keys.into_iter()
         .map(|(name, k)| Ok(entry(k, sym(name)?)))
+        .collect()
+}
+
+/// Error values of the types besides contract, keyed by type name.
+fn error_entries() -> Result<Vec<ScMapEntry>> {
+    let errors = vec![
+        ("auth", ScError::Auth(ScErrorCode::InvalidAction)),
+        ("crypto", ScError::Crypto(ScErrorCode::InvalidInput)),
+        ("events", ScError::Events(ScErrorCode::UnexpectedSize)),
+    ];
+    errors
+        .into_iter()
+        .map(|(name, e)| Ok(entry(sym(name)?, ScVal::Error(e))))
         .collect()
 }
 
@@ -642,7 +655,21 @@ impl Recipe for ScvalShapes {
             .fields(&ARGS)
             .flags(&["non-utf8"]),
         )
-        .context("capturing the refused symbol")
+        .context("capturing the refused symbol")?;
+
+        // the mixed-key map holds only a contract error; the host converts
+        // errors of every type, so the other arms an indexer decodes ride
+        // in a map of their own
+        let errors = ScVal::Map(Some(ScMap::sorted_from(error_entries()?)?));
+        let applied = Self::echo(ctx, &caller, &echo, errors)?;
+        ctx.capture(
+            "errors-auth-crypto-events",
+            Selector::transaction(&applied),
+            Spec::new(
+                "a map from symbols to error values of type auth (invalid_action), crypto (invalid_input) and events (unexpected_size), stored, emitted and returned unchanged",
+            )
+            .fields(&ARGS),
+        )
     }
 }
 

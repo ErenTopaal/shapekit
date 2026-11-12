@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.source_account",
+    "tx.signatures",
+    "op.set_options.signer"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-op-bad-auth",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "two transactions in one ledger: the first removes a signer from an account, the second pays from that account as operation source signed only by the removed signer, so its operation fails with op_bad_auth at apply",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 192,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-op-bad-auth/mainnet.expected.json",
+      "expected_json_sha256": "9929fac7b55bb41e8f16c57dc39975913b9ea315b1324e3547e4a1270f672446",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-op-bad-auth/mainnet.xdr",
+      "xdr_sha256": "caadc53d8eaa8439f713b6748409e23615e57331c301e55c974191daeff8255b"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-op-bad-auth/testnet.expected.json",
+      "expected_json_sha256": "25973f2e7b637bf7ffd260199e06af0837e7b7bb9df12ef75c0a5e9358b2e91c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-op-bad-auth/testnet.xdr",
+      "xdr_sha256": "c61ae14b89b16d3f7bf04b49fa3d1a3c6e06f52886b5069f206e933f8e9ef5c0"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

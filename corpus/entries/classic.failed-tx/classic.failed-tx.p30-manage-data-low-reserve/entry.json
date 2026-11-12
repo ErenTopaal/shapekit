@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_data.data_name",
+    "op.manage_data.data_value"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-data-low-reserve",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "manage data adding an entry to an account without the reserve for it (core: manage_data.low_reserve)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 142,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-low-reserve/mainnet.expected.json",
+      "expected_json_sha256": "cb1b5efc045b9e9c39784a439de3c7743c79584c7c1ea493fb227d3c9de2d381",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-low-reserve/mainnet.xdr",
+      "xdr_sha256": "be2ac2e01b87c1134455e23a620c79f9e0d24da563abc092eea4f3845b9867ba"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-low-reserve/testnet.expected.json",
+      "expected_json_sha256": "3fd375116d32610fe84cb2f2fe9fc561fa7b2085cc087579bf8e8891cf5f2cbc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-low-reserve/testnet.xdr",
+      "xdr_sha256": "c2ca7089229a783ff8c583c75af1b72e290badbc96b84a5e2c1158536a1362ff"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

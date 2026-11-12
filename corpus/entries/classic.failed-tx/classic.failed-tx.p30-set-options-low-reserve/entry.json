@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.set_options.signer"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-set-options-low-reserve",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "set options adding a signer to an account without the reserve for it (core: set_options.low_reserve)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 146,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-low-reserve/mainnet.expected.json",
+      "expected_json_sha256": "4d29a21383bfb8ae0163349f8bbc8856031e189a3a1fabf39c12958644e95fda",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-low-reserve/mainnet.xdr",
+      "xdr_sha256": "675fedeb8d41b2fd12b762595fba1e71cad7f25a32712df7abb434c2994a4bdc"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-low-reserve/testnet.expected.json",
+      "expected_json_sha256": "5974af5282c31250854bd06358dc66c0f363f30347c48dca090a43e1e26f4273",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-low-reserve/testnet.xdr",
+      "xdr_sha256": "6906a6feb7a6a19928bae8070d16a5f96faa9fda67be404efbe85c1f31a69f74"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

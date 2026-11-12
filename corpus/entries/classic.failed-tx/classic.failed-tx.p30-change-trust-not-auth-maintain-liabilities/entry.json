@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.change_trust.line.liquidity_pool"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "change trust to the XLM/AUT pool share over an AUT line that is not authorized (core: change_trust.not_auth_maintain_liabilities)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 151,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities/mainnet.expected.json",
+      "expected_json_sha256": "51615b48d1c5a90cc56eccc89ee50fcd765d3f9116517123f6649c59d865e1f0",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities/mainnet.xdr",
+      "xdr_sha256": "0b23279968c8bad2dd6f1257d639a74b8590766728ae2fad89f7117f549cf104"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities/testnet.expected.json",
+      "expected_json_sha256": "0237ee235af5fb99f1ebd9819c67119f7a349d1f786cdebd8e1b48e28cb426f1",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities/testnet.xdr",
+      "xdr_sha256": "79d22871501d226d38b5f8e5e49a247f54972f78ef26d2779b0813ea03769df7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

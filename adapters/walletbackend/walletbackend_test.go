@@ -256,3 +256,13 @@ func TestStroops(t *testing.T) {
 		}
 	}
 }
+
+func TestPoolShareAsset(t *testing.T) {
+	m, _, _ := testMapper(t)
+	got := m.mapTransaction([]row{
+		scRow(catTrustline, reasonRemove, int64(65)<<32|1, 1, map[string]any{"account_id": stored(t, testAccount), "liquidity_pool_id": "79d95b12eb2e5c9bc625aa5e059360ec35a1be8a7a4a7fdb90a04c8e5f814ba4"}),
+	})
+	if len(got.changes) != 1 || got.changes[0].Fields["asset"] != "pool-share:LB45SWYS5MXFZG6GEWVF4BMTMDWDLIN6RJ5EU763SCQEZDS7QFF2IPOF" {
+		t.Fatalf("changes %+v unmapped %+v", got.changes, got.unmapped)
+	}
+}

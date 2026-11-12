@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/stellar/go-stellar-sdk/strkey"
+
 	"github.com/ErenTopaal/shapekit/adapters/protocol/wire"
 )
 
@@ -446,7 +448,17 @@ func companionAuth(rows []row, used []bool, at int) int {
 // liquidity_pool_id to the vocabulary's asset string.
 func (m *mapper) trustlineAsset(r row) (string, string) {
 	if lp, ok := r.text("liquidity_pool_id"); ok && lp != "" {
-		return "pool-share:" + lp, ""
+		// wallet-backend stores the pool id as hex; the oracle names pools by
+		// their L strkey
+		id, err := hex.DecodeString(lp)
+		if err != nil || len(id) != 32 {
+			return "", "liquidity_pool_id is not a 32-byte hex pool id"
+		}
+		l, err := strkey.Encode(strkey.VersionByteLiquidityPool, id)
+		if err != nil {
+			return "", fmt.Sprintf("liquidity_pool_id: %v", err)
+		}
+		return "pool-share:" + l, ""
 	}
 	tok, ok := r.bytes("token_id")
 	if !ok {

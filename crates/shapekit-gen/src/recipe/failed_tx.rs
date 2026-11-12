@@ -16,6 +16,11 @@
 //!
 //! None of the three ghost accounts, nor the cosigner in ledger 4, appears
 //! in any ledger entry change of those ledgers.
+//!
+//! Then one failing transaction per apply-time result code core can reach
+//! on a private network (`codes`), a passive offer and a data deletion, and
+//! three failures that need an earlier transaction in the same ledger
+//! (`ordering`).
 
 use anyhow::{Context, Result, bail, ensure};
 use ed25519_dalek::SigningKey;
@@ -29,6 +34,9 @@ use stellar_xdr::{
 };
 
 use super::{ChainCtx, Recipe, Selector, Spec};
+
+mod codes;
+pub(crate) mod ordering;
 
 pub const FAMILY: &str = "classic.failed-tx";
 
@@ -266,6 +274,11 @@ impl Recipe for FailedTx {
                 "tx.signatures",
                 "op.payment.destination",
             ]),
-        )
+        )?;
+
+        codes::run(ctx)?;
+        ordering::op_bad_auth(ctx, "op-bad-auth")?;
+        ordering::bad_auth_extra(ctx, "tx-bad-auth-extra", None)?;
+        ordering::bad_min_seq_gap(ctx, "tx-bad-min-seq-gap", None)
     }
 }

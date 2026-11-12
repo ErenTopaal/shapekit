@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.revoke_sponsorship"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-revoke-does-not-exist",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a sponsorship revoke of a data entry that does not exist (core: revoke_sponsorship.does_not_exist)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 183,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-does-not-exist/mainnet.expected.json",
+      "expected_json_sha256": "f7267f430b280168d19342ef7657a6d5fa1cb4a820c98cdd837847b4836beef9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-does-not-exist/mainnet.xdr",
+      "xdr_sha256": "62523b311be56b3e65be262cc4535af0e1056155040beddc25d1cdeb1c7287f2"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-does-not-exist/testnet.expected.json",
+      "expected_json_sha256": "ba7d1a82c87b0863aa90d65c21c2a9b31fb4ea9ffd4c4419a011dbce518be557",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-does-not-exist/testnet.xdr",
+      "xdr_sha256": "9ceb148502bed12cad9f4b78430eb5b5c081f88a32a6ac6b456321775185c741"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

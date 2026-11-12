@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-deposit-no-trust",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a deposit into the XLM/OPN pool from an account without its pool share line (core: liquidity_pool_deposit.no_trust)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 172,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-no-trust/mainnet.expected.json",
+      "expected_json_sha256": "1f48f8c28c9ee387e72197bf35db9f1d65dbb84e5a3dc144e0c5295e9cb6ec91",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-no-trust/mainnet.xdr",
+      "xdr_sha256": "28cbc895b70646d2e7db564e47f51cada58ce118dfa5bf697bf89815c7f46942"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-no-trust/testnet.expected.json",
+      "expected_json_sha256": "be90cd5b21ca04594524efb22ffa4838b44888e329199967f1f50f109b4507c7",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-no-trust/testnet.xdr",
+      "xdr_sha256": "c953f9446a8eb7cce17e9e64761315dfca20d0b45e1a6acf76fd35ba6073b7c9"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "op.set_options.signer"
+  ],
+  "flags": [
+    "max-length-vec"
+  ],
+  "id": "classic.max-length.p30-signer-21-too-many",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "set options adding a 21st signer to an account holding 20, which fails at apply with set_options too_many_signers; the account's entry in the meta still holds 20",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.max-length.p30",
+    "class": "local-core",
+    "ledger_seq": 86,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.max-length"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.max-length/classic.max-length.p30-signer-21-too-many/mainnet.expected.json",
+      "expected_json_sha256": "7263d33e66ec9332d9783a13e040d0137134605565f82d24ab72051a3286c656",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.max-length/classic.max-length.p30-signer-21-too-many/mainnet.xdr",
+      "xdr_sha256": "96445118d891b9f2700d717488b9f2be6e7f4a4ae791ecbf50108039c4631a53"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.max-length/classic.max-length.p30-signer-21-too-many/testnet.expected.json",
+      "expected_json_sha256": "bc52243b0b08f6a7e080993d29463810b316b6e83ea54f8d028823974f50ac12",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.max-length/classic.max-length.p30-signer-21-too-many/testnet.xdr",
+      "xdr_sha256": "e89177e2ce48f44a84a9e8909c1968760a7c02c470c1a45727871f4048cfaffb"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_data.data_name",
+    "op.manage_data.data_value"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-data-name-not-found",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "manage data deleting a name the account never set (core: manage_data.name_not_found)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 141,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-name-not-found/mainnet.expected.json",
+      "expected_json_sha256": "6657dd518747609296d94c65503c79f745b2772524cf90fb415e23728a725c19",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-name-not-found/mainnet.xdr",
+      "xdr_sha256": "c0fe98d424751c56e88faf3dce5abed5251341e81b9444f2bd2a281738491aaa"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-name-not-found/testnet.expected.json",
+      "expected_json_sha256": "915de7df3bc2e008cbc62dd7315e1cda52a1bb1663f38949d174db5edbbff708",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-data-name-not-found/testnet.xdr",
+      "xdr_sha256": "2efd4c355a2a821437947df2d7a3b77b13696b9310d5bb626f3bfa8266a29ef8"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

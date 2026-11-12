@@ -468,6 +468,7 @@ go-stellar-sdk's strict strkey decoder; account columns accept `G` and `C`, sign
 | HOME_DOMAIN SET / UPDATE / CLEAR | `home-domain` | `account`, `before`, `after` from `key_value` old/new (absent as `""`) |
 | DATA_ENTRY ADD / UPDATE / REMOVE | `data-entry` | `account`, `action`, `name_hex`, `value_before_hex`, `value_after_hex` (base64 `key_value` as hex) |
 | TRUSTLINE ADD | `trustline-created` | `account`, `asset`, `limit` (stored in horizon's 7-decimal amount form, converted to stroops); `flags` from the BALANCE_AUTHORIZATION SET row written with it |
+| (asset of a pool-share trustline) | | `pool-share:` plus the pool's `L` strkey, from the hex `liquidity_pool_id`, which is how the oracle names it |
 | TRUSTLINE UPDATE / REMOVE | `trustline-limit` / `trustline-removed` | `account`, `asset`, `before`, `after` |
 | BALANCE_AUTHORIZATION SET / CLEAR, G holder | `trustline-flags`, one per holder, asset and operation | `account`, `asset` |
 | BALANCE_AUTHORIZATION SET / CLEAR, C holder | `token-event` `set_authorized` (not claimed) | `contract`, `to`, `authorized` |

@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.change_trust.line",
+    "op.change_trust.limit"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-change-trust-low-reserve",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "change trust creating a line on an account without the reserve for it (core: change_trust.low_reserve)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 149,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-low-reserve/mainnet.expected.json",
+      "expected_json_sha256": "fe0183b0b82813ea570a2335d91d7fe84162da20ecf1d05922b9536c786dde1f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-low-reserve/mainnet.xdr",
+      "xdr_sha256": "3f37b74a59dea7c785857e47b633ce4f204007ed71a9fbf57d4248cd228e69f9"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-low-reserve/testnet.expected.json",
+      "expected_json_sha256": "5d7caa285b4dc2afeedafded33cb6da158fbb75ae92fb9839769c9c3cbabd6a0",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-change-trust-low-reserve/testnet.xdr",
+      "xdr_sha256": "6cced1c349df46f212c226f5fc00aea6af00de087693c54b3b3c5a9778e88604"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

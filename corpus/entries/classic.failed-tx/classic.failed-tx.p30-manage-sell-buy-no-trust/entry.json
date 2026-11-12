@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-sell-buy-no-trust",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "an offer buying OPN from an account without an OPN line (core: manage_sell_offer.buy_no_trust)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 116,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-buy-no-trust/mainnet.expected.json",
+      "expected_json_sha256": "5b12ba6466d042cd04565fc3253b76e8414a883fd6642c677198007a459675d9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-buy-no-trust/mainnet.xdr",
+      "xdr_sha256": "7f05e7bf8e4688283a800c374c030aa02aa41ca29302e0c118fd4071346f0e4b"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-buy-no-trust/testnet.expected.json",
+      "expected_json_sha256": "efa30c7a923aec1a11d2fc2a686ee57936bff8c3e7130d57ce59ca509fecf9b9",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-buy-no-trust/testnet.xdr",
+      "xdr_sha256": "b355717a970d71d9f5cb67914e1a5f47bf146267acf77285bcb46f5a49c9035d"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

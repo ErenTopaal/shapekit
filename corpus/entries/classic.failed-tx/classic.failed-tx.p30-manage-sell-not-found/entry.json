@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-sell-not-found",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "an update of offer id 2^40, which the source does not have (core: manage_sell_offer.not_found)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 121,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-not-found/mainnet.expected.json",
+      "expected_json_sha256": "f6554f406235090f891d3926a22d169267708e76f20c9361a8391c99528cefd8",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-not-found/mainnet.xdr",
+      "xdr_sha256": "b5872057e5702189d49fcf364668c15351f45c399fb7e2269eab739df2e07eb6"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-not-found/testnet.expected.json",
+      "expected_json_sha256": "8617e714fe0ced15081526b2549692f67cac50ba3b42a10d37b4ccfdf823288c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-not-found/testnet.xdr",
+      "xdr_sha256": "1c68edd308713725f08929dbb4d11dc9fdece8203297b4ca99e07b962891918a"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

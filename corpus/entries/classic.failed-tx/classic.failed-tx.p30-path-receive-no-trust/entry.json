@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.amounts"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-path-receive-no-trust",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a strict-receive path payment of OPN to an account without an OPN line (core: path_payment_strict_receive.no_trust)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 98,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-receive-no-trust/mainnet.expected.json",
+      "expected_json_sha256": "b8394e98284c5f3f08bf853b79444214b1e56230f3fe6ea3c3e28c0ce6f36d7e",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-receive-no-trust/mainnet.xdr",
+      "xdr_sha256": "0f247426034775f0c7bb36834f88165eea85e2ab8125668ecc05170c3e2dd414"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-receive-no-trust/testnet.expected.json",
+      "expected_json_sha256": "01855cff0ec12d2313be7b077fee8aab95d6c3004366df246fc71acc0fc4a4a1",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-receive-no-trust/testnet.xdr",
+      "xdr_sha256": "a2479f672ab81d1c636a08c162521af2fe9ef977b5db479f58393d744a1d4b7f"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

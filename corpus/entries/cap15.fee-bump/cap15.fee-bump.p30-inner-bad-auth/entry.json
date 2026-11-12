@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0015"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [
+    "feebump.inner_tx",
+    "tx.signatures",
+    "op.set_options.signer"
+  ],
+  "flags": [],
+  "id": "cap15.fee-bump.p30-inner-bad-auth",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/stellar-etl/issues/477"
+  ],
+  "notes": "two transactions in one ledger: the first removes a signer, the second, inside a fee bump, is signed by that signer alone, so its inner transaction fails with tx_bad_auth at apply",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap15.fee-bump.p30",
+    "class": "local-core",
+    "ledger_seq": 72,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap15.fee-bump"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-inner-bad-auth/mainnet.expected.json",
+      "expected_json_sha256": "3b202f1b2dfae1fdf6c87ecb610f8908ffc970c41fa92920742f5e79cae170f9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-inner-bad-auth/mainnet.xdr",
+      "xdr_sha256": "3145d96076148ca91d5e6be24572b0019c81d1c000e81c8de8cc60f981b3d92b"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-inner-bad-auth/testnet.expected.json",
+      "expected_json_sha256": "233eaee8b0da9b2bafd94bacc71776f6f304194ef052c0e29d1c33cbce8100ba",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-inner-bad-auth/testnet.xdr",
+      "xdr_sha256": "3f868583f48bb363082cb68eab1dca35e09b6e3a77748a75795a72158c9f48e6"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

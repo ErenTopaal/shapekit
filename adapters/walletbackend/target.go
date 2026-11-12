@@ -271,6 +271,10 @@ func (t *target) cgroupPeakPath(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return cgroupPeakPathOf(st)
+}
+
+func cgroupPeakPathOf(st containerState) (string, error) {
 	if !st.Running || st.Pid == 0 {
 		return "", errors.New("ingest is not running, no cgroup to read")
 	}
@@ -322,7 +326,7 @@ func (t *target) status(ctx context.Context) (wire.StatusResult, error) {
 		return wire.StatusResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	if st.Running {
-		if p, err := t.cgroupPeakPath(ctx); err == nil {
+		if p, err := cgroupPeakPathOf(st); err == nil {
 			t.samplePeak(p)
 		}
 	}

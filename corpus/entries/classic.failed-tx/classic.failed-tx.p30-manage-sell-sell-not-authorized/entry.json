@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-sell-sell-not-authorized",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "an offer selling AUT from a line holding 100 AUT at maintain-liabilities (core: manage_sell_offer.sell_not_authorized)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 123,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-sell-not-authorized/mainnet.expected.json",
+      "expected_json_sha256": "e92c0692202ac3e2490d082792c43251c04a76afcb49d22eff5cd9ae7ad0d425",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-sell-not-authorized/mainnet.xdr",
+      "xdr_sha256": "741d73b20549596904bb5d391f33a8dc2293a0caba6467c9e780728b1f107272"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-sell-not-authorized/testnet.expected.json",
+      "expected_json_sha256": "9de3decd4ef65f715e4f079a3deb5ed76399be5c62678f87e85be6b830ffecbd",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-sell-sell-not-authorized/testnet.xdr",
+      "xdr_sha256": "e8aa2a502b5438e2fc2ae45aa84491d2ec345c21d75e1220ef15ba3a7d475ae3"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

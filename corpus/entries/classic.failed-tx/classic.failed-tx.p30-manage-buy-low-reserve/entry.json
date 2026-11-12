@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-manage-buy-low-reserve",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a new offer from an account without the reserve for one more subentry (core: manage_buy_offer.low_reserve)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 129,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-buy-low-reserve/mainnet.expected.json",
+      "expected_json_sha256": "e50446dab26b2940ccfa6e2b5d1ad562e68081cfb681a3f8460290afb355b20d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-buy-low-reserve/mainnet.xdr",
+      "xdr_sha256": "dc3ad9bacd01ceb79d75aa22301df0f9f35b77d0750e03126c44a672fbf20e38"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-buy-low-reserve/testnet.expected.json",
+      "expected_json_sha256": "d4d1b674672cfbb9a3c52ba77789cee3ff846c57db2431ba405ee769672678ca",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-manage-buy-low-reserve/testnet.xdr",
+      "xdr_sha256": "653016ae0872e79adc9fb34844fb03568a8c86e46d441158c3d1c42151d8679a"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

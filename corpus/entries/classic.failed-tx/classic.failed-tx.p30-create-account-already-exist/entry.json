@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.create_account.destination",
+    "op.create_account.starting_balance"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-create-account-already-exist",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "create account naming an account that exists (core: create_account.already_exist)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 134,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-already-exist/mainnet.expected.json",
+      "expected_json_sha256": "701fc389e40e28ac2659bb6a8a11156cc8cca66a547667708be91a31ba7825f0",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-already-exist/mainnet.xdr",
+      "xdr_sha256": "8734bfbda4422fc5d3a7700a35f5683a68ce0fb866d9551cd5141ca6d1fed739"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-already-exist/testnet.expected.json",
+      "expected_json_sha256": "b5008c14128d9c3eb7b2e4d5ff5735f1a40cb0c37e77d36cfb29472d1bed40a3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-already-exist/testnet.xdr",
+      "xdr_sha256": "60bbe9f2b5af8bec566d6d050bfd89da56596b2b700a317182c814d6d3f10e83"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

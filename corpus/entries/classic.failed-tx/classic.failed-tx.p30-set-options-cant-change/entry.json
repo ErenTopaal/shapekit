@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.set_options.thresholds_and_flags"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-set-options-cant-change",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "set options setting AUTH_REQUIRED on an account with AUTH_IMMUTABLE (core: set_options.cant_change)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 144,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-cant-change/mainnet.expected.json",
+      "expected_json_sha256": "d7b8e506715a700ba0cb022c9ab93e945c8d71e26205442f65aff3dab4cb1b0c",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-cant-change/mainnet.xdr",
+      "xdr_sha256": "a74e7c2a3146902501ead519820faa25923e45e2e4530d881eaf9d52b917f441"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-cant-change/testnet.expected.json",
+      "expected_json_sha256": "a66878f37a61dd5514656a32efb8679404d058bfb163f898de3d4c73dc10cbe0",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-set-options-cant-change/testnet.xdr",
+      "xdr_sha256": "4cbc90409e410230d2291f2544bed6a7253bcf9c6b9602a9a637611a49596bb3"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

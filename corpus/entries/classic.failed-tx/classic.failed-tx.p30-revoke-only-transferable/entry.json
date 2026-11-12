@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.revoke_sponsorship"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-revoke-only-transferable",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a sponsorship revoke of the source's own claimable balance outside a sponsorship, which can only be transferred (core: revoke_sponsorship.only_transferable)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 186,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-only-transferable/mainnet.expected.json",
+      "expected_json_sha256": "ff9b998a5881d6bcfc4b4ee2e19a73b9415d7ccf35a517278a191a733d2feede",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-only-transferable/mainnet.xdr",
+      "xdr_sha256": "2657726ee7b70a3cb5725a4a1737351f66566cae2c609ce3172254254f8897a1"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-only-transferable/testnet.expected.json",
+      "expected_json_sha256": "920b65c4d5fb7449369d636ce36b4750a289207b89964186a91c6871fbd722c5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-revoke-only-transferable/testnet.xdr",
+      "xdr_sha256": "23a3682579c7b72d6b9d450e18c7154e9edf06c5ae1637b48bcdd87116895a54"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-deposit-not-authorized",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a deposit into the XLM/AUT pool over an AUT line at maintain-liabilities (core: liquidity_pool_deposit.not_authorized)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 173,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-not-authorized/mainnet.expected.json",
+      "expected_json_sha256": "e876e0e5550721707396f1edecc2af7ff2654f7678c4f977e4af9172a618cbc7",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-not-authorized/mainnet.xdr",
+      "xdr_sha256": "12d7b8027830ee074ffc339b7cb061797c27e956c935238349d85c73768d8820"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-not-authorized/testnet.expected.json",
+      "expected_json_sha256": "916f72ec55ce66997675788fb33e652c5e409b8d5286aec30d41029eaa8564e3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-not-authorized/testnet.xdr",
+      "xdr_sha256": "7cd97d2e65bf5048d73ae80d08f708b0aaabc1b3266869778de41f37f3cb5c56"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

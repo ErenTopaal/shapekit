@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.clawback.from",
+    "op.clawback.asset_amount"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-clawback-no-trust",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a clawback of AUT from an account without an AUT line (core: clawback.no_trust)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 170,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-no-trust/mainnet.expected.json",
+      "expected_json_sha256": "c23e0f484e835742eb261aed491b0413c4fb0cbb87e1df1054e9affd093abbdb",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-no-trust/mainnet.xdr",
+      "xdr_sha256": "c7eeef91aacf24c3eec66a64ddef56da19d8eb5e18b5edba69cae834c9fb264f"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-no-trust/testnet.expected.json",
+      "expected_json_sha256": "2bfbb3571678898f031b649ea1d3af3fa06459820a946a9450d0ef44da5d2fcc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-no-trust/testnet.xdr",
+      "xdr_sha256": "1e0f1680c004e79755a7d6a8b254b19835fae8d7d6502261f0e73d96c6609120"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

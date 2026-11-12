@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.source_account",
+    "op.manage_offer.assets_amount_price"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-passive-offer-operation-source",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a passive sell offer placed by an operation source that has never sourced a transaction: core reports its result under the manage_sell_offer arm, and the source's entry gains AccountEntryExtensionV1 with its own extension at v0",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 187,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-passive-offer-operation-source/mainnet.expected.json",
+      "expected_json_sha256": "64c644a3196c9702f4f2c800b6c6d91df9d8affbcaec350af22069cc12c8cadb",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-passive-offer-operation-source/mainnet.xdr",
+      "xdr_sha256": "7e182e93d1a40271bd01ab6cd923f89dedef43a8512a10231da0ab36bbbafa25"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-passive-offer-operation-source/testnet.expected.json",
+      "expected_json_sha256": "da7d156300b4afce1c68d001e4cdccb4f874cac16a551cc837b3ed077b28c4bc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-passive-offer-operation-source/testnet.xdr",
+      "xdr_sha256": "404ad08e14a8dfb95b5a79152122217ce073bb2bc713c2e3a5044f19ef87c08e"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

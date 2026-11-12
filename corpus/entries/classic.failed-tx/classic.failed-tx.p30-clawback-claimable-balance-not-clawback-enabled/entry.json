@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.clawback_claimable_balance.balance_id"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "the OPN issuer clawing back an OPN balance created without clawback (core: clawback_claimable_balance.not_clawback_enabled)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 168,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled/mainnet.expected.json",
+      "expected_json_sha256": "446661d01e0cd7a8a4eda9878df14b3d4648bed1709901cfa08f3359f6a3f472",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled/mainnet.xdr",
+      "xdr_sha256": "5ccc8d141b393de84c32d51b32863c1a47101411acfc5bdab9c30252c455e58f"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled/testnet.expected.json",
+      "expected_json_sha256": "76893568e2b7ee331e7bf85d7f53ef0299fe5a9bcc87c673a901363704bfd538",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled/testnet.xdr",
+      "xdr_sha256": "3406ce8e8d707cab01718c966924a1d2edfc456ee63c4c2b6b4cd0bf9d00023c"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

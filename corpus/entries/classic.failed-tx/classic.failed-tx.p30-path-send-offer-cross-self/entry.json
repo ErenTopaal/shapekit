@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.amounts"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-path-send-offer-cross-self",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a strict-send path payment from XLM to SLF whose best offer is the source's own (core: path_payment_strict_send.offer_cross_self)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 114,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-offer-cross-self/mainnet.expected.json",
+      "expected_json_sha256": "f5f0dfaacd38d176f19cfb73e62255f25f3471af7d508179fa5e16b00581add9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-offer-cross-self/mainnet.xdr",
+      "xdr_sha256": "2cd2d12a768b3dede73dde8387012cf72179ffd5357367f14571239648941936"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-offer-cross-self/testnet.expected.json",
+      "expected_json_sha256": "2539905d1acd4777a9ae9e034a4024ed59417a02b640eb502252b883aea8c7d1",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-offer-cross-self/testnet.xdr",
+      "xdr_sha256": "14fce0d2472e4663d49dedfc2f1abcd9d39b98f6203cdd72e2c0738823dd12ed"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

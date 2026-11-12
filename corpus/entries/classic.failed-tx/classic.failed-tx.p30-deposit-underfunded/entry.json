@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-deposit-underfunded",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a deposit of 200 OPN from a line holding 100 (core: liquidity_pool_deposit.underfunded)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 174,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-underfunded/mainnet.expected.json",
+      "expected_json_sha256": "a364e2e3f5fe03f1d07d58d1d9a6fe96b0553fccd25a8a6287f1238dd52cfa07",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-underfunded/mainnet.xdr",
+      "xdr_sha256": "12494d81d2226e59d8cbb70efe7fc2b07e947d22072b309d93cc942e1a8f301c"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-underfunded/testnet.expected.json",
+      "expected_json_sha256": "196d5742411d6eb5255a1d4bee1386b1e7971552a958be2ce260f79f94d7e712",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-underfunded/testnet.xdr",
+      "xdr_sha256": "2e0e82fa695340aee5cfc9b1b1ef0559de77e049f2f635a6d9616ba40525a487"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

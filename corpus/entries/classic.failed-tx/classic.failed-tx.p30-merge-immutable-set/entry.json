@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.account_merge.destination"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-merge-immutable-set",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a merge of an account with AUTH_IMMUTABLE (core: account_merge.immutable_set)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 138,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-immutable-set/mainnet.expected.json",
+      "expected_json_sha256": "539787224e81bd8631075d8707c853c7e83312e44e1421c32731dc9ee9f0f004",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-immutable-set/mainnet.xdr",
+      "xdr_sha256": "a99ea4469be21e7730256088fb71cb23b381a0ef5eb68640c012001670902e98"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-immutable-set/testnet.expected.json",
+      "expected_json_sha256": "cff9d1e647f1da330ec4df6464ffbf4ff84a77f3a1a176f85ac4c1497bf20f4c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-immutable-set/testnet.xdr",
+      "xdr_sha256": "05ff38f6fadc8c4367702a4196113762d46e73468843c15e16b6be7d10af56ed"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

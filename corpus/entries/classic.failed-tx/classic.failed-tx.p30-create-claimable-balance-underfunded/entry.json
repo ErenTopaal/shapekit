@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.create_claimable_balance.asset_amount",
+    "op.create_claimable_balance.claimants.destination"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-create-claimable-balance-underfunded",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a claimable balance of 10 XLM from an account 1 XLM above its reserve (core: create_claimable_balance.underfunded)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 166,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-claimable-balance-underfunded/mainnet.expected.json",
+      "expected_json_sha256": "5a88b83307b0ec40bcd6498e74f26fabff4f1d792401d38a28eb2a409dca83e5",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-claimable-balance-underfunded/mainnet.xdr",
+      "xdr_sha256": "855f538310c40bf497498c2feefc62894f3ff87a82ea7104e79e76cd67cf74f0"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-claimable-balance-underfunded/testnet.expected.json",
+      "expected_json_sha256": "e98296cfeafb2e80fd1e92c1a05b903fa76f105da735f3feef21724b75cab664",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-claimable-balance-underfunded/testnet.xdr",
+      "xdr_sha256": "3ebbc2eb836eda04553a483c4813f9a6b1337175b077ce3271d2c5d41c0173a1"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -11,6 +11,9 @@
 //! | 6      | payer as muxed fee source (id 2^64-1), inner success             |
 //! | 7      | payer as muxed fee source (id 1), inner failed                   |
 //! | 8      | alice bumps her own payment                                      |
+//! | 9 on   | inner tx_bad_auth, tx_bad_seq, tx_bad_auth_extra and             |
+//! |        | tx_bad_min_seq_age_or_gap, each after an earlier transaction in  |
+//! |        | the same ledger (`failed_tx::ordering`), and tx_bad_sponsorship  |
 //!
 //! The failed inner payments name a destination that was never funded, so
 //! they pass submission and fail at apply with `PAYMENT_NO_DESTINATION`;
@@ -26,6 +29,7 @@ use stellar_xdr::{
     OperationResultTr, PaymentOp, PaymentResult, TransactionEnvelope, TransactionResultResult,
 };
 
+use super::failed_tx::ordering;
 use super::{ChainCtx, Recipe, Selector, Spec};
 
 pub const FAMILY: &str = "cap15.fee-bump";
@@ -206,6 +210,14 @@ impl Recipe for FeeBump {
             Selector::transaction(&applied),
             Spec::new("a fee bump whose fee source is the inner transaction's own source account")
                 .fields(&FIELDS),
-        )
+        )?;
+
+        // inner results only apply can give: an earlier transaction in the
+        // same ledger changes what the inner one was validated against
+        ordering::bad_auth(ctx, "inner-bad-auth", &payer)?;
+        ordering::bad_seq(ctx, "inner-bad-seq", &payer)?;
+        ordering::bad_auth_extra(ctx, "inner-bad-auth-extra", Some(&payer))?;
+        ordering::bad_min_seq_gap(ctx, "inner-bad-min-seq-gap", Some(&payer))?;
+        ordering::bad_sponsorship(ctx, "inner-bad-sponsorship", &payer)
     }
 }

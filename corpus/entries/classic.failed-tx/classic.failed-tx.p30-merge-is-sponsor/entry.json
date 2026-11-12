@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.account_merge.destination"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-merge-is-sponsor",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a merge of an account that sponsors a trust line (core: account_merge.is_sponsor)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 139,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-is-sponsor/mainnet.expected.json",
+      "expected_json_sha256": "3bb3606cb6b2efec1227adf430577b0432986fe703678abdcdbee7756a5b197b",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-is-sponsor/mainnet.xdr",
+      "xdr_sha256": "e6910a979c21003f7867de42fb4fdbf9aaea8526cbaf2d4a8ef3e2b8c2188449"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-is-sponsor/testnet.expected.json",
+      "expected_json_sha256": "32ab0bf4575e533151b65ab5cb068f400f8d77ca3b3faf8e6173b2ac1d81e7da",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-merge-is-sponsor/testnet.xdr",
+      "xdr_sha256": "c91926b2a5775395b7f9c2b12168ccf6a8fabc25f66077be824794772d6b4cf3"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

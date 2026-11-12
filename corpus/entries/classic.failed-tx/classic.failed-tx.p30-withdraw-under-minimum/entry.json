@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.liquidity_pool_withdraw"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-withdraw-under-minimum",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a withdrawal of one share asking for at least 1000 XLM (core: liquidity_pool_withdraw.under_minimum)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 180,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-withdraw-under-minimum/mainnet.expected.json",
+      "expected_json_sha256": "f4b03d8fcebc07142f537d8d31dbdf5dd5125b4019911985bbd8b28e3ac3ea9b",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-withdraw-under-minimum/mainnet.xdr",
+      "xdr_sha256": "59a8aff2105088d8c2252010b43bfdd39262e9ebc0c2c11fc9d81be8bb393611"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-withdraw-under-minimum/testnet.expected.json",
+      "expected_json_sha256": "50347ee151f856721eedce54c764cfe9febaad260a4a76922bba990394051955",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-withdraw-under-minimum/testnet.xdr",
+      "xdr_sha256": "208a194ecff3e23e50b5009c0db064b13a7ac3f98af640d0c194d0053dda9f45"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

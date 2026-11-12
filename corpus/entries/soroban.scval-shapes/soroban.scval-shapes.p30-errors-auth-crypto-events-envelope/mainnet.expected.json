@@ -1,0 +1,107 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "b91aed86",
+        "signature": "870ddb4098a086ec975da05d0ee253cecc0f3f35e6b54bef4d7199fbeb201c03e0c984b9d07167e25157b85eb4c3a1339fb63ae0d2b25fd008c9f3e4e02d1508"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "16201",
+          "resources": {
+            "disk_read_bytes": 0,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CDYK4DTPTF7FILRLXAPI52PFSCIDFBZ5O3ZNLRTFLLVIRFM7YLLFUUI4",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "f9b16f83ec2b943d5ac11524c410c5e8b6cd13955e15935e99b3923ffa9c8c06"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CDYK4DTPTF7FILRLXAPI52PFSCIDFBZ5O3ZNLRTFLLVIRFM7YLLFUUI4",
+                    "durability": "persistent",
+                    "key": {
+                      "symbol": "last"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 397914,
+            "write_bytes": 160
+          }
+        }
+      },
+      "fee": 16301,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "map": [
+                        {
+                          "key": {
+                            "symbol": "auth"
+                          },
+                          "val": {
+                            "error": {
+                              "auth": "invalid_action"
+                            }
+                          }
+                        },
+                        {
+                          "key": {
+                            "symbol": "crypto"
+                          },
+                          "val": {
+                            "error": {
+                              "crypto": "invalid_input"
+                            }
+                          }
+                        },
+                        {
+                          "key": {
+                            "symbol": "events"
+                          },
+                          "val": {
+                            "error": {
+                              "events": "unexpected_size"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "contract_address": "CDYK4DTPTF7FILRLXAPI52PFSCIDFBZ5O3ZNLRTFLLVIRFM7YLLFUUI4",
+                  "function_name": "echo"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "292057776141",
+      "source_account": "GDDSYMVSWJE5X6ICQVVSQIUIHH3Y3H777BATB4FLL6QWMZFZDLWYNMJX"
+    }
+  }
+}

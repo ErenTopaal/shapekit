@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.amounts"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-path-send-too-few-offers",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a strict-send path payment from XLM to NOB, which no offer or pool sells (core: path_payment_strict_send.too_few_offers)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 113,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-too-few-offers/mainnet.expected.json",
+      "expected_json_sha256": "f3d4e6d4d282ee95fa188465e313f8d06e0aaf10e1966f95ccb4f91719bbda9f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-too-few-offers/mainnet.xdr",
+      "xdr_sha256": "d76d339ffa18aee9f5c826b1b19504b66d35979bc00ba44f8cedbbf4cc9af714"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-too-few-offers/testnet.expected.json",
+      "expected_json_sha256": "13c39ead9ecc6050c190e2f864e1b4d1e378d79c466e68107568d29468db5b1a",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-path-send-too-few-offers/testnet.xdr",
+      "xdr_sha256": "545fb6206e8f9334e1728c98e4d288201f6b1f36502c858796297324d4724d70"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

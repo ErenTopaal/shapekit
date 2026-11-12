@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.create_account.destination",
+    "op.create_account.starting_balance"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-create-account-underfunded",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "create account with 20 XLM, the new account's reserve, from an account 1 XLM above its own (core: create_account.underfunded)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 136,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-underfunded/mainnet.expected.json",
+      "expected_json_sha256": "76b347fcdde48624a411db475797af830a8d8e102d2c9a6c3e66d914e64e1838",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-underfunded/mainnet.xdr",
+      "xdr_sha256": "8226b5b5129265776af96d7981d1a489afd323ba87339d770426573e01260b99"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-underfunded/testnet.expected.json",
+      "expected_json_sha256": "51d8017d561b91d07dd85f2c49d5962c92c1dccd0273a3284f559a78330756bc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-create-account-underfunded/testnet.xdr",
+      "xdr_sha256": "c7df896319a28e0074edbefc80c87f7fb7c0e46e515c496eeaced302b9568b73"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -37,6 +37,7 @@ pub mod max_length;
 pub mod memo_arms;
 pub mod memo_bytes;
 pub mod muxed_source;
+mod order;
 mod output;
 mod run;
 pub mod scval;

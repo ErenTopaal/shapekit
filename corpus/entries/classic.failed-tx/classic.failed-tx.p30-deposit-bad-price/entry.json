@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-deposit-bad-price",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a deposit at the pool's price of one asking for a price between 2 and 3 (core: liquidity_pool_deposit.bad_price)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 175,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-bad-price/mainnet.expected.json",
+      "expected_json_sha256": "dabd0567f767d20cb4422b1e5a334b8951f6896a9ae6afcaf0cb00a91f908a30",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-bad-price/mainnet.xdr",
+      "xdr_sha256": "6d4b98724ba5a07c9fc19dde099d0ed43f5c60d371a5d818ed175599091ebc3f"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-bad-price/testnet.expected.json",
+      "expected_json_sha256": "908009e9c04ab1ecf183fb5d101de9a9fa3a4b6576193bfa3b82f8a2f8bd0cfc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-deposit-bad-price/testnet.xdr",
+      "xdr_sha256": "e9ad2de8a7740ec84670af267008014392e13ec76288fbb7429d3f2bf53ea35b"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

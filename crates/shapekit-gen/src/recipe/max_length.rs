@@ -18,6 +18,7 @@
 //! |          | one over the credit-only route                                    |
 //! | 22       | strict-send path payment over the 5 asset path                    |
 //! | 23       | multisig sets a 32 byte home domain (`string32`), 20 signatures   |
+//! | 24       | multisig tries a 21st signer and fails with too_many_signers      |
 //!
 //! Core requires every home domain byte to be printable ascii, 0x20 to
 //! 0x7e (`isStringValid` in src/util/types.cpp, checked by
@@ -466,7 +467,57 @@ impl Recipe for MaxLength {
             ),
             other => bail!("multisig's account is missing: {other:?}"),
         }
-        Ok(())
+
+        // a 21st signer: signer changes need the high threshold, still 0,
+        // so the master key alone signs (SetOptionsOpFrame::addOrChangeSigner,
+        // stellar-core v30.0.0)
+        let extra = ctx.account(&signer_role(MAX_SIGNERS));
+        let tx = ctx
+            .tx(&multisig)?
+            .operation(
+                None,
+                OperationBody::SetOptions(SetOptionsOp {
+                    inflation_dest: None,
+                    clear_flags: None,
+                    set_flags: None,
+                    master_weight: None,
+                    low_threshold: None,
+                    med_threshold: None,
+                    high_threshold: None,
+                    home_domain: None,
+                    signer: Some(Signer {
+                        key: ed25519_signer(&extra.verifying_key()),
+                        weight: 1,
+                    }),
+                }),
+            )
+            .build()?;
+        let env = ctx.sign(tx, &[&multisig])?;
+        let applied = ctx.submit_and_close_failing(&env)?;
+        let TransactionResultResult::TxFailed(ops) = &applied.result.result else {
+            bail!(
+                "core answered {:?} for a 21st signer, expected tx_failed",
+                applied.result.result
+            );
+        };
+        ensure!(
+            matches!(
+                ops.first(),
+                Some(OperationResult::OpInner(OperationResultTr::SetOptions(
+                    SetOptionsResult::TooManySigners
+                )))
+            ),
+            "core answered {ops:?} for a 21st signer, expected set_options too_many_signers"
+        );
+        ctx.capture(
+            "signer-21-too-many",
+            Selector::ledger_of(&applied),
+            Spec::new(
+                "set options adding a 21st signer to an account holding 20, which fails at apply with set_options too_many_signers; the account's entry in the meta still holds 20",
+            )
+            .fields(&["op.set_options.signer"])
+            .flags(&["max-length-vec"]),
+        )
     }
 }
 
