@@ -12,12 +12,16 @@ use serde_json::{Value, json};
 use shapekit_serve::{BLOCKING_THREADS, DEFAULT_CACHE_BYTES};
 
 /// Resident bytes per byte of the largest JSON-RPC response, for one thread that built it.
-/// A response is assembled as a `serde_json::Value` tree before it is written, and XDR-JSON
-/// is mostly small objects, each a whole B-tree node of several hundred bytes. Measured with
-/// one malloc arena over every committed chain (peak minus the rss at startup, over the
-/// largest response): 16.8 to 35.3, highest on classic.failed-tx.p30 (3,756,669 bytes of
-/// getTransactions json, 122 MiB) and soroban.auth-trees.p30. 48 is a third above the highest.
-const RESIDENT_PER_RESPONSE_BYTE: u64 = 48;
+/// A response is written as text a ledger or transaction at a time, so on a large chain this
+/// is little more than the text itself; on a small one it is mostly the fixed cost of the
+/// first request thread (its malloc arena and stack, about 3 MiB) over a small response.
+/// Measured as peak minus the rss at startup, over the largest response, every committed
+/// chain swept three times: 2.8 to 3.1 on classic.failed-tx.p30 (3,756,669 bytes of
+/// getTransactions json; was 33.9 when responses were built as a `serde_json::Value`), 9.5
+/// to 10.7 on the checkpoints fixture below (395,811 bytes), and at most 16.6 over all chains
+/// (cap26.inflation.p12, 178,265 bytes, nearly all of it the fixed cost). 17 is above all of
+/// them.
+const RESIDENT_PER_RESPONSE_BYTE: u64 = 17;
 
 /// Resident bytes of the ledger state per decompressed lake byte: the state holds only what
 /// the metas created, measured at 1.6 times the lake on classic.failed-tx.p30 (head 2 to

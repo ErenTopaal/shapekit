@@ -24,3 +24,5 @@ tokio.workspace = true
 
 [dev-dependencies]
 reqwest.workspace = true
+# json format responses nest deeper than serde_json's default parse limit
+serde_json = { workspace = true, features = ["unbounded_depth"] }

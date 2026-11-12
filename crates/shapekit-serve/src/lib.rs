@@ -12,6 +12,7 @@
 //! Every answer comes from the recorded chain. Ledgers are read from the lake on demand
 //! through a cache bounded in bytes.
 
+mod json;
 pub mod replay;
 pub mod rpc;
 
@@ -78,28 +79,40 @@ async fn rpc_route(State(app): State<App>, body: Bytes) -> Response {
     let out = tokio::task::spawn_blocking(move || {
         let req: Value = match serde_json::from_slice(&body) {
             Ok(v) => v,
-            Err(e) => return Some(rpc::parse_error(&e).to_string()),
+            Err(e) => return Some(rpc::parse_error(&e).to_string().into_bytes()),
         };
-        let one = |r: &Value| {
+        // the text is built here and not on an async worker, so only the capped blocking
+        // threads ever grow an arena to the size of a large response
+        let mut out = Vec::new();
+        let one = |r: &Value, out: &mut Vec<u8>| {
             if log {
                 eprintln!(
                     "rpc {}",
                     r.get("method").and_then(Value::as_str).unwrap_or("?")
                 );
             }
-            rpc::handle(&replay, r)
+            rpc::handle(&replay, r, out)
         };
-        let v = match &req {
+        match &req {
             Value::Array(items) if !items.is_empty() => {
-                let out: Vec<Value> = items.iter().filter_map(one).collect();
-                (!out.is_empty()).then_some(Value::Array(out))
+                out.push(b'[');
+                let mut any = false;
+                for r in items {
+                    let mark = out.len();
+                    if any {
+                        out.push(b',');
+                    }
+                    if one(r, &mut out) {
+                        any = true;
+                    } else {
+                        out.truncate(mark);
+                    }
+                }
+                out.push(b']');
+                any.then_some(out)
             }
-            other => one(other),
-        };
-        // the text is written on this thread, whose arena already held the larger value
-        // tree; written on an async worker, the first large body ratchets that worker's
-        // arena up as well
-        v.map(|v| v.to_string())
+            other => one(other, &mut out).then_some(out),
+        }
     })
     .await;
     match out {

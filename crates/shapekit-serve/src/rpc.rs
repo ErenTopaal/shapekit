@@ -6,15 +6,15 @@
 //! the conformance fixtures were captured from.
 
 use serde::Deserialize;
-use serde_json::{Map, Value, json};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use shapekit_manifest::xdr::json_value;
 use shapekit_oracle::view::LedgerView;
 use stellar_xdr::{
     LedgerCloseMeta, LedgerEntry, LedgerKey, LedgerKeyTtl, Limits, ReadXdr, TransactionEnvelope,
-    TransactionMeta, TransactionResultResult, Type, WriteXdr,
+    TransactionMeta, TransactionResultResult, WriteXdr,
 };
 
+use crate::json::{self as text, Object};
 use crate::replay::{Replay, header_entry};
 
 /// jrpc2's standard codes, the ones stellar-rpc answers with.
@@ -69,16 +69,38 @@ fn internal(e: impl std::fmt::Display) -> RpcError {
     RpcError::new(INTERNAL_ERROR, e.to_string())
 }
 
-/// Handles one request object and returns its response object, or `None` for a
-/// notification (a request without an id).
-pub fn handle(replay: &Replay, req: &Value) -> Option<Value> {
-    let id = req.get("id").cloned();
-    let result = dispatch(replay, req);
-    let id = id?;
-    Some(match result {
-        Ok(v) => json!({"jsonrpc": "2.0", "id": id, "result": v}),
-        Err(e) => json!({"jsonrpc": "2.0", "id": id, "error": e.to_json()}),
-    })
+impl From<serde_json::Error> for RpcError {
+    fn from(e: serde_json::Error) -> Self {
+        internal(e)
+    }
+}
+
+/// Handles one request object, appending its response object to `out`. Returns false, with
+/// nothing written, for a notification (a request without an id): every method is read
+/// only, so a notification has no effect to carry out.
+///
+/// The response is text from the start, ledger by ledger and transaction by transaction,
+/// and in the bytes a `serde_json::Value` of it would print: keys sorted, compact.
+pub fn handle(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> bool {
+    let Some(id) = req.get("id") else {
+        return false;
+    };
+    let mark = out.len();
+    // "id" < "jsonrpc" < "result": the result, written last, streams in place
+    out.extend_from_slice(b"{\"id\":");
+    let wrote = text::write(out, id).map_err(RpcError::from).and_then(|()| {
+        out.extend_from_slice(b",\"jsonrpc\":\"2.0\",\"result\":");
+        dispatch(replay, req, out)
+    });
+    match wrote {
+        Ok(()) => out.push(b'}'),
+        Err(e) => {
+            out.truncate(mark);
+            let v = json!({"jsonrpc": "2.0", "id": id, "error": e.to_json()});
+            text::write(out, &v).expect("an error object of plain values serialises");
+        }
+    }
+    true
 }
 
 /// A response for a body that is not JSON at all.
@@ -90,7 +112,9 @@ pub fn parse_error(e: &serde_json::Error) -> Value {
     })
 }
 
-fn dispatch(replay: &Replay, req: &Value) -> Result<Value, RpcError> {
+/// Writes the result of one request into `out`; on an error `out` holds a partial result
+/// that the caller discards.
+fn dispatch(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> Result<(), RpcError> {
     if req.get("jsonrpc").and_then(Value::as_str) != Some("2.0") {
         return Err(RpcError::new(INVALID_REQUEST, "invalid version marker"));
     }
@@ -99,15 +123,15 @@ fn dispatch(replay: &Replay, req: &Value) -> Result<Value, RpcError> {
         .and_then(Value::as_str)
         .ok_or_else(|| RpcError::new(INVALID_REQUEST, "empty method name"))?;
     let params = req.get("params").cloned().unwrap_or(Value::Null);
-    match method {
+    let small = match method {
         "getHealth" => get_health(replay),
         "getNetwork" => get_network(replay),
         "getVersionInfo" => get_version_info(replay),
         "getLatestLedger" => get_latest_ledger(replay),
-        "getLedgers" => get_ledgers(replay, parse(params)?),
-        "getLedgerEntries" => get_ledger_entries(replay, parse(params)?),
-        "getTransaction" => get_transaction(replay, parse(params)?),
-        "getTransactions" => get_transactions(replay, parse(params)?),
+        "getLedgers" => return get_ledgers(replay, parse(params)?, out),
+        "getLedgerEntries" => return get_ledger_entries(replay, parse(params)?, out),
+        "getTransaction" => return get_transaction(replay, parse(params)?, out),
+        "getTransactions" => return get_transactions(replay, parse(params)?, out),
         "sendTransaction" => Err(RpcError::new(
             INVALID_REQUEST,
             "shapekit replay server is read-only: it serves recorded ledgers and accepts no transactions",
@@ -119,7 +143,8 @@ fn dispatch(replay: &Replay, req: &Value) -> Result<Value, RpcError> {
             message: "method not found".into(),
             data: Some(Value::String(other.to_string())),
         }),
-    }
+    }?;
+    Ok(text::write(out, &small)?)
 }
 
 /// Decodes params the way jrpc2 does for stellar-rpc's handlers: an object or nothing,
@@ -159,10 +184,6 @@ fn b64(t: &impl WriteXdr) -> Result<String, RpcError> {
 fn b64_bytes(b: &[u8]) -> String {
     use base64::Engine;
     base64::engine::general_purpose::STANDARD.encode(b)
-}
-
-fn xdr_json(t: Type) -> Result<Value, RpcError> {
-    json_value(&t).map_err(internal)
 }
 
 fn latest(replay: &Replay) -> Result<(u32, u64), RpcError> {
@@ -287,7 +308,7 @@ fn join(errs: [Result<(), String>; 2]) -> Result<(), String> {
     }
 }
 
-fn get_ledgers(replay: &Replay, req: GetLedgersRequest) -> Result<Value, RpcError> {
+fn get_ledgers(replay: &Replay, req: GetLedgersRequest, out: &mut Vec<u8>) -> Result<(), RpcError> {
     let (first, head) = (replay.first, replay.head());
     let as_json = check_format(&req.format);
     join([
@@ -324,32 +345,85 @@ fn get_ledgers(replay: &Replay, req: GetLedgersRequest) -> Result<Value, RpcErro
         }
     };
     let end = (u64::from(start) + limit - 1).min(u64::from(head)) as u32;
-    let mut ledgers = Vec::new();
+    // the members before "ledgers" depend on how the page ends, so the page is written
+    // first and they are put in front of it after
+    let at = out.len();
+    out.extend_from_slice(b"\"ledgers\":[");
     for seq in start..=end {
+        if seq != start {
+            out.push(b',');
+        }
         let (xdr, lcm) = replay.ledger(seq).map_err(|e| {
             RpcError::new(
                 INTERNAL_ERROR,
                 format!("error fetching ledgers from db: {e}"),
             )
         })?;
-        ledgers.push(ledger_info(&xdr, lcm, as_json)?);
+        ledger_info(&xdr, &lcm, as_json, out)?;
     }
-    let cursor = match ledgers.last() {
-        Some(_) => end.to_string(),
-        None => match &req.pagination {
+    out.push(b']');
+    let cursor = if start <= end {
+        end.to_string()
+    } else {
+        match &req.pagination {
             Some(p) if !p.cursor.is_empty() => p.cursor.clone(),
             _ => (start - 1).to_string(),
-        },
+        }
     };
     let head_time = replay.close_time(head).map_err(internal)?;
-    Ok(json!({
-        "ledgers": ledgers,
-        "latestLedger": head,
-        "latestLedgerCloseTime": head_time,
-        "oldestLedger": first,
-        "oldestLedgerCloseTime": replay.first_close_time,
-        "cursor": cursor,
-    }))
+    let mut front = b"{".to_vec();
+    members(
+        &mut front,
+        &[
+            ("cursor", &cursor),
+            ("latestLedger", &head),
+            ("latestLedgerCloseTime", &head_time),
+        ],
+    )?;
+    front.push(b',');
+    insert(out, at, &front);
+    out.push(b',');
+    members(
+        out,
+        &[
+            ("oldestLedger", &first),
+            ("oldestLedgerCloseTime", &replay.first_close_time),
+        ],
+    )?;
+    out.push(b'}');
+    Ok(())
+}
+
+/// `"key":value` pairs, comma separated, in the order given, which the caller keeps sorted.
+fn members(out: &mut Vec<u8>, pairs: &[(&str, &dyn erased::Value)]) -> Result<(), RpcError> {
+    for (i, (key, v)) in pairs.iter().enumerate() {
+        debug_assert!(i == 0 || pairs[i - 1].0 < *key, "members out of order");
+        if i > 0 {
+            out.push(b',');
+        }
+        text::write(out, *key)?;
+        out.push(b':');
+        v.write(out)?;
+    }
+    Ok(())
+}
+
+/// Puts `bytes` into `out` at `at`, moving what follows within the buffer.
+fn insert(out: &mut Vec<u8>, at: usize, bytes: &[u8]) {
+    out.splice(at..at, bytes.iter().copied());
+}
+
+/// A serialisable value behind a reference of one type, for lists of mixed members.
+mod erased {
+    pub trait Value {
+        fn write(&self, out: &mut Vec<u8>) -> Result<(), serde_json::Error>;
+    }
+
+    impl<T: serde::Serialize> Value for T {
+        fn write(&self, out: &mut Vec<u8>) -> Result<(), serde_json::Error> {
+            crate::json::write(out, self)
+        }
+    }
 }
 
 /// Go's `strconv.ParseUint(s, 10, 32)` error text.
@@ -378,24 +452,35 @@ fn go_quote(s: &str) -> String {
     serde_json::to_string(s).expect("a string serialises")
 }
 
-fn ledger_info(xdr: &[u8], lcm: LedgerCloseMeta, as_json: bool) -> Result<Value, RpcError> {
-    let h = header_entry(&lcm).clone();
-    let mut info = json!({
-        "hash": hex::encode(h.hash.0),
-        "sequence": h.header.ledger_seq,
-        "ledgerCloseTime": h.header.scp_value.close_time.0.to_string(),
-    });
+fn ledger_info(
+    xdr: &[u8],
+    lcm: &LedgerCloseMeta,
+    as_json: bool,
+    out: &mut Vec<u8>,
+) -> Result<(), RpcError> {
+    let h = header_entry(lcm);
+    let mut info = Object::new(out);
+    info.member("hash", &hex::encode(h.hash.0))?;
     if as_json {
         // go-stellar-sdk leaves the xdr fields empty but present in json mode
-        info["headerXdr"] = json!("");
-        info["headerJson"] = xdr_json(Type::LedgerHeaderHistoryEntry(Box::new(h)))?;
-        info["metadataXdr"] = json!("");
-        info["metadataJson"] = xdr_json(Type::LedgerCloseMeta(Box::new(lcm)))?;
+        info.member("headerJson", h)?;
+        info.member("headerXdr", "")?;
     } else {
-        info["headerXdr"] = json!(b64(&h)?);
-        info["metadataXdr"] = json!(b64_bytes(xdr));
+        info.member("headerXdr", &b64(h)?)?;
     }
-    Ok(info)
+    info.member(
+        "ledgerCloseTime",
+        &h.header.scp_value.close_time.0.to_string(),
+    )?;
+    if as_json {
+        info.member("metadataJson", lcm)?;
+        info.member("metadataXdr", "")?;
+    } else {
+        info.member("metadataXdr", &b64_bytes(xdr))?;
+    }
+    info.member("sequence", &h.header.ledger_seq)?;
+    info.end();
+    Ok(())
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -406,7 +491,11 @@ struct GetLedgerEntriesRequest {
     format: Option<String>,
 }
 
-fn get_ledger_entries(replay: &Replay, req: GetLedgerEntriesRequest) -> Result<Value, RpcError> {
+fn get_ledger_entries(
+    replay: &Replay,
+    req: GetLedgerEntriesRequest,
+    out: &mut Vec<u8>,
+) -> Result<(), RpcError> {
     let as_json = check_format(&req.format).map_err(|m| RpcError::new(INVALID_PARAMS, m))?;
     if req.keys.len() > MAX_KEYS {
         return Err(RpcError::new(
@@ -448,34 +537,31 @@ fn get_ledger_entries(replay: &Replay, req: GetLedgerEntriesRequest) -> Result<V
         })
         .map_err(internal)?;
     let (entries, head) = found;
-    let mut out = Vec::with_capacity(entries.len());
-    for (key, entry, ttl) in entries {
-        let mut r = Map::new();
+    out.extend_from_slice(b"{\"entries\":[");
+    for (i, (key, entry, ttl)) in entries.iter().enumerate() {
+        if i > 0 {
+            out.push(b',');
+        }
+        let mut r = Object::new(out);
         if as_json {
-            r.insert("keyJson".into(), xdr_json(Type::LedgerKey(Box::new(key)))?);
-            r.insert(
-                "dataJson".into(),
-                xdr_json(Type::LedgerEntryData(Box::new(entry.data)))?,
-            );
-            r.insert(
-                "extJson".into(),
-                xdr_json(Type::LedgerEntryExt(Box::new(entry.ext)))?,
-            );
+            r.member("keyJson", key)?;
+            r.member("dataJson", &entry.data)?;
+            r.member("extJson", &entry.ext)?;
         } else {
-            r.insert("key".into(), json!(b64(&key)?));
-            r.insert("xdr".into(), json!(b64(&entry.data)?));
-            r.insert("extXdr".into(), json!(b64(&entry.ext)?));
+            r.member("key", &b64(key)?)?;
+            r.member("xdr", &b64(&entry.data)?)?;
+            r.member("extXdr", &b64(&entry.ext)?)?;
         }
-        r.insert(
-            "lastModifiedLedgerSeq".into(),
-            json!(entry.last_modified_ledger_seq),
-        );
+        r.member("lastModifiedLedgerSeq", &entry.last_modified_ledger_seq)?;
         if let Some(t) = ttl {
-            r.insert("liveUntilLedgerSeq".into(), json!(t));
+            r.member("liveUntilLedgerSeq", t)?;
         }
-        out.push(Value::Object(r));
+        r.end();
     }
-    Ok(json!({"entries": out, "latestLedger": head}))
+    out.extend_from_slice(b"],");
+    members(out, &[("latestLedger", &head)])?;
+    out.push(b'}');
+    Ok(())
 }
 
 /// TTL of a contract data or code entry, from its TTL entry keyed by the key's hash.
@@ -501,7 +587,11 @@ struct GetTransactionRequest {
     format: Option<String>,
 }
 
-fn get_transaction(replay: &Replay, req: GetTransactionRequest) -> Result<Value, RpcError> {
+fn get_transaction(
+    replay: &Replay,
+    req: GetTransactionRequest,
+    out: &mut Vec<u8>,
+) -> Result<(), RpcError> {
     let as_json = check_format(&req.format).map_err(|m| RpcError::new(INVALID_PARAMS, m))?;
     if req.hash.len() / 2 != 32 {
         return Err(RpcError::new(
@@ -513,42 +603,50 @@ fn get_transaction(replay: &Replay, req: GetTransactionRequest) -> Result<Value,
     hex::decode_to_slice(&req.hash, &mut hash)
         .map_err(|e| RpcError::new(INVALID_PARAMS, format!("incorrect hash: {e}")))?;
     let (head, head_time) = latest(replay)?;
-    let mut out = json!({
-        "latestLedger": head,
-        "latestLedgerCloseTime": head_time.to_string(),
-        "oldestLedger": replay.first,
-        "oldestLedgerCloseTime": replay.first_close_time.to_string(),
-    });
     let loc = replay.tx(&hash).filter(|l| l.ledger <= head);
-    let Some(loc) = loc else {
-        let o = out.as_object_mut().expect("an object");
-        o.insert("status".into(), json!("NOT_FOUND"));
-        o.insert("txHash".into(), json!(req.hash));
-        o.insert("applicationOrder".into(), json!(0));
-        o.insert("feeBump".into(), json!(false));
-        o.insert("events".into(), json!({}));
-        o.insert("ledger".into(), json!(0));
-        o.insert("createdAt".into(), json!("0"));
-        return Ok(out);
+    let found = match loc {
+        Some(loc) => {
+            let (_, lcm) = replay.ledger(loc.ledger).map_err(internal)?;
+            Some((loc, lcm))
+        }
+        None => None,
     };
-    let (_, lcm) = replay.ledger(loc.ledger).map_err(internal)?;
+    let mut o = Object::new(out);
+    o.member("latestLedger", &head)?;
+    o.member("latestLedgerCloseTime", &head_time.to_string())?;
+    o.member("oldestLedger", &replay.first)?;
+    o.member(
+        "oldestLedgerCloseTime",
+        &replay.first_close_time.to_string(),
+    )?;
+    let Some((loc, lcm)) = found else {
+        o.member("status", "NOT_FOUND")?;
+        o.member("txHash", &req.hash)?;
+        o.member("applicationOrder", &0)?;
+        o.member("feeBump", &false)?;
+        o.member("events", &json!({}))?;
+        o.member("ledger", &0)?;
+        o.member("createdAt", "0")?;
+        o.end();
+        return Ok(());
+    };
     let close_time = header_entry(&lcm).header.scp_value.close_time.0;
     let view = LedgerView::new(&lcm, &replay.network).map_err(internal)?;
     let tx = &view.txs[loc.index as usize];
-    let details = tx_details(tx, loc.ledger, as_json)?;
-    let o = out.as_object_mut().expect("an object");
-    o.extend(details);
-    o.insert("createdAt".into(), json!(close_time.to_string()));
-    Ok(out)
+    tx_details(tx, loc.ledger, as_json, &mut o)?;
+    o.member("createdAt", &close_time.to_string())?;
+    o.end();
+    Ok(())
 }
 
 /// `TransactionDetails` for one transaction, as stellar-rpc's `ParseTransaction` and
-/// `GetTransactionEvents` extract it. The hash is the one the ledger records.
+/// `GetTransactionEvents` extract it, added to `o`. The hash is the one the ledger records.
 fn tx_details(
     tx: &shapekit_oracle::view::TxView<'_>,
     ledger: u32,
     as_json: bool,
-) -> Result<Map<String, Value>, RpcError> {
+    o: &mut Object<'_>,
+) -> Result<(), RpcError> {
     let result = &tx.result.result;
     let success = matches!(
         result.result,
@@ -556,85 +654,55 @@ fn tx_details(
     );
     let fee_bump = matches!(tx.envelope, TransactionEnvelope::TxFeeBump(_));
     let (tx_events, op_events, diagnostic) = events(tx.meta, tx.envelope);
-    let mut o = Map::new();
-    o.insert(
-        "status".into(),
-        json!(if success { "SUCCESS" } else { "FAILED" }),
-    );
-    o.insert(
-        "txHash".into(),
-        json!(hex::encode(tx.result.transaction_hash.0)),
-    );
-    o.insert("applicationOrder".into(), json!(tx.index + 1));
-    o.insert("feeBump".into(), json!(fee_bump));
-    let mut ev = Map::new();
+    o.member("status", if success { "SUCCESS" } else { "FAILED" })?;
+    o.member("txHash", &hex::encode(tx.result.transaction_hash.0))?;
+    o.member("applicationOrder", &(tx.index + 1))?;
+    o.member("feeBump", &fee_bump)?;
     if as_json {
-        o.insert(
-            "envelopeJson".into(),
-            xdr_json(Type::TransactionEnvelope(Box::new(tx.envelope.clone())))?,
-        );
-        o.insert(
-            "resultJson".into(),
-            xdr_json(Type::TransactionResult(Box::new(result.clone())))?,
-        );
-        o.insert(
-            "resultMetaJson".into(),
-            xdr_json(Type::TransactionMeta(Box::new(tx.meta.clone())))?,
-        );
+        o.member("envelopeJson", tx.envelope)?;
+        o.member("resultJson", result)?;
+        o.member("resultMetaJson", tx.meta)?;
         if !diagnostic.is_empty() {
-            let d = diagnostic
-                .iter()
-                .map(|e| xdr_json(Type::DiagnosticEvent(Box::new((*e).clone()))))
-                .collect::<Result<Vec<_>, _>>()?;
-            o.insert("diagnosticEventsJson".into(), json!(d));
-        }
-        if !tx_events.is_empty() {
-            let t = tx_events
-                .iter()
-                .map(|e| xdr_json(Type::TransactionEvent(Box::new((*e).clone()))))
-                .collect::<Result<Vec<_>, _>>()?;
-            ev.insert("transactionEventsJson".into(), json!(t));
-        }
-        if !op_events.is_empty() {
-            let c = op_events
-                .iter()
-                .map(|op| {
-                    op.iter()
-                        .map(|e| xdr_json(Type::ContractEvent(Box::new((*e).clone()))))
-                        .collect::<Result<Vec<_>, _>>()
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-            ev.insert("contractEventsJson".into(), json!(c));
+            o.member("diagnosticEventsJson", &diagnostic)?;
         }
     } else {
-        o.insert("envelopeXdr".into(), json!(b64(tx.envelope)?));
-        o.insert("resultXdr".into(), json!(b64(result)?));
-        o.insert("resultMetaXdr".into(), json!(b64(tx.meta)?));
+        o.member("envelopeXdr", &b64(tx.envelope)?)?;
+        o.member("resultXdr", &b64(result)?)?;
+        o.member("resultMetaXdr", &b64(tx.meta)?)?;
         if !diagnostic.is_empty() {
-            let d = diagnostic
-                .iter()
-                .map(|e| b64(*e))
-                .collect::<Result<Vec<_>, _>>()?;
-            o.insert("diagnosticEventsXdr".into(), json!(d));
-        }
-        if !tx_events.is_empty() {
-            let t = tx_events
-                .iter()
-                .map(|e| b64(*e))
-                .collect::<Result<Vec<_>, _>>()?;
-            ev.insert("transactionEventsXdr".into(), json!(t));
-        }
-        if !op_events.is_empty() {
-            let c = op_events
-                .iter()
-                .map(|op| op.iter().map(|e| b64(*e)).collect::<Result<Vec<_>, _>>())
-                .collect::<Result<Vec<_>, _>>()?;
-            ev.insert("contractEventsXdr".into(), json!(c));
+            o.member("diagnosticEventsXdr", &all_b64(&diagnostic)?)?;
         }
     }
-    o.insert("events".into(), Value::Object(ev));
-    o.insert("ledger".into(), json!(ledger));
-    Ok(o)
+    o.member_with("events", |out| -> Result<(), RpcError> {
+        let mut ev = Object::new(out);
+        if as_json {
+            if !tx_events.is_empty() {
+                ev.member("transactionEventsJson", &tx_events)?;
+            }
+            if !op_events.is_empty() {
+                ev.member("contractEventsJson", &op_events)?;
+            }
+        } else {
+            if !tx_events.is_empty() {
+                ev.member("transactionEventsXdr", &all_b64(&tx_events)?)?;
+            }
+            if !op_events.is_empty() {
+                let c = op_events
+                    .iter()
+                    .map(|op| all_b64(op))
+                    .collect::<Result<Vec<_>, _>>()?;
+                ev.member("contractEventsXdr", &c)?;
+            }
+        }
+        ev.end();
+        Ok(())
+    })?;
+    o.member("ledger", &ledger)?;
+    Ok(())
+}
+
+fn all_b64<T: WriteXdr>(items: &[&T]) -> Result<Vec<String>, RpcError> {
+    items.iter().map(|e| b64(*e)).collect()
 }
 
 type Events<'a> = (
@@ -697,7 +765,11 @@ fn toid(ledger: i64, tx: i64, op: i64) -> i64 {
     (ledger << 32) | (tx << 12) | op
 }
 
-fn get_transactions(replay: &Replay, req: GetTransactionsRequest) -> Result<Value, RpcError> {
+fn get_transactions(
+    replay: &Replay,
+    req: GetTransactionsRequest,
+    out: &mut Vec<u8>,
+) -> Result<(), RpcError> {
     let (first, head) = (replay.first, replay.head());
     let as_json = check_format(&req.format);
     join([
@@ -728,7 +800,11 @@ fn get_transactions(replay: &Replay, req: GetTransactionsRequest) -> Result<Valu
             limit = p.limit;
         }
     }
-    let mut txs = Vec::new();
+    // "cursor" comes first and is known only once the page is written, so the page is
+    // written first and the members before it are put in front after
+    let at = out.len();
+    out.extend_from_slice(b"\"transactions\":[");
+    let mut count = 0u64;
     let mut cursor = toid(0, 0, 0);
     let mut seq = start_ledger;
     while seq <= i64::from(head) {
@@ -753,10 +829,15 @@ fn get_transactions(replay: &Replay, req: GetTransactionsRequest) -> Result<Valu
         let mut done = false;
         for i in from..=(view.txs.len() as i64) {
             cursor = toid(seq, i, 1);
-            let mut d = tx_details(&view.txs[(i - 1) as usize], s, as_json)?;
-            d.insert("createdAt".into(), json!(close_time));
-            txs.push(Value::Object(d));
-            if txs.len() as u64 >= limit {
+            if count > 0 {
+                out.push(b',');
+            }
+            let mut d = Object::new(out);
+            tx_details(&view.txs[(i - 1) as usize], s, as_json, &mut d)?;
+            d.member("createdAt", &close_time)?;
+            d.end();
+            count += 1;
+            if count >= limit {
                 done = true;
                 break;
             }
@@ -766,13 +847,20 @@ fn get_transactions(replay: &Replay, req: GetTransactionsRequest) -> Result<Valu
         }
         seq += 1;
     }
+    out.extend_from_slice(b"]}");
     let (head, head_time) = latest(replay)?;
-    Ok(json!({
-        "transactions": txs,
-        "latestLedger": head,
-        "latestLedgerCloseTimestamp": head_time,
-        "oldestLedger": first,
-        "oldestLedgerCloseTimestamp": replay.first_close_time,
-        "cursor": cursor.to_string(),
-    }))
+    let mut front = b"{".to_vec();
+    members(
+        &mut front,
+        &[
+            ("cursor", &cursor.to_string()),
+            ("latestLedger", &head),
+            ("latestLedgerCloseTimestamp", &head_time),
+            ("oldestLedger", &first),
+            ("oldestLedgerCloseTimestamp", &replay.first_close_time),
+        ],
+    )?;
+    front.push(b',');
+    insert(out, at, &front);
+    Ok(())
 }
