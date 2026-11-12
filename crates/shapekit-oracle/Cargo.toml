@@ -1,7 +1,23 @@
 [package]
 name = "shapekit-oracle"
+description = "Ledger state store and the meta oracle: what each ledger changed, read only from LedgerCloseMeta."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[dependencies]
+ed25519-dalek.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+shapekit-manifest.workspace = true
+stellar-xdr = { workspace = true, features = ["base64"] }
+thiserror.workspace = true
+
+[dev-dependencies]
+shapekit-registry.workspace = true
+tempfile.workspace = true
+stellar-strkey.workspace = true

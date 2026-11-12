@@ -1,0 +1,82 @@
+{
+  "core_goldens": {
+    "commit": "0e49751aa9ddf892302cca02cea7f3f5d97df9f1",
+    "files": {
+      "core-goldens/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr": {
+        "sha256": "0103e517acd8229d0e20979bf08a199047c3a69b9023f84007d42155970139ce",
+        "test_case": "sponsor future reserves|protocol version 30|add sponsored entry before adding first sponsored signer",
+        "upstream_path": "test-lcm-current/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr"
+      },
+      "core-goldens/BeginSponsoringFutureReservesTests/1c7fb8566ea79e53.xdr": {
+        "sha256": "050f06f2466e240e080e4ea2d965977b23e4a8701997e1d03bc4e46ae156f39d",
+        "test_case": "sponsor future reserves|protocol version 30|success",
+        "upstream_path": "test-lcm-current/BeginSponsoringFutureReservesTests/1c7fb8566ea79e53.xdr"
+      },
+      "core-goldens/BumpSequenceTests/27d2533d64835282.xdr": {
+        "sha256": "294a2c6928bbc34208885099ebc10a4067e01840bf38e4e22dee0f2e7bf8a2b9",
+        "test_case": "minSeqAge under sub-second ledgers|whole-second ledger one second later: age requirement met",
+        "upstream_path": "test-lcm-current/BumpSequenceTests/27d2533d64835282.xdr"
+      },
+      "core-goldens/BumpSequenceTests/fa3e2dcc9ad7fa98.xdr": {
+        "sha256": "9c2ae5666aea8ebdc4d57abf4b5cc40645abd681b08eaf2ec1232869f52b3bf2",
+        "test_case": "minSeqAge under sub-second ledgers|sub-second ledger in the same whole second: age still 0",
+        "upstream_path": "test-lcm-current/BumpSequenceTests/fa3e2dcc9ad7fa98.xdr"
+      },
+      "core-goldens/ClaimableBalanceTests/3635a80135f66ca8.xdr": {
+        "sha256": "e1dcf44d0f68a2cfc75bfcecacd98df041fee252b3d5b64265cc303d7ab1d5d0",
+        "test_case": "claimable balance absBefore under sub-second ledgers|claim within the same second succeeds",
+        "upstream_path": "test-lcm-current/ClaimableBalanceTests/3635a80135f66ca8.xdr"
+      },
+      "core-goldens/ClaimableBalanceTests/67b49513ed2f1609.xdr": {
+        "sha256": "74091776b92e20f47e65d38dce530d19de094e6b39da85e85d5fe8262064334a",
+        "test_case": "claimable balance absBefore under sub-second ledgers|claim in the next second fails",
+        "upstream_path": "test-lcm-current/ClaimableBalanceTests/67b49513ed2f1609.xdr"
+      },
+      "core-goldens/InvokeHostFunctionTests/13c1727d3159fbb9.xdr": {
+        "sha256": "866d885fb0c394e2b7d20ba4ab28c6aa08762b69eb72c71305bcd9bd3089fc6b",
+        "test_case": "parallel txs|multi RO extensions with a single RW extension in a single stage and cluster. Run 1",
+        "upstream_path": "test-lcm-current/InvokeHostFunctionTests/13c1727d3159fbb9.xdr"
+      },
+      "core-goldens/InvokeHostFunctionTests/426337b02a4e2a17.xdr": {
+        "sha256": "025a5bc74bb73af08e13312a312cc105a0f10c77cfa5ee8d86b1ba0d60bcaefd",
+        "test_case": "Stellar asset contract transfer to muxed contract (CAP-0084)|custom asset|issuer transfer emits mint",
+        "upstream_path": "test-lcm-current/InvokeHostFunctionTests/426337b02a4e2a17.xdr"
+      },
+      "core-goldens/InvokeHostFunctionTests/4c437318f87437c5.xdr": {
+        "sha256": "20624d6db29bb4546312a1aafcc72c978c1781b40b90a4828ab0dc7166fefeda",
+        "test_case": "Trustline stellar asset contract|protocol version 30",
+        "upstream_path": "test-lcm-current/InvokeHostFunctionTests/4c437318f87437c5.xdr"
+      },
+      "core-goldens/InvokeHostFunctionTests/9700997eaf5ce058.xdr": {
+        "sha256": "69259c2b0c5e6187ea1fbc3761e6ace53d1b98d906af26a97b17e1cacd60f349",
+        "test_case": "source account of first tx is in second txs footprint|protocol version 30",
+        "upstream_path": "test-lcm-current/InvokeHostFunctionTests/9700997eaf5ce058.xdr"
+      },
+      "core-goldens/OfferTests/847b038d8a2ce1c2.xdr": {
+        "sha256": "b16766eed1ee97b90dd8405e1d5881613b81bb898712dc3315537b84bcdff568",
+        "test_case": "offer crossing with minimal receive cap|protocol version 30|maker offer is fully taken",
+        "upstream_path": "test-lcm-current/OfferTests/847b038d8a2ce1c2.xdr"
+      },
+      "core-goldens/TxEnvelopeTests/8c2395b250372f24.xdr": {
+        "sha256": "43bd0137f8ef98aa7646e7f1624e6a7444a21a06de23b30e014ecd457e1046db",
+        "test_case": "txset - correct apply order",
+        "upstream_path": "test-lcm-current/TxEnvelopeTests/8c2395b250372f24.xdr"
+      }
+    },
+    "framing": "record-marked LedgerCloseMeta stream, copied byte for byte",
+    "license": "Apache-2.0, see NOTICE",
+    "passphrase": "(V) (;,,;) (V)",
+    "ref": "v30.0.0",
+    "repo": "https://github.com/stellar/stellar-core"
+  },
+  "testnet-4437357.lcm.xdr": {
+    "form": "one bare LedgerCloseMeta, zstd batch decompressed and the single ledger taken out, as stored in corpus entry cap40.signed-payload-signer.testnet-4437357",
+    "ledger_hash": "0984e28878f8b074c3710f52630f5b6bc5a369bf61a15e7364b6123edf1881b6",
+    "ledger_sequence": 4437357,
+    "network": "testnet",
+    "network_passphrase": "Test SDF Network ; September 2015",
+    "sha256": "582e694b96bf69f894763909a1b058c1a2523d5634f2e0947393cee9765f4e0e",
+    "source": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/testnet/2025-12-18/FFBC9DFF--4416000-4479999/FFBC4A92--4437357.xdr.zst",
+    "why": "the ledger wallet-backend#729 names as holding a SetOptions with a signed-payload signer"
+  }
+}

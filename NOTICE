@@ -13,7 +13,14 @@ crates/shapekit-core-driver/tests/fixtures/core-golden/, unmodified:
   test-lcm-current/InvokeHostFunctionTests/a61f6dd6f81e6f17.xdr
   test-lcm-current/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr
 
-Golden LedgerCloseMeta files from stellar-core (https://github.com/stellar/stellar-core,
-Apache License 2.0, copyright Stellar Development Foundation and contributors) are planned
-to be imported under corpus/goldens/. When they are, each imported file and the stellar-core
-release it came from will be listed in this section.
+Twelve golden LedgerCloseMeta files from the same stellar-core v30.0.0 commit are used,
+unmodified, as test fixtures in crates/shapekit-oracle/tests/fixtures/core-goldens/. Each file's
+upstream path under test-lcm-current/, test case and SHA-256 are listed in
+crates/shapekit-oracle/tests/fixtures/provenance.json.
+
+Golden LedgerCloseMeta values from stellar-core v30.0.0 (https://github.com/stellar/stellar-core,
+commit 0e49751aa9ddf892302cca02cea7f3f5d97df9f1, Apache License 2.0, copyright Stellar Development
+Foundation and contributors) are imported, unmodified, as corpus entries with source class
+core-golden under corpus/entries/. Each such entry names its upstream file under
+test-lcm-current/ and that file's SHA-256 in its entry.json, and corpus/goldens/core-v30.0.0/index.json
+lists every upstream golden file with its SHA-256 and the entries imported from it.
