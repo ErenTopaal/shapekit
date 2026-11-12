@@ -4,12 +4,12 @@
       {
         "arm": "AccountEntryExt:v0",
         "by_source_class": {
-          "core-golden": 24,
+          "core-golden": 27,
           "local-core": 81,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 109,
+        "core_emitted_entries": 112,
         "examples": [
           "cap01.bump-sequence.p30-bump-forward",
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
@@ -19,12 +19,12 @@
       {
         "arm": "AccountEntryExt:v1",
         "by_source_class": {
-          "core-golden": 76,
+          "core-golden": 90,
           "local-core": 247,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 331,
+        "core_emitted_entries": 345,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -34,12 +34,12 @@
       {
         "arm": "AccountEntryExtensionV1Ext:v2",
         "by_source_class": {
-          "core-golden": 76,
+          "core-golden": 90,
           "local-core": 247,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 331,
+        "core_emitted_entries": 345,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -62,12 +62,12 @@
       {
         "arm": "AccountEntryExtensionV2Ext:v3",
         "by_source_class": {
-          "core-golden": 76,
+          "core-golden": 90,
           "local-core": 246,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 330,
+        "core_emitted_entries": 344,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -98,10 +98,10 @@
       {
         "arm": "AccountMergeResult:success",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 5
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
@@ -139,12 +139,12 @@
       {
         "arm": "Asset:credit_alphanum4",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 7,
           "local-core": 67,
           "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 78,
+        "core_emitted_entries": 79,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -154,16 +154,16 @@
       {
         "arm": "Asset:native",
         "by_source_class": {
-          "core-golden": 13,
+          "core-golden": 14,
           "local-core": 91,
           "mainnet-history": 1,
           "testnet-history": 2
         },
-        "core_emitted_entries": 107,
+        "core_emitted_entries": 108,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.golden-27d2533d64835282-0"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -191,16 +191,36 @@
         ]
       },
       {
+        "arm": "BeginSponsoringFutureReservesResult:already_sponsored",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap33.sponsorship.golden-16ca002da0d1fd67-1"
+        ]
+      },
+      {
+        "arm": "BeginSponsoringFutureReservesResult:recursive",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
+        ]
+      },
+      {
         "arm": "BeginSponsoringFutureReservesResult:success",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 5,
           "local-core": 6
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 11,
         "examples": [
+          "cap33.sponsorship.golden-16ca002da0d1fd67-1",
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48",
-          "cap33.sponsorship.p30-sponsored-account-meta"
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
         ]
       },
       {
@@ -282,14 +302,14 @@
       {
         "arm": "ClaimAtom:order_book",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 5
         },
-        "core_emitted_entries": 8,
+        "core_emitted_entries": 9,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -744,6 +764,16 @@
         ]
       },
       {
+        "arm": "ContractCodeEntryExt:v0",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
+        ]
+      },
+      {
         "arm": "ContractCodeEntryExt:v1",
         "by_source_class": {
           "core-golden": 3,
@@ -759,12 +789,12 @@
       {
         "arm": "ContractEventBody:v0",
         "by_source_class": {
-          "core-golden": 29,
+          "core-golden": 38,
           "local-core": 225,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 263,
+        "core_emitted_entries": 272,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -840,11 +870,11 @@
       {
         "arm": "CreateAccountResult:success",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-meta",
           "cap38.liquidity-pools.testnet-5521432",
@@ -886,16 +916,46 @@
         ]
       },
       {
+        "arm": "EndSponsoringFutureReservesResult:not_sponsored",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
+        ]
+      },
+      {
         "arm": "EndSponsoringFutureReservesResult:success",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 6
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48",
-          "cap33.sponsorship.p30-sponsored-account-meta"
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
+          "cap33.sponsorship.golden-6f067a349543093a-48"
+        ]
+      },
+      {
+        "arm": "ExtendFootprintTtlResult:insufficient_refundable_fee",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-568d51258ccf9080-9"
+        ]
+      },
+      {
+        "arm": "ExtendFootprintTtlResult:resource_limit_exceeded",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-8299635e181e651c-11"
         ]
       },
       {
@@ -914,12 +974,12 @@
       {
         "arm": "ExtensionPoint:v0",
         "by_source_class": {
-          "core-golden": 77,
+          "core-golden": 91,
           "local-core": 252,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 338,
+        "core_emitted_entries": 352,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -957,11 +1017,11 @@
       {
         "arm": "GeneralizedTransactionSet:v1",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 104,
           "local-core": 178,
           "testnet-history": 3
         },
-        "core_emitted_entries": 271,
+        "core_emitted_entries": 285,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -997,12 +1057,12 @@
       {
         "arm": "HostFunction:invoke_contract",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 24,
           "local-core": 58,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 82,
+        "core_emitted_entries": 87,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1012,14 +1072,14 @@
       {
         "arm": "HostFunction:upload_contract_wasm",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 7,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap67.unified-events.golden-60000be2e73a4207-10",
-          "soroban.events-max.golden-a8df5d4dbdc85ac8-1"
+          "classic.failed-tx.golden-8e3126c525875c96-10"
         ]
       },
       {
@@ -1074,6 +1134,26 @@
         ]
       },
       {
+        "arm": "InvokeHostFunctionResult:entry_archived",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap66.archival.golden-04667ce620bffee7-23"
+        ]
+      },
+      {
+        "arm": "InvokeHostFunctionResult:insufficient_refundable_fee",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-e14cf5fee65b0fed-7"
+        ]
+      },
+      {
         "arm": "InvokeHostFunctionResult:resource_limit_exceeded",
         "by_source_class": {
           "core-golden": 1,
@@ -1089,12 +1169,12 @@
       {
         "arm": "InvokeHostFunctionResult:success",
         "by_source_class": {
-          "core-golden": 16,
+          "core-golden": 17,
           "local-core": 50,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 71,
+        "core_emitted_entries": 72,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1104,11 +1184,11 @@
       {
         "arm": "InvokeHostFunctionResult:trapped",
         "by_source_class": {
-          "core-golden": 10,
+          "core-golden": 12,
           "local-core": 14,
           "testnet-history": 1
         },
-        "core_emitted_entries": 25,
+        "core_emitted_entries": 27,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap67.unified-events.golden-938fb779c48ac3af-16",
@@ -1129,10 +1209,10 @@
       {
         "arm": "LedgerCloseMeta:v1",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 8,
           "local-core": 34
         },
-        "core_emitted_entries": 40,
+        "core_emitted_entries": 42,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-5",
@@ -1142,11 +1222,11 @@
       {
         "arm": "LedgerCloseMeta:v2",
         "by_source_class": {
-          "core-golden": 84,
+          "core-golden": 96,
           "local-core": 144,
           "testnet-history": 3
         },
-        "core_emitted_entries": 231,
+        "core_emitted_entries": 243,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1156,10 +1236,10 @@
       {
         "arm": "LedgerCloseMetaExt:v0",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 104,
           "local-core": 178
         },
-        "core_emitted_entries": 268,
+        "core_emitted_entries": 282,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1181,12 +1261,12 @@
       {
         "arm": "LedgerEntryChange:created",
         "by_source_class": {
-          "core-golden": 25,
+          "core-golden": 27,
           "local-core": 47,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 76,
+        "core_emitted_entries": 78,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
           "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
@@ -1196,15 +1276,15 @@
       {
         "arm": "LedgerEntryChange:removed",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 5,
           "local-core": 17,
           "testnet-history": 1
         },
-        "core_emitted_entries": 21,
+        "core_emitted_entries": 23,
         "examples": [
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -1223,12 +1303,12 @@
       {
         "arm": "LedgerEntryChange:state",
         "by_source_class": {
-          "core-golden": 85,
+          "core-golden": 99,
           "local-core": 247,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 341,
+        "core_emitted_entries": 355,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1238,12 +1318,12 @@
       {
         "arm": "LedgerEntryChange:updated",
         "by_source_class": {
-          "core-golden": 85,
+          "core-golden": 99,
           "local-core": 247,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 341,
+        "core_emitted_entries": 355,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1253,12 +1333,12 @@
       {
         "arm": "LedgerEntryData:account",
         "by_source_class": {
-          "core-golden": 77,
+          "core-golden": 91,
           "local-core": 247,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 333,
+        "core_emitted_entries": 347,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1294,14 +1374,14 @@
       {
         "arm": "LedgerEntryData:contract_code",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 4
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
           "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
-          "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
-          "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1"
+          "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
+          "soroban.invoke-basics.golden-7b59aa36c1776fe1-32"
         ]
       },
       {
@@ -1346,10 +1426,10 @@
       {
         "arm": "LedgerEntryData:offer",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 11
         },
-        "core_emitted_entries": 16,
+        "core_emitted_entries": 17,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -1359,27 +1439,27 @@
       {
         "arm": "LedgerEntryData:trustline",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 9,
           "local-core": 67,
           "mainnet-history": 3,
           "testnet-history": 1
         },
-        "core_emitted_entries": 79,
+        "core_emitted_entries": 80,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
         "arm": "LedgerEntryData:ttl",
         "by_source_class": {
-          "core-golden": 21,
+          "core-golden": 22,
           "local-core": 39,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 64,
+        "core_emitted_entries": 65,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1389,12 +1469,12 @@
       {
         "arm": "LedgerEntryExt:v0",
         "by_source_class": {
-          "core-golden": 86,
+          "core-golden": 100,
           "local-core": 260,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 355,
+        "core_emitted_entries": 369,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1432,11 +1512,11 @@
       {
         "arm": "LedgerHeaderExt:v0",
         "by_source_class": {
-          "core-golden": 92,
+          "core-golden": 106,
           "local-core": 178,
           "testnet-history": 3
         },
-        "core_emitted_entries": 273,
+        "core_emitted_entries": 287,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1446,11 +1526,11 @@
       {
         "arm": "LedgerHeaderHistoryEntryExt:v0",
         "by_source_class": {
-          "core-golden": 92,
+          "core-golden": 106,
           "local-core": 178,
           "testnet-history": 3
         },
-        "core_emitted_entries": 273,
+        "core_emitted_entries": 287,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1460,12 +1540,12 @@
       {
         "arm": "LedgerKey:account",
         "by_source_class": {
-          "core-golden": 9,
+          "core-golden": 11,
           "local-core": 26,
           "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 37,
+        "core_emitted_entries": 39,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
@@ -1487,12 +1567,12 @@
       {
         "arm": "LedgerKey:contract_code",
         "by_source_class": {
-          "core-golden": 27,
+          "core-golden": 34,
           "local-core": 54,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 86,
+        "core_emitted_entries": 93,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -1502,12 +1582,12 @@
       {
         "arm": "LedgerKey:contract_data",
         "by_source_class": {
-          "core-golden": 38,
+          "core-golden": 45,
           "local-core": 76,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 119,
+        "core_emitted_entries": 126,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1527,14 +1607,14 @@
       {
         "arm": "LedgerKey:offer",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 3
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 6,
         "examples": [
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -1717,14 +1797,14 @@
       {
         "arm": "ManageOfferSuccessResultOffer:deleted",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 2
         },
-        "core_emitted_entries": 4,
+        "core_emitted_entries": 5,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -1740,14 +1820,14 @@
       {
         "arm": "ManageSellOfferResult:success",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 5
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p30-credit-pair-cross-partial"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -1779,12 +1859,12 @@
       {
         "arm": "Memo:none",
         "by_source_class": {
-          "core-golden": 77,
+          "core-golden": 91,
           "local-core": 216,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 302,
+        "core_emitted_entries": 316,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1821,12 +1901,12 @@
       {
         "arm": "MuxedAccount:ed25519",
         "by_source_class": {
-          "core-golden": 76,
+          "core-golden": 90,
           "local-core": 229,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 313,
+        "core_emitted_entries": 327,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1849,10 +1929,10 @@
       {
         "arm": "OfferEntryExt:v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 11
         },
-        "core_emitted_entries": 16,
+        "core_emitted_entries": 17,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -1862,10 +1942,10 @@
       {
         "arm": "OperationBody:account_merge",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 8
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 11,
         "examples": [
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-envelope",
           "cap01.bump-sequence.p30-merge-seqnum-too-far",
@@ -1889,14 +1969,14 @@
       {
         "arm": "OperationBody:begin_sponsoring_future_reserves",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 6,
           "local-core": 6
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 12,
         "examples": [
+          "cap33.sponsorship.golden-16ca002da0d1fd67-1",
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-24cec2c5f1acf638-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48"
+          "cap33.sponsorship.golden-24cec2c5f1acf638-1"
         ]
       },
       {
@@ -1967,11 +2047,11 @@
       {
         "arm": "OperationBody:create_account",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-envelope",
           "cap38.liquidity-pools.testnet-5521432",
@@ -1993,40 +2073,50 @@
         ]
       },
       {
+        "arm": "OperationBody:create_passive_sell_offer",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
+        ]
+      },
+      {
         "arm": "OperationBody:end_sponsoring_future_reserves",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 6
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48",
-          "cap33.sponsorship.p30-sponsored-account-envelope"
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
+          "cap33.sponsorship.golden-6f067a349543093a-48"
         ]
       },
       {
         "arm": "OperationBody:extend_footprint_ttl",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 6,
           "local-core": 4
         },
-        "core_emitted_entries": 8,
+        "core_emitted_entries": 10,
         "examples": [
           "cap63.parallel-txset.golden-04667ce620bffee7-24",
           "soroban.invoke-basics.golden-04667ce620bffee7-24",
-          "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32"
+          "soroban.invoke-basics.golden-568d51258ccf9080-9"
         ]
       },
       {
         "arm": "OperationBody:invoke_host_function",
         "by_source_class": {
-          "core-golden": 29,
+          "core-golden": 36,
           "local-core": 67,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 101,
+        "core_emitted_entries": 108,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -2141,10 +2231,10 @@
       {
         "arm": "OperationBody:restore_footprint",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 9,
           "local-core": 5
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 14,
         "examples": [
           "cap66.archival.golden-04667ce620bffee7-26",
           "cap66.archival.p30-restore-footprint",
@@ -2166,11 +2256,11 @@
       {
         "arm": "OperationBody:set_options",
         "by_source_class": {
-          "core-golden": 7,
+          "core-golden": 8,
           "local-core": 13,
           "testnet-history": 1
         },
-        "core_emitted_entries": 21,
+        "core_emitted_entries": 22,
         "examples": [
           "cap33.sponsorship.golden-6f067a349543093a-48",
           "cap33.sponsorship.p30-sponsored-signer-envelope",
@@ -2193,12 +2283,12 @@
       {
         "arm": "OperationResult:op_inner",
         "by_source_class": {
-          "core-golden": 76,
+          "core-golden": 90,
           "local-core": 242,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 327,
+        "core_emitted_entries": 341,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2228,10 +2318,10 @@
       {
         "arm": "OperationResultTr:account_merge",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 8
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 11,
         "examples": [
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
           "cap01.bump-sequence.p30-merge-seqnum-too-far",
@@ -2255,14 +2345,14 @@
       {
         "arm": "OperationResultTr:begin_sponsoring_future_reserves",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 5,
           "local-core": 6
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 11,
         "examples": [
+          "cap33.sponsorship.golden-16ca002da0d1fd67-1",
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48",
-          "cap33.sponsorship.p30-sponsored-account-meta"
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
         ]
       },
       {
@@ -2333,11 +2423,11 @@
       {
         "arm": "OperationResultTr:create_account",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-meta",
           "cap38.liquidity-pools.testnet-5521432",
@@ -2361,38 +2451,38 @@
       {
         "arm": "OperationResultTr:end_sponsoring_future_reserves",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 6
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
-          "cap33.sponsorship.golden-6f067a349543093a-48",
-          "cap33.sponsorship.p30-sponsored-account-meta"
+          "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
+          "cap33.sponsorship.golden-6f067a349543093a-48"
         ]
       },
       {
         "arm": "OperationResultTr:extend_footprint_ttl",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 6,
           "local-core": 4
         },
-        "core_emitted_entries": 8,
+        "core_emitted_entries": 10,
         "examples": [
           "cap63.parallel-txset.golden-04667ce620bffee7-24",
           "soroban.invoke-basics.golden-04667ce620bffee7-24",
-          "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32"
+          "soroban.invoke-basics.golden-568d51258ccf9080-9"
         ]
       },
       {
         "arm": "OperationResultTr:invoke_host_function",
         "by_source_class": {
-          "core-golden": 27,
+          "core-golden": 32,
           "local-core": 67,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 99,
+        "core_emitted_entries": 104,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -2451,14 +2541,14 @@
       {
         "arm": "OperationResultTr:manage_sell_offer",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 3,
           "local-core": 5
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p30-credit-pair-cross-partial"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -2505,10 +2595,10 @@
       {
         "arm": "OperationResultTr:restore_footprint",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 9,
           "local-core": 5
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 14,
         "examples": [
           "cap66.archival.golden-04667ce620bffee7-26",
           "cap66.archival.p30-restore-footprint",
@@ -2530,11 +2620,11 @@
       {
         "arm": "OperationResultTr:set_options",
         "by_source_class": {
-          "core-golden": 7,
+          "core-golden": 8,
           "local-core": 13,
           "testnet-history": 1
         },
-        "core_emitted_entries": 21,
+        "core_emitted_entries": 22,
         "examples": [
           "cap33.sponsorship.golden-6f067a349543093a-48",
           "cap33.sponsorship.p30-sponsored-signer-meta",
@@ -2631,11 +2721,11 @@
       {
         "arm": "Preconditions:none",
         "by_source_class": {
-          "core-golden": 75,
+          "core-golden": 89,
           "local-core": 234,
           "testnet-history": 1
         },
-        "core_emitted_entries": 310,
+        "core_emitted_entries": 324,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2672,16 +2762,26 @@
       {
         "arm": "PublicKey:public_key_type_ed25519",
         "by_source_class": {
-          "core-golden": 92,
+          "core-golden": 106,
           "local-core": 281,
           "mainnet-history": 12,
           "testnet-history": 3
         },
-        "core_emitted_entries": 388,
+        "core_emitted_entries": 402,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward"
+        ]
+      },
+      {
+        "arm": "RestoreFootprintResult:insufficient_refundable_fee",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-d8e7a355b968f3df-28"
         ]
       },
       {
@@ -2744,12 +2844,12 @@
       {
         "arm": "ScAddress:account",
         "by_source_class": {
-          "core-golden": 16,
+          "core-golden": 19,
           "local-core": 234,
           "mainnet-history": 8,
           "testnet-history": 3
         },
-        "core_emitted_entries": 261,
+        "core_emitted_entries": 264,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -2772,12 +2872,12 @@
       {
         "arm": "ScAddress:contract",
         "by_source_class": {
-          "core-golden": 38,
+          "core-golden": 45,
           "local-core": 98,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 143,
+        "core_emitted_entries": 150,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -2824,14 +2924,26 @@
         ]
       },
       {
-        "arm": "ScError:budget",
+        "arm": "ScError:auth",
         "by_source_class": {
           "core-golden": 2
         },
         "core_emitted_entries": 2,
         "examples": [
+          "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+          "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
+        ]
+      },
+      {
+        "arm": "ScError:budget",
+        "by_source_class": {
+          "core-golden": 6
+        },
+        "core_emitted_entries": 6,
+        "examples": [
           "cap66.archival.golden-9b704e753d572789-23",
-          "soroban.scval-shapes.golden-8299635e181e651c-27"
+          "soroban.invoke-basics.golden-568d51258ccf9080-9",
+          "soroban.invoke-basics.golden-8299635e181e651c-11"
         ]
       },
       {
@@ -2854,6 +2966,16 @@
           "soroban.scval-shapes.p30-map-keys-collide-native-meta",
           "soroban.scval-shapes.p30-map-mixed-keys-sorted-envelope",
           "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta"
+        ]
+      },
+      {
+        "arm": "ScError:crypto",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
         ]
       },
       {
@@ -2880,13 +3002,13 @@
       {
         "arm": "ScError:value",
         "by_source_class": {
-          "core-golden": 5
+          "core-golden": 6
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 6,
         "examples": [
+          "cap66.archival.golden-04667ce620bffee7-23",
           "cap71.credentials.golden-e25799a2e2e9eea2-17",
-          "cap84.muxed-contract.golden-7f92354d03578deb-11",
-          "soroban.auth-trees.golden-57a486abce28859d-17"
+          "cap84.muxed-contract.golden-7f92354d03578deb-11"
         ]
       },
       {
@@ -2903,12 +3025,12 @@
       {
         "arm": "ScVal:address",
         "by_source_class": {
-          "core-golden": 23,
+          "core-golden": 28,
           "local-core": 234,
           "mainnet-history": 8,
           "testnet-history": 3
         },
-        "core_emitted_entries": 268,
+        "core_emitted_entries": 273,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -2918,12 +3040,12 @@
       {
         "arm": "ScVal:bool",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 8,
           "local-core": 24,
           "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 35,
+        "core_emitted_entries": 37,
         "examples": [
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
           "cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4",
@@ -2933,12 +3055,12 @@
       {
         "arm": "ScVal:bytes",
         "by_source_class": {
-          "core-golden": 18,
+          "core-golden": 22,
           "local-core": 40,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 64,
+        "core_emitted_entries": 68,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -2975,15 +3097,15 @@
       {
         "arm": "ScVal:error",
         "by_source_class": {
-          "core-golden": 12,
+          "core-golden": 19,
           "local-core": 4,
           "testnet-history": 1
         },
-        "core_emitted_entries": 17,
+        "core_emitted_entries": 24,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
-          "cap66.archival.golden-9b704e753d572789-23",
-          "cap67.unified-events.golden-938fb779c48ac3af-16"
+          "cap66.archival.golden-04667ce620bffee7-23",
+          "cap66.archival.golden-9b704e753d572789-23"
         ]
       },
       {
@@ -3001,12 +3123,12 @@
       {
         "arm": "ScVal:i128",
         "by_source_class": {
-          "core-golden": 11,
+          "core-golden": 13,
           "local-core": 230,
           "mainnet-history": 8,
           "testnet-history": 3
         },
-        "core_emitted_entries": 252,
+        "core_emitted_entries": 254,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -3029,14 +3151,15 @@
       {
         "arm": "ScVal:i32",
         "by_source_class": {
+          "core-golden": 1,
           "local-core": 8,
           "testnet-history": 1
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
-          "soroban.scval-shapes.p30-integer-extremes-envelope",
-          "soroban.scval-shapes.p30-integer-extremes-meta"
+          "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
+          "soroban.scval-shapes.p30-integer-extremes-envelope"
         ]
       },
       {
@@ -3055,12 +3178,12 @@
       {
         "arm": "ScVal:ledger_key_contract_instance",
         "by_source_class": {
-          "core-golden": 28,
+          "core-golden": 33,
           "local-core": 84,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 119,
+        "core_emitted_entries": 124,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3070,10 +3193,10 @@
       {
         "arm": "ScVal:ledger_key_nonce",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 5,
           "local-core": 12
         },
-        "core_emitted_entries": 16,
+        "core_emitted_entries": 17,
         "examples": [
           "cap71.credentials.golden-e25799a2e2e9eea2-17",
           "cap71.credentials.p30-address-v2",
@@ -3083,12 +3206,12 @@
       {
         "arm": "ScVal:map",
         "by_source_class": {
-          "core-golden": 10,
+          "core-golden": 12,
           "local-core": 83,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 99,
+        "core_emitted_entries": 101,
         "examples": [
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
           "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
@@ -3098,12 +3221,12 @@
       {
         "arm": "ScVal:string",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 15,
           "local-core": 137,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 150,
+        "core_emitted_entries": 157,
         "examples": [
           "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
           "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -3113,12 +3236,12 @@
       {
         "arm": "ScVal:symbol",
         "by_source_class": {
-          "core-golden": 39,
+          "core-golden": 48,
           "local-core": 238,
           "mainnet-history": 8,
           "testnet-history": 3
         },
-        "core_emitted_entries": 288,
+        "core_emitted_entries": 297,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -3182,12 +3305,12 @@
       {
         "arm": "ScVal:u64",
         "by_source_class": {
-          "core-golden": 26,
+          "core-golden": 34,
           "local-core": 47,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 78,
+        "core_emitted_entries": 86,
         "examples": [
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
           "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
@@ -3197,12 +3320,12 @@
       {
         "arm": "ScVal:vec",
         "by_source_class": {
-          "core-golden": 17,
+          "core-golden": 24,
           "local-core": 41,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 65,
+        "core_emitted_entries": 72,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3212,12 +3335,12 @@
       {
         "arm": "ScVal:void",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 21,
           "local-core": 31,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 55,
+        "core_emitted_entries": 57,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3227,11 +3350,11 @@
       {
         "arm": "SetOptionsResult:success",
         "by_source_class": {
-          "core-golden": 7,
+          "core-golden": 8,
           "local-core": 13,
           "testnet-history": 1
         },
-        "core_emitted_entries": 21,
+        "core_emitted_entries": 22,
         "examples": [
           "cap33.sponsorship.golden-6f067a349543093a-48",
           "cap33.sponsorship.p30-sponsored-signer-meta",
@@ -3304,12 +3427,12 @@
       {
         "arm": "SorobanAuthorizedFunction:contract_fn",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 10,
           "local-core": 29,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 42,
+        "core_emitted_entries": 44,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3358,10 +3481,10 @@
       {
         "arm": "SorobanCredentials:address_v2",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 4,
           "local-core": 1
         },
-        "core_emitted_entries": 4,
+        "core_emitted_entries": 5,
         "examples": [
           "cap71.credentials.golden-e25799a2e2e9eea2-17",
           "cap71.credentials.p30-address-v2",
@@ -3382,12 +3505,12 @@
       {
         "arm": "SorobanCredentials:source_account",
         "by_source_class": {
-          "core-golden": 9,
+          "core-golden": 10,
           "local-core": 22,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 36,
+        "core_emitted_entries": 37,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3397,12 +3520,12 @@
       {
         "arm": "SorobanTransactionDataExt:v0",
         "by_source_class": {
-          "core-golden": 40,
+          "core-golden": 50,
           "local-core": 75,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 120,
+        "core_emitted_entries": 130,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -3424,10 +3547,10 @@
       {
         "arm": "SorobanTransactionMetaExt:v0",
         "by_source_class": {
-          "core-golden": 27,
+          "core-golden": 28,
           "local-core": 59
         },
-        "core_emitted_entries": 86,
+        "core_emitted_entries": 87,
         "examples": [
           "cap63.parallel-txset.golden-04667ce620bffee7-24",
           "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
@@ -3450,11 +3573,11 @@
       {
         "arm": "StellarValueExt:signed",
         "by_source_class": {
-          "core-golden": 12,
+          "core-golden": 14,
           "local-core": 51,
           "testnet-history": 2
         },
-        "core_emitted_entries": 65,
+        "core_emitted_entries": 67,
         "examples": [
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
           "cap27.muxed-accounts.p28-clawback-from-id-2p64-1",
@@ -3464,11 +3587,11 @@
       {
         "arm": "StellarValueExt:signed_ms",
         "by_source_class": {
-          "core-golden": 80,
+          "core-golden": 92,
           "local-core": 127,
           "testnet-history": 1
         },
-        "core_emitted_entries": 208,
+        "core_emitted_entries": 220,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3478,12 +3601,12 @@
       {
         "arm": "TransactionEnvelope:tx",
         "by_source_class": {
-          "core-golden": 75,
+          "core-golden": 89,
           "local-core": 237,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 318,
+        "core_emitted_entries": 332,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3517,12 +3640,12 @@
       {
         "arm": "TransactionExt:v0",
         "by_source_class": {
-          "core-golden": 37,
+          "core-golden": 43,
           "local-core": 167,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 211,
+        "core_emitted_entries": 217,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3532,12 +3655,12 @@
       {
         "arm": "TransactionExt:v1",
         "by_source_class": {
-          "core-golden": 41,
+          "core-golden": 51,
           "local-core": 76,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 122,
+        "core_emitted_entries": 132,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -3557,25 +3680,25 @@
       {
         "arm": "TransactionMeta:v3",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 3,
           "local-core": 17
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 20,
         "examples": [
+          "cap67.unified-events.golden-27003f6cc5cdecc2-1",
           "cap67.unified-events.p22-account-merge-muxed-destination",
-          "cap67.unified-events.p22-claim-claimable-balance",
-          "cap67.unified-events.p22-clawback"
+          "cap67.unified-events.p22-claim-claimable-balance"
         ]
       },
       {
         "arm": "TransactionMeta:v4",
         "by_source_class": {
-          "core-golden": 75,
+          "core-golden": 87,
           "local-core": 225,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 309,
+        "core_emitted_entries": 321,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3585,11 +3708,11 @@
       {
         "arm": "TransactionPhase:v0",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 104,
           "local-core": 178,
           "testnet-history": 3
         },
-        "core_emitted_entries": 271,
+        "core_emitted_entries": 285,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3599,11 +3722,11 @@
       {
         "arm": "TransactionPhase:v1",
         "by_source_class": {
-          "core-golden": 84,
+          "core-golden": 96,
           "local-core": 144,
           "testnet-history": 3
         },
-        "core_emitted_entries": 231,
+        "core_emitted_entries": 243,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3613,16 +3736,26 @@
       {
         "arm": "TransactionResultExt:v0",
         "by_source_class": {
-          "core-golden": 77,
+          "core-golden": 91,
           "local-core": 242,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 328,
+        "core_emitted_entries": 342,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward"
+        ]
+      },
+      {
+        "arm": "TransactionResultResult:tx_bad_auth",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.golden-8e3126c525875c96-10"
         ]
       },
       {
@@ -3648,12 +3781,12 @@
       {
         "arm": "TransactionResultResult:tx_failed",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 28,
           "local-core": 26,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 49,
+        "core_emitted_entries": 58,
         "examples": [
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
           "cap01.bump-sequence.p30-merge-seqnum-too-far",
@@ -3699,14 +3832,24 @@
         ]
       },
       {
+        "arm": "TransactionResultResult:tx_no_account",
+        "by_source_class": {
+          "core-golden": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.golden-fad872f357f20fe9-12"
+        ]
+      },
+      {
         "arm": "TransactionResultResult:tx_success",
         "by_source_class": {
-          "core-golden": 56,
+          "core-golden": 61,
           "local-core": 211,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 272,
+        "core_emitted_entries": 277,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3740,16 +3883,16 @@
       {
         "arm": "TrustLineAsset:credit_alphanum4",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 9,
           "local-core": 71,
           "mainnet-history": 4,
           "testnet-history": 1
         },
-        "core_emitted_entries": 84,
+        "core_emitted_entries": 85,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -3769,30 +3912,30 @@
       {
         "arm": "TrustLineEntryExt:v0",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 7,
           "local-core": 62,
           "mainnet-history": 3,
           "testnet-history": 1
         },
-        "core_emitted_entries": 72,
+        "core_emitted_entries": 73,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
         "arm": "TrustLineEntryExt:v1",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 7,
           "local-core": 20,
           "testnet-history": 1
         },
-        "core_emitted_entries": 27,
+        "core_emitted_entries": 28,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -3812,14 +3955,14 @@
       {
         "arm": "TrustLineEntryV1Ext:v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 12
         },
-        "core_emitted_entries": 17,
+        "core_emitted_entries": 18,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
+          "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
         ]
       },
       {
@@ -3839,11 +3982,11 @@
       {
         "arm": "TxSetComponent:txset_comp_txs_maybe_discounted_fee",
         "by_source_class": {
-          "core-golden": 38,
+          "core-golden": 45,
           "local-core": 124,
           "testnet-history": 3
         },
-        "core_emitted_entries": 165,
+        "core_emitted_entries": 172,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3964,30 +4107,12 @@
         }
       },
       {
-        "arm": "BeginSponsoringFutureReservesResult:already_sponsored",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "1 core golden ledger hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/16ca002da0d1fd67.xdr record 1"
-        }
-      },
-      {
         "arm": "BeginSponsoringFutureReservesResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
-        }
-      },
-      {
-        "arm": "BeginSponsoringFutureReservesResult:recursive",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "2 core golden ledgers hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/5a03a46b7b48bb06.xdr record 2"
         }
       },
       {
@@ -4202,15 +4327,6 @@
         }
       },
       {
-        "arm": "ContractCodeEntryExt:v0",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "8 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 11; soroban-env-host 30.0.0 upload_contract_wasm always writes V1 (src/host/lifecycle.rs)"
-        }
-      },
-      {
         "arm": "CreateAccountResult:already_exist",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -4285,39 +4401,12 @@
         }
       },
       {
-        "arm": "EndSponsoringFutureReservesResult:not_sponsored",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "2 core golden ledgers hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/5a03a46b7b48bb06.xdr record 2"
-        }
-      },
-      {
-        "arm": "ExtendFootprintTtlResult:insufficient_refundable_fee",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "1 core golden ledger hold it, the first test-lcm-current/InvokeHostFunctionTests/568d51258ccf9080.xdr record 9"
-        }
-      },
-      {
         "arm": "ExtendFootprintTtlResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions"
-        }
-      },
-      {
-        "arm": "ExtendFootprintTtlResult:resource_limit_exceeded",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "2 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/140652bdfd74f633.xdr record 14"
         }
       },
       {
@@ -4471,24 +4560,6 @@
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "HerderSCPDriver::validateValue checks the tx set at the close time of the value being voted on (stellar-core v30.0.0), so every transaction in an externalized set meets its time and ledger bounds at apply"
-        }
-      },
-      {
-        "arm": "InvokeHostFunctionResult:entry_archived",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "128 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/04667ce620bffee7.xdr record 22"
-        }
-      },
-      {
-        "arm": "InvokeHostFunctionResult:insufficient_refundable_fee",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "15 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/19f50bd55f924432.xdr record 31"
         }
       },
       {
@@ -4933,15 +5004,6 @@
         }
       },
       {
-        "arm": "OperationBody:create_passive_sell_offer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "18 core golden ledgers hold it, the first test-lcm-current/FrozenLedgerKeysTests/12c04cf739c52eac.xdr record 20"
-        }
-      },
-      {
         "arm": "OperationBody:inflation",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -5275,15 +5337,6 @@
         }
       },
       {
-        "arm": "RestoreFootprintResult:insufficient_refundable_fee",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "5 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/19f50bd55f924432.xdr record 31"
-        }
-      },
-      {
         "arm": "RestoreFootprintResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -5335,24 +5388,6 @@
         "uncovered": {
           "blocker": "recipe-gap",
           "reason": "set at apply by RevokeSponsorshipOpFrame updateLedgerEntrySponsorship, updateSignerSponsorship and processSponsorshipResult (stellar-core v30.0.0)"
-        }
-      },
-      {
-        "arm": "ScError:auth",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "166 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/002cd42f82ef4c1b.xdr record 17"
-        }
-      },
-      {
-        "arm": "ScError:crypto",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "17 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/002cd42f82ef4c1b.xdr record 17"
         }
       },
       {
@@ -5600,15 +5635,6 @@
         }
       },
       {
-        "arm": "TransactionResultResult:tx_bad_auth",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "3 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/8e3126c525875c96.xdr record 10"
-        }
-      },
-      {
         "arm": "TransactionResultResult:tx_bad_auth_extra",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -5675,15 +5701,6 @@
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set"
-        }
-      },
-      {
-        "arm": "TransactionResultResult:tx_no_account",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "not-imported",
-          "reason": "3 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/09beaf24eb0cdcb0.xdr record 11"
         }
       },
       {
@@ -5767,15 +5784,15 @@
       "title": "Bump Sequence"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 10,
+      "entries": 10,
       "entries_by_source_class": {
-        "core-golden": 2,
+        "core-golden": 4,
         "local-core": 4,
         "mainnet-history": 2
       },
       "entries_by_variant": {
-        "any": 2,
+        "any": 4,
         "mainnet": 6,
         "testnet": 4
       },
@@ -5797,15 +5814,15 @@
       "title": "Transaction level signature verification"
     },
     {
-      "core_emitted_entries": 17,
-      "entries": 21,
+      "core_emitted_entries": 18,
+      "entries": 22,
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 6,
         "local-core": 12,
         "synthetic": 4
       },
       "entries_by_variant": {
-        "any": 6,
+        "any": 7,
         "mainnet": 12,
         "testnet": 12,
         "vector": 3
@@ -5856,15 +5873,15 @@
       "title": "Throttling and transaction pricing improvements"
     },
     {
-      "core_emitted_entries": 17,
-      "entries": 21,
+      "core_emitted_entries": 18,
+      "entries": 22,
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 6,
         "local-core": 12,
         "synthetic": 4
       },
       "entries_by_variant": {
-        "any": 6,
+        "any": 7,
         "mainnet": 12,
         "testnet": 12,
         "vector": 3
@@ -6300,15 +6317,15 @@
       "title": "First-class multiplexed accounts"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 10,
+      "entries": 10,
       "entries_by_source_class": {
-        "core-golden": 2,
+        "core-golden": 4,
         "local-core": 4,
         "mainnet-history": 2
       },
       "entries_by_variant": {
-        "any": 2,
+        "any": 4,
         "mainnet": 6,
         "testnet": 4
       },
@@ -6388,14 +6405,14 @@
       "title": "Trustline Preauthorization"
     },
     {
-      "core_emitted_entries": 20,
-      "entries": 20,
+      "core_emitted_entries": 22,
+      "entries": 22,
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 7,
         "local-core": 15
       },
       "entries_by_variant": {
-        "any": 5,
+        "any": 7,
         "mainnet": 15,
         "testnet": 15
       },
@@ -6647,15 +6664,15 @@
       "title": "SPEEDEX - Pricing"
     },
     {
-      "core_emitted_entries": 40,
-      "entries": 45,
+      "core_emitted_entries": 47,
+      "entries": 52,
       "entries_by_source_class": {
-        "core-golden": 15,
+        "core-golden": 22,
         "local-core": 27,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 16,
+        "any": 23,
         "mainnet": 27,
         "testnet": 27,
         "vector": 2
@@ -6668,10 +6685,12 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         28,
         30
       ],
       "protocols_core_emitted": [
+        20,
         28,
         30
       ],
@@ -6713,15 +6732,15 @@
       "title": "Soroban Runtime Environment"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6733,9 +6752,11 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -6757,15 +6778,15 @@
       "title": "Smart Contract Host Functions"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6777,9 +6798,11 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -6819,15 +6842,15 @@
       "title": "Smart Contract Standardized Asset (Stellar Asset Contract)"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6839,24 +6862,26 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
       "title": "Fee and resource model in smart contracts"
     },
     {
-      "core_emitted_entries": 40,
-      "entries": 43,
+      "core_emitted_entries": 47,
+      "entries": 50,
       "entries_by_source_class": {
-        "core-golden": 17,
+        "core-golden": 24,
         "local-core": 23,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 18,
+        "any": 25,
         "mainnet": 23,
         "testnet": 23,
         "vector": 2
@@ -6869,9 +6894,11 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -6966,15 +6993,15 @@
       "title": "Soroban Authorization Framework"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6986,9 +7013,11 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -7081,15 +7110,15 @@
       "title": "Separate host functions to extend the TTL for contract instance and contract code"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7101,9 +7130,11 @@
       "indexer_visible": true,
       "protocol": 21,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -7155,15 +7186,15 @@
       "title": "State Archival Persistent Entry Eviction"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 35,
+      "core_emitted_entries": 39,
+      "entries": 42,
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 14,
+        "any": 21,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7175,9 +7206,11 @@
       "indexer_visible": true,
       "protocol": 22,
       "protocols_all": [
+        20,
         30
       ],
       "protocols_core_emitted": [
+        20,
         30
       ],
       "status": "Final",
@@ -7228,14 +7261,14 @@
       "title": "Smart Contract Standardized Asset (Stellar Asset Contract) Extension: Memo"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 9,
+      "entries": 9,
       "entries_by_source_class": {
-        "core-golden": 3,
+        "core-golden": 4,
         "local-core": 5
       },
       "entries_by_variant": {
-        "any": 3,
+        "any": 4,
         "mainnet": 5,
         "testnet": 5
       },
@@ -7313,14 +7346,14 @@
       "title": "Reusable module cache"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 9,
+      "entries": 9,
       "entries_by_source_class": {
-        "core-golden": 3,
+        "core-golden": 4,
         "local-core": 5
       },
       "entries_by_variant": {
-        "any": 3,
+        "any": 4,
         "mainnet": 5,
         "testnet": 5
       },
@@ -7340,15 +7373,15 @@
       "title": "Soroban In-memory Read Resource"
     },
     {
-      "core_emitted_entries": 68,
-      "entries": 69,
+      "core_emitted_entries": 69,
+      "entries": 70,
       "entries_by_source_class": {
-        "core-golden": 9,
+        "core-golden": 10,
         "local-core": 59,
         "synthetic": 1
       },
       "entries_by_variant": {
-        "any": 10,
+        "any": 11,
         "mainnet": 59,
         "testnet": 59
       },
@@ -7360,11 +7393,13 @@
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
+        20,
         22,
         28,
         30
       ],
       "protocols_core_emitted": [
+        20,
         22,
         28,
         30
@@ -8292,6 +8327,8 @@
           "core_emitted": [
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-extend-ttl-envelope",
             "soroban.muxed-source.golden-04667ce620bffee7-24",
@@ -8312,6 +8349,7 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.p30-restore-archived-instance-and-code-envelope",
             "soroban.muxed-source.golden-e55ad2d584383867-44",
@@ -8505,6 +8543,7 @@
             "cap40.signed-payload-signer.testnet-4437357",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-envelope",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
@@ -8541,6 +8580,8 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-envelope",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
@@ -8574,11 +8615,15 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
             "soroban.invoke-basics.p30-create-contract-v1-envelope",
             "soroban.invoke-basics.p30-create-contract-v2-constructor-envelope",
@@ -8634,6 +8679,7 @@
             "cap33.sponsorship.p30-sponsored-account-meta",
             "cap38.liquidity-pools.testnet-5521432",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0",
             "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
             "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
@@ -8680,6 +8726,7 @@
             "cap85.executable-tag.p30-create-external-ref-envelope",
             "cap85.executable-tag.p30-create-external-ref-missing-tag",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
             "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
             "sep41.muxed-addresses.p28-xlm-transfer-to-muxed",
@@ -9005,6 +9052,8 @@
             "soroban.auth-trees.p30-unmatched-create-success",
             "soroban.events-max.golden-692fdd0e57531ce4-25",
             "soroban.events-max.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
@@ -9147,6 +9196,8 @@
             "soroban.auth-trees.p30-unmatched-create-success",
             "soroban.events-max.golden-692fdd0e57531ce4-25",
             "soroban.events-max.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
@@ -9366,6 +9417,8 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -9571,6 +9624,7 @@
             "cap40.signed-payload-signer.p30-authorised-by-payload-32",
             "cap40.signed-payload-signer.p30-extra-signer-payload-64-meta",
             "cap40.signed-payload-signer.testnet-4437357",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
@@ -9653,6 +9707,12 @@
             "sep41.muxed-addresses.p30-credit-transfer-to-muxed",
             "sep41.muxed-addresses.p30-xlm-transfer-to-muxed",
             "soroban.events-max.golden-692fdd0e57531ce4-25",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
@@ -9766,6 +9826,7 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-envelope",
@@ -9847,6 +9908,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -9909,11 +9971,18 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
             "soroban.invoke-basics.p30-create-contract-v1-meta",
@@ -10023,9 +10092,13 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
             "soroban.invoke-basics.p30-failed-trapped-envelope",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -10234,7 +10307,7 @@
         "CAP-0067"
       ],
       "entries_by_source_class": {
-        "core-golden": 8,
+        "core-golden": 9,
         "local-core": 53,
         "synthetic": 1
       },
@@ -10251,6 +10324,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
@@ -10308,10 +10382,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
             "cap33.sponsorship.p30-revoke-trustline-sponsorship-meta",
@@ -10356,6 +10432,7 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
@@ -10440,7 +10517,9 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -10507,13 +10586,19 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
@@ -10716,6 +10801,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -10837,6 +10923,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
             "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
             "sep41.muxed-addresses.p28-xlm-transfer-to-muxed",
@@ -11170,6 +11257,7 @@
         },
         {
           "core_emitted": [
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.p22-account-merge-muxed-destination",
             "cap67.unified-events.p22-claim-claimable-balance",
             "cap67.unified-events.p22-clawback",
@@ -11187,7 +11275,8 @@
             "cap67.unified-events.p22-payment-transfer",
             "cap67.unified-events.p22-set-authorized-false",
             "cap67.unified-events.p22-set-authorized-true",
-            "soroban.auth-trees.golden-27003f6cc5cdecc2-3"
+            "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
           ],
           "covered": true,
           "fragment": "TransactionMeta:v3",
@@ -11307,6 +11396,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -11346,10 +11436,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -11375,6 +11467,7 @@
             "cap63.parallel-txset.golden-41088f6ef87c4e0a-7",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-7b59aa36c1776fe1-31",
             "cap66.archival.golden-9b704e753d572789-23",
@@ -11438,7 +11531,9 @@
             "cap88.ms-close-time.golden-b71da06f9ce2dec8-3",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -11501,7 +11596,11 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
@@ -11509,6 +11608,8 @@
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -11546,6 +11647,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -11585,10 +11687,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -11614,6 +11718,7 @@
             "cap63.parallel-txset.golden-41088f6ef87c4e0a-7",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-7b59aa36c1776fe1-31",
             "cap66.archival.golden-9b704e753d572789-23",
@@ -11677,7 +11782,9 @@
             "cap88.ms-close-time.golden-b71da06f9ce2dec8-3",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -11740,7 +11847,11 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
@@ -11748,6 +11859,8 @@
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -11792,6 +11905,7 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
@@ -11831,6 +11945,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
@@ -11865,13 +11980,19 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
@@ -11953,6 +12074,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -11992,10 +12114,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -12024,6 +12148,7 @@
             "cap63.parallel-txset.golden-41088f6ef87c4e0a-7",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-7b59aa36c1776fe1-31",
             "cap66.archival.golden-9b704e753d572789-23",
@@ -12031,6 +12156,7 @@
             "cap66.archival.p30-evicted-temporary",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -12123,7 +12249,9 @@
             "cap88.ms-close-time.golden-b71da06f9ce2dec8-3",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -12186,8 +12314,13 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
@@ -12195,6 +12328,8 @@
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -12234,6 +12369,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -12273,10 +12409,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -12305,6 +12443,7 @@
             "cap63.parallel-txset.golden-41088f6ef87c4e0a-7",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-7b59aa36c1776fe1-31",
             "cap66.archival.golden-9b704e753d572789-23",
@@ -12312,6 +12451,7 @@
             "cap66.archival.p30-evicted-temporary",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -12404,7 +12544,9 @@
             "cap88.ms-close-time.golden-b71da06f9ce2dec8-3",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -12467,8 +12609,13 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
@@ -12476,6 +12623,8 @@
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -12515,6 +12664,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -12554,10 +12704,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -12576,6 +12728,7 @@
             "cap40.signed-payload-signer.testnet-4437357",
             "cap42.generalized-txset.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-4c437318f87437c5-9",
             "cap67.unified-events.golden-60000be2e73a4207-10",
@@ -12639,7 +12792,9 @@
             "cap77.frozen-keys.p30-withdraw-frozen-trustline",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -12668,6 +12823,7 @@
             "classic.memo-bytes.p30-memo-truncated-sequence-28",
             "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
             "soroban.events-max.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
             "soroban.scval-shapes.golden-4c437318f87437c5-9"
@@ -12684,6 +12840,7 @@
             "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
             "cap46.config-upgrades.golden-27003f6cc5cdecc2-5",
             "cap63.parallel-txset.golden-308caf2d0fc09c95-12",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.p22-account-merge-muxed-destination",
             "cap67.unified-events.p22-backfill-account-merge-muxed-destination",
             "cap67.unified-events.p22-backfill-claim-claimable-balance",
@@ -12720,7 +12877,8 @@
             "cap67.unified-events.p22-set-authorized-true",
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
             "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
-            "soroban.auth-trees.golden-27003f6cc5cdecc2-3"
+            "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
           ],
           "covered": true,
           "fragment": "LedgerCloseMeta:v1",
@@ -12758,6 +12916,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -12787,10 +12946,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap35.clawback.golden-3f24be68a9962089-11",
             "cap35.clawback.p30-clawback",
@@ -12811,6 +12972,7 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-7b59aa36c1776fe1-31",
             "cap66.archival.golden-9b704e753d572789-23",
@@ -12872,7 +13034,9 @@
             "cap88.ms-close-time.golden-b71da06f9ce2dec8-3",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
             "classic.failed-tx.p30-unknown-destination",
             "classic.max-length.golden-34519f44ec59503a-22",
@@ -12931,7 +13095,11 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
@@ -12939,6 +13107,8 @@
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-upload-wasm",
@@ -13014,7 +13184,7 @@
         "CAP-0028"
       ],
       "entries_by_source_class": {
-        "core-golden": 2,
+        "core-golden": 4,
         "local-core": 4,
         "mainnet-history": 2
       },
@@ -13025,11 +13195,14 @@
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
             "cap03.offer-liabilities.p30-merge-dest-full",
             "cap23.claimable-balances.golden-67b49513ed2f1609-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap35.clawback.p30-clawback-not-enabled",
             "cap38.liquidity-pools.golden-0d70bfa2dc91b602-16",
             "cap38.liquidity-pools.golden-d637d6474c6d185d-16",
             "cap38.liquidity-pools.testnet-5521432",
             "cap40.signed-payload-signer.testnet-4437357",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap67.unified-events.golden-938fb779c48ac3af-16",
             "cap67.unified-events.golden-938fb779c48ac3af-19",
@@ -13062,7 +13235,13 @@
             "soroban.auth-trees.p30-unmatched-create-failed-tx",
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-failed-events-discarded-meta",
             "soroban.invoke-basics.p30-failed-trapped-meta",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
@@ -13111,6 +13290,24 @@
           ],
           "covered": true,
           "fragment": "SignerKey:pre_auth_tx",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.golden-8e3126c525875c96-10"
+          ],
+          "covered": true,
+          "fragment": "TransactionResultResult:tx_bad_auth",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.golden-fad872f357f20fe9-12"
+          ],
+          "covered": true,
+          "fragment": "TransactionResultResult:tx_no_account",
           "non_core_entries": [],
           "refused_by_core": []
         }
@@ -13318,6 +13515,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
@@ -13375,10 +13573,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
             "cap33.sponsorship.p30-revoke-trustline-sponsorship-meta",
@@ -13425,11 +13625,13 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -13526,7 +13728,9 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -13594,14 +13798,21 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
@@ -13655,14 +13866,16 @@
         "CAP-0033"
       ],
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 7,
         "local-core": 15
       },
       "fragments": [
         {
           "core_emitted": [
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-sponsored-account-envelope",
             "cap33.sponsorship.p30-sponsored-claimable-balance-envelope",
@@ -13680,6 +13893,7 @@
         {
           "core_emitted": [
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-sponsored-account-envelope",
             "cap33.sponsorship.p30-sponsored-claimable-balance-envelope",
@@ -13775,6 +13989,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
@@ -13832,10 +14047,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
             "cap33.sponsorship.p30-revoke-trustline-sponsorship-meta",
@@ -13883,11 +14100,13 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -13984,7 +14203,9 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -14052,14 +14273,21 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
@@ -14124,6 +14352,33 @@
           ],
           "covered": true,
           "fragment": ".signer_sponsoring_i_ds[]:public_key_type_ed25519",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1"
+          ],
+          "covered": true,
+          "fragment": "BeginSponsoringFutureReservesResult:already_sponsored",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
+          ],
+          "covered": true,
+          "fragment": "BeginSponsoringFutureReservesResult:recursive",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2"
+          ],
+          "covered": true,
+          "fragment": "EndSponsoringFutureReservesResult:not_sponsored",
           "non_core_entries": [],
           "refused_by_core": []
         }
@@ -14228,7 +14483,7 @@
         "CAP-0058"
       ],
       "entries_by_source_class": {
-        "core-golden": 13,
+        "core-golden": 20,
         "local-core": 19,
         "synthetic": 3
       },
@@ -14237,7 +14492,9 @@
           "core_emitted": [
             "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
             "cap67.unified-events.golden-60000be2e73a4207-10",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-upload-wasm"
           ],
@@ -14282,6 +14539,7 @@
             "cap40.signed-payload-signer.testnet-4437357",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-envelope",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
@@ -14309,6 +14567,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-envelope",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
@@ -14339,8 +14598,11 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
             "soroban.invoke-basics.p30-failed-events-discarded-envelope",
             "soroban.invoke-basics.p30-failed-trapped-envelope",
@@ -14376,6 +14638,8 @@
           "core_emitted": [
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-extend-ttl-envelope",
             "soroban.muxed-source.golden-04667ce620bffee7-24",
@@ -14396,6 +14660,7 @@
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.p30-restore-archived-instance-and-code-envelope",
             "soroban.muxed-source.golden-e55ad2d584383867-44",
@@ -14430,6 +14695,8 @@
             "soroban.auth-trees.p30-fanout-324-fails",
             "soroban.auth-trees.p30-matched-depth-32-fails",
             "soroban.auth-trees.p30-unmatched-create-failed-tx",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.p30-failed-trapped-meta",
             "soroban.scval-shapes.p30-map-depth-over",
@@ -14491,6 +14758,7 @@
         {
           "core_emitted": [
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-restore-archived-instance-and-code-meta",
@@ -14616,6 +14884,7 @@
             "soroban.events-max.golden-a8df5d4dbdc85ac8-7",
             "soroban.events-max.p30-echo-bytes-at-limit",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
@@ -14668,6 +14937,7 @@
             "soroban.auth-trees.p30-matched-depth-31",
             "soroban.auth-trees.p30-matched-depth-32-fails",
             "soroban.events-max.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a347bc4c32a9193c-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
@@ -14842,6 +15112,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -14898,6 +15169,7 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
             "soroban.invoke-basics.p30-create-contract-v1-meta",
             "soroban.invoke-basics.p30-create-contract-v2-constructor-meta",
@@ -14937,6 +15209,70 @@
             "soroban.scval-shapes.synth-event-vec-absent",
             "soroban.scval-shapes.synth-event-vec-depth-101"
           ],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
+          ],
+          "covered": true,
+          "fragment": "ContractCodeEntryExt:v0",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-568d51258ccf9080-9"
+          ],
+          "covered": true,
+          "fragment": "ExtendFootprintTtlResult:insufficient_refundable_fee",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-8299635e181e651c-11"
+          ],
+          "covered": true,
+          "fragment": "ExtendFootprintTtlResult:resource_limit_exceeded",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7"
+          ],
+          "covered": true,
+          "fragment": "InvokeHostFunctionResult:insufficient_refundable_fee",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28"
+          ],
+          "covered": true,
+          "fragment": "RestoreFootprintResult:insufficient_refundable_fee",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
+          ],
+          "covered": true,
+          "fragment": "ScError:auth",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
+          ],
+          "covered": true,
+          "fragment": "ScError:crypto",
+          "non_core_entries": [],
           "refused_by_core": []
         }
       ],
@@ -15115,6 +15451,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -15171,6 +15508,7 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
             "soroban.invoke-basics.p30-create-contract-v1-meta",
             "soroban.invoke-basics.p30-create-contract-v2-constructor-meta",
@@ -15329,6 +15667,7 @@
             "cap40.signed-payload-signer.testnet-4437357",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
@@ -15404,6 +15743,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -15463,9 +15803,16 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
             "soroban.invoke-basics.p30-create-contract-v1-meta",
             "soroban.invoke-basics.p30-create-contract-v2-constructor-meta",
@@ -15522,6 +15869,7 @@
           "core_emitted": [
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
             "soroban.events-max.p30-echo-bytes-at-limit",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-upload-wasm"
           ],
@@ -15559,7 +15907,8 @@
             "cap71.credentials.golden-e25799a2e2e9eea2-17",
             "cap71.credentials.p30-address-v2",
             "soroban.auth-trees.golden-57a486abce28859d-17",
-            "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17"
+            "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
           ],
           "covered": true,
           "fragment": "SorobanCredentials:address_v2",
@@ -15598,7 +15947,7 @@
         "CAP-0062"
       ],
       "entries_by_source_class": {
-        "core-golden": 3,
+        "core-golden": 4,
         "local-core": 5
       },
       "fragments": [
@@ -15651,6 +16000,15 @@
           ],
           "covered": true,
           "fragment": ".evicted_keys[]:contract_data",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap66.archival.golden-04667ce620bffee7-23"
+          ],
+          "covered": true,
+          "fragment": "InvokeHostFunctionResult:entry_archived",
           "non_core_entries": [],
           "refused_by_core": []
         }
@@ -16035,7 +16393,7 @@
         "CAP-0006"
       ],
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 6,
         "local-core": 12,
         "synthetic": 4
       },
@@ -16064,6 +16422,7 @@
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
@@ -16121,10 +16480,12 @@
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
             "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+            "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-1c7fb8566ea79e53-1",
             "cap33.sponsorship.golden-24cec2c5f1acf638-1",
             "cap33.sponsorship.golden-27d2533d64835282-0",
             "cap33.sponsorship.golden-3635a80135f66ca8-0",
+            "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap33.sponsorship.golden-6f067a349543093a-48",
             "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
             "cap33.sponsorship.p30-revoke-trustline-sponsorship-meta",
@@ -16172,11 +16533,13 @@
             "cap63.parallel-txset.golden-04667ce620bffee7-24",
             "cap63.parallel-txset.golden-81af9cfb66a06a01-18",
             "cap63.parallel-txset.p30-five-calls-parallel-phase",
+            "cap66.archival.golden-04667ce620bffee7-23",
             "cap66.archival.golden-04667ce620bffee7-26",
             "cap66.archival.golden-9b704e753d572789-23",
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
+            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -16273,7 +16636,9 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-6f067a349543093a-50",
+            "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-pre-auth-failed-removes-signer",
@@ -16341,14 +16706,21 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
+            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
+            "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+            "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+            "soroban.invoke-basics.golden-8299635e181e651c-11",
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
+            "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
+            "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.golden-e55ad2d584383867-44",
             "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32",
             "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
@@ -16395,6 +16767,7 @@
           "core_emitted": [
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
@@ -16444,6 +16817,7 @@
           "core_emitted": [
             "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -16462,6 +16836,15 @@
           ],
           "covered": true,
           "fragment": "AccountMergeResult:dest_full",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
+          ],
+          "covered": true,
+          "fragment": "OperationBody:create_passive_sell_offer",
           "non_core_entries": [],
           "refused_by_core": []
         }
@@ -17422,13 +17805,12 @@
   "schema_version": 1,
   "stellar_xdr": "30.0.0",
   "summary": {
-    "arms_covered": 293,
+    "arms_covered": 307,
     "arms_reachable": 499,
-    "arms_uncovered": 206,
+    "arms_uncovered": 192,
     "arms_uncovered_by_blocker": {
       "history-only": 3,
       "never-emitted": 10,
-      "not-imported": 14,
       "not-producible-locally": 2,
       "old-protocol-only": 16,
       "recipe-gap": 114,
@@ -17438,10 +17820,10 @@
     "caps_indexer_visible": 45,
     "caps_indexer_visible_core_emitted": 44,
     "caps_indexer_visible_with_reason": 1,
-    "core_emitted_entries": 445,
-    "entries": 560,
+    "core_emitted_entries": 459,
+    "entries": 574,
     "entries_by_source_class": {
-      "core-golden": 92,
+      "core-golden": 106,
       "local-core": 354,
       "mainnet-history": 12,
       "synthetic": 99,
@@ -17450,8 +17832,8 @@
     "families": 35,
     "fields_not_fully_validated": 36,
     "fields_not_fully_validated_exercised": 36,
-    "fragments": 172,
-    "fragments_covered": 163,
+    "fragments": 186,
+    "fragments_covered": 177,
     "fragments_uncovered": 9
   }
 }

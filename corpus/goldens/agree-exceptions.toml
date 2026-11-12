@@ -94,3 +94,9 @@ golden = "classic.max-length.golden-6f067a349543093a-46"
 op = "set_options"
 kinds = ["state:account", "state:account", "updated:account", "updated:account"]
 reason = "core InvokeHostFunctionTests golden: each set_options adds a signer inside begin/end_sponsoring_future_reserves, so the sponsor's account is updated as well (num_sponsoring). the local max-length set_options entries change only the source account (home domain, unsponsored signers). sponsored signer set_options is recorded by cap33.sponsorship"
+
+[[exception]]
+golden = "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
+op = "manage_sell_offer"
+kinds = ["removed:offer", "state:account", "state:account", "state:account", "state:offer", "state:offer", "state:trustline", "state:trustline", "state:trustline", "updated:account", "updated:account", "updated:account", "updated:offer", "updated:trustline", "updated:trustline", "updated:trustline"]
+reason = "core test 'frozen ledger keys DEX offer operations' (second offer active, buying frozen): the best offer's seller key is frozen through the cap-0077 config setting, so core removes that offer without a trade and crosses the second one. the golden is in this family through create_passive_sell_offer. the local offer recipes run with no frozen keys, so a removed offer there always comes from a full fill"
