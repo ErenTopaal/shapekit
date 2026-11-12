@@ -1,0 +1,44 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  goldens:
+    # literal golden agreement: the committed golden index must describe exactly the files at
+    # the pinned core tag, and core 30.0.0's own --check-lcm run must accept those files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2
+      - name: fetch test-lcm-current at the pinned stellar-core tag
+        run: |
+          set -euo pipefail
+          tag=v30.0.0
+          pinned=$(awk '/^\[\[git\]\]/{n=""} /^name = "stellar-core"$/{n=1} n && /^sha = /{gsub(/"/,"",$3); print $3; exit}' pins.toml)
+          git clone --quiet --depth 1 --branch "$tag" --filter=blob:none --sparse \
+            https://github.com/stellar/stellar-core "$RUNNER_TEMP/core"
+          git -C "$RUNNER_TEMP/core" sparse-checkout set test-lcm-current
+          git -C "$RUNNER_TEMP/core" fetch --quiet --depth 1 origin "refs/tags/$tag:refs/tags/$tag"
+          head=$(git -C "$RUNNER_TEMP/core" rev-parse HEAD)
+          if [ "$head" != "$pinned" ]; then
+            echo "tag $tag is $head upstream, pins.toml pins $pinned" >&2
+            exit 1
+          fi
+      - name: committed golden index matches upstream
+        run: cargo run --release -p shapekit-cli -- goldens verify --core-src "$RUNNER_TEMP/core"
+      - name: core's own check-lcm run
+        run: scripts/check-lcm.sh "$RUNNER_TEMP/core" 2 5
+      - name: structural agreement with local-core and history entries
+        run: cargo run --release -p shapekit-cli -- goldens agree

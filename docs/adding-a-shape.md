@@ -1,0 +1,203 @@
+# Adding a shape
+
+How to add a shape family to the corpus and generate its core-emitted entries. A new CAP that
+changes what an indexer sees goes through the same steps.
+
+The pieces:
+
+- **Family**: a record in `registry/families.toml` naming the CAPs, the protocol range and the
+  signature fragments that define the shape.
+- **Recipe**: a Rust program in `crates/shapekit-gen/src/recipe/` that drives a private
+  standalone stellar-core and captures what it emits.
+- **Chain**: one recorded run of a recipe at one protocol under one passphrase, kept under
+  `corpus/chains/<chain-id>/<network>/`.
+- **Entry**: one captured value, written to
+  `corpus/entries/<family>/<entry-id>/` with a `testnet` and a `mainnet` variant.
+
+`crates/shapekit-gen/src/recipe/cap40.rs` is the worked example. Read it next to this page.
+
+## 1. The family record
+
+Add a `[[family]]` to `registry/families.toml`:
+
+```toml
+[[family]]
+id = "cap40.signed-payload-signer"
+title = "Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship revokes"
+caps = ["CAP-0040"]
+protocol_introduced = 19
+protocol_valid = { min = 19 }
+signature = [
+    "SignerKey:ed25519_signed_payload",
+    ".body:set_options.signer.key:ed25519_signed_payload",
+    ".extra_signers[]:ed25519_signed_payload",
+]
+source_classes = ["local-core", "testnet-history"]
+fields = ["op.set_options.signer", "tx.cond.extra_signers"]
+linked_issues = ["https://github.com/stellar/wallet-backend/pull/729"]
+priority = 1
+```
+
+`signature` holds fragments in the grammar documented at the top of
+`crates/shapekit-manifest/src/signature.rs`. An entry belongs to the family when the shape
+signature of its bytes matches at least one fragment. Run `shapekit registry check` after editing.
+Every id in `fields` must exist in `registry/fields.toml`.
+
+## 2. The recipe
+
+Create `crates/shapekit-gen/src/recipe/<name>.rs` and register it in
+`crates/shapekit-gen/src/recipe/mod.rs`: one `pub mod <name>;` line and one line per protocol in
+`all()`. Nothing else needs to change. The CLI, extraction, checks and reproducibility comparison
+pick it up from `all()`.
+
+```rust
+pub struct MyRecipe { pub protocol: u32 }
+
+impl Recipe for MyRecipe {
+    fn id(&self) -> &str { "cap99.my-shape" }      // derives every key; usually the family id
+    fn family(&self) -> &str { "cap99.my-shape" }  // registry family of every capture
+    fn protocol(&self) -> u32 { self.protocol }    // ledger protocol of the chain
+    fn soroban_settings(&self) -> bool { false }   // true: testnet Soroban settings first (protocol 30 only)
+    fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()> { /* steps and captures */ Ok(()) }
+}
+```
+
+One recipe value is one chain. Its chain id is `<id>.p<protocol>`. Recording the same family at
+protocol 30 and 28 means two values in `all()`, as `cap40` does.
+
+### `ChainCtx`
+
+| Method | What it does |
+|---|---|
+| `account(role) -> SigningKey` | Key derived from the recipe id and the role. Same under both passphrases. Not funded until `fund` |
+| `root() -> &SigningKey` | The network root account, funded at genesis |
+| `fund(&[roles], stroops)` | One transaction from root creating each role's account. Closes a ledger |
+| `classic(source, ops)` | Envelope from `source` with `ops`, base fee per operation, signed by `source` |
+| `tx(source) -> TransactionBuilder` | Builder carrying `source`'s next sequence number, for preconditions, memos, operation sources and fees (`shapekit_core_driver::tx::TransactionBuilder`) |
+| `sign(tx, &[keys])` | Signs under this chain's network id. Add signed-payload or hash-x signatures with `shapekit_core_driver::tx::{push_signature, sign_signed_payload, sign_hash_x}` |
+| `submit_and_close(env) -> Applied` | Submits, closes the next ledger, fails unless the transaction succeeded |
+| `submit_and_close_failing(env) -> Applied` | Same, but fails unless core included it and it failed (a failed transaction in a ledger) |
+| `capture(slug, selector, spec)` | Records an entry from the canonical meta of a closed ledger |
+| `capture_rejected(slug, env, spec) -> TransactionResult` | Submits an envelope core must refuse at submission and records it as an `invalid-by-core` entry with core's result. No ledger closes |
+| `driver() -> &mut ChainDriver` | The Phase 3 driver: `upload`, `deploy`, `invoke`, `soroban`, `soroban_with`, `apply`, `node()` for `ledger_entries` queries |
+| `network()`, `protocol()`, `network_id()` | The chain's network, protocol and network id |
+
+`Applied` carries the ledger, the transaction hash, core's `TransactionResult` and the meta.
+Every submitted transaction closes its own ledger, so a ledger holds exactly one transaction.
+
+### Selectors
+
+| Selector | Entries written | XDR types |
+|---|---|---|
+| `Selector::transaction(&applied)` | `<slug>-envelope` and `<slug>-meta` | `TransactionEnvelope`; `TransactionResultMetaV1` (v2 ledgers) or `TransactionResultMeta` |
+| `Selector::ledger_of(&applied)` or `Selector::Ledger(seq)` | `<slug>` | `LedgerCloseMeta` |
+| `Selector::LedgerEntry { ledger, key }` | `<slug>` | `LedgerEntry`, the last created, updated or restored state of `key` in that ledger's meta, in apply order |
+
+Selection always reads the canonical meta (see Normalization below), never core's raw output.
+
+### `Spec`
+
+```rust
+Spec::new("what the entry shows, one sentence")
+    .fields(&["op.set_options.signer"])   // ids from registry/fields.toml
+    .flags(&["max-length-vec"])           // optional, lowercase kebab-case
+    .issues(&["https://..."])             // optional, default: the family's linked_issues
+```
+
+### Entry ids
+
+`capture("set-options-payload-1", ...)` in the protocol 30 chain of family `cap40.signed-payload-signer`
+gives `cap40.signed-payload-signer.p30-set-options-payload-1-envelope` and `...-meta`. Slugs are
+lowercase kebab-case and unique within a recipe; the protocol prefix keeps the chains of one
+family apart.
+
+### Rules a recipe must follow
+
+- **Every captured value must match a family fragment, per variant.** `gen chains` fails otherwise.
+  An envelope whose only distinctive part is a signature (decorated signatures carry no signer key
+  in the grammar) matches nothing on its own: capture its ledger instead, whose meta shows the
+  signer on the account. `cap40` does this for the transaction authorised by a signed payload.
+- **Determinism.** No randomness, no wall-clock values, no iteration over hash maps. Keys come
+  from `account(role)`, payloads and salts from hashes of fixed strings (see `cap40::payload`).
+  Close times are fixed by the driver: `1767225600 + seq * 86400` (Phase 3 decision; the
+  standalone virtual clock runs ahead of wall time, so close times step one day per ledger).
+- **Assert what makes the shape.** Check core's answer where the shape depends on it (for
+  example the result code of a refused twin, or the signers on an account) and fail with a
+  message. A recipe never passes by accident.
+- **Negative twins.** Where core refuses a malformed variant, submit it with `capture_rejected`
+  and check the returned result code. The entry gets `expected.validity = invalid-by-core` and
+  `source.core_rejection { stage: submit, result_code, result_xdr }`. A malformed transaction that
+  core includes and fails is a normal `submit_and_close_failing` plus `capture`.
+- **Only core-emitted bytes.** Never hand-build an entry. Hand-crafted values belong to
+  `shapekit synth` with `synthetic: true`.
+- **Soroban.** `soroban_settings() -> true` applies testnet's live CONFIG_SETTING values before
+  `run` (protocol 30 only, they were captured there). Use `driver().upload`, `deploy`, `invoke`
+  and `soroban_with`. `driver().soroban(...)` simulates with soroban-simulation 30.0.0, which
+  supports protocol 30 only, and accepts source-account auth only. Below protocol 29 the
+  committed contracts trap (soroban-sdk 29 declares interface protocol 29); see the Phase 3 status
+  in the plan before writing an older-protocol Soroban recipe.
+
+## 3. Generating
+
+```sh
+shapekit gen chains --family cap99.my-shape --network both --jobs 4
+shapekit manifest build
+shapekit manifest validate
+shapekit gen verify-repro --family cap99.my-shape --jobs 4
+```
+
+`gen chains` runs every selected recipe under every selected passphrase, each chain on its own
+core container, `--jobs` at a time. Then, for each chain:
+
+1. The captures of the two networks are paired by slug. Both runs must capture the same slugs
+   with the same types, ledgers and core answers.
+2. `passphrase_dependent` is set when the testnet and mainnet bytes differ.
+3. Every variant must round-trip through `stellar-xdr` 30.0.0 and match a family fragment
+   (the matched fragments are printed per entry).
+4. The produced entries go through the manifest validator.
+5. Only if every chain and check passed, chains and entries are moved into the corpus. Entries
+   the chain produced before but no longer produces are removed. Entries of other source classes
+   are never touched; an id collision with one is an error.
+
+`--network testnet` or `mainnet` records one passphrase and keeps the other variant from the
+committed entry, so passphrase dependence is still decided on both.
+
+`gen verify-repro` regenerates under both passphrases into a temporary directory and compares
+with the corpus: per chain the canonical ledger hashes, ledger range and canonical stream; per
+entry the set of ids, `entry.json` (oracle references excluded) and every `.xdr` and
+`.expected.json` file byte for byte. Exit status 1 when anything differs.
+
+## 4. What is written
+
+```
+corpus/chains/<chain-id>/<network>/
+  chain.json               protocol, passphrase, validator, core image, close schedule,
+                           ledger range, per-ledger sha256 (canonical and raw), normalization
+  ledgers.canonical.xdr    framed LedgerCloseMeta, canonical change order, reproducible
+  ledgers.xdr              core's raw framed stream, kept as provenance, not reproducible
+  archive/                 the node's history archive (checkpoints only once a chain reaches 63)
+corpus/entries/<family>/<entry-id>/
+  entry.json
+  testnet.xdr, testnet.expected.json
+  mainnet.xdr, mainnet.expected.json
+```
+
+Entry fields filled by the generator: `source.class = local-core`, `source.recipe`,
+`source.chain`, `source.ledger_seq` (absent for refused envelopes), `source.tx_index`,
+`protocol.generated_at`, `lcm_version` and `tx_meta_version` where they apply, `caps` and the
+protocol range from the family. `source.tx_hash` is left out because a transaction hash covers
+the network id and so differs between the variants; it is derivable from each variant's envelope.
+
+### Normalization
+
+Release core emits each ledger-entry change list in a per-process order. The recorder writes a
+canonical stream with the order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp)
+applies before it compares goldens, and checks it is a permutation of core's output. Entries that
+carry change lists (`LedgerCloseMeta`, `TransactionResultMeta`, `TransactionResultMetaV1`,
+`TransactionMeta`) record `source.normalization = "core-normalize-meta"`; the validator requires
+it on such local-core entries. A canonical LCM is a byte string core itself can emit.
+
+## 5. Timing
+
+Measured on the cap40 family: each chain (ten ledgers, eighteen captures) records in about 4.5 s;
+the four chains (protocols 30 and 28, both passphrases) take about 5 s with `--jobs 4`.
