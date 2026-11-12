@@ -1,0 +1,20 @@
+{
+  "name": "@shapekit/testee-js",
+  "version": "0.0.0",
+  "private": true,
+  "description": "javascript testee for the shapekit conformance runner",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc && node --test \"dist/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2"
+  }
+}
