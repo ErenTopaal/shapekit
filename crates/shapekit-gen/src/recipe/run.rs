@@ -86,6 +86,7 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
         .context("creating the node workdir")?;
     let driver = ChainDriver::start(node_config(recipe, network, image), work.path())?;
     let mut ctx = ChainCtx::new(driver, recipe.id(), network, recipe.protocol());
+    pad_to_first_checkpoint(&mut ctx)?;
     if recipe.soroban_settings() {
         let root = ctx.root().clone();
         ctx.driver()
@@ -108,6 +109,21 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
         },
         captured,
     ))
+}
+
+/// The ledger closing core's first history checkpoint at the default frequency of 64.
+pub const FIRST_CHECKPOINT: u32 = 63;
+
+/// Closes empty ledgers through the first checkpoint before settings and the recipe, so
+/// the archive holds a real checkpoint that precedes every shape ledger. Indexers that
+/// bootstrap from the archive (wallet-backend live mode on an empty database starts at the
+/// latest checkpoint and refuses an archive at ledger 0) can then start before the first
+/// shape. Done before the settings so no entry with a ttl ages during the padding.
+fn pad_to_first_checkpoint(ctx: &mut ChainCtx) -> Result<()> {
+    while ctx.driver().last_closed() < FIRST_CHECKPOINT {
+        ctx.driver().close_empty()?;
+    }
+    Ok(())
 }
 
 fn family_of<'r>(registry: &'r Registry, recipe: &dyn Recipe) -> Result<&'r Family> {

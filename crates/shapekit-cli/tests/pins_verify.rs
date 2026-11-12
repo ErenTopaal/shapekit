@@ -69,6 +69,7 @@ fn registered_commands() {
             "guide",
             "pack",
             "serve",
+            "harness",
             "help"
         ]
     );

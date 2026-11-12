@@ -14,7 +14,7 @@
   "kind": "xdr",
   "lcm_version": 2,
   "linked_issues": [],
-  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of [1, 2, 2] transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of [2, 1, 2] transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -24,7 +24,7 @@
   "source": {
     "chain": "cap63.parallel-txset.p30",
     "class": "local-core",
-    "ledger_seq": 12,
+    "ledger_seq": 73,
     "normalization": "core-normalize-meta",
     "recipe": "cap63.parallel-txset"
   },
@@ -33,21 +33,21 @@
   "variants": {
     "mainnet": {
       "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.expected.json",
-      "expected_json_sha256": "c0ae3f140cf3cb0f59c8ee33165fb8366300e240ffdd1d9d9db7e43149f66a0d",
+      "expected_json_sha256": "91052585ae6508cb290b220dff7f02bf1c22824919e682202f83a9e47c458c7e",
       "network_passphrase": "Public Global Stellar Network ; September 2015",
       "oracle_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.oracle.json",
-      "oracle_sha256": "f89aff4c9f6f1cba142da52185a3d30ea66e6a8b5f42e7634e8cee8fe20d24c3",
+      "oracle_sha256": "ea840e708bd759efdfb84c5e8713088eaa5a23c9e64b4935bc4aeb1b6e50a628",
       "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.xdr",
-      "xdr_sha256": "17607edc2847e029ebde6d5091d783dedf7d95918fec7d971f9e180b82045eb8"
+      "xdr_sha256": "b1782873d5d125bea0214609ac7d6191f430b6a8324833b043bb799c4f9a0df4"
     },
     "testnet": {
       "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.expected.json",
-      "expected_json_sha256": "b43169c37c7538f32bd48847d32e94d92491d7d3aa1bb9c12511fb45ffa583a5",
+      "expected_json_sha256": "49df294af59cd59bd40083197032ac53ff4dfb518f4977b9f759def14b0fa97b",
       "network_passphrase": "Test SDF Network ; September 2015",
       "oracle_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.oracle.json",
-      "oracle_sha256": "2a10869a2e45dae5f6b2e0999c57ca541342099ef9dcc53edc8090c7160bc976",
+      "oracle_sha256": "c2ac92992e351c3485186a2b0eb8e30943b635fe88d0304bc138c04105b9bf1a",
       "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.xdr",
-      "xdr_sha256": "02ee02b287a2896685355de973163e2b5842b7e370a84020829ae47b8d5d5643"
+      "xdr_sha256": "a92303be53988987445eef3987cd49ea69409e3e349e384afc8b3143391a8877"
     }
   },
   "xdr_type": "LedgerCloseMeta"

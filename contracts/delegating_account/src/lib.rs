@@ -78,7 +78,9 @@ mod test {
         let s = Address::generate(&env);
         let id = env.register(DelegatingAccount, (vec![&env, s.clone()],));
         let has: bool = env.as_contract(&id, || {
-            env.storage().persistent().has(&super::Key::Signer(s.clone()))
+            env.storage()
+                .persistent()
+                .has(&super::Key::Signer(s.clone()))
         });
         assert!(has);
     }

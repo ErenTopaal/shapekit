@@ -1,0 +1,135 @@
+# wallet-backend sightings reproduced by `shapekit harness reproduce --table adapters/walletbackend/reproductions.toml`.
+# Commit pairs: the pre-fix commit is the parent of the fix's merge (for the rebase-merged
+# #792, the commit before its first rebased commit). #716 has no single fix; its default pair
+# is the parent of #693's merge and the current pin. The format is in docs/adapter-interface.md.
+
+[adapter]
+command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}"]
+
+[[reproduction]]
+id = "wallet-backend-729"
+issue = "https://github.com/stellar/wallet-backend/pull/729"
+chain = "cap40.signed-payload-signer.p28"
+network = "testnet"
+notes = "a SetOptions adding a P signer makes the persist COPY fail; ingestion retries ledger 65 forever"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "2a0a84ea12523b6c92e278c0c84b443041240095"
+expect = [
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "mishandled", reason = "halted" },
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-4-meta", verdict = "not-evaluated" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "2c873353c1f0f3c9b145e25a7d009023ad104a1c"
+expect = [
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "pass" },
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-4-meta", verdict = "pass" },
+]
+
+[[reproduction]]
+id = "wallet-backend-731"
+issue = "https://github.com/stellar/wallet-backend/issues/731"
+chain = "cap73.sac-trust.p28"
+network = "testnet"
+notes = "SAC trust() creates a trustline but no TRUSTLINE or BALANCE_AUTHORIZATION row is written"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "764a4f5bcbff5abb0949d93da37f769063013ea0"
+expect = [
+  { entry = "cap73.sac-trust.p28-trust-meta", verdict = "dropped" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "c152783c054c765c8b51fd26ed313fd1ebc1c50c"
+expect = [
+  { entry = "cap73.sac-trust.p28-trust-meta", verdict = "pass" },
+]
+
+[[reproduction]]
+id = "wallet-backend-716-signed-payload"
+issue = "https://github.com/stellar/wallet-backend/issues/716"
+chain = "cap40.signed-payload-signer.p28"
+network = "testnet"
+notes = "signed-payload signers are cut to 32 bytes and stored as rows that do not decode back"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "79ea2acd1dc65a07166133cc04b12e76db314db0"
+expect = [
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "mishandled", reason = "undecodable-address" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "e967ce8b7362b79c277e700e789181d76fbb5967"
+expect = [
+  { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "pass" },
+]
+
+[[reproduction]]
+id = "wallet-backend-716-muxed"
+issue = "https://github.com/stellar/wallet-backend/issues/716"
+chain = "cap27.muxed-accounts.p28"
+network = "testnet"
+notes = "muxed (40-byte) addresses are cut to 32 bytes and stored as rows that do not decode back"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "79ea2acd1dc65a07166133cc04b12e76db314db0"
+expect = [
+  { entry = "cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1", verdict = "mishandled", reason = "undecodable-address" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "e967ce8b7362b79c277e700e789181d76fbb5967"
+expect = [
+  { entry = "cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1", verdict = "pass" },
+]
+
+[[reproduction]]
+id = "wallet-backend-753"
+issue = "https://github.com/stellar/wallet-backend/pull/753"
+chain = "soroban.muxed-source.p28"
+network = "testnet"
+notes = "beyond the rfp: a muxed soroban source plus its base account produce a duplicate key (23505) and ingestion halts"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "f8e5786d22c04adad16318f2e126728beec5aac9"
+expect = [
+  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "mishandled", reason = "halted" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "bb0b162b072583c7dabffbdee664d1c117e5ba56"
+expect = [
+  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "pass" },
+]
+
+[[reproduction]]
+id = "wallet-backend-792"
+issue = "https://github.com/stellar/wallet-backend/pull/792"
+chain = "cap84.muxed-contract.p30"
+network = "testnet"
+notes = "beyond the rfp, protocol 30: a W address fails the whole ledger persist"
+
+[[reproduction.case]]
+label = "pre-fix"
+commit = "a9bac8d2f59f7590d393c3e72e67d95b7cb2fba1"
+expect = [
+  { entry = "cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract", verdict = "mishandled", reason = "halted" },
+]
+
+[[reproduction.case]]
+label = "fixed"
+commit = "09303667545a1effb09c779ff29d271c6c812de3"
+expect = [
+  { entry = "cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract", verdict = "pass" },
+]

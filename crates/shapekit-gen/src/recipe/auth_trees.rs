@@ -12,12 +12,11 @@
 //! - the deepest invocation tree one `require_auth` chain can match (one
 //!   instance per level, since the host forbids re-entry), and the tree one
 //!   level deeper, which fails at apply;
-//! - the widest fan-out of one level, and one wider, which runs out of
-//!   budget at apply;
+//! - the widest fan-out of one level that applies, and one wider, which
+//!   simulation accepts but the host refuses at apply;
 //! - declared trees far deeper than the call, whose nodes below the root
-//!   are never matched and never checked: the deepest the host decodes, one
-//!   deeper (core includes it, the host traps), the deepest core accepts at
-//!   all, and one deeper, refused as malformed;
+//!   are never matched and never checked: the deepest the host decodes, and
+//!   one deeper, which core includes and the host traps on;
 //! - a failed transaction whose address entry the host matched and checked
 //!   before the call trapped;
 //! - the three ways wallet-backend#746 reads contract creations that never
@@ -32,9 +31,15 @@
 //! | shape                          | accepted | first refused | where                                |
 //! |--------------------------------|----------|---------------|--------------------------------------|
 //! | matched depth (invocations)    | 31       | 32            | host, at apply                       |
-//! | fan-out of one level           | 325      | 326           | host budget, at apply                |
+//! | fan-out of one level           | 323      | 324           | host, at apply (simulation: 325)     |
 //! | declared levels below the root | 245      | 246           | host xdr depth 500, at apply         |
-//! | declared levels below the root | 492      | 493           | core envelope depth 1000, submission |
+//!
+//! Core itself accepts declared chains up to 492 levels below the root
+//! (envelope depth 1000, `validateXDRForProtocol`), includes them and fails
+//! them in the host, and refuses 493 as txMALFORMED at submission (measured
+//! on this chain). Those two are not recorded: a ledger holding a
+//! 492-level envelope needs decode depth 1012, and the SEP-54 packer and the
+//! oracle decode meta at 1000.
 //!
 //! Simulation (soroban-simulation 30.0.0) gives up before the network on
 //! declared trees: from 243 levels below the root it cannot size the
@@ -62,7 +67,7 @@ use stellar_xdr::{
     LedgerKeyContractData, OperationBody, OperationResult, OperationResultTr, ScAddress, ScMap,
     ScMapEntry, ScNonceKey, ScSymbol, ScVal, SorobanAddressCredentials, SorobanAuthorizationEntry,
     SorobanAuthorizedFunction, SorobanAuthorizedInvocation, SorobanCredentials,
-    SorobanTransactionData, TransactionResultResult, TransactionEnvelope, TransactionExt,
+    SorobanTransactionData, TransactionResultResult,
 };
 
 use super::soroban_steps::{
@@ -80,16 +85,14 @@ const BALANCE: i64 = 100_000_000_000;
 /// Deepest `require_auth` chain one transaction can match, in invocations.
 pub const MATCHED_DEPTH: u32 = 31;
 
-/// Most calls one level can fan out to within the instruction budget.
-pub const FANOUT: u32 = 325;
+/// Most calls one level can fan out to and still apply. Simulation
+/// accepts up to 325; core's host traps from 324 even when the transaction
+/// declares every instruction it may.
+pub const FANOUT: u32 = 323;
 
 /// Deepest declared chain below a matched root that the host decodes
 /// (`DEFAULT_XDR_RW_LIMITS` depth 500 in soroban-env-host 30.0.0).
 pub const HOST_DECLARED_DEPTH: u32 = 245;
-
-/// Deepest declared chain below the root that core accepts (envelope depth
-/// 1000 from protocol 28, `validateXDRForProtocol`).
-pub const CORE_DECLARED_DEPTH: u32 = 492;
 
 /// Deepest declared chain simulation can size.
 const SIMULATED_DECLARED_DEPTH: u32 = 242;
@@ -129,7 +132,7 @@ const MIXED_FIELDS: [&str; 7] = [
 ];
 
 /// Every role that signs one address-credential entry.
-const SIGNERS: [&str; 10] = [
+const SIGNERS: [&str; 9] = [
     "address-signer",
     "deep-signer",
     "deep-over-signer",
@@ -137,7 +140,6 @@ const SIGNERS: [&str; 10] = [
     "wide-over-signer",
     "declared-sim-signer",
     "declared-host-signer",
-    "declared-core-signer",
     "failed-signer",
     "unmatched-signer",
 ];
@@ -347,12 +349,7 @@ fn sign_with(
         return Ok(e);
     }
     let exp = expiration(ctx);
-    Ok(sign_authorization_entry(
-        e,
-        &ctx.network_id(),
-        exp,
-        &[key],
-    )?)
+    Ok(sign_authorization_entry(e, &ctx.network_id(), exp, &[key])?)
 }
 
 fn account_key(key: &SigningKey) -> LedgerKey {
@@ -418,9 +415,7 @@ fn entry_nonce(e: &SorobanAuthorizationEntry) -> Result<i64> {
 /// declare.
 fn tx_max_instructions() -> Result<u32> {
     match NetworkSettings::testnet()?.get(ConfigSettingId::ContractComputeV0) {
-        Some(ConfigSettingEntry::ContractComputeV0(c)) => {
-            Ok(u32::try_from(c.tx_max_instructions)?)
-        }
+        Some(ConfigSettingEntry::ContractComputeV0(c)) => Ok(u32::try_from(c.tx_max_instructions)?),
         other => bail!("testnet settings have no compute setting: {other:?}"),
     }
 }
@@ -486,8 +481,7 @@ impl Recipe for AuthTrees {
 
         // source-account credentials: the source itself is the signer
         let hf = call(&t0, "node", node_args(&[], &[(source_addr.clone(), 0)])?)?;
-        let (env, auth) =
-            authorized_prefetched(ctx, &source, hf, RECORD, &prefetch, |_, e| Ok(e))?;
+        let (env, auth) = authorized_prefetched(ctx, &source, hf, RECORD, &prefetch, |_, e| Ok(e))?;
         ensure!(
             matches!(auth.as_slice(), [e] if matches!(e.credentials, SorobanCredentials::SourceAccount)),
             "expected one source-account entry, recorded {auth:?}"
@@ -617,28 +611,6 @@ fn fanout(
     trees: &[ContractId],
     prefetch: &[LedgerKey],
 ) -> Result<()> {
-    if std::env::var("P5_FANOUT_PROBE").is_ok() {
-        let k = ctx.account("wide-signer");
-        let addr = account_address(&k.verifying_key());
-        for f in [324u32, 323, 322, 321, 320] {
-            let levels = [(addr.clone(), f), (addr.clone(), 0)];
-            let hf = call(&trees[0], "node", node_args(&trees[1..2], &levels)?)?;
-            let (env, _) = authorized_prefetched(ctx, source, hf.clone(), RECORD, prefetch, |ctx, e| sign_with(ctx, e, &k))?;
-            let mut d = soroban_data(&env)?;
-            let simulated = d.resources.instructions;
-            d.resources.instructions = tx_max_instructions()?;
-            d.resource_fee = d.resource_fee * 2 + 10_000_000;
-            let TransactionEnvelope::Tx(e) = &env else { bail!("v1") };
-            let TransactionExt::V1(_) = &e.tx.ext else { bail!("v1") };
-            let auth = match &e.tx.operations[0].body { OperationBody::InvokeHostFunction(op) => op.auth.to_vec(), _ => bail!("op") };
-            let env2 = ctx.driver().soroban_with(source, hf, d, auth)?;
-            let a = ctx.driver().apply(&env2)?;
-            eprintln!("EXPLORE fanout apply {f}: simulated {simulated} result {:?}", a.result.result);
-            if a.succeeded() { break; }
-        }
-        bail!("fanout probe only");
-    }
-
     let k = ctx.account("wide-signer");
     let addr = account_address(&k.verifying_key());
     let levels = [(addr.clone(), FANOUT), (addr.clone(), 0)];
@@ -663,7 +635,7 @@ fn fanout(
         &format!("fanout-{FANOUT}"),
         Selector::ledger_of(&applied),
         Spec::new(format!(
-            "one address-credential entry whose root invocation has {FANOUT} matched sub-invocations, the widest one level fits in the instruction budget"
+            "one address-credential entry whose root invocation has {FANOUT} matched sub-invocations, the widest one level can carry and still apply"
         ))
         .fields(&ADDRESS_FIELDS)
         .flags(&["max-length-vec"]),
@@ -673,11 +645,7 @@ fn fanout(
     let k2 = ctx.account("wide-over-signer");
     let addr2 = account_address(&k2.verifying_key());
     let n2 = nonce("wide-over");
-    let entry = address_entry(
-        &addr2,
-        n2,
-        fanout_tree(&trees[0], &trees[1], &addr2, over)?,
-    );
+    let entry = address_entry(&addr2, n2, fanout_tree(&trees[0], &trees[1], &addr2, over)?);
     let entry = sign_with(ctx, entry, &k2)?;
     retarget(&mut over_data, (&k, wide_nonce), (&k2, n2))?;
     over_data.resources.instructions = tx_max_instructions()?;
@@ -693,15 +661,14 @@ fn fanout(
         &format!("fanout-{over}-fails"),
         Selector::ledger_of(&applied),
         Spec::new(format!(
-            "the same call fanned out {over} times, declaring the maximum instructions: the host exceeds its budget and core fails the transaction"
+            "the same call fanned out {over} times, declaring the maximum instructions, which simulation still accepts: the host traps at apply and core fails the transaction"
         ))
         .fields(&ADDRESS_FIELDS)
         .flags(&["failed-tx"]),
     )
 }
 
-/// Declared chains below a matched root: the host limit and its twin,
-/// core's limit and its twin.
+/// Declared chains below a matched root: the host limit and its twin.
 fn declared_depth(
     ctx: &mut ChainCtx,
     source: &SigningKey,
@@ -741,8 +708,6 @@ fn declared_depth(
     let cases = [
         ("declared-host-signer", HOST_DECLARED_DEPTH, "host-limit"),
         ("declared-host-signer", HOST_DECLARED_DEPTH + 1, "host-over"),
-        ("declared-core-signer", CORE_DECLARED_DEPTH, "core-limit"),
-        ("declared-core-signer", CORE_DECLARED_DEPTH + 1, "core-over"),
     ];
     for (role, depth, case) in cases {
         let k = ctx.account(role);
@@ -757,57 +722,32 @@ fn declared_depth(
         let hf = call(root, "node", node_args(&[], &[(addr, 0)])?)?;
         let env = ctx.driver().soroban_with(source, hf, data, vec![entry])?;
         let slug = format!("declared-depth-{depth}");
-        match case {
-            "host-limit" => {
-                let applied = ctx.submit_and_close(&env)?;
-                ctx.capture(
-                    &slug,
-                    Selector::ledger_of(&applied),
-                    Spec::new(format!(
-                        "an address entry whose matched root declares a chain {depth} invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked"
-                    ))
-                    .fields(&ADDRESS_FIELDS),
-                )?;
-            }
-            "host-over" | "core-limit" => {
-                let applied = ctx.submit_and_close_failing(&env)?;
-                ensure_invoke_result(
-                    &applied,
-                    |r| matches!(r, InvokeHostFunctionResult::Trapped),
-                    "invoke_host_function trapped",
-                )?;
-                let note = if case == "core-limit" {
-                    format!(
-                        "an address entry declaring a chain {depth} invocations deep below its root, the deepest core accepts (envelope depth 1000): core includes it, the host cannot decode the entry and traps"
-                    )
-                } else {
-                    format!(
-                        "an address entry declaring a chain {depth} invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps"
-                    )
-                };
-                ctx.capture(
-                    &slug,
-                    Selector::ledger_of(&applied),
-                    Spec::new(note)
-                        .fields(&ADDRESS_FIELDS)
-                        .flags(&["failed-tx"]),
-                )?;
-            }
-            _ => {
-                let r = ctx.capture_rejected(
-                    &slug,
-                    &env,
-                    Spec::new(format!(
-                        "an address entry declaring a chain {depth} invocations deep below its root: the envelope passes XDR depth 1000 and core refuses it as malformed at submission"
-                    ))
-                    .fields(&ADDRESS_FIELDS),
-                )?;
-                ensure!(
-                    matches!(r.result, TransactionResultResult::TxMalformed),
-                    "core answered {:?} for a declared chain past its depth limit, expected tx_malformed",
-                    r.result
-                );
-            }
+        if case == "host-limit" {
+            let applied = ctx.submit_and_close(&env)?;
+            ctx.capture(
+                &slug,
+                Selector::ledger_of(&applied),
+                Spec::new(format!(
+                    "an address entry whose matched root declares a chain {depth} invocations deep below it that no call reaches, the deepest the host still decodes; the transaction succeeds and the declared nodes are never checked"
+                ))
+                .fields(&ADDRESS_FIELDS),
+            )?;
+        } else {
+            let applied = ctx.submit_and_close_failing(&env)?;
+            ensure_invoke_result(
+                &applied,
+                |r| matches!(r, InvokeHostFunctionResult::Trapped),
+                "invoke_host_function trapped",
+            )?;
+            ctx.capture(
+                &slug,
+                Selector::ledger_of(&applied),
+                Spec::new(format!(
+                    "an address entry declaring a chain {depth} invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps"
+                ))
+                .fields(&ADDRESS_FIELDS)
+                .flags(&["failed-tx"]),
+            )?;
         }
     }
     Ok(())
@@ -921,7 +861,10 @@ fn unmatched_creations(
         .simulate_invoke(good, RECORD, &source_id)?
         .transaction_data;
     add_read_only(&mut data, &[instance_key(echo), code_key(echo_hash)])?;
-    data.resource_fee *= 2;
+    // the simulated call never loads echo, so the instructions are
+    // raised to what a transaction may declare; the excess fee is refunded
+    data.resources.instructions = tx_max_instructions()?;
+    data.resource_fee = data.resource_fee * 2 + 10_000_000;
     let env = ctx.driver().soroban_with(source, hf, data, auth.clone())?;
     let applied = ctx.submit_and_close_failing(&env)?;
     ensure_invoke_result(

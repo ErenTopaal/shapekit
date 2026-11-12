@@ -5,6 +5,7 @@ mod conformance_cmd;
 mod gen_cmd;
 mod golden_cmd;
 mod guide_cmd;
+mod harness_cmd;
 mod manifest_cmd;
 mod oracle_cmd;
 mod pack_cmd;
@@ -96,6 +97,12 @@ enum Command {
     /// Replay one recorded chain over HTTP: the SEP-54 lake, the history archive and a
     /// read-only JSON-RPC endpoint shaped like stellar-rpc.
     Serve(serve_cmd::ServeArgs),
+    /// Replay chains into an indexer through an adapter and judge what it stored against the
+    /// meta oracle.
+    Harness {
+        #[command(subcommand)]
+        command: harness_cmd::HarnessCommand,
+    },
 }
 
 #[derive(Subcommand)]
@@ -484,6 +491,7 @@ fn main() -> ExitCode {
         Command::Guide { command } => guide_cmd::run(command),
         Command::Pack { command } => pack_cmd::run(command),
         Command::Serve(args) => serve_cmd::run(args),
+        Command::Harness { command } => harness_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

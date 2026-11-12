@@ -99,8 +99,7 @@ impl Adapter {
                 let mut buf = Vec::new();
                 loop {
                     buf.clear();
-                    let read = (&mut r)
-                        .take(MAX_LINE as u64 + 1)
+                    let read = std::io::Read::take(&mut r, MAX_LINE as u64 + 1)
                         .read_until(b'\n', &mut buf);
                     let msg = match read {
                         Ok(0) => Line::Eof,
@@ -288,10 +287,8 @@ impl Adapter {
                 Err(e) => break format!("waiting for the adapter: {e}"),
             }
         };
-        // the reader ends at eof, which the exit produced
         if let Some(r) = self.reader.take() {
-            // drain so a reader blocked on a full channel can see eof
-            while self.lines.try_recv().is_ok() {}
+            // dropping the receiver unblocks a reader stuck on a full channel
             drop(std::mem::replace(&mut self.lines, sync_channel(1).1));
             if r.join().is_err() {
                 return format!("{status}; the stdout reader panicked");
@@ -306,10 +303,14 @@ impl Drop for Adapter {
         if self.reader.is_some() {
             // finish was not called: an error path; never leave the process behind
             self.stdin = None;
-            if let Ok(None) = self.child.try_wait() {
-                let _ = self.child.kill();
+            if let Ok(None) = self.child.try_wait()
+                && let Err(e) = self.child.kill()
+            {
+                eprintln!("shapekit harness: killing the adapter: {e}");
             }
-            let _ = self.child.wait();
+            if let Err(e) = self.child.wait() {
+                eprintln!("shapekit harness: waiting for the adapter: {e}");
+            }
         }
     }
 }

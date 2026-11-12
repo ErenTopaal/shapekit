@@ -1,0 +1,66 @@
+{
+  "caps": [
+    "CAP-0046-11"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.auth-trees",
+  "fields_exercised": [
+    "op.invoke_host_function.auth",
+    "auth.credentials.source_account",
+    "auth.credentials.address.address",
+    "auth.credentials.address.nonce",
+    "auth.credentials.address.signature_expiration_ledger",
+    "auth.credentials.address.signature",
+    "auth.root_invocation"
+  ],
+  "flags": [
+    "declared-not-executed"
+  ],
+  "id": "soroban.auth-trees.p30-unmatched-create-success",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/746"
+  ],
+  "notes": "a successful call that never requires auth while its entries declare three deployments: an address entry rooted at the call with CreateContract and CreateContractV2 below it, and a source-account CreateContractV2 entry; the meta creates no contract",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.auth-trees.p30",
+    "class": "local-core",
+    "ledger_seq": 114,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.auth-trees"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/mainnet.expected.json",
+      "expected_json_sha256": "040310e56aaf465e6ff16a47593376514b1cf588f6fafef238fb531d49fc4971",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/mainnet.oracle.json",
+      "oracle_sha256": "03b7ce6293ed05f1ca0d7cb1978c74b9f9d3eeb4a746c8a111bb676960a3f170",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/mainnet.xdr",
+      "xdr_sha256": "128c46d9c8d0451ed0c451aef1b5e11184fedf5703d34a631e7ca2b99b66b586"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/testnet.expected.json",
+      "expected_json_sha256": "b0d048fc90b24c3728b8ca7821b318c6542ba13a5100746f0854c5835caa53d9",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/testnet.oracle.json",
+      "oracle_sha256": "8968fe78591c4b8c02a15ee965b2394a5184644c5485cfcefc20139cfcbbc94e",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-unmatched-create-success/testnet.xdr",
+      "xdr_sha256": "6dbfcde5b33a34c0011ee6d6549f55be562afe58940cc3c98acc1c71e35d13e4"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

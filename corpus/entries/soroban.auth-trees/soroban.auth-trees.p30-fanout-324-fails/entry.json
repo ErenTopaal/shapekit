@@ -1,0 +1,65 @@
+{
+  "caps": [
+    "CAP-0046-11"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.auth-trees",
+  "fields_exercised": [
+    "op.invoke_host_function.auth",
+    "auth.credentials.address.address",
+    "auth.credentials.address.nonce",
+    "auth.credentials.address.signature_expiration_ledger",
+    "auth.credentials.address.signature",
+    "auth.root_invocation"
+  ],
+  "flags": [
+    "failed-tx"
+  ],
+  "id": "soroban.auth-trees.p30-fanout-324-fails",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/746"
+  ],
+  "notes": "the same call fanned out 324 times, declaring the maximum instructions, which simulation still accepts: the host traps at apply and core fails the transaction",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.auth-trees.p30",
+    "class": "local-core",
+    "ledger_seq": 109,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.auth-trees"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/mainnet.expected.json",
+      "expected_json_sha256": "835853cfb56f8c50e34abda2c3ee6c1f86fc215fa8743f4b15d8cdf4a57e49c9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/mainnet.oracle.json",
+      "oracle_sha256": "5b5f4ff7d60bb80304d4e38bc936b61c2b91ee7270d4cdd9bcfcbcbd0c938248",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/mainnet.xdr",
+      "xdr_sha256": "6359cce81a61cd1da57cf79fed4d659fc2ba641844d66667874ad3567e97d984"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/testnet.expected.json",
+      "expected_json_sha256": "17887ffa1236a00a437270f1e79adcf8ce7fed9088bc74a5f5ed27ed444ea5c7",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/testnet.oracle.json",
+      "oracle_sha256": "041e6463b8e115632e4ae94dda9525ca15662e0af9929e3fa77b1e7157858e4e",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-fanout-324-fails/testnet.xdr",
+      "xdr_sha256": "95bd76d940e418ced31948eb9c960a2f5f99825ebd3bc2e49b357221722168d0"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

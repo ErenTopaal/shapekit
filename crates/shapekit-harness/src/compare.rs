@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use shapekit_oracle::vocab::TxFacts;
 
-use crate::protocol::{ChangeClaim, Claims, ExportChange, TxRecord, Unmapped};
+use crate::protocol::{ChangeClaim, Claims, TxRecord, Unmapped};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -123,8 +123,13 @@ pub struct TxComparison {
 /// can be paired with the expected one. Documented in `docs/adapter-interface.md`.
 pub fn key_fields(kind: &str) -> &'static [&'static str] {
     match kind {
-        "account-created" | "account-removed" | "thresholds" | "account-flags" | "home-domain"
-        | "inflation-destination" | "sequence" => &["account"],
+        "account-created"
+        | "account-removed"
+        | "thresholds"
+        | "account-flags"
+        | "home-domain"
+        | "inflation-destination"
+        | "sequence" => &["account"],
         "balance-change" => &["holder", "asset", "held_in"],
         "trustline-created" | "trustline-removed" | "trustline-flags" | "trustline-limit" => {
             &["account", "asset"]
@@ -181,8 +186,8 @@ fn key_of(m: &Map<String, Value>, kind: &str, claim: &ChangeClaim) -> Vec<Value>
 }
 
 /// The first claim of `kind` whose filter the change satisfies.
-fn claim_for<'c>(
-    claims: &'c Claims,
+fn claim_for(
+    claims: &Claims,
     kind: &str,
     m: &Map<String, Value>,
     exported: bool,
@@ -252,7 +257,9 @@ pub fn compare_tx(
             out.problems.push(problem(
                 ProblemKind::Dropped,
                 "participant",
-                format!("the target stored nothing for transaction {tx}; expected participant {addr}"),
+                format!(
+                    "the target stored nothing for transaction {tx}; expected participant {addr}"
+                ),
                 Some(Value::String(addr.clone())),
                 None,
             ));
@@ -282,7 +289,10 @@ pub fn compare_tx(
             out.problems.push(problem(
                 ProblemKind::UndecodableAddress,
                 "participant",
-                format!("{} holds {} which does not decode: {err}", raw.column, raw.hex),
+                format!(
+                    "{} holds {} which does not decode: {err}",
+                    raw.column, raw.hex
+                ),
                 None,
                 Some(Value::String(raw.hex.clone())),
             ));
@@ -367,7 +377,10 @@ pub fn compare_tx(
         }
         match vocab.get(&c.kind) {
             None => {
-                out.notes.push(format!("exported kind {:?} is not in the vocabulary", c.kind));
+                out.notes.push(format!(
+                    "exported kind {:?} is not in the vocabulary",
+                    c.kind
+                ));
                 continue;
             }
             Some(known) => {
@@ -393,8 +406,7 @@ pub fn compare_tx(
         let want = expected.remove(&i).unwrap_or_default();
         let have = got.remove(&i).unwrap_or_default();
         compare_claim(claim, want, have, &mut |kind, detail, e, g| {
-            out.problems
-                .push(problem(kind, &claim.kind, detail, e, g));
+            out.problems.push(problem(kind, &claim.kind, detail, e, g));
         });
     }
     out
@@ -559,7 +571,11 @@ pub fn verdict_of(comparisons: Vec<TxComparison>) -> EntryVerdict {
 }
 
 /// The verdict of an entry at `ledger` in a chain the target stopped in.
-pub fn stopped_verdict(ledger: u32, stop: &Stop, first_entry_at_stop: Option<&str>) -> EntryVerdict {
+pub fn stopped_verdict(
+    ledger: u32,
+    stop: &Stop,
+    first_entry_at_stop: Option<&str>,
+) -> EntryVerdict {
     if ledger == stop.ledger {
         EntryVerdict::simple(
             Verdict::Mishandled,

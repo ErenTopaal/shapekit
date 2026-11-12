@@ -397,6 +397,91 @@ command exits non-zero when any case does not hold, and writes `reproductions.js
 The schema check `cargo test -p shapekit-harness` validates recorded adapter traffic against
 the schema; add a recording of your adapter's answers there when you add an adapter.
 
+## The wallet-backend adapter
+
+`adapters/walletbackend` (Go), binary `adapters/walletbackend/cmd/wb-adapter`:
+
+```sh
+(cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
+shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit hash>"
+```
+
+`--repo` names a wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`,
+cloned from github.com/stellar/wallet-backend on first use); `--db-memory` caps the database
+container (default 1 GiB).
+
+- **Build.** `git archive <commit> | docker build -` with the commit's own `Dockerfile`, image
+  `shapekit-wallet-backend:<commit>`, reused when it exists. Building needs network access;
+  running does not.
+- **Services.** `timescale/timescaledb:2.28.2-pg17` (by digest, as in `pins.toml`) with the
+  settings of wallet-backend's `docker-compose.yaml`, the `timescaledb` extension created before
+  `wallet-backend migrate up`, then `wallet-backend ingest` (live mode) with `--memory` and
+  `--memory-swap` set to `limits.memory_bytes` and `--restart on-failure`. All containers join
+  `docker_network` only. The restart policy stands in for the deployment's restart loop:
+  wallet-backend gives up on a ledger after five persist attempts and exits, and when restarted it
+  retries the same ledger, so a give-up is reported as a halt (`running`, cursor stuck,
+  `last_error` set). `crashed` means a Go runtime failure in the log or a container that stayed
+  down; `oom` means docker reports an OOM kill.
+- **Configuration.** `NETWORK_PASSPHRASE`, `RPC_URL`, `ARCHIVE_URL`, `CHECKPOINT_FREQUENCY` from
+  `start`; `LEDGER_BACKEND_TYPE` always set (commits before a9bac8d2 default to the datastore);
+  `STELLAR_ENVIRONMENT` for commits whose ingest command still requires it; `LOG_LEVEL=INFO`.
+  `sep54-s3` adds `chrislusf/seaweedfs:4.46` run as in wallet-backend's integration tests
+  (`weed server -s3`, no auth, bucket `ledgers`) and the `DATASTORE_*` variables; `advance`
+  uploads `.config.json` and every batch at or below the head from `lake.path`.
+- **Bootstrap.** `checkpoint`: an empty database makes live mode load the archive's latest
+  checkpoint and start there.
+- **Status.** `last_ingested_ledger` is `ingest_store.latest_ingest_ledger`. `last_error` is the
+  newest log line at level error, fatal or panic, a retry warning whose message starts with
+  `Error ` (`Error ingesting data ...`, `Error fetching ledger ...`), or the `Error:` / `panic:`
+  line printed on exit. Peak memory is the ingest container's cgroup `memory.peak`, sampled every
+  second.
+- **Protocols.** Up to 28 for commits on go-stellar-sdk v0.7.3, up to 30 on v0.8.0; another sdk
+  version is an error until it is added.
+
+Read-back joins `transactions` (hash, ledger), `transactions_accounts` (participants) and
+`state_changes` on `to_id`, selecting every column so commits with other columns read as they
+are. Token ids (asset contract ids) on trustline rows are named by recomputing the asset
+contract id of every asset in `trustline_assets` and the SAC rows of `contract_tokens`. Address
+bytes (`AddressBytea`, `SignerKeyBytea`) are decoded as stored, version byte then payload, with
+go-stellar-sdk's strict strkey decoder; account columns accept `G` and `C`, signer columns `G`,
+`T`, `X` and `P`. Transaction ids are TOIDs: the operation index is the low 12 bits minus one,
+`operation_id` 0 is the transaction's fee row.
+
+| `state_change_category` / `reason` | vocabulary change | fields exported |
+|---|---|---|
+| BALANCE DEBIT/CREDIT, `operation_id` 0 | `token-event` `fee` | `contract` (token_id), `from` (account_id), `amount` (net: DEBIT as stored, CREDIT negated) |
+| BALANCE DEBIT + CREDIT, same token and amount | `token-event` `transfer` | `contract`, `from`, `to`, `amount`, `to_muxed_id` `{"type":"u64"}` from the CREDIT row |
+| BALANCE MINT (+ CREDIT) | `token-event` `mint` | `contract`, `to` (the CREDIT row, else the MINT row's account), `amount`, `to_muxed_id` |
+| BALANCE BURN (+ DEBIT) | `token-event` `burn` | `contract`, `from` (the DEBIT row, else the BURN row's account), `amount` |
+| BALANCE DEBIT or CREDIT without a partner | `token-event` `transfer` | the side wallet-backend stored only (`from` or `to`) |
+| ACCOUNT CREATE (G) | `account-created` | `account` |
+| ACCOUNT CREATE (C) | `contract-deployed` | `contract` |
+| ACCOUNT MERGE | `account-removed` | `account` |
+| SIGNER ADD / REMOVE / UPDATE | `signer-added` / `signer-removed` / `signer-weight` | `account`, `signer` (signer_account_id), `weight` or `before`, `after` |
+| SIGNATURE_THRESHOLD UPDATE (one row per threshold) | `thresholds`, one per account and operation | `account` |
+| FLAGS SET / CLEAR | `account-flags`, one per account and operation | `account` |
+| HOME_DOMAIN SET / UPDATE / CLEAR | `home-domain` | `account`, `before`, `after` from `key_value` old/new (absent as `""`) |
+| DATA_ENTRY ADD / UPDATE / REMOVE | `data-entry` | `account`, `action`, `name_hex`, `value_before_hex`, `value_after_hex` (base64 `key_value` as hex) |
+| TRUSTLINE ADD | `trustline-created` | `account`, `asset`, `limit`; `flags` from the BALANCE_AUTHORIZATION SET row written with it |
+| TRUSTLINE UPDATE / REMOVE | `trustline-limit` / `trustline-removed` | `account`, `asset`, `before`, `after` |
+| BALANCE_AUTHORIZATION SET / CLEAR, G holder | `trustline-flags`, one per holder, asset and operation | `account`, `asset` |
+| BALANCE_AUTHORIZATION SET / CLEAR, C holder | `token-event` `set_authorized` (not claimed) | `contract`, `to`, `authorized` |
+| ALLOWANCE UPDATE | `token-event` `approve` | `contract`, `from`, `spender`, `amount`, `live_until_ledger` |
+| BLEND_*, any other category, and rows the rules above cannot name (a token id of no known asset) | `unmapped` | the whole row, with the reason |
+
+wallet-backend's trustline flag bits (bit 0 authorized, bit 5 clawback enabled, bit 6 authorized
+to maintain liabilities) become core's `TrustLineFlags` values (1, 4, 2). Debit and credit rows
+pair in `state_change_id` order on equal token and amount. State change and participant rows
+whose transaction has no `transactions` row come out as `unattributed` records.
+
+Claims follow from the table: participants of kind `account` only (wallet-backend does not record
+event-emitting contracts as participants, and keeps no mux ids), every kind above on the
+fields it stores, `token-event` `transfer`/`mint`/`burn`/`clawback` on `event`, `contract`,
+`from`, `to`, `amount`, `to_muxed_id`, `fee` on `event`, `contract`, `from` (the stored fee is net
+of the refund), and `approve`. Values wallet-backend does not keep (starting balances, threshold
+values, account flag values, trustline flag values after authorization changes, executables)
+are not claimed.
+
 ## Oracle vocabulary
 
 What the oracle says each transaction changed, read only from `LedgerCloseMeta`, in
