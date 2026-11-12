@@ -1,0 +1,104 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "1",
+        "entry_count": 3,
+        "keys": [
+          {
+            "key": {
+              "json": {
+                "u32": 1
+              },
+              "xdr": "AAAAAwAAAAE="
+            },
+            "type": "U32"
+          },
+          {
+            "key": {
+              "json": {
+                "string": "1"
+              },
+              "xdr": "AAAADgAAAAExAAAA"
+            },
+            "type": "String"
+          },
+          {
+            "key": {
+              "json": {
+                "symbol": "1"
+              },
+              "xdr": "AAAADwAAAAExAAAA"
+            },
+            "type": "Symbol"
+          }
+        ],
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "string": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 30
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAADAAAAAwAAAAEAAAADAAAACgAAAA4AAAABMQAAAAAAAAMAAAAUAAAADwAAAAExAAAAAAAAAwAAAB4="
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-collision-after-native"
+    ],
+    "id": "soroban.scval-shapes.synth-map-u32-string-symbol",
+    "kind": "native-projection",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1789"
+    ],
+    "notes": "u32 1, string \"1\" and symbol \"1\" in one map. keys are sorted the way soroban-env-host 30.0.0 sorts them and the host converts the map, so a contract can emit it. rule no-entry-lost: an error passes, a structure keeping all 3 entries with their key types passes, fewer entries fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

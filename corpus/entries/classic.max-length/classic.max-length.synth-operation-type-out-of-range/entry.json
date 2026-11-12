@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.operations"
+  ],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "classic.max-length.synth-operation-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an operation of type 27, one past RESTORE_FOOTPRINT = 26. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 152 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-operation-type-out-of-range/any.xdr",
+      "xdr_sha256": "58b09da89bbb5a068fd51e144e70b36f8777ed96392fcbd5fb5f64c1ca7c0e7f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

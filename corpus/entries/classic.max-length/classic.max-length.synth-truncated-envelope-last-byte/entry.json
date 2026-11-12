@@ -1,0 +1,36 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [],
+  "flags": [
+    "truncated"
+  ],
+  "id": "classic.max-length.synth-truncated-envelope-last-byte",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a one-payment v1 envelope with its final byte cut off, inside the last signature. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 199 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-truncated-envelope-last-byte/any.xdr",
+      "xdr_sha256": "bb2d063232987ceab73d15d9582f09a2012d96534509e4b02f84272300be2e7b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

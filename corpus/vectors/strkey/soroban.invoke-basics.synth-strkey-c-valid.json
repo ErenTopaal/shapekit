@@ -1,0 +1,82 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "contract": "0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "contract"
+      },
+      "note": "zero key",
+      "op": "strkey_decode",
+      "text": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4"
+    },
+    {
+      "expected": {
+        "contract": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+        "kind": "contract"
+      },
+      "note": "0x3a key",
+      "op": "strkey_decode",
+      "text": "CA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUXRQ"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "contract"
+      },
+      "note": "sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUWDA"
+    },
+    {
+      "expected": {
+        "contract": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "kind": "contract"
+      },
+      "note": "0xff key",
+      "op": "strkey_decode",
+      "text": "CD7777777777777777777777777777777777777777777777777767GY"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "contract"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUWDA"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046",
+      "CAP-0046-02",
+      "CAP-0046-05",
+      "CAP-0046-07",
+      "CAP-0046-08",
+      "CAP-0046-12",
+      "CAP-0054",
+      "CAP-0058"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.invoke-basics",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "soroban.invoke-basics.synth-strkey-c-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid contract ids (C, 2 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 22,
+      "valid_min": 22
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

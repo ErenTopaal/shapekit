@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "kind": "private_key_ed25519",
+        "seed": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "note": "zero key",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSU2"
+    },
+    {
+      "expected": {
+        "kind": "private_key_ed25519",
+        "seed": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a"
+      },
+      "note": "0x3a key",
+      "op": "strkey_decode",
+      "text": "SA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUXHW"
+    },
+    {
+      "expected": {
+        "kind": "private_key_ed25519",
+        "seed": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a"
+      },
+      "note": "sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "SA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUWVG"
+    },
+    {
+      "expected": {
+        "kind": "private_key_ed25519",
+        "seed": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "note": "0xff key",
+      "op": "strkey_decode",
+      "text": "SD7777777777777777777777777777777777777777777777777767Q6"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "cap27.muxed-accounts.synth-strkey-s-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid ed25519 secret seeds (S, 18 << 3); every seed here is a made-up byte pattern. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

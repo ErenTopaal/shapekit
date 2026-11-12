@@ -1,0 +1,209 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum off by one bit",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4TY"
+    },
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum bytes in big-endian order",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAA6LQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte short, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAVOZQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte long, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAAAN6TY"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one extra base32 symbol",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4DYA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "lowercase base32",
+      "op": "strkey_decode",
+      "text": "pa7qynf7sowq3glr2bgmzehxavirza4kvwltjjfc7mgxua74p7ujuaaaaaaqcaaaac4dy"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "a trailing = pad",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4DY="
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "surrounding spaces",
+      "op": "strkey_decode",
+      "text": " PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4DY "
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "algorithm bits of the version byte set to 7",
+      "op": "strkey_decode",
+      "text": "P47QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAB5SM"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "version byte 5 << 3, which no strkey type uses",
+      "op": "strkey_decode",
+      "text": "FA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAB774"
+    },
+    {
+      "expected": {
+        "reject": "too-short"
+      },
+      "note": "the empty string",
+      "op": "strkey_decode",
+      "text": ""
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the prefix letter alone",
+      "op": "strkey_decode",
+      "text": "P"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the lowest of the 1 unused trailing bits of the last symbol set",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4DZ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "an empty payload: CAP-40 allows 0 to 64 bytes in XDR, but core answers SET_OPTIONS_BAD_SIGNER for an empty one",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAKH4Y"
+    },
+    {
+      "expected": {
+        "reject": "too-long"
+      },
+      "note": "a 65-byte payload, one past opaque payload<64>",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAABAQCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IBBEIRSIJJGE4UCSKRLFQWS4LZQGEZDGNBVGY3TQOJ2HM6D2PR7IBAQAAAARVTQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "length prefix 4 with 5 payload bytes",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAACACAQDAQCQAAAABHMA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "length prefix 9 with 5 payload bytes and 3 padding bytes, longer than everything after it",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAEQCAQDAQCQAAAAHKDA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-padding"
+      },
+      "note": "non-zero padding after a 5-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAACQCAQDAQCQAAABBMRQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "a 5-byte payload without its padding",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAACQCAQDAQCSOYI"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAQACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IAAAAAAAAPM"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAOQCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4Z2PQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAOQCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DXFH6"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0040"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap40.signed-payload-signer",
+    "fields_exercised": [],
+    "flags": [
+      "signed-payload",
+      "strkey-invalid"
+    ],
+    "id": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "invalid ed25519 signed-payload signers (P, 15 << 3, CAP-40): 32 key bytes, a u32 length, 1 to 64 payload bytes and zero padding to a multiple of four. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 19,
+      "valid_min": 19
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

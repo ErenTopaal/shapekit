@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "ed25519": "0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "public_key_ed25519"
+      },
+      "note": "zero key",
+      "op": "strkey_decode",
+      "text": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+    },
+    {
+      "expected": {
+        "ed25519": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+        "kind": "public_key_ed25519"
+      },
+      "note": "0x3a key",
+      "op": "strkey_decode",
+      "text": "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "public_key_ed25519"
+      },
+      "note": "sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ"
+    },
+    {
+      "expected": {
+        "ed25519": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "kind": "public_key_ed25519"
+      },
+      "note": "0xff key",
+      "op": "strkey_decode",
+      "text": "GD7777777777777777777777777777777777777777777777777773DB"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "public_key_ed25519"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "cap27.muxed-accounts.synth-strkey-g-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid ed25519 account public keys (G, 6 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

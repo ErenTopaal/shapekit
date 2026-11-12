@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.memo-bytes",
+  "fields_exercised": [
+    "tx.memo.type"
+  ],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "classic.memo-bytes.synth-memo-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a transaction memo with MemoType 5; the enum ends at MEMO_RETURN = 4. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 200 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.synth-memo-type-out-of-range/any.xdr",
+      "xdr_sha256": "d8ad8a513976a96ed90abb1d98b752dc8e44419d5835de4e572be9f970f6e481"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "tx.signatures",
+    "tx.signatures.hint",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-authorised-by-payload-32",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a payment whose only signature is a signed-payload signature (hint is the key's last four bytes xor the payload's) for a signer of the source account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap40.signed-payload-signer"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-authorised-by-payload-32/mainnet.expected.json",
+      "expected_json_sha256": "58cf751ab18a597f34ffdadf8810c7276b55694ff96c320743d7b0c9359c5ff8",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-authorised-by-payload-32/mainnet.xdr",
+      "xdr_sha256": "b561e65c6c4ef1c3322eb363d48d1b36ddcc22825b81b32c598199693fe5a79c"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-authorised-by-payload-32/testnet.expected.json",
+      "expected_json_sha256": "458027b1eef581beb6fe2bdae3866261aa49d38f9c0e54c3f4f3ff2271203004",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-authorised-by-payload-32/testnet.xdr",
+      "xdr_sha256": "e1d2d52e416d151e7e6aedf49fc4bd86c2e24cf0e02d03f6fe286fa4a472fd18"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

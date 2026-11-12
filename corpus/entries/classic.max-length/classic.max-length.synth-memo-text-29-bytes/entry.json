@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.memo.text"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "classic.max-length.synth-memo-text-29-bytes",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a memo text of 29 bytes, one past string text<28>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 236 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-memo-text-29-bytes/any.xdr",
+      "xdr_sha256": "345733e49d92227ca04fa149be6e2b25ca914fcf2cca5fe8403738aeb2b87995"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

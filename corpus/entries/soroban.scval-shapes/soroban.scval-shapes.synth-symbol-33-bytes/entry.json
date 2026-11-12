@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "over-max-length"
+  ],
+  "id": "soroban.scval-shapes.synth-symbol-33-bytes",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ScVal symbol of 33 bytes, one past SCSYMBOL_LIMIT = 32 (scval.symbol.len). stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 44 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-symbol-33-bytes/any.xdr",
+      "xdr_sha256": "66e73e9230f6d246d1a9dd9d131862319fc84b220a89e3ec80fa65649a36b49d"
+    }
+  },
+  "xdr_type": "ScVal"
+}

@@ -1,0 +1,278 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "18446744073709551616"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0x10"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0X10"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0o20"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0b10000"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "leading-zero"
+      },
+      "input": {
+        "text": "016"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "leading-zero"
+      },
+      "input": {
+        "text": "00"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": " 16 "
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16 "
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "\t16"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16\n"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "empty"
+      },
+      "input": {
+        "text": ""
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "+16"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-1"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-0"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16.0"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "1e1"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "1_6"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "１６"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "99999999999999999999999"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "negative"
+      },
+      "input": {
+        "number": -1
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "negative"
+      },
+      "input": {
+        "number": -16
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-an-integer"
+      },
+      "input": {
+        "number": 16.5
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-an-integer"
+      },
+      "input": {
+        "number": 16.0
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "muxed-account",
+      "non-canonical-id"
+    ],
+    "id": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785"
+    ],
+    "notes": "non-canonical or out-of-range muxed account ids (uint64, 0 to 2^64-1). accepted cases carry the M address and MuxedAccount XDR for key 0x3a..3a with that id. text is accepted only as the exact decimal rendering of an in-range value (ASCII digits, no sign, whitespace, leading zero, radix prefix, fraction or exponent); a JSON number is accepted as an integer in range with |n| <= 2^53-1, and refused when negative, fractional or out of range. in-range JSON numbers above 2^53-1 are in a separate implementation-defined entry. negative offer ids are refused because core answers MANAGE_SELL_OFFER_MALFORMED / MANAGE_BUY_OFFER_MALFORMED for offerID < 0 from protocol 15 (stellar-core v30.0.0 src/transactions/ManageOfferOpFrameBase.cpp, ManageOfferOpFrameBase::doCheckValid). the reject reason is informational; a testee passes by refusing.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

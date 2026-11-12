@@ -1,0 +1,80 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "claimable_balance",
+        "version": 0
+      },
+      "note": "v0, zero key",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE"
+    },
+    {
+      "expected": {
+        "hash": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+        "kind": "claimable_balance",
+        "version": 0
+      },
+      "note": "v0, 0x3a key",
+      "op": "strkey_decode",
+      "text": "BAADUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2ZU"
+    },
+    {
+      "expected": {
+        "hash": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "claimable_balance",
+        "version": 0
+      },
+      "note": "v0, sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "BAAD6DBUX6J22DMZOHIEZTEQ64CVCHEDRKWZONFEUL5Q26QD7R76RGR4TU"
+    },
+    {
+      "expected": {
+        "hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "kind": "claimable_balance",
+        "version": 0
+      },
+      "note": "v0, 0xff key",
+      "op": "strkey_decode",
+      "text": "BAAP77777777777777777777777777777777777777777777777777YYEU"
+    },
+    {
+      "expected": {
+        "hash": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "claimable_balance",
+        "version": 0
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "BAAD6DBUX6J22DMZOHIEZTEQ64CVCHEDRKWZONFEUL5Q26QD7R76RGR4TU"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0023"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap23.claimable-balances",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "cap23.claimable-balances.synth-strkey-b-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid claimable balance ids (B, 1 << 3): a version byte (0 for v0) and 32 hash bytes. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 14,
+      "valid_min": 14
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

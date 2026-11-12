@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "soroban.scval-shapes.synth-scval-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ScVal whose type discriminant is 23, one past the last SCValType (SCV_EXECUTABLE_TAG = 22). stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 8 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-scval-type-out-of-range/any.xdr",
+      "xdr_sha256": "bb706f5d16515fb194575099e2e81fe3da51ff52fb263a6bc440987ff22e13af"
+    }
+  },
+  "xdr_type": "ScVal"
+}

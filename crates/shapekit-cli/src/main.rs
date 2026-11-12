@@ -1,8 +1,14 @@
 //! The `shapekit` command line tool.
 
+mod capture_cmd;
+mod conformance_cmd;
+mod gen_cmd;
+mod golden_cmd;
 mod manifest_cmd;
+mod oracle_cmd;
 mod pins;
 mod registry_cmd;
+mod synth_cmd;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -36,6 +42,109 @@ enum Command {
     Manifest {
         #[command(subcommand)]
         command: ManifestCommand,
+    },
+    /// Run corpus entries through SDK testees: the divergence matrix, reproductions of
+    /// upstream sightings, and issue drafting.
+    Conformance {
+        #[command(subcommand)]
+        command: conformance_cmd::ConformanceCommand,
+    },
+    /// The meta oracle: what each ledger changed, read from LedgerCloseMeta only.
+    Oracle {
+        #[command(subcommand)]
+        command: OracleCommand,
+    },
+    /// Import upstream corpus sources.
+    Import {
+        #[command(subcommand)]
+        command: ImportCommand,
+    },
+    /// Checks over imported core goldens.
+    Goldens {
+        #[command(subcommand)]
+        command: GoldensCommand,
+    },
+    /// Capture entries from public network history (online).
+    Capture {
+        #[command(subcommand)]
+        command: CaptureCommand,
+    },
+    /// Record chains on a private standalone stellar-core (needs docker and
+    /// the pinned core image).
+    Gen {
+        #[command(subcommand)]
+        command: GenCommand,
+    },
+    /// Hand-crafted synthetic entries and the non-xdr vector kinds.
+    Synth {
+        #[command(subcommand)]
+        command: SynthCommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum SynthCommand {
+    /// Write every synthetic entry and vector, each checked against its reference
+    /// implementation, and remove synthetic files this build no longer produces.
+    Build {
+        /// The corpus directory.
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        /// Directory holding the registry files.
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum GenCommand {
+    /// Record the smoke chain: protocol 30, testnet's Soroban settings, four
+    /// funded accounts, a payment, a trustline and one echo contract call.
+    Smoke {
+        /// Passphrase the chain runs under.
+        #[arg(long, value_parser = ["testnet", "mainnet"])]
+        network: String,
+        /// Directory to write the chain into; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+        /// pins.toml, read for the core image.
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
+    /// Record the recipe chains, one per family and protocol, and install
+    /// their chains and core-emitted entries into the corpus.
+    Chains {
+        /// Only the recipes of this family; repeatable. All when absent.
+        #[arg(long)]
+        family: Vec<String>,
+        /// Passphrases to record under. A single network keeps the other
+        /// network's committed variant of each entry.
+        #[arg(long, default_value = "both", value_parser = ["testnet", "mainnet", "both"])]
+        network: String,
+        /// Chains recorded at once, each on its own core container.
+        #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
+        jobs: u16,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
+    /// Regenerate the recipe chains under both passphrases into a temporary
+    /// directory and compare canonical hashes and entry files with the corpus.
+    VerifyRepro {
+        /// Only the recipes of this family; repeatable. All when absent.
+        #[arg(long)]
+        family: Vec<String>,
+        #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
+        jobs: u16,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
     },
 }
 
@@ -80,6 +189,114 @@ enum ManifestCommand {
 }
 
 #[derive(Subcommand)]
+enum ImportCommand {
+    /// Index stellar-core's --check-lcm goldens and import the smallest golden ledger per
+    /// family fragment as core-golden entries.
+    Goldens {
+        /// A git checkout of stellar-core at the tag, holding test-lcm-current/.
+        #[arg(long)]
+        core_src: PathBuf,
+        #[arg(long, default_value = "v30.0.0")]
+        tag: String,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum GoldensCommand {
+    /// Rescan a stellar-core checkout and require it to match the committed golden index.
+    Verify {
+        #[arg(long)]
+        core_src: PathBuf,
+        #[arg(long, default_value = "v30.0.0")]
+        tag: String,
+        #[arg(long, default_value = "corpus/goldens/core-v30.0.0/index.json")]
+        index: PathBuf,
+    },
+    /// Structural agreement between golden entries and local-core or history entries.
+    Agree {
+        #[arg(long, default_value = "corpus/manifest.json")]
+        file: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum CaptureCommand {
+    /// Capture one ledger's LedgerCloseMeta as a testnet-history or mainnet-history entry.
+    History {
+        #[arg(long, value_enum)]
+        network: capture_cmd::NetworkArg,
+        #[arg(long)]
+        ledger: u32,
+        /// A transaction hash the ledger must contain; recorded with its apply index.
+        #[arg(long)]
+        tx: Option<String>,
+        /// Store the whole ledger, or only the --tx transaction's envelope and result meta.
+        #[arg(long, value_enum, default_value = "ledger")]
+        slice: capture_cmd::SliceArg,
+        /// Registry family; the ledger must match one of its signature fragments.
+        #[arg(long)]
+        family: String,
+        /// Entry slug, giving the id <family>.<slug>.
+        #[arg(long)]
+        slug: String,
+        /// Where the ledger comes from; there is no fallback between the two.
+        #[arg(long, value_enum, default_value = "lake")]
+        via: capture_cmd::Via,
+        /// Data lake prefix, for a testnet that has since been reset.
+        #[arg(long)]
+        lake_prefix: Option<String>,
+        /// stellar-rpc endpoint for --via rpc.
+        #[arg(long)]
+        rpc_url: Option<String>,
+        /// Upstream issue or pull request this capture reproduces (repeatable).
+        #[arg(long = "linked-issue")]
+        linked_issues: Vec<String>,
+        /// Extra provenance text appended to the entry notes.
+        #[arg(long)]
+        note: Option<String>,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum OracleCommand {
+    /// Write <variant>.oracle.json next to every eligible corpus entry and record it.
+    Run {
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+    },
+    /// Apply a record-marked LedgerCloseMeta stream to a ledger state, checking state
+    /// consistency, conservation of lumens and interpretation on every ledger.
+    Check {
+        #[arg(long)]
+        file: PathBuf,
+        #[arg(long)]
+        passphrase: String,
+        #[arg(long, value_enum, default_value = "genesis")]
+        start: oracle_cmd::StartState,
+    },
+    /// Print the oracle facts for a LedgerCloseMeta file.
+    Interpret {
+        #[arg(long)]
+        file: PathBuf,
+        #[arg(long)]
+        passphrase: String,
+        /// The file is a record-marked stream of ledgers rather than one bare value.
+        #[arg(long)]
+        framed: bool,
+    },
+}
+
+#[derive(Subcommand)]
 enum PinsCommand {
     /// Check every pin against its live upstream source.
     Verify {
@@ -112,6 +329,116 @@ fn main() -> ExitCode {
             } => manifest_cmd::build_file(&corpus, &pins, &corpus_version),
             ManifestCommand::Schema { out } => manifest_cmd::write_schema(&out),
         },
+        Command::Oracle { command } => match command {
+            OracleCommand::Run { corpus } => oracle_cmd::run(&corpus),
+            OracleCommand::Check {
+                file,
+                passphrase,
+                start,
+            } => oracle_cmd::check(&file, &passphrase, start),
+            OracleCommand::Interpret {
+                file,
+                passphrase,
+                framed,
+            } => oracle_cmd::interpret(&file, &passphrase, framed),
+        },
+        Command::Gen {
+            command: GenCommand::Smoke { network, out, pins },
+        } => gen_cmd::smoke(&network, &out, &pins),
+        Command::Gen {
+            command:
+                GenCommand::Chains {
+                    family,
+                    network,
+                    jobs,
+                    corpus,
+                    registry,
+                    pins,
+                },
+        } => gen_cmd::chains(
+            &family,
+            &network,
+            jobs,
+            &gen_cmd::GenPaths {
+                corpus: &corpus,
+                registry: &registry,
+                pins: &pins,
+            },
+        ),
+        Command::Gen {
+            command:
+                GenCommand::VerifyRepro {
+                    family,
+                    jobs,
+                    corpus,
+                    registry,
+                    pins,
+                },
+        } => gen_cmd::verify_repro(
+            &family,
+            jobs,
+            &gen_cmd::GenPaths {
+                corpus: &corpus,
+                registry: &registry,
+                pins: &pins,
+            },
+        ),
+        Command::Synth {
+            command: SynthCommand::Build { corpus, registry },
+        } => synth_cmd::build(&corpus, &registry),
+        Command::Import {
+            command:
+                ImportCommand::Goldens {
+                    core_src,
+                    tag,
+                    corpus,
+                    registry,
+                },
+        } => golden_cmd::import(&core_src, &tag, &corpus, &registry),
+        Command::Goldens {
+            command: GoldensCommand::Agree { file, registry },
+        } => golden_cmd::agree(&file, &registry),
+        Command::Goldens {
+            command:
+                GoldensCommand::Verify {
+                    core_src,
+                    tag,
+                    index,
+                },
+        } => golden_cmd::verify(&core_src, &tag, &index),
+        Command::Capture {
+            command:
+                CaptureCommand::History {
+                    network,
+                    ledger,
+                    tx,
+                    slice,
+                    family,
+                    slug,
+                    via,
+                    lake_prefix,
+                    rpc_url,
+                    linked_issues,
+                    note,
+                    corpus,
+                    registry,
+                },
+        } => capture_cmd::run(capture_cmd::Args {
+            network,
+            ledger,
+            tx: tx.as_deref(),
+            slice,
+            family: &family,
+            slug: &slug,
+            via,
+            lake_prefix: lake_prefix.as_deref(),
+            rpc_url: rpc_url.as_deref(),
+            linked_issues,
+            note: note.as_deref(),
+            corpus: &corpus,
+            registry: &registry,
+        }),
+        Command::Conformance { command } => conformance_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

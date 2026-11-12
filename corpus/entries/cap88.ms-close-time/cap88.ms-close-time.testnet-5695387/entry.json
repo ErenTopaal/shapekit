@@ -1,0 +1,41 @@
+{
+  "caps": [
+    "CAP-0088"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap88.ms-close-time",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap88.ms-close-time.testnet-5695387",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/testnet/2025-12-18/FFAA0FFF--5632000-5695999/FFA91864--5695387.xdr.zst. ledger 5695387 hash e3f1723430f41657a77e745fd635714e0aa345f5935c5b22f54a6d550351eb2c, protocol 30, LedgerCloseMeta v2. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). a recent protocol 30 ledger whose close_time_ms 1794500579038 has a non-zero millisecond part (038), which a standalone core cannot produce",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 30,
+    "valid_min": 30
+  },
+  "source": {
+    "class": "testnet-history",
+    "ledger_seq": 5695387,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/testnet/2025-12-18/FFAA0FFF--5632000-5695999/FFA91864--5695387.xdr.zst"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/cap88.ms-close-time/cap88.ms-close-time.testnet-5695387/testnet.expected.json",
+      "expected_json_sha256": "fd641e97bc2a408944858ef1a3fa2a4a78b2cb44f2abdbf92c8efa36df77481a",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap88.ms-close-time/cap88.ms-close-time.testnet-5695387/testnet.xdr",
+      "xdr_sha256": "0269f86e6388aedbfd07ea532bc88826b593a9342c23a1a8a53a1be4604e7b0f"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

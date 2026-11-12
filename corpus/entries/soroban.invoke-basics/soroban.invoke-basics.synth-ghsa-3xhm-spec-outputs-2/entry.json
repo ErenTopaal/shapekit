@@ -1,0 +1,45 @@
+{
+  "caps": [
+    "CAP-0046",
+    "CAP-0046-02",
+    "CAP-0046-05",
+    "CAP-0046-07",
+    "CAP-0046-08",
+    "CAP-0046-12",
+    "CAP-0054",
+    "CAP-0058"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.invoke-basics",
+  "fields_exercised": [],
+  "flags": [
+    "ghsa",
+    "over-max-length"
+  ],
+  "id": "soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh"
+  ],
+  "notes": "the GHSA-3xhm-p452-9wjh bytes AAAAAAAAAAFmAAAAAAAAAAAAAAIAAAAEAAAABA== as ScSpecFunctionV0: two outputs where outputs<1> allows one. stellar-xdr 28.0.0 produced them from JSON and then could not decode them. contract specs live in uploaded wasm, so the entry sits with the wasm upload family. stellar-xdr 30.0.0 rejects it (ScSpecFunctionV0::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 28 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2/any.xdr",
+      "xdr_sha256": "fb327670046f80b79ffef7ad1c7684bc34a413d9281197e25b7b8a5639164e25"
+    }
+  },
+  "xdr_type": "ScSpecFunctionV0"
+}

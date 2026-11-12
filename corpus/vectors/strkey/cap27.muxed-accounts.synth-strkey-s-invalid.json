@@ -1,0 +1,128 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum off by one bit",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABS42"
+    },
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum bytes in big-endian order",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABGWK"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte short, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACXAQ"
+    },
+    {
+      "expected": {
+        "reject": "too-long"
+      },
+      "note": "payload one byte long, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHT5A"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one extra base32 symbol",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSU2A"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "lowercase base32",
+      "op": "strkey_decode",
+      "text": "saaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabsu2"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "a trailing = pad",
+      "op": "strkey_decode",
+      "text": "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSU2="
+    },
+    {
+      "expected": {
+        "reject": "too-long"
+      },
+      "note": "surrounding spaces",
+      "op": "strkey_decode",
+      "text": " SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSU2 "
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "algorithm bits of the version byte set to 7",
+      "op": "strkey_decode",
+      "text": "S4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABPIL"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "version byte 5 << 3, which no strkey type uses",
+      "op": "strkey_decode",
+      "text": "FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5EX"
+    },
+    {
+      "expected": {
+        "reject": "too-short"
+      },
+      "note": "the empty string",
+      "op": "strkey_decode",
+      "text": ""
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the prefix letter alone",
+      "op": "strkey_decode",
+      "text": "S"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [],
+    "flags": [
+      "strkey-invalid"
+    ],
+    "id": "cap27.muxed-accounts.synth-strkey-s-invalid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "invalid ed25519 secret seeds (S, 18 << 3); every seed here is a made-up byte pattern. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

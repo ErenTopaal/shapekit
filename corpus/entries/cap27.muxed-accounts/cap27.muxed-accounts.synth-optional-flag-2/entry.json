@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [
+    "op.source_account"
+  ],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "cap27.muxed-accounts.synth-optional-flag-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an operation whose optional source account has presence flag 2; optional data is a bool of 0 or 1. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 200 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.synth-optional-flag-2/any.xdr",
+      "xdr_sha256": "346b5542ef165696d405cd6c2fc72cf796f3b99e717b152e9bab4c311e78e2a5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

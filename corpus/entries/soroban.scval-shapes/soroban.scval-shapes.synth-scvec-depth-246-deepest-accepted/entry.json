@@ -1,0 +1,41 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [
+    "at-depth-cap",
+    "deep-nesting",
+    "nested-vec"
+  ],
+  "id": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an invoke-contract argument nested 246 ScVec levels deep, at the deepest an envelope decodes at depth 1000. core's depth check accepts it; the host converts at most 100 levels (scval.depth) and runs at most 100 frames, so an invocation this deep fails and the transaction lands in the ledger as failed with the full tree intact. a decoder must accept it.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 28
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted/any.expected.json",
+      "expected_json_sha256": "d711367a6a1d0162e968423ef10e1fada46da7755e7d56b0fd6e9ab18aac3b66",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted/any.xdr",
+      "xdr_sha256": "c90b80254aa797ec5c25f6f47eaa2595a4d50b73e567a2c61b93649968b98ca7"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

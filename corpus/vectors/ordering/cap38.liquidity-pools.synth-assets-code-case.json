@@ -1,0 +1,137 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "usd",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "usd:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAXVzZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "USD:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAVVTRAAAAAAA//////////////////////////////////////////8="
+      },
+      "expected": "greater",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "USD:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAVVTRAAAAAAA//////////////////////////////////////////8="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "usd",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "usd:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAXVzZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "expected": "less",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "usd",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "usd:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAXVzZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "USD:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAVVTRAAAAAAA//////////////////////////////////////////8="
+      },
+      "expected": {
+        "reject": "assets-out-of-order"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "USD:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAVVTRAAAAAAA//////////////////////////////////////////8="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "usd",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "usd:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAXVzZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "expected": {
+        "pool_id": "64b5c390d809c3e9dfa6610e8987aaa0be1e89249dddffc5cb008012ff37cf6d",
+        "strkey": "LBSLLQ4Q3AE4H2O7UZQQ5CMHVKQL4HUJESO5376FZMAIAEX7G7HW2U7B"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-code-case",
+    "kind": "ordering",
+    "linked_issues": [],
+    "notes": "codes usd and USD: raw bytes put U (0x55) before u (0x75). a case-insensitive or locale comparison calls the codes equal and falls through to the issuer, which points the other way here. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

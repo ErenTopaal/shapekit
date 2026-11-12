@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p30-account-four-payload-signers",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "an account entry holding signed-payload signers with 1, 4, 32 and 64 byte payloads, one of them sponsored",
+  "passphrase_dependent": false,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "recipe": "cap40.signed-payload-signer"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p30-account-four-payload-signers/mainnet.expected.json",
+      "expected_json_sha256": "70e55ed250a63cc3460720aa35fae3d2690d2891ac984a602384d5f7ab09581c",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p30-account-four-payload-signers/mainnet.xdr",
+      "xdr_sha256": "a5df8ab3d6c0da4779ca55262a39dc7475281a6d148987116a957797c2fa9527"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p30-account-four-payload-signers/testnet.expected.json",
+      "expected_json_sha256": "70e55ed250a63cc3460720aa35fae3d2690d2891ac984a602384d5f7ab09581c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p30-account-four-payload-signers/testnet.xdr",
+      "xdr_sha256": "a5df8ab3d6c0da4779ca55262a39dc7475281a6d148987116a957797c2fa9527"
+    }
+  },
+  "xdr_type": "LedgerEntry"
+}

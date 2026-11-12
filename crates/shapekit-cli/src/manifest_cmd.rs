@@ -50,7 +50,7 @@ pub fn build_file(corpus: &Path, pins_file: &Path, corpus_version: &str) -> Resu
 
 // the header names the stack the corpus was produced with; the xdr crate is the one linked
 // into this binary, and must agree with what pins.toml says was used
-fn generated_with(pins: &pins::Pins) -> Result<GeneratedWith> {
+pub(crate) fn generated_with(pins: &pins::Pins) -> Result<GeneratedWith> {
     let linked = shapekit_manifest::STELLAR_XDR_VERSION;
     if !pins
         .crates

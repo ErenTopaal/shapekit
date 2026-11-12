@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0038"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "cap38.liquidity-pools",
+  "fields_exercised": [],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "cap38.liquidity-pools.synth-asset-type-pool-share",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an Asset with type ASSET_TYPE_POOL_SHARE = 3, which only ChangeTrustAsset and TrustLineAsset have an arm for. stellar-xdr 30.0.0 rejects it (Asset::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 36 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 18,
+    "valid_min": 18
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.synth-asset-type-pool-share/any.xdr",
+      "xdr_sha256": "19b8eb8715f20019966e9af0c4d667b943bdeedc0de48a86162faa2a5c039651"
+    }
+  },
+  "xdr_type": "Asset"
+}

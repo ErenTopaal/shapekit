@@ -1,0 +1,231 @@
+{
+  "cases": [
+    {
+      "entries": [
+        {
+          "key": {
+            "json": {
+              "bytes": "0a"
+            },
+            "xdr": "AAAADQAAAAEKAAAA"
+          },
+          "val": {
+            "json": {
+              "u32": 0
+            },
+            "xdr": "AAAAAwAAAAA="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "bytes": "09"
+            },
+            "xdr": "AAAADQAAAAEJAAAA"
+          },
+          "val": {
+            "json": {
+              "u32": 1
+            },
+            "xdr": "AAAAAwAAAAE="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "bytes": "0102"
+            },
+            "xdr": "AAAADQAAAAIBAgAA"
+          },
+          "val": {
+            "json": {
+              "u32": 2
+            },
+            "xdr": "AAAAAwAAAAI="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "bytes": "02"
+            },
+            "xdr": "AAAADQAAAAECAAAA"
+          },
+          "val": {
+            "json": {
+              "u32": 3
+            },
+            "xdr": "AAAAAwAAAAM="
+          }
+        }
+      ],
+      "expected": {
+        "map": {
+          "json": {
+            "map": [
+              {
+                "key": {
+                  "bytes": "0102"
+                },
+                "val": {
+                  "u32": 2
+                }
+              },
+              {
+                "key": {
+                  "bytes": "02"
+                },
+                "val": {
+                  "u32": 3
+                }
+              },
+              {
+                "key": {
+                  "bytes": "09"
+                },
+                "val": {
+                  "u32": 1
+                }
+              },
+              {
+                "key": {
+                  "bytes": "0a"
+                },
+                "val": {
+                  "u32": 0
+                }
+              }
+            ]
+          },
+          "xdr": "AAAAEQAAAAEAAAAEAAAADQAAAAIBAgAAAAAAAwAAAAIAAAANAAAAAQIAAAAAAAADAAAAAwAAAA0AAAABCQAAAAAAAAMAAAABAAAADQAAAAEKAAAAAAAAAwAAAAA="
+        },
+        "order": [
+          2,
+          3,
+          1,
+          0
+        ]
+      },
+      "op": "map_sort"
+    },
+    {
+      "expected": "reject",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "bytes": "0a"
+              },
+              "val": {
+                "u32": 0
+              }
+            },
+            {
+              "key": {
+                "bytes": "09"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "bytes": "0102"
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "bytes": "02"
+              },
+              "val": {
+                "u32": 3
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAAEAAAADQAAAAEKAAAAAAAAAwAAAAAAAAANAAAAAQkAAAAAAAADAAAAAQAAAA0AAAACAQIAAAAAAAMAAAACAAAADQAAAAECAAAAAAAAAwAAAAM="
+      },
+      "op": "map_validate"
+    },
+    {
+      "expected": "accept",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "bytes": "0102"
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "bytes": "02"
+              },
+              "val": {
+                "u32": 3
+              }
+            },
+            {
+              "key": {
+                "bytes": "09"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "bytes": "0a"
+              },
+              "val": {
+                "u32": 0
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAAEAAAADQAAAAIBAgAAAAAAAwAAAAIAAAANAAAAAQIAAAAAAAADAAAAAwAAAA0AAAABCQAAAAAAAAMAAAABAAAADQAAAAEKAAAAAAAAAwAAAAA="
+      },
+      "op": "map_validate"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-order",
+      "xdr-byte-order-differs"
+    ],
+    "id": "soroban.scval-shapes.synth-map-keys-bytes",
+    "kind": "ordering",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/pull/1766"
+    ],
+    "notes": "the js-stellar-sdk#1766 bytes keys [10], [9], [1,2], [2]. the host compares content bytewise, so [1,2] comes before [2]; the XDR encodings start with the length, so sorting the encoded keys puts [2] first. map_sort expects the entry indices in the order soroban-env-host 30.0.0 sorts them (Compare<ScVal> for Budget, src/host/comparison.rs), and the sorted map; map_validate expects the host's verdict on converting the map to a host object, which refuses keys that are not strictly increasing (\"ScMap was not sorted by key for conversion to host object\").",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

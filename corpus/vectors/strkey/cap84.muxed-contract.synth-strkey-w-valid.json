@@ -1,0 +1,102 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "0",
+        "kind": "muxed_contract"
+      },
+      "note": "sep-23 sample key, id 0",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWC"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "1",
+        "kind": "muxed_contract"
+      },
+      "note": "sep-23 sample key, id 1",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAEGHC"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "9007199254740992",
+        "kind": "muxed_contract"
+      },
+      "note": "sep-23 sample key, id 2^53",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUABAAAAAAAAAADNQ6"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "9223372036854775808",
+        "kind": "muxed_contract"
+      },
+      "note": "sep-23 sample key, id 2^63",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVAAAAAAAAAAAACWJY"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "18446744073709551615",
+        "kind": "muxed_contract"
+      },
+      "note": "sep-23 sample key, id 2^64-1",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJV7777777777777GMO"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "0",
+        "kind": "muxed_contract"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWC"
+    },
+    {
+      "expected": {
+        "contract": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "id": "9223372036854775808",
+        "kind": "muxed_contract"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVAAAAAAAAAAAACWJY"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0084"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap84.muxed-contract",
+    "fields_exercised": [],
+    "flags": [
+      "muxed-contract"
+    ],
+    "id": "cap84.muxed-contract.synth-strkey-w-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid muxed contracts (W, 22 << 3, CAP-84): 32 contract id bytes then a big-endian u64 id. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 30,
+      "valid_min": 30
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

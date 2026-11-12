@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-set-options-empty-payload",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "SetOptions adding a signed-payload signer with an empty payload, which core refuses with SET_OPTIONS_BAD_SIGNER before the transaction reaches a ledger. submitted with ledger 11 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////+AAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "cap40.signed-payload-signer"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-empty-payload/mainnet.expected.json",
+      "expected_json_sha256": "07074de0d247eeb410c4945ca7b6cdfbdf0647bddce232fccdd0a520a778a8e5",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-empty-payload/mainnet.xdr",
+      "xdr_sha256": "d203aabf9f07ba62bd4f1fff13ae50266ffaa15528b75c7301acbaf7f8c7ee0e"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-empty-payload/testnet.expected.json",
+      "expected_json_sha256": "c4e322af3ae23c6307a51901ba0d8ddeeab05bdfba8f705cf0176b03860e697d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-empty-payload/testnet.xdr",
+      "xdr_sha256": "72296ff80d50c622bb20e75dd3f230ec00bb64db6d3482c4ca0fc623694aea47"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

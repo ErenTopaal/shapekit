@@ -1,0 +1,128 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740992",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAASEY",
+              "xdr": "AAABAAAgAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAASEY"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740992
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740993",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAECVY",
+              "xdr": "AAABAAAgAAAAAAABOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAECVY"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740993
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9223372036854775807",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DU7777777777776ZHS",
+              "xdr": "AAABAH//////////Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DU7777777777776ZHS"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9223372036854775807
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "18446744073709551615",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DV7777777777774ZYI",
+              "xdr": "AAABAP//////////Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DV7777777777774ZYI"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 18446744073709551615
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "valid"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "muxed-account",
+      "non-canonical-id",
+      "unsafe-json-number"
+    ],
+    "id": "cap27.muxed-accounts.synth-textual-muxed-id-unsafe-number",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785",
+      "https://www.rfc-editor.org/rfc/rfc8259#section-6"
+    ],
+    "notes": "in-range muxed account ids (uint64, 0 to 2^64-1). accepted cases carry the M address and MuxedAccount XDR for key 0x3a..3a with that id, given as JSON numbers above 2^53-1. this bound is not a network rule but a JSON interoperability limit: RFC 8259 section 6 says integers outside [-(2^53)+1, 2^53-1] are not interoperable because implementations commonly hold numbers as IEEE-754 doubles. js-stellar-sdk#1785 is that failure: a number above 2^53-1 lost precision and the operation encoded a different id. each case expects either the exact written id or a refusal (unsafe-integer); encoding any other id fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

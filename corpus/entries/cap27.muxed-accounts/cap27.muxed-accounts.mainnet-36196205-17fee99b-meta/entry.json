@@ -1,0 +1,44 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap27.muxed-accounts.mainnet-36196205-17fee99b-meta",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/stellar-etl/issues/477"
+  ],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FDD83DFF--36160000-36223999/FDD7B092--36196205.xdr.zst. ledger 36196205 hash d869a0341c34c64744df4ad9ca3ac0cd1197a1275b6a235ea11697e4cf53a3de, protocol 17, LedgerCloseMeta v0. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). transaction slice: the envelope and the result meta of transaction 17fee99b64f9c34ec9f8b52ffd4a72c51186bdf36f79a92bbbc138603916039c cut byte for byte out of the ledger. stellar-etl#477 names this transaction as a fee bump with a muxed fee source; the ledger holds it as a plain v1 envelope (no fee bump in the whole ledger) whose own source account is muxed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 17,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 36196205,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FDD83DFF--36160000-36223999/FDD7B092--36196205.xdr.zst",
+    "tx_hash": "17fee99b64f9c34ec9f8b52ffd4a72c51186bdf36f79a92bbbc138603916039c",
+    "tx_index": 135
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.mainnet-36196205-17fee99b-meta/mainnet.expected.json",
+      "expected_json_sha256": "44b64591037af79d5f9db222714a1145ff59d32b7337d2c01d935947cd56cdab",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.mainnet-36196205-17fee99b-meta/mainnet.xdr",
+      "xdr_sha256": "28451ae4e92036491eaa4ad59cea64d6aa2953d7be6c62b9dd693ca74d9b56a3"
+    }
+  },
+  "xdr_type": "TransactionResultMeta"
+}

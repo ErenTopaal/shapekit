@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.operations"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "classic.max-length.synth-tx-101-operations",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a v1 transaction envelope with 101 operations, one past MAX_OPS_PER_TX = 100 (operations<MAX_OPS_PER_TX> in Stellar-transaction.x). stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 5800 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-tx-101-operations/any.xdr",
+      "xdr_sha256": "cdbc7dcea3d8f571abbd406557d8e6f385fe4db9decda5a358a2901ed19ed472"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

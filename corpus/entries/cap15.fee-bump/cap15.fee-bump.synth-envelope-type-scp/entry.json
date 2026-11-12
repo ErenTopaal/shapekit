@@ -1,0 +1,36 @@
+{
+  "caps": [
+    "CAP-0015",
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "cap15.fee-bump.synth-envelope-type-scp",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a transaction envelope whose type is ENVELOPE_TYPE_SCP = 1: a valid EnvelopeType value with no arm in TransactionEnvelope, followed by a v1 body. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 200 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.synth-envelope-type-scp/any.xdr",
+      "xdr_sha256": "7974340de659a0aedf8673c7f0f0bf91c2094c4d8866b428ff028c0bd949af6d"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,327 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "9223372036854775808"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "18446744073709551615"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "18446744073709551616"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0x10"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0X10"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0o20"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "0b10000"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "leading-zero"
+      },
+      "input": {
+        "text": "016"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "leading-zero"
+      },
+      "input": {
+        "text": "00"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": " 16 "
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16 "
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "\t16"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16\n"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "empty"
+      },
+      "input": {
+        "text": ""
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "+16"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-1"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-0"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "16.0"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "1e1"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "1_6"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "１６"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "text": "99999999999999999999999"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-16"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-decimal-digits"
+      },
+      "input": {
+        "text": "-9223372036854775808"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "out-of-range"
+      },
+      "input": {
+        "number": 18446744073709551615
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "negative"
+      },
+      "input": {
+        "number": -1
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "negative"
+      },
+      "input": {
+        "number": -16
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-an-integer"
+      },
+      "input": {
+        "number": 16.5
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "not-an-integer"
+      },
+      "input": {
+        "number": 16.0
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "non-canonical-id"
+    ],
+    "id": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785"
+    ],
+    "notes": "non-canonical or out-of-range offer ids (int64 in XDR, 0 to 2^63-1 because core refuses negative ids from protocol 15). accepted cases carry a ManageSellOfferOp with that offer id. text is accepted only as the exact decimal rendering of an in-range value (ASCII digits, no sign, whitespace, leading zero, radix prefix, fraction or exponent); a JSON number is accepted as an integer in range with |n| <= 2^53-1, and refused when negative, fractional or out of range. in-range JSON numbers above 2^53-1 are in a separate implementation-defined entry. negative offer ids are refused because core answers MANAGE_SELL_OFFER_MALFORMED / MANAGE_BUY_OFFER_MALFORMED for offerID < 0 from protocol 15 (stellar-core v30.0.0 src/transactions/ManageOfferOpFrameBase.cpp, ManageOfferOpFrameBase::doCheckValid). the reject reason is informational; a testee passes by refusing.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

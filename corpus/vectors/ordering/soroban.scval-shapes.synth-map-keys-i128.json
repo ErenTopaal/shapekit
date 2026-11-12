@@ -1,0 +1,231 @@
+{
+  "cases": [
+    {
+      "entries": [
+        {
+          "key": {
+            "json": {
+              "i128": "1"
+            },
+            "xdr": "AAAACgAAAAAAAAAAAAAAAAAAAAE="
+          },
+          "val": {
+            "json": {
+              "u32": 0
+            },
+            "xdr": "AAAAAwAAAAA="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "i128": "-1"
+            },
+            "xdr": "AAAACv////////////////////8="
+          },
+          "val": {
+            "json": {
+              "u32": 1
+            },
+            "xdr": "AAAAAwAAAAE="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "i128": "0"
+            },
+            "xdr": "AAAACgAAAAAAAAAAAAAAAAAAAAA="
+          },
+          "val": {
+            "json": {
+              "u32": 2
+            },
+            "xdr": "AAAAAwAAAAI="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "i128": "-200"
+            },
+            "xdr": "AAAACv///////////////////zg="
+          },
+          "val": {
+            "json": {
+              "u32": 3
+            },
+            "xdr": "AAAAAwAAAAM="
+          }
+        }
+      ],
+      "expected": {
+        "map": {
+          "json": {
+            "map": [
+              {
+                "key": {
+                  "i128": "-200"
+                },
+                "val": {
+                  "u32": 3
+                }
+              },
+              {
+                "key": {
+                  "i128": "-1"
+                },
+                "val": {
+                  "u32": 1
+                }
+              },
+              {
+                "key": {
+                  "i128": "0"
+                },
+                "val": {
+                  "u32": 2
+                }
+              },
+              {
+                "key": {
+                  "i128": "1"
+                },
+                "val": {
+                  "u32": 0
+                }
+              }
+            ]
+          },
+          "xdr": "AAAAEQAAAAEAAAAEAAAACv///////////////////zgAAAADAAAAAwAAAAr/////////////////////AAAAAwAAAAEAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAACAAAACgAAAAAAAAAAAAAAAAAAAAEAAAADAAAAAA=="
+        },
+        "order": [
+          3,
+          1,
+          2,
+          0
+        ]
+      },
+      "op": "map_sort"
+    },
+    {
+      "expected": "reject",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "i128": "1"
+              },
+              "val": {
+                "u32": 0
+              }
+            },
+            {
+              "key": {
+                "i128": "-1"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "i128": "0"
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "i128": "-200"
+              },
+              "val": {
+                "u32": 3
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAAEAAAACgAAAAAAAAAAAAAAAAAAAAEAAAADAAAAAAAAAAr/////////////////////AAAAAwAAAAEAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAACAAAACv///////////////////zgAAAADAAAAAw=="
+      },
+      "op": "map_validate"
+    },
+    {
+      "expected": "accept",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "i128": "-200"
+              },
+              "val": {
+                "u32": 3
+              }
+            },
+            {
+              "key": {
+                "i128": "-1"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "i128": "0"
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "i128": "1"
+              },
+              "val": {
+                "u32": 0
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAAEAAAACv///////////////////zgAAAADAAAAAwAAAAr/////////////////////AAAAAwAAAAEAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAACAAAACgAAAAAAAAAAAAAAAAAAAAEAAAADAAAAAA=="
+      },
+      "op": "map_validate"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-order",
+      "xdr-byte-order-differs"
+    ],
+    "id": "soroban.scval-shapes.synth-map-keys-i128",
+    "kind": "ordering",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/pull/1766"
+    ],
+    "notes": "the js-stellar-sdk#1766 i128 keys 1, -1, 0, -200: numeric order. the two's-complement encodings of negative values sort after the positive ones as raw bytes. map_sort expects the entry indices in the order soroban-env-host 30.0.0 sorts them (Compare<ScVal> for Budget, src/host/comparison.rs), and the sorted map; map_validate expects the host's verdict on converting the map to a host object, which refuses keys that are not strictly increasing (\"ScMap was not sorted by key for conversion to host object\").",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

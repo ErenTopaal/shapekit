@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "duplicate-map-key"
+  ],
+  "id": "soroban.scval-shapes.synth-event-map-duplicate-key",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a contract event whose data map has the key symbol a twice. host maps have unique keys, so the host never emits this; a keyed projection would keep one of the two values.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-map-duplicate-key/any.expected.json",
+      "expected_json_sha256": "16163855d4d071de54d04876e4d3a011f13de2464943bbb898556b8b2d3a940d",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-map-duplicate-key/any.xdr",
+      "xdr_sha256": "d36429a5cd2daac9ecefa599a0d9714e95d00c2c9146abbe5d461ac75b605377"
+    }
+  },
+  "xdr_type": "ContractEvent"
+}

@@ -1,0 +1,141 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO"
+          }
+        },
+        "text": "USD:GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO",
+        "xdr": "AAAAAVVTRAAAAAAA96TA5bLRFwmw77hliDpn58MyAH9oo7Kz9x0ESsvSz4U="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL"
+          }
+        },
+        "text": "USD:GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL",
+        "xdr": "AAAAAVVTRAAAAAAA4wX4hf/0IDWYv3p7spz23LBfnsxE8VpcVVfvZlwOAfc="
+      },
+      "expected": "greater",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL"
+          }
+        },
+        "text": "USD:GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL",
+        "xdr": "AAAAAVVTRAAAAAAA4wX4hf/0IDWYv3p7spz23LBfnsxE8VpcVVfvZlwOAfc="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO"
+          }
+        },
+        "text": "USD:GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO",
+        "xdr": "AAAAAVVTRAAAAAAA96TA5bLRFwmw77hliDpn58MyAH9oo7Kz9x0ESsvSz4U="
+      },
+      "expected": "less",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO"
+          }
+        },
+        "text": "USD:GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO",
+        "xdr": "AAAAAVVTRAAAAAAA96TA5bLRFwmw77hliDpn58MyAH9oo7Kz9x0ESsvSz4U="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL"
+          }
+        },
+        "text": "USD:GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL",
+        "xdr": "AAAAAVVTRAAAAAAA4wX4hf/0IDWYv3p7spz23LBfnsxE8VpcVVfvZlwOAfc="
+      },
+      "expected": {
+        "reject": "assets-out-of-order"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL"
+          }
+        },
+        "text": "USD:GDRQL6EF772CANMYX55HXMU463OLAX46ZRCPCWS4KVL66ZS4BYA7OYDL",
+        "xdr": "AAAAAVVTRAAAAAAA4wX4hf/0IDWYv3p7spz23LBfnsxE8VpcVVfvZlwOAfc="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO"
+          }
+        },
+        "text": "USD:GD32JQHFWLIROCNQ564GLCB2M7T4GMQAP5UKHMVT64OQISWL2LHYK2HO",
+        "xdr": "AAAAAVVTRAAAAAAA96TA5bLRFwmw77hliDpn58MyAH9oo7Kz9x0ESsvSz4U="
+      },
+      "expected": {
+        "pool_id": "c2a730127d006897b021d6fcb279da68b4f65f9b6a408c74eb2cdd85ea862d5e",
+        "strkey": "LDBKOMASPUAGRF5QEHLPZMTZ3JULJ5S7TNVEBDDU5MWN3BPKQYWV53DN"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair",
+      "issuer-order-differs",
+      "strkey-order-differs"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-py1246-testnet-pool",
+    "kind": "ordering",
+    "linked_issues": [
+      "https://github.com/StellarCN/py-stellar-base/issues/1246"
+    ],
+    "notes": "the py-stellar-base#1246 pair from testnet pool c2a730127d006897b021d6fcb279da68b4f65f9b6a408c74eb2cdd85ea862d5e (transaction 0126748091930959a3aefac9296e1773b947f964a9b73f37ce856c4df32d346f, ledger 5521432). the pool id computed from the pair in core order equals the real pool id, which the build checks. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

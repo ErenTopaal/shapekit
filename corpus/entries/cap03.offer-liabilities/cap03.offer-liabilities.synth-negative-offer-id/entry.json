@@ -1,0 +1,42 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [
+    "non-canonical-id"
+  ],
+  "id": "cap03.offer-liabilities.synth-negative-offer-id",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "a manage sell offer with offerID -16. the XDR type is int64, but from protocol 15 core answers MANAGE_SELL_OFFER_MALFORMED for a negative id (ManageOfferOpFrameBase::doCheckValid).",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 11,
+    "valid_min": 15
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.synth-negative-offer-id/any.expected.json",
+      "expected_json_sha256": "7ebe02e097d1b0d06e7de6c5e0e0ab76e8905d82a453123ca799d91a4e4a8b37",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.synth-negative-offer-id/any.xdr",
+      "xdr_sha256": "70fe9145fee7f812ac20a92df132ce2f183b89bfde1f763f5b904ef6a308944f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

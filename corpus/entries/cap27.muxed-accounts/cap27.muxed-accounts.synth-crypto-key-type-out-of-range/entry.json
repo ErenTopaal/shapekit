@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [
+    "op.source_account"
+  ],
+  "flags": [
+    "bad-discriminant",
+    "muxed-account"
+  ],
+  "id": "cap27.muxed-accounts.synth-crypto-key-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an operation source MuxedAccount with CryptoKeyType 0x101, between KEY_TYPE_MUXED_ED25519 = 0x100 and nothing; MuxedAccount has arms only for 0 and 0x100. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 236 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.synth-crypto-key-type-out-of-range/any.xdr",
+      "xdr_sha256": "b8a509a3426ddfaf2d6852e5b77de5eab27a433f590848889c6afd33773e3438"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

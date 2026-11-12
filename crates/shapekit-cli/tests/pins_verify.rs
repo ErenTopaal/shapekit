@@ -53,7 +53,22 @@ fn registered_commands() {
         .lines()
         .filter_map(|l| l.split_whitespace().next())
         .collect();
-    assert_eq!(commands, ["pins", "registry", "manifest", "help"]);
+    assert_eq!(
+        commands,
+        [
+            "pins",
+            "registry",
+            "manifest",
+            "conformance",
+            "oracle",
+            "import",
+            "goldens",
+            "capture",
+            "gen",
+            "synth",
+            "help"
+        ]
+    );
 }
 
 #[test]

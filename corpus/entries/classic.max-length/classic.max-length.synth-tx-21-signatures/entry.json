@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.signatures"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "classic.max-length.synth-tx-21-signatures",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a v1 transaction envelope with 21 decorated signatures, one past signatures<20>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 1640 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-tx-21-signatures/any.xdr",
+      "xdr_sha256": "503c3d94ba346ff94283fbd410ff8bcdb4877effab6721550752a6dc72890686"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

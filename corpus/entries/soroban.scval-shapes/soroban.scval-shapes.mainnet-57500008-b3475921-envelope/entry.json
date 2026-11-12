@@ -1,0 +1,41 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "soroban.scval-shapes.mainnet-57500008-b3475921-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC930BFF--57472000-57535999/FC929E97--57500008.xdr.zst. ledger 57500008 hash 02a867c1ade5d8fb91a2f88132f80a604d02d617ac8e44180cd6162e933792e0, protocol 22, LedgerCloseMeta v1. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). transaction slice: the envelope and the result meta of transaction b34759219fd6b7af350936fbc145316d101f1000215a7a2c0f708de383f4a154 cut byte for byte out of the ledger. a wallet-backend indexer fixture ledger (protocol 22, LedgerCloseMeta v1). smallest transaction in it carrying a vec nested four deep",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 57500008,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC930BFF--57472000-57535999/FC929E97--57500008.xdr.zst",
+    "tx_hash": "b34759219fd6b7af350936fbc145316d101f1000215a7a2c0f708de383f4a154",
+    "tx_index": 239
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.mainnet-57500008-b3475921-envelope/mainnet.expected.json",
+      "expected_json_sha256": "f8f79f1761dd8ef2be660cd6cbbc97e74310023908c42fcc0b86abe00650fa31",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.mainnet-57500008-b3475921-envelope/mainnet.xdr",
+      "xdr_sha256": "0560a376ffcce849cdcaf04eafcf1c1f99d1188283c256e3672aee1cecb3f3e9"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

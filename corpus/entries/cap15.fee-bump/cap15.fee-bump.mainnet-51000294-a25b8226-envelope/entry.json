@@ -1,0 +1,43 @@
+{
+  "caps": [
+    "CAP-0015"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap15.fee-bump.mainnet-51000294-a25b8226-envelope",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/stellar-etl/issues/477"
+  ],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FCF6A7FF--50944000-51007999/FCF5CC19--51000294.xdr.zst. ledger 51000294 hash ea7d42d6a170942cfc15212a85a49dee3861cd239c92883c7b2a87e3b63c5034, protocol 20, LedgerCloseMeta v1. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). transaction slice: the envelope and the result meta of transaction a25b8226b0c01a99c26168e2e61c7ee1f386d34255fc10c8c41ff6e46bf93431 cut byte for byte out of the ledger. a wallet-backend indexer fixture ledger (protocol 20, LedgerCloseMeta v1). fee bump with an unmuxed fee source over a failed inner transaction whose source is muxed, the second mode stellar-etl#477 describes",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 20,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 51000294,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FCF6A7FF--50944000-51007999/FCF5CC19--51000294.xdr.zst",
+    "tx_hash": "a25b8226b0c01a99c26168e2e61c7ee1f386d34255fc10c8c41ff6e46bf93431",
+    "tx_index": 237
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.mainnet-51000294-a25b8226-envelope/mainnet.expected.json",
+      "expected_json_sha256": "392d9cd56e4106044a02730227aeb50480d5ddf97e550bb1f5b206583be147c5",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.mainnet-51000294-a25b8226-envelope/mainnet.xdr",
+      "xdr_sha256": "85d144ab94690b2d69140461d78df959d95efdce46328bf3dd96de2dad07d8f8"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

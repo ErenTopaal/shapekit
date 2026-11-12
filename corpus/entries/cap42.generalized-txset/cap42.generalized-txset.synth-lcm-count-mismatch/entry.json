@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0042"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "cap42.generalized-txset",
+  "fields_exercised": [],
+  "flags": [
+    "count-mismatch"
+  ],
+  "id": "cap42.generalized-txset.synth-lcm-count-mismatch",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a LedgerCloseMeta v1 whose generalized transaction set carries one transaction while txProcessing is empty. core writes one TransactionResultMeta per applied transaction, so the counts always match in real meta; an indexer that zips the two lists must not panic or drop the ledger silently.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/cap42.generalized-txset/cap42.generalized-txset.synth-lcm-count-mismatch/any.expected.json",
+      "expected_json_sha256": "893f4312656a78d61e98a383bf58e07e8eef96de26f7d353c89f8f473bf42026",
+      "xdr_file": "entries/cap42.generalized-txset/cap42.generalized-txset.synth-lcm-count-mismatch/any.xdr",
+      "xdr_sha256": "4f7da95929045e371f18bcb334ce08c6e1ce7a9345939acb3d13106cf9891fcf"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,185 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum off by one bit",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWGC"
+    },
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum bytes in big-endian order",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAABQS2"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte short, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAUCCQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte long, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAAIOUI"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one extra base32 symbol",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWCA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "lowercase base32",
+      "op": "strkey_decode",
+      "text": "wa7qynf7sowq3glr2bgmzehxavirza4kvwltjjfc7mgxua74p7ujuaaaaaaaaaaaaawwc"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "a trailing = pad",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWC="
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "surrounding spaces",
+      "op": "strkey_decode",
+      "text": " WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWC "
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "algorithm bits of the version byte set to 7",
+      "op": "strkey_decode",
+      "text": "W47QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAADXHW"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "version byte 5 << 3, which no strkey type uses",
+      "op": "strkey_decode",
+      "text": "FA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAACNCE"
+    },
+    {
+      "expected": {
+        "reject": "too-short"
+      },
+      "note": "the empty string",
+      "op": "strkey_decode",
+      "text": ""
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the prefix letter alone",
+      "op": "strkey_decode",
+      "text": "W"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the lowest of the 1 unused trailing bits of the last symbol set",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWD"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "32 bytes without the 8-byte id",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSQ7"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWD"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWCA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAAIOUI"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "W47QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAADXHW"
+    },
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "WA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAAAAWWA"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0084"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap84.muxed-contract",
+    "fields_exercised": [],
+    "flags": [
+      "muxed-contract",
+      "strkey-invalid"
+    ],
+    "id": "cap84.muxed-contract.synth-strkey-w-invalid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "invalid muxed contracts (W, 22 << 3, CAP-84): 32 contract id bytes then a big-endian u64 id. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 30,
+      "valid_min": 30
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

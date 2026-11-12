@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "kind": "pre_auth_tx"
+      },
+      "note": "zero key",
+      "op": "strkey_decode",
+      "text": "TAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLVU"
+    },
+    {
+      "expected": {
+        "hash": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+        "kind": "pre_auth_tx"
+      },
+      "note": "0x3a key",
+      "op": "strkey_decode",
+      "text": "TA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOGY"
+    },
+    {
+      "expected": {
+        "hash": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "pre_auth_tx"
+      },
+      "note": "sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "TA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUPUI"
+    },
+    {
+      "expected": {
+        "hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "kind": "pre_auth_tx"
+      },
+      "note": "0xff key",
+      "op": "strkey_decode",
+      "text": "TD777777777777777777777777777777777777777777777777776GRQ"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0040"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap40.signed-payload-signer",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "cap40.signed-payload-signer.synth-strkey-t-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid pre-authorized transaction hashes (T, 19 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 19,
+      "valid_min": 19
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

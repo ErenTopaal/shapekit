@@ -1,0 +1,41 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC3E15FF--63040000-63103999/FC3D46FB--63092996.xdr.zst. ledger 63092996 hash 23221d8b4d3b29d874ddf37f8cb985f9e780717688271b0fbe9aa54a422c43a1, protocol 26, LedgerCloseMeta v2. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). transaction slice: the envelope and the result meta of transaction 71f6c6ffc200cb8b845ea4f41f04dfef2586f1d7e7405d6de122b44fca4c056e cut byte for byte out of the ledger. a wallet-backend indexer fixture ledger (protocol 26). smallest transaction in it with a u32-keyed ScMap",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 26,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 63092996,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC3E15FF--63040000-63103999/FC3D46FB--63092996.xdr.zst",
+    "tx_hash": "71f6c6ffc200cb8b845ea4f41f04dfef2586f1d7e7405d6de122b44fca4c056e",
+    "tx_index": 245
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope/mainnet.expected.json",
+      "expected_json_sha256": "9248f61f844f933fd07cb1a4d30a5cdc9e6a90eff9614d75e237a97609dd5dfe",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope/mainnet.xdr",
+      "xdr_sha256": "4068029f2e19e54a0fa4e77f37b3e1d9142151853248d8ae4cfa11e2843f750a"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

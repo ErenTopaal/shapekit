@@ -1,0 +1,192 @@
+{
+  "cases": [
+    {
+      "entries": [
+        {
+          "key": {
+            "json": {
+              "symbol": "b"
+            },
+            "xdr": "AAAADwAAAAFiAAAA"
+          },
+          "val": {
+            "json": {
+              "u32": 0
+            },
+            "xdr": "AAAAAwAAAAA="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "symbol": "aa"
+            },
+            "xdr": "AAAADwAAAAJhYQAA"
+          },
+          "val": {
+            "json": {
+              "u32": 1
+            },
+            "xdr": "AAAAAwAAAAE="
+          }
+        },
+        {
+          "key": {
+            "json": {
+              "symbol": "a"
+            },
+            "xdr": "AAAADwAAAAFhAAAA"
+          },
+          "val": {
+            "json": {
+              "u32": 2
+            },
+            "xdr": "AAAAAwAAAAI="
+          }
+        }
+      ],
+      "expected": {
+        "map": {
+          "json": {
+            "map": [
+              {
+                "key": {
+                  "symbol": "a"
+                },
+                "val": {
+                  "u32": 2
+                }
+              },
+              {
+                "key": {
+                  "symbol": "aa"
+                },
+                "val": {
+                  "u32": 1
+                }
+              },
+              {
+                "key": {
+                  "symbol": "b"
+                },
+                "val": {
+                  "u32": 0
+                }
+              }
+            ]
+          },
+          "xdr": "AAAAEQAAAAEAAAADAAAADwAAAAFhAAAAAAAAAwAAAAIAAAAPAAAAAmFhAAAAAAADAAAAAQAAAA8AAAABYgAAAAAAAAMAAAAA"
+        },
+        "order": [
+          2,
+          1,
+          0
+        ]
+      },
+      "op": "map_sort"
+    },
+    {
+      "expected": "reject",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "symbol": "b"
+              },
+              "val": {
+                "u32": 0
+              }
+            },
+            {
+              "key": {
+                "symbol": "aa"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "symbol": "a"
+              },
+              "val": {
+                "u32": 2
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAADAAAADwAAAAFiAAAAAAAAAwAAAAAAAAAPAAAAAmFhAAAAAAADAAAAAQAAAA8AAAABYQAAAAAAAAMAAAAC"
+      },
+      "op": "map_validate"
+    },
+    {
+      "expected": "accept",
+      "map": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "symbol": "a"
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "symbol": "aa"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "symbol": "b"
+              },
+              "val": {
+                "u32": 0
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAADAAAADwAAAAFhAAAAAAAAAwAAAAIAAAAPAAAAAmFhAAAAAAADAAAAAQAAAA8AAAABYgAAAAAAAAMAAAAA"
+      },
+      "op": "map_validate"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-order",
+      "xdr-byte-order-differs"
+    ],
+    "id": "soroban.scval-shapes.synth-map-keys-symbols",
+    "kind": "ordering",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/pull/1766"
+    ],
+    "notes": "the js-stellar-sdk#1766 symbol keys b, aa, a; bytewise content order puts aa between a and b, while the length-prefixed encodings put both one-letter symbols first. map_sort expects the entry indices in the order soroban-env-host 30.0.0 sorts them (Compare<ScVal> for Budget, src/host/comparison.rs), and the sorted map; map_validate expects the host's verdict on converting the map to a host object, which refuses keys that are not strictly increasing (\"ScMap was not sorted by key for conversion to host object\").",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [],
+  "flags": [
+    "bad-enum-value"
+  ],
+  "id": "cap67.unified-events.synth-event-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a contract event whose ContractEventType field is 3; the enum ends at DIAGNOSTIC = 2. stellar-xdr 30.0.0 rejects it (ContractEvent::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 24 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.synth-event-type-out-of-range/any.xdr",
+      "xdr_sha256": "ea8d8205511e6253497f3215d7e42b39594885f2bbcdf82d8a57b06fdd6f33ab"
+    }
+  },
+  "xdr_type": "ContractEvent"
+}

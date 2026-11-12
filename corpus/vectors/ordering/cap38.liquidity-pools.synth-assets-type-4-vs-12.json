@@ -1,0 +1,138 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum12": {
+            "asset_code": "AAAAA",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "AAAAA:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAkFBQUFBAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ZZZZ",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "ZZZZ:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVpaWloAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": "greater",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ZZZZ",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "ZZZZ:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVpaWloAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum12": {
+            "asset_code": "AAAAA",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "AAAAA:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAkFBQUFBAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="
+      },
+      "expected": "less",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum12": {
+            "asset_code": "AAAAA",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "AAAAA:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAkFBQUFBAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ZZZZ",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "ZZZZ:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVpaWloAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": {
+        "reject": "assets-out-of-order"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ZZZZ",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "ZZZZ:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVpaWloAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum12": {
+            "asset_code": "AAAAA",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "AAAAA:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAkFBQUFBAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=="
+      },
+      "expected": {
+        "pool_id": "acff6c4ed387858920b4a1fc2d6ea6581da644476349b751a99cbd74e89b04ea",
+        "strkey": "LCWP63CO2ODYLCJAWSQ7YLLOUZMB3JSEI5RUTN2RVGOL25HITMCOUM34"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair",
+      "strkey-order-differs"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-type-4-vs-12",
+    "kind": "ordering",
+    "linked_issues": [],
+    "notes": "alphanum12 AAAAA against alphanum4 ZZZZ with the same issuer: the type decides, so ZZZZ is lower although its text sorts after. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

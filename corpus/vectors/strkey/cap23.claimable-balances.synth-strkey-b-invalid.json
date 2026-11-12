@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum off by one bit",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFNUE"
+    },
+    {
+      "expected": {
+        "reject": "checksum-mismatch"
+      },
+      "note": "checksum bytes in big-endian order",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFBVQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte short, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZBO"
+    },
+    {
+      "expected": {
+        "reject": "invalid-payload-length"
+      },
+      "note": "payload one byte long, with a correct checksum",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZMEQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one extra base32 symbol",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUEA"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "lowercase base32",
+      "op": "strkey_decode",
+      "text": "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafmue"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "a trailing = pad",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE="
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "surrounding spaces",
+      "op": "strkey_decode",
+      "text": " BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE "
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "algorithm bits of the version byte set to 7",
+      "op": "strkey_decode",
+      "text": "B4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABUIU"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-version"
+      },
+      "note": "version byte 5 << 3, which no strkey type uses",
+      "op": "strkey_decode",
+      "text": "FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6A4"
+    },
+    {
+      "expected": {
+        "reject": "too-short"
+      },
+      "note": "the empty string",
+      "op": "strkey_decode",
+      "text": ""
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the prefix letter alone",
+      "op": "strkey_decode",
+      "text": "B"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "the lowest of the 2 unused trailing bits of the last symbol set",
+      "op": "strkey_decode",
+      "text": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUF"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-claimable-balance-version"
+      },
+      "note": "claimable balance sub-version 1",
+      "op": "strkey_decode",
+      "text": "BAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADQFQ"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "BAAD6DBUX6J22DMZOHIEZTEQ64CVCHEDRKWZONFEUL5Q26QD7R76RGR4TV"
+    },
+    {
+      "expected": {
+        "reject": "unsupported-claimable-balance-version"
+      },
+      "note": "SEP-23 1.4.0 invalid test case",
+      "op": "strkey_decode",
+      "text": "BAAT6DBUX6J22DMZOHIEZTEQ64CVCHEDRKWZONFEUL5Q26QD7R76RGXACA"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0023"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap23.claimable-balances",
+    "fields_exercised": [],
+    "flags": [
+      "strkey-invalid"
+    ],
+    "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "invalid claimable balance ids (B, 1 << 3): a version byte (0 for v0) and 32 hash bytes. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 14,
+      "valid_min": 14
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

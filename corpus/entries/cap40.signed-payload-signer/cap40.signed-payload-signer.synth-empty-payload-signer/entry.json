@@ -1,0 +1,40 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [
+    "signed-payload"
+  ],
+  "id": "cap40.signed-payload-signer.synth-empty-payload-signer",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a set-options signer of type ed25519 signed payload with an empty payload. the XDR allows 0 to 64 bytes, but core answers SET_OPTIONS_BAD_SIGNER for an empty one (SetOptionsOpFrame::doCheckValid), so it never reaches a ledger.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.synth-empty-payload-signer/any.expected.json",
+      "expected_json_sha256": "916dc862d8da3a2107f35b75e7b248a8734bd86c321dabb53da5d7ea36640d34",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.synth-empty-payload-signer/any.xdr",
+      "xdr_sha256": "b695bb70f53cf81348c3aa8abb533cc3894be9b8666ce75e863a572300ebdbae"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,87 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "1",
+        "entry_count": 2,
+        "keys": [
+          {
+            "key": {
+              "json": {
+                "u32": 1
+              },
+              "xdr": "AAAAAwAAAAE="
+            },
+            "type": "U32"
+          },
+          {
+            "key": {
+              "json": {
+                "symbol": "1"
+              },
+              "xdr": "AAAADwAAAAExAAAA"
+            },
+            "type": "Symbol"
+          }
+        ],
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAA8AAAABMQAAAAAAAAMAAAAU"
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-collision-after-native"
+    ],
+    "id": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+    "kind": "native-projection",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1789"
+    ],
+    "notes": "the js-stellar-sdk#1789 map literally: {u32 1: u32 10, symbol \"1\": u32 20}. scValToNative in 17.2.1 returned { \"1\": 20 }. keys are sorted the way soroban-env-host 30.0.0 sorts them and the host converts the map, so a contract can emit it. rule no-entry-lost: an error passes, a structure keeping all 2 entries with their key types passes, fewer entries fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

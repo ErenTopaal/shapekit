@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "absent-container"
+  ],
+  "id": "soroban.scval-shapes.synth-event-vec-absent",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a contract event whose data is an ScVal vec with the optional body absent (SCV_VEC with no SCVec). the host has no representation for it and refuses to convert or compare it, so it never emits one.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-vec-absent/any.expected.json",
+      "expected_json_sha256": "4863959365b65fbf2ddafd63ebbb6ecd4c478b5331efb50bd868c1b1b7847c19",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-vec-absent/any.xdr",
+      "xdr_sha256": "7dcc482ced4a18ec9afd37ad2ada1b6ce90d8cae4fe0dfbebc1d4f37a8b74370"
+    }
+  },
+  "xdr_type": "ContractEvent"
+}

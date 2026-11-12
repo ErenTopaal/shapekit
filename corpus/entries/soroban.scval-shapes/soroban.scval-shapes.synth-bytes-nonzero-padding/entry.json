@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "non-zero-padding"
+  ],
+  "id": "soroban.scval-shapes.synth-bytes-nonzero-padding",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ScVal bytes value of length 5 whose last padding byte is 0xff. stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with NonZeroPadding under Limits { depth: 1000 (xdr.envelope.depth), len: 16 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-bytes-nonzero-padding/any.xdr",
+      "xdr_sha256": "ce287bc9a7c87e0029dd5d1a4c87a914633f1b7f80663355715ae17ccb6a6678"
+    }
+  },
+  "xdr_type": "ScVal"
+}

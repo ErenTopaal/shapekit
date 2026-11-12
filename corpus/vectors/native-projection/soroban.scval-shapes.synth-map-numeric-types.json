@@ -1,0 +1,223 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "1",
+        "entry_count": 10,
+        "keys": [
+          {
+            "key": {
+              "json": {
+                "u32": 1
+              },
+              "xdr": "AAAAAwAAAAE="
+            },
+            "type": "U32"
+          },
+          {
+            "key": {
+              "json": {
+                "i32": 1
+              },
+              "xdr": "AAAABAAAAAE="
+            },
+            "type": "I32"
+          },
+          {
+            "key": {
+              "json": {
+                "u64": "1"
+              },
+              "xdr": "AAAABQAAAAAAAAAB"
+            },
+            "type": "U64"
+          },
+          {
+            "key": {
+              "json": {
+                "i64": "1"
+              },
+              "xdr": "AAAABgAAAAAAAAAB"
+            },
+            "type": "I64"
+          },
+          {
+            "key": {
+              "json": {
+                "timepoint": "1"
+              },
+              "xdr": "AAAABwAAAAAAAAAB"
+            },
+            "type": "Timepoint"
+          },
+          {
+            "key": {
+              "json": {
+                "duration": "1"
+              },
+              "xdr": "AAAACAAAAAAAAAAB"
+            },
+            "type": "Duration"
+          },
+          {
+            "key": {
+              "json": {
+                "u128": "1"
+              },
+              "xdr": "AAAACQAAAAAAAAAAAAAAAAAAAAE="
+            },
+            "type": "U128"
+          },
+          {
+            "key": {
+              "json": {
+                "i128": "1"
+              },
+              "xdr": "AAAACgAAAAAAAAAAAAAAAAAAAAE="
+            },
+            "type": "I128"
+          },
+          {
+            "key": {
+              "json": {
+                "u256": "1"
+              },
+              "xdr": "AAAACwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"
+            },
+            "type": "U256"
+          },
+          {
+            "key": {
+              "json": {
+                "i256": "1"
+              },
+              "xdr": "AAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB"
+            },
+            "type": "I256"
+          }
+        ],
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "i32": 1
+              },
+              "val": {
+                "u32": 2
+              }
+            },
+            {
+              "key": {
+                "u64": "1"
+              },
+              "val": {
+                "u32": 3
+              }
+            },
+            {
+              "key": {
+                "i64": "1"
+              },
+              "val": {
+                "u32": 4
+              }
+            },
+            {
+              "key": {
+                "timepoint": "1"
+              },
+              "val": {
+                "u32": 5
+              }
+            },
+            {
+              "key": {
+                "duration": "1"
+              },
+              "val": {
+                "u32": 6
+              }
+            },
+            {
+              "key": {
+                "u128": "1"
+              },
+              "val": {
+                "u32": 7
+              }
+            },
+            {
+              "key": {
+                "i128": "1"
+              },
+              "val": {
+                "u32": 8
+              }
+            },
+            {
+              "key": {
+                "u256": "1"
+              },
+              "val": {
+                "u32": 9
+              }
+            },
+            {
+              "key": {
+                "i256": "1"
+              },
+              "val": {
+                "u32": 10
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAAKAAAAAwAAAAEAAAADAAAAAQAAAAQAAAABAAAAAwAAAAIAAAAFAAAAAAAAAAEAAAADAAAAAwAAAAYAAAAAAAAAAQAAAAMAAAAEAAAABwAAAAAAAAABAAAAAwAAAAUAAAAIAAAAAAAAAAEAAAADAAAABgAAAAkAAAAAAAAAAAAAAAAAAAABAAAAAwAAAAcAAAAKAAAAAAAAAAAAAAAAAAAAAQAAAAMAAAAIAAAACwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAwAAAAkAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAADAAAACg=="
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "map-key-collision-after-native"
+    ],
+    "id": "soroban.scval-shapes.synth-map-numeric-types",
+    "kind": "native-projection",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1789"
+    ],
+    "notes": "the value 1 under every integer type, timepoint and duration: ten distinct keys that all project to the number or string 1. keys are sorted the way soroban-env-host 30.0.0 sorts them and the host converts the map, so a contract can emit it. rule no-entry-lost: an error passes, a structure keeping all 10 entries with their key types passes, fewer entries fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

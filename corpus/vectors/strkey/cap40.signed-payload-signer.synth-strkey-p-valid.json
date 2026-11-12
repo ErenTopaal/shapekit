@@ -1,0 +1,122 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "01"
+      },
+      "note": "1-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAQCAAAAC4DY"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "010203"
+      },
+      "note": "3-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAABQCAQDAAEEG"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "01020304"
+      },
+      "note": "4-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAACACAQDARMGI"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d"
+      },
+      "note": "29-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAOQCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUAAAAFGBU"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
+      },
+      "note": "32-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAQACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IBZGM"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+      },
+      "note": "63-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAA7QCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IBBEIRSIJJGE4UCSKRLFQWS4LZQGEZDGNBVGY3TQOJ2HM6D2PR7ABAL6"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40"
+      },
+      "note": "64-byte payload",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAABAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IBBEIRSIJJGE4UCSKRLFQWS4LZQGEZDGNBVGY3TQOJ2HM6D2PR7IAQLU"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAQACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6IBZGM"
+    },
+    {
+      "expected": {
+        "ed25519": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a",
+        "kind": "signed_payload_ed25519",
+        "payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "PA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAOQCAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUAAAAFGBU"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0040"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap40.signed-payload-signer",
+    "fields_exercised": [],
+    "flags": [
+      "signed-payload"
+    ],
+    "id": "cap40.signed-payload-signer.synth-strkey-p-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid ed25519 signed-payload signers (P, 15 << 3, CAP-40): 32 key bytes, a u32 length, 1 to 64 payload bytes and zero padding to a multiple of four. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 19,
+      "valid_min": 19
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

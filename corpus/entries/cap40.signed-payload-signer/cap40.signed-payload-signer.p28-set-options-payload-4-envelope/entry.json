@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-set-options-payload-4-envelope",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "SetOptions adds a signed-payload signer with a 4 byte payload to the source account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "ledger_seq": 5,
+    "recipe": "cap40.signed-payload-signer",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-4-envelope/mainnet.expected.json",
+      "expected_json_sha256": "9fa75a9be951578b86696ed047ae679e7ace4b4dd3a79d6f08a0390421b9b82c",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-4-envelope/mainnet.xdr",
+      "xdr_sha256": "0da6ade378346c6181ea11612e8830179b2b9eebe5335294a4610dc705883100"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-4-envelope/testnet.expected.json",
+      "expected_json_sha256": "736010dc23488eefbe6d6344cbe0051535ff19ba7513eb987cd39d2c71fa60a6",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-4-envelope/testnet.xdr",
+      "xdr_sha256": "36e4391b0d693642de148a837cd40d7210ca681aa4fb01f0f12d2e5dc3f672b5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,137 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK"
+          }
+        },
+        "text": "USD:GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK",
+        "xdr": "AAAAAVVTRAAAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO"
+          }
+        },
+        "text": "USD:GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO",
+        "xdr": "AAAAAVVTRAAAAAAAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f38="
+      },
+      "expected": "greater",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO"
+          }
+        },
+        "text": "USD:GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO",
+        "xdr": "AAAAAVVTRAAAAAAAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f38="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK"
+          }
+        },
+        "text": "USD:GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK",
+        "xdr": "AAAAAVVTRAAAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA="
+      },
+      "expected": "less",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK"
+          }
+        },
+        "text": "USD:GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK",
+        "xdr": "AAAAAVVTRAAAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO"
+          }
+        },
+        "text": "USD:GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO",
+        "xdr": "AAAAAVVTRAAAAAAAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f38="
+      },
+      "expected": {
+        "reject": "assets-out-of-order"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO"
+          }
+        },
+        "text": "USD:GB7X6737P57X6737P57X6737P57X6737P57X6737P57X6737P57X6TJO",
+        "xdr": "AAAAAVVTRAAAAAAAf39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f38="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK"
+          }
+        },
+        "text": "USD:GCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIB6NK",
+        "xdr": "AAAAAVVTRAAAAAAAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA="
+      },
+      "expected": {
+        "pool_id": "aaffff5ac9c5494ab1dcdb90264a5e5d581672a95da20601695034691c27874c",
+        "strkey": "LCVP7722ZHCUSSVR3TNZAJSKLZOVQFTSVFO2EBQBNFIDI2I4E6DUZJIA"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-issuer-high-bit",
+    "kind": "ordering",
+    "linked_issues": [],
+    "notes": "issuers of 32 bytes 0x80 and 32 bytes 0x7f: bytes compare unsigned, so 0x7f is lower. a language with signed bytes that compares them as numbers gets it backwards. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

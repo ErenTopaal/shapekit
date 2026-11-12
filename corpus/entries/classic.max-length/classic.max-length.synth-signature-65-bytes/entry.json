@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.signatures"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "classic.max-length.synth-signature-65-bytes",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "one decorated signature of 65 bytes, one past typedef opaque Signature<64>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 204 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-signature-65-bytes/any.xdr",
+      "xdr_sha256": "69fd1d8b37a76fae67ced0b9b394d643be6c0e475b2d0e8a4df00b287046659e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

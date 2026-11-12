@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "op.path_payment.path"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "classic.max-length.synth-path-6-assets",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a path payment strict receive with 6 path assets, one past path<5>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 520 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-path-6-assets/any.xdr",
+      "xdr_sha256": "065f4aaa4de2dcc9589fc4a8c691c5ef37c1893cad75f7a7fe7d6a513193a87c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

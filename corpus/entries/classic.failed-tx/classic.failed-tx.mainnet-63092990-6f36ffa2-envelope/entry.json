@@ -1,0 +1,42 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "classic.failed-tx.mainnet-63092990-6f36ffa2-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "captured 2026-11-12 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC3E15FF--63040000-63103999/FC3D4701--63092990.xdr.zst. ledger 63092990 hash cf1a17b4c5e208e869e59656ae816eca278b85b5a3376ea5f7221ac8cb44ad6f, protocol 26, LedgerCloseMeta v2. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). transaction slice: the envelope and the result meta of transaction 6f36ffa23e5eca93602c20cf0950741e81cb5a7b82056f7cb4e9ab2106fb21b3 cut byte for byte out of the ledger. a wallet-backend indexer fixture ledger (protocol 26). fee bump whose inner payment failed with no_destination, so its destination appears only in the envelope",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 26,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 63092990,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC3E15FF--63040000-63103999/FC3D4701--63092990.xdr.zst",
+    "tx_hash": "6f36ffa23e5eca93602c20cf0950741e81cb5a7b82056f7cb4e9ab2106fb21b3",
+    "tx_index": 38
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.mainnet-63092990-6f36ffa2-envelope/mainnet.expected.json",
+      "expected_json_sha256": "6fe1a815614091cc8c5b00fde73688fc95133a038f15379b9a023c7967a4ecd1",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.mainnet-63092990-6f36ffa2-envelope/mainnet.xdr",
+      "xdr_sha256": "c5eac32538410688aa180cbb5c386d2be0bf421011ba6631c803b7faa226c158"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

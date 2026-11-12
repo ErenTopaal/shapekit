@@ -1,0 +1,75 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "kind": "liquidity_pool",
+        "pool": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "note": "zero key",
+      "op": "strkey_decode",
+      "text": "LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR"
+    },
+    {
+      "expected": {
+        "kind": "liquidity_pool",
+        "pool": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a"
+      },
+      "note": "0x3a key",
+      "op": "strkey_decode",
+      "text": "LA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUO35"
+    },
+    {
+      "expected": {
+        "kind": "liquidity_pool",
+        "pool": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a"
+      },
+      "note": "sep-23 sample key",
+      "op": "strkey_decode",
+      "text": "LA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUPJN"
+    },
+    {
+      "expected": {
+        "kind": "liquidity_pool",
+        "pool": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "note": "0xff key",
+      "op": "strkey_decode",
+      "text": "LD777777777777777777777777777777777777777777777777776GMV"
+    },
+    {
+      "expected": {
+        "kind": "liquidity_pool",
+        "pool": "3f0c34bf93ad0d9971d04ccc90f705511c838aad9734a4a2fb0d7a03fc7fe89a"
+      },
+      "note": "SEP-23 1.4.0 valid test case",
+      "op": "strkey_decode",
+      "text": "LA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUPJN"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [],
+    "flags": [],
+    "id": "cap38.liquidity-pools.synth-strkey-l-valid",
+    "kind": "strkey",
+    "linked_issues": [],
+    "notes": "valid liquidity pool ids (L, 11 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [],
+  "flags": [
+    "truncated"
+  ],
+  "id": "classic.max-length.synth-truncated-envelope-discriminant",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the first three bytes of a v1 envelope: the envelope type discriminant is cut short. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 3 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-truncated-envelope-discriminant/any.xdr",
+      "xdr_sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

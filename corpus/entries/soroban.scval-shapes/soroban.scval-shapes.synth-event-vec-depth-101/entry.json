@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "deep-nesting",
+    "nested-vec"
+  ],
+  "id": "soroban.scval-shapes.synth-event-vec-depth-101",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a contract event whose data nests 101 ScVec levels. every ScVal the host writes passes from_host_val, which fails past DEFAULT_HOST_DEPTH_LIMIT = 100 (scval.depth), so meta never carries this. the bytes decode well inside xdr.meta.depth.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-vec-depth-101/any.expected.json",
+      "expected_json_sha256": "de865088569d35c6327d268cf8b8f49dfcbe339e8dea7839187c3091bb7b26e5",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-vec-depth-101/any.xdr",
+      "xdr_sha256": "01daa9c4ad96332f12a649e293de0e8b12841215b25322dea8ab0d9dd0c23cc4"
+    }
+  },
+  "xdr_type": "ContractEvent"
+}

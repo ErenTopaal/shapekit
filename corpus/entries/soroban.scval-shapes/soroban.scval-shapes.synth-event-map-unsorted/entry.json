@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "unsorted-map"
+  ],
+  "id": "soroban.scval-shapes.synth-event-map-unsorted",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766"
+  ],
+  "notes": "a contract event whose data is a map with keys symbol b then symbol a. the host writes maps only from its sorted host objects, so it never emits keys out of order; an indexer that re-sorts or rejects them must not lose the event.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-map-unsorted/any.expected.json",
+      "expected_json_sha256": "97a868431585be5170b9a6fa2a8cec33985d45bd324f9ec0f9c0176c3883002b",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-event-map-unsorted/any.xdr",
+      "xdr_sha256": "1fcd7512956023a1f29ae1cd81b10ddb3b15d215fa1cc4cd3ef4a2bd864d980c"
+    }
+  },
+  "xdr_type": "ContractEvent"
+}

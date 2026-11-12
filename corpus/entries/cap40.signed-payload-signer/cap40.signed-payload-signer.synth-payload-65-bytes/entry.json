@@ -1,0 +1,40 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length",
+    "signed-payload"
+  ],
+  "id": "cap40.signed-payload-signer.synth-payload-65-bytes",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a set-options signer of type ed25519 signed payload carrying 65 payload bytes, one past opaque payload<64> (CAP-40). stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 300 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.synth-payload-65-bytes/any.xdr",
+      "xdr_sha256": "ee5610f8bf025637791727d75ae045d37f4e1a6222a54a0ff3415ec3773ad651"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

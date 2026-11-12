@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0023"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap23.claimable-balances",
+  "fields_exercised": [
+    "op.create_claimable_balance.claimants.destination"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "cap23.claimable-balances.synth-claimants-11",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a create claimable balance with 11 claimants, one past claimants<10>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 652 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 14,
+    "valid_min": 14
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap23.claimable-balances/cap23.claimable-balances.synth-claimants-11/any.xdr",
+      "xdr_sha256": "c5771f2737dce430b085a818d7961cf13635b752dd9b708f2c113d2b03e1bdd5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

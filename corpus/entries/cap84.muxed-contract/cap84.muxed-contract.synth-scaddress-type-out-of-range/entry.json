@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0084"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "cap84.muxed-contract",
+  "fields_exercised": [],
+  "flags": [
+    "bad-discriminant"
+  ],
+  "id": "cap84.muxed-contract.synth-scaddress-type-out-of-range",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ScVal address of ScAddressType 6, one past SC_ADDRESS_TYPE_MUXED_CONTRACT = 5. stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 40 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 30,
+    "valid_min": 30
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap84.muxed-contract/cap84.muxed-contract.synth-scaddress-type-out-of-range/any.xdr",
+      "xdr_sha256": "cce10374e1f86590ff35643c15a4537a37d3111339b9f5f3328bc79c5e5bbbbb"
+    }
+  },
+  "xdr_type": "ScVal"
+}

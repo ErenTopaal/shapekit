@@ -1,0 +1,40 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "tx.operations"
+  ],
+  "flags": [
+    "length-prefix-overrun"
+  ],
+  "id": "classic.max-length.synth-operations-count-overrun",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/pull/581"
+  ],
+  "notes": "a v1 envelope whose operation count says 100 (the maximum) with one operation present, followed by the ext and signatures. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with Invalid under Limits { depth: 1000 (xdr.envelope.depth), len: 200 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.max-length/classic.max-length.synth-operations-count-overrun/any.xdr",
+      "xdr_sha256": "6769e07d202191099cffb329f4748a9ccda27af1ca012140744dd9b5691a10ab"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

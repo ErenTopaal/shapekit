@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "length-prefix-overrun"
+  ],
+  "id": "soroban.scval-shapes.synth-bytes-length-overrun",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/pull/581"
+  ],
+  "notes": "an ScVal bytes value claiming 0xffffffff bytes with four present. stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 12 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-bytes-length-overrun/any.xdr",
+      "xdr_sha256": "9980c3781ec375e41a91f907881ef44da4534fa68ad5204ba08c482a2dc55a3e"
+    }
+  },
+  "xdr_type": "ScVal"
+}

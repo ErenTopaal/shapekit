@@ -1,0 +1,39 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [
+    "deep-nesting",
+    "nested-vec",
+    "over-depth-cap"
+  ],
+  "id": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an invoke-contract argument nested 247 ScVec levels deep, one past the deepest that decodes inside an envelope at depth 1000 (scval.depth.envelope = 246). core refuses the envelope from protocol 28 because its rust parser (TransactionEnvelope::read_xdr in can_parse_transaction) fails at depth 1000. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with DepthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 3212 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 28
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-scvec-depth-247-over-cap/any.xdr",
+      "xdr_sha256": "41edad818a284527dd4d15483358a09b68efccd0726f6dc64c24aaa8fc5ff696"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

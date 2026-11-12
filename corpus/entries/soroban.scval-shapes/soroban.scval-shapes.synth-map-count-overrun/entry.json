@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "length-prefix-overrun"
+  ],
+  "id": "soroban.scval-shapes.synth-map-count-overrun",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/pull/581"
+  ],
+  "notes": "an ScVal map claiming 16777216 entries with none present. stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 12 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-map-count-overrun/any.xdr",
+      "xdr_sha256": "e92f149f083c9629d0bf96b28484bafbc7ec6f1368174f5ed5462d3cf3a19c81"
+    }
+  },
+  "xdr_type": "ScVal"
+}

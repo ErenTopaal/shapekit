@@ -1,0 +1,42 @@
+{
+  "caps": [
+    "CAP-0038"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap38.liquidity-pools",
+  "fields_exercised": [
+    "op.change_trust.line.liquidity_pool"
+  ],
+  "flags": [
+    "issuer-order-differs"
+  ],
+  "id": "cap38.liquidity-pools.synth-change-trust-strkey-order",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/StellarCN/py-stellar-base/issues/1246",
+    "https://github.com/stellar/js-stellar-sdk/pull/1766"
+  ],
+  "notes": "a pool-share change trust whose USD assets are ordered by issuer strkey text (GA5D... before GAAA...). core requires assetA < assetB by raw key bytes (isPoolShareAssetValid), so this is CHANGE_TRUST_MALFORMED and never reaches a ledger.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 18,
+    "valid_min": 18
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.synth-change-trust-strkey-order/any.expected.json",
+      "expected_json_sha256": "1eaed51c78fd15ded9cfab053d7ad854f3401dbb457160e4e04bd927015257f9",
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.synth-change-trust-strkey-order/any.xdr",
+      "xdr_sha256": "535efde59de383fbd7af7bb6a1e4dc7b48c080d8da545ac201e128270e45025f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

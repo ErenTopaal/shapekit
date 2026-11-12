@@ -1,0 +1,36 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [],
+  "flags": [
+    "non-zero-padding",
+    "signed-payload"
+  ],
+  "id": "cap40.signed-payload-signer.synth-signer-key-nonzero-padding",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ed25519 signed-payload signer key with a 1-byte payload and padding 00 00 01. stellar-xdr 30.0.0 rejects it (SignerKey::from_xdr) with NonZeroPadding under Limits { depth: 1000 (xdr.envelope.depth), len: 44 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.synth-signer-key-nonzero-padding/any.xdr",
+      "xdr_sha256": "ffa7160dfd09b394c14c619113ce143dbbc3e555ab3afd068e2487e3b270d2d0"
+    }
+  },
+  "xdr_type": "SignerKey"
+}

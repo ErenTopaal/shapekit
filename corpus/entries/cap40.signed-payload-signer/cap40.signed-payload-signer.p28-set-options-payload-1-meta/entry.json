@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-set-options-payload-1-meta",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "SetOptions adds a signed-payload signer with a 1 byte payload to the source account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "ledger_seq": 4,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap40.signed-payload-signer",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-1-meta/mainnet.expected.json",
+      "expected_json_sha256": "e98fd26b905944c239f3a9fcf0d413006b8fb5dd1f3f49491f83a2a9b77059c9",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-1-meta/mainnet.xdr",
+      "xdr_sha256": "ac7fbf83fb791eb4a6ffbf2cc10cb36a506e808fca216872228180362409ad56"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-1-meta/testnet.expected.json",
+      "expected_json_sha256": "b7ba13904f7cab8f7d2fd7091c393ff666069a98619ba4c4ea31efc9a2c2d9ad",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-set-options-payload-1-meta/testnet.xdr",
+      "xdr_sha256": "70ed5f8ff8136f5c21d8c331ac4e245661050c18e4044e64c988004820296ff5"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

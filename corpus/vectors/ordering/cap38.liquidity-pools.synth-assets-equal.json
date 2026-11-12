@@ -1,0 +1,136 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": "equal",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": "equal",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": {
+        "reject": "assets-equal"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+          }
+        },
+        "text": "USD:GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H",
+        "xdr": "AAAAAVVTRAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+      },
+      "expected": {
+        "reject": "assets-equal"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-equal",
+    "kind": "ordering",
+    "linked_issues": [],
+    "notes": "the same asset twice. core requires assetA < assetB strictly, so a pool of one asset with itself is malformed. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

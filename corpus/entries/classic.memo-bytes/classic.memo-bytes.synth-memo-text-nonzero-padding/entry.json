@@ -1,0 +1,37 @@
+{
+  "caps": [
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.memo-bytes",
+  "fields_exercised": [
+    "tx.memo.text"
+  ],
+  "flags": [
+    "non-zero-padding"
+  ],
+  "id": "classic.memo-bytes.synth-memo-text-nonzero-padding",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a one-byte memo text whose first padding byte is 0x01; XDR requires padding bytes to be zero. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with NonZeroPadding under Limits { depth: 1000 (xdr.envelope.depth), len: 208 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.synth-memo-text-nonzero-padding/any.xdr",
+      "xdr_sha256": "13ce7313aec5634c2b0cd7b114f0f5f489d829b3b17f18debe9c44b3a054e2ee"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

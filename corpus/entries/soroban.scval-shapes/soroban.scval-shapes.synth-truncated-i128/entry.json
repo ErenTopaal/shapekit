@@ -1,0 +1,35 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [],
+  "flags": [
+    "truncated"
+  ],
+  "id": "soroban.scval-shapes.synth-truncated-i128",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ScVal i128 with the last four bytes of its low half missing. stellar-xdr 30.0.0 rejects it (ScVal::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 16 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.synth-truncated-i128/any.xdr",
+      "xdr_sha256": "e54fc267d532a0db14b97d569ea48b014213709f3d52d07faf60a5702217e3a7"
+    }
+  },
+  "xdr_type": "ScVal"
+}

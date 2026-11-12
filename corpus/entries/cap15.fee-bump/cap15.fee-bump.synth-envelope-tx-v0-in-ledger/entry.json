@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0015",
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "not-emittable"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [],
+  "flags": [
+    "legacy-envelope"
+  ],
+  "id": "cap15.fee-bump.synth-envelope-tx-v0-in-ledger",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an ENVELOPE_TYPE_TX_V0 envelope. from protocol 13 core answers txNOT_SUPPORTED for a v0 envelope in a transaction set (TransactionFrame::commonValidPreSeqNum) and converts v0 submissions to v1 before they enter the queue (txbridge::convertForV13 in CommandHandler::tx), so no ledger at protocol 13 or later carries one. it decodes, and must be accepted as data.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.synth-envelope-tx-v0-in-ledger/any.expected.json",
+      "expected_json_sha256": "b4c3fd1fa9bb6b2a69161a19e9fa84e7fe08c6978d3be165ce0607e75b9de23e",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.synth-envelope-tx-v0-in-ledger/any.xdr",
+      "xdr_sha256": "64cba5ae22fe7207c19b02d5538a07dddb56adead011a48ed70c5b902aa5e7ec"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

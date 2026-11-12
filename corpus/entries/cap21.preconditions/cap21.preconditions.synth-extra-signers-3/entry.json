@@ -1,0 +1,38 @@
+{
+  "caps": [
+    "CAP-0021"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap21.preconditions",
+  "fields_exercised": [
+    "tx.cond.extra_signers"
+  ],
+  "flags": [
+    "max-length-vec",
+    "over-max-length"
+  ],
+  "id": "cap21.preconditions.synth-extra-signers-3",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "preconditions v2 with 3 extra signers, one past extraSigners<2>. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with LengthExceedsMax under Limits { depth: 1000 (xdr.envelope.depth), len: 336 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/cap21.preconditions/cap21.preconditions.synth-extra-signers-3/any.xdr",
+      "xdr_sha256": "72fd08fdbba7cf877882bcc2a206f695ca01b85e392a3b060ee0720cd14fb123"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

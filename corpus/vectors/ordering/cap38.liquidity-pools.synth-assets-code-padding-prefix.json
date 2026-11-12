@@ -1,0 +1,137 @@
+{
+  "cases": [
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABC",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "ABC:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAUFCQwAAAAAA//////////////////////////////////////////8="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABCD",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "ABCD:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAUFCQ0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "expected": "less",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABCD",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "ABCD:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAUFCQ0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABC",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "ABC:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAUFCQwAAAAAA//////////////////////////////////////////8="
+      },
+      "expected": "greater",
+      "op": "asset_order"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABC",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "ABC:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAUFCQwAAAAAA//////////////////////////////////////////8="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABCD",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "ABCD:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAUFCQ0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "expected": {
+        "pool_id": "e97a730886d96250465a258240c97fd11266c56ff9dfe68624047af42c2195cf",
+        "strkey": "LDUXU4YIQ3MWEUCGLISYEQGJP7IREZWFN7457ZUGEQCHV5BMEGK46MFN"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    },
+    {
+      "a": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABCD",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        },
+        "text": "ABCD:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        "xdr": "AAAAAUFCQ0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+      },
+      "b": {
+        "json": {
+          "credit_alphanum4": {
+            "asset_code": "ABC",
+            "issuer": "GD7777777777777777777777777777777777777777777777777773DB"
+          }
+        },
+        "text": "ABC:GD7777777777777777777777777777777777777777777777777773DB",
+        "xdr": "AAAAAUFCQwAAAAAA//////////////////////////////////////////8="
+      },
+      "expected": {
+        "reject": "assets-out-of-order"
+      },
+      "fee": 30,
+      "op": "pool_id"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0038"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "cap38.liquidity-pools",
+    "fields_exercised": [
+      "op.change_trust.line.liquidity_pool"
+    ],
+    "flags": [
+      "asset-pair"
+    ],
+    "id": "cap38.liquidity-pools.synth-assets-code-padding-prefix",
+    "kind": "ordering",
+    "linked_issues": [],
+    "notes": "alphanum4 ABC against ABCD: the padding byte 00 is below every code character, so the prefix is lower, and the issuers, which point the other way, never matter. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 18,
+      "valid_min": 18
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

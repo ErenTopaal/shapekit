@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "op.set_options.signer",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a sponsor pays the reserve of a signed-payload signer with a 64 byte payload, inside begin and end sponsoring",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap40.signed-payload-signer",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta/mainnet.expected.json",
+      "expected_json_sha256": "46ca03702abcaecfaff38b7f4290a86f40a5fdb9e8607a1bba4a89574e47f8ea",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta/mainnet.xdr",
+      "xdr_sha256": "d2e53d8c8e264f3d3b527b1e42ff9f41fd41a960830b719995707bf495680e38"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta/testnet.expected.json",
+      "expected_json_sha256": "0b637ab0b9868aa5644cd341b8853e3c610cd66af9d2d29310adf02ac8350e41",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta/testnet.xdr",
+      "xdr_sha256": "2826662a7472e3e8d198d48b1ea9f8b249c9a6dede2817717f4451b79eb4d280"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

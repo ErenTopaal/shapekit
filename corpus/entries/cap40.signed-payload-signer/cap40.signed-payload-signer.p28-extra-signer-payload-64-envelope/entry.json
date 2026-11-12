@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0040"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap40.signed-payload-signer",
+  "fields_exercised": [
+    "tx.cond.extra_signers",
+    "tx.signatures",
+    "tx.signatures.hint",
+    "signer_key.signed_payload.payload"
+  ],
+  "flags": [],
+  "id": "cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a payment whose preconditions require a signed-payload extra signer with a 64 byte payload, signed by the source and that signer",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap40.signed-payload-signer.p28",
+    "class": "local-core",
+    "ledger_seq": 9,
+    "recipe": "cap40.signed-payload-signer",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope/mainnet.expected.json",
+      "expected_json_sha256": "368b78054a78fb721c7ac0d65b824e16b09a958c0f133ac16290fc1708558bec",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope/mainnet.xdr",
+      "xdr_sha256": "9d2e33d2c2503837edb87db390b58afa56b77d2f108315e16f7120e8fa734991"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope/testnet.expected.json",
+      "expected_json_sha256": "4d35a1a0701c8d00f9d91c24eb00eb99b7e832c7967983470efe913eb2214e94",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap40.signed-payload-signer/cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope/testnet.xdr",
+      "xdr_sha256": "a2a86046a9fb6b3a336bee0b8ccebc08031b014fbc41ac13ca36975f073e451b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,36 @@
+{
+  "caps": [
+    "CAP-0046-11"
+  ],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "soroban.auth-trees",
+  "fields_exercised": [],
+  "flags": [
+    "nested-auth",
+    "truncated"
+  ],
+  "id": "soroban.auth-trees.synth-truncated-auth-entry",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a three-level authorization entry cut in the middle of its innermost invocation. stellar-xdr 30.0.0 rejects it (SorobanAuthorizationEntry::from_xdr) with LengthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 129 (the input length) }.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.synth-truncated-auth-entry/any.xdr",
+      "xdr_sha256": "e08638ca3a99f20509317fe286f0a6eb9271602b2f02eab3c9d03b81f1e7a222"
+    }
+  },
+  "xdr_type": "SorobanAuthorizationEntry"
+}
