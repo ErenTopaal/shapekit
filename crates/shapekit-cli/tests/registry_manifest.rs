@@ -61,6 +61,39 @@ fn registry_check_prints_every_problem_and_fails() {
 }
 
 #[test]
+fn registry_check_refuses_fragments_the_schema_lacks() {
+    let src = crate_fixture("shapekit-registry", "tests/fixtures/good");
+    let dir = tempfile::tempdir().unwrap();
+    for name in [
+        "caps.toml",
+        "fields.toml",
+        "caps-limits.toml",
+        "lint-rules.toml",
+        "families.toml",
+    ] {
+        std::fs::copy(src.join(name), dir.path().join(name)).unwrap();
+    }
+    let families = dir.path().join("families.toml");
+    let text = std::fs::read_to_string(&families).unwrap().replace(
+        r#"signature = ["SignerKey:ed25519_signed_payload"]"#,
+        r#"signature = ["SignerKey:ed25519_signed_payload", "ScError:cryptox", "ScErrorr:contract", "ContractEventType=nope", ".execution_stages#max", ".body:set_options.signer.key:ed25519_signed_payload.payload#max"]"#,
+    );
+    std::fs::write(&families, text).unwrap();
+    let out = shapekit(&["registry", "check", "--dir", dir.path().to_str().unwrap()]);
+    assert_eq!(out.status.code(), Some(1));
+    let text = stdout(&out);
+    for want in [
+        "ScError:cryptox: not an arm reachable from LedgerCloseMeta",
+        "ScErrorr is not a type reachable",
+        "nope is not a value of the XDR enum ContractEventType",
+        ".execution_stages#max: #max needs",
+        "4 problems",
+    ] {
+        assert!(text.contains(want), "missing {want}: {text}");
+    }
+}
+
+#[test]
 fn registry_check_load_error_exits_2() {
     let out = shapekit(&["registry", "check", "--dir", "/nonexistent"]);
     assert_eq!(out.status.code(), Some(2));

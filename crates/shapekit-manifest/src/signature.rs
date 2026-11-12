@@ -45,6 +45,8 @@
 //! when it is a member of the signature, or when it starts with a segment delimiter
 //! (`.`, `:`, `=`, `[`, `#`) and some path ends with it. So both `SignerKey:ed25519_signed_payload`
 //! and `.body:set_options.signer.key:ed25519_signed_payload` are valid fragments.
+//! [`FragmentChecker`] refuses fragments that no value of the root type can produce, which is
+//! what `shapekit registry check` runs over `families.toml`.
 
 use std::collections::BTreeSet;
 use std::str::FromStr;
@@ -452,6 +454,295 @@ pub fn check_fragment(fragment: &str) -> Result<(), String> {
         rest = &body[end..];
     }
     Ok(())
+}
+
+/// Checks `families.toml` fragments against the schema of one root type. Beyond the grammar
+/// of [`check_fragment`], every named type, arm, field and enum value must exist where the
+/// fragment puts it, and a length bucket must fit the value it follows (`#max` only on a
+/// bounded array, opaque or string, `#none` only on an optional), because a fragment that
+/// names something the schema lacks can never match and would leave its family looking
+/// covered by nothing rather than wrong.
+///
+/// A fragment anchored at a type (`ScError:contract`) is walked from that type's definition,
+/// or accepted when it is one of [`XdrSchema::reachable_arms`]. A fragment that starts with a
+/// delimiter is accepted when it walks from some node of the schema, since the signature
+/// matches it as a path suffix.
+pub struct FragmentChecker {
+    schema: XdrSchema,
+    arms: BTreeSet<String>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Segment<'a> {
+    Field(&'a str),
+    Arm(&'a str),
+    Value(&'a str),
+    Item,
+    Bucket(&'a str),
+}
+
+impl FragmentChecker {
+    pub fn new(root_type: &str) -> Result<FragmentChecker, ToolkitError> {
+        let schema = XdrSchema::for_type(root_type)?;
+        let arms = schema.reachable_arms()?;
+        let checker = FragmentChecker { schema, arms };
+        // resolving every reference up front lets the walk treat the schema as well formed
+        for node in checker.nodes() {
+            if node.get("$ref").is_some() {
+                checker.schema.resolve(node, None)?;
+            }
+        }
+        Ok(checker)
+    }
+
+    pub fn root_type(&self) -> &str {
+        &self.schema.root_name
+    }
+
+    /// `Ok` when the fragment is grammatical and names a path the schema can produce.
+    pub fn check(&self, fragment: &str) -> Result<(), String> {
+        check_fragment(fragment)?;
+        if self.walks(fragment) {
+            return Ok(());
+        }
+        let root = self.root_type();
+        if let Some(stem) = fragment.strip_suffix("#max")
+            && self.walks(&format!("{stem}#many"))
+        {
+            return Err(format!(
+                "{fragment}: #max needs an array, opaque or string with a declared bound"
+            ));
+        }
+        if fragment.starts_with(DELIMITERS) {
+            return Err(format!(
+                "{fragment}: no path reachable from {root} ends with it"
+            ));
+        }
+        let end = fragment.find(DELIMITERS).unwrap_or(fragment.len());
+        let (head, tail) = fragment.split_at(end);
+        if self.definition(head).is_none() {
+            return Err(format!(
+                "{fragment}: {head} is not a type reachable from {root}"
+            ));
+        }
+        Err(match segments(tail).as_slice() {
+            [Segment::Arm(_)] => format!("{fragment}: not an arm reachable from {root}"),
+            [Segment::Value(v)] => match self.definition(head).filter(|n| is_xdr_enum(n)) {
+                Some(_) => format!("{fragment}: {v} is not a value of the XDR enum {head}"),
+                None => format!("{fragment}: {head} is not an XDR enum, write its arms with :"),
+            },
+            _ => format!("{fragment}: {tail} is not a path of {head}"),
+        })
+    }
+
+    fn walks(&self, fragment: &str) -> bool {
+        if fragment.starts_with(DELIMITERS) {
+            let segs = segments(fragment);
+            return self.nodes().iter().any(|n| self.walk(n, None, &segs))
+                || self.named().any(|(k, n)| self.walk(n, Some(k), &segs));
+        }
+        let end = fragment.find(DELIMITERS).unwrap_or(fragment.len());
+        let (head, tail) = fragment.split_at(end);
+        if tail.starts_with(':') && !tail[1..].contains(DELIMITERS) && self.arms.contains(fragment)
+        {
+            return true;
+        }
+        self.definition(head)
+            .is_some_and(|n| self.walk(n, Some(head), &segments(tail)))
+    }
+
+    fn definition(&self, name: &str) -> Option<&Value> {
+        self.named().find(|(k, _)| *k == name).map(|(_, n)| n)
+    }
+
+    fn named(&self) -> impl Iterator<Item = (&str, &Value)> {
+        let s = &self.schema;
+        let root = (!s.defs.contains_key(&s.root_name)).then_some((s.root_name.as_str(), &s.root));
+        s.defs.iter().map(|(k, v)| (k.as_str(), v)).chain(root)
+    }
+
+    fn nodes(&self) -> Vec<&Value> {
+        let mut out = Vec::new();
+        for (_, def) in self.named() {
+            object_nodes(def, &mut out);
+        }
+        out
+    }
+
+    // follows references, and an optional into its value branches as well as itself
+    fn expand<'a>(
+        &'a self,
+        node: &'a Value,
+        name: Option<&'a str>,
+    ) -> Vec<(&'a Value, Option<&'a str>)> {
+        let (node, name) = self
+            .schema
+            .resolve(node, name)
+            .expect("FragmentChecker::new resolved every reference");
+        if let Some(options) = node.get("anyOf").and_then(Value::as_array) {
+            let mut out: Vec<_> = options
+                .iter()
+                .filter(|o| o.get("type").and_then(Value::as_str) != Some("null"))
+                .flat_map(|o| self.expand(o, None))
+                .collect();
+            if !out.is_empty() {
+                out.push((node, name));
+                return out;
+            }
+        }
+        vec![(node, name)]
+    }
+
+    fn walk(&self, node: &Value, name: Option<&str>, segs: &[Segment]) -> bool {
+        let Some((&seg, rest)) = segs.split_first() else {
+            return true;
+        };
+        for (n, def) in self.expand(node, name) {
+            // strkey unions have no schema below the arm, so they follow the signature's rules
+            if let Some(union) = def.and_then(StringUnion::from_def) {
+                if self.walk_string_union(union, seg, rest) {
+                    return true;
+                }
+                continue;
+            }
+            let ok = match seg {
+                Segment::Field(w) => n
+                    .get("properties")
+                    .and_then(|p| p.get(w))
+                    .is_some_and(|p| self.walk(p, None, rest)),
+                Segment::Arm(w) => {
+                    let branch = n.get("oneOf").and_then(Value::as_array).is_some_and(|bs| {
+                        bs.iter().any(|b| {
+                            b.get("properties")
+                                .and_then(|p| p.get(w))
+                                .is_some_and(|p| self.walk(p, None, rest))
+                                || (rest.is_empty() && has_enum_value(b, w))
+                        })
+                    });
+                    branch || (rest.is_empty() && !is_xdr_enum(n) && has_enum_value(n, w))
+                }
+                Segment::Value(w) => rest.is_empty() && is_xdr_enum(n) && has_enum_value(n, w),
+                Segment::Item => {
+                    type_includes(n, "array")
+                        && n.get("items").is_some_and(|i| self.walk(i, None, rest))
+                }
+                Segment::Bucket(w) => rest.is_empty() && bucket_fits(n, w),
+            };
+            if ok {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn walk_string_union(&self, union: StringUnion, seg: Segment, rest: &[Segment]) -> bool {
+        let Segment::Arm(arm) = seg else {
+            return false;
+        };
+        if !self.arms.contains(&format!("{}:{arm}", union.type_name())) {
+            return false;
+        }
+        match rest {
+            [] => true,
+            [Segment::Field("payload"), more @ ..]
+                if matches!(union, StringUnion::SignerKey) && arm == "ed25519_signed_payload" =>
+            {
+                matches!(
+                    more,
+                    [] | [Segment::Bucket("empty" | "one" | "many" | "max")]
+                )
+            }
+            _ => false,
+        }
+    }
+}
+
+// only called on fragments that passed check_fragment, so every segment starts with a delimiter
+fn segments(fragment: &str) -> Vec<Segment<'_>> {
+    let mut out = Vec::new();
+    let mut rest = fragment;
+    while !rest.is_empty() {
+        if let Some(r) = rest.strip_prefix("[]") {
+            out.push(Segment::Item);
+            rest = r;
+            continue;
+        }
+        let body = &rest[1..];
+        let end = body.find(DELIMITERS).unwrap_or(body.len());
+        let word = &body[..end];
+        out.push(match rest.as_bytes()[0] {
+            b'.' => Segment::Field(word),
+            b':' => Segment::Arm(word),
+            b'=' => Segment::Value(word),
+            _ => Segment::Bucket(word),
+        });
+        rest = &body[end..];
+    }
+    out
+}
+
+fn object_nodes<'a>(value: &'a Value, out: &mut Vec<&'a Value>) {
+    match value {
+        Value::Object(map) => {
+            out.push(value);
+            for v in map.values() {
+                object_nodes(v, out);
+            }
+        }
+        Value::Array(items) => {
+            for v in items {
+                object_nodes(v, out);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn has_enum_value(node: &Value, value: &str) -> bool {
+    node.get("enum")
+        .and_then(Value::as_array)
+        .is_some_and(|e| e.iter().any(|x| x.as_str() == Some(value)))
+}
+
+fn type_includes(node: &Value, ty: &str) -> bool {
+    match node.get("type") {
+        Some(Value::String(t)) => t == ty,
+        Some(Value::Array(ts)) => ts.iter().any(|t| t.as_str() == Some(ty)),
+        _ => false,
+    }
+}
+
+// an optional is the anyOf node itself, which the expansion lists next to its value branch,
+// whether the field declares it inline or through a typedef like SponsorshipDescriptor
+fn bucket_fits(node: &Value, bucket: &str) -> bool {
+    if bucket == "none" {
+        return node.get("anyOf").is_some() || type_includes(node, "null");
+    }
+    let is_array = node.get("items").is_some();
+    let (min, max) = if is_array {
+        ("minItems", "maxItems")
+    } else {
+        ("minLength", "maxLength")
+    };
+    let min = node.get(min).and_then(Value::as_u64);
+    let max = node.get(max).and_then(Value::as_u64);
+    // fixed-length values get no bucket; an unbounded `<>` array or string carries u32::MAX,
+    // which no value reaches, and an unbounded opaque carries no maxLength at all
+    let fixed = min.is_some() && min == max;
+    let bounded = max.is_some_and(|m| m < u64::from(u32::MAX));
+    if fixed {
+        return false;
+    }
+    let reachable = bucket != "max" || bounded;
+    if is_array {
+        return reachable;
+    }
+    if !type_includes(node, "string") {
+        return false;
+    }
+    // mirrors walk_string: opaque is bucketed even when unbounded, text only when it has a bound
+    let hex = node.get("contentEncoding").and_then(Value::as_str) == Some("hex");
+    (hex || max.is_some()) && reachable
 }
 
 fn is_ident(s: &str) -> bool {

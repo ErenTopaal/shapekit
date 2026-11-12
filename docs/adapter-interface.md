@@ -51,9 +51,20 @@ not hide the others.
   optional members.
 - When stdin reaches end of file the adapter tears the target down as for `stop` and exits.
 - The harness enforces a timeout per request (defaults: `describe` 60 s, `start` 30 min,
-  since it may build images, `advance` 120 s, `status` 60 s, `export` 10 min, `stop` 5 min).
-  On a timeout, a protocol violation or an adapter exit, the harness kills the adapter
-  process and records the chain's remaining entries as `not-evaluated` with the reason. The
+  since it may build images, `advance` 120 s, `status` 300 s, `export` 10 min, `stop` 5 min).
+  `--start-timeout` and `--status-timeout` change the two that depend on the host. The status
+  default is sized for a heavily loaded host: a wallet-backend status answer (a database
+  query and a container inspection) took more than 60 s at a load average near 200, and a
+  status timeout ends the chain. On a timeout, a protocol violation or an adapter exit, the
+  harness sends `stop` where it still can, kills the adapter process and records the
+  chain's remaining entries as `not-evaluated` with the reason.
+- A request whose timeout passed is abandoned, not forgotten: when its answer lines arrive
+  later, while the harness waits for the reply to a later request (in practice `stop`),
+  they are skipped and listed in the chain's `notes`, up to and including the abandoned
+  request's final line. This is the one exception to the id rule above. A line that carries
+  an id the harness never sent, or the id of a request that was already answered, is still a
+  protocol violation, and so is anything that arrives after the reply the harness waits for
+  (the harness does not read it). The
   adapter must therefore not leave containers behind when it is killed: label them with the
   chain's `docker_network` name, which the harness removes along with every container still
   attached to it.
@@ -298,12 +309,38 @@ and are counted separately.
 | `mishandled` | `oom` | it was killed for its memory limit at the entry's ledger (`health: oom`) |
 | `mishandled` | `timeout` | it stopped advancing at the entry's ledger without reporting an error |
 | `not-evaluated` | | the target stopped at an earlier ledger (the result names the entry), or the chain could not be run (the result says why) |
-| `out-of-scope` | | the entry has no fact the target claims, or the chain's protocol is outside `protocols` |
+| `out-of-scope` | | the entry has no fact the target claims, the chain's protocol is outside `protocols`, or every comparable fact matched but a claimed event fact cannot be checked because the meta format has no place for it (see "Facts the meta cannot show") |
 
 When an entry has several problems the verdict is the first in the order halted, crashed,
 oom, timeout, undecodable-address, wrong-value, dropped, and every problem is listed in the
 report. A target stops "at" ledger `L` when `L` is the first ledger it did not ingest; every
 entry in `L` gets the stop verdict, entries in later ledgers are `not-evaluated`.
+
+### Facts the meta cannot show
+
+`token-event` and `contract-event` facts come only from events, and older meta formats have
+no place for most events. The oracle records, per transaction, `events`:
+
+| `events` | meta | events present |
+|---|---|---|
+| `unified` | `TransactionMeta` v4 (protocol 23 on, and earlier ledgers replayed with CAP-67 backfill) | every operation's events, classic operations included, and the fee events |
+| `soroban-operation` | v3 with Soroban meta | the invoked contract's own events, at operation scope |
+| `none` | v0 to v3 without Soroban meta | none |
+
+A claim on an event kind is not comparable for a transaction when the coverage lacks any
+scope the claim can match: the scopes of the stages its `where.stage` lists
+(`before-all-txs` is fee processing, `operation`, `after-tx`, `after-all-txs` is post-apply
+fee), or every event scope when the claim does not restrict `stage`. For such a claim the
+harness compares neither side on that transaction: an oracle fact is not expected, an
+exported fact is not extra, and the entry lists the claim under its detail. The verdict then
+follows the comparable facts: any problem there gives `dropped` or `mishandled` as usual;
+otherwise the entry is `out-of-scope`, never `pass`, because a pass would say the event
+claims were checked. Example: on `cap67.unified-events.p22-payment-transfer` (protocol 22,
+classic events off, meta v3) wallet-backend derives a transfer and a fee from the operation;
+the meta shows neither, and that is not evidence of anything.
+
+The harness refuses oracle files without `events` (written before the field existed); `shapekit
+oracle run` rewrites them.
 
 Pairing for `wrong-value`: an expected change and an exported change of the same kind are a
 pair when they agree on the kind's key fields that the claim compares:
@@ -512,8 +549,9 @@ The oracle file of an entry is `{"oracle_vocab_version", "network_passphrase", "
 [{"ledger_seq", "ledger_hash", "protocol", "close_time", "transactions", "upgrades",
 "evicted"}]}`; each transaction has `hash`, `apply_index`, `successful`, `result`,
 `inner_hash`, `fee {source, charged, balance_delta}`, `participants` (actual, from meta and
-events), `changes`, and `declared` (what the envelope names, kept apart and never used as the
-expected participants).
+events), `changes`, `declared` (what the envelope names, kept apart and never used as the
+expected participants) and `events` (which events the meta format can carry, see "Facts the
+meta cannot show").
 
 <!-- vocabulary: generated by `shapekit harness schema --write`, do not edit -->
 

@@ -1,5 +1,10 @@
 name: pr
 
+# the per pull request tier. every check runs offline once toolchains, crates, modules, npm
+# packages and the pinned images are fetched. the budget is 15 minutes of wall clock for the
+# whole workflow on standard hosted runners; jobs run in parallel and each has a timeout.
+# measured durations and the reasoning behind the split are in docs/infrastructure.md.
+
 on:
   pull_request:
   push:
@@ -12,32 +17,70 @@ concurrency:
   group: pr-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
 jobs:
+  build:
+    # one release build of the cli, shared by every job that runs the tools
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - run: cargo build --release --locked -p shapekit-cli
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shapekit
+          path: target/release/shapekit
+          retention-days: 3
+          if-no-files-found: error
+
   rust:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      # line tables keep backtraces readable at a fraction of the disk full debug info takes
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: debug
       - run: cargo fmt --all --check
-      - run: cargo clippy --workspace --all-targets -- -D warnings
-      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: cargo test --workspace --locked --no-fail-fast
 
   go:
+    needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version: 1.27.4
-          cache-dependency-path: "**/go.mod"
+          cache-dependency-path: "**/go.sum"
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
       - name: install golangci-lint
         run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
       - name: vet, test and lint each module in go.work
+        env:
+          # the consumer checks in adapters/protocol serve chains with the cli
+          SHAPEKIT_BIN: ${{ runner.temp }}/bin/shapekit
         run: |
           set -euo pipefail
+          chmod +x "$SHAPEKIT_BIN"
           # golangci-lint and go vet both work per module, so walk the workspace
           # instead of hardcoding the list and missing a module added later
           for dir in $(go list -m -f '{{.Dir}}'); do
@@ -45,9 +88,15 @@ jobs:
             (cd "$dir" && go vet ./... && go test ./... && golangci-lint run --config "$GITHUB_WORKSPACE/.golangci.yml" ./...)
             echo "::endgroup::"
           done
+      - name: indexerlint runs clean on this repository's own adapters
+        run: |
+          set -euo pipefail
+          (cd lint && go build -o "$RUNNER_TEMP/bin/indexerlint" ./cmd/indexerlint)
+          cd adapters && "$RUNNER_TEMP/bin/indexerlint" ./...
 
   js:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: testees/js
@@ -58,13 +107,192 @@ jobs:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: testees/js/package-lock.json
-      - run: npm ci
+      - run: npm ci --no-audit --no-fund
       - run: npx tsc --noEmit
       - run: npx tsc
       - run: node --test "dist/**/*.test.js"
 
-  text:
+  corpus:
+    # registry, manifest (which round-trips every entry through stellar-xdr), generated files,
+    # coverage, guide, goldens, committed chains, the release archive, text rules
+    needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: put shapekit on PATH
+        run: |
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          echo "$RUNNER_TEMP/bin" >>"$GITHUB_PATH"
+      - run: shapekit registry check
+      - name: manifest validate (round trip of every entry)
+        run: shapekit manifest validate
+      - name: committed manifest and synthetic entries are what the tools write
+        run: |
+          set -euo pipefail
+          shapekit synth build
+          shapekit manifest build
+          changed=$(git status --porcelain -- corpus)
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff --stat -- corpus
+            echo "::error::committed corpus differs from synth build plus manifest build"
+            exit 1
+          fi
+      - run: shapekit coverage --check
+      - run: shapekit guide check
+      - name: goldens agree (structural agreement with core's goldens)
+        run: shapekit goldens agree
+      - name: committed chains match their chain.json
+        run: shapekit pack verify
+      - name: adapter protocol schema and docs are current
+        run: shapekit harness schema
+      - name: the release archive builds
+        run: |
+          shapekit corpus pack --out "$RUNNER_TEMP/dist"
+          cat "$RUNNER_TEMP/dist/SHA256SUMS"
       - run: scripts/check-no-em-dash.sh
+
+  repro-select:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: select
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          ROTATION: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_number }}
+        run: |
+          set -euo pipefail
+          changed="$RUNNER_TEMP/changed.txt"
+          # a push that creates a branch has an all-zero before sha; then only the rotation runs
+          if [ -n "$BASE" ] && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            git diff --name-only "$BASE" HEAD >"$changed"
+          else
+            : >"$changed"
+          fi
+          echo "changed paths: $(wc -l <"$changed")"
+          matrix=$(scripts/select-repro.sh "$ROTATION" "$changed")
+          echo "matrix=$matrix" >>"$GITHUB_OUTPUT"
+
+  repro:
+    # regenerates the selected chains under both passphrases and compares them byte for byte
+    needs: [build, repro-select]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.repro-select.outputs.matrix) }}
+    name: repro (${{ matrix.shard }})
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pull the pinned stellar-core image by digest
+        run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
+      - name: gen verify-repro
+        env:
+          FAMILIES: ${{ matrix.families }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          args=()
+          for f in $FAMILIES; do args+=(--family "$f"); done
+          "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2 "${args[@]}"
+
+  conformance:
+    # current sdk versions only; the full version matrix and the reproductions run nightly
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      # the rust testee builds outside the workspace into its own target directory
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/testees/rust/30.0.0
+          key: testee-rust-30.0.0-${{ hashFiles('testees/rust/versions/30.0.0/Cargo.lock') }}
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: testees/js/**/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance run on rust 30.0.0, go v0.8.0, js 17.4.0
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance/MATRIX.md ]; then cat target/conformance/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: conformance
+          path: target/conformance/
+          retention-days: 14
+
+  harness:
+    # the wallet-backend reference adapter at the current pin, testnet variant, on the chains
+    # behind the rfp's reproductions; every chain runs nightly
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pull the pinned database image by digest
+        run: docker pull --quiet "$(scripts/pin.sh image timescaledb)"
+      - name: build the adapter
+        run: cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter
+      - name: harness run
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          pin=$(scripts/pin.sh git wallet-backend)
+          "$RUNNER_TEMP/bin/shapekit" harness run \
+            --adapter "adapters/bin/wb-adapter --commit $pin" \
+            --network testnet --out harness-out \
+            --chain cap40.signed-payload-signer.p30 \
+            --chain cap73.sac-trust.p30 \
+            --chain cap27.muxed-accounts.p30
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: harness
+          path: harness-out/
+          retention-days: 14

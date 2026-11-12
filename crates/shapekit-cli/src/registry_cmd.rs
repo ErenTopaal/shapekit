@@ -3,17 +3,21 @@
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use shapekit_manifest::signature::check_fragment;
+use shapekit_coverage::ROOT_TYPE;
+use shapekit_manifest::signature::FragmentChecker;
 use shapekit_registry::{FAMILIES_FILE, Problem, Registry};
 
 pub fn check(dir: &Path) -> Result<bool> {
     let registry = Registry::load(dir)
         .with_context(|| format!("loading the registry in {}", dir.display()))?;
     let mut problems = registry.check();
-    // fragments must be written in the signature grammar, or they silently match nothing
+    // a fragment that misnames an arm, field, type or value matches nothing, silently; the
+    // registry crate cannot see the xdr schema, so this check lives here
+    let checker = FragmentChecker::new(ROOT_TYPE)
+        .with_context(|| format!("loading the {ROOT_TYPE} schema"))?;
     for family in registry.families.iter().flat_map(|f| &f.families) {
         for fragment in &family.signature {
-            if let Err(message) = check_fragment(fragment) {
+            if let Err(message) = checker.check(fragment) {
                 problems.push(Problem::new(
                     format!("{FAMILIES_FILE} {}", family.id),
                     format!("signature {message}"),

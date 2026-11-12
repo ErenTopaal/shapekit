@@ -354,3 +354,46 @@ impl Drop for Adapter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::protocol::{StatusResult, StopResult};
+
+    // an adapter that answers each request two seconds late
+    const SLOW: &str = r#"
+read a; sleep 2; echo '{"id":"0","status":"ok","result":{"last_ingested_ledger":null,"health":"running","last_error":null,"peak_memory_bytes":null}}'
+read b; echo '{"id":"1","status":"ok","result":{"logs":""}}'
+"#;
+
+    fn spawn(script: &str) -> (Adapter, tempfile::TempDir) {
+        let dir = tempfile::tempdir().unwrap();
+        let a = Adapter::spawn(
+            &["sh".into(), "-c".into(), script.into()],
+            &dir.path().join("stderr.log"),
+        )
+        .unwrap();
+        (a, dir)
+    }
+
+    #[test]
+    fn a_late_answer_before_the_next_reply_is_skipped() {
+        let (mut a, _dir) = spawn(SLOW);
+        let st = a.call::<StatusResult>(Command::Status, Duration::from_millis(300));
+        assert!(matches!(st, Err(AdapterFailure::Timeout { .. })), "{st:?}");
+        let stop = a.call::<StopResult>(Command::Stop, Duration::from_secs(20));
+        assert!(stop.is_ok(), "{stop:?}");
+        assert_eq!(a.late_answers.len(), 1, "{:?}", a.late_answers);
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_foreign_id_is_still_a_violation() {
+        let (mut a, _dir) = spawn(
+            r#"read a; echo '{"id":"7","status":"ok","result":{"logs":""}}'; read b"#,
+        );
+        let stop = a.call::<StopResult>(Command::Stop, Duration::from_secs(20));
+        assert!(matches!(stop, Err(AdapterFailure::Protocol { .. })), "{stop:?}");
+        a.finish(Duration::from_secs(5));
+    }
+}

@@ -4,7 +4,7 @@
 use std::path::{Path, PathBuf};
 
 use shapekit_manifest::framing::{FramedReader, decode_framed, frame_records};
-use shapekit_manifest::signature::check_fragment;
+use shapekit_manifest::signature::{FragmentChecker, check_fragment};
 use shapekit_manifest::{
     Limits, ToolkitError, fragment_matches, reachable_arms, roundtrip_check, sha256_hex,
     shape_signature, to_xdr_json,
@@ -390,6 +390,90 @@ fn signature_fragments_from_real_paths_are_valid() {
     let sig = shape_signature("LedgerCloseMeta", &bytes, limits(&bytes)).unwrap();
     for p in &sig {
         check_fragment(p).unwrap_or_else(|e| panic!("{e}"));
+    }
+}
+
+#[test]
+fn every_path_of_a_real_ledger_and_its_suffixes_pass_the_fragment_checker() {
+    let checker = FragmentChecker::new("LedgerCloseMeta").unwrap();
+    let bytes = fixture(LCM);
+    let sig = shape_signature("LedgerCloseMeta", &bytes, limits(&bytes)).unwrap();
+    for path in &sig {
+        checker.check(path).unwrap_or_else(|e| panic!("{e}"));
+        for (i, _) in path.match_indices(['.', ':', '=', '#']) {
+            let suffix = &path[i..];
+            checker.check(suffix).unwrap_or_else(|e| panic!("{e}"));
+        }
+    }
+}
+
+#[test]
+fn fragment_checker_accepts_fragments_the_schema_can_produce() {
+    let checker = FragmentChecker::new("LedgerCloseMeta").unwrap();
+    for ok in [
+        "LedgerCloseMeta",
+        "LedgerCloseMeta:v2",
+        "ScError:contract",
+        "SignerKey:ed25519_signed_payload",
+        "PublicKey:public_key_type_ed25519",
+        "ContractEventType=contract",
+        "ScVal:vec[]",
+        ".body:set_options.signer.key:ed25519_signed_payload.payload#max",
+        ".extra_signers[]:ed25519_signed_payload.payload#one",
+        ".operations#max",
+        ".memo:text#max",
+        ".body:payment.destination:muxed_ed25519",
+        ".body:set_options.home_domain#none",
+        "TransactionEnvelope:tx.tx.operations[].body:manage_data.data_value#max",
+        // optional through a typedef, and unbounded opaque, which still has buckets below max
+        ".signer_sponsoring_i_ds[]#none",
+        ".data:bytes#many",
+    ] {
+        assert_eq!(checker.check(ok), Ok(()), "{ok}");
+    }
+}
+
+#[test]
+fn fragment_checker_refuses_names_the_schema_lacks() {
+    let checker = FragmentChecker::new("LedgerCloseMeta").unwrap();
+    for (bad, why) in [
+        // grammar
+        ("ScError:contract#huge", "#huge is not one of"),
+        // typo arm
+        (
+            "ScError:cryptox",
+            "not an arm reachable from LedgerCloseMeta",
+        ),
+        ("SignerKey:bogus", "not an arm reachable"),
+        ("LedgerCloseMeta:v3", "not an arm reachable"),
+        // unknown type
+        ("ScErrorr:contract", "ScErrorr is not a type reachable"),
+        ("FooBar", "FooBar is not a type reachable"),
+        // bad enum value, and an enum written as a union or a union as an enum
+        (
+            "ContractEventType=nope",
+            "nope is not a value of the XDR enum",
+        ),
+        ("ContractEventType:contract", "not an arm reachable"),
+        ("ScVal=map", "ScVal is not an XDR enum"),
+        // #max on unbounded values
+        (
+            ".execution_stages#max",
+            "#max needs an array, opaque or string with a declared bound",
+        ),
+        // suffixes that walk nowhere
+        (
+            ".body:payment.destination:muxed_contract",
+            "no path reachable",
+        ),
+        (".memo:text#none", "no path reachable"),
+        (".operations#none", "no path reachable"),
+        (":map[].key:nope", "no path reachable"),
+        (".ledger_bounds.max_ledger#none", "no path reachable"),
+        (".tx.tx.opperations", "no path reachable"),
+    ] {
+        let err = checker.check(bad).expect_err(bad);
+        assert!(err.contains(why), "{bad}: {err}");
     }
 }
 

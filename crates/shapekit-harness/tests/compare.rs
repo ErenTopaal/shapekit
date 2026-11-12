@@ -9,7 +9,8 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
 use shapekit_harness::compare::{
-    ProblemKind, Reason, Stop, Verdict, compare_tx, stopped_verdict, verdict_of,
+    ProblemKind, Reason, Stop, Verdict, compare_tx, stopped_verdict, uncomparable_claims,
+    verdict_of,
 };
 use shapekit_harness::protocol::{
     ChangeClaim, Claims, ExportChange, ExportParticipant, ParticipantClaim, RawAddress, TxRecord,
@@ -17,7 +18,7 @@ use shapekit_harness::protocol::{
 };
 use shapekit_harness::report::{MemoryOptions, Round, memory_check};
 use shapekit_harness::run::bootstrap_checkpoint;
-use shapekit_oracle::vocab::{OracleFile, TxFacts};
+use shapekit_oracle::vocab::{EventCoverage, OracleFile, TxFacts};
 
 fn corpus() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus")
@@ -388,4 +389,95 @@ fn memory_growth_across_rounds_fails_the_check() {
     assert!(!grew.flat, "{grew:?}");
     let over = memory_check(&[round(1, 600 << 20)], &mem);
     assert!(!over.within_budget, "{over:?}");
+}
+
+const V3_CLASSIC_ENTRY: &str = "cap67.unified-events.p22-payment-transfer";
+const V4_CLASSIC_ENTRY: &str = "cap67.unified-events.p22-backfill-payment-transfer";
+
+/// A transfer and a fee derived from the operation, the way wallet-backend stores them for a
+/// payment whether or not the meta has events.
+fn derived_events(tx: &TxFacts) -> Vec<ExportChange> {
+    let fields = |v: Value| match v {
+        Value::Object(m) => m,
+        _ => unreachable!(),
+    };
+    vec![
+        ExportChange {
+            kind: "token-event".into(),
+            raw: BTreeMap::new(),
+            source: None,
+            fields: fields(json!({"event": "transfer", "contract": "CXX", "from": tx.fee.source, "to": "GXX", "amount": "1", "scope": "operation"})),
+        },
+        ExportChange {
+            kind: "token-event".into(),
+            raw: BTreeMap::new(),
+            source: None,
+            fields: fields(json!({"event": "fee", "contract": "CXX", "from": tx.fee.source, "amount": "100", "scope": "fee-processing"})),
+        },
+    ]
+}
+
+#[test]
+fn events_the_meta_cannot_carry_are_out_of_scope_not_extra() {
+    let tx = oracle_tx(V3_CLASSIC_ENTRY);
+    assert_eq!(tx.events, Some(EventCoverage::None));
+    let mut rec = faithful_export(&tx, &claims());
+    rec.changes.extend(derived_events(&tx));
+    let v = verdict_of(vec![compare_tx(
+        &tx,
+        Some(&rec),
+        &claims(),
+        &vocabulary_fields(),
+    )]);
+    assert_eq!(v.verdict, Verdict::OutOfScope, "{v:?}");
+    assert!(v.problems.is_empty(), "{:?}", v.problems);
+    assert!(v.detail.contains("cannot be checked"), "{}", v.detail);
+}
+
+#[test]
+fn a_real_problem_still_wins_over_uncomparable_events() {
+    let tx = oracle_tx(V3_CLASSIC_ENTRY);
+    let mut rec = faithful_export(&tx, &claims());
+    rec.participants.clear();
+    rec.changes.extend(derived_events(&tx));
+    let v = verdict_of(vec![compare_tx(
+        &tx,
+        Some(&rec),
+        &claims(),
+        &vocabulary_fields(),
+    )]);
+    assert_eq!(v.verdict, Verdict::Dropped, "{v:?}");
+    assert!(v.problems.iter().all(|p| p.fact == "participant"));
+}
+
+#[test]
+fn events_in_v4_meta_are_compared() {
+    let tx = oracle_tx(V4_CLASSIC_ENTRY);
+    assert_eq!(tx.events, Some(EventCoverage::Unified));
+    let mut rec = faithful_export(&tx, &claims());
+    assert_eq!(verdict(&tx, Some(&rec), &claims()), (Verdict::Pass, None));
+    rec.changes.extend(derived_events(&tx));
+    assert_eq!(
+        verdict(&tx, Some(&rec), &claims()),
+        (Verdict::Mishandled, Some(Reason::WrongValue))
+    );
+}
+
+#[test]
+fn soroban_v3_coverage_drops_only_claims_beyond_operation_events() {
+    let mut op = claim("token-event", &["event", "contract", "from", "to", "amount"]);
+    op.filter.insert("stage".into(), vec![json!("operation")]);
+    let mut fee = claim("token-event", &["event", "contract", "from"]);
+    fee.filter.insert("stage".into(), vec![json!("before-all-txs")]);
+    let any = claim("contract-event", &["contract", "stage"]);
+    let c = Claims {
+        participants: None,
+        changes: vec![op, fee, any],
+    };
+    assert_eq!(
+        uncomparable_claims(EventCoverage::SorobanOperation, &c),
+        vec![1, 2]
+    );
+    assert_eq!(uncomparable_claims(EventCoverage::None, &c), vec![0, 1, 2]);
+    assert!(uncomparable_claims(EventCoverage::Unified, &c).is_empty());
 }
