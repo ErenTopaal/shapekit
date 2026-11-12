@@ -1,0 +1,58 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_data.data_name",
+    "op.manage_data.data_value",
+    "tx.envelope.type"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p1-manage-data-not-supported-yet",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ManageData in a v0 envelope at protocol 1, refused at submission with MANAGE_DATA_NOT_SUPPORTED_YET; the check is in doCheckValid, so the tx queue and tx set validation keep it out of every ledger. submitted with ledger 63 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 1,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.manage-data.p1",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAK/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "classic.failed-tx.manage-data"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p1-manage-data-not-supported-yet/mainnet.expected.json",
+      "expected_json_sha256": "89b8ba0ab2532f60fd500ee166877f5ad3ec2f290b9cef2e00f5e9541f8ed1aa",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p1-manage-data-not-supported-yet/mainnet.xdr",
+      "xdr_sha256": "3213a2d4fc75325a2e31b7f76353063b09486e4b72cbbb3120b7ff6c7fb682e2"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p1-manage-data-not-supported-yet/testnet.expected.json",
+      "expected_json_sha256": "7f1f148ac7c8e4bfe4be8708858bddeda61c0b11838af06f56d8f8558fdebfcf",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p1-manage-data-not-supported-yet/testnet.xdr",
+      "xdr_sha256": "985a39f865d41db2cd34166981ba0afb96fd433d48d165f5809e17e71c33d2a7"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,61 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.payment.destination",
+    "op.payment.asset",
+    "op.payment.amount"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p12-payment-no-issuer",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "a payment of an asset whose issuer account does not exist to an account that is not the issuer; core runs it as a path payment and maps the code (core: payment.no_issuer)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.issuer-checks.p12",
+    "class": "local-core",
+    "ledger_seq": 72,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx.issuer-checks"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/mainnet.expected.json",
+      "expected_json_sha256": "b096a7d621dc2bf31fbff640926b79e2ea2fa31dbebef5c92b1d066beb2dba0f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/mainnet.oracle.json",
+      "oracle_sha256": "1ebb80f8d26d4629d14aa5b3d0bffd36b07497f0b42d69492ff3c0e4223f9d92",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/mainnet.xdr",
+      "xdr_sha256": "d403f4b0db8043f9f353a9011e546e3f55a8bbf6fa65099a4b3b742b526133da"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/testnet.expected.json",
+      "expected_json_sha256": "ca6bce9edcf9455d079447cd0f33fe1871c622ceff6158512773caffddffdb2b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/testnet.oracle.json",
+      "oracle_sha256": "15cefe25d12e538ad850b55d58e78caf51a3a51babf25c8289ff3e511fd2ed91",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-payment-no-issuer/testnet.xdr",
+      "xdr_sha256": "16ff74ade74adaf8a6220911383b01349b6b51dfb211df94bbef46c38feefbf1"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

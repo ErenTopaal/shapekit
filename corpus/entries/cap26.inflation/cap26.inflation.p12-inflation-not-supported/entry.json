@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0026"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap26.inflation",
+  "fields_exercised": [
+    "tx.envelope.type"
+  ],
+  "flags": [],
+  "id": "cap26.inflation.p12-inflation-not-supported",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "an inflation operation at protocol 12, where CAP-0026 disabled it: core refuses the transaction at submission with opNOT_SUPPORTED. submitted with ledger 64 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 12,
+    "valid_min": 12
+  },
+  "source": {
+    "chain": "cap26.inflation.p12",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAf////0AAAAA",
+      "stage": "submit"
+    },
+    "recipe": "cap26.inflation"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p12-inflation-not-supported/mainnet.expected.json",
+      "expected_json_sha256": "3d7ca62034a19c960d9f070e35b4ca9bdc4ceb3c69dd8a54215e631fa7821bae",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p12-inflation-not-supported/mainnet.xdr",
+      "xdr_sha256": "ac773a11b83d315f2ac984787bbc7e7dc8cdec07c76761f54a5ca136e120e6c5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p12-inflation-not-supported/testnet.expected.json",
+      "expected_json_sha256": "9f34eec93f5dcef476454a091a6ef9f613fde0510e848820ad545e7bc102111f",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p12-inflation-not-supported/testnet.xdr",
+      "xdr_sha256": "5cf8f032bf48756a5b08d87ca1205aef98a5f962d48273b322bcb466f054141c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

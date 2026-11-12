@@ -9,7 +9,7 @@ use shapekit_core_driver::chain::{Applied, ChainDriver};
 use shapekit_core_driver::keys::{account_id, derive_key, muxed_account};
 use shapekit_core_driver::node::SubmitStatus;
 use shapekit_core_driver::recorder::{ChainSummary, FIRST_LEDGER, canonical_frame};
-use shapekit_core_driver::tx::{TransactionBuilder, envelope_hash, sign_transaction};
+use shapekit_core_driver::tx::{TransactionBuilder, envelope_hash, sign_for_protocol};
 use shapekit_manifest::xdr::{self, result_code};
 use shapekit_manifest::{CoreRejection, RejectionStage, Validity, decode_limits};
 use stellar_xdr::{
@@ -163,13 +163,15 @@ impl ChainCtx {
         ))
     }
 
-    /// Signs `tx` with each key under this chain's network id.
+    /// Signs `tx` with each key under this chain's network id, as a v0
+    /// envelope below protocol 13 and a v1 envelope from then on.
     pub fn sign(&self, tx: Transaction, signers: &[&SigningKey]) -> Result<TransactionEnvelope> {
-        Ok(TransactionEnvelope::Tx(sign_transaction(
+        Ok(sign_for_protocol(
             tx,
+            self.protocol,
             self.driver.network_id(),
             signers,
-        )?))
+        )?)
     }
 
     /// One transaction from `source` with `ops`, signed by `source`.

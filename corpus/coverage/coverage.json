@@ -5,11 +5,11 @@
         "arm": "AccountEntryExt:v0",
         "by_source_class": {
           "core-golden": 27,
-          "local-core": 91,
+          "local-core": 107,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 122,
+        "core_emitted_entries": 138,
         "examples": [
           "cap01.bump-sequence.p30-bump-forward",
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
@@ -20,11 +20,11 @@
         "arm": "AccountEntryExt:v1",
         "by_source_class": {
           "core-golden": 90,
-          "local-core": 354,
+          "local-core": 358,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 452,
+        "core_emitted_entries": 456,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -34,11 +34,13 @@
       {
         "arm": "AccountEntryExtensionV1Ext:v0",
         "by_source_class": {
-          "local-core": 1
+          "local-core": 5
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 5,
         "examples": [
-          "classic.failed-tx.p30-passive-offer-operation-source"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
         ]
       },
       {
@@ -189,6 +191,16 @@
         ]
       },
       {
+        "arm": "AllowTrustResult:self_not_allowed",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-allow-trust-self-not-allowed"
+        ]
+      },
+      {
         "arm": "AllowTrustResult:success",
         "by_source_class": {
           "core-golden": 1,
@@ -200,6 +212,16 @@
           "cap18.maintain-liabilities.golden-3f24be68a9962089-4",
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
           "cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4"
+        ]
+      },
+      {
+        "arm": "AllowTrustResult:trust_not_required",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-allow-trust-trust-not-required"
         ]
       },
       {
@@ -220,11 +242,11 @@
         "arm": "Asset:credit_alphanum4",
         "by_source_class": {
           "core-golden": 7,
-          "local-core": 120,
+          "local-core": 131,
           "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 132,
+        "core_emitted_entries": 143,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -235,11 +257,11 @@
         "arm": "Asset:native",
         "by_source_class": {
           "core-golden": 14,
-          "local-core": 127,
+          "local-core": 137,
           "mainnet-history": 1,
           "testnet-history": 2
         },
-        "core_emitted_entries": 144,
+        "core_emitted_entries": 154,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -260,10 +282,10 @@
         "arm": "AssetCode:credit_alphanum4",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 7,
+          "local-core": 9,
           "testnet-history": 1
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 11,
         "examples": [
           "cap18.maintain-liabilities.golden-3f24be68a9962089-4",
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
@@ -330,10 +352,10 @@
         "arm": "ChangeTrustAsset:credit_alphanum4",
         "by_source_class": {
           "core-golden": 2,
-          "local-core": 6,
+          "local-core": 7,
           "testnet-history": 1
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
           "cap33.sponsorship.p30-sponsored-trustline-envelope",
@@ -405,6 +427,16 @@
         ]
       },
       {
+        "arm": "ChangeTrustResult:self_not_allowed",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-change-trust-self-not-allowed"
+        ]
+      },
+      {
         "arm": "ChangeTrustResult:success",
         "by_source_class": {
           "core-golden": 3,
@@ -450,6 +482,18 @@
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
           "cap03.offer-liabilities.golden-12c04cf739c52eac-20"
+        ]
+      },
+      {
+        "arm": "ClaimAtom:v0",
+        "by_source_class": {
+          "local-core": 4
+        },
+        "core_emitted_entries": 4,
+        "examples": [
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
         ]
       },
       {
@@ -1374,6 +1418,26 @@
         ]
       },
       {
+        "arm": "InflationResult:not_time",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap26.inflation.p11-inflation-not-time"
+        ]
+      },
+      {
+        "arm": "InflationResult:success",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap26.inflation.p11-inflation-payout"
+        ]
+      },
+      {
         "arm": "InnerTransactionResultExt:v0",
         "by_source_class": {
           "core-golden": 1,
@@ -1539,12 +1603,14 @@
       {
         "arm": "LedgerCloseMeta:v0",
         "by_source_class": {
-          "core-golden": 2
+          "core-golden": 2,
+          "local-core": 16
         },
-        "core_emitted_entries": 2,
+        "core_emitted_entries": 18,
         "examples": [
-          "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
-          "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
         ]
       },
       {
@@ -1645,11 +1711,11 @@
         "arm": "LedgerEntryChange:state",
         "by_source_class": {
           "core-golden": 99,
-          "local-core": 354,
+          "local-core": 370,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 462,
+        "core_emitted_entries": 478,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1660,11 +1726,11 @@
         "arm": "LedgerEntryChange:updated",
         "by_source_class": {
           "core-golden": 99,
-          "local-core": 354,
+          "local-core": 370,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 462,
+        "core_emitted_entries": 478,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1675,11 +1741,11 @@
         "arm": "LedgerEntryData:account",
         "by_source_class": {
           "core-golden": 91,
-          "local-core": 354,
+          "local-core": 370,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 454,
+        "core_emitted_entries": 470,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1769,9 +1835,9 @@
         "arm": "LedgerEntryData:offer",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 12
+          "local-core": 16
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 22,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -1782,11 +1848,11 @@
         "arm": "LedgerEntryData:trustline",
         "by_source_class": {
           "core-golden": 9,
-          "local-core": 68,
+          "local-core": 72,
           "mainnet-history": 3,
           "testnet-history": 1
         },
-        "core_emitted_entries": 81,
+        "core_emitted_entries": 85,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -1812,11 +1878,11 @@
         "arm": "LedgerEntryExt:v0",
         "by_source_class": {
           "core-golden": 100,
-          "local-core": 367,
+          "local-core": 383,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 476,
+        "core_emitted_entries": 492,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1855,10 +1921,10 @@
         "arm": "LedgerHeaderExt:v0",
         "by_source_class": {
           "core-golden": 106,
-          "local-core": 284,
+          "local-core": 300,
           "testnet-history": 3
         },
-        "core_emitted_entries": 393,
+        "core_emitted_entries": 409,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1889,10 +1955,10 @@
         "arm": "LedgerHeaderHistoryEntryExt:v0",
         "by_source_class": {
           "core-golden": 106,
-          "local-core": 285,
+          "local-core": 301,
           "testnet-history": 3
         },
-        "core_emitted_entries": 394,
+        "core_emitted_entries": 410,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2272,6 +2338,16 @@
         ]
       },
       {
+        "arm": "ManageBuyOfferResult:buy_no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer"
+        ]
+      },
+      {
         "arm": "ManageBuyOfferResult:buy_no_trust",
         "by_source_class": {
           "local-core": 1
@@ -2332,6 +2408,16 @@
         ]
       },
       {
+        "arm": "ManageBuyOfferResult:sell_no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer"
+        ]
+      },
+      {
         "arm": "ManageBuyOfferResult:sell_no_trust",
         "by_source_class": {
           "local-core": 1
@@ -2355,13 +2441,13 @@
         "arm": "ManageBuyOfferResult:success",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 3
+          "local-core": 4
         },
-        "core_emitted_entries": 4,
+        "core_emitted_entries": 5,
         "examples": [
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -2422,9 +2508,9 @@
         "arm": "ManageOfferSuccessResultOffer:deleted",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 2
+          "local-core": 4
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 7,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -2439,6 +2525,16 @@
         "core_emitted_entries": 1,
         "examples": [
           "cap03.offer-liabilities.p30-update-offer-by-id"
+        ]
+      },
+      {
+        "arm": "ManageSellOfferResult:buy_no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer"
         ]
       },
       {
@@ -2502,6 +2598,16 @@
         ]
       },
       {
+        "arm": "ManageSellOfferResult:sell_no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer"
+        ]
+      },
+      {
         "arm": "ManageSellOfferResult:sell_no_trust",
         "by_source_class": {
           "local-core": 1
@@ -2525,9 +2631,9 @@
         "arm": "ManageSellOfferResult:success",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 6
+          "local-core": 7
         },
-        "core_emitted_entries": 9,
+        "core_emitted_entries": 10,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -2574,11 +2680,11 @@
         "arm": "Memo:none",
         "by_source_class": {
           "core-golden": 91,
-          "local-core": 323,
+          "local-core": 339,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 423,
+        "core_emitted_entries": 439,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2616,11 +2722,11 @@
         "arm": "MuxedAccount:ed25519",
         "by_source_class": {
           "core-golden": 90,
-          "local-core": 336,
+          "local-core": 343,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 434,
+        "core_emitted_entries": 441,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2644,9 +2750,9 @@
         "arm": "OfferEntryExt:v0",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 12
+          "local-core": 16
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 22,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -2670,10 +2776,10 @@
         "arm": "OperationBody:allow_trust",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 8,
+          "local-core": 10,
           "testnet-history": 1
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 12,
         "examples": [
           "cap18.maintain-liabilities.golden-3f24be68a9962089-4",
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
@@ -2710,11 +2816,11 @@
         "arm": "OperationBody:change_trust",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 9,
+          "local-core": 10,
           "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 14,
+        "core_emitted_entries": 15,
         "examples": [
           "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
           "cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope",
@@ -2825,6 +2931,17 @@
         ]
       },
       {
+        "arm": "OperationBody:inflation",
+        "by_source_class": {
+          "local-core": 2
+        },
+        "core_emitted_entries": 2,
+        "examples": [
+          "cap26.inflation.p11-inflation-not-time",
+          "cap26.inflation.p11-inflation-payout"
+        ]
+      },
+      {
         "arm": "OperationBody:invoke_host_function",
         "by_source_class": {
           "core-golden": 36,
@@ -2869,13 +2986,13 @@
         "arm": "OperationBody:manage_buy_offer",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 12
+          "local-core": 15
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 16,
         "examples": [
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope",
-          "cap03.offer-liabilities.p30-buy-offer-near-int64-max-envelope"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope"
         ]
       },
       {
@@ -2895,50 +3012,50 @@
         "arm": "OperationBody:manage_sell_offer",
         "by_source_class": {
           "core-golden": 2,
-          "local-core": 14
+          "local-core": 17
         },
-        "core_emitted_entries": 16,
+        "core_emitted_entries": 19,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p30-credit-pair-cross-partial"
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0"
         ]
       },
       {
         "arm": "OperationBody:path_payment_strict_receive",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 16,
+          "local-core": 18,
           "mainnet-history": 1
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 20,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
           "cap15.fee-bump.mainnet-51000294-a25b8226-envelope",
-          "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1"
+          "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1"
         ]
       },
       {
         "arm": "OperationBody:path_payment_strict_send",
         "by_source_class": {
-          "local-core": 14
+          "local-core": 16
         },
-        "core_emitted_entries": 14,
+        "core_emitted_entries": 16,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
           "cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1",
-          "cap38.liquidity-pools.p30-path-payment-through-pool"
+          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1"
         ]
       },
       {
         "arm": "OperationBody:payment",
         "by_source_class": {
           "core-golden": 7,
-          "local-core": 85,
+          "local-core": 86,
           "mainnet-history": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 96,
+        "core_emitted_entries": 97,
         "examples": [
           "cap03.offer-liabilities.golden-27d2533d64835282-0",
           "cap15.fee-bump.p30-fee-source-is-inner-source-envelope",
@@ -3021,11 +3138,11 @@
         "arm": "OperationResult:op_inner",
         "by_source_class": {
           "core-golden": 90,
-          "local-core": 347,
+          "local-core": 363,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 446,
+        "core_emitted_entries": 462,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3069,10 +3186,10 @@
         "arm": "OperationResultTr:allow_trust",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 8,
+          "local-core": 10,
           "testnet-history": 1
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 12,
         "examples": [
           "cap18.maintain-liabilities.golden-3f24be68a9962089-4",
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
@@ -3109,11 +3226,11 @@
         "arm": "OperationResultTr:change_trust",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 9,
+          "local-core": 10,
           "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 14,
+        "core_emitted_entries": 15,
         "examples": [
           "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
           "cap27.muxed-accounts.mainnet-36196205-17fee99b-meta",
@@ -3212,6 +3329,17 @@
         ]
       },
       {
+        "arm": "OperationResultTr:inflation",
+        "by_source_class": {
+          "local-core": 2
+        },
+        "core_emitted_entries": 2,
+        "examples": [
+          "cap26.inflation.p11-inflation-not-time",
+          "cap26.inflation.p11-inflation-payout"
+        ]
+      },
+      {
         "arm": "OperationResultTr:invoke_host_function",
         "by_source_class": {
           "core-golden": 32,
@@ -3256,13 +3384,13 @@
         "arm": "OperationResultTr:manage_buy_offer",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 12
+          "local-core": 15
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 16,
         "examples": [
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -3281,9 +3409,9 @@
         "arm": "OperationResultTr:manage_sell_offer",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 15
+          "local-core": 18
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 21,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -3294,37 +3422,37 @@
         "arm": "OperationResultTr:path_payment_strict_receive",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 15,
+          "local-core": 17,
           "mainnet-history": 1
         },
-        "core_emitted_entries": 17,
+        "core_emitted_entries": 19,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
           "cap15.fee-bump.mainnet-51000294-a25b8226-meta",
-          "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1"
+          "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1"
         ]
       },
       {
         "arm": "OperationResultTr:path_payment_strict_send",
         "by_source_class": {
-          "local-core": 14
+          "local-core": 16
         },
-        "core_emitted_entries": 14,
+        "core_emitted_entries": 16,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
           "cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1",
-          "cap38.liquidity-pools.p30-path-payment-through-pool"
+          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1"
         ]
       },
       {
         "arm": "OperationResultTr:payment",
         "by_source_class": {
           "core-golden": 7,
-          "local-core": 78,
+          "local-core": 79,
           "mainnet-history": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 89,
+        "core_emitted_entries": 90,
         "examples": [
           "cap03.offer-liabilities.golden-27d2533d64835282-0",
           "cap15.fee-bump.p30-fee-source-is-inner-source-meta",
@@ -3404,6 +3532,16 @@
         ]
       },
       {
+        "arm": "PathPaymentStrictReceiveResult:no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-path-payment-strict-receive-no-issuer"
+        ]
+      },
+      {
         "arm": "PathPaymentStrictReceiveResult:no_trust",
         "by_source_class": {
           "local-core": 1
@@ -3467,13 +3605,13 @@
         "arm": "PathPaymentStrictReceiveResult:success",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 6
+          "local-core": 7
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
           "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1",
-          "cap67.unified-events.p22-backfill-path-payment-muxed-destination"
+          "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1"
         ]
       },
       {
@@ -3514,6 +3652,16 @@
         "core_emitted_entries": 1,
         "examples": [
           "classic.failed-tx.p30-path-send-no-destination"
+        ]
+      },
+      {
+        "arm": "PathPaymentStrictSendResult:no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-path-payment-strict-send-no-issuer"
         ]
       },
       {
@@ -3569,13 +3717,13 @@
       {
         "arm": "PathPaymentStrictSendResult:success",
         "by_source_class": {
-          "local-core": 4
+          "local-core": 5
         },
-        "core_emitted_entries": 4,
+        "core_emitted_entries": 5,
         "examples": [
+          "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
           "cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1",
-          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1",
-          "cap38.liquidity-pools.p30-path-payment-through-pool"
+          "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1"
         ]
       },
       {
@@ -3630,6 +3778,16 @@
           "cap15.fee-bump.p30-inner-failed-meta",
           "cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta",
           "cap40.signed-payload-signer.testnet-4437357"
+        ]
+      },
+      {
+        "arm": "PaymentResult:no_issuer",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p12-payment-no-issuer"
         ]
       },
       {
@@ -3701,10 +3859,10 @@
         "arm": "Preconditions:none",
         "by_source_class": {
           "core-golden": 89,
-          "local-core": 341,
+          "local-core": 345,
           "testnet-history": 1
         },
-        "core_emitted_entries": 431,
+        "core_emitted_entries": 435,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3742,11 +3900,11 @@
         "arm": "PublicKey:public_key_type_ed25519",
         "by_source_class": {
           "core-golden": 106,
-          "local-core": 389,
+          "local-core": 405,
           "mainnet-history": 12,
           "testnet-history": 3
         },
-        "core_emitted_entries": 510,
+        "core_emitted_entries": 526,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4701,14 +4859,14 @@
         "arm": "StellarValueExt:signed",
         "by_source_class": {
           "core-golden": 14,
-          "local-core": 51,
+          "local-core": 67,
           "testnet-history": 2
         },
-        "core_emitted_entries": 67,
+        "core_emitted_entries": 83,
         "examples": [
-          "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
-          "cap27.muxed-accounts.p28-clawback-from-id-2p64-1",
-          "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
         ]
       },
       {
@@ -4729,11 +4887,11 @@
         "arm": "TransactionEnvelope:tx",
         "by_source_class": {
           "core-golden": 89,
-          "local-core": 343,
+          "local-core": 347,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 438,
+        "core_emitted_entries": 442,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4757,10 +4915,13 @@
       {
         "arm": "TransactionEnvelope:tx_v0",
         "by_source_class": {
-          "core-golden": 1
+          "core-golden": 1,
+          "local-core": 12
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 13,
         "examples": [
+          "cap26.inflation.p11-inflation-not-time",
+          "cap26.inflation.p11-inflation-payout",
           "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
         ]
       },
@@ -4768,11 +4929,11 @@
         "arm": "TransactionExt:v0",
         "by_source_class": {
           "core-golden": 43,
-          "local-core": 273,
+          "local-core": 277,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 323,
+        "core_emitted_entries": 327,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4797,11 +4958,14 @@
       {
         "arm": "TransactionMeta:v2",
         "by_source_class": {
-          "core-golden": 1
+          "core-golden": 1,
+          "local-core": 16
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 17,
         "examples": [
-          "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
+          "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
         ]
       },
       {
@@ -4864,11 +5028,11 @@
         "arm": "TransactionResultExt:v0",
         "by_source_class": {
           "core-golden": 91,
-          "local-core": 349,
+          "local-core": 365,
           "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 449,
+        "core_emitted_entries": 465,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4929,11 +5093,11 @@
         "arm": "TransactionResultResult:tx_failed",
         "by_source_class": {
           "core-golden": 28,
-          "local-core": 123,
+          "local-core": 134,
           "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 155,
+        "core_emitted_entries": 166,
         "examples": [
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
           "cap01.bump-sequence.p30-merge-seqnum-too-far",
@@ -4992,11 +5156,11 @@
         "arm": "TransactionResultResult:tx_success",
         "by_source_class": {
           "core-golden": 61,
-          "local-core": 221,
+          "local-core": 226,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 287,
+        "core_emitted_entries": 292,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -5006,10 +5170,13 @@
       {
         "arm": "TransactionV0Ext:v0",
         "by_source_class": {
-          "core-golden": 1
+          "core-golden": 1,
+          "local-core": 12
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 13,
         "examples": [
+          "cap26.inflation.p11-inflation-not-time",
+          "cap26.inflation.p11-inflation-payout",
           "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
         ]
       },
@@ -5031,11 +5198,11 @@
         "arm": "TrustLineAsset:credit_alphanum4",
         "by_source_class": {
           "core-golden": 9,
-          "local-core": 74,
+          "local-core": 78,
           "mainnet-history": 4,
           "testnet-history": 1
         },
-        "core_emitted_entries": 88,
+        "core_emitted_entries": 92,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5060,11 +5227,11 @@
         "arm": "TrustLineEntryExt:v0",
         "by_source_class": {
           "core-golden": 7,
-          "local-core": 63,
+          "local-core": 67,
           "mainnet-history": 3,
           "testnet-history": 1
         },
-        "core_emitted_entries": 74,
+        "core_emitted_entries": 78,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5075,10 +5242,10 @@
         "arm": "TrustLineEntryExt:v1",
         "by_source_class": {
           "core-golden": 7,
-          "local-core": 21,
+          "local-core": 25,
           "testnet-history": 1
         },
-        "core_emitted_entries": 29,
+        "core_emitted_entries": 33,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5103,9 +5270,9 @@
         "arm": "TrustLineEntryV1Ext:v0",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 13
+          "local-core": 17
         },
-        "core_emitted_entries": 19,
+        "core_emitted_entries": 23,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5164,24 +5331,6 @@
         }
       },
       {
-        "arm": "AllowTrustResult:self_not_allowed",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp)"
-        }
-      },
-      {
-        "arm": "AllowTrustResult:trust_not_required",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "AllowTrustOpFrame::isAuthRevocationValid sets it only before protocol 16 (stellar-core v30.0.0)"
-        }
-      },
-      {
         "arm": "BeginSponsoringFutureReservesResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -5219,24 +5368,6 @@
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
-        }
-      },
-      {
-        "arm": "ChangeTrustResult:self_not_allowed",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp)"
-        }
-      },
-      {
-        "arm": "ClaimAtom:v0",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "makeClaimAtom writes CLAIM_ATOM_TYPE_V0 only before protocol 18 (stellar-core v30.0.0 TransactionUtils.cpp); mainnet history from protocols 10 to 17 holds it"
         }
       },
       {
@@ -5293,24 +5424,6 @@
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions"
-        }
-      },
-      {
-        "arm": "InflationResult:not_time",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
-        }
-      },
-      {
-        "arm": "InflationResult:success",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
         }
       },
       {
@@ -5440,30 +5553,12 @@
         }
       },
       {
-        "arm": "ManageBuyOfferResult:buy_no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
-        }
-      },
-      {
         "arm": "ManageBuyOfferResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
-        }
-      },
-      {
-        "arm": "ManageBuyOfferResult:sell_no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
         }
       },
       {
@@ -5478,19 +5573,12 @@
       {
         "arm": "ManageDataResult:not_supported_yet",
         "non_core_entries": [],
-        "refused_by_core": [],
+        "refused_by_core": [
+          "classic.failed-tx.p1-manage-data-not-supported-yet"
+        ],
         "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0), and as a validity check it never reached a ledger even then"
-        }
-      },
-      {
-        "arm": "ManageSellOfferResult:buy_no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
+          "blocker": "refused-before-ledger",
+          "reason": "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0). core 30.0.0 still runs a fresh network at protocol 1 and refuses ManageData there at submission with this code (classic.failed-tx.manage-data.p1); a validity check keeps it out of the tx queue and of tx set validation, so no ledger at any protocol holds it"
         }
       },
       {
@@ -5503,27 +5591,11 @@
         }
       },
       {
-        "arm": "ManageSellOfferResult:sell_no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
-        }
-      },
-      {
-        "arm": "OperationBody:inflation",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
-        }
-      },
-      {
         "arm": "OperationResult:op_not_supported",
         "non_core_entries": [],
-        "refused_by_core": [],
+        "refused_by_core": [
+          "cap26.inflation.p12-inflation-not-supported"
+        ],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "OperationFrame::checkValid sets it from isOpSupported, which reads only the ledger header, so validation and apply in one ledger agree (stellar-core v30.0.0)"
@@ -5548,30 +5620,12 @@
         }
       },
       {
-        "arm": "OperationResultTr:inflation",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
-        }
-      },
-      {
         "arm": "PathPaymentStrictReceiveResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
-        }
-      },
-      {
-        "arm": "PathPaymentStrictReceiveResult:no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
         }
       },
       {
@@ -5584,30 +5638,12 @@
         }
       },
       {
-        "arm": "PathPaymentStrictSendResult:no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
-        }
-      },
-      {
         "arm": "PaymentResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [],
         "uncovered": {
           "blocker": "refused-before-ledger",
           "reason": "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
-        }
-      },
-      {
-        "arm": "PaymentResult:no_issuer",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "old-protocol-only",
-          "reason": "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
         }
       },
       {
@@ -5912,17 +5948,17 @@
       "title": "Bump Sequence"
     },
     {
-      "core_emitted_entries": 110,
-      "entries": 110,
+      "core_emitted_entries": 120,
+      "entries": 121,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 104,
+        "local-core": 115,
         "mainnet-history": 2
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 106,
-        "testnet": 104
+        "mainnet": 117,
+        "testnet": 115
       },
       "families": [
         "classic.failed-tx"
@@ -5931,10 +5967,13 @@
       "indexer_visible": true,
       "protocol": 10,
       "protocols_all": [
+        1,
+        12,
         26,
         30
       ],
       "protocols_core_emitted": [
+        12,
         26,
         30
       ],
@@ -5942,17 +5981,17 @@
       "title": "Transaction level signature verification"
     },
     {
-      "core_emitted_entries": 18,
-      "entries": 22,
+      "core_emitted_entries": 22,
+      "entries": 26,
       "entries_by_source_class": {
         "core-golden": 6,
-        "local-core": 12,
+        "local-core": 16,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 12,
-        "testnet": 12,
+        "mainnet": 16,
+        "testnet": 16,
         "vector": 3
       },
       "families": [
@@ -5962,9 +6001,11 @@
       "indexer_visible": true,
       "protocol": 10,
       "protocols_all": [
+        17,
         30
       ],
       "protocols_core_emitted": [
+        17,
         30
       ],
       "status": "Final",
@@ -6001,17 +6042,17 @@
       "title": "Throttling and transaction pricing improvements"
     },
     {
-      "core_emitted_entries": 18,
-      "entries": 22,
+      "core_emitted_entries": 22,
+      "entries": 26,
       "entries_by_source_class": {
         "core-golden": 6,
-        "local-core": 12,
+        "local-core": 16,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 12,
-        "testnet": 12,
+        "mainnet": 16,
+        "testnet": 16,
         "vector": 3
       },
       "families": [
@@ -6021,9 +6062,11 @@
       "indexer_visible": true,
       "protocol": 11,
       "protocols_all": [
+        17,
         30
       ],
       "protocols_core_emitted": [
+        17,
         30
       ],
       "status": "Final",
@@ -6395,17 +6438,29 @@
       "title": "Remove Bucket Shadowing"
     },
     {
-      "core_emitted_entries": 0,
-      "entries": 0,
-      "entries_by_source_class": {},
-      "entries_by_variant": {},
-      "families": [],
+      "core_emitted_entries": 2,
+      "entries": 3,
+      "entries_by_source_class": {
+        "local-core": 3
+      },
+      "entries_by_variant": {
+        "mainnet": 3,
+        "testnet": 3
+      },
+      "families": [
+        "cap26.inflation"
+      ],
       "id": "CAP-0026",
       "indexer_visible": false,
       "not_visible_reason": "INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape",
       "protocol": 12,
-      "protocols_all": [],
-      "protocols_core_emitted": [],
+      "protocols_all": [
+        11,
+        12
+      ],
+      "protocols_core_emitted": [
+        11
+      ],
       "status": "Final",
       "title": "Disable Inflation Mechanism"
     },
@@ -6445,17 +6500,17 @@
       "title": "First-class multiplexed accounts"
     },
     {
-      "core_emitted_entries": 110,
-      "entries": 110,
+      "core_emitted_entries": 120,
+      "entries": 121,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 104,
+        "local-core": 115,
         "mainnet-history": 2
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 106,
-        "testnet": 104
+        "mainnet": 117,
+        "testnet": 115
       },
       "families": [
         "classic.failed-tx"
@@ -6464,10 +6519,13 @@
       "indexer_visible": true,
       "protocol": 13,
       "protocols_all": [
+        1,
+        12,
         26,
         30
       ],
       "protocols_core_emitted": [
+        12,
         26,
         30
       ],
@@ -14516,7 +14574,7 @@
       ],
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 104,
+        "local-core": 115,
         "mainnet-history": 2
       },
       "fragments": [
@@ -14526,6 +14584,7 @@
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
             "cap03.offer-liabilities.p30-merge-dest-full",
             "cap23.claimable-balances.golden-67b49513ed2f1609-1",
+            "cap26.inflation.p11-inflation-not-time",
             "cap33.sponsorship.golden-16ca002da0d1fd67-1",
             "cap33.sponsorship.golden-5a03a46b7b48bb06-2",
             "cap35.clawback.p30-clawback-not-enabled",
@@ -14551,6 +14610,16 @@
             "cap85.executable-tag.p30-create-external-ref-missing-tag",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.p12-allow-trust-self-not-allowed",
+            "classic.failed-tx.p12-allow-trust-trust-not-required",
+            "classic.failed-tx.p12-change-trust-self-not-allowed",
+            "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+            "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+            "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+            "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+            "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+            "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+            "classic.failed-tx.p12-payment-no-issuer",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
             "classic.failed-tx.p30-allow-trust-no-trust-line",
@@ -14685,10 +14754,12 @@
             "cap01.bump-sequence.p30-bump-negative",
             "cap18.maintain-liabilities.p30-allow-trust-both-flags",
             "cap23.claimable-balances.p30-create-predicate-depth-5",
+            "cap26.inflation.p12-inflation-not-supported",
             "cap35.clawback.p30-set-flags-clawback-enabled",
             "cap38.liquidity-pools.p30-change-trust-pool-strkey-order",
             "cap40.signed-payload-signer.p28-set-options-empty-payload",
             "cap40.signed-payload-signer.p30-set-options-empty-payload",
+            "classic.failed-tx.p1-manage-data-not-supported-yet",
             "classic.max-length.p30-home-domain-del-rejected",
             "classic.max-length.p30-home-domain-utf8-rejected"
           ]
@@ -15625,6 +15696,10 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
             "classic.failed-tx.p30-passive-offer-operation-source"
           ],
           "covered": true,
@@ -15639,6 +15714,121 @@
           ],
           "covered": true,
           "fragment": "LedgerKey:data",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap26.inflation.p11-inflation-not-time",
+            "cap26.inflation.p11-inflation-payout",
+            "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0",
+            "classic.failed-tx.p12-allow-trust-self-not-allowed",
+            "classic.failed-tx.p12-allow-trust-trust-not-required",
+            "classic.failed-tx.p12-change-trust-self-not-allowed",
+            "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+            "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+            "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+            "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+            "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+            "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+            "classic.failed-tx.p12-payment-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "TransactionEnvelope:tx_v0",
+          "non_core_entries": [
+            "cap15.fee-bump.synth-envelope-tx-v0-in-ledger",
+            "cap26.inflation.p12-inflation-not-supported",
+            "classic.failed-tx.p1-manage-data-not-supported-yet"
+          ],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "ManageBuyOfferResult:buy_no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "ManageBuyOfferResult:sell_no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "ManageSellOfferResult:buy_no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "ManageSellOfferResult:sell_no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-path-payment-strict-receive-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "PathPaymentStrictReceiveResult:no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-path-payment-strict-send-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "PathPaymentStrictSendResult:no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-payment-no-issuer"
+          ],
+          "covered": true,
+          "fragment": "PaymentResult:no_issuer",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-allow-trust-trust-not-required"
+          ],
+          "covered": true,
+          "fragment": "AllowTrustResult:trust_not_required",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-allow-trust-self-not-allowed"
+          ],
+          "covered": true,
+          "fragment": "AllowTrustResult:self_not_allowed",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p12-change-trust-self-not-allowed"
+          ],
+          "covered": true,
+          "fragment": "ChangeTrustResult:self_not_allowed",
           "non_core_entries": [],
           "refused_by_core": []
         }
@@ -19354,16 +19544,19 @@
       ],
       "entries_by_source_class": {
         "core-golden": 6,
-        "local-core": 12,
+        "local-core": 16,
         "synthetic": 4
       },
       "fragments": [
         {
           "core_emitted": [
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+            "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-envelope",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-envelope",
+            "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+            "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
             "classic.failed-tx.p30-manage-buy-buy-no-trust",
             "classic.failed-tx.p30-manage-buy-buy-not-authorized",
             "classic.failed-tx.p30-manage-buy-cross-self",
@@ -19394,6 +19587,10 @@
             "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
+            "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -19845,6 +20042,10 @@
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
             "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
+            "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -19926,6 +20127,18 @@
           "fragment": "OperationBody:create_passive_sell_offer",
           "non_core_entries": [],
           "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+            "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0"
+          ],
+          "covered": true,
+          "fragment": "ClaimAtom:v0",
+          "non_core_entries": [],
+          "refused_by_core": []
         }
       ],
       "id": "cap03.offer-liabilities",
@@ -19951,6 +20164,8 @@
             "cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12",
             "cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain",
             "cap38.liquidity-pools.testnet-5521432",
+            "classic.failed-tx.p12-allow-trust-self-not-allowed",
+            "classic.failed-tx.p12-allow-trust-trust-not-required",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
             "classic.failed-tx.p30-allow-trust-no-trust-line"
@@ -19970,6 +20185,8 @@
             "cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4",
             "cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain",
             "cap38.liquidity-pools.testnet-5521432",
+            "classic.failed-tx.p12-allow-trust-self-not-allowed",
+            "classic.failed-tx.p12-allow-trust-trust-not-required",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
             "classic.failed-tx.p30-allow-trust-no-trust-line"
@@ -19995,6 +20212,60 @@
       "missing_source_classes": [],
       "planned": [],
       "title": "Trustlines authorized to maintain liabilities through allow trust"
+    },
+    {
+      "caps": [
+        "CAP-0026"
+      ],
+      "entries_by_source_class": {
+        "local-core": 3
+      },
+      "fragments": [
+        {
+          "core_emitted": [
+            "cap26.inflation.p11-inflation-not-time",
+            "cap26.inflation.p11-inflation-payout"
+          ],
+          "covered": true,
+          "fragment": "OperationBody:inflation",
+          "non_core_entries": [
+            "cap26.inflation.p12-inflation-not-supported"
+          ],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap26.inflation.p11-inflation-not-time",
+            "cap26.inflation.p11-inflation-payout"
+          ],
+          "covered": true,
+          "fragment": "OperationResultTr:inflation",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap26.inflation.p11-inflation-payout"
+          ],
+          "covered": true,
+          "fragment": "InflationResult:success",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "cap26.inflation.p11-inflation-not-time"
+          ],
+          "covered": true,
+          "fragment": "InflationResult:not_time",
+          "non_core_entries": [],
+          "refused_by_core": []
+        }
+      ],
+      "id": "cap26.inflation",
+      "missing_source_classes": [],
+      "planned": [],
+      "title": "Inflation operations and payouts from before CAP-0026 disabled them"
     }
   ],
   "fields": [
@@ -20302,7 +20573,7 @@
       "xdr_path": "PaymentOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id"
     },
     {
-      "core_emitted_entries": 16,
+      "core_emitted_entries": 17,
       "entries": [
         "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
         "cap27.muxed-accounts.p30-issued-payment-destination-id-2p53",
@@ -20315,6 +20586,7 @@
         "cap67.unified-events.p30-payment-burn",
         "cap67.unified-events.p30-payment-mint",
         "cap67.unified-events.p30-payment-transfer",
+        "classic.failed-tx.p12-payment-no-issuer",
         "classic.failed-tx.p30-payment-line-full",
         "classic.failed-tx.p30-payment-no-trust",
         "classic.failed-tx.p30-payment-not-authorized",
@@ -20322,7 +20594,7 @@
         "classic.failed-tx.p30-payment-src-not-authorized"
       ],
       "entries_by_source_class": {
-        "local-core": 16
+        "local-core": 17
       },
       "id": "op.payment.asset",
       "validated_by_core": "partial",
@@ -20347,15 +20619,17 @@
       "xdr_path": "PathPaymentStrictReceiveOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id | PathPaymentStrictSendOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id"
     },
     {
-      "core_emitted_entries": 3,
+      "core_emitted_entries": 5,
       "entries": [
         "cap38.liquidity-pools.p30-path-payment-through-pool",
+        "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+        "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
         "classic.max-length.p30-path-strict-receive-5",
         "classic.max-length.p30-path-strict-send-5",
         "classic.max-length.synth-path-6-assets"
       ],
       "entries_by_source_class": {
-        "local-core": 3,
+        "local-core": 5,
         "synthetic": 1
       },
       "id": "op.path_payment.path",
@@ -20379,6 +20653,7 @@
     {
       "core_emitted_entries": 5,
       "entries": [
+        "classic.failed-tx.p1-manage-data-not-supported-yet",
         "classic.failed-tx.p30-manage-data-low-reserve",
         "classic.failed-tx.p30-manage-data-name-not-found",
         "classic.failed-tx.p30-manage-data-removed",
@@ -20386,7 +20661,7 @@
         "classic.max-length.p30-data-name-value-64-meta"
       ],
       "entries_by_source_class": {
-        "local-core": 5
+        "local-core": 6
       },
       "id": "op.manage_data.data_name",
       "validated_by_core": "partial",
@@ -20395,6 +20670,7 @@
     {
       "core_emitted_entries": 5,
       "entries": [
+        "classic.failed-tx.p1-manage-data-not-supported-yet",
         "classic.failed-tx.p30-manage-data-low-reserve",
         "classic.failed-tx.p30-manage-data-name-not-found",
         "classic.failed-tx.p30-manage-data-removed",
@@ -20403,7 +20679,7 @@
         "classic.max-length.synth-data-value-65-bytes"
       ],
       "entries_by_source_class": {
-        "local-core": 5,
+        "local-core": 6,
         "synthetic": 1
       },
       "id": "op.manage_data.data_value",
@@ -20911,34 +21187,33 @@
   "schema_version": 1,
   "stellar_xdr": "30.0.0",
   "summary": {
-    "arms_covered": 420,
+    "arms_covered": 435,
     "arms_reachable": 499,
-    "arms_uncovered": 79,
+    "arms_uncovered": 64,
     "arms_uncovered_by_blocker": {
       "history-only": 3,
       "never-emitted": 11,
       "not-producible-locally": 2,
-      "old-protocol-only": 16,
-      "refused-before-ledger": 47
+      "refused-before-ledger": 48
     },
     "caps": 102,
     "caps_indexer_visible": 45,
     "caps_indexer_visible_core_emitted": 44,
     "caps_indexer_visible_with_reason": 1,
-    "core_emitted_entries": 568,
-    "entries": 683,
+    "core_emitted_entries": 584,
+    "entries": 701,
     "entries_by_source_class": {
       "core-golden": 106,
-      "local-core": 463,
+      "local-core": 481,
       "mainnet-history": 12,
       "synthetic": 99,
       "testnet-history": 3
     },
-    "families": 35,
+    "families": 36,
     "fields_not_fully_validated": 36,
     "fields_not_fully_validated_exercised": 36,
-    "fragments": 301,
-    "fragments_covered": 292,
+    "fragments": 317,
+    "fragments_covered": 308,
     "fragments_uncovered": 9
   }
 }

@@ -1,0 +1,58 @@
+{
+  "caps": [
+    "CAP-0026"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap26.inflation",
+  "fields_exercised": [
+    "tx.v0.source_account_ed25519"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap26.inflation.p11-inflation-not-time",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "an inflation operation at protocol 11 after every weekly round up to the close time has been paid (core: inflation.not_time)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 11,
+    "introduced": 12,
+    "valid_min": 12
+  },
+  "source": {
+    "chain": "cap26.inflation.p11",
+    "class": "local-core",
+    "ledger_seq": 74,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap26.inflation"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/mainnet.expected.json",
+      "expected_json_sha256": "e001ea3aa013034d3653102171e573be776c1cf252a97cc657556642b2c83db3",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/mainnet.oracle.json",
+      "oracle_sha256": "27c0546875b4c29ec4c20c9228aae6c90dbcdbcd77ae2b49bb9acb160b327406",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/mainnet.xdr",
+      "xdr_sha256": "820cafd39b7028a421083b94123eda96827d97be548a4d3be67814ffc28a9e5a"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/testnet.expected.json",
+      "expected_json_sha256": "a1c2e809d3b328c423672d5fcaf99d0bf5d0e5f61b0ee4b7a4e01cc969a2fa8e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/testnet.oracle.json",
+      "oracle_sha256": "b363658f9e2d3f0eb9a57eb084467ab91ea3bf97525b765f11ad8df531d288fc",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-not-time/testnet.xdr",
+      "xdr_sha256": "3274a34a3fc83022155130e69123e3db868747b76ae8deedc6b7bee413846882"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

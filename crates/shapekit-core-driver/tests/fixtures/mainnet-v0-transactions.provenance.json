@@ -1,0 +1,32 @@
+{
+  "fixture": "mainnet-v0-transactions.json",
+  "source": "https://history.stellar.org/prd/core-live/core_live_001",
+  "network": "mainnet",
+  "fetched_at": "2026-11-12T21:14:00Z",
+  "checkpoint": 27000063,
+  "files": [
+    {
+      "url": "https://history.stellar.org/prd/core-live/core_live_001/ledger/01/9b/fc/ledger-019bfcff.xdr.gz",
+      "sha256": "d991fb5813ccc00324b0024abf2b24eb13b148c883f3e5e5db7e5f9de0157760"
+    },
+    {
+      "url": "https://history.stellar.org/prd/core-live/core_live_001/transactions/01/9b/fc/transactions-019bfcff.xdr.gz",
+      "sha256": "3783740df557000aee051fab8d279eda94cd0d9ea81b80c89ab365f0934097f8"
+    },
+    {
+      "url": "https://history.stellar.org/prd/core-live/core_live_001/results/01/9b/fc/results-019bfcff.xdr.gz",
+      "sha256": "e17dcc18b0dddb4965e6807983ce648c2e3f4d5825ca0e38c9d658780a90914f"
+    }
+  ],
+  "discovery": "every one of the 64 ledger headers in the checkpoint has ledgerVersion 12. all 2386 transactions in the checkpoint's TransactionHistoryEntry sets are v0 envelopes; each hash recomputed from the envelope matched a transactionHash in the checkpoint's TransactionHistoryResultEntry records",
+  "tx_hash_from": "TransactionResultPair.transactionHash in the results file, written by the validators that closed the ledger",
+  "selection": {
+    "v0-text-memo-no-time-bounds": "no time bounds, a text memo and an operation source account; the transaction failed (payment no_trust), which leaves its hash and signature unchanged",
+    "v0-time-bounds-two-signatures": "time bounds with a max time, two operations with their own source account and two signatures"
+  },
+  "kept_fields": [
+    "ledgerSeq",
+    "transactionHash",
+    "envelope"
+  ]
+}

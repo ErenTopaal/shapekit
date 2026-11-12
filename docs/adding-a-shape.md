@@ -77,9 +77,9 @@ protocol 30 and 28 means two values in `all()`, as `cap40` does.
 | `account(role) -> SigningKey` | Key derived from the recipe id and the role. Same under both passphrases. Not funded until `fund` |
 | `root() -> &SigningKey` | The network root account, funded at genesis |
 | `fund(&[roles], stroops)` | One transaction from root creating each role's account. Closes a ledger |
-| `classic(source, ops)` | Envelope from `source` with `ops`, base fee per operation, signed by `source` |
+| `classic(source, ops)` | Envelope from `source` with `ops`, base fee per operation, signed by `source`. A v0 envelope below protocol 13, a v1 envelope from then on |
 | `tx(source) -> TransactionBuilder` | Builder carrying `source`'s next sequence number, for preconditions, memos, operation sources and fees (`shapekit_core_driver::tx::TransactionBuilder`) |
-| `sign(tx, &[keys])` | Signs under this chain's network id. Add signed-payload or hash-x signatures with `shapekit_core_driver::tx::{push_signature, sign_signed_payload, sign_hash_x}` |
+| `sign(tx, &[keys])` | Signs under this chain's network id, into a v0 envelope below protocol 13 (`tx::to_v0` fails for a muxed source, v2 preconditions or Soroban data). Add signed-payload or hash-x signatures with `shapekit_core_driver::tx::{push_signature, sign_signed_payload, sign_hash_x}` |
 | `submit_and_close(env) -> Applied` | Submits, closes the next ledger, fails unless the transaction succeeded |
 | `submit_and_close_failing(env) -> Applied` | Same, but fails unless core included it and it failed (a failed transaction in a ledger) |
 | `capture(slug, selector, spec)` | Records an entry from the canonical meta of a closed ledger |
@@ -160,6 +160,14 @@ family apart.
   emits; set both hooks to `false` for the meta a pre-23 ledger had in its day (v3, no classic
   events, `EventManager.cpp` and `TransactionMeta.cpp`, v30.0.0). From protocol 23 on the
   backfill flag has no effect. `cap67.unified-events` records both variants at protocol 22.
+- **Protocols below 13.** Core 30.0.0 runs fresh networks from protocol 1 up, but before
+  protocol 13 it refuses every envelope except v0 with txNOT_SUPPORTED. `classic` and `sign`
+  build v0 there (`tx::sign_for_protocol`); a v0 transaction hashes like its v1 form
+  (`tx::transaction_v0_hash`, checked against mainnet protocol 12 history in
+  `crates/shapekit-core-driver/tests/tx_mainnet_v0_kat.rs`). There are no muxed accounts and
+  no preconditions beyond time bounds. Ledgers below protocol 20 are LedgerCloseMeta v0; with
+  both event hooks off the meta is TransactionMeta v2, which is what such a ledger held when
+  core closed it. `old_protocols.rs` records chains at protocols 1, 11, 12 and 17.
 - **Contrast chains.** A chain that shows what a ledger looked like before its family's shape
   existed runs below `protocol_valid.min`. Return `below_protocol_valid() -> true`: the
   generator then requires the protocol to be below the range (and no longer refuses it), and

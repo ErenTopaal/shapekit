@@ -35,7 +35,7 @@ use stellar_xdr::{
 
 use super::{ChainCtx, Recipe, Selector, Spec};
 
-mod codes;
+pub(crate) mod codes;
 pub(crate) mod ordering;
 
 pub const FAMILY: &str = "classic.failed-tx";

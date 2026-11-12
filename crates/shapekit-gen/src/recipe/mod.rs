@@ -37,6 +37,7 @@ pub mod max_length;
 pub mod memo_arms;
 pub mod memo_bytes;
 pub mod muxed_source;
+pub mod old_protocols;
 mod order;
 mod output;
 mod run;
@@ -162,6 +163,11 @@ pub fn all() -> Vec<Box<dyn Recipe>> {
         Box::new(auth_trees::AuthTrees { protocol: 30 }),
         Box::new(cap71::Credentials { protocol: 30 }),
         Box::new(cap85::ExecutableTag { protocol: 30 }),
+        Box::new(old_protocols::IssuerChecks { protocol: 12 }),
+        Box::new(old_protocols::ManageDataProtocol1 { protocol: 1 }),
+        Box::new(old_protocols::Inflation { protocol: 11 }),
+        Box::new(old_protocols::Inflation { protocol: 12 }),
+        Box::new(old_protocols::ClaimAtomV0 { protocol: 17 }),
     ]
 }
 

@@ -16,11 +16,16 @@ use stellar_xdr::{
     SorobanAddressCredentials, SorobanAuthorizationEntry, SorobanCredentials, SorobanResources,
     SorobanResourcesExtV0, SorobanTransactionData, SorobanTransactionDataExt, Transaction,
     TransactionEnvelope, TransactionExt, TransactionSignaturePayload,
-    TransactionSignaturePayloadTaggedTransaction, TransactionV1Envelope, Uint256, WriteXdr,
+    TransactionSignaturePayloadTaggedTransaction, TransactionV0, TransactionV0Envelope,
+    TransactionV0Ext, TransactionV1Envelope, Uint256, WriteXdr,
 };
 
 /// Fee core charges per operation at genesis and on both public networks.
 pub const BASE_FEE: u32 = 100;
+
+/// First protocol that accepts v1 and fee-bump envelopes (CAP-0015, CAP-0019,
+/// CAP-0027). Below it core answers txNOT_SUPPORTED for anything but v0.
+pub const FIRST_V1_ENVELOPE_PROTOCOL: u32 = 13;
 
 #[derive(Debug, thiserror::Error)]
 pub enum TxError {
@@ -28,8 +33,8 @@ pub enum TxError {
     Xdr(#[from] stellar_xdr::Error),
     #[error("signed payload is {0} bytes, the xdr allows at most 64")]
     PayloadTooLong(usize),
-    #[error("transaction v0 envelopes have no signature payload since protocol 13")]
-    UnsupportedEnvelope,
+    #[error("a v0 transaction cannot carry {0}")]
+    NotV0(&'static str),
     #[error("soroban assembly needs exactly one operation, the transaction has {0}")]
     NotSingleOperation(usize),
     #[error("auth entries can only be attached to an invoke host function operation")]
@@ -76,6 +81,22 @@ pub fn transaction_hash(tx: &Transaction, network_id: &[u8; 32]) -> Result<[u8; 
     )
 }
 
+/// Signature payload hash of a v0 transaction under a network id, the way
+/// core forms it (`TransactionFrame::getContentsHash`, stellar-core v30.0.0):
+/// the network id, ENVELOPE_TYPE_TX, then a zero word and the v0 body. The
+/// zero is KEY_TYPE_ED25519, which turns the raw source key into the muxed
+/// account of a v1 transaction, and the optional time bounds encode like
+/// PRECOND_NONE or PRECOND_TIME, so the bytes are those of the equivalent v1
+/// transaction and both envelopes of one transaction share a hash.
+pub fn transaction_v0_hash(tx: &TransactionV0, network_id: &[u8; 32]) -> Result<[u8; 32], TxError> {
+    let mut h = Sha256::new();
+    h.update(network_id);
+    h.update(stellar_xdr::EnvelopeType::Tx.to_xdr(Limits::none())?);
+    h.update(0u32.to_be_bytes());
+    h.update(tx.to_xdr(Limits::none())?);
+    Ok(h.finalize().into())
+}
+
 /// Signature payload hash of a fee-bump transaction under a network id.
 pub fn fee_bump_hash(tx: &FeeBumpTransaction, network_id: &[u8; 32]) -> Result<[u8; 32], TxError> {
     payload_hash(
@@ -93,7 +114,7 @@ pub fn envelope_hash(
     match env {
         TransactionEnvelope::Tx(e) => transaction_hash(&e.tx, network_id),
         TransactionEnvelope::TxFeeBump(e) => fee_bump_hash(&e.tx, network_id),
-        TransactionEnvelope::TxV0(_) => Err(TxError::UnsupportedEnvelope),
+        TransactionEnvelope::TxV0(e) => transaction_v0_hash(&e.tx, network_id),
     }
 }
 
@@ -239,6 +260,62 @@ pub fn sign_transaction(
     Ok(TransactionV1Envelope {
         tx,
         signatures: signatures.try_into()?,
+    })
+}
+
+/// The v0 form of a v1 transaction. Fails for anything only v1 can carry: a
+/// muxed source, preconditions beyond time bounds, or Soroban data.
+pub fn to_v0(tx: Transaction) -> Result<TransactionV0, TxError> {
+    let source = match tx.source_account {
+        MuxedAccount::Ed25519(k) => k,
+        MuxedAccount::MuxedEd25519(_) => return Err(TxError::NotV0("a muxed source account")),
+    };
+    let time_bounds = match tx.cond {
+        Preconditions::None => None,
+        Preconditions::Time(tb) => Some(tb),
+        Preconditions::V2(_) => return Err(TxError::NotV0("v2 preconditions")),
+    };
+    if !matches!(tx.ext, TransactionExt::V0) {
+        return Err(TxError::NotV0("soroban transaction data"));
+    }
+    Ok(TransactionV0 {
+        source_account_ed25519: source,
+        fee: tx.fee,
+        seq_num: tx.seq_num,
+        time_bounds,
+        memo: tx.memo,
+        operations: tx.operations,
+        ext: TransactionV0Ext::V0,
+    })
+}
+
+/// Signs a v0 transaction with each key in order and wraps it in a v0
+/// envelope, the only envelope core accepts below protocol 13.
+pub fn sign_transaction_v0(
+    tx: TransactionV0,
+    network_id: &[u8; 32],
+    signers: &[&SigningKey],
+) -> Result<TransactionV0Envelope, TxError> {
+    let hash = transaction_v0_hash(&tx, network_id)?;
+    let signatures: Vec<DecoratedSignature> = signers.iter().map(|k| sign_hash(k, &hash)).collect();
+    Ok(TransactionV0Envelope {
+        tx,
+        signatures: signatures.try_into()?,
+    })
+}
+
+/// Signs `tx` into the envelope type core accepts at `protocol`: v0 below
+/// protocol 13, v1 from then on.
+pub fn sign_for_protocol(
+    tx: Transaction,
+    protocol: u32,
+    network_id: &[u8; 32],
+    signers: &[&SigningKey],
+) -> Result<TransactionEnvelope, TxError> {
+    Ok(if protocol < FIRST_V1_ENVELOPE_PROTOCOL {
+        TransactionEnvelope::TxV0(sign_transaction_v0(to_v0(tx)?, network_id, signers)?)
+    } else {
+        TransactionEnvelope::Tx(sign_transaction(tx, network_id, signers)?)
     })
 }
 

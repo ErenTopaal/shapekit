@@ -555,6 +555,17 @@ signature = [
     "TransactionResultResult:tx_bad_min_seq_age_or_gap",
     "AccountEntryExtensionV1Ext:v0",
     "LedgerKey:data",
+    "TransactionEnvelope:tx_v0",
+    "ManageBuyOfferResult:buy_no_issuer",
+    "ManageBuyOfferResult:sell_no_issuer",
+    "ManageSellOfferResult:buy_no_issuer",
+    "ManageSellOfferResult:sell_no_issuer",
+    "PathPaymentStrictReceiveResult:no_issuer",
+    "PathPaymentStrictSendResult:no_issuer",
+    "PaymentResult:no_issuer",
+    "AllowTrustResult:trust_not_required",
+    "AllowTrustResult:self_not_allowed",
+    "ChangeTrustResult:self_not_allowed",
 ]
 source_classes = ["local-core"]
 fields = [
@@ -565,7 +576,7 @@ fields = [
 ]
 linked_issues = []
 priority = 13
-notes = "the participants-from-meta case: accounts named only in the envelope of a failed transaction. cap-0028 removes a pre-auth signer even when the transaction fails, and cap-0002 puts signature and one-time signer changes in tx-level meta, so failed transactions still change state"
+notes = "the participants-from-meta case: accounts named only in the envelope of a failed transaction. cap-0028 removes a pre-auth signer even when the transaction fails, and cap-0002 puts signature and one-time signer changes in tx-level meta, so failed transactions still change state. the no_issuer, trust_not_required and self_not_allowed codes come from a contrast chain at protocol 12 in v0 envelopes, since core stopped giving them at protocol 13 or 16; a protocol 1 chain records the refused ManageData envelope"
 
 [[family]]
 id = "cap23.claimable-balances"
@@ -903,12 +914,13 @@ signature = [
     "ClaimAtom:order_book",
     "AccountMergeResult:dest_full",
     "OperationBody:create_passive_sell_offer",
+    "ClaimAtom:v0",
 ]
 source_classes = ["local-core", "synthetic"]
 fields = ["op.manage_offer.offer_id", "op.manage_offer.assets_amount_price"]
 linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1785"]
 priority = 14
-notes = "offer ids come from the header id pool, so ids above 2^53 cannot be produced on a fresh network; those stay textual-id vectors in phase 6"
+notes = "offer ids come from the header id pool, so ids above 2^53 cannot be produced on a fresh network; those stay textual-id vectors in phase 6. claim atom v0 (seller as a raw ed25519 key) comes from a protocol 17 chain, the last protocol before cap-0038 replaced it"
 
 [[family]]
 id = "cap18.maintain-liabilities"
@@ -926,3 +938,21 @@ fields = ["op.allow_trust", "op.set_trust_line_flags"]
 linked_issues = []
 priority = 14
 notes = "the authorize value 2 and the trustline flag are leaf values, so the fragments are coarse and the recipe records which entries carry the maintain-liabilities flag"
+
+[[family]]
+id = "cap26.inflation"
+title = "Inflation operations and payouts from before CAP-0026 disabled them"
+caps = ["CAP-0026"]
+protocol_introduced = 12
+protocol_valid = { min = 12 }
+signature = [
+    "OperationBody:inflation",
+    "OperationResultTr:inflation",
+    "InflationResult:success",
+    "InflationResult:not_time",
+]
+source_classes = ["local-core"]
+fields = ["op.set_options.inflation_dest"]
+linked_issues = []
+priority = 14
+notes = "protocol 12 refuses the operation with opNOT_SUPPORTED at submission, so every inflation result is a contrast entry from a protocol 11 chain. a payout credits the voted destination, an account the envelope never names"

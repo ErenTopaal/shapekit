@@ -24,7 +24,7 @@ use crate::sim::{AuthMode, SimError};
 use crate::sim_legacy::AnySimulator;
 use crate::tx::{
     BASE_FEE, TransactionBuilder, TxError, assemble_soroban, contract_id_from_address,
-    contract_preimage, envelope_hash, sign_transaction,
+    contract_preimage, envelope_hash, sign_for_protocol, sign_transaction,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -275,7 +275,8 @@ impl ChainDriver {
     }
 
     /// One classic transaction from `source` with these operations, base
-    /// fee per operation, signed by `source` alone.
+    /// fee per operation, signed by `source` alone. Below protocol 13 it is a
+    /// v0 envelope, since core refuses v1 there.
     pub fn classic(
         &self,
         source: &SigningKey,
@@ -289,11 +290,12 @@ impl ChainDriver {
             b = b.operation(None, op);
         }
         let tx = b.build()?;
-        Ok(TransactionEnvelope::Tx(sign_transaction(
+        Ok(sign_for_protocol(
             tx,
+            self.node.config().protocol,
             &self.network_id,
             &[source],
-        )?))
+        )?)
     }
 
     /// Simulates `host_function` against the last closed ledger, with the

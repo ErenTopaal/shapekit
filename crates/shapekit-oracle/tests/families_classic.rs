@@ -1937,3 +1937,90 @@ fn classic_max_length_21st_signer_fails() {
         assert!(op_changes(&tx).is_empty(), "{n}");
     }
 }
+
+/// The old-protocol chains (`old_protocols.rs` in the generator): LedgerCloseMeta v0 with
+/// v0 envelopes at protocols 11 and 12 and v1 envelopes at 17, TransactionMeta v2 throughout.
+/// Failures charge the fee and change nothing, the inflation payout lands on the root's
+/// inflation destination, and v0 claim atoms read as trades with the maker.
+#[test]
+fn old_protocol_chains_read_from_v0_ledgers() {
+    let fam = "classic.failed-tx";
+    let recipe = "classic.failed-tx.issuer-checks";
+    for n in NETWORKS {
+        for (slug, role) in [
+            ("manage-sell-offer-sell-no-issuer", "holder"),
+            ("manage-sell-offer-buy-no-issuer", "holder"),
+            ("manage-buy-offer-sell-no-issuer", "holder"),
+            ("manage-buy-offer-buy-no-issuer", "holder"),
+            ("path-payment-strict-receive-no-issuer", "holder"),
+            ("path-payment-strict-send-no-issuer", "holder"),
+            ("payment-no-issuer", "holder"),
+            ("allow-trust-trust-not-required", "issuer"),
+            ("allow-trust-self-not-allowed", "issuer"),
+            ("change-trust-self-not-allowed", "issuer"),
+        ] {
+            let ctx = format!("{slug} {n}");
+            let id = format!("{fam}.p12-{slug}");
+            let l = entry_ledger(fam, &id, n);
+            assert_eq!(l.protocol, 12, "{ctx}");
+            let tx = only_tx(fam, &id, n);
+            assert!(!tx.successful, "{ctx}");
+            assert_eq!(tx.result, "tx_failed", "{ctx}");
+            assert_eq!(tx.fee.source, account(recipe, role), "{ctx}");
+            assert_eq!(tx.fee.charged.0, BASE_FEE, "{ctx}");
+            assert!(op_changes(&tx).is_empty(), "{ctx}: {:?}", op_changes(&tx));
+        }
+    }
+
+    let fam = "cap26.inflation";
+    let winner = account(fam, "winner");
+    let caller = account(fam, "caller");
+    for n in NETWORKS {
+        let id = format!("{fam}.p11-inflation-payout");
+        assert_eq!(entry_ledger(fam, &id, n).protocol, 11);
+        let tx = only_tx(fam, &id, n);
+        assert!(tx.successful, "{n}");
+        assert_eq!(tx.fee.source, caller, "{n}");
+        // the payout is the only balance change of the operation, and it goes to the winner
+        assert!(delta(&tx, &winner, "native", "account") > 0, "{n}");
+        let others: Vec<_> = op_changes(&tx)
+            .into_iter()
+            .filter(|c| matches!(c, Change::BalanceChange { holder, .. } if *holder != winner))
+            .collect();
+        assert!(others.is_empty(), "{n}: {others:?}");
+
+        let tx = only_tx(fam, &format!("{fam}.p11-inflation-not-time"), n);
+        assert!(!tx.successful, "{n}");
+        assert_eq!(tx.fee.source, caller, "{n}");
+        assert!(op_changes(&tx).is_empty(), "{n}: {:?}", op_changes(&tx));
+    }
+
+    let fam = "cap03.offer-liabilities";
+    let recipe = "cap03.offer-liabilities.claim-atom-v0";
+    let maker = account(recipe, "maker");
+    let usd = format!("USD:{}", account(recipe, "issuer"));
+    for n in NETWORKS {
+        for slug in [
+            "manage-sell-offer-claim-atom-v0",
+            "manage-buy-offer-claim-atom-v0",
+            "path-payment-strict-receive-claim-atom-v0",
+            "path-payment-strict-send-claim-atom-v0",
+        ] {
+            let ctx = format!("{slug} {n}");
+            let id = format!("{fam}.p17-{slug}");
+            assert_eq!(entry_ledger(fam, &id, n).protocol, 17, "{ctx}");
+            let tx = only_tx(fam, &id, n);
+            assert!(tx.successful, "{ctx}");
+            let t = trades(&tx);
+            assert_eq!(t.len(), 1, "{ctx}: {t:?}");
+            let (op, counterparty, offer_id, sold, sold_amount, bought, bought_amount) = &t[0];
+            assert_eq!(*op, 0, "{ctx}");
+            assert_eq!(counterparty, &maker, "{ctx}");
+            assert!(offer_id.is_some(), "{ctx}");
+            // the maker sells USD at 2 XLM each, so the taker gives twice what it gets
+            assert_eq!(sold, &usd, "{ctx}");
+            assert_eq!(bought, "native", "{ctx}");
+            assert_eq!(*bought_amount, 2 * sold_amount, "{ctx}");
+        }
+    }
+}

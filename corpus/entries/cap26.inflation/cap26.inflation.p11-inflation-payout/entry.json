@@ -1,0 +1,59 @@
+{
+  "caps": [
+    "CAP-0026"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap26.inflation",
+  "fields_exercised": [
+    "op.set_options.inflation_dest",
+    "tx.v0.source_account_ed25519"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap26.inflation.p11-inflation-payout",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "an inflation operation at protocol 11 paying the one account the root voted for; the payout is a balance change on an account the envelope never names",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 11,
+    "introduced": 12,
+    "valid_min": 12
+  },
+  "source": {
+    "chain": "cap26.inflation.p11",
+    "class": "local-core",
+    "ledger_seq": 66,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap26.inflation"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.expected.json",
+      "expected_json_sha256": "6a9bf567816b0631632f74758afd88279d650d739db43dd9cbbdca1ab16060b2",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.oracle.json",
+      "oracle_sha256": "03cf55c73232fcf40654be746014e885c545fcca17534994c1e5b1c347523dd8",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/mainnet.xdr",
+      "xdr_sha256": "8f14b862a35304456fe3c795153032a58dad7d52dcba82b13ee4c8f214a56288"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.expected.json",
+      "expected_json_sha256": "9273141fc1e0dfc138691401249dd8bbaa41397ad75aa52d894d73f6055eac53",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.oracle.json",
+      "oracle_sha256": "c5d81fe5aafa3da20ce723a55afb2f0b506b1f97b40bf4e8fc98ce9207ffb2ab",
+      "xdr_file": "entries/cap26.inflation/cap26.inflation.p11-inflation-payout/testnet.xdr",
+      "xdr_sha256": "1a64deaee08b9964f592ceadbfdffa8467f72592a0dfa6b4fd8eec5e9c17c5f4"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

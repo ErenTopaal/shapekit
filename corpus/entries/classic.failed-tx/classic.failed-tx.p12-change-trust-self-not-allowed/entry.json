@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.change_trust.line",
+    "op.change_trust.limit"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p12-change-trust-self-not-allowed",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "ChangeTrust by an issuer to its own asset; from protocol 16 this is MALFORMED and never reaches a ledger (core: change_trust.self_not_allowed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.issuer-checks.p12",
+    "class": "local-core",
+    "ledger_seq": 75,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx.issuer-checks"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/mainnet.expected.json",
+      "expected_json_sha256": "641cef79045c096ff71a926c5028954271c3f572a2cfac1a4f85af444b9e8645",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/mainnet.oracle.json",
+      "oracle_sha256": "399d71e569c423d2494cc0d588c1e9b36dd2e4c117e63f852d6fafea1ca6c735",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/mainnet.xdr",
+      "xdr_sha256": "f4030d7ff39ecada88c19954384f551e9986a6bfe7cffaab436b99b50569c912"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/testnet.expected.json",
+      "expected_json_sha256": "91f5ed28e221f26e7fed6fe4b27d169d51a80151da39da07360fb5fa761f6961",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/testnet.oracle.json",
+      "oracle_sha256": "50ace2665d6b7e22f91facc028acd2a59584396f1d7ebd7ad09e38d45e4f6d96",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-change-trust-self-not-allowed/testnet.xdr",
+      "xdr_sha256": "b51e41127bb4ad168d70e987b453058738b2fed788d7a004c6d6fa660c4e3359"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

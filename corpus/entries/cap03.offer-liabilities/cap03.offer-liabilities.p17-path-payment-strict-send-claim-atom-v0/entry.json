@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.amounts"
+  ],
+  "flags": [],
+  "id": "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "a strict-send path payment of XLM into USD for a third account through the maker's offer at protocol 17, claim atom v0",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 17,
+    "introduced": 11,
+    "valid_min": 11
+  },
+  "source": {
+    "chain": "cap03.offer-liabilities.claim-atom-v0.p17",
+    "class": "local-core",
+    "ledger_seq": 73,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap03.offer-liabilities.claim-atom-v0"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/mainnet.expected.json",
+      "expected_json_sha256": "d6daec7d2add84a263c2ac85bdbd2c5d6114701fbd2ae4971bc16cecd18fcd53",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/mainnet.oracle.json",
+      "oracle_sha256": "ac518cdbc10e083ef9767691f486790fe6eba229279017f69ee79cd79310c3ae",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/mainnet.xdr",
+      "xdr_sha256": "1086ab3aa486f3463c3a360a070fb0198b9f45145c27eed97a3dc8bc94c674a5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/testnet.expected.json",
+      "expected_json_sha256": "c424e03fd405ce0e3eb80fd4932b7589a0d221cb82080ba3cd6693cb4e606aae",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/testnet.oracle.json",
+      "oracle_sha256": "1e41dc5395cdee7eae62c2363339c2c9ad2886ad6d18093a6495ed7cc7647178",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0/testnet.xdr",
+      "xdr_sha256": "f55d52511b682fb992209ea4e63a457ea660556a3ed3a4c14a22ce774222e3f9"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

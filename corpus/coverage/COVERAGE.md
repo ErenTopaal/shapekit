@@ -8,17 +8,17 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 683 |
-| Core-emitted entries | 568 |
-| Entries by source class | core-golden 106, local-core 463, mainnet-history 12, synthetic 99, testnet-history 3 |
+| Entries | 701 |
+| Core-emitted entries | 584 |
+| Entries by source class | core-golden 106, local-core 481, mainnet-history 12, synthetic 99, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
 | Union arms reachable from `LedgerCloseMeta` | 499 |
-| Arms covered by a core-emitted entry | 420 (84.2%) |
-| Arms uncovered | 79 |
-| Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 16, history-only 3, not-producible-locally 2, never-emitted 11 |
-| Family fragments covered | 292 of 301 in 35 families |
+| Arms covered by a core-emitted entry | 435 (87.2%) |
+| Arms uncovered | 64 |
+| Uncovered arms by blocker | refused-before-ledger 48, history-only 3, not-producible-locally 2, never-emitted 11 |
+| Family fragments covered | 308 of 317 in 36 families |
 | Fields core does not fully validate, exercised | 36 of 36 |
 
 ## Blockers
@@ -38,11 +38,11 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP | Protocol | Indexer-visible | Families | Entries | Core-emitted | By source class | By variant | Core-emitted protocols | Note |
 |---|---|---|---|---|---|---|---|---|---|
 | CAP-0001 Bump Sequence | 10 | yes | `cap01.bump-sequence` | 9 | 8 | core-golden 1, local-core 8 | any 1, mainnet 8, testnet 8 | 30 |  |
-| CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 110 | 110 | core-golden 4, local-core 104, mainnet-history 2 | any 4, mainnet 106, testnet 104 | 26, 30 |  |
-| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 22 | 18 | core-golden 6, local-core 12, synthetic 4 | any 7, mainnet 12, testnet 12, vector 3 | 30 |  |
+| CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 121 | 120 | core-golden 4, local-core 115, mainnet-history 2 | any 4, mainnet 117, testnet 115 | 12, 26, 30 |  |
+| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 26 | 22 | core-golden 6, local-core 16, synthetic 4 | any 7, mainnet 16, testnet 16, vector 3 | 17, 30 |  |
 | CAP-0004 Improved Rounding for Cross Offer | 10 | no |  | 0 | 0 |  |  |  | offer-crossing rounding arithmetic only; results and meta keep existing shapes |
 | CAP-0005 Throttling and transaction pricing improvements | 11 | no |  | 0 | 0 |  |  |  | fee and transaction set selection only; the CAP states no changes in XDR |
-| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 22 | 18 | core-golden 6, local-core 12, synthetic 4 | any 7, mainnet 12, testnet 12, vector 3 | 30 |  |
+| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 26 | 22 | core-golden 6, local-core 16, synthetic 4 | any 7, mainnet 16, testnet 16, vector 3 | 17, 30 |  |
 | CAP-0007 Deterministic Account Creation |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDeterministicAccountOp is absent at v30.0 |
 | CAP-0008 Self Identified Pre-Auth Transaction |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_PRE_AUTH_SELF_TX is absent at v30.0 |
 | CAP-0009 Linear/Exterior Immutable Accounts |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
@@ -62,9 +62,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0023 Two-Part Payments with ClaimableBalanceEntry | 14 | yes | `cap23.claimable-balances` | 11 | 7 | core-golden 2, local-core 6, synthetic 3 | any 3, mainnet 6, testnet 6, vector 2 | 30 |  |
 | CAP-0024 Make PathPayment Symmetrical | 12 | yes | `classic.max-length` | 26 | 14 | core-golden 2, local-core 12, mainnet-history 2, synthetic 10 | any 12, mainnet 14, testnet 12 | 26, 30 |  |
 | CAP-0025 Remove Bucket Shadowing | 12 | no |  | 0 | 0 |  |  |  | bucket merge semantics and history archive publishing only; no XDR change |
-| CAP-0026 Disable Inflation Mechanism | 12 | no |  | 0 | 0 |  |  |  | INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape |
+| CAP-0026 Disable Inflation Mechanism | 12 | no | `cap26.inflation` | 3 | 2 | local-core 3 | mainnet 3, testnet 3 | 11 | INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape |
 | CAP-0027 First-class multiplexed accounts | 13 | yes | `cap27.muxed-accounts`, `soroban.muxed-source` | 43 | 30 | core-golden 2, local-core 28, mainnet-history 2, synthetic 11 | any 4, mainnet 30, testnet 28, vector 9 | 17, 28, 30 |  |
-| CAP-0028 Clear pre-auth transaction signer on failed transactions | 13 | yes | `classic.failed-tx` | 110 | 110 | core-golden 4, local-core 104, mainnet-history 2 | any 4, mainnet 106, testnet 104 | 26, 30 |  |
+| CAP-0028 Clear pre-auth transaction signer on failed transactions | 13 | yes | `classic.failed-tx` | 121 | 120 | core-golden 4, local-core 115, mainnet-history 2 | any 4, mainnet 117, testnet 115 | 12, 26, 30 |  |
 | CAP-0029 AllowTrust when not AUTH_REQUIRED | 16 | no |  | 0 | 0 |  |  |  | relaxes ALLOW_TRUST authorization rules; the specification defines no XDR change and results and meta keep existing shapes |
 | CAP-0030 Remove NO_ISSUER Operation Results | 13 | no |  | 0 | 0 |  |  |  | operations stop returning *_NO_ISSUER codes (except ChangeTrust); no new XDR or meta shape |
 | CAP-0031 Sponsored Reserve |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol (in favour of CAP-0033); proposed SponsorshipEntry is absent at v30.0 |
@@ -142,7 +142,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 ## Union arms reachable from `LedgerCloseMeta`
 
-420 of 499 arms are held by at least one core-emitted entry. The full per-arm counts are in `coverage.json`.
+435 of 499 arms are held by at least one core-emitted entry. The full per-arm counts are in `coverage.json`.
 
 ### Uncovered arms
 
@@ -150,22 +150,16 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 |---|---|---|---|
 | `AccountMergeResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `AllowTrustResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap18.maintain-liabilities.p30-allow-trust-both-flags` |
-| `AllowTrustResult:self_not_allowed` | `old-protocol-only` | from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp) |  |
-| `AllowTrustResult:trust_not_required` | `old-protocol-only` | AllowTrustOpFrame::isAuthRevocationValid sets it only before protocol 16 (stellar-core v30.0.0) |  |
 | `BeginSponsoringFutureReservesResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `BumpSequenceResult:bad_seq` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap01.bump-sequence.p30-bump-negative` |
 | `ChangeTrustAsset:native` | `refused-before-ledger` | ChangeTrustOpFrame::doCheckValid answers CHANGE_TRUST_MALFORMED for a native line from protocol 10 and doApply throws on one below it (stellar-core v30.0.0) |  |
 | `ChangeTrustResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap38.liquidity-pools.p30-change-trust-pool-strkey-order` |
-| `ChangeTrustResult:self_not_allowed` | `old-protocol-only` | from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp) |  |
-| `ClaimAtom:v0` | `old-protocol-only` | makeClaimAtom writes CLAIM_ATOM_TYPE_V0 only before protocol 18 (stellar-core v30.0.0 TransactionUtils.cpp); mainnet history from protocols 10 to 17 holds it |  |
 | `ClawbackResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `ConfigSettingEntry:freeze_bypass_txs_delta` | `never-emitted` | a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |  |
 | `ConfigSettingEntry:frozen_ledger_keys_delta` | `never-emitted` | a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |  |
 | `CreateAccountResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `CreateClaimableBalanceResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap23.claimable-balances.p30-create-predicate-depth-5` |
 | `ExtendFootprintTtlResult:malformed` | `refused-before-ledger` | set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions |  |
-| `InflationResult:not_time` | `old-protocol-only` | InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it |  |
-| `InflationResult:success` | `old-protocol-only` | InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it |  |
 | `InnerTransactionResultResult:tx_frozen_key_accessed` | `refused-before-ledger` | TransactionFrame::commonValidPreSeqNum checks frozen keys against the network config (stellar-core v30.0.0), which only changes through config upgrades applied after a ledger's transactions, so validation already refused any transaction that fails at apply; none of the 1732 core golden files (test-lcm-current and test-lcm-next) holds it |  |
 | `InnerTransactionResultResult:tx_insufficient_balance` | `refused-before-ledger` | tx set validation requires each fee source's available balance to cover all its fees in the set (TxSetUtils.cpp getInvalidTxListWithErrors) and at apply the fee is already charged, so commonValid only fails on a negative available balance, which no operation leaves (stellar-core v30.0.0) |  |
 | `InnerTransactionResultResult:tx_insufficient_fee` | `refused-before-ledger` | set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set |  |
@@ -180,25 +174,16 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | `LedgerKey:config_setting` | `refused-before-ledger` | refused in Soroban footprints (TransactionFrame footprintKeyIsValid) and in revoke sponsorship (RevokeSponsorshipOpFrame::doCheckValid), and core never removes or evicts a config setting, so no removed change names one (stellar-core v30.0.0) |  |
 | `LiquidityPoolDepositResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `LiquidityPoolWithdrawResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `ManageBuyOfferResult:buy_no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
 | `ManageBuyOfferResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `ManageBuyOfferResult:sell_no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
 | `ManageDataResult:invalid_name` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `ManageDataResult:not_supported_yet` | `old-protocol-only` | ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0), and as a validity check it never reached a ledger even then |  |
-| `ManageSellOfferResult:buy_no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
+| `ManageDataResult:not_supported_yet` | `refused-before-ledger` | ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0). core 30.0.0 still runs a fresh network at protocol 1 and refuses ManageData there at submission with this code (classic.failed-tx.manage-data.p1); a validity check keeps it out of the tx queue and of tx set validation, so no ledger at any protocol holds it | refused by core 1: `classic.failed-tx.p1-manage-data-not-supported-yet` |
 | `ManageSellOfferResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `ManageSellOfferResult:sell_no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
-| `OperationBody:inflation` | `old-protocol-only` | InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it |  |
-| `OperationResult:op_not_supported` | `refused-before-ledger` | OperationFrame::checkValid sets it from isOpSupported, which reads only the ledger header, so validation and apply in one ledger agree (stellar-core v30.0.0) |  |
+| `OperationResult:op_not_supported` | `refused-before-ledger` | OperationFrame::checkValid sets it from isOpSupported, which reads only the ledger header, so validation and apply in one ledger agree (stellar-core v30.0.0) | refused by core 1: `cap26.inflation.p12-inflation-not-supported` |
 | `OperationResult:op_too_many_sponsoring` | `not-producible-locally` | needs numSponsoring plus numSubEntries near UINT32_MAX (SponsorshipUtils.cpp tooManySponsoring, stellar-core v30.0.0), about four billion sponsored entries |  |
 | `OperationResultTr:create_passive_sell_offer` | `never-emitted` | CreatePassiveSellOfferOpFrame applies a MANAGE_SELL_OFFER operation it builds from the passive one (ManageSellOfferOpHolder), and MutableTransactionResult sets the result arm from that operation's type, so core reports every passive offer under manage_sell_offer (stellar-core v30.0.0 CreatePassiveSellOfferOpFrame.cpp, MutableTransactionResult.cpp); classic.failed-tx records an applied passive offer whose result is manage_sell_offer success, and none of the 18 golden ledgers holding the operation carries the arm |  |
-| `OperationResultTr:inflation` | `old-protocol-only` | InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it |  |
 | `PathPaymentStrictReceiveResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `PathPaymentStrictReceiveResult:no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
 | `PathPaymentStrictSendResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `PathPaymentStrictSendResult:no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
 | `PaymentResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
-| `PaymentResult:no_issuer` | `old-protocol-only` | issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0 |  |
 | `RestoreFootprintResult:malformed` | `refused-before-ledger` | set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions |  |
 | `RevokeSponsorshipResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `ScpHistoryEntry:v0` | `never-emitted` | reachable only through LedgerCloseMetaV0/V1/V2.scpInfo, which stellar-core v30.0.0 never fills (the only scpInfo outside tests is the HTTP route name in CommandHandler.cpp) |  |
@@ -466,11 +451,11 @@ Expected source classes with no entry: testnet-history, mainnet-history.
 
 ### `classic.failed-tx`
 
-Failed transactions whose envelope names accounts the ledger never touched. CAPs: CAP-0002, CAP-0028. Entries: core-golden 4, local-core 104, mainnet-history 2.
+Failed transactions whose envelope names accounts the ledger never touched. CAPs: CAP-0002, CAP-0028. Entries: core-golden 4, local-core 115, mainnet-history 2.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionResultResult:tx_failed` | 155: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.p30-merge-dest-full` and 152 more |  |
+| `TransactionResultResult:tx_failed` | 166: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.p30-merge-dest-full` and 163 more |  |
 | `PaymentResult:no_destination` | 6: `cap15.fee-bump.p30-inner-failed-meta`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta`, `cap40.signed-payload-signer.testnet-4437357` and 3 more |  |
 | `SignerKey:pre_auth_tx` | 6: `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50`, `classic.failed-tx.p30-add-pre-auth-signer-envelope` and 3 more |  |
 | `TransactionResultResult:tx_bad_auth` | 1: `classic.failed-tx.golden-8e3126c525875c96-10` |  |
@@ -573,8 +558,19 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 | `OperationResult:op_exceeded_work_limit` | 1: `classic.failed-tx.p30-path-receive-exceeded-work-limit` |  |
 | `TransactionResultResult:tx_bad_auth_extra` | 1: `classic.failed-tx.p30-tx-bad-auth-extra` |  |
 | `TransactionResultResult:tx_bad_min_seq_age_or_gap` | 1: `classic.failed-tx.p30-tx-bad-min-seq-gap` |  |
-| `AccountEntryExtensionV1Ext:v0` | 1: `classic.failed-tx.p30-passive-offer-operation-source` |  |
+| `AccountEntryExtensionV1Ext:v0` | 5: `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` and 2 more |  |
 | `LedgerKey:data` | 2: `classic.failed-tx.p30-manage-data-removed`, `classic.failed-tx.p30-revoke-does-not-exist` |  |
+| `TransactionEnvelope:tx_v0` | 13: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout`, `cap73.sac-trust.golden-e6b26f2ad89e0e1b-0` and 10 more |  |
+| `ManageBuyOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` |  |
+| `ManageBuyOfferResult:sell_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` |  |
+| `ManageSellOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` |  |
+| `ManageSellOfferResult:sell_no_issuer` | 1: `classic.failed-tx.p12-manage-sell-offer-sell-no-issuer` |  |
+| `PathPaymentStrictReceiveResult:no_issuer` | 1: `classic.failed-tx.p12-path-payment-strict-receive-no-issuer` |  |
+| `PathPaymentStrictSendResult:no_issuer` | 1: `classic.failed-tx.p12-path-payment-strict-send-no-issuer` |  |
+| `PaymentResult:no_issuer` | 1: `classic.failed-tx.p12-payment-no-issuer` |  |
+| `AllowTrustResult:trust_not_required` | 1: `classic.failed-tx.p12-allow-trust-trust-not-required` |  |
+| `AllowTrustResult:self_not_allowed` | 1: `classic.failed-tx.p12-allow-trust-self-not-allowed` |  |
+| `ChangeTrustResult:self_not_allowed` | 1: `classic.failed-tx.p12-change-trust-self-not-allowed` |  |
 
 ### `cap23.claimable-balances`
 
@@ -768,17 +764,18 @@ Bump sequence and merges refused for a sequence number too far ahead. CAPs: CAP-
 
 ### `cap03.offer-liabilities`
 
-Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 12, synthetic 4.
+Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, synthetic 4.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:manage_buy_offer` | 13: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope`, `cap03.offer-liabilities.p30-buy-offer-near-int64-max-envelope` and 10 more |  |
-| `AccountEntryExt:v1` | 452: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 449 more |  |
-| `TrustLineEntryExt:v1` | 29: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 26 more |  |
+| `OperationBody:manage_buy_offer` | 16: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope` and 13 more |  |
+| `AccountEntryExt:v1` | 456: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 453 more |  |
+| `TrustLineEntryExt:v1` | 33: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 30 more |  |
 | `ManageOfferSuccessResultOffer:created` | 7: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta` and 4 more |  |
 | `ClaimAtom:order_book` | 9: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 6 more |  |
 | `AccountMergeResult:dest_full` | 1: `cap03.offer-liabilities.p30-merge-dest-full` |  |
 | `OperationBody:create_passive_sell_offer` | 2: `cap03.offer-liabilities.golden-12c04cf739c52eac-20`, `classic.failed-tx.p30-passive-offer-operation-source` |  |
+| `ClaimAtom:v0` | 4: `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` and 1 more |  |
 
 ### `cap18.maintain-liabilities`
 
@@ -786,9 +783,20 @@ Trustlines authorized to maintain liabilities through allow trust. CAPs: CAP-001
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `OperationBody:allow_trust` | 10: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 7 more |  |
-| `.body:allow_trust.asset:credit_alphanum4` | 9: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 6 more |  |
+| `OperationBody:allow_trust` | 12: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 9 more |  |
+| `.body:allow_trust.asset:credit_alphanum4` | 11: `cap18.maintain-liabilities.golden-3f24be68a9962089-4`, `cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4`, `cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4` and 8 more |  |
 | `.body:allow_trust.asset:credit_alphanum12` | 1: `cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12` |  |
+
+### `cap26.inflation`
+
+Inflation operations and payouts from before CAP-0026 disabled them. CAPs: CAP-0026. Entries: local-core 3.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `OperationBody:inflation` | 2: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` |  |
+| `OperationResultTr:inflation` | 2: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` |  |
+| `InflationResult:success` | 1: `cap26.inflation.p11-inflation-payout` |  |
+| `InflationResult:not_time` | 1: `cap26.inflation.p11-inflation-not-time` |  |
 
 ## Fields core does not fully validate
 
@@ -806,12 +814,12 @@ Trustlines authorized to maintain liabilities through allow trust. CAPs: CAP-001
 | `feebump.fee_source.mux_id` | `FeeBumpTransaction.feeSource(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 4 | 4 | local-core 4 |
 | `op.source_account.mux_id` | `Operation.sourceAccount(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 2 | 2 | local-core 2 |
 | `op.payment.destination.mux_id` | `PaymentOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 16 | 13 | local-core 13, synthetic 3 |
-| `op.payment.asset` | `PaymentOp.asset` | partial | 16 | 16 | local-core 16 |
+| `op.payment.asset` | `PaymentOp.asset` | partial | 17 | 17 | local-core 17 |
 | `op.path_payment.destination.mux_id` | `PathPaymentStrictReceiveOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id \| PathPaymentStrictSendOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 7 | 7 | local-core 7 |
-| `op.path_payment.path` | `PathPaymentStrictReceiveOp.path \| PathPaymentStrictSendOp.path` | partial | 4 | 3 | local-core 3, synthetic 1 |
+| `op.path_payment.path` | `PathPaymentStrictReceiveOp.path \| PathPaymentStrictSendOp.path` | partial | 6 | 5 | local-core 5, synthetic 1 |
 | `op.set_options.home_domain` | `SetOptionsOp.homeDomain` | partial | 3 | 1 | local-core 3 |
-| `op.manage_data.data_name` | `ManageDataOp.dataName` | partial | 5 | 5 | local-core 5 |
-| `op.manage_data.data_value` | `ManageDataOp.dataValue` | no | 6 | 5 | local-core 5, synthetic 1 |
+| `op.manage_data.data_name` | `ManageDataOp.dataName` | partial | 6 | 5 | local-core 6 |
+| `op.manage_data.data_value` | `ManageDataOp.dataValue` | no | 7 | 5 | local-core 6, synthetic 1 |
 | `op.create_claimable_balance.claimants.destination` | `CreateClaimableBalanceOp.claimants[].v0.destination` | partial | 7 | 6 | local-core 6, synthetic 1 |
 | `op.clawback.from.mux_id` | `ClawbackOp.from(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 2 | 2 | local-core 2 |
 | `op.begin_sponsoring.sponsored_id` | `BeginSponsoringFutureReservesOp.sponsoredID` | partial | 9 | 9 | local-core 9 |

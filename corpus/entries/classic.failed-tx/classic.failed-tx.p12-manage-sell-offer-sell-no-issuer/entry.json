@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "tx.v0.source_account_ed25519"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "a sell offer selling an asset whose issuer account does not exist, in a v0 envelope at protocol 12; the holder has no trustline for it either, and the issuer check comes first (core: manage_sell_offer.sell_no_issuer)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.issuer-checks.p12",
+    "class": "local-core",
+    "ledger_seq": 66,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx.issuer-checks"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/mainnet.expected.json",
+      "expected_json_sha256": "1a3e99345593f9730b62344ee21b334ba7d34275f5e08d2334b0505a97c98975",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/mainnet.oracle.json",
+      "oracle_sha256": "91f881d6ed11bb5b7445f9d58583e1c3b4dc75cd10090d5bb83afe8f16c1072d",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/mainnet.xdr",
+      "xdr_sha256": "e70eefcafc49a6e19c97b86f4ff09773942d8e2eb8e5afe0b974a37321096ccb"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/testnet.expected.json",
+      "expected_json_sha256": "de188767863b109f54d57f4d8c643702bf84409cab1cbd0a2fc80c4ce048cafe",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/testnet.oracle.json",
+      "oracle_sha256": "9bf94cc137cb7080f92d0ae988d6de89b56b3b95c918c2187b6b5dfab342042c",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-sell-offer-sell-no-issuer/testnet.xdr",
+      "xdr_sha256": "05c2885f48fdf37eed3abf9827db1325bef0bbfecc3e6e9238a714f0283a8ce8"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

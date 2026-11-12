@@ -161,50 +161,9 @@ blocker = "never-emitted"
 reason = "a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm"
 
 [[arm]]
-arms = [
-    "ManageBuyOfferResult:buy_no_issuer",
-    "ManageBuyOfferResult:sell_no_issuer",
-    "ManageSellOfferResult:buy_no_issuer",
-    "ManageSellOfferResult:sell_no_issuer",
-    "PathPaymentStrictReceiveResult:no_issuer",
-    "PathPaymentStrictSendResult:no_issuer",
-    "PaymentResult:no_issuer",
-]
-blocker = "old-protocol-only"
-reason = "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
-
-[[arm]]
-arms = ["AllowTrustResult:trust_not_required"]
-blocker = "old-protocol-only"
-reason = "AllowTrustOpFrame::isAuthRevocationValid sets it only before protocol 16 (stellar-core v30.0.0)"
-
-[[arm]]
-arms = [
-    "AllowTrustResult:self_not_allowed",
-    "ChangeTrustResult:self_not_allowed",
-]
-blocker = "old-protocol-only"
-reason = "from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp)"
-
-[[arm]]
 arms = ["ManageDataResult:not_supported_yet"]
-blocker = "old-protocol-only"
-reason = "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0), and as a validity check it never reached a ledger even then"
-
-[[arm]]
-arms = [
-    "OperationBody:inflation",
-    "OperationResultTr:inflation",
-    "InflationResult:success",
-    "InflationResult:not_time",
-]
-blocker = "old-protocol-only"
-reason = "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
-
-[[arm]]
-arms = ["ClaimAtom:v0"]
-blocker = "old-protocol-only"
-reason = "makeClaimAtom writes CLAIM_ATOM_TYPE_V0 only before protocol 18 (stellar-core v30.0.0 TransactionUtils.cpp); mainnet history from protocols 10 to 17 holds it"
+blocker = "refused-before-ledger"
+reason = "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0). core 30.0.0 still runs a fresh network at protocol 1 and refuses ManageData there at submission with this code (classic.failed-tx.manage-data.p1); a validity check keeps it out of the tx queue and of tx set validation, so no ledger at any protocol holds it"
 
 [[arm]]
 arms = ["StellarValueExt:basic"]

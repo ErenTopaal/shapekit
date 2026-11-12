@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "tx.v0.source_account_ed25519"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "a buy offer buying an asset whose issuer account does not exist, in a v0 envelope at protocol 12 (core: manage_buy_offer.buy_no_issuer)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.issuer-checks.p12",
+    "class": "local-core",
+    "ledger_seq": 69,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx.issuer-checks"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/mainnet.expected.json",
+      "expected_json_sha256": "a518ba2ac1b9ad2cfcf5ef5631e63055bf84bf22bcac2c92a2219350d8c84a15",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/mainnet.oracle.json",
+      "oracle_sha256": "33bce9c7730f5d83d4fb7d1d7d64f84b0a12b8a3889d177d61dd01bfe8d72ad4",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/mainnet.xdr",
+      "xdr_sha256": "b007390b3ea7c0e379f24697eab8b4e61d9111eda111e81a53042969d4655979"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/testnet.expected.json",
+      "expected_json_sha256": "d64a17a5d421e9bbe0917d86f5efe8267a7d82492729111e0bb66f78617d0d64",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/testnet.oracle.json",
+      "oracle_sha256": "889c9ae62bb16911b2140553e59ac619ca1bf867e8bf14da5f9786681ba5f002",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-manage-buy-offer-buy-no-issuer/testnet.xdr",
+      "xdr_sha256": "5ca272f90932d9fbcce92b2c8529ef5bc36cb6d49f87f248a7b84e1a5ff65089"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

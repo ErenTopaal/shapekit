@@ -1,0 +1,471 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "73aa4523ea0fb78200f60e554c2f23963b5bf46f43cb0c9ceacefcba37ef5ba9",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "ce03a6708129eef2997398949fb67c5e5ea1533c1c1ac9b60df40a7ae0f78948",
+        "ext": "v0",
+        "fee_pool": "1100",
+        "id_pool": "1",
+        "inflation_seq": 0,
+        "ledger_seq": 71,
+        "ledger_version": 17,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "9d6ceabf0467b9dee5a0b19cb270c3633427e8e60c99211a8c7458e60b1c48ab",
+        "scp_value": {
+          "close_time": "1773360000",
+          "ext": {
+            "signed": {
+              "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+              "signature": "edfa3a27f25b12009b10b79f27fc9ee7eef7e7614e4c4b13544ff3c18f0864f680ecb66ea4ae356dbcefa99aa27ee4acd8b78e01a650c0b37ebca6de2aafa709"
+            }
+          },
+          "tx_set_hash": "646cfa882b8ded7a2ae59c833ecb92c1093c97e3ae52d0d1a39dac86dc18209e",
+          "upgrades": []
+        },
+        "skip_list": [
+          "f0dbf292bc20fd51a022d7b18dc5f63a8a448ade503449c30961b334892840f3",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "abade95320423e3064c2982ea36c39eef69bf32b30f1a64d2d7d9e9f702c1d5e"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [
+      {
+        "fee_processing": [
+          {
+            "state": {
+              "data": {
+                "account": {
+                  "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                  "balance": "99799999800",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 1,
+                  "seq_num": "274877906946",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 70
+            }
+          },
+          {
+            "updated": {
+              "data": {
+                "account": {
+                  "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                  "balance": "99799999700",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 1,
+                  "seq_num": "274877906946",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 71
+            }
+          }
+        ],
+        "result": {
+          "result": {
+            "ext": "v0",
+            "fee_charged": "100",
+            "result": {
+              "tx_success": [
+                {
+                  "op_inner": {
+                    "manage_buy_offer": {
+                      "success": {
+                        "offer": "deleted",
+                        "offers_claimed": [
+                          {
+                            "v0": {
+                              "amount_bought": "100000000",
+                              "amount_sold": "50000000",
+                              "asset_bought": "native",
+                              "asset_sold": {
+                                "credit_alphanum4": {
+                                  "asset_code": "USD",
+                                  "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                                }
+                              },
+                              "offer_id": "1",
+                              "seller_ed25519": "8562b0377d824231df93f55abbaa0505889cd0ae224e0dc30c54775e03c0256a"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "transaction_hash": "ff243feac4d0614be73832baa8c94ddcea1025af3221f0476b4d7ce6487fa053"
+        },
+        "tx_apply_processing": {
+          "v2": {
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "state": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "balance": "100199999800",
+                          "ext": {
+                            "v1": {
+                              "ext": "v0",
+                              "liabilities": {
+                                "buying": "9800000000",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 2,
+                          "seq_num": "274877906946",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 70
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "balance": "100299999800",
+                          "ext": {
+                            "v1": {
+                              "ext": "v0",
+                              "liabilities": {
+                                "buying": "9700000000",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 2,
+                          "seq_num": "274877906946",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                          "balance": "99799999700",
+                          "ext": "v0",
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 1,
+                          "seq_num": "274877906947",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                          "balance": "99699999700",
+                          "ext": "v0",
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 1,
+                          "seq_num": "274877906947",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          },
+                          "balance": "9900000000",
+                          "ext": {
+                            "v1": {
+                              "ext": "v0",
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "4900000000"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 70
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          },
+                          "balance": "9850000000",
+                          "ext": {
+                            "v1": {
+                              "ext": "v0",
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "4850000000"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          },
+                          "balance": "100000000",
+                          "ext": "v0",
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 70
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          },
+                          "balance": "150000000",
+                          "ext": "v0",
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "offer": {
+                          "amount": "4900000000",
+                          "buying": "native",
+                          "ext": "v0",
+                          "flags": 0,
+                          "offer_id": "1",
+                          "price": {
+                            "d": 1,
+                            "n": 2
+                          },
+                          "seller_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "selling": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 70
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "offer": {
+                          "amount": "4850000000",
+                          "buying": "native",
+                          "ext": "v0",
+                          "flags": 0,
+                          "offer_id": "1",
+                          "price": {
+                            "d": 1,
+                            "n": 2
+                          },
+                          "seller_id": "GCCWFMBXPWBEEMO7SP2VVO5KAUCYRHGQVYRE4DODBRKHOXQDYASWVD7D",
+                          "selling": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  }
+                ]
+              }
+            ],
+            "tx_changes_after": [],
+            "tx_changes_before": [
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                      "balance": "99799999700",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 1,
+                      "seq_num": "274877906946",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 71
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B",
+                      "balance": "99799999700",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 1,
+                      "seq_num": "274877906947",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 71
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "tx_set": {
+      "previous_ledger_hash": "9d6ceabf0467b9dee5a0b19cb270c3633427e8e60c99211a8c7458e60b1c48ab",
+      "txs": [
+        {
+          "tx": {
+            "signatures": [
+              {
+                "hint": "ab732d73",
+                "signature": "9352986ee464add68c66cf2c516e5a0f73e491de003703b908ffdd1dd291f1c64a8b11b47d7ef7f3a73cca256c0184523e9e08206142d96a2c587c4a9cb9d704"
+              }
+            ],
+            "tx": {
+              "cond": "none",
+              "ext": "v0",
+              "fee": 100,
+              "memo": "none",
+              "operations": [
+                {
+                  "body": {
+                    "manage_buy_offer": {
+                      "buy_amount": "50000000",
+                      "buying": {
+                        "credit_alphanum4": {
+                          "asset_code": "USD",
+                          "issuer": "GAYBA6I5VMJBDSWZFF5CYL2UMLSETHVI4WZRTDDX66KSSC7PVC7W2AYD"
+                        }
+                      },
+                      "offer_id": "0",
+                      "price": {
+                        "d": 1,
+                        "n": 2
+                      },
+                      "selling": "native"
+                    }
+                  },
+                  "source_account": null
+                }
+              ],
+              "seq_num": "274877906947",
+              "source_account": "GCU2K66Z22R5MWLNX7B6BNF32GKUIFLEQCZ57O6W6VTY245LOMWXGZ7B"
+            }
+          }
+        }
+      ]
+    },
+    "upgrades_processing": []
+  }
+}

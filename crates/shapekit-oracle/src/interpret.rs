@@ -463,7 +463,9 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
 fn event_coverage(meta: &stellar_xdr::TransactionMeta) -> EventCoverage {
     match meta {
         stellar_xdr::TransactionMeta::V4(_) => EventCoverage::Unified,
-        stellar_xdr::TransactionMeta::V3(m) if m.soroban_meta.is_some() => EventCoverage::SorobanOperation,
+        stellar_xdr::TransactionMeta::V3(m) if m.soroban_meta.is_some() => {
+            EventCoverage::SorobanOperation
+        }
         _ => EventCoverage::None,
     }
 }

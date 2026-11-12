@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.manage_offer.assets_amount_price",
+    "op.manage_offer.offer_id"
+  ],
+  "flags": [],
+  "id": "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "a buy offer crossing the maker's offer at protocol 17, claim atom v0",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 17,
+    "introduced": 11,
+    "valid_min": 11
+  },
+  "source": {
+    "chain": "cap03.offer-liabilities.claim-atom-v0.p17",
+    "class": "local-core",
+    "ledger_seq": 71,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap03.offer-liabilities.claim-atom-v0"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/mainnet.expected.json",
+      "expected_json_sha256": "3c4a5568555552fe939e3732e74348106a415b1c483c70ab263de7859f389f77",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/mainnet.oracle.json",
+      "oracle_sha256": "988db0b93523e792a1e9fad14dd7a76dc035939cca904374db3dfb040f6362d1",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/mainnet.xdr",
+      "xdr_sha256": "87e0aa560480b942d203d414c1e21d124fd2bcab559e8fb247a4fc18d014027e"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/testnet.expected.json",
+      "expected_json_sha256": "798b6ad9cc91b8783db1aaa1cd9c6cde65bd705de0d58d1f2fe7756eaec4000d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/testnet.oracle.json",
+      "oracle_sha256": "cd7bcf77af9cc1feb35d3858758a3556be39800583e1fbde2329522c63bd15b4",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0/testnet.xdr",
+      "xdr_sha256": "8f348ec3393ab21d41142671422c834bff1938c47d748b05686df219eadc3bcf"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

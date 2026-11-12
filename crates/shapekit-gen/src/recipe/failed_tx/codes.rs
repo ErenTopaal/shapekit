@@ -296,7 +296,7 @@ fn absent_balance() -> ClaimableBalanceId {
 /// The code of one operation result as XDR-JSON names it:
 /// `payment.line_full` for an inner result, `op_bad_auth` for an
 /// operation-level one.
-pub(super) fn op_code(r: &OperationResult) -> Result<String> {
+pub(crate) fn op_code(r: &OperationResult) -> Result<String> {
     use serde_json::Value;
     let arm = |v: &Value| -> Option<String> {
         match v {

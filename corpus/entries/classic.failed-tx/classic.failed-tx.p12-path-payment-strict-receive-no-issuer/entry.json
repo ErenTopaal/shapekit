@@ -1,0 +1,61 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.amounts",
+    "op.path_payment.path"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+  "kind": "xdr",
+  "lcm_version": 0,
+  "linked_issues": [],
+  "notes": "a strict-receive path payment of XLM into an asset whose issuer account does not exist; the result names that asset, which neither the source nor the destination holds (core: path_payment_strict_receive.no_issuer)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 12,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.issuer-checks.p12",
+    "class": "local-core",
+    "ledger_seq": 70,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx.issuer-checks"
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/mainnet.expected.json",
+      "expected_json_sha256": "e2ef0bc69be642f7b405788936bcb225275db525adcce574a7d82b1238fe5879",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/mainnet.oracle.json",
+      "oracle_sha256": "bfe1c380ed3cf79f5cd2e89c9b67b69a956e464154d08ba4f5bb21cf5d8a2387",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/mainnet.xdr",
+      "xdr_sha256": "e7a080edd746659acd72f52360f986dd8d37da952d2650e307791083661c278e"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/testnet.expected.json",
+      "expected_json_sha256": "22680c9599cf2654422ebe47ed82c24f99134021fe6291ae329beb202ef66825",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/testnet.oracle.json",
+      "oracle_sha256": "736915cf3f05802a84feac1ee9c24413f3542e919a45f38ee09eac9238e0554f",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p12-path-payment-strict-receive-no-issuer/testnet.xdr",
+      "xdr_sha256": "1de423a31d72daacfc6edd8d3beccb55268d0f419edcefa8678d01d973d62309"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}
