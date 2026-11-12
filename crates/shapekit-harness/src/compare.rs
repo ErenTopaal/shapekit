@@ -271,7 +271,10 @@ pub fn compare_tx(
             if c.filter.is_empty() {
                 String::new()
             } else {
-                format!(" where {}", serde_json::to_string(&c.filter).unwrap_or_default())
+                format!(
+                    " where {}",
+                    serde_json::to_string(&c.filter).unwrap_or_default()
+                )
             },
             match oracle.events {
                 Some(EventCoverage::SorobanOperation) => "only the invoked contract's operation",

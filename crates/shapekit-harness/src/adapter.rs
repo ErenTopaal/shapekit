@@ -1,9 +1,9 @@
 //! The harness side of the adapter protocol: one adapter child process, requests on its
 //! stdin, response lines read by a thread from its stdout.
 
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
-use std::collections::HashSet;
 use std::path::Path;
 use std::process::{Child, ChildStdin, Command as Process, Stdio};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, sync_channel};
@@ -389,11 +389,13 @@ read b; echo '{"id":"1","status":"ok","result":{"logs":""}}'
 
     #[test]
     fn a_foreign_id_is_still_a_violation() {
-        let (mut a, _dir) = spawn(
-            r#"read a; echo '{"id":"7","status":"ok","result":{"logs":""}}'; read b"#,
-        );
+        let (mut a, _dir) =
+            spawn(r#"read a; echo '{"id":"7","status":"ok","result":{"logs":""}}'; read b"#);
         let stop = a.call::<StopResult>(Command::Stop, Duration::from_secs(20));
-        assert!(matches!(stop, Err(AdapterFailure::Protocol { .. })), "{stop:?}");
+        assert!(
+            matches!(stop, Err(AdapterFailure::Protocol { .. })),
+            "{stop:?}"
+        );
         a.finish(Duration::from_secs(5));
     }
 }

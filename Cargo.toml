@@ -23,6 +23,8 @@ soroban-env-host-p28 = { package = "soroban-env-host", version = "=28.0.2" }
 soroban-simulation-p28 = { package = "soroban-simulation", version = "=28.0.2" }
 stellar-strkey = "1.0.0"
 anyhow = "1.0.104"
+# phase 14 fuzzing; stellar-xdr asks for >= 1.1.3 behind its arbitrary feature
+arbitrary = "1.5.0"
 base64 = "0.23.1"
 clap = { version = "4.6.7", features = ["derive"] }
 hex = "0.4.3"
@@ -54,3 +56,5 @@ shapekit-pack = { path = "crates/shapekit-pack" }
 shapekit-serve = { path = "crates/shapekit-serve" }
 shapekit-guide = { path = "crates/shapekit-guide" }
 shapekit-harness = { path = "crates/shapekit-harness" }
+shapekit-findings = { path = "crates/shapekit-findings" }
+shapekit-fuzz = { path = "crates/shapekit-fuzz" }

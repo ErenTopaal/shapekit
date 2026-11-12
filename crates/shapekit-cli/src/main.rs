@@ -3,6 +3,7 @@
 mod capture_cmd;
 mod conformance_cmd;
 mod coverage_cmd;
+mod findings_cmd;
 mod gen_cmd;
 mod golden_cmd;
 mod guide_cmd;
@@ -103,6 +104,12 @@ enum Command {
     Harness {
         #[command(subcommand)]
         command: harness_cmd::HarnessCommand,
+    },
+    /// Findings: every harness, conformance and linter failure mapped to a triaged root cause
+    /// with its upstream status.
+    Findings {
+        #[command(subcommand)]
+        command: findings_cmd::FindingsCommand,
     },
     /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
     Coverage(coverage_cmd::CoverageArgs),
@@ -500,6 +507,7 @@ fn main() -> ExitCode {
         Command::Pack { command } => pack_cmd::run(command),
         Command::Serve(args) => serve_cmd::run(args),
         Command::Harness { command } => harness_cmd::run(command),
+        Command::Findings { command } => findings_cmd::run(command),
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
     };

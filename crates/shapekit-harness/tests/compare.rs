@@ -406,13 +406,17 @@ fn derived_events(tx: &TxFacts) -> Vec<ExportChange> {
             kind: "token-event".into(),
             raw: BTreeMap::new(),
             source: None,
-            fields: fields(json!({"event": "transfer", "contract": "CXX", "from": tx.fee.source, "to": "GXX", "amount": "1", "scope": "operation"})),
+            fields: fields(
+                json!({"event": "transfer", "contract": "CXX", "from": tx.fee.source, "to": "GXX", "amount": "1", "scope": "operation"}),
+            ),
         },
         ExportChange {
             kind: "token-event".into(),
             raw: BTreeMap::new(),
             source: None,
-            fields: fields(json!({"event": "fee", "contract": "CXX", "from": tx.fee.source, "amount": "100", "scope": "fee-processing"})),
+            fields: fields(
+                json!({"event": "fee", "contract": "CXX", "from": tx.fee.source, "amount": "100", "scope": "fee-processing"}),
+            ),
         },
     ]
 }
@@ -465,10 +469,14 @@ fn events_in_v4_meta_are_compared() {
 
 #[test]
 fn soroban_v3_coverage_drops_only_claims_beyond_operation_events() {
-    let mut op = claim("token-event", &["event", "contract", "from", "to", "amount"]);
+    let mut op = claim(
+        "token-event",
+        &["event", "contract", "from", "to", "amount"],
+    );
     op.filter.insert("stage".into(), vec![json!("operation")]);
     let mut fee = claim("token-event", &["event", "contract", "from"]);
-    fee.filter.insert("stage".into(), vec![json!("before-all-txs")]);
+    fee.filter
+        .insert("stage".into(), vec![json!("before-all-txs")]);
     let any = claim("contract-event", &["contract", "stage"]);
     let c = Claims {
         participants: None,

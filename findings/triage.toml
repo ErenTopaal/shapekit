@@ -1,0 +1,434 @@
+# triaged root causes of every failure the tooling reports, and what was decided upstream.
+# `shapekit findings collect` applies the matchers below to the inputs and writes
+# findings.json and FINDINGS.md; `shapekit findings check` fails while a failure matches no
+# finding or a finding has no link or decision. format and rules: the shapekit-findings crate docs (crates/shapekit-findings/src/lib.rs).
+#
+# matchers are tried in file order and the first finding whose matcher takes a failure gets
+# it, so a narrow matcher must come before a broad one.
+
+schema = 1
+
+[inputs]
+manifest = "corpus/manifest.json"
+# shapekit harness run --network both --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967" --out target/findings/wallet-backend-e967ce8b
+harness = ["target/findings/wallet-backend-e967ce8b/harness-report.json"]
+# shapekit conformance run --sdk <sdk> --all-versions --out target/conformance/<sdk>
+matrices = [
+  "target/conformance/rust/divergence-matrix.json",
+  "target/conformance/go/divergence-matrix.json",
+  "target/conformance/js/divergence-matrix.json",
+]
+
+[[inputs.lint]]
+target = "wallet-backend"
+version = "e967ce8b7362b79c277e700e789181d76fbb5967"
+result = "target/findings/indexerlint-wallet-backend-e967ce8b.json"
+command = "indexerlint -format json ./..."
+
+[targets.wallet-backend]
+repo = "stellar/wallet-backend"
+adapter = "adapters/bin/wb-adapter --commit {version}"
+
+# wallet-backend, current pin, harness
+
+[[finding]]
+id = "SK-W10"
+title = "the cap66 auto-restore ledger stores UPDATED before RESTORED, an order core never emits, and wallet-backend's ingest panics on it"
+component = "shapekit"
+severity = "halt"
+status = "wont-fix"
+reason = "Not an upstream defect, nothing to file. Core 30.0.0's raw stream for ledger 87 of cap66.archival.p30 has operation 0 changes [restored ttl, restored contract data, updated contract data]; shapekit's canonical order (crates/shapekit-core-driver/src/canonical.rs, core's normalizeMeta rank state, created, updated, removed, restored) moves the update before its restore. go-stellar-sdk v0.8.0 ingest.GetChangesFromLedgerEntryChanges reads the change before an UPDATED as its state (CAP-62 pairs), finds none at index 0 and panics with index out of range [-1]. Fix in shapekit (keep a restore immediately before the update or removal of its key) and re-record the chain; until then this verdict is a corpus artifact."
+cause = "Formerly triaged as wallet-backend W10 (ingestion panic, private-disclosure candidate). Checked against core's raw ledgers.xdr: the order the panic needs is produced by shapekit's canonicalisation, not by core, and it is the only restored-then-updated or restored-then-removed pair in every recorded chain."
+
+[[finding.harness]]
+target = "wallet-backend"
+entries = ["cap66.archival.*"]
+verdicts = ["mishandled"]
+reasons = ["halted"]
+
+[[finding.harness]]
+target = "wallet-backend"
+entries = ["cap66.archival.*"]
+verdicts = ["not-evaluated"]
+detail_contains = "the target stopped at ledger"
+
+[[finding]]
+id = "WB-W3"
+title = "clawbacks are stored as BURN, so a clawback is indistinguishable from a payment to the issuer"
+component = "wallet-backend"
+severity = "wrong-data"
+status = "draft"
+draft = "findings/issues/wallet-backend-W3.md"
+cause = "The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimableBalance write a BALANCE BURN row (and a DEBIT), so the CAP-67 `clawback` event of the ledger is stored as a `burn`."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["dropped"]
+events = ["clawback"]
+
+[[finding.harness]]
+target = "wallet-backend"
+entries = ["*clawback*"]
+facts = ["token-event"]
+problems = ["extra"]
+events = ["burn"]
+
+[[finding]]
+id = "WB-W1"
+title = "transaction participants from meta are never collected (participantsForMeta reads the TransactionMeta V0 arm)"
+component = "wallet-backend"
+severity = "data-loss"
+status = "duplicate-of"
+link = "https://github.com/stellar/wallet-backend/issues/677"
+draft = "findings/issues/wallet-backend-W1.md"
+cause = "participantsForMeta switches on `meta.Operations`, the V0 arm of the TransactionMeta union, which is nil for v1 to v4 meta, so accounts that only the meta shows (the sponsor of a claimed or clawed-back claimable balance) are never participants, while accounts only the envelope names (claimants, a payment destination that is the issuer) are. Already reported upstream as #677 (open)."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["participant"]
+problems = ["dropped", "extra"]
+
+[[finding]]
+id = "WB-W2"
+title = "transfers into or out of a claimable balance or a liquidity pool keep one side only"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W2.md"
+cause = "BALANCE rows are written per account; the claimable balance (B) or liquidity pool (L) end of a transfer has no row, so the stored transfer has a null counterparty and the ledger's transfer event to or from the B or L address has no counterpart."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["dropped"]
+events = ["transfer"]
+prefix = { to = ["B", "L"] }
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["dropped"]
+events = ["transfer"]
+prefix = { from = ["B", "L"] }
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["extra"]
+events = ["transfer"]
+null = ["to"]
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["extra"]
+events = ["transfer"]
+null = ["from"]
+
+[[finding]]
+id = "WB-W4"
+title = "to_muxed_id is kept only when it is a u64; a text, hash or return memo carried by the event is lost"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W4.md"
+related = ["https://github.com/stellar/wallet-backend/issues/800"]
+cause = "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["token-event"]
+problems = ["wrong-value"]
+detail_contains = "to_muxed_id"
+
+[[finding]]
+id = "WB-W5"
+title = "contract deployments without a matching auth entry (asset contracts, contract-to-contract deploys) record no contract creation"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W5.md"
+related = ["https://github.com/stellar/wallet-backend/issues/746"]
+cause = "Contract creation state changes come from the declared auth invocation tree. A Stellar Asset Contract deployed from an asset, or a contract deployed by another contract with no auth entry for the deployment, creates a contract instance in the meta but no ACCOUNT CREATE row. #746 is the reverse case (rows for deployments that did not happen); both go away when deployments are read from the created contract instances in meta."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["contract-deployed"]
+problems = ["dropped"]
+
+[[finding]]
+id = "WB-W6"
+title = "an XLM transfer through the native asset contract that creates the destination account records no account creation"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W6.md"
+cause = "A native SAC transfer to a G address that does not exist creates the account (CAP-73). The meta shows the new account entry; wallet-backend writes the balance credit but no ACCOUNT CREATE row."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["account-created"]
+problems = ["dropped"]
+
+[[finding]]
+id = "WB-W7"
+title = "a pool-share trustline removed by an authorization revocation records no trustline removal"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W7.md"
+cause = "Revoking authorization with SetTrustLineFlags or AllowTrust redeems the holder's pool shares and removes the pool-share trustline (CAP-38). The removal is in the meta; wallet-backend writes no TRUSTLINE REMOVE for it."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["trustline-removed"]
+problems = ["dropped"]
+
+[[finding]]
+id = "WB-W8"
+title = "a failed transaction that consumes a pre-auth signer records no signer removal"
+component = "wallet-backend"
+severity = "data-loss"
+status = "draft"
+draft = "findings/issues/wallet-backend-W8.md"
+cause = "Core removes a pre-authorized transaction signer when the transaction is applied, even when it fails (txChangesBefore). wallet-backend derives signer changes from operation effects, which exist only for successful transactions, so the removal is not stored."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["signer-removed"]
+problems = ["dropped"]
+
+[[finding]]
+id = "WB-W9"
+title = "CreateAccount writes a SIGNER ADD for the new account's master key, which the ledger does not show"
+component = "wallet-backend"
+severity = "wrong-data"
+status = "draft"
+draft = "findings/issues/wallet-backend-W9.md"
+cause = "Following Horizon's effects, account creation emits a signer-created state change for the master key. The ledger has no signer entry: the master key's weight is threshold 0 of the account entry, and no signer was added."
+
+[[finding.harness]]
+target = "wallet-backend"
+facts = ["signer-added"]
+problems = ["extra"]
+
+# wallet-backend, current pin, indexerlint
+
+[[finding]]
+id = "WB-L1"
+title = "ContractDeployProcessor walks the declared auth invocation tree with no depth limit (indexerlint IDX002)"
+component = "wallet-backend"
+severity = "robustness"
+status = "draft"
+draft = "findings/issues/wallet-backend-L1.md"
+caps = ["CAP-0046"]
+related = ["https://github.com/stellar/wallet-backend/issues/746"]
+cause = "The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurses over xdr.SorobanAuthorizedInvocation with no depth counter. The decoder (depth 1500) and core (transactions nested deeper than 1000 are refused from protocol 28) bound it today, so it is a hardening finding, not a halt."
+
+[[finding.lint]]
+target = "wallet-backend"
+rule = "IDX002"
+package = "github.com/stellar/wallet-backend/internal/indexer/processors"
+function = "(*ContractDeployProcessor).ProcessOperation"
+
+# go-stellar-sdk
+
+[[finding]]
+id = "GO-1"
+title = "strkey.DecodeAny accepts a claimable balance id whose type byte is not v0"
+component = "go-stellar-sdk"
+severity = "divergence"
+status = "draft"
+draft = "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md"
+cause = "DecodeAny checks a B key's length but not its claimable balance id type byte, so ids of types core does not define decode."
+
+[[finding.conformance]]
+sdk = "go"
+entries = ["cap23.claimable-balances.synth-strkey-b-invalid"]
+
+[[finding]]
+id = "GO-2"
+title = "v0.7.1 strkey decoders accept payloads of the wrong length"
+component = "go-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/go-stellar-sdk/pull/5977"
+cause = "v0.7.1 Decode and DecodeAny do not check the payload length against the version byte. Fixed in v0.7.2 by #5977; reproduced on the pre-fix release only."
+
+[[finding.conformance]]
+sdk = "go"
+versions = ["v0.7.1"]
+entries = ["*.synth-strkey-*-invalid"]
+
+[[finding]]
+id = "GO-3"
+title = "v0.7.1 orders asset issuers by strkey text and derives a pool id for a pair of one asset with itself"
+component = "go-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/go-stellar-sdk/pull/5974"
+cause = "v0.7.1 xdr.Asset.LessThan compares issuers as strkey text instead of key bytes, and NewPoolId accepts equal assets. Fixed in v0.7.2 by #5974; reproduced on the pre-fix release only."
+
+[[finding.conformance]]
+sdk = "go"
+versions = ["v0.7.1"]
+entries = ["cap38.liquidity-pools.synth-assets-*"]
+
+[[finding]]
+id = "GO-4"
+title = "xdr.DecodeOptions.MaxDepth counts about two levels per nesting, so the sdk decodes envelopes nested deeper than core accepts"
+component = "go-stellar-sdk"
+severity = "robustness"
+status = "draft"
+draft = "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md"
+cause = "A bare ScVal holds 499 ScVec levels at MaxDepth 1000, while rs-stellar-xdr (and core) spend one level per nesting. At the depth core applies, the sdk accepts auth trees and ScVals that core refuses."
+
+[[finding.conformance]]
+sdk = "go"
+entries = [
+  "soroban.auth-trees.synth-auth-depth-494-over-cap",
+  "soroban.auth-trees.p30-declared-depth-493",
+  "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+  "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+]
+
+# js-stellar-sdk
+
+[[finding]]
+id = "JS-1766"
+title = "Asset.compare and scvSortedMap ordered by text instead of the network's byte order"
+component = "js-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/js-stellar-sdk/pull/1766"
+cause = "Asset issuers were compared as strkey text and ScVal map keys by their native form. Fixed by #1766 in 17.2.1 (issuers also backported to 16.3.1); the 16.x map key cells are in JS-16X."
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["16.3.0", "17.2.0"]
+entries = ["cap38.liquidity-pools.synth-assets-*"]
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["17.2.0"]
+entries = ["soroban.scval-shapes.synth-map-keys-*"]
+
+[[finding]]
+id = "JS-1789"
+title = "scValToNative merges map entries whose keys collide as object properties"
+component = "js-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/js-stellar-sdk/issues/1789"
+cause = "Converting an ScMap to a JS object keys entries by their string form, so distinct keys (an address and its strkey string, u32 1 and symbol \"1\") collapse. Fixed in 17.3.0 (#1778); the 16.x cells are in JS-16X."
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["17.2.0", "17.2.1"]
+entries = ["soroban.scval-shapes.synth-map-*"]
+
+[[finding]]
+id = "JS-1785"
+title = "textual muxed and offer ids accept non-canonical forms that encode another id"
+component = "js-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/js-stellar-sdk/issues/1785"
+cause = "Ids given as text with leading zeros, a sign or past 2^64 were accepted and wrapped. Fixed in 17.3.0; the 16.x cells are in JS-16X."
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["17.2.0", "17.2.1"]
+entries = ["cap03.offer-liabilities.synth-textual-offer-id-*", "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical"]
+
+[[finding]]
+id = "JS-16X"
+title = "the 16.x line still has six divergences that 17.x fixed (map key order and collisions, textual ids, strkey lengths, W addresses, decode depth)"
+component = "js-stellar-sdk"
+severity = "divergence"
+status = "draft"
+draft = "findings/issues/js-16x-backports.md"
+related = [
+  "https://github.com/stellar/js-stellar-sdk/pull/1766",
+  "https://github.com/stellar/js-stellar-sdk/issues/1785",
+  "https://github.com/stellar/js-stellar-sdk/issues/1789",
+  "https://github.com/stellar/js-stellar-sdk/pull/1811",
+  "https://github.com/stellar/js-stellar-sdk/pull/1828",
+  "https://github.com/stellar/js-xdr/pull/155",
+]
+cause = "16.3.1 and 16.4.1 backported issuer ordering and the protocol 30 xdr, but not ScVal map key ordering (#1766), map key collisions (#1789), canonical textual ids (#1785), strkey payload length checks, the W strkey codec (#1811) or js-xdr 5's nesting limit (js-xdr#155, 16.x stops at 200 nested types, below depths the network accepts). One issue asks for the backports or a documented end of support."
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["16.3.0", "16.3.1", "16.4.1"]
+entries = [
+  "soroban.scval-shapes.synth-map-*",
+  "cap03.offer-liabilities.synth-textual-offer-id-*",
+  "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+  "*.synth-strkey-*-invalid",
+  "cap84.muxed-contract.synth-strkey-w-valid",
+  "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+  "soroban.scval-shapes.synth-event-vec-depth-101",
+  "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+  "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+  "soroban.auth-trees.p30-declared-depth-*",
+  "soroban.scval-shapes.p30-*-depth-*",
+  "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+]
+
+[[finding]]
+id = "JS-DEPTH"
+title = "17.x decodes with js-xdr 5's limit of 1500 nested types and fromXdr takes no limit, so it accepts transactions nested deeper than core does"
+component = "js-stellar-sdk"
+severity = "robustness"
+status = "draft"
+draft = "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md"
+related = ["https://github.com/stellar/js-xdr/pull/155"]
+cause = "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, so the sdk accepts and re-encodes values core refuses."
+
+[[finding.conformance]]
+sdk = "js"
+versions = ["17.2.0", "17.2.1", "17.3.0", "17.4.0"]
+entries = [
+  "soroban.auth-trees.synth-auth-depth-494-over-cap",
+  "soroban.auth-trees.p30-declared-depth-493",
+  "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+  "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+]
+
+# rs-stellar-xdr
+
+[[finding]]
+id = "RS-1"
+title = "the XDR-JSON reader accepts offer ids in forms the network's canonical text refuses"
+component = "rs-stellar-xdr"
+severity = "divergence"
+status = "draft"
+draft = "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md"
+cause = "Offer ids with leading zeros, a plus sign or a negative value are read as numbers instead of being refused."
+
+[[finding.conformance]]
+sdk = "rust"
+entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical"]
+
+[[finding]]
+id = "RS-2"
+title = "the XDR-JSON reader stops at serde_json's 128-level recursion limit, so values the crate renders cannot be read back"
+component = "rs-stellar-xdr"
+severity = "divergence"
+status = "draft"
+draft = "findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md"
+cause = "to_xdr_json renders nested values of any depth the decoder accepts, but the reader uses serde_json with its default recursion limit, so deep auth trees, ScVals and events (including ones on recorded protocol 30 ledgers) do not round-trip through JSON."
+
+[[finding.conformance]]
+sdk = "rust"
+entries = [
+  "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+  "soroban.scval-shapes.synth-event-vec-depth-101",
+  "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+  "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+  "soroban.auth-trees.p30-declared-depth-*",
+  "soroban.scval-shapes.p30-*-depth-*",
+  "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+]
