@@ -1,0 +1,25 @@
+# next tier: shape families protocol 31 would add. NOT part of the release
+# registry; merged into a scratch copy by next/overlay-registry.sh. no recipe
+# records these yet: the vnext core cannot produce them (CAP-0090 is not
+# implemented), so they stay uncovered until it is.
+
+schema_version = 1
+
+[[family]]
+id = "cap90.custom-payload-credentials"
+title = "Address-v3 and with-delegates-v2 Soroban credentials with custom payloads"
+caps = ["CAP-0090"]
+protocol_introduced = 31
+protocol_valid = { min = 31 }
+signature = [
+    "SorobanCredentials:address_v3",
+    "SorobanCredentials:address_with_delegates_v2",
+]
+source_classes = ["local-core"]
+fields = [
+    "auth.credentials.address_v3.custom_payload",
+    "auth.credentials.address_with_delegates_v2.delegates",
+]
+linked_issues = []
+priority = 13
+notes = "fragment arm names follow the serde snake_case of the cap's xdr; re-check them against the generated rust once stellar-xdr merges the types"

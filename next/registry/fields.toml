@@ -1,0 +1,35 @@
+# next tier: envelope fields protocol 31 would add. NOT part of the release
+# registry; merged into a scratch copy by next/overlay-registry.sh.
+# citations point at the cap text because no implementation exists yet; every
+# row must be re-cited from core and rs-soroban-env source once CAP-0090 lands.
+
+schema_version = 1
+
+[[field]]
+id = "auth.credentials.address_v3.custom_payload"
+xdr_path = "SorobanAddressCredentialsV3.customPayload"
+validated_by_core = "partial"
+checks = "per the cap text only: when set, it is hashed into the signature payload through ENVELOPE_TYPE_SOROBAN_AUTHORIZATION_WITH_CUSTOM_PAYLOAD and passed to a 4-argument __check_auth as a one-element vec; for a G-account address or a 3-argument __check_auth the host errors and the guest panics. content is never checked by core, and on unmatched entries it is never looked at"
+protocol_min = 31
+risk = "an arbitrary nested ScVal chosen by the signer; on unmatched entries it carries no meaning at all"
+handling = "treat as opaque contract-defined data; decode with the same depth limit as signature; never display it as text or key rows by it"
+go_accessors = []
+citations = [
+  { repo = "stellar/stellar-protocol", ref = "ced008c3727005ca4a775f430fe6fe346c30f58f", path = "core/cap-0090.md", symbol = "SorobanAddressCredentialsV3", lines = "74-81" },
+  { repo = "stellar/stellar-protocol", ref = "ced008c3727005ca4a775f430fe6fe346c30f58f", path = "core/cap-0090.md", symbol = "Custom payload dispatch rules", lines = "170-194" },
+]
+notes = "go_accessors is empty because go-stellar-sdk has no protocol 31 xdr yet"
+
+[[field]]
+id = "auth.credentials.address_with_delegates_v2.delegates"
+xdr_path = "SorobanAddressCredentialsWithDelegatesV2.delegates"
+validated_by_core = "partial"
+checks = "per the cap text only: each SorobanDelegateSignatureV2 is verified like a v1 delegate when its address is consulted, with its own optional customPayload chained into the payload its nested delegates sign; unconsulted delegates are not verified"
+protocol_min = 31
+risk = "recursive through nestedDelegates, each level adding an optional ScVal customPayload"
+handling = "walk with a depth counter; treat delegates as declared, not as evidence of authorization"
+go_accessors = []
+citations = [
+  { repo = "stellar/stellar-protocol", ref = "ced008c3727005ca4a775f430fe6fe346c30f58f", path = "core/cap-0090.md", symbol = "SorobanDelegateSignatureV2", lines = "91-97" },
+  { repo = "stellar/stellar-protocol", ref = "ced008c3727005ca4a775f430fe6fe346c30f58f", path = "core/cap-0090.md", symbol = "Signature preimage for custom payload", lines = "162-169" },
+]

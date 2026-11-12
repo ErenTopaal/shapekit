@@ -1,0 +1,43 @@
+# next tier: protocol 31 cap records. NOT part of the release registry.
+# these replace the Draft placeholders for CAP-0089 and CAP-0090 in
+# registry/caps.toml only inside the next-tier overlay that
+# next/overlay-registry.sh builds; registry/ itself is unchanged.
+#
+# both caps are Draft (stellar-protocol ced008c, 2026-11-04). on 2026-11-12 no
+# implementation exists upstream: stellar-xdr main and next have no protocol 31
+# types, rs-soroban-env main has neither host function, and the vnext core
+# (362dbc5184) runs protocol 31 with the protocol 30 host built with `next`.
+# xdr_additions below are taken from the cap text, not from a merged xdr.
+
+schema_version = 1
+
+[[cap]]
+id = "CAP-0089"
+title = "Host functions for invoker-less authorization"
+status = "Draft"
+protocol = 31
+xdr_additions = []
+indexer_visible = false
+reason = "adds two host functions (require_external_auth, require_external_auth_for_args) and no xdr; an invocation they reject fails with the existing auth error result and meta shapes"
+source = { path = "core/cap-0089.md" }
+notes = "Draft at stellar-protocol ced008c. env.json diff based on rs-soroban-env 0c99950, which does not contain it. indexer effect: invoker auth no longer satisfies these calls, so transactions that used to succeed through invoker auth now need an explicit SorobanAuthorizationEntry; the entries themselves keep their shape"
+
+[[cap]]
+id = "CAP-0090"
+title = "Custom signature payload for account contracts"
+status = "Draft"
+protocol = 31
+xdr_additions = [
+    "SorobanAddressCredentialsV3",
+    "SorobanDelegateSignatureV2",
+    "SorobanAddressCredentialsWithDelegatesV2",
+    "SOROBAN_CREDENTIALS_ADDRESS_V3",
+    "SOROBAN_CREDENTIALS_ADDRESS_WITH_DELEGATES_V2",
+    "SorobanCredentials.addressV3",
+    "SorobanCredentials.addressWithDelegatesV2",
+    "ENVELOPE_TYPE_SOROBAN_AUTHORIZATION_WITH_CUSTOM_PAYLOAD",
+    "HashIDPreimage.sorobanAuthorizationWithCustomPayload",
+]
+indexer_visible = true
+source = { path = "core/cap-0090.md", xdr_diff = "4f524bbac80c781c06e4fb5fc93a2d0d331d6705..(cap text, not merged)" }
+notes = "Draft at stellar-protocol ced008c; the xdr diff is the cap's own patch against stellar-xdr 4f524bb (v30.0) and is in no stellar-xdr branch on 2026-11-12. two new SorobanCredentials arms reach every indexer through envelopes and auth entries; a decoder built from v30.0 rejects them as an unknown union arm. customPayload is an optional SCVal, so it is recursive and needs the same depth caps as signature. the HashIDPreimage arm is a signing preimage only and never appears in a ledger"

@@ -7,17 +7,23 @@ use shapekit_gen::golden;
 use shapekit_manifest::build;
 use shapekit_registry::Registry;
 
-pub fn import(core_src: &Path, tag: &str, corpus: &Path, registry_dir: &Path) -> Result<bool> {
+pub fn import(
+    core_src: &Path,
+    tag: &str,
+    tier: &str,
+    corpus: &Path,
+    registry_dir: &Path,
+) -> Result<bool> {
     let registry = Registry::load(registry_dir)
         .with_context(|| format!("loading the registry in {}", registry_dir.display()))?;
-    let commit = golden::checkout_commit(core_src, tag)?;
-    let mut set = golden::scan(core_src, tag, &commit)?;
+    let commit = golden::checkout_commit_tier(core_src, tier, tag)?;
+    let mut set = golden::scan_tier(core_src, tier, tag, &commit)?;
     println!(
         "indexed {} files ({} ledgers) in {} directories of {} at {tag} ({commit})",
         set.files.len(),
         set.lcms.len(),
         set.dirs.len(),
-        golden::TIER
+        set.tier
     );
     let report = golden::import(&mut set, &registry, corpus)?;
     if !report.removed.is_empty() {
@@ -46,9 +52,9 @@ pub fn import(core_src: &Path, tag: &str, corpus: &Path, registry_dir: &Path) ->
     Ok(true)
 }
 
-pub fn verify(core_src: &Path, tag: &str, index: &Path) -> Result<bool> {
-    let commit = golden::checkout_commit(core_src, tag)?;
-    let set = golden::scan(core_src, tag, &commit)?;
+pub fn verify(core_src: &Path, tag: &str, tier: &str, index: &Path) -> Result<bool> {
+    let commit = golden::checkout_commit_tier(core_src, tier, tag)?;
+    let set = golden::scan_tier(core_src, tier, tag, &commit)?;
     let committed: serde_json::Value = serde_json::from_slice(
         &std::fs::read(index).with_context(|| format!("reading {}", index.display()))?,
     )

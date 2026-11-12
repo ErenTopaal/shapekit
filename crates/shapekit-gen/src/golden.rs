@@ -29,9 +29,13 @@ use crate::entry_io;
 
 /// The passphrase every golden was captured under (core's test network).
 pub const GOLDEN_PASSPHRASE: &str = "(V) (;,,;) (V)";
-/// The tier a release build of core reads; `test-lcm-next` holds protocol 31 meta that
-/// stellar-xdr 30.0.0 cannot decode.
+/// The tier a release build of core reads, and the one the release corpus imports.
 pub const TIER: &str = "test-lcm-current";
+/// The tier core's next-protocol build reads. Only imported into the separate `next/`
+/// rehearsal tree, never into the release corpus.
+pub const NEXT_TIER: &str = "test-lcm-next";
+/// The golden tiers stellar-core keeps.
+pub const TIERS: [&str; 2] = [TIER, NEXT_TIER];
 pub const CORE_REPO: &str = "https://github.com/stellar/stellar-core";
 /// The arguments of core's own literal check, as ci-build.sh at v30.0.0 runs it.
 pub const CHECK_LCM_ARGS: &str =
@@ -106,6 +110,8 @@ pub struct GoldenLcm {
 
 pub struct GoldenSet {
     pub tag: String,
+    /// [`TIER`] or [`NEXT_TIER`].
+    pub tier: String,
     pub commit: String,
     pub dirs: Vec<GoldenDir>,
     pub files: Vec<GoldenFile>,
@@ -115,6 +121,15 @@ pub struct GoldenSet {
 /// The commit `tag` names in the git checkout at `core_src`, required to be the checked-out
 /// commit so the index never records a tag for files from another revision.
 pub fn checkout_commit(core_src: &Path, tag: &str) -> Result<String> {
+    checkout_commit_tier(core_src, TIER, tag)
+}
+
+/// [`checkout_commit`] for one of [`TIERS`]; only that tier must be free of local changes.
+pub fn checkout_commit_tier(core_src: &Path, tier: &str, tag: &str) -> Result<String> {
+    ensure!(
+        TIERS.contains(&tier),
+        "unknown golden tier {tier:?}, expected one of {TIERS:?}"
+    );
     let rev = |spec: &str| -> Result<String> {
         let out = Command::new("git")
             .arg("-C")
@@ -140,13 +155,13 @@ pub fn checkout_commit(core_src: &Path, tag: &str) -> Result<String> {
     let dirty = Command::new("git")
         .arg("-C")
         .arg(core_src)
-        .args(["status", "--porcelain", "--", TIER])
+        .args(["status", "--porcelain", "--", tier])
         .output()
         .context("running git status")?;
     ensure!(dirty.status.success(), "git status failed");
     ensure!(
         dirty.stdout.is_empty(),
-        "{TIER} in {} has local changes",
+        "{tier} in {} has local changes",
         core_src.display()
     );
     Ok(head)
@@ -155,10 +170,20 @@ pub fn checkout_commit(core_src: &Path, tag: &str) -> Result<String> {
 /// Reads every directory of the current tier, checks that index and files agree, and decodes,
 /// round-trips and signs every ledger.
 pub fn scan(core_src: &Path, tag: &str, commit: &str) -> Result<GoldenSet> {
-    let tier = core_src.join(TIER);
+    scan_tier(core_src, TIER, tag, commit)
+}
+
+/// [`scan`] over one of [`TIERS`].
+pub fn scan_tier(core_src: &Path, tier_name: &str, tag: &str, commit: &str) -> Result<GoldenSet> {
+    ensure!(
+        TIERS.contains(&tier_name),
+        "unknown golden tier {tier_name:?}, expected one of {TIERS:?}"
+    );
+    let tier = core_src.join(tier_name);
     let schema = XdrSchema::for_type(LCM_TYPE)?;
     let mut set = GoldenSet {
         tag: tag.to_string(),
+        tier: tier_name.to_string(),
         commit: commit.to_string(),
         dirs: Vec::new(),
         files: Vec::new(),
@@ -211,12 +236,12 @@ pub fn scan(core_src: &Path, tag: &str, commit: &str) -> Result<GoldenSet> {
         );
         set.dirs.push(GoldenDir {
             name: name.clone(),
-            index_path: format!("{TIER}/{name}/index.json"),
+            index_path: format!("{tier_name}/{name}/index.json"),
             index_sha256: sha256_hex(&index_bytes),
             stamps: stamps.clone(),
         });
         for (hash, human) in listed {
-            let rel = format!("{TIER}/{name}/{hash}.xdr");
+            let rel = format!("{tier_name}/{name}/{hash}.xdr");
             let bytes =
                 std::fs::read(core_src.join(&rel)).with_context(|| format!("reading {rel}"))?;
             let (test, section) = match human.split_once('|') {
@@ -541,7 +566,7 @@ fn index_json(set: &GoldenSet, not_imported: &[NotImported]) -> Result<Value> {
             repo: CORE_REPO,
             tag: &set.tag,
             commit: &set.commit,
-            tier: TIER,
+            tier: &set.tier,
         },
         network_passphrase: GOLDEN_PASSPHRASE,
         check_lcm: CHECK_LCM_ARGS,
@@ -571,6 +596,13 @@ pub fn verify_index(set: &GoldenSet, committed: &Value) -> Vec<String> {
         out.push(format!(
             "index records commit {commit:?}, the checkout is {}",
             set.commit
+        ));
+    }
+    let tier = committed.pointer("/upstream/tier").and_then(Value::as_str);
+    if tier != Some(set.tier.as_str()) {
+        out.push(format!(
+            "index records tier {tier:?}, the scan read {}",
+            set.tier
         ));
     }
     let pairs = |key: &str, path_key: &str, hash_key: &str| -> BTreeMap<String, String> {

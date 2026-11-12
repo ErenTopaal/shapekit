@@ -1,0 +1,86 @@
+next tier, NOT part of the release: the step 3 changes of docs/protocol-upgrade-runbook.md
+as rehearsed for protocol 31, applied to an export of commit 8293e53b (git archive).
+the binary built from it (own CARGO_TARGET_DIR) recorded next/chains/smoke.p31.
+never apply this to the main branch: the next feature drops protocol 30 simulation.
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 1bc3a87..ef4ce7e 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -12,7 +12,7 @@ publish = false
+ 
+ [workspace.dependencies]
+ ed25519-dalek = "3.0.0"
+-soroban-env-host = "30.0.0"
++soroban-env-host = { version = "30.0.0", features = ["next"] }
+ soroban-simulation = "30.0.0"
+ # older hosts for chains below protocol 30, see crates/shapekit-core-driver/src/sim_legacy.rs
+ soroban-env-host-p22 = { package = "soroban-env-host", version = "=22.1.4" }
+diff --git a/crates/shapekit-core-driver/src/chain.rs b/crates/shapekit-core-driver/src/chain.rs
+index ecc22c1..b31b35b 100644
+--- a/crates/shapekit-core-driver/src/chain.rs
++++ b/crates/shapekit-core-driver/src/chain.rs
+@@ -432,7 +432,10 @@ impl ChainDriver {
+         writer_wasm: &[u8],
+     ) -> Result<SettingsApplied, ChainError> {
+         let protocol = self.node.config().protocol;
+-        if protocol != settings.protocol_version {
++        // rehearsal: a next protocol has no live network to capture settings from, so
++        // settings of an older protocol are offered and core decides whether the cost
++        // parameter entries still fit (it refuses the upgrade set if they do not)
++        if protocol < settings.protocol_version {
+             return Err(ChainError::Unexpected {
+                 ledger: self.last_closed,
+                 what: format!(
+diff --git a/crates/shapekit-core-driver/src/config.rs b/crates/shapekit-core-driver/src/config.rs
+index 4485164..7f305ef 100644
+--- a/crates/shapekit-core-driver/src/config.rs
++++ b/crates/shapekit-core-driver/src/config.rs
+@@ -25,7 +25,7 @@ pub const NODE_SEED_DOMAIN: &[u8] = b"shapekit/node-seed/v1";
+ pub const CORE_IMAGE_PIN: &str = "stellar-core";
+ 
+ /// Highest ledger protocol stellar-core 30.0.0 can run.
+-pub const MAX_PROTOCOL: u32 = 30;
++pub const MAX_PROTOCOL: u32 = 31;
+ 
+ /// Command port inside the container. Bound to the container's loopback only.
+ pub const HTTP_PORT: u16 = 11626;
+diff --git a/crates/shapekit-core-driver/src/sim_legacy.rs b/crates/shapekit-core-driver/src/sim_legacy.rs
+index e4035e4..1757669 100644
+--- a/crates/shapekit-core-driver/src/sim_legacy.rs
++++ b/crates/shapekit-core-driver/src/sim_legacy.rs
+@@ -41,7 +41,7 @@ use crate::sim::{
+ 
+ /// Ledger protocols a simulator exists for: the ones below 30 that this
+ /// module covers, plus 30 itself through [`Simulator`].
+-pub const SIMULATED_PROTOCOLS: [u32; 4] = [22, 24, 28, 30];
++pub const SIMULATED_PROTOCOLS: [u32; 4] = [22, 24, 28, 31];
+ 
+ /// Average of the live state size window, as core computes it. Every value
+ /// read is converted from the snapshot, so a missing or malformed entry
+diff --git a/crates/shapekit-core-driver/src/smoke.rs b/crates/shapekit-core-driver/src/smoke.rs
+index 1b511c8..8b98faf 100644
+--- a/crates/shapekit-core-driver/src/smoke.rs
++++ b/crates/shapekit-core-driver/src/smoke.rs
+@@ -39,7 +39,7 @@ pub const MAINNET_PASSPHRASE: &str = "Public Global Stellar Network ; September
+ /// Recipe id the smoke chain derives its keys and salts from.
+ pub const RECIPE: &str = "smoke";
+ 
+-pub const PROTOCOL: u32 = 30;
++pub const PROTOCOL: u32 = 31;
+ 
+ /// Roles of the four funded accounts.
+ pub const ROLES: [&str; 4] = ["alice", "bob", "issuer", "deployer"];
+diff --git a/crates/shapekit-registry/src/lib.rs b/crates/shapekit-registry/src/lib.rs
+index 6dc276e..9418585 100644
+--- a/crates/shapekit-registry/src/lib.rs
++++ b/crates/shapekit-registry/src/lib.rs
+@@ -14,7 +14,7 @@ pub use model::*;
+ pub const SCHEMA_VERSION: u32 = 1;
+ 
+ /// Indexer-visible CAPs up to and including this protocol must be covered by a family.
+-pub const COVERED_THROUGH_PROTOCOL: u32 = 30;
++pub const COVERED_THROUGH_PROTOCOL: u32 = 31;
+ 
+ /// The lint rule IDs the linter and the guide agree on.
+ pub const LINT_RULE_IDS: [&str; 3] = ["IDX001", "IDX002", "IDX003"];

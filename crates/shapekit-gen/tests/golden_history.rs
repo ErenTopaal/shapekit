@@ -233,6 +233,56 @@ fn scan_import_and_verify_a_golden_tree() {
     assert_eq!(again.removed.len(), selections.len());
 }
 
+// the next-protocol tier goes through the same scan and import, records its tier in the
+// index, and an index of one tier never verifies against a scan of the other
+#[test]
+fn next_tier_imports_into_its_own_tree() {
+    let registry = registry();
+    let a = entry("cap35.clawback.golden-3f24be68a9962089-11");
+    let a_bytes = variant_bytes(&a);
+
+    let tmp = tempfile::tempdir().unwrap();
+    let core = tmp.path().join("core");
+    let dir = core.join(golden::NEXT_TIER).join("ClawbackTests");
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(
+        dir.join("index.json"),
+        r#"{"!cfg protocol version": 31, "!rng seed": 12345, "!test all versions": false,
+            "!versions to test": [31], "00000000000000aa": "clawback|one ledger"}"#,
+    )
+    .unwrap();
+    std::fs::write(
+        dir.join("00000000000000aa.xdr"),
+        frame_records([a_bytes.as_slice()]).unwrap(),
+    )
+    .unwrap();
+
+    assert!(golden::scan(&core, "v30.0.0", "x").is_err());
+    assert!(golden::scan_tier(&core, "test-lcm-other", "v30.0.0", "x").is_err());
+    let mut set = golden::scan_tier(&core, golden::NEXT_TIER, "v30.0.0", "x").unwrap();
+    assert_eq!(set.tier, golden::NEXT_TIER);
+    assert_eq!(set.files[0].stamps.protocol, 31);
+    assert!(
+        set.files[0]
+            .path
+            .starts_with("test-lcm-next/ClawbackTests/")
+    );
+
+    let out = tmp.path().join("next");
+    let report = golden::import(&mut set, &registry, &out).unwrap();
+    assert!(report.index_path.starts_with(&out));
+    let written: Value =
+        serde_json::from_slice(&std::fs::read(&report.index_path).unwrap()).unwrap();
+    assert_eq!(written["upstream"]["tier"], golden::NEXT_TIER);
+    assert!(golden::verify_index(&set, &written).is_empty());
+
+    let mut other = written.clone();
+    other["upstream"]["tier"] = Value::from(TIER);
+    let problems = golden::verify_index(&set, &other);
+    assert_eq!(problems.len(), 1, "{problems:?}");
+    assert!(problems[0].contains("tier"), "{problems:?}");
+}
+
 #[test]
 fn scan_rejects_an_index_that_disagrees_with_the_files() {
     let tmp = tempfile::tempdir().unwrap();
