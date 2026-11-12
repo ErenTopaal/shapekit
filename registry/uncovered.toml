@@ -1,0 +1,606 @@
+# why some shapes have no core-emitted corpus entry.
+#
+# `shapekit coverage --check` reads this file. every indexer-visible cap with no core-emitted
+# entry, every union arm reachable from LedgerCloseMeta that no core-emitted entry holds, and
+# every family fragment no core-emitted entry matches needs a record here, and a record for
+# something now covered fails the check, so the file never drifts from the corpus.
+#
+# blockers:
+#   refused-before-ledger   core refuses the transaction before any ledger holds it
+#   never-emitted           the pinned core has no code path that writes it into meta
+#   old-protocol-only       only ledgers below some protocol carry it
+#   history-only            only a public network can hold it, and no capture of it exists
+#   not-producible-locally  the code path exists, but a standalone network cannot reach it
+#   not-imported            the core goldens hold it; the importer takes one per fragment
+#   recipe-gap              a local core can produce it and no recipe records it yet
+#
+# every reason was read from the cited source at the pinned tags, not inferred from the name.
+
+schema_version = 1
+
+[[cap]]
+id = "CAP-0083"
+blocker = "history-only"
+reason = "the only shape is StellarValueExt:empty_tx_set, written when the ballot protocol drops a tx set it cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node never does, testnet 4.0M to 5.695M holds none, and no ledger in the 1732 core golden files takes the arm; mainnet history is not yet searched"
+
+[[arm]]
+arms = [
+    "AccountMergeResult:malformed",
+    "AllowTrustResult:malformed",
+    "BeginSponsoringFutureReservesResult:malformed",
+    "BumpSequenceResult:bad_seq",
+    "ChangeTrustResult:malformed",
+    "ClawbackResult:malformed",
+    "CreateAccountResult:malformed",
+    "CreateClaimableBalanceResult:malformed",
+    "LiquidityPoolDepositResult:malformed",
+    "LiquidityPoolWithdrawResult:malformed",
+    "ManageBuyOfferResult:malformed",
+    "ManageSellOfferResult:malformed",
+    "ManageDataResult:invalid_name",
+    "PathPaymentStrictReceiveResult:malformed",
+    "PathPaymentStrictSendResult:malformed",
+    "PaymentResult:malformed",
+    "RevokeSponsorshipResult:malformed",
+    "SetOptionsResult:bad_flags",
+    "SetOptionsResult:bad_signer",
+    "SetOptionsResult:invalid_home_domain",
+    "SetOptionsResult:threshold_out_of_range",
+    "SetOptionsResult:unknown_flag",
+    "SetTrustLineFlagsResult:malformed",
+]
+blocker = "refused-before-ledger"
+reason = "set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
+
+[[arm]]
+arms = [
+    "ExtendFootprintTtlResult:malformed",
+    "RestoreFootprintResult:malformed",
+]
+blocker = "refused-before-ledger"
+reason = "set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions"
+
+[[arm]]
+arms = ["OperationResult:op_not_supported"]
+blocker = "refused-before-ledger"
+reason = "OperationFrame::checkValid sets it from isOpSupported, which reads only the ledger header, so validation and apply in one ledger agree (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_malformed",
+    "TransactionResultResult:tx_missing_operation",
+    "TransactionResultResult:tx_not_supported",
+    "TransactionResultResult:tx_insufficient_fee",
+    "InnerTransactionResultResult:tx_malformed",
+    "InnerTransactionResultResult:tx_missing_operation",
+    "InnerTransactionResultResult:tx_not_supported",
+    "InnerTransactionResultResult:tx_insufficient_fee",
+]
+blocker = "refused-before-ledger"
+reason = "set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_too_early",
+    "TransactionResultResult:tx_too_late",
+    "InnerTransactionResultResult:tx_too_early",
+    "InnerTransactionResultResult:tx_too_late",
+]
+blocker = "refused-before-ledger"
+reason = "HerderSCPDriver::validateValue checks the tx set at the close time of the value being voted on (stellar-core v30.0.0), so every transaction in an externalized set meets its time and ledger bounds at apply"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_soroban_invalid",
+    "InnerTransactionResultResult:tx_soroban_invalid",
+]
+blocker = "refused-before-ledger"
+reason = "set in TransactionFrame::commonValidPreSeqNum (memo and muxed source rule from protocol 25) or TransactionQueue::canAdd (before 25) from the envelope and network settings (stellar-core v30.0.0); the corpus holds the submit-time refusals"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_frozen_key_accessed",
+    "InnerTransactionResultResult:tx_frozen_key_accessed",
+]
+blocker = "refused-before-ledger"
+reason = "TransactionFrame::commonValidPreSeqNum checks frozen keys against the network config (stellar-core v30.0.0), which only changes through config upgrades applied after a ledger's transactions, so validation already refused any transaction that fails at apply; none of the 1732 core golden files (test-lcm-current and test-lcm-next) holds it"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_insufficient_balance",
+    "InnerTransactionResultResult:tx_insufficient_balance",
+]
+blocker = "refused-before-ledger"
+reason = "tx set validation requires each fee source's available balance to cover all its fees in the set (TxSetUtils.cpp getInvalidTxListWithErrors) and at apply the fee is already charged, so commonValid only fails on a negative available balance, which no operation leaves (stellar-core v30.0.0)"
+
+[[arm]]
+arms = ["ChangeTrustAsset:native"]
+blocker = "refused-before-ledger"
+reason = "ChangeTrustOpFrame::doCheckValid answers CHANGE_TRUST_MALFORMED for a native line from protocol 10 and doApply throws on one below it (stellar-core v30.0.0)"
+
+[[arm]]
+arms = ["TrustLineAsset:native"]
+blocker = "refused-before-ledger"
+reason = "a native trustline key is refused in Soroban footprints (TransactionFrame footprintKeyIsValid) and in revoke sponsorship (RevokeSponsorshipOpFrame::doCheckValid), and change trust never creates a native trustline (stellar-core v30.0.0)"
+
+[[arm]]
+arms = ["LedgerKey:config_setting"]
+blocker = "refused-before-ledger"
+reason = "refused in Soroban footprints (TransactionFrame footprintKeyIsValid) and in revoke sponsorship (RevokeSponsorshipOpFrame::doCheckValid), and core never removes or evicts a config setting, so no removed change names one (stellar-core v30.0.0)"
+
+[[arm]]
+arms = ["InvokeHostFunctionResult:malformed"]
+blocker = "never-emitted"
+reason = "no code outside src/test sets INVOKE_HOST_FUNCTION_MALFORMED in stellar-core v30.0.0; invalid invocations are refused with tx-level codes or fail as trapped or resource_limit_exceeded"
+
+[[arm]]
+arms = [
+    "TransactionMeta:v0",
+    "TransactionMeta:v1",
+]
+blocker = "never-emitted"
+reason = "TransactionMetaBuilder writes v2, v3 or v4 only (src/transactions/TransactionMeta.cpp: \"core does not produce it anymore\"), and both data lakes hold history replayed by a current core"
+
+[[arm]]
+arms = [
+    "ScpHistoryEntry:v0",
+    "ScpStatementPledges:confirm",
+    "ScpStatementPledges:externalize",
+    "ScpStatementPledges:nominate",
+    "ScpStatementPledges:prepare",
+]
+blocker = "never-emitted"
+reason = "reachable only through LedgerCloseMetaV0/V1/V2.scpInfo, which stellar-core v30.0.0 never fills (the only scpInfo outside tests is the HTTP route name in CommandHandler.cpp)"
+
+[[arm]]
+arms = [
+    "ConfigSettingEntry:frozen_ledger_keys_delta",
+    "ConfigSettingEntry:freeze_bypass_txs_delta",
+]
+blocker = "never-emitted"
+reason = "a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm"
+
+[[arm]]
+arms = [
+    "ManageBuyOfferResult:buy_no_issuer",
+    "ManageBuyOfferResult:sell_no_issuer",
+    "ManageSellOfferResult:buy_no_issuer",
+    "ManageSellOfferResult:sell_no_issuer",
+    "PathPaymentStrictReceiveResult:no_issuer",
+    "PathPaymentStrictSendResult:no_issuer",
+    "PaymentResult:no_issuer",
+]
+blocker = "old-protocol-only"
+reason = "issuer existence is checked only before protocol 13 (ManageOfferOpFrameBase::checkOfferValid, PathPaymentOpFrameBase; PaymentOpFrame maps the path payment code) in stellar-core v30.0.0"
+
+[[arm]]
+arms = ["AllowTrustResult:trust_not_required"]
+blocker = "old-protocol-only"
+reason = "AllowTrustOpFrame::isAuthRevocationValid sets it only before protocol 16 (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "AllowTrustResult:self_not_allowed",
+    "ChangeTrustResult:self_not_allowed",
+]
+blocker = "old-protocol-only"
+reason = "from protocol 16 doCheckValid answers MALFORMED for a trustor or issuer equal to the source first, so the doApply check (protocol 3 on) is reached only at protocols 3 to 15 (stellar-core v30.0.0 AllowTrustOpFrame.cpp, ChangeTrustOpFrame.cpp, TrustFlagsOpFrameBase.cpp)"
+
+[[arm]]
+arms = ["ManageDataResult:not_supported_yet"]
+blocker = "old-protocol-only"
+reason = "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0), and as a validity check it never reached a ledger even then"
+
+[[arm]]
+arms = [
+    "OperationBody:inflation",
+    "OperationResultTr:inflation",
+    "InflationResult:success",
+    "InflationResult:not_time",
+]
+blocker = "old-protocol-only"
+reason = "InflationOpFrame::isOpSupported is true only before protocol 12 (stellar-core v30.0.0); mainnet history from protocols 1 to 11 holds it"
+
+[[arm]]
+arms = ["ClaimAtom:v0"]
+blocker = "old-protocol-only"
+reason = "makeClaimAtom writes CLAIM_ATOM_TYPE_V0 only before protocol 18 (stellar-core v30.0.0 TransactionUtils.cpp); mainnet history from protocols 10 to 17 holds it"
+
+[[arm]]
+arms = ["StellarValueExt:basic"]
+blocker = "history-only"
+reason = "HerderImpl::makeStellarValue writes only SIGNED or SIGNED_MS values (stellar-core v30.0.0), so only early mainnet headers carry a basic value; the one entry holding it is synthetic"
+
+[[arm]]
+arms = [
+    "StellarValueExt:empty_tx_set",
+    "StellarValueExt:empty_tx_set_ms",
+]
+blocker = "history-only"
+reason = "written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm"
+
+[[arm]]
+arms = ["OperationResult:op_too_many_sponsoring"]
+blocker = "not-producible-locally"
+reason = "needs numSponsoring plus numSubEntries near UINT32_MAX (SponsorshipUtils.cpp tooManySponsoring, stellar-core v30.0.0), about four billion sponsored entries"
+
+[[arm]]
+arms = ["InnerTransactionResultResult:tx_internal_error"]
+blocker = "not-producible-locally"
+reason = "only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp)"
+
+[[arm]]
+arms = ["BeginSponsoringFutureReservesResult:already_sponsored"]
+blocker = "not-imported"
+reason = "1 core golden ledger hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/16ca002da0d1fd67.xdr record 1"
+
+[[arm]]
+arms = ["BeginSponsoringFutureReservesResult:recursive"]
+blocker = "not-imported"
+reason = "2 core golden ledgers hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/5a03a46b7b48bb06.xdr record 2"
+
+[[arm]]
+arms = ["EndSponsoringFutureReservesResult:not_sponsored"]
+blocker = "not-imported"
+reason = "2 core golden ledgers hold it, the first test-lcm-current/BeginSponsoringFutureReservesTests/5a03a46b7b48bb06.xdr record 2"
+
+[[arm]]
+arms = ["ContractCodeEntryExt:v0"]
+blocker = "not-imported"
+reason = "8 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 11; soroban-env-host 30.0.0 upload_contract_wasm always writes V1 (src/host/lifecycle.rs)"
+
+[[arm]]
+arms = ["ExtendFootprintTtlResult:insufficient_refundable_fee"]
+blocker = "not-imported"
+reason = "1 core golden ledger hold it, the first test-lcm-current/InvokeHostFunctionTests/568d51258ccf9080.xdr record 9"
+
+[[arm]]
+arms = ["ExtendFootprintTtlResult:resource_limit_exceeded"]
+blocker = "not-imported"
+reason = "2 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/140652bdfd74f633.xdr record 14"
+
+[[arm]]
+arms = ["InvokeHostFunctionResult:entry_archived"]
+blocker = "not-imported"
+reason = "128 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/04667ce620bffee7.xdr record 22"
+
+[[arm]]
+arms = ["InvokeHostFunctionResult:insufficient_refundable_fee"]
+blocker = "not-imported"
+reason = "15 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/19f50bd55f924432.xdr record 31"
+
+[[arm]]
+arms = ["RestoreFootprintResult:insufficient_refundable_fee"]
+blocker = "not-imported"
+reason = "5 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/19f50bd55f924432.xdr record 31"
+
+[[arm]]
+arms = ["OperationBody:create_passive_sell_offer"]
+blocker = "not-imported"
+reason = "18 core golden ledgers hold it, the first test-lcm-current/FrozenLedgerKeysTests/12c04cf739c52eac.xdr record 20"
+
+[[arm]]
+arms = ["ScError:auth"]
+blocker = "not-imported"
+reason = "166 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/002cd42f82ef4c1b.xdr record 17"
+
+[[arm]]
+arms = ["ScError:crypto"]
+blocker = "not-imported"
+reason = "17 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/002cd42f82ef4c1b.xdr record 17"
+
+[[arm]]
+arms = ["TransactionResultResult:tx_bad_auth"]
+blocker = "not-imported"
+reason = "3 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/8e3126c525875c96.xdr record 10"
+
+[[arm]]
+arms = ["TransactionResultResult:tx_no_account"]
+blocker = "not-imported"
+reason = "3 core golden ledgers hold it, the first test-lcm-current/InvokeHostFunctionTests/09beaf24eb0cdcb0.xdr record 11"
+
+[[arm]]
+arms = [
+    "AccountMergeResult:has_sub_entries",
+    "AccountMergeResult:immutable_set",
+    "AccountMergeResult:is_sponsor",
+    "AccountMergeResult:no_account",
+]
+blocker = "recipe-gap"
+reason = "set at apply by MergeOpFrame::doApplyFromV16 (stellar-core v30.0.0); merging an account with a trustline, with AUTH_IMMUTABLE, while sponsoring, or into a missing destination gives each"
+
+[[arm]]
+arms = [
+    "AllowTrustResult:cant_revoke",
+    "AllowTrustResult:low_reserve",
+    "AllowTrustResult:no_trust_line",
+    "SetTrustLineFlagsResult:cant_revoke",
+    "SetTrustLineFlagsResult:invalid_state",
+    "SetTrustLineFlagsResult:low_reserve",
+    "SetTrustLineFlagsResult:no_trust_line",
+]
+blocker = "recipe-gap"
+reason = "set at apply by TrustFlagsOpFrameBase::doApply and its isAuthRevocationValid and calcExpectedFlagValue (stellar-core v30.0.0); revoking without AUTH_REVOCABLE, a missing trustline, conflicting flags and pool share redemption without reserve give each"
+
+[[arm]]
+arms = [
+    "ChangeTrustResult:cannot_delete",
+    "ChangeTrustResult:invalid_limit",
+    "ChangeTrustResult:low_reserve",
+    "ChangeTrustResult:no_issuer",
+    "ChangeTrustResult:not_auth_maintain_liabilities",
+    "ChangeTrustResult:trust_line_missing",
+]
+blocker = "recipe-gap"
+reason = "set at apply by ChangeTrustOpFrame::doApply and tryIncrementPoolUseCount (stellar-core v30.0.0); deleting a trustline a pool uses, a zero limit on a new line, no reserve, a merged issuer, and pool shares over an unauthorized or missing asset line give each"
+
+[[arm]]
+arms = [
+    "ClaimClaimableBalanceResult:does_not_exist",
+    "ClaimClaimableBalanceResult:line_full",
+    "ClaimClaimableBalanceResult:no_trust",
+    "ClaimClaimableBalanceResult:not_authorized",
+    "ClawbackClaimableBalanceResult:does_not_exist",
+    "ClawbackClaimableBalanceResult:not_clawback_enabled",
+    "ClawbackClaimableBalanceResult:not_issuer",
+    "CreateClaimableBalanceResult:low_reserve",
+    "CreateClaimableBalanceResult:not_authorized",
+    "CreateClaimableBalanceResult:underfunded",
+]
+blocker = "recipe-gap"
+reason = "set at apply by the claimable balance doApply functions (stellar-core v30.0.0 ClaimClaimableBalanceOpFrame.cpp, ClawbackClaimableBalanceOpFrame.cpp, CreateClaimableBalanceOpFrame.cpp)"
+
+[[arm]]
+arms = [
+    "ClawbackResult:no_trust",
+    "ClawbackResult:underfunded",
+]
+blocker = "recipe-gap"
+reason = "set at apply by ClawbackOpFrame::doApply (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "CreateAccountResult:already_exist",
+    "CreateAccountResult:low_reserve",
+    "CreateAccountResult:underfunded",
+]
+blocker = "recipe-gap"
+reason = "set at apply by CreateAccountOpFrame::doApply and doApplyFromV14 (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "LiquidityPoolDepositResult:bad_price",
+    "LiquidityPoolDepositResult:line_full",
+    "LiquidityPoolDepositResult:no_trust",
+    "LiquidityPoolDepositResult:not_authorized",
+    "LiquidityPoolDepositResult:pool_full",
+    "LiquidityPoolDepositResult:underfunded",
+    "LiquidityPoolWithdrawResult:line_full",
+    "LiquidityPoolWithdrawResult:no_trust",
+    "LiquidityPoolWithdrawResult:under_minimum",
+    "LiquidityPoolWithdrawResult:underfunded",
+]
+blocker = "recipe-gap"
+reason = "set at apply by LiquidityPoolDepositOpFrame and LiquidityPoolWithdrawOpFrame doApply (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "ManageBuyOfferResult:buy_no_trust",
+    "ManageBuyOfferResult:buy_not_authorized",
+    "ManageBuyOfferResult:cross_self",
+    "ManageBuyOfferResult:line_full",
+    "ManageBuyOfferResult:low_reserve",
+    "ManageBuyOfferResult:not_found",
+    "ManageBuyOfferResult:sell_no_trust",
+    "ManageBuyOfferResult:sell_not_authorized",
+    "ManageBuyOfferResult:underfunded",
+    "ManageSellOfferResult:buy_no_trust",
+    "ManageSellOfferResult:buy_not_authorized",
+    "ManageSellOfferResult:cross_self",
+    "ManageSellOfferResult:line_full",
+    "ManageSellOfferResult:low_reserve",
+    "ManageSellOfferResult:not_found",
+    "ManageSellOfferResult:sell_no_trust",
+    "ManageSellOfferResult:sell_not_authorized",
+    "ManageSellOfferResult:underfunded",
+]
+blocker = "recipe-gap"
+reason = "set at apply by ManageOfferOpFrameBase::doApply and checkOfferValid (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "ManageDataResult:low_reserve",
+    "ManageDataResult:name_not_found",
+]
+blocker = "recipe-gap"
+reason = "set at apply by ManageDataOpFrame::doApply (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "PathPaymentStrictReceiveResult:line_full",
+    "PathPaymentStrictReceiveResult:no_destination",
+    "PathPaymentStrictReceiveResult:no_trust",
+    "PathPaymentStrictReceiveResult:not_authorized",
+    "PathPaymentStrictReceiveResult:offer_cross_self",
+    "PathPaymentStrictReceiveResult:src_no_trust",
+    "PathPaymentStrictReceiveResult:src_not_authorized",
+    "PathPaymentStrictReceiveResult:too_few_offers",
+    "PathPaymentStrictReceiveResult:underfunded",
+    "PathPaymentStrictSendResult:line_full",
+    "PathPaymentStrictSendResult:no_destination",
+    "PathPaymentStrictSendResult:no_trust",
+    "PathPaymentStrictSendResult:not_authorized",
+    "PathPaymentStrictSendResult:offer_cross_self",
+    "PathPaymentStrictSendResult:src_no_trust",
+    "PathPaymentStrictSendResult:src_not_authorized",
+    "PathPaymentStrictSendResult:too_few_offers",
+    "PathPaymentStrictSendResult:under_destmin",
+    "PathPaymentStrictSendResult:underfunded",
+    "PaymentResult:line_full",
+    "PaymentResult:no_trust",
+    "PaymentResult:not_authorized",
+    "PaymentResult:src_no_trust",
+    "PaymentResult:src_not_authorized",
+]
+blocker = "recipe-gap"
+reason = "set at apply by PathPaymentOpFrameBase and the strict receive and strict send doApply, and by PaymentOpFrame::doApply mapping them (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "RevokeSponsorshipResult:does_not_exist",
+    "RevokeSponsorshipResult:low_reserve",
+    "RevokeSponsorshipResult:not_sponsor",
+    "RevokeSponsorshipResult:only_transferable",
+]
+blocker = "recipe-gap"
+reason = "set at apply by RevokeSponsorshipOpFrame updateLedgerEntrySponsorship, updateSignerSponsorship and processSponsorshipResult (stellar-core v30.0.0)"
+
+[[arm]]
+arms = [
+    "SetOptionsResult:auth_revocable_required",
+    "SetOptionsResult:cant_change",
+    "SetOptionsResult:invalid_inflation",
+    "SetOptionsResult:low_reserve",
+    "SetOptionsResult:too_many_signers",
+]
+blocker = "recipe-gap"
+reason = "set at apply by SetOptionsOpFrame::doApply and addOrChangeSigner (stellar-core v30.0.0); a 21st signer on the 20-signer account classic.max-length already records gives too_many_signers"
+
+[[arm]]
+arms = ["OperationResult:op_bad_auth"]
+blocker = "recipe-gap"
+reason = "at apply processSignatures re-checks each operation source's signature against current signers (OperationFrame::checkSignature, stellar-core v30.0.0), so an earlier transaction in the same ledger that removes the signer makes it fail"
+
+[[arm]]
+arms = ["OperationResult:op_exceeded_work_limit"]
+blocker = "recipe-gap"
+reason = "an offer or path payment that would cross more than MAX_OFFERS_TO_CROSS = 1000 offers (stellar-core v30.0.0 TransactionUtils.cpp, ManageOfferOpFrameBase.cpp, PathPaymentOpFrameBase.cpp)"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_bad_auth_extra",
+    "InnerTransactionResultResult:tx_bad_auth_extra",
+]
+blocker = "recipe-gap"
+reason = "at apply TransactionFrame::processSignatures requires every signature to be used (stellar-core v30.0.0), so an earlier transaction in the same ledger removing the signer one signature belongs to makes it fail"
+
+[[arm]]
+arms = [
+    "TransactionResultResult:tx_bad_min_seq_age_or_gap",
+    "InnerTransactionResultResult:tx_bad_min_seq_age_or_gap",
+]
+blocker = "recipe-gap"
+reason = "at apply isTooEarlyForAccount reads the account's seqLedger and seqTime, which a bump_sequence earlier in the same ledger with this account as operation source sets even when it does not raise the sequence (stellar-core v30.0.0 BumpSequenceOpFrame::doApply, maybeUpdateAccountOnLedgerSeqUpdate)"
+
+[[arm]]
+arms = [
+    "InnerTransactionResultResult:tx_bad_auth",
+    "InnerTransactionResultResult:tx_bad_seq",
+    "InnerTransactionResultResult:tx_bad_sponsorship",
+]
+blocker = "recipe-gap"
+reason = "the fee-bump twins of apply-time failures the corpus holds unwrapped (tx_bad_seq and tx_bad_sponsorship from goldens): an earlier transaction in the ledger changing signers or the sequence, or an unclosed begin_sponsoring (stellar-core v30.0.0 TransactionFrame::commonValid, applyOperations)"
+
+[[arm]]
+arms = ["OperationResultTr:create_passive_sell_offer"]
+blocker = "recipe-gap"
+reason = "any applied create_passive_sell_offer gives it (stellar-core v30.0.0 CreatePassiveSellOfferOpFrame.cpp); none of the 18 golden ledgers holding the operation carries its operation result (scan of test-lcm-current)"
+
+[[arm]]
+arms = [
+    "LedgerUpgrade:base_fee",
+    "LedgerUpgrade:base_reserve",
+    "LedgerUpgrade:max_tx_set_size",
+    "LedgerUpgrade:flags",
+]
+blocker = "recipe-gap"
+reason = "the upgrades command takes basefee, basereserve, maxtxsetsize and flags (CommandHandler::upgrades, stellar-core v30.0.0); recipes upgrade only the protocol and config, and a chain's upgrade ledgers are not entries"
+
+[[arm]]
+arms = [
+    "LedgerHeaderExt:v1",
+    "LedgerHeaderExtensionV1Ext:v0",
+]
+blocker = "recipe-gap"
+reason = "setLedgerHeaderFlag switches the header to ext v1 on the first non-zero flags upgrade (stellar-core v30.0.0 TransactionUtils.cpp, Upgrades.cpp), and every later header keeps it"
+
+[[arm]]
+arms = ["LedgerKey:data"]
+blocker = "recipe-gap"
+reason = "a removed change for a deleted data entry carries LedgerKey:data (ManageDataOpFrame::doApply erases it, stellar-core v30.0.0); no recipe deletes a data entry or revokes a data entry's sponsorship"
+
+[[arm]]
+arms = ["AccountEntryExtensionV1Ext:v0"]
+blocker = "recipe-gap"
+reason = "an account with liabilities and no v2 extension: offers write AccountEntryExtensionV1 (TransactionUtils.cpp prepareAccountEntryExtensionV1) and only sponsorship or, from protocol 19, a sequence bump of the transaction source adds v2 and v3 (stellar-core v30.0.0 maybeUpdateAccountOnLedgerSeqUpdate), so an account that places an offer only as operation source keeps it"
+
+[[arm]]
+arms = ["ScError:events"]
+blocker = "recipe-gap"
+reason = "the echo contract returns any value it is given, so invoking it with an events-type ScVal error puts the arm in the return value; the scval recipe echoes only a contract-type error"
+
+[[fragment]]
+family = "soroban.muxed-source"
+fragment = "TransactionResultResult:tx_soroban_invalid"
+blocker = "refused-before-ledger"
+reason = "the arm itself: set in TransactionFrame::commonValidPreSeqNum (memo and muxed source rule from protocol 25) or TransactionQueue::canAdd (before 25) from the envelope and network settings (stellar-core v30.0.0); the corpus holds the submit-time refusals"
+
+[[fragment]]
+family = "cap38.liquidity-pools"
+fragment = "ChangeTrustResult:malformed"
+blocker = "refused-before-ledger"
+reason = "the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
+
+[[fragment]]
+family = "cap88.ms-close-time"
+fragment = "StellarValueExt:empty_tx_set_ms"
+blocker = "history-only"
+reason = "the arm itself: written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm"
+
+[[fragment]]
+family = "cap83.empty-txset"
+fragment = "StellarValueExt:empty_tx_set"
+blocker = "history-only"
+reason = "the arm itself: written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm"
+
+[[fragment]]
+family = "cap23.claimable-balances"
+fragment = "CreateClaimableBalanceResult:malformed"
+blocker = "refused-before-ledger"
+reason = "the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
+
+[[fragment]]
+family = "cap77.frozen-keys"
+fragment = "ConfigSettingEntry:frozen_ledger_keys_delta"
+blocker = "never-emitted"
+reason = "the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm"
+
+[[fragment]]
+family = "cap77.frozen-keys"
+fragment = "ConfigSettingEntry:freeze_bypass_txs_delta"
+blocker = "never-emitted"
+reason = "the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm"
+
+[[fragment]]
+family = "cap77.frozen-keys"
+fragment = "TransactionResultResult:tx_frozen_key_accessed"
+blocker = "refused-before-ledger"
+reason = "the arm itself: TransactionFrame::commonValidPreSeqNum checks frozen keys against the network config (stellar-core v30.0.0), which only changes through config upgrades applied after a ledger's transactions, so validation already refused any transaction that fails at apply; none of the 1732 core golden files (test-lcm-current and test-lcm-next) holds it"
+
+[[fragment]]
+family = "cap01.bump-sequence"
+fragment = "BumpSequenceResult:bad_seq"
+blocker = "refused-before-ledger"
+reason = "the arm itself: set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails"
+
+[[planned]]
+family = "soroban.muxed-source"
+shape = "a protocol 24 invoke_host_function with a muxed transaction or operation source, accepted into a ledger"
+blocker = "not-producible-locally"
+reason = "before protocol 25 the memo and muxed-source rule lives in TransactionQueue::canAdd and from 25 in TransactionFrame::commonValidPreSeqNum (stellar-core v30.0.0), and the standalone tx endpoint goes through the queue, so a local core refuses it at every protocol; only a validator nominating it directly could, so it can exist only in public history before protocol 25"
+
+[[planned]]
+family = "soroban.events-max"
+shape = "a local-core transaction at events.contract.per_tx, 682 minimal contract events in one invocation"
+blocker = "recipe-gap"
+reason = "the recipe records the byte limit with one large event or 200 topics; the echo contract has no function that emits n events, so the count limit needs a new contract function and a rebuilt wasm. the many-events fragment itself is covered by golden 692fdd0e57531ce4 record 25 and by classic operation events"

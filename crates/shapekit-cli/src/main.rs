@@ -2,6 +2,7 @@
 
 mod capture_cmd;
 mod conformance_cmd;
+mod coverage_cmd;
 mod gen_cmd;
 mod golden_cmd;
 mod guide_cmd;
@@ -102,6 +103,13 @@ enum Command {
     Harness {
         #[command(subcommand)]
         command: harness_cmd::HarnessCommand,
+    },
+    /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
+    Coverage(coverage_cmd::CoverageArgs),
+    /// The corpus as a release asset.
+    Corpus {
+        #[command(subcommand)]
+        command: coverage_cmd::CorpusCommand,
     },
 }
 
@@ -492,6 +500,8 @@ fn main() -> ExitCode {
         Command::Pack { command } => pack_cmd::run(command),
         Command::Serve(args) => serve_cmd::run(args),
         Command::Harness { command } => harness_cmd::run(command),
+        Command::Coverage(args) => coverage_cmd::coverage(args),
+        Command::Corpus { command } => coverage_cmd::corpus(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

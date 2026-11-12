@@ -3108,6 +3108,7 @@ dependencies = [
  "serde_json",
  "shapekit-conformance",
  "shapekit-core-driver",
+ "shapekit-coverage",
  "shapekit-gen",
  "shapekit-guide",
  "shapekit-harness",
@@ -3166,6 +3167,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "shapekit-coverage"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2 0.11.1",
+ "shapekit-manifest",
+ "shapekit-registry",
+ "stellar-xdr 30.0.0",
+ "tar",
+ "tempfile",
+ "thiserror 2.0.21",
+ "toml",
+ "walkdir",
+ "zstd",
+]
+
+[[package]]
 name = "shapekit-gen"
 version = "0.1.0"
 dependencies = [
@@ -3178,6 +3198,7 @@ dependencies = [
  "sha2 0.11.1",
  "shapekit-core-driver",
  "shapekit-manifest",
+ "shapekit-oracle",
  "shapekit-pack",
  "shapekit-registry",
  "soroban-env-host 30.0.0",
@@ -3248,6 +3269,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.11.1",
+ "shapekit-core-driver",
  "shapekit-manifest",
  "shapekit-pack",
  "shapekit-registry",
