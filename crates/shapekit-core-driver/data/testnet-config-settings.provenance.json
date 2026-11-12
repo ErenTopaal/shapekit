@@ -1,0 +1,28 @@
+{
+  "file": "testnet-config-settings.json",
+  "sha256": "5c785afb8e0b8ecca6dcee779b93aa161857411ea9d6313841c02e618d04b295",
+  "source": "https://soroban-testnet.stellar.org",
+  "network": "testnet",
+  "protocol_version": 30,
+  "fetched_at": "2026-11-12T16:41:12Z",
+  "requests": [
+    {
+      "method": "getLedgerEntries",
+      "params": {
+        "keys": "CONFIG_SETTING ids 0 to 20, one LedgerKey each, in id order"
+      },
+      "result_latest_ledger": 5695605
+    },
+    {
+      "method": "getNetwork",
+      "kept": "passphrase and protocolVersion"
+    }
+  ],
+  "entry_shape": "data_xdr is the LedgerEntryData rpc returns, key_xdr the LedgerKey sent, last_modified_ledger_seq as rpc reported it",
+  "returned_entries": 19,
+  "requested_keys": 21,
+  "absent_keys": [
+    "CONFIG_SETTING 18 (CONFIG_SETTING_FROZEN_LEDGER_KEYS_DELTA): a delta applied through upgrades, never stored",
+    "CONFIG_SETTING 20 (CONFIG_SETTING_FREEZE_BYPASS_TXS_DELTA): a delta applied through upgrades, never stored"
+  ]
+}

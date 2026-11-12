@@ -169,7 +169,13 @@ pub struct NodeConfig {
     pub soroban_high_limits: bool,
     pub emit_classic_events: bool,
     pub backfill_stellar_asset_events: bool,
-    /// `ENABLE_SOROBAN_DIAGNOSTIC_EVENTS`.
+    /// `ENABLE_SOROBAN_DIAGNOSTIC_EVENTS`. Off for recorded chains: with it
+    /// on, every invocation also gets `core_metrics` diagnostic events, one
+    /// of which (`invoke_time_nsecs`) carries the host call's wall-clock
+    /// duration (`maybePopulateMetricsInDiagnosticEvents`,
+    /// InvokeHostFunctionOpFrame.cpp, v30.0.0), so the meta would differ on
+    /// every run. Core's golden check zeroes that value; the recorder keeps
+    /// values as core wrote them, so the event is left out instead.
     pub diagnostic_events: bool,
 }
 

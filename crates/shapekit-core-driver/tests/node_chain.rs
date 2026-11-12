@@ -3,14 +3,17 @@
 
 mod node_support;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use node_support::{MAINNET, TESTNET, config, docker_object_exists, enabled};
+use shapekit_core_driver::canonical::permutation_equal;
 use shapekit_core_driver::config::close_time;
 use shapekit_core_driver::meta::{FramedLcm, read_all};
 use shapekit_core_driver::node::CoreNode;
-use shapekit_core_driver::recorder::{ChainRecorder, ChainSummary, FIRST_LEDGER, STREAM_FILE};
-use stellar_xdr::{LedgerCloseMeta, Limits, WriteXdr};
+use shapekit_core_driver::recorder::{
+    CANONICAL_STREAM_FILE, ChainRecorder, ChainSummary, FIRST_LEDGER, STREAM_FILE,
+};
+use stellar_xdr::LedgerCloseMeta;
 
 /// Ledger 2 carries the protocol upgrade, then ten empty ledgers.
 const LAST: u32 = FIRST_LEDGER + 10;
@@ -20,7 +23,7 @@ fn record(
     protocol: u32,
     last: u32,
     dir: &Path,
-) -> (ChainSummary, Vec<FramedLcm>) {
+) -> (ChainSummary, Vec<FramedLcm>, PathBuf) {
     let work = dir.join("work");
     std::fs::create_dir(&work).unwrap();
     let node = CoreNode::start(config(passphrase, protocol), &work).expect("core starts");
@@ -39,108 +42,38 @@ fn record(
     assert!(!docker_object_exists("container", &container));
     assert!(!docker_object_exists("network", &network));
     let frames = read_all(&target.join(STREAM_FILE)).expect("recorded stream");
-    (summary, frames)
-}
-
-/// First differing json path between two values, for reporting.
-fn first_difference(a: &serde_json::Value, b: &serde_json::Value, path: &str) -> Option<String> {
-    use serde_json::Value;
-    match (a, b) {
-        (Value::Object(x), Value::Object(y)) => {
-            for (k, va) in x {
-                match y.get(k) {
-                    Some(vb) => {
-                        if let Some(d) = first_difference(va, vb, &format!("{path}.{k}")) {
-                            return Some(d);
-                        }
-                    }
-                    None => return Some(format!("{path}.{k} missing on the right")),
-                }
-            }
-            y.keys()
-                .find(|k| !x.contains_key(*k))
-                .map(|k| format!("{path}.{k} missing on the left"))
-        }
-        (Value::Array(x), Value::Array(y)) => {
-            for (i, (va, vb)) in x.iter().zip(y).enumerate() {
-                if let Some(d) = first_difference(va, vb, &format!("{path}[{i}]")) {
-                    return Some(d);
-                }
-            }
-            (x.len() != y.len()).then(|| format!("{path} lengths {} vs {}", x.len(), y.len()))
-        }
-        _ => (a != b).then(|| format!("{path}: {a} vs {b}")),
-    }
-}
-
-fn describe_difference(a: &LedgerCloseMeta, b: &LedgerCloseMeta) -> String {
-    let ja = serde_json::to_value(a).unwrap();
-    let jb = serde_json::to_value(b).unwrap();
-    first_difference(&ja, &jb, "lcm").unwrap_or_else(|| "values equal, encodings differ".into())
-}
-
-/// A copy of the meta with each upgrade's ledger entry changes sorted by
-/// their xdr. Used only to describe a difference, never to compare chains.
-fn with_sorted_upgrade_changes(m: &LedgerCloseMeta) -> LedgerCloseMeta {
-    let mut m = m.clone();
-    let upgrades = match &mut m {
-        LedgerCloseMeta::V0(x) => &mut x.upgrades_processing,
-        LedgerCloseMeta::V1(x) => &mut x.upgrades_processing,
-        LedgerCloseMeta::V2(x) => &mut x.upgrades_processing,
-    };
-    let mut list = upgrades.to_vec();
-    for u in &mut list {
-        let mut changes = u.changes.to_vec();
-        changes.sort_by_key(|c| c.to_xdr(Limits::none()).unwrap());
-        u.changes = changes.try_into().unwrap();
-    }
-    *upgrades = list.try_into().unwrap();
-    m
-}
-
-/// Every ledger whose bytes differ, with the first differing field and
-/// whether the difference is only the order of upgrade changes.
-fn differences(a: &[FramedLcm], b: &[FramedLcm]) -> Vec<(u32, String, bool)> {
-    assert_eq!(a.len(), b.len(), "ledger counts differ");
-    let mut out = Vec::new();
-    for (x, y) in a.iter().zip(b) {
-        assert_eq!(x.ledger_seq, y.ledger_seq);
-        if x.xdr != y.xdr {
-            let order_only =
-                with_sorted_upgrade_changes(&x.meta) == with_sorted_upgrade_changes(&y.meta);
-            out.push((
-                x.ledger_seq,
-                describe_difference(&x.meta, &y.meta),
-                order_only,
-            ));
-        }
-    }
-    out
+    (summary, frames, target)
 }
 
 /// Release builds of stellar-core order the ledger entry changes of one
 /// LedgerTxn by iterating an unordered map keyed through a siphash whose key
 /// comes from libsodium randombytes at process start
 /// (`LedgerTxn::Impl::getChanges`, `std::hash<LedgerKey>` in
-/// LedgerHashUtils.h, `shortHash::initialize`, v30.0.0). Nothing in a
-/// release build can seed it, so the order of the changes in an upgrade
-/// ledger differs from run to run. This asserts exactly that: every other
-/// byte is identical, and a differing ledger differs only in that order.
-/// It does not make the recorded chains equal; they are stored as core
-/// wrote them.
-fn assert_identical_but_change_order(name: &str, a: &[FramedLcm], b: &[FramedLcm]) {
-    let diffs = differences(a, b);
-    for (seq, field, order_only) in &diffs {
-        eprintln!(
-            "{name}: ledger {seq} bytes differ between runs, first at {field}, order only: {order_only}"
-        );
+/// LedgerHashUtils.h, `shortHash::initialize`, v30.0.0), so raw meta may
+/// differ between runs in that order. The canonical stream must not differ
+/// at all, and every raw difference must be a permutation of the same
+/// changes. Returns the ledgers whose raw bytes differ.
+fn assert_reproducible(name: &str, a: &Path, b: &Path) -> Vec<u32> {
+    let ca = std::fs::read(a.join(CANONICAL_STREAM_FILE)).unwrap();
+    let cb = std::fs::read(b.join(CANONICAL_STREAM_FILE)).unwrap();
+    assert_eq!(ca, cb, "{name}: canonical streams differ");
+    let ra = read_all(&a.join(STREAM_FILE)).unwrap();
+    let rb = read_all(&b.join(STREAM_FILE)).unwrap();
+    assert_eq!(ra.len(), rb.len());
+    let mut differ = Vec::new();
+    for (x, y) in ra.iter().zip(&rb) {
+        assert_eq!(x.ledger_seq, y.ledger_seq);
+        if x.xdr != y.xdr {
+            assert!(
+                permutation_equal(&x.meta, &y.meta).unwrap(),
+                "{name}: ledger {} differs beyond change order",
+                x.ledger_seq
+            );
+            differ.push(x.ledger_seq);
+        }
     }
-    for (seq, field, order_only) in &diffs {
-        assert!(
-            *order_only && *seq == FIRST_LEDGER,
-            "{name}: ledger {seq} differs beyond upgrade change order, first at {field}"
-        );
-    }
+    eprintln!("{name}: canonical identical, raw differs only in change order at {differ:?}");
+    differ
 }
 
 fn header(f: &FramedLcm) -> &stellar_xdr::LedgerHeader {
@@ -168,12 +101,16 @@ fn node_chain_is_byte_reproducible_per_passphrase() {
         ("testnet", &runs[0], &runs[1]),
         ("mainnet", &runs[2], &runs[3]),
     ] {
-        assert_identical_but_change_order(name, &a.1, &b.1);
-        // chain.json may only differ in the hashes that cover ledger 2
+        let differ = assert_reproducible(name, &a.2, &b.2);
+        // only the upgrade ledger has a change list of more than one entry
+        assert!(differ.iter().all(|s| *s == FIRST_LEDGER), "{differ:?}");
+        // chain.json may only differ in the hashes of core's raw order
         let strip = |c: &ChainSummary| {
             let mut c = c.clone();
-            c.ledgers.retain(|l| l.ledger_seq != FIRST_LEDGER);
             c.stream_sha256.clear();
+            for l in &mut c.ledgers {
+                l.raw_sha256.clear();
+            }
             c
         };
         assert_eq!(strip(&a.0), strip(&b.0), "{name}: chain.json differs");
@@ -221,7 +158,7 @@ fn node_chain_publishes_first_checkpoint() {
         return;
     }
     let tmp = tempfile::tempdir().unwrap();
-    let (summary, frames) = record(TESTNET, 30, 63, tmp.path());
+    let (summary, frames, _) = record(TESTNET, 30, 63, tmp.path());
     assert_eq!(summary.checkpoints, vec![63]);
     assert_eq!(frames.len(), 62);
     for sub in ["ledger", "transactions", "results", "scp"] {
@@ -239,7 +176,7 @@ fn node_runs_older_protocols() {
     }
     for protocol in [22, 24, 26, 28] {
         let tmp = tempfile::tempdir().unwrap();
-        let (summary, frames) = record(TESTNET, protocol, FIRST_LEDGER + 3, tmp.path());
+        let (summary, frames, _) = record(TESTNET, protocol, FIRST_LEDGER + 3, tmp.path());
         assert_eq!(summary.protocol, protocol);
         for f in &frames {
             assert_eq!(

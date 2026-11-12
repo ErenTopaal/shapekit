@@ -1,0 +1,22 @@
+{
+  "source": "https://github.com/stellar/stellar-core",
+  "tag": "v30.0.0",
+  "commit": "0e49751aa9ddf892302cca02cea7f3f5d97df9f1",
+  "license": "Apache-2.0",
+  "framing": "xdr record marking, one LedgerCloseMeta per record, as core's --capture-lcm writes it",
+  "files": [
+    {
+      "file": "a61f6dd6f81e6f17.xdr",
+      "upstream_path": "test-lcm-current/InvokeHostFunctionTests/a61f6dd6f81e6f17.xdr",
+      "test_case": "settings upgrade|from init settings",
+      "sha256": "685490935388156ce2fe7fce4829b041ad0e5f4eeaa5da2865244a358e2d2ca1"
+    },
+    {
+      "file": "1467a37ff2a1e960.xdr",
+      "upstream_path": "test-lcm-current/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr",
+      "test_case": "sponsor future reserves|protocol version 30|add sponsored entry before adding first sponsored signer",
+      "sha256": "0103e517acd8229d0e20979bf08a199047c3a69b9023f84007d42155970139ce"
+    }
+  ],
+  "selection": "the smallest golden of each test file whose change lists are not in normalizeMeta order"
+}

@@ -129,6 +129,10 @@ pub enum SimError {
     },
     #[error("simulation returned no transaction data")]
     NoTransactionData,
+    #[error(
+        "soroban-env-host {host} only runs ledger protocol {host}, the ledger runs {ledger} (Host::check_ledger_protocol_supported); older protocols need hand-set resources or a matching soroban-simulation"
+    )]
+    UnsupportedProtocol { ledger: u32, host: u32 },
 }
 
 /// Snapshot source over a fetcher. Results are cached for the lifetime of the
@@ -259,6 +263,15 @@ impl Simulator {
         fetcher: impl SnapshotFetcher + 'static,
         ctx: &LedgerContext,
     ) -> Result<Self, SimError> {
+        // a release host refuses every other ledger protocol, but only once
+        // a run starts and with a bare Context/InternalError
+        let host = soroban_env_host::meta::INTERFACE_VERSION.protocol;
+        if ctx.protocol_version != host {
+            return Err(SimError::UnsupportedProtocol {
+                ledger: ctx.protocol_version,
+                host,
+            });
+        }
         let snapshot = Rc::new(FetchingSnapshot {
             fetcher: Box::new(fetcher),
             cache: RefCell::new(BTreeMap::new()),

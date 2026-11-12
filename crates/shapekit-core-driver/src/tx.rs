@@ -7,15 +7,16 @@
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 use stellar_xdr::{
-    DecoratedSignature, FeeBumpTransaction, FeeBumpTransactionEnvelope, FeeBumpTransactionExt,
-    FeeBumpTransactionInnerTx, Hash, HashIdPreimage, HashIdPreimageSorobanAuthorization,
-    HashIdPreimageSorobanAuthorizationWithAddress, Limits, Memo, MuxedAccount, Operation,
-    OperationBody, Preconditions, ScAddress, ScBytes, ScMap, ScMapEntry, ScSymbol, ScVal, ScVec,
-    SequenceNumber, Signature, SignatureHint, SorobanAddressCredentials, SorobanAuthorizationEntry,
-    SorobanCredentials, SorobanResources, SorobanResourcesExtV0, SorobanTransactionData,
-    SorobanTransactionDataExt, Transaction, TransactionEnvelope, TransactionExt,
-    TransactionSignaturePayload, TransactionSignaturePayloadTaggedTransaction,
-    TransactionV1Envelope, WriteXdr,
+    ContractId, ContractIdPreimage, ContractIdPreimageFromAddress, DecoratedSignature,
+    FeeBumpTransaction, FeeBumpTransactionEnvelope, FeeBumpTransactionExt,
+    FeeBumpTransactionInnerTx, Hash, HashIdPreimage, HashIdPreimageContractId,
+    HashIdPreimageSorobanAuthorization, HashIdPreimageSorobanAuthorizationWithAddress, Limits,
+    Memo, MuxedAccount, Operation, OperationBody, Preconditions, ScAddress, ScBytes, ScMap,
+    ScMapEntry, ScSymbol, ScVal, ScVec, SequenceNumber, Signature, SignatureHint,
+    SorobanAddressCredentials, SorobanAuthorizationEntry, SorobanCredentials, SorobanResources,
+    SorobanResourcesExtV0, SorobanTransactionData, SorobanTransactionDataExt, Transaction,
+    TransactionEnvelope, TransactionExt, TransactionSignaturePayload,
+    TransactionSignaturePayloadTaggedTransaction, TransactionV1Envelope, Uint256, WriteXdr,
 };
 
 /// Fee core charges per operation at genesis and on both public networks.
@@ -448,4 +449,30 @@ pub fn sign_authorization_entry(
         SorobanCredentials::SourceAccount => return Err(TxError::SourceAccountCredentials),
     }
     Ok(entry)
+}
+
+/// Id of a contract created from an address and salt (`CreateContract` with
+/// `CONTRACT_ID_PREIMAGE_FROM_ADDRESS`): SHA-256 of the
+/// `ENVELOPE_TYPE_CONTRACT_ID` preimage under the network id, so the same
+/// deployer and salt give a different id on each network.
+pub fn contract_id_from_address(
+    network_id: &[u8; 32],
+    deployer: &ScAddress,
+    salt: &[u8; 32],
+) -> Result<ContractId, TxError> {
+    let preimage = HashIdPreimage::ContractId(HashIdPreimageContractId {
+        network_id: Hash(*network_id),
+        contract_id_preimage: contract_preimage(deployer, salt),
+    });
+    Ok(ContractId(Hash(
+        Sha256::digest(preimage.to_xdr(Limits::none())?).into(),
+    )))
+}
+
+/// The from-address preimage a create-contract host function carries.
+pub fn contract_preimage(deployer: &ScAddress, salt: &[u8; 32]) -> ContractIdPreimage {
+    ContractIdPreimage::Address(ContractIdPreimageFromAddress {
+        address: deployer.clone(),
+        salt: Uint256(*salt),
+    })
 }

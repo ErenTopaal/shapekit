@@ -137,3 +137,11 @@ pub fn signed_payload_strkey(
     let sp = stellar_strkey::ed25519::SignedPayload::new(key.to_bytes(), payload)?;
     Ok(sp.to_string().as_str().to_owned())
 }
+
+/// `C...` strkey of a contract id.
+pub fn contract_strkey(id: &stellar_xdr::ContractId) -> String {
+    stellar_strkey::Contract(id.0.0)
+        .to_string()
+        .as_str()
+        .to_owned()
+}

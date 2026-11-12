@@ -15,8 +15,8 @@ use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use stellar_xdr::{
-    DiagnosticEvent, LedgerEntry, LedgerKey, Limits, ReadXdr, TransactionEnvelope,
-    TransactionResult, VecM, WriteXdr,
+    AccountId, ConfigUpgradeSet, DiagnosticEvent, LedgerEntry, LedgerEntryData, LedgerKey,
+    LedgerKeyAccount, Limits, ReadXdr, TransactionEnvelope, TransactionResult, VecM, WriteXdr,
 };
 
 use crate::config::{
@@ -25,6 +25,7 @@ use crate::config::{
 };
 use crate::http::{CoreHttp, HttpError, percent_encode};
 use crate::meta::decode_limits;
+use crate::sim::{FetchError, FetchedEntry, LedgerContext, SnapshotFetcher};
 
 /// How long `start` waits for core to report `Synced!`.
 pub const SYNC_TIMEOUT: Duration = Duration::from_secs(120);
@@ -93,6 +94,10 @@ pub enum NodeError {
     NoKeys,
     #[error("cleanup failed: {0}")]
     Cleanup(String),
+    #[error("account {0} does not exist")]
+    NoAccount(String),
+    #[error("query server answered for ledger {got}, expected {want}")]
+    StaleQuery { want: u32, got: u32 },
 }
 
 fn docker(args: &[&str]) -> Result<Output, NodeError> {
@@ -599,84 +604,90 @@ impl CoreNode {
     /// closed ledger. TTL keys are not accepted by core; it reports TTLs
     /// alongside the Soroban entries instead.
     pub fn ledger_entries(&self, keys: &[LedgerKey]) -> Result<LedgerEntries, NodeError> {
-        let what = "getledgerentry".to_owned();
-        if keys.is_empty() {
-            return Err(NodeError::NoKeys);
+        query_ledger_entries(&self.http, keys)
+    }
+
+    /// Sequence number of an account at the last closed ledger.
+    pub fn account_seq(&self, account: &AccountId) -> Result<i64, NodeError> {
+        let key = LedgerKey::Account(LedgerKeyAccount {
+            account_id: account.clone(),
+        });
+        let got = self.ledger_entries(&[key])?;
+        match got.entries[0].entry.as_ref().map(|e| &e.data) {
+            Some(LedgerEntryData::Account(a)) => Ok(a.seq_num.0),
+            _ => Err(NodeError::NoAccount(account.to_string())),
         }
-        let mut form = Vec::with_capacity(keys.len());
-        for k in keys {
-            let b64 = k
-                .to_xdr_base64(Limits::none())
-                .map_err(|source| NodeError::Xdr {
-                    what: "ledger key".into(),
-                    source,
-                })?;
-            form.push(format!("key={}", percent_encode(&b64)));
+    }
+
+    /// The header values simulation needs, from the last closed ledger.
+    pub fn ledger_context(&self) -> Result<LedgerContext, NodeError> {
+        let info = self.info()?;
+        Ok(LedgerContext {
+            network_passphrase: self.cfg.passphrase.clone(),
+            protocol_version: info.ledger.version,
+            sequence_number: info.ledger.num,
+            timestamp: info.ledger.close_time,
+            base_reserve: info.ledger.base_reserve,
+        })
+    }
+
+    /// A snapshot fetcher over the query server, pinned to the last closed
+    /// ledger: it fails rather than mixing state from two ledgers if a
+    /// ledger closes while a simulation runs.
+    pub fn snapshot(&self) -> Result<NodeSnapshot, NodeError> {
+        Ok(NodeSnapshot {
+            http: self.http.clone(),
+            ledger_seq: self.info()?.ledger.num,
+        })
+    }
+
+    /// Arms a Soroban config upgrade and closes `ledger_seq` with it. The
+    /// upgrade set must already be stored as a live temporary contract data
+    /// entry; core checks that and the set's validity when it is armed
+    /// (`CommandHandler::upgrades`, v30.0.0) and answers "Error setting
+    /// configUpgradeSet" otherwise. Only the config upgrade is armed: the
+    /// call replaces every pending upgrade parameter.
+    pub fn config_upgrade(
+        &self,
+        key_base64: &str,
+        ledger_seq: u32,
+        close_time: u64,
+    ) -> Result<ClosedLedger, NodeError> {
+        let what = "config upgrade".to_owned();
+        let body = self.http.command(&format!(
+            "upgrades?mode=set&upgradetime={}&configupgradesetkey={}",
+            percent_encode(UPGRADE_TIME),
+            percent_encode(key_base64)
+        ))?;
+        if !body.trim().is_empty() {
+            let message = exception(&body).unwrap_or(body);
+            return Err(NodeError::Rejected { what, message });
         }
-        let body = match self.http.query("getledgerentry", &form.join("&")) {
-            Ok(b) => b,
-            // core's query server answers a refused query with http 404 and
-            // its reason as the body (QueryServer.cpp, v30.0.0)
-            Err(HttpError::Status { status, body, .. }) => {
-                return Err(NodeError::Rejected {
-                    what,
-                    message: format!("http {status}: {}", body.trim()),
-                });
-            }
-            Err(e) => return Err(e.into()),
-        };
-        #[derive(Deserialize)]
-        struct Raw {
-            #[serde(rename = "ledgerSeq")]
-            ledger_seq: u32,
-            #[serde(default)]
-            entries: Vec<RawEntry>,
-        }
-        #[derive(Deserialize)]
-        struct RawEntry {
-            state: String,
-            entry: Option<String>,
-            #[serde(rename = "liveUntilLedgerSeq")]
-            live_until_ledger_seq: Option<u32>,
-        }
-        let raw: Raw = serde_json::from_str(&body).map_err(|_| NodeError::Unexpected {
-            what: what.clone(),
-            body: body.clone(),
-        })?;
-        if raw.entries.len() != keys.len() {
-            return Err(NodeError::Unexpected { what, body });
-        }
-        let mut entries = Vec::with_capacity(raw.entries.len());
-        for e in raw.entries {
-            let state = match e.state.as_str() {
-                "live" => EntryState::Live,
-                "archived" => EntryState::Archived,
-                "not-found" => EntryState::NotFound,
-                _ => return Err(NodeError::Unexpected { what, body }),
-            };
-            let entry = match e.entry {
-                Some(b64) => Some(
-                    LedgerEntry::from_xdr_base64(&b64, decode_limits(b64.len())).map_err(
-                        |source| NodeError::Xdr {
-                            what: "ledger entry".into(),
-                            source,
-                        },
-                    )?,
+        self.close(ledger_seq, close_time)
+    }
+
+    /// `sorobaninfo?format=basic`: core's view of the live Soroban limits.
+    pub fn soroban_info(&self) -> Result<serde_json::Value, NodeError> {
+        let body = self.http.command("sorobaninfo?format=basic")?;
+        serde_json::from_str(&body).map_err(|_| NodeError::Unexpected {
+            what: "sorobaninfo".into(),
+            body,
+        })
+    }
+
+    /// `sorobaninfo?format=upgrade_xdr`: every upgradeable CONFIG_SETTING
+    /// entry of the last closed ledger, as one upgrade set.
+    pub fn soroban_upgrade_set(&self) -> Result<ConfigUpgradeSet, NodeError> {
+        let body = self.http.command("sorobaninfo?format=upgrade_xdr")?;
+        let b64 = body.trim();
+        ConfigUpgradeSet::from_xdr_base64(b64, decode_limits(b64.len())).map_err(|source| {
+            NodeError::Xdr {
+                what: format!(
+                    "sorobaninfo upgrade_xdr {:?}",
+                    b64.chars().take(80).collect::<String>()
                 ),
-                None => None,
-            };
-            if (state == EntryState::NotFound) == entry.is_some() {
-                return Err(NodeError::Unexpected { what, body });
+                source,
             }
-            entries.push(QueriedEntry {
-                state,
-                entry,
-                live_until_ledger_seq: e.live_until_ledger_seq,
-            });
-        }
-        Ok(LedgerEntries {
-            ledger_seq: raw.ledger_seq,
-            entries,
         })
     }
 
@@ -732,6 +743,126 @@ impl CoreNode {
     /// node does the same but can only print failures.
     pub fn stop(mut self) -> Result<(), NodeError> {
         self.resources.release()
+    }
+}
+
+/// `getledgerentry` on the query server behind `http`.
+fn query_ledger_entries(http: &CoreHttp, keys: &[LedgerKey]) -> Result<LedgerEntries, NodeError> {
+    let what = "getledgerentry".to_owned();
+    if keys.is_empty() {
+        return Err(NodeError::NoKeys);
+    }
+    let mut form = Vec::with_capacity(keys.len());
+    for k in keys {
+        let b64 = k
+            .to_xdr_base64(Limits::none())
+            .map_err(|source| NodeError::Xdr {
+                what: "ledger key".into(),
+                source,
+            })?;
+        form.push(format!("key={}", percent_encode(&b64)));
+    }
+    let body = match http.query("getledgerentry", &form.join("&")) {
+        Ok(b) => b,
+        // core's query server answers a refused query with http 404 and
+        // its reason as the body (QueryServer.cpp, v30.0.0)
+        Err(HttpError::Status { status, body, .. }) => {
+            return Err(NodeError::Rejected {
+                what,
+                message: format!("http {status}: {}", body.trim()),
+            });
+        }
+        Err(e) => return Err(e.into()),
+    };
+    #[derive(Deserialize)]
+    struct Raw {
+        #[serde(rename = "ledgerSeq")]
+        ledger_seq: u32,
+        #[serde(default)]
+        entries: Vec<RawEntry>,
+    }
+    #[derive(Deserialize)]
+    struct RawEntry {
+        state: String,
+        entry: Option<String>,
+        #[serde(rename = "liveUntilLedgerSeq")]
+        live_until_ledger_seq: Option<u32>,
+    }
+    let raw: Raw = serde_json::from_str(&body).map_err(|_| NodeError::Unexpected {
+        what: what.clone(),
+        body: body.clone(),
+    })?;
+    if raw.entries.len() != keys.len() {
+        return Err(NodeError::Unexpected { what, body });
+    }
+    let mut entries = Vec::with_capacity(raw.entries.len());
+    for e in raw.entries {
+        let state = match e.state.as_str() {
+            "live" => EntryState::Live,
+            "archived" => EntryState::Archived,
+            "not-found" => EntryState::NotFound,
+            _ => return Err(NodeError::Unexpected { what, body }),
+        };
+        let entry = match e.entry {
+            Some(b64) => Some(
+                LedgerEntry::from_xdr_base64(&b64, decode_limits(b64.len())).map_err(|source| {
+                    NodeError::Xdr {
+                        what: "ledger entry".into(),
+                        source,
+                    }
+                })?,
+            ),
+            None => None,
+        };
+        if (state == EntryState::NotFound) == entry.is_some() {
+            return Err(NodeError::Unexpected { what, body });
+        }
+        entries.push(QueriedEntry {
+            state,
+            entry,
+            live_until_ledger_seq: e.live_until_ledger_seq,
+        });
+    }
+    Ok(LedgerEntries {
+        ledger_seq: raw.ledger_seq,
+        entries,
+    })
+}
+
+/// Snapshot fetcher over a node's query server, see [`CoreNode::snapshot`].
+#[derive(Debug, Clone)]
+pub struct NodeSnapshot {
+    http: CoreHttp,
+    ledger_seq: u32,
+}
+
+impl NodeSnapshot {
+    pub fn ledger_seq(&self) -> u32 {
+        self.ledger_seq
+    }
+}
+
+impl SnapshotFetcher for NodeSnapshot {
+    fn fetch(&self, keys: &[LedgerKey]) -> Result<Vec<Option<FetchedEntry>>, FetchError> {
+        let got = query_ledger_entries(&self.http, keys)?;
+        if got.ledger_seq != self.ledger_seq {
+            return Err(Box::new(NodeError::StaleQuery {
+                want: self.ledger_seq,
+                got: got.ledger_seq,
+            }));
+        }
+        Ok(got
+            .entries
+            .into_iter()
+            .map(|q| {
+                q.entry.map(|entry| FetchedEntry {
+                    entry,
+                    // core reports 0 for archived entries, which the
+                    // simulation then treats as archived, as it should
+                    live_until_ledger_seq: q.live_until_ledger_seq,
+                })
+            })
+            .collect())
     }
 }
 

@@ -2,8 +2,13 @@
 //! ledger 2 (the first ledger after genesis) on, the node's history archive,
 //! and a `chain.json` describing both.
 //!
-//! The raw framed stream is kept as core wrote it (`ledgers.xdr`). Writing
-//! SEP-54 batches from it is a separate step.
+//! The raw framed stream is kept as core wrote it (`ledgers.xdr`), as the
+//! provenance record. Beside it the recorder writes the canonical stream
+//! (`ledgers.canonical.xdr`): the same LCMs with their change lists in the
+//! order core's own `normalizeMeta` produces (see [`crate::canonical`]).
+//! Release core orders those lists differently in every process, so only
+//! the canonical stream is reproducible byte for byte, and the corpus is
+//! built from it. Writing SEP-54 batches is a separate step.
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -11,6 +16,9 @@ use std::time::Duration;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
+use stellar_xdr::{Limits, WriteXdr};
+
+use crate::canonical::{canonicalize_lcm, permutation_equal};
 use crate::config::{CHAIN_EPOCH, CLOSE_STEP, CoreImage, node_public_key};
 use crate::keys::network_id;
 use crate::meta::{FramedLcm, MetaError, MetaStream};
@@ -21,6 +29,12 @@ pub const FIRST_LEDGER: u32 = 2;
 
 pub const CHAIN_FILE: &str = "chain.json";
 pub const STREAM_FILE: &str = "ledgers.xdr";
+pub const CANONICAL_STREAM_FILE: &str = "ledgers.canonical.xdr";
+
+/// Names the ordering rule applied to the canonical stream, recorded in
+/// `chain.json` so a reader knows the canonical bytes are not core's raw
+/// output order.
+pub const NORMALIZATION: &str = "core-normalize-meta";
 pub const ARCHIVE_DIR: &str = "archive";
 
 /// How long to wait for a closed ledger's meta or a checkpoint publish.
@@ -45,6 +59,13 @@ pub enum RecorderError {
     TargetExists(String),
     #[error("serialising chain.json: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("canonicalizing ledger {ledger_seq}: {source}")]
+    Canonical {
+        ledger_seq: u32,
+        source: stellar_xdr::Error,
+    },
+    #[error("ledger {0}: canonical meta is not a permutation of core's meta")]
+    NotPermutation(u32),
 }
 
 fn io(path: &Path) -> impl FnOnce(std::io::Error) -> RecorderError + '_ {
@@ -57,9 +78,60 @@ fn io(path: &Path) -> impl FnOnce(std::io::Error) -> RecorderError + '_ {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct LedgerRecord {
     pub ledger_seq: u32,
-    /// SHA-256 of the `LedgerCloseMeta` XDR, without the frame header.
+    /// SHA-256 of the canonical `LedgerCloseMeta` XDR, without the frame
+    /// header. Reproducible across runs.
     pub sha256: String,
+    /// SHA-256 of the meta exactly as core wrote it. Differs between runs
+    /// whenever a change list holds two or more entries.
+    pub raw_sha256: String,
+    /// Length of the XDR; the same for both forms, which only differ in order.
     pub xdr_len: usize,
+}
+
+/// One ledger's meta in canonical form.
+#[derive(Debug, Clone)]
+pub struct CanonicalLcm {
+    pub ledger_seq: u32,
+    pub xdr: Vec<u8>,
+    pub meta: stellar_xdr::LedgerCloseMeta,
+}
+
+/// Canonical form of a recorded frame, checked to be a permutation of it.
+pub fn canonical_frame(f: &FramedLcm) -> Result<CanonicalLcm, RecorderError> {
+    let err = |source| RecorderError::Canonical {
+        ledger_seq: f.ledger_seq,
+        source,
+    };
+    let mut meta = f.meta.clone();
+    canonicalize_lcm(&mut meta).map_err(err)?;
+    if !permutation_equal(&f.meta, &meta).map_err(err)? {
+        return Err(RecorderError::NotPermutation(f.ledger_seq));
+    }
+    let xdr = meta.to_xdr(Limits::none()).map_err(err)?;
+    if xdr.len() != f.xdr.len() {
+        return Err(RecorderError::NotPermutation(f.ledger_seq));
+    }
+    Ok(CanonicalLcm {
+        ledger_seq: f.ledger_seq,
+        xdr,
+        meta,
+    })
+}
+
+/// Frames `values` with single-fragment record marking, as core does. Every
+/// value here has the length of a frame the reader accepted, which
+/// `MAX_FRAME_LEN` keeps far below the 31-bit limit.
+pub fn frame_stream<'a>(values: impl IntoIterator<Item = &'a [u8]>) -> Vec<u8> {
+    let mut out = Vec::new();
+    for v in values {
+        let len = u32::try_from(v.len())
+            .ok()
+            .filter(|l| *l <= crate::meta::MAX_FRAME_LEN)
+            .expect("lcm longer than MAX_FRAME_LEN");
+        out.extend((0x8000_0000 | len).to_be_bytes());
+        out.extend_from_slice(v);
+    }
+    out
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -88,6 +160,12 @@ pub struct ChainSummary {
     pub ledger_range: LedgerRange,
     /// Checkpoint ledgers whose files are in the archive.
     pub checkpoints: Vec<u32>,
+    /// How the canonical stream orders change lists, [`NORMALIZATION`].
+    pub normalization: String,
+    /// The canonical stream, reproducible byte for byte.
+    pub canonical_stream_file: String,
+    pub canonical_stream_sha256: String,
+    /// Core's raw stream, kept as written.
     pub stream_file: String,
     pub stream_sha256: String,
     pub ledgers: Vec<LedgerRecord>,
@@ -165,6 +243,15 @@ impl ChainRecorder {
         let stream_path = target.join(STREAM_FILE);
         std::fs::write(&stream_path, &raw).map_err(io(&stream_path))?;
 
+        let canonical = self
+            .frames
+            .iter()
+            .map(canonical_frame)
+            .collect::<Result<Vec<_>, _>>()?;
+        let canonical_stream = frame_stream(canonical.iter().map(|c| c.xdr.as_slice()));
+        let canonical_path = target.join(CANONICAL_STREAM_FILE);
+        std::fs::write(&canonical_path, &canonical_stream).map_err(io(&canonical_path))?;
+
         let archive = target.join(ARCHIVE_DIR);
         copy_dir(&node.history_dir(), &archive)?;
         let checkpoints = archive_checkpoints(&archive)?;
@@ -186,14 +273,19 @@ impl ChainRecorder {
                 last,
             },
             checkpoints,
+            normalization: NORMALIZATION.to_owned(),
+            canonical_stream_file: CANONICAL_STREAM_FILE.to_owned(),
+            canonical_stream_sha256: hex::encode(Sha256::digest(&canonical_stream)),
             stream_file: STREAM_FILE.to_owned(),
             stream_sha256: hex::encode(Sha256::digest(&raw)),
             ledgers: self
                 .frames
                 .iter()
-                .map(|f| LedgerRecord {
+                .zip(&canonical)
+                .map(|(f, c)| LedgerRecord {
                     ledger_seq: f.ledger_seq,
-                    sha256: hex::encode(Sha256::digest(&f.xdr)),
+                    sha256: hex::encode(Sha256::digest(&c.xdr)),
+                    raw_sha256: hex::encode(Sha256::digest(&f.xdr)),
                     xdr_len: f.xdr.len(),
                 })
                 .collect(),
