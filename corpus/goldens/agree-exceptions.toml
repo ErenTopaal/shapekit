@@ -100,3 +100,21 @@ golden = "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32"
 op = "extend_footprint_ttl"
 kinds = ["state:ttl", "updated:ttl"]
 reason = "core test 'state archival' (lifetime extensions): one footprint entry is extended. the local extend-ttl recipe extends two entries in one operation"
+
+[[exception]]
+golden = "cap67.unified-events.golden-426337b02a4e2a17-11"
+op = "invoke_host_function"
+kinds = ["created:contract_data", "created:ttl", "state:ttl", "updated:ttl"]
+reason = "core test 'Stellar asset contract transfer to muxed contract (CAP-0084)': the SAC extends its instance TTL whenever fewer than 6 days of ledgers (103680) remain (INSTANCE_TTL_THRESHOLD, soroban-env-host 30.0.0), and the core test's settings leave the fresh instance below that, so the TTL is bumped. the local chain runs testnet's settings, whose minimum persistent TTL of 120960 ledgers (7 days) starts the instance above that threshold, so the same issuer transfer to a muxed contract (cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract) shows {created:contract_data, created:ttl}"
+
+[[exception]]
+golden = "soroban.events-max.golden-692fdd0e57531ce4-25"
+op = "invoke_host_function"
+kinds = ["state:account", "state:account", "state:account", "state:account", "state:account", "state:contract_data", "updated:account", "updated:account", "updated:account", "updated:account", "updated:account", "updated:contract_data"]
+reason = "core test 'Native stellar asset contract': a native SAC call that moves lumens between five accounts. it belongs to this family only through .operations[].events#many. the local recipe reaches the event size limit with the echo contract, whose calls change only its own storage entry"
+
+[[exception]]
+golden = "soroban.events-max.golden-a8df5d4dbdc85ac8-1"
+op = "invoke_host_function"
+kinds = ["created:contract_code", "created:ttl"]
+reason = "core test 'complex contract': a wasm upload, in this family only because an upload returns the code hash as bytes (.return_value:bytes). the local chain uploads echo the same way but records only the invocations at the event size limit; an upload carries no event-size shape"

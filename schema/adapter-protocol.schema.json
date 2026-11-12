@@ -1,0 +1,2050 @@
+{
+  "$defs": {
+    "Action": {
+      "enum": [
+        "created",
+        "updated",
+        "removed",
+        "restored"
+      ],
+      "type": "string"
+    },
+    "AdapterError": {
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/ErrorClass"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "class",
+        "message"
+      ],
+      "type": "object"
+    },
+    "AdvanceResult": {
+      "properties": {
+        "head": {
+          "description": "The head the target can now read up to; equals the requested head.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "head"
+      ],
+      "type": "object"
+    },
+    "AnyResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DescribeResult"
+        },
+        {
+          "$ref": "#/$defs/StartResult"
+        },
+        {
+          "$ref": "#/$defs/AdvanceResult"
+        },
+        {
+          "$ref": "#/$defs/StatusResult"
+        },
+        {
+          "$ref": "#/$defs/ExportResult"
+        },
+        {
+          "$ref": "#/$defs/StopResult"
+        }
+      ],
+      "description": "The result member of an `ok` line, by command."
+    },
+    "Bootstrap": {
+      "description": "Where the target starts.",
+      "oneOf": [
+        {
+          "const": "checkpoint",
+          "description": "The target reads the newest history archive checkpoint and starts ingesting at that\ncheckpoint ledger (wallet-backend live mode on an empty database). The harness makes a\ncheckpoint before the chain's first shape ledger the visible head before `start`.",
+          "type": "string"
+        },
+        {
+          "const": "ledger",
+          "description": "The target can be told to start at any ledger. The harness passes the chain's first\nledger as `ledgers.bootstrap`.",
+          "type": "string"
+        }
+      ]
+    },
+    "Change": {
+      "oneOf": [
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "account-created",
+              "type": "string"
+            },
+            "starting_balance": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "starting_balance"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "final_balance": {
+              "$ref": "#/$defs/Int"
+            },
+            "kind": {
+              "const": "account-removed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "final_balance"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A change in what an address holds of an asset: account native balance, trustline\nbalance, claimable balance amount, pool reserve, or a Stellar Asset Contract balance\nentry. `holder` is the address whose holding changed.",
+          "properties": {
+            "after": {
+              "$ref": "#/$defs/Int"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "before": {
+              "$ref": "#/$defs/Int"
+            },
+            "delta": {
+              "$ref": "#/$defs/Int"
+            },
+            "held_in": {
+              "description": "`account`, `trustline`, `claimable-balance`, `liquidity-pool` or `contract`.",
+              "type": "string"
+            },
+            "holder": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "balance-change",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "holder",
+            "asset",
+            "held_in",
+            "before",
+            "after",
+            "delta"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "flags": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "trustline-created",
+              "type": "string"
+            },
+            "limit": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "asset",
+            "limit",
+            "flags"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "trustline-removed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "asset"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "before": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "trustline-flags",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "asset",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "$ref": "#/$defs/Int"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "before": {
+              "$ref": "#/$defs/Int"
+            },
+            "kind": {
+              "const": "trustline-limit",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "asset",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "signer-added",
+              "type": "string"
+            },
+            "signer": {
+              "type": "string"
+            },
+            "weight": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "signer",
+            "weight"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "signer-removed",
+              "type": "string"
+            },
+            "signer": {
+              "type": "string"
+            },
+            "weight": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "signer",
+            "weight"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Includes the master key, whose weight is threshold 0 of the account.",
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "before": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "signer-weight",
+              "type": "string"
+            },
+            "signer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "signer",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "$ref": "#/$defs/Thresholds"
+            },
+            "before": {
+              "$ref": "#/$defs/Thresholds"
+            },
+            "kind": {
+              "const": "thresholds",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "before": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "kind": {
+              "const": "account-flags",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "type": "string"
+            },
+            "before": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "home-domain",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "before": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "const": "inflation-destination",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "$ref": "#/$defs/Int"
+            },
+            "before": {
+              "$ref": "#/$defs/Int"
+            },
+            "kind": {
+              "const": "sequence",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Data entry name and values as hex, since neither has to be UTF-8.",
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "kind": {
+              "const": "data-entry",
+              "type": "string"
+            },
+            "name_hex": {
+              "type": "string"
+            },
+            "value_after_hex": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "value_before_hex": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "action",
+            "name_hex"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The sponsor of a ledger entry or of one signer changed (created, revoked, transferred,\nor the sponsored thing went away). `target` names the entry or signer.",
+          "properties": {
+            "kind": {
+              "const": "sponsorship",
+              "type": "string"
+            },
+            "signer": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sponsor_after": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sponsor_before": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "target"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "amount": {
+              "$ref": "#/$defs/Int"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "balance_id": {
+              "type": "string"
+            },
+            "claimants": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "kind": {
+              "const": "claimable-balance-created",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "balance_id",
+            "asset",
+            "amount",
+            "claimants"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Removed by a claim. The operation type tells a claim from a clawback, since the\nentry change itself is the same.",
+          "properties": {
+            "amount": {
+              "$ref": "#/$defs/Int"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "balance_id": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "claimable-balance-claimed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "balance_id",
+            "asset",
+            "amount"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "amount": {
+              "$ref": "#/$defs/Int"
+            },
+            "asset": {
+              "type": "string"
+            },
+            "balance_id": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "claimable-balance-clawed-back",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "balance_id",
+            "asset",
+            "amount"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A pool-share trustline balance.",
+          "properties": {
+            "account": {
+              "type": "string"
+            },
+            "after": {
+              "$ref": "#/$defs/Int"
+            },
+            "before": {
+              "$ref": "#/$defs/Int"
+            },
+            "delta": {
+              "$ref": "#/$defs/Int"
+            },
+            "kind": {
+              "const": "pool-shares",
+              "type": "string"
+            },
+            "pool": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "pool",
+            "before",
+            "after",
+            "delta"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "asset_a": {
+              "type": "string"
+            },
+            "asset_b": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "liquidity-pool",
+              "type": "string"
+            },
+            "pool": {
+              "type": "string"
+            },
+            "reserve_a_after": {
+              "$ref": "#/$defs/Int"
+            },
+            "reserve_a_before": {
+              "$ref": "#/$defs/Int"
+            },
+            "reserve_b_after": {
+              "$ref": "#/$defs/Int"
+            },
+            "reserve_b_before": {
+              "$ref": "#/$defs/Int"
+            },
+            "shares_after": {
+              "$ref": "#/$defs/Int"
+            },
+            "shares_before": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "pool",
+            "action",
+            "asset_a",
+            "asset_b",
+            "reserve_a_before",
+            "reserve_a_after",
+            "reserve_b_before",
+            "reserve_b_after",
+            "shares_before",
+            "shares_after"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "amount_after": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Int"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "amount_before": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Int"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "buying": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "offer",
+              "type": "string"
+            },
+            "offer_id": {
+              "$ref": "#/$defs/Int"
+            },
+            "price_d": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "price_n": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "seller": {
+              "type": "string"
+            },
+            "selling": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "action",
+            "offer_id",
+            "seller",
+            "selling",
+            "buying",
+            "price_n",
+            "price_d"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A contract instance entry appeared. Read from meta, never from auth entries.",
+          "properties": {
+            "contract": {
+              "type": "string"
+            },
+            "executable": {
+              "description": "`wasm:<hex hash>` or `stellar-asset`.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "contract-deployed",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "contract",
+            "executable"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "hash": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "contract-code",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "action",
+            "hash"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "contract": {
+              "type": "string"
+            },
+            "durability": {
+              "type": "string"
+            },
+            "key_xdr": {
+              "description": "The key `ScVal` as base64 XDR.",
+              "type": "string"
+            },
+            "kind": {
+              "const": "contract-data",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "contract",
+            "action",
+            "durability",
+            "key_xdr"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "after": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "before": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "key_hash": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "ttl",
+              "type": "string"
+            },
+            "target": {
+              "description": "The entry the TTL belongs to, when its key is visible in this ledger.",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "action",
+            "key_hash"
+          ],
+          "type": "object"
+        },
+        {
+          "properties": {
+            "action": {
+              "$ref": "#/$defs/Action"
+            },
+            "kind": {
+              "const": "config-setting",
+              "type": "string"
+            },
+            "setting": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "action",
+            "setting"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "One offer or pool crossed by a manage-offer or path-payment operation, from the\noperation result's claim atoms. `counterparty` is the offer's seller or the pool.",
+          "properties": {
+            "bought_amount": {
+              "$ref": "#/$defs/Int"
+            },
+            "bought_asset": {
+              "description": "What the counterparty received.",
+              "type": "string"
+            },
+            "counterparty": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "trade",
+              "type": "string"
+            },
+            "offer_id": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Int"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sold_amount": {
+              "$ref": "#/$defs/Int"
+            },
+            "sold_asset": {
+              "description": "What the counterparty gave up.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "counterparty",
+            "sold_asset",
+            "sold_amount",
+            "bought_asset",
+            "bought_amount"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A consensus contract event that is not a token event (for example a protocol's\nown events, such as Blend's supply or borrow), with topics and data as base64 XDR.",
+          "properties": {
+            "contract": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "data_xdr": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "contract-event",
+              "type": "string"
+            },
+            "stage": {
+              "description": "`before-all-txs`, `operation`, `after-tx` or `after-all-txs`.",
+              "type": "string"
+            },
+            "topics_xdr": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "kind",
+            "stage",
+            "topics_xdr",
+            "data_xdr"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/TokenEvent",
+          "description": "A token event (CAP-67 and SEP-41 shapes): transfer, mint, burn, clawback,\nset_authorized, fee, approve.",
+          "properties": {
+            "kind": {
+              "const": "token-event",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ChangeClaim": {
+      "description": "One claimed change kind. The harness compares an oracle change of `kind` that satisfies\n`where` with the exported changes of the same kind, on `fields` only.",
+      "properties": {
+        "fields": {
+          "description": "Fields of the kind the target stores and the harness compares. May include `scope` and\n`op_index`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "description": "A `kind` value of the oracle vocabulary.",
+          "type": "string"
+        },
+        "where": {
+          "additionalProperties": {
+            "items": true,
+            "type": "array"
+          },
+          "description": "Restricts the claim to changes whose field equals one of the listed values (an absent\nfield equals `null`). For example `{\"event\": [\"transfer\", \"mint\"]}` on `token-event`.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "fields"
+      ],
+      "type": "object"
+    },
+    "Claims": {
+      "description": "What the target records, in oracle vocabulary terms. Oracle facts outside the claims are\n`out-of-scope`; facts inside them must appear in the export.",
+      "properties": {
+        "changes": {
+          "description": "State change kinds the target records, each with the fields it stores.",
+          "items": {
+            "$ref": "#/$defs/ChangeClaim"
+          },
+          "type": "array"
+        },
+        "participants": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParticipantClaim"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Whether and which participants the target records per transaction."
+        }
+      },
+      "required": [
+        "changes"
+      ],
+      "type": "object"
+    },
+    "Delivery": {
+      "properties": {
+        "archive_url": {
+          "description": "Root of the history archive as it stood at the newest checkpoint at or below the head.",
+          "type": "string"
+        },
+        "lake": {
+          "$ref": "#/$defs/Lake"
+        },
+        "mode": {
+          "$ref": "#/$defs/DeliveryMode",
+          "description": "The mode the harness picked, one of the adapter's `delivery_modes`."
+        },
+        "rpc_url": {
+          "description": "JSON-RPC endpoint of the replay server (stellar-rpc read methods). Present in every\nmode, since targets such as wallet-backend need it next to a lake.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "rpc_url",
+        "archive_url",
+        "lake"
+      ],
+      "type": "object"
+    },
+    "DeliveryMode": {
+      "description": "How ledgers reach the target.",
+      "oneOf": [
+        {
+          "const": "sep54-filesystem",
+          "description": "The SEP-54 lake read from a directory.",
+          "type": "string"
+        },
+        {
+          "const": "sep54-s3",
+          "description": "The SEP-54 lake read from an S3-compatible object store the adapter runs.",
+          "type": "string"
+        },
+        {
+          "const": "rpc",
+          "description": "`getLedgers` and the other read methods of the replay server's JSON-RPC endpoint.",
+          "type": "string"
+        }
+      ]
+    },
+    "DescribeResult": {
+      "properties": {
+        "adapter": {
+          "description": "Name of the adapter program.",
+          "type": "string"
+        },
+        "adapter_version": {
+          "type": "string"
+        },
+        "bootstrap": {
+          "$ref": "#/$defs/Bootstrap"
+        },
+        "claims": {
+          "$ref": "#/$defs/Claims"
+        },
+        "default_delivery": {
+          "$ref": "#/$defs/DeliveryMode",
+          "description": "The mode used when the harness is not told otherwise. Must be in `delivery_modes`."
+        },
+        "delivery_modes": {
+          "description": "Delivery modes this adapter can drive, at least one.",
+          "items": {
+            "$ref": "#/$defs/DeliveryMode"
+          },
+          "type": "array"
+        },
+        "protocol": {
+          "description": "Must equal the harness's version; the harness stops otherwise.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "protocols": {
+          "$ref": "#/$defs/ProtocolRange",
+          "description": "Lowest and highest ledger protocol the target build can ingest. Chains outside it are\nreported `out-of-scope`."
+        },
+        "target": {
+          "description": "The indexer under test, for example `wallet-backend`.",
+          "type": "string"
+        },
+        "target_version": {
+          "description": "The exact target build, for example a full commit hash.",
+          "type": "string"
+        },
+        "vocab_version": {
+          "description": "The oracle vocabulary version the claims and exports are written in. Must equal the\nharness's `ORACLE_VOCAB_VERSION`.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "protocol",
+        "adapter",
+        "adapter_version",
+        "target",
+        "target_version",
+        "delivery_modes",
+        "default_delivery",
+        "bootstrap",
+        "vocab_version",
+        "protocols",
+        "claims"
+      ],
+      "type": "object"
+    },
+    "ErrorClass": {
+      "oneOf": [
+        {
+          "const": "bad-request",
+          "description": "The request does not follow this protocol. A harness bug.",
+          "type": "string"
+        },
+        {
+          "const": "unsupported",
+          "description": "Valid, but this adapter cannot do it (a delivery mode it lacks).",
+          "type": "string"
+        },
+        {
+          "const": "target",
+          "description": "The target could not be brought up or queried: build failure, a container that\ndoes not start, a database that refuses connections.",
+          "type": "string"
+        },
+        {
+          "const": "internal",
+          "description": "The adapter itself failed.",
+          "type": "string"
+        }
+      ]
+    },
+    "ExportChange": {
+      "additionalProperties": true,
+      "description": "One stored state change in oracle vocabulary terms. `kind` and the claimed fields use the\nnames and encodings of the vocabulary (`$defs/Change`). An address field whose stored\nbytes do not decode is `null` and has an entry in `raw`.",
+      "properties": {
+        "kind": {
+          "description": "A `kind` of the oracle vocabulary.",
+          "enum": [
+            "account-created",
+            "account-flags",
+            "account-removed",
+            "balance-change",
+            "claimable-balance-claimed",
+            "claimable-balance-clawed-back",
+            "claimable-balance-created",
+            "config-setting",
+            "contract-code",
+            "contract-data",
+            "contract-deployed",
+            "contract-event",
+            "data-entry",
+            "home-domain",
+            "inflation-destination",
+            "liquidity-pool",
+            "offer",
+            "pool-shares",
+            "sequence",
+            "signer-added",
+            "signer-removed",
+            "signer-weight",
+            "sponsorship",
+            "thresholds",
+            "token-event",
+            "trade",
+            "trustline-created",
+            "trustline-flags",
+            "trustline-limit",
+            "trustline-removed",
+            "ttl"
+          ]
+        },
+        "raw": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RawAddress"
+          },
+          "description": "Stored address bytes, by vocabulary field name.",
+          "type": "object"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RowRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The stored row the change was read from, for triage."
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
+    "ExportParticipant": {
+      "properties": {
+        "address": {
+          "description": "Canonical strkey, or `null` when the stored value does not decode (see `raw`).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mux_ids": {
+          "items": {
+            "$ref": "#/$defs/Int"
+          },
+          "type": "array"
+        },
+        "raw": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RawAddress"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The stored bytes, where the target stores an address as bytes."
+        }
+      },
+      "type": "object"
+    },
+    "ExportRecord": {
+      "description": "One streamed export line's payload.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TxRecord",
+          "description": "What the target stored for one transaction.",
+          "properties": {
+            "type": {
+              "const": "transaction",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Stored rows the adapter cannot tie to a transaction hash.",
+          "properties": {
+            "ledger": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "type": {
+              "const": "unattributed",
+              "type": "string"
+            },
+            "unmapped": {
+              "items": {
+                "$ref": "#/$defs/Unmapped"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "type",
+            "unmapped"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ExportResult": {
+      "properties": {
+        "records": {
+          "description": "Number of `record` lines sent for this request.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "records"
+      ],
+      "type": "object"
+    },
+    "Health": {
+      "description": "Target health as the adapter observes it.",
+      "oneOf": [
+        {
+          "const": "starting",
+          "description": "Up, still bootstrapping (no ledger ingested yet).",
+          "type": "string"
+        },
+        {
+          "const": "running",
+          "description": "The ingest process is alive. It may be stuck; the harness decides that from progress\nand `last_error`.",
+          "type": "string"
+        },
+        {
+          "const": "crashed",
+          "description": "The ingest process exited or was killed for a reason other than its memory limit.",
+          "type": "string"
+        },
+        {
+          "const": "oom",
+          "description": "The ingest process was killed for exceeding `limits.memory_bytes`.",
+          "type": "string"
+        }
+      ]
+    },
+    "Int": {
+      "description": "A signed integer of up to 128 bits as a decimal string.",
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "Lake": {
+      "description": "The chain's SEP-54 lake. `url` serves `.config.json` and only those batches whose\nledgers are all visible; `path` holds every batch, so an adapter copying from it must\nskip batches past the head it was last told.",
+      "properties": {
+        "batches_per_partition": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ledgers_per_batch": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "description": "Absolute path on the harness host.",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "path",
+        "ledgers_per_batch",
+        "batches_per_partition"
+      ],
+      "type": "object"
+    },
+    "LedgerWindow": {
+      "properties": {
+        "bootstrap": {
+          "description": "Visible head when `start` is sent. A checkpoint ledger for `checkpoint` targets.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "checkpoint_frequency": {
+          "description": "Ledgers per history checkpoint the archive was written with.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "last": {
+          "description": "The chain's last ledger. The harness releases `bootstrap + 1` to `last` one at a time.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bootstrap",
+        "last",
+        "checkpoint_frequency"
+      ],
+      "type": "object"
+    },
+    "Limits": {
+      "properties": {
+        "memory_bytes": {
+          "description": "Memory limit the adapter must apply to the target (a container `--memory` limit, or\nthe sum over the target's containers that ingest). A target killed for exceeding it is\nreported with `health: \"oom\"`.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "memory_bytes"
+      ],
+      "type": "object"
+    },
+    "ParticipantClaim": {
+      "properties": {
+        "address_kinds": {
+          "description": "Address kinds recorded: `account`, `contract`, `liquidity-pool`, `claimable-balance`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mux_ids": {
+          "description": "Whether the target keeps the mux ids a participant carried.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "address_kinds",
+        "mux_ids"
+      ],
+      "type": "object"
+    },
+    "ProtocolRange": {
+      "properties": {
+        "max": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "min": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "type": "object"
+    },
+    "RawAddress": {
+      "description": "Address bytes as the target stored them.",
+      "properties": {
+        "column": {
+          "description": "`table.column` the bytes came from.",
+          "type": "string"
+        },
+        "error": {
+          "description": "Why the bytes do not decode to any strkey.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "hex": {
+          "description": "The stored bytes, lowercase hex, exactly as stored (for wallet-backend's\n`AddressBytea`, the version byte then the key bytes).",
+          "type": "string"
+        },
+        "strkey": {
+          "description": "The strkey the bytes decode to. Exactly one of `strkey` and `error` is present.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "column",
+        "hex"
+      ],
+      "type": "object"
+    },
+    "Request": {
+      "description": "One line from the harness to the adapter.",
+      "oneOf": [
+        {
+          "description": "First request of every adapter process. Answered with [`DescribeResult`].",
+          "properties": {
+            "cmd": {
+              "const": "describe",
+              "type": "string"
+            },
+            "protocol": {
+              "description": "The protocol version the harness speaks.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "cmd",
+            "protocol"
+          ],
+          "type": "object"
+        },
+        {
+          "$ref": "#/$defs/StartParams",
+          "description": "Bring the target up against the delivery endpoints. Answered with [`StartResult`] once\nthe target process runs; bootstrapping may still be in progress.",
+          "properties": {
+            "cmd": {
+              "const": "start",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cmd"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Ledgers up to `head` are now visible on the replay server. Answered with\n[`AdvanceResult`] once the adapter has made them available in its delivery mode.",
+          "properties": {
+            "cmd": {
+              "const": "advance",
+              "type": "string"
+            },
+            "head": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "cmd",
+            "head"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Answered with [`StatusResult`].",
+          "properties": {
+            "cmd": {
+              "const": "status",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cmd"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Stream what the target stored for transactions in ledgers `from` to `to` inclusive:\nany number of `record` lines, then one `ok` line with [`ExportResult`].",
+          "properties": {
+            "cmd": {
+              "const": "export",
+              "type": "string"
+            },
+            "from": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "to": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "cmd",
+            "from",
+            "to"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Tear the target down. Answered with [`StopResult`]; the adapter then exits.",
+          "properties": {
+            "cmd": {
+              "const": "stop",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cmd"
+          ],
+          "type": "object"
+        }
+      ],
+      "properties": {
+        "id": {
+          "description": "Chosen by the harness, unique within one adapter process. Every response line to this\nrequest carries it back.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "Response": {
+      "description": "One line from the adapter.",
+      "oneOf": [
+        {
+          "description": "The final line for a request.",
+          "properties": {
+            "result": {
+              "$ref": "#/$defs/AnyResult"
+            },
+            "status": {
+              "const": "ok",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "result"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "One export record; only while an `export` is answered.",
+          "properties": {
+            "record": {
+              "$ref": "#/$defs/ExportRecord"
+            },
+            "status": {
+              "const": "record",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "record"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The final line for a failed request.",
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/AdapterError"
+            },
+            "status": {
+              "const": "error",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "error"
+          ],
+          "type": "object"
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "RowRef": {
+      "properties": {
+        "category": {
+          "description": "The target's own classification, for example wallet-backend's\n`state_change_category` and `state_change_reason`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "table": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "table"
+      ],
+      "type": "object"
+    },
+    "StartParams": {
+      "properties": {
+        "chain": {
+          "description": "The chain id, for logs and container names.",
+          "type": "string"
+        },
+        "delivery": {
+          "$ref": "#/$defs/Delivery"
+        },
+        "docker_network": {
+          "description": "A Docker network created by the harness with `--internal` (no route off the host).\nContainers of the target join it and reach the replay server at the URLs below, which\npoint at the network's gateway address. Absent when the harness runs without Docker.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ledgers": {
+          "$ref": "#/$defs/LedgerWindow"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "network": {
+          "description": "`testnet` or `mainnet`: which passphrase variant of the chain is replayed.",
+          "type": "string"
+        },
+        "network_passphrase": {
+          "type": "string"
+        },
+        "protocol": {
+          "description": "Ledger protocol of the chain.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "workdir": {
+          "description": "A fresh empty directory the adapter may use for this chain; the harness removes it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chain",
+        "network",
+        "network_passphrase",
+        "protocol",
+        "delivery",
+        "ledgers",
+        "limits",
+        "workdir"
+      ],
+      "type": "object"
+    },
+    "StartResult": {
+      "properties": {
+        "components": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "What actually runs, for example container image ids; free form, kept in the report.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "StatusResult": {
+      "properties": {
+        "health": {
+          "$ref": "#/$defs/Health"
+        },
+        "last_error": {
+          "description": "The most recent error the target reported (log line, exit status, health endpoint\ntext), verbatim. `null` when it has reported none since `start`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_ingested_ledger": {
+          "description": "The highest ledger the target has durably ingested, read from the target's own store\n(for wallet-backend, `ingest_store.latest_ingest_ledger`). `null` before the first.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "peak_memory_bytes": {
+          "description": "Peak memory of the target since `start` in bytes, from the container runtime or the\nkernel. `null` when it cannot be read.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "health"
+      ],
+      "type": "object"
+    },
+    "StopResult": {
+      "properties": {
+        "logs": {
+          "description": "The tail of the target's logs (at most 1 MiB), kept next to the report.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "logs"
+      ],
+      "type": "object"
+    },
+    "Thresholds": {
+      "properties": {
+        "high": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "low": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "medium": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "type": "object"
+    },
+    "TokenEvent": {
+      "properties": {
+        "amount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "asset": {
+          "description": "Set when the contract is the Stellar Asset Contract of this asset, which the oracle\nproves by recomputing the contract id.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "asset_topic": {
+          "description": "The SEP-11 asset string a SAC event carries as its last topic, verbatim.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authorized": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "contract": {
+          "type": "string"
+        },
+        "event": {
+          "type": "string"
+        },
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "live_until_ledger": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "spender": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stage": {
+          "description": "`before-all-txs`, `operation`, `after-tx` or `after-all-txs`.",
+          "type": "string"
+        },
+        "to": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to_muxed_id": {
+          "description": "`id:<u64>`, `hash:<hex>` or `text:<hex>`, from the data map's `to_muxed_id`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "event",
+        "stage",
+        "contract"
+      ],
+      "type": "object"
+    },
+    "TxRecord": {
+      "properties": {
+        "changes": {
+          "description": "Every stored state change the adapter maps to a claimed kind.",
+          "items": {
+            "$ref": "#/$defs/ExportChange"
+          },
+          "type": "array"
+        },
+        "hash": {
+          "description": "Transaction hash, lowercase hex. For a fee bump, the outer (fee bump) hash, which is\nwhat the oracle's `hash` holds.",
+          "type": "string"
+        },
+        "ledger": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "participants": {
+          "description": "Every participant the target stored for the transaction.",
+          "items": {
+            "$ref": "#/$defs/ExportParticipant"
+          },
+          "type": "array"
+        },
+        "unmapped": {
+          "default": [],
+          "description": "Stored rows for this transaction the adapter has no oracle mapping for. Never dropped.",
+          "items": {
+            "$ref": "#/$defs/Unmapped"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "ledger",
+        "hash",
+        "participants",
+        "changes"
+      ],
+      "type": "object"
+    },
+    "Unmapped": {
+      "properties": {
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "note": {
+          "description": "Why the adapter could not map it.",
+          "type": "string"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "row": {
+          "additionalProperties": true,
+          "description": "The row, column name to value, byte columns as lowercase hex.",
+          "type": "object"
+        },
+        "table": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "table",
+        "row",
+        "note"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/adapter-protocol.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "One JSON object per line: requests on the adapter's stdin, responses on its stdout. See docs/adapter-interface.md.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Request"
+    },
+    {
+      "$ref": "#/$defs/Response"
+    }
+  ],
+  "title": "shapekit adapter protocol, version 1"
+}

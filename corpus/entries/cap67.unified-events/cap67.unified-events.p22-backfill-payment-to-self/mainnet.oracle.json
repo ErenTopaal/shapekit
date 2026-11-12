@@ -1,0 +1,100 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1768003200",
+      "evicted": [],
+      "ledger_hash": "0fab623662ea55f804d95d80682d54f5ba2e09085d610248959ee50356253646",
+      "ledger_seq": 9,
+      "protocol": 22,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999999600",
+              "asset": "native",
+              "before": "99999999700",
+              "delta": "-100",
+              "held_in": "account",
+              "holder": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "100",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+              "after": "12884901891",
+              "before": "12884901890",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "amount": "10000000",
+              "asset": "native",
+              "asset_topic": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "transfer",
+              "from": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+              "kind": "token-event",
+              "op_index": 0,
+              "scope": "operation",
+              "stage": "operation",
+              "to": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+                "kind": "account",
+                "roles": [
+                  "destination",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E"
+          },
+          "fee": {
+            "balance_delta": "-100",
+            "charged": "100",
+            "source": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E"
+          },
+          "hash": "861d8e3211b539eda3271d6df6f7975096a5af4358b9c06d3258c4ab149c4c98",
+          "participants": [
+            {
+              "address": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 1
+}

@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0063"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap63.parallel-txset",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap63.parallel-txset.p30-five-calls-parallel-phase",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of [1, 2, 2] transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap63.parallel-txset.p30",
+    "class": "local-core",
+    "ledger_seq": 12,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap63.parallel-txset"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.expected.json",
+      "expected_json_sha256": "c0ae3f140cf3cb0f59c8ee33165fb8366300e240ffdd1d9d9db7e43149f66a0d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.oracle.json",
+      "oracle_sha256": "d1a140265af915745af4223058c535e1fbf3c99efd4df4e8a93cd931f31c6358",
+      "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/mainnet.xdr",
+      "xdr_sha256": "17607edc2847e029ebde6d5091d783dedf7d95918fec7d971f9e180b82045eb8"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.expected.json",
+      "expected_json_sha256": "b43169c37c7538f32bd48847d32e94d92491d7d3aa1bb9c12511fb45ffa583a5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.oracle.json",
+      "oracle_sha256": "f0d0d997b16602b0f400b65f2e8ab3fde5639fa506d8986b7c910574232292ba",
+      "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-five-calls-parallel-phase/testnet.xdr",
+      "xdr_sha256": "02ee02b287a2896685355de973163e2b5842b7e370a84020829ae47b8d5d5643"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

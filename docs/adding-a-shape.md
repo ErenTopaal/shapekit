@@ -84,11 +84,14 @@ protocol 30 and 28 means two values in `all()`, as `cap40` does.
 | `submit_and_close_failing(env) -> Applied` | Same, but fails unless core included it and it failed (a failed transaction in a ledger) |
 | `capture(slug, selector, spec)` | Records an entry from the canonical meta of a closed ledger |
 | `capture_rejected(slug, env, spec) -> TransactionResult` | Submits an envelope core must refuse at submission and records it as an `invalid-by-core` entry with core's result. No ledger closes |
-| `driver() -> &mut ChainDriver` | The Phase 3 driver: `upload`, `deploy`, `invoke`, `soroban`, `soroban_with`, `apply`, `node()` for `ledger_entries` queries |
+| `driver() -> &mut ChainDriver` | The Phase 3 driver: `upload`, `deploy`, `invoke`, `soroban`, `soroban_with`, `apply`, `apply_together` (several transactions in one ledger), `close_empty`, `close_with_upgrades` (ledger upgrades such as `maxsorobantxsetsize`), `apply_upgrade_set` with `settings_writer` (a config upgrade set on top of the live settings), `node()` for `ledger_entries` queries |
 | `network()`, `protocol()`, `network_id()` | The chain's network, protocol and network id |
 
 `Applied` carries the ledger, the transaction hash, core's `TransactionResult` and the meta.
-Every submitted transaction closes its own ledger, so a ledger holds exactly one transaction.
+Every submitted transaction closes its own ledger, so a ledger holds exactly one transaction, unless
+the recipe submits several through `driver().apply_together` (`cap63` does, for a parallel
+transaction set). Config upgrades on top of testnet's settings go through
+`driver().apply_upgrade_set`; `cap46.rs` has the helpers the settings recipes share.
 
 ### Selectors
 

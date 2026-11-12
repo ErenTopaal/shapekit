@@ -1,10 +1,10 @@
 {
   "ledgers": [
     {
-      "close_time": "1768176000",
+      "close_time": "1768262400",
       "evicted": [],
-      "ledger_hash": "204189c38ef85e01e1695fee01d2bbab65b94862c1aab71a0cf691d1d0656613",
-      "ledger_seq": 11,
+      "ledger_hash": "066425c171c95357d96a1023369f7cbcbfceabf180c087b13780c40617dd9486",
+      "ledger_seq": 12,
       "protocol": 30,
       "transactions": [
         {
@@ -48,7 +48,7 @@
             },
             {
               "action": "created",
-              "after": 120970,
+              "after": 120971,
               "key_hash": "eabad34a5f8d258ba9616b500ee9f67ed28ae8be275c655c3a1a5110f2e40cb0",
               "kind": "ttl",
               "op_index": 0,
@@ -146,9 +146,242 @@
           "apply_index": 1,
           "changes": [
             {
-              "after": "99999850802",
+              "after": "99999862151",
               "asset": "native",
-              "before": "99999955651",
+              "before": "100000000000",
+              "delta": "-137849",
+              "held_in": "account",
+              "holder": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "137849",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "after": "30064771073",
+              "before": "30064771072",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "created",
+              "contract": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
+              "durability": "persistent",
+              "key_xdr": "AAAADwAAAARsYXN0",
+              "kind": "contract-data",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "created",
+              "after": 120971,
+              "key_hash": "03a3e5801355be8ffa59021e0abd90ed3c70aafe53a0489e36afb9aa531b778c",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW key 0000000f000000046c617374"
+            },
+            {
+              "contract": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
+              "data_xdr": "AAAAAwAAAAI=",
+              "kind": "contract-event",
+              "op_index": 0,
+              "scope": "operation",
+              "stage": "operation",
+              "topics_xdr": [
+                "AAAADwAAAARsYXN0"
+              ]
+            },
+            {
+              "after": "99999868320",
+              "asset": "native",
+              "before": "99999862151",
+              "delta": "6169",
+              "held_in": "account",
+              "holder": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            },
+            {
+              "amount": "-6169",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "kind": "token-event",
+              "scope": "post-apply-fee",
+              "stage": "after-all-txs"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
+                "kind": "contract",
+                "roles": [
+                  "footprint",
+                  "invoked-contract"
+                ]
+              },
+              {
+                "address": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4"
+          },
+          "fee": {
+            "balance_delta": "-131680",
+            "charged": "131680",
+            "source": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4"
+          },
+          "hash": "ac003df77843dbc983d4c135f849a9ca35142074c2307ef867a270fe1cf83b2c",
+          "participants": [
+            {
+              "address": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
+              "kind": "contract",
+              "roles": [
+                "entry-changed",
+                "event-contract"
+              ]
+            },
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        },
+        {
+          "apply_index": 2,
+          "changes": [
+            {
+              "after": "99999993519",
+              "asset": "native",
+              "before": "100000000000",
+              "delta": "-6481",
+              "held_in": "account",
+              "holder": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "6481",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "after": "30064771073",
+              "before": "30064771072",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "after": "99999998359",
+              "asset": "native",
+              "before": "99999993519",
+              "delta": "4840",
+              "held_in": "account",
+              "holder": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            },
+            {
+              "amount": "-4840",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "kind": "token-event",
+              "scope": "post-apply-fee",
+              "stage": "after-all-txs"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CAP7ONBRWQ2UWVNFENTCTXFOIEZYWWZMIU3DZX72QJEUWJ2I4H32MS73",
+                "kind": "contract",
+                "roles": [
+                  "footprint",
+                  "invoked-contract"
+                ]
+              },
+              {
+                "address": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+                "kind": "account",
+                "roles": [
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M"
+          },
+          "fee": {
+            "balance_delta": "-1641",
+            "charged": "1641",
+            "source": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M"
+          },
+          "hash": "c1cb730e34ed6a9c60eba16c084ec27f8dba7a60e1d6b39bacae44c8d3fc0e2c",
+          "participants": [
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GDEJ2FD4DZ2HJ3DYPFPL6227VQWQL64SWXFV37YCZHJGWWEMYEJJBB6M",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        },
+        {
+          "apply_index": 3,
+          "changes": [
+            {
+              "after": "99999836019",
+              "asset": "native",
+              "before": "99999940868",
               "delta": "-104849",
               "held_in": "account",
               "holder": "GAE3F67TCEBTRS3ID2EPKY5G5IYYOGNJZNISBBOIAMZPTXUBS2JIRCNZ",
@@ -167,8 +400,8 @@
             },
             {
               "account": "GAE3F67TCEBTRS3ID2EPKY5G5IYYOGNJZNISBBOIAMZPTXUBS2JIRCNZ",
-              "after": "30064771076",
-              "before": "30064771075",
+              "after": "30064771077",
+              "before": "30064771076",
               "kind": "sequence",
               "scope": "tx-before"
             },
@@ -183,7 +416,7 @@
             },
             {
               "action": "created",
-              "after": 120970,
+              "after": 120971,
               "key_hash": "9b2909e7d9f542f005a11cacfbf71db4a792d050d040f1928f2349e95978692a",
               "kind": "ttl",
               "op_index": 0,
@@ -202,9 +435,9 @@
               ]
             },
             {
-              "after": "99999856971",
+              "after": "99999842188",
               "asset": "native",
-              "before": "99999850802",
+              "before": "99999836019",
               "delta": "6169",
               "held_in": "account",
               "holder": "GAE3F67TCEBTRS3ID2EPKY5G5IYYOGNJZNISBBOIAMZPTXUBS2JIRCNZ",
@@ -247,7 +480,7 @@
             "charged": "98680",
             "source": "GAE3F67TCEBTRS3ID2EPKY5G5IYYOGNJZNISBBOIAMZPTXUBS2JIRCNZ"
           },
-          "hash": "0bafcaa90a6c0596e379016c3ee5269029cad1b0310096c127e88f08eff6d6ac",
+          "hash": "0a5197b6025289654ee047a7b3b3c7bffe48cd41827b4dad1441dee9144932c3",
           "participants": [
             {
               "address": "CAYJQJAU3IDXABSDE4CYDKWVXOIFQKQ6VGP2SKECHZBJSH7LCYPPDW3H",
@@ -278,7 +511,7 @@
           "successful": true
         },
         {
-          "apply_index": 2,
+          "apply_index": 4,
           "changes": [
             {
               "after": "99999895151",
@@ -392,141 +625,6 @@
             },
             {
               "address": "GAWKWK4INA35G72QAHMHJICN4VOEFFMEAXMFMEWQRRX6M454U24RRU2K",
-              "kind": "account",
-              "roles": [
-                "entry-changed",
-                "event-address",
-                "fee-source"
-              ]
-            }
-          ],
-          "result": "tx_success",
-          "successful": true
-        },
-        {
-          "apply_index": 3,
-          "changes": [
-            {
-              "after": "99999862151",
-              "asset": "native",
-              "before": "100000000000",
-              "delta": "-137849",
-              "held_in": "account",
-              "holder": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-              "kind": "balance-change",
-              "scope": "fee-processing"
-            },
-            {
-              "amount": "137849",
-              "asset": "native",
-              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-              "event": "fee",
-              "from": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-              "kind": "token-event",
-              "scope": "fee-processing",
-              "stage": "before-all-txs"
-            },
-            {
-              "account": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-              "after": "30064771073",
-              "before": "30064771072",
-              "kind": "sequence",
-              "scope": "tx-before"
-            },
-            {
-              "action": "created",
-              "contract": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
-              "durability": "persistent",
-              "key_xdr": "AAAADwAAAARsYXN0",
-              "kind": "contract-data",
-              "op_index": 0,
-              "scope": "operation"
-            },
-            {
-              "action": "created",
-              "after": 120970,
-              "key_hash": "03a3e5801355be8ffa59021e0abd90ed3c70aafe53a0489e36afb9aa531b778c",
-              "kind": "ttl",
-              "op_index": 0,
-              "scope": "operation",
-              "target": "contract data of CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW key 0000000f000000046c617374"
-            },
-            {
-              "contract": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
-              "data_xdr": "AAAAAwAAAAI=",
-              "kind": "contract-event",
-              "op_index": 0,
-              "scope": "operation",
-              "stage": "operation",
-              "topics_xdr": [
-                "AAAADwAAAARsYXN0"
-              ]
-            },
-            {
-              "after": "99999868320",
-              "asset": "native",
-              "before": "99999862151",
-              "delta": "6169",
-              "held_in": "account",
-              "holder": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-              "kind": "balance-change",
-              "scope": "post-apply-fee"
-            },
-            {
-              "amount": "-6169",
-              "asset": "native",
-              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-              "event": "fee",
-              "from": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-              "kind": "token-event",
-              "scope": "post-apply-fee",
-              "stage": "after-all-txs"
-            }
-          ],
-          "declared": {
-            "participants": [
-              {
-                "address": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
-                "kind": "contract",
-                "roles": [
-                  "footprint",
-                  "invoked-contract"
-                ]
-              },
-              {
-                "address": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
-                "kind": "account",
-                "roles": [
-                  "tx-source"
-                ]
-              }
-            ],
-            "source": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4"
-          },
-          "fee": {
-            "balance_delta": "-131680",
-            "charged": "131680",
-            "source": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4"
-          },
-          "hash": "ac003df77843dbc983d4c135f849a9ca35142074c2307ef867a270fe1cf83b2c",
-          "participants": [
-            {
-              "address": "CCVTEKPJQRO5BTU6LHBNMTEESXWFPZCHEL4VZJUNGCAIUP3MC73U34PW",
-              "kind": "contract",
-              "roles": [
-                "entry-changed",
-                "event-contract"
-              ]
-            },
-            {
-              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-              "kind": "contract",
-              "roles": [
-                "event-contract"
-              ]
-            },
-            {
-              "address": "GCLEWATNZY7QDJGPP7QKBES565T26BHSTPUM3X7HXQZBT4GMSQKUXTA4",
               "kind": "account",
               "roles": [
                 "entry-changed",
