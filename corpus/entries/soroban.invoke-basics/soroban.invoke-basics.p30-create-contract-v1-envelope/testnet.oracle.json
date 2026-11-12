@@ -1,0 +1,146 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1769299200",
+      "evicted": [],
+      "ledger_hash": "8459bfacad09039ddbc89c4beff85c0ec82ba5c51ae82ce5fb8c6fd1744ac7d5",
+      "ledger_seq": 24,
+      "protocol": 30,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99996597306",
+              "asset": "native",
+              "before": "99996618641",
+              "delta": "-21335",
+              "held_in": "account",
+              "holder": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "21335",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "after": "30064771075",
+              "before": "30064771074",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "created",
+              "contract": "CC55SZPCDIUPEKFLSM4IIECL2F4ZH3QP54362P4TISIZH3JRE2UQAQY6",
+              "durability": "persistent",
+              "key_xdr": "AAAAFA==",
+              "kind": "contract-data",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "contract": "CC55SZPCDIUPEKFLSM4IIECL2F4ZH3QP54362P4TISIZH3JRE2UQAQY6",
+              "executable": "wasm:f9b16f83ec2b943d5ac11524c410c5e8b6cd13955e15935e99b3923ffa9c8c06",
+              "kind": "contract-deployed",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "created",
+              "after": 120983,
+              "key_hash": "006301e579383ed5b64e912abef176ba912d3d729d5667902439bf2c6cc21be9",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CC55SZPCDIUPEKFLSM4IIECL2F4ZH3QP54362P4TISIZH3JRE2UQAQY6 key 00000014"
+            },
+            {
+              "after": "99996603867",
+              "asset": "native",
+              "before": "99996597306",
+              "delta": "6561",
+              "held_in": "account",
+              "holder": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            },
+            {
+              "amount": "-6561",
+              "asset": "native",
+              "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "event": "fee",
+              "from": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "kind": "token-event",
+              "scope": "post-apply-fee",
+              "stage": "after-all-txs"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CC55SZPCDIUPEKFLSM4IIECL2F4ZH3QP54362P4TISIZH3JRE2UQAQY6",
+                "kind": "contract",
+                "roles": [
+                  "footprint"
+                ]
+              },
+              {
+                "address": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+                "kind": "account",
+                "roles": [
+                  "deployer",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ"
+          },
+          "fee": {
+            "balance_delta": "-14774",
+            "charged": "14774",
+            "source": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ"
+          },
+          "hash": "3bf150646e73b0169a0c3c61476df241af63ce8a6be83acc53b20467bf2cf7e9",
+          "participants": [
+            {
+              "address": "CC55SZPCDIUPEKFLSM4IIECL2F4ZH3QP54362P4TISIZH3JRE2UQAQY6",
+              "kind": "contract",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "GBPLURF64V24DKDIKNVGRRD7WOXJL2OTZGNBFC2OEROKQ76S5AADRPZZ",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "oracle_vocab_version": 1
+}

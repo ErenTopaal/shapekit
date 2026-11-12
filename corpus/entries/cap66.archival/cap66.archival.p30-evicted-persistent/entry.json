@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0066",
+    "CAP-0062"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap66.archival",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap66.archival.p30-evicted-persistent",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a ledger whose eviction scan removed an expired persistent contract data entry, which moves to the hot archive, listed in evictedKeys with its ttl key",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap66.archival.p30",
+    "class": "local-core",
+    "ledger_seq": 23,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap66.archival"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/mainnet.expected.json",
+      "expected_json_sha256": "f7d24a20a414a226b9697ce981656a6a6644e29f1f5ee5817e4b2b239ce3c7c0",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/mainnet.oracle.json",
+      "oracle_sha256": "7d432efb7565585a5b726b7cb39aabcf31d90c11d4b7c7db57d5b52d7e527c01",
+      "xdr_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/mainnet.xdr",
+      "xdr_sha256": "a96b5ed4e428c506f3652837ce8803249789b185fc909345013a428f1a1004a4"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/testnet.expected.json",
+      "expected_json_sha256": "54562810f89a1e4dcd512cf44995081ef1c86990fff3c62f646cff47f448292b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/testnet.oracle.json",
+      "oracle_sha256": "a5dcf7223a55237e099c0aa11e5d5db71aa9457fd6be341f9bb082e772e210b7",
+      "xdr_file": "entries/cap66.archival/cap66.archival.p30-evicted-persistent/testnet.xdr",
+      "xdr_sha256": "0da399987a5521fe39cd2e80128887a7167e973d59a8b973bf53d4dd83c8cc95"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

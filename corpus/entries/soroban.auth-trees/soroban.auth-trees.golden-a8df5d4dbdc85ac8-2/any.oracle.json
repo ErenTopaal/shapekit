@@ -1,0 +1,118 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1451692800",
+      "evicted": [],
+      "ledger_hash": "3cbe0e86671083c9449049d1fb3452fd8f768e6bd386b51151bd5ae71098e8ed",
+      "ledger_seq": 4,
+      "protocol": 30,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "999999999698863505",
+              "asset": "native",
+              "before": "999999999699897326",
+              "delta": "-1033821",
+              "held_in": "account",
+              "holder": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "account": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X",
+              "after": "3",
+              "before": "2",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "action": "created",
+              "contract": "CBINMC5KSEB5K4UO4S4XUZBZTQ63SWJWNCTUYELBV3IJT2VBVOOQQ3JQ",
+              "durability": "persistent",
+              "key_xdr": "AAAAFA==",
+              "kind": "contract-data",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "contract": "CBINMC5KSEB5K4UO4S4XUZBZTQ63SWJWNCTUYELBV3IJT2VBVOOQQ3JQ",
+              "executable": "wasm:4b9316721487281d8201e1c6044544400f120253487971e339eb23a465516935",
+              "kind": "contract-deployed",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "created",
+              "after": 4099,
+              "key_hash": "9e3a2af96b946ee33a2938d3e88554028fb898d886a777153046d9124b6faeb3",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CBINMC5KSEB5K4UO4S4XUZBZTQ63SWJWNCTUYELBV3IJT2VBVOOQQ3JQ key 00000014"
+            },
+            {
+              "after": "999999999699843990",
+              "asset": "native",
+              "before": "999999999698863505",
+              "delta": "980485",
+              "held_in": "account",
+              "holder": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CBINMC5KSEB5K4UO4S4XUZBZTQ63SWJWNCTUYELBV3IJT2VBVOOQQ3JQ",
+                "kind": "contract",
+                "roles": [
+                  "footprint"
+                ]
+              },
+              {
+                "address": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X",
+                "kind": "account",
+                "roles": [
+                  "deployer",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X"
+          },
+          "fee": {
+            "balance_delta": "-53336",
+            "charged": "53336",
+            "source": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X"
+          },
+          "hash": "ea49324dbe34cd82f1516f45c27dd465040f338199b2666c2b818b4096057acf",
+          "participants": [
+            {
+              "address": "CBINMC5KSEB5K4UO4S4XUZBZTQ63SWJWNCTUYELBV3IJT2VBVOOQQ3JQ",
+              "kind": "contract",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GC4EFXBN6BEENDAX7PBW5PGIIIVH3INMD3OEPQASXOLGOHVVP7ZEMG7X",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "(V) (;,,;) (V)",
+  "oracle_vocab_version": 1
+}
