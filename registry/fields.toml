@@ -1,0 +1,1280 @@
+# which transaction envelope fields stellar-core v30.0.0 validates, field by field.
+# every row cites the source it was read from. "yes" means core rejects the
+# transaction (or fails the operation) when the value is wrong; "partial" means
+# only some properties are checked, or the check happens later inside the
+# soroban host and only on some paths; "no" means core passes the value through.
+#
+# a caveat that applies to every "yes" row: checks that run at apply time only
+# fail the operation or transaction, and failed transactions are still in the
+# ledger with their envelope. a value is only known good when the transaction
+# result (and the operation result) is a success.
+
+schema_version = 1
+
+# ---------------------------------------------------------------- envelope
+
+[[field]]
+id = "tx.envelope.type"
+xdr_path = "TransactionEnvelope.type"
+validated_by_core = "yes"
+checks = "before protocol 13 any ENVELOPE_TYPE_TX or any muxed account anywhere in the envelope gives txNOT_SUPPORTED; from protocol 13 ENVELOPE_TYPE_TX_V0 gives txNOT_SUPPORTED. fee bump envelopes give txNOT_SUPPORTED before protocol 13. every envelope must also parse with the rust xdr parser of the ledger protocol (depth 500 c++ check before protocol 28, rust depth 1000 from 28) or it is txMALFORMED"
+protocol_min = 0
+risk = "an indexer that only handles v1 envelopes drops or crashes on v0 envelopes in pre-13 history and on fee bumps from 13 on"
+handling = "switch on all three arms; treat v0 as history-only and fee bump as a wrapper whose inner v1 transaction carries the operations"
+go_accessors = ["xdr.TransactionEnvelope.Type", "xdr.TransactionEnvelope.GetV0", "xdr.TransactionEnvelope.GetV1", "xdr.TransactionEnvelope.GetFeeBump", "xdr.TransactionEnvelope.IsFeeBump"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1254-1264" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::commonValidPreSeqNum", lines = "387-400" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol", lines = "1349-1380" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "TransactionEnvelope", lines = "1002-1010" },
+]
+
+[[field]]
+id = "tx.v0.source_account_ed25519"
+xdr_path = "TransactionV0Envelope.tx.sourceAccountEd25519"
+validated_by_core = "yes"
+checks = "core rebuilds an AccountID from the raw 32 bytes and applies the same existence and signature checks as for v1 sources; the whole v0 arm is rejected from protocol 13"
+protocol_min = 0
+protocol_max = 12
+risk = "v0 has no key type discriminant, so code that expects a MuxedAccount here misreads the bytes"
+handling = "wrap the 32 bytes as an ed25519 account id (G strkey); never expect a mux id in v0"
+go_accessors = ["xdr.TransactionV0.SourceAccountEd25519", "xdr.TransactionEnvelope.SourceAccount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::getSourceID", lines = "217-227" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "TransactionV0", lines = "908-921" },
+]
+
+[[field]]
+id = "tx.signatures"
+xdr_path = "TransactionV1Envelope.signatures"
+validated_by_core = "yes"
+checks = "at most 20 by xdr. source account signers must reach the low threshold (txBAD_AUTH), each operation source must reach its op threshold (opBAD_AUTH), and from protocol 19 every extra signer must be satisfied. every signature must be used by some signer or the transaction is txBAD_AUTH_EXTRA. from protocol 28 at most 1000 ed25519 verifications per transaction. at apply, from protocol 13, signature checking stops early when the transaction already failed validation, so a failed transaction can carry signatures that were never verified"
+protocol_min = 0
+risk = "signatures on a failed transaction are not proof of anything; a signature count says nothing about which signer signed"
+handling = "derive signer participation from signer changes in meta, not from the signature list; only treat signatures as verified on successful transactions"
+go_accessors = ["xdr.TransactionV1Envelope.Signatures", "xdr.TransactionEnvelope.Signatures"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureChecker.cpp", symbol = "SignatureChecker::checkSignature", lines = "46-169" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureChecker.cpp", symbol = "SignatureChecker::checkAllSignaturesUsed", lines = "171-191" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::processSignatures", lines = "1516-1578" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkAllTransactionSignatures", lines = "503-528" },
+]
+notes = "the 1000 verification budget is SignatureChecker::TX_ED25519_VERIFY_BUDGET (SignatureChecker.h line 50), gated by TX_ED25519_VERIFY_BUDGET_PROTOCOL_VERSION = 28 (util/ProtocolVersion.h line 85)"
+
+[[field]]
+id = "tx.signatures.hint"
+xdr_path = "DecoratedSignature.hint"
+validated_by_core = "partial"
+checks = "the hint is only a filter: core tries a signer only when the hint equals the last 4 bytes of the ed25519 key (or of the hash-x hash). for a signed-payload signer the expected hint is the last 4 bytes of the key xor the payload hint; getHint copies the last 4 payload bytes, or, for a payload shorter than 4 bytes, the payload into the start of the hint. pre-auth-tx signers use no signature and no hint"
+protocol_min = 0
+risk = "4 bytes are not unique; two signers can share a hint, so a hint does not identify the signer"
+handling = "never key or attribute signers by hint; if a signer must be attributed, verify the signature against candidate keys yourself"
+go_accessors = ["xdr.DecoratedSignature.Hint"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::verify", lines = "38-46" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::getSignedPayloadHint", lines = "93-105" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::getHint", lines = "107-125" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::doesHintMatch", lines = "127-136" },
+]
+
+[[field]]
+id = "tx.signatures.signature"
+xdr_path = "DecoratedSignature.signature"
+validated_by_core = "yes"
+checks = "ed25519 signers: ed25519 verify over the transaction contents hash, sha256(networkID, envelope type, tx). hash-x signers: sha256(signature) must equal the hash, so the signature field is the preimage (up to 64 bytes). signed-payload signers: ed25519 verify over the raw payload bytes, with no network id and no hashing"
+protocol_min = 0
+risk = "a signed-payload signature is not bound to any network or transaction; hash-x signatures reveal a preimage, not a signature"
+handling = "do not treat a signed-payload signature as transaction-specific or network-specific; store signature bytes as opaque, up to 64 bytes"
+go_accessors = ["xdr.DecoratedSignature.Signature"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::verifyEd25519SignedPayload", lines = "48-61" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::verifyHashX", lines = "83-91" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::getContentsHash", lines = "153-180" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-types.x", symbol = "Signature", lines = "82-84" },
+]
+
+# ------------------------------------------------------------- transaction
+
+[[field]]
+id = "tx.source_account"
+xdr_path = "Transaction.sourceAccount"
+validated_by_core = "yes"
+checks = "core reduces the MuxedAccount to its ed25519 key with toAccountID; that account must exist (txNO_ACCOUNT) and its signers must reach the low threshold (txBAD_AUTH); it pays the fee and its sequence number is consumed"
+protocol_min = 0
+risk = "the claimed source is real, but it is not the full list of affected accounts"
+handling = "use the base key (G) as the account identity; take the full participant set from meta changes and events"
+go_accessors = ["xdr.Transaction.SourceAccount", "xdr.TransactionEnvelope.SourceAccount", "xdr.MuxedAccount.ToAccountId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1473-1478" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValid", lines = "1607-1728" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
+]
+
+[[field]]
+id = "tx.source_account.mux_id"
+xdr_path = "Transaction.sourceAccount(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "never compared, never looked up, never stored in a ledger entry. toAccountID discards it. outside tests the only reads of med25519().id copy it into classic and soroban events (makeMuxedAccountAddress, makeMuxIDSCVal) and the json dumper. before protocol 13 any muxed account makes the transaction txNOT_SUPPORTED (hasMuxedAccount checks only the key type). from protocol 25 a soroban invoke transaction with a muxed source is txSOROBAN_INVALID"
+protocol_min = 13
+risk = "any 64-bit value, chosen by the submitter, with no account behind it. trusting it as an account id, or storing a muxed address in a 32-byte column, truncates or fabricates identities (wallet-backend#716)"
+handling = "store the base account and the mux id separately, the id as an unsigned 64-bit value; never treat an M address as an account that exists; key balances by the base account"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeMuxIDSCVal, makeMuxedAccountAddress", lines = "2272-2300" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "detail::MuxChecker", lines = "1305-1347" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::validateSorobanMemo", lines = "340-369" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "MuxedAccount", lines = "21-31" },
+]
+notes = "before protocol 25 the soroban muxed-source rule is only a transaction queue admission policy (herder/TransactionQueue.cpp lines 498-507), not a consensus rule. resolves plan R16: core never validates or stores a mux id. searched every med25519() use in src/ outside src/test/: TransactionUtils.cpp lines 1194, 1212-1213 (toAccountID, toMuxedAccount), 2292-2293 (makeMuxedAccountAddress), util/XDRCereal.cpp line 114 (json output)"
+
+[[field]]
+id = "tx.fee"
+xdr_path = "Transaction.fee"
+validated_by_core = "yes"
+checks = "inclusion fee (fee minus declared soroban resource fee) must be at least baseFee times max(1, op count) (txINSUFFICIENT_FEE), and the source must afford it above reserve (txINSUFFICIENT_BALANCE). the fee actually charged is computed at apply, min(inclusion fee, baseFee times ops) plus the resource fee, then soroban refunds; it is not the envelope value"
+protocol_min = 0
+risk = "the envelope fee is a bid, not what was paid"
+handling = "read feeCharged from the transaction result and fee changes from meta"
+go_accessors = ["xdr.Transaction.Fee", "xdr.TransactionEnvelope.Fee"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1460-1471" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::getFee", lines = "394-426" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::processFeeSeqNum", lines = "1730-1771" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "getMinInclusionFee", lines = "1998-2009" },
+]
+
+[[field]]
+id = "tx.seq_num"
+xdr_path = "Transaction.seqNum"
+validated_by_core = "yes"
+checks = "must be account seqNum + 1, or, from protocol 19 with minSeqNum set, account seqNum in [minSeqNum, tx.seqNum); a seqNum equal to the ledger starting sequence (ledgerSeq << 32) or INT64_MAX is rejected (txBAD_SEQ). on apply the account seqNum is set to tx.seqNum"
+protocol_min = 0
+risk = "low; the value is checked. gaps are legal with minSeqNum, so seqNum is not always previous + 1"
+handling = "safe to store; do not assume contiguity per account"
+go_accessors = ["xdr.Transaction.SeqNum", "xdr.TransactionEnvelope.SeqNum"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isBadSeq", lines = "1580-1605" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::processSeqNum", lines = "1497-1514" },
+]
+
+[[field]]
+id = "tx.cond.type"
+xdr_path = "Transaction.cond.type"
+validated_by_core = "yes"
+checks = "PRECOND_V2 before protocol 19 gives txNOT_SUPPORTED; PRECOND_TIME and PRECOND_NONE are accepted in all v1 envelopes"
+protocol_min = 13
+risk = "low"
+handling = "handle all three arms; v0 envelopes carry an optional TimeBounds instead"
+go_accessors = ["xdr.Preconditions.Type", "xdr.Transaction.Cond", "xdr.TransactionEnvelope.Preconditions"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1266-1272" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Preconditions", lines = "839-847" },
+]
+
+[[field]]
+id = "tx.cond.time_bounds"
+xdr_path = "Transaction.cond(PRECOND_TIME).timeBounds | Transaction.cond(PRECOND_V2).v2.timeBounds"
+validated_by_core = "yes"
+checks = "minTime must be <= ledger close time (txTOO_EARLY), maxTime 0 means unbounded, otherwise maxTime must be >= close time (txTOO_LATE). minTime > maxTime is not rejected as malformed, it just can never be valid"
+protocol_min = 0
+risk = "low"
+handling = "safe to store; treat maxTime 0 as no bound"
+go_accessors = ["xdr.Preconditions.TimeBounds", "xdr.PreconditionsV2.TimeBounds", "xdr.TimeBounds.MinTime", "xdr.TimeBounds.MaxTime", "xdr.TransactionEnvelope.TimeBounds"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooEarly", lines = "1147-1169" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooLate", lines = "1171-1195" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::getTimeBounds", lines = "631-663" },
+]
+
+[[field]]
+id = "tx.cond.ledger_bounds"
+xdr_path = "Transaction.cond(PRECOND_V2).v2.ledgerBounds"
+validated_by_core = "yes"
+checks = "from protocol 19: minLedger must be <= ledger seq (txTOO_EARLY); maxLedger 0 means unbounded, otherwise ledger seq must be < maxLedger (txTOO_LATE)"
+protocol_min = 19
+risk = "low"
+handling = "safe to store; maxLedger is exclusive"
+go_accessors = ["xdr.PreconditionsV2.LedgerBounds", "xdr.LedgerBounds.MinLedger", "xdr.LedgerBounds.MaxLedger", "xdr.TransactionEnvelope.LedgerBounds"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooEarly", lines = "1162-1166" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooLate", lines = "1189-1193" },
+]
+
+[[field]]
+id = "tx.cond.min_seq_num"
+xdr_path = "Transaction.cond(PRECOND_V2).v2.minSeqNum"
+validated_by_core = "yes"
+checks = "from protocol 19, when set, relaxes the sequence check to minSeqNum <= account seqNum < tx.seqNum"
+protocol_min = 19
+risk = "an indexer that assumes seqNum = previous + 1 sees gaps"
+handling = "do not reconstruct account sequence numbers from envelopes; read them from meta"
+go_accessors = ["xdr.PreconditionsV2.MinSeqNum", "xdr.TransactionEnvelope.MinSeqNum"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isBadSeq", lines = "1580-1605" },
+]
+
+[[field]]
+id = "tx.cond.min_seq_age"
+xdr_path = "Transaction.cond(PRECOND_V2).v2.minSeqAge"
+validated_by_core = "yes"
+checks = "from protocol 19, close time minus minSeqAge must be >= the source account seqTime (AccountEntryExtensionV3, 0 when absent), else txBAD_MIN_SEQ_AGE_OR_GAP"
+protocol_min = 19
+risk = "low"
+handling = "safe to store"
+go_accessors = ["xdr.PreconditionsV2.MinSeqAge", "xdr.TransactionEnvelope.MinSeqAge"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooEarlyForAccount", lines = "1197-1238" },
+]
+
+[[field]]
+id = "tx.cond.min_seq_ledger_gap"
+xdr_path = "Transaction.cond(PRECOND_V2).v2.minSeqLedgerGap"
+validated_by_core = "yes"
+checks = "from protocol 19, ledger seq minus minSeqLedgerGap must be >= the source account seqLedger, else txBAD_MIN_SEQ_AGE_OR_GAP"
+protocol_min = 19
+risk = "low"
+handling = "safe to store"
+go_accessors = ["xdr.PreconditionsV2.MinSeqLedgerGap", "xdr.TransactionEnvelope.MinSeqLedgerGap"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::isTooEarlyForAccount", lines = "1197-1238" },
+]
+
+[[field]]
+id = "tx.cond.extra_signers"
+xdr_path = "Transaction.cond(PRECOND_V2).v2.extraSigners"
+validated_by_core = "yes"
+checks = "at most 2 by xdr; two identical entries give txMALFORMED; a signed-payload signer with an empty payload gives txMALFORMED; from protocol 19 each extra signer needs a matching signature (weight 1 each, needed weight = count), else txBAD_AUTH. the signer keys need not belong to any account"
+protocol_min = 19
+risk = "extra signers are arbitrary keys, not accounts; a P (signed payload) signer carries up to 64 payload bytes that a 32-byte column truncates"
+handling = "store signer keys with their type and full payload; do not treat them as participants unless meta shows them"
+go_accessors = ["xdr.PreconditionsV2.ExtraSigners", "xdr.TransactionEnvelope.ExtraSigners", "xdr.SignerKey.Type"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1274-1294" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkExtraSigners", lines = "457-481" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "PreconditionsV2", lines = "799-830" },
+]
+
+[[field]]
+id = "signer_key.signed_payload.payload"
+xdr_path = "SignerKey(SIGNER_KEY_TYPE_ED25519_SIGNED_PAYLOAD).ed25519SignedPayload.payload"
+validated_by_core = "partial"
+checks = "length 1 to 64: the 64 upper bound is xdr, the empty check is core (txMALFORMED in extraSigners, SET_OPTIONS_BAD_SIGNER in set options). content is never checked. the signature is ed25519 over these raw bytes, not over the transaction, not bound to the network"
+protocol_min = 19
+risk = "variable length payload: storing it in a fixed 32-byte column truncates it and makes the row undecodable (wallet-backend#716, #729); a valid signature can be replayed on any network"
+handling = "store the full payload with its length; encode as a P strkey (SEP-23) when rendering"
+go_accessors = ["xdr.SignerKey.Ed25519SignedPayload", "xdr.SignerKey.GetEd25519SignedPayload", "xdr.SignerKeyEd25519SignedPayload.Payload", "xdr.SignerKeyEd25519SignedPayload.Ed25519"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1285-1293" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetOptionsOpFrame.cpp", symbol = "SetOptionsOpFrame::doCheckValid", lines = "308-315" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SignatureUtils.cpp", symbol = "SignatureUtils::verifyEd25519SignedPayload", lines = "48-61" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-types.x", symbol = "SignerKey", lines = "61-79" },
+]
+
+[[field]]
+id = "tx.memo.type"
+xdr_path = "Transaction.memo.type"
+validated_by_core = "partial"
+checks = "any memo type is accepted for classic transactions. from protocol 25 a soroban transaction whose single operation is INVOKE_HOST_FUNCTION must use MEMO_NONE (txSOROBAN_INVALID) as a consensus rule; extend and restore transactions may carry a memo. before protocol 25 the same rule is only a transaction queue admission policy of the receiving node, so ledgers before 25 can contain soroban invocations with a memo or a muxed source"
+protocol_min = 0
+risk = "low for the type itself; the memo values below are unvalidated"
+handling = "switch on all five arms"
+go_accessors = ["xdr.Memo.Type", "xdr.Transaction.Memo", "xdr.TransactionEnvelope.Memo"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::validateSorobanMemo", lines = "340-369" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1315-1328" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/herder/TransactionQueue.cpp", symbol = "TransactionQueue::canAdd", lines = "498-507" },
+]
+
+[[field]]
+id = "tx.memo.text"
+xdr_path = "Transaction.memo(MEMO_TEXT).text"
+validated_by_core = "no"
+checks = "xdr length limit 28 bytes only; no utf-8, character set or content check. searched src/ outside tests for memo handling: the only use is makeClassicMemoSCVal, which copies the bytes into an SCV_STRING in the to_muxed_id field of transfer and mint events"
+protocol_min = 0
+risk = "arbitrary bytes up to 28: invalid utf-8, nul bytes, control characters. decoding as a utf-8 string can throw, replace bytes (js-stellar-sdk#1823) or break a text column; the same bytes reappear in event data"
+handling = "store as bytes; if a string is needed, validate utf-8 explicitly and keep the raw bytes alongside; never use it as a key or a destination identifier"
+go_accessors = ["xdr.Memo.Text", "xdr.Memo.GetText", "xdr.Memo.MustText"]
+citations = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Memo", lines = "773-785" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeClassicMemoSCVal", lines = "2252-2270" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/EventManager.cpp", symbol = "getPossibleMuxedData", lines = "104-136" },
+]
+notes = "the only other read of memo text in src/ is maybeTriggerTestInternalError in TransactionFrame.cpp (lines 2013-2025), compiled only under BUILD_TESTS"
+
+[[field]]
+id = "tx.memo.id"
+xdr_path = "Transaction.memo(MEMO_ID).id"
+validated_by_core = "no"
+checks = "any uint64; no check. copied into event to_muxed_id when the destination is a plain account"
+protocol_min = 0
+risk = "submitter-chosen; values above 2^63-1 overflow signed 64-bit columns and above 2^53-1 lose precision as js numbers"
+handling = "store as unsigned 64-bit (or decimal string); never treat as an account reference"
+go_accessors = ["xdr.Memo.Id", "xdr.Memo.GetId", "xdr.Memo.MustId"]
+citations = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Memo", lines = "773-785" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeClassicMemoSCVal", lines = "2252-2270" },
+]
+
+[[field]]
+id = "tx.memo.hash"
+xdr_path = "Transaction.memo(MEMO_HASH).hash"
+validated_by_core = "no"
+checks = "32 opaque bytes by xdr; no check"
+protocol_min = 0
+risk = "arbitrary bytes; it is not a hash of anything core knows"
+handling = "store as 32 raw bytes or hex"
+go_accessors = ["xdr.Memo.Hash", "xdr.Memo.GetHash", "xdr.Memo.MustHash"]
+citations = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Memo", lines = "773-785" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeClassicMemoSCVal", lines = "2252-2270" },
+]
+
+[[field]]
+id = "tx.memo.return"
+xdr_path = "Transaction.memo(MEMO_RETURN).retHash"
+validated_by_core = "no"
+checks = "32 opaque bytes by xdr; core does not check that it names a real transaction"
+protocol_min = 0
+risk = "a fabricated reference to a transaction that may not exist"
+handling = "store as 32 raw bytes; do not join on it without checking the referenced transaction exists"
+go_accessors = ["xdr.Memo.RetHash", "xdr.Memo.GetRetHash", "xdr.Memo.MustRetHash"]
+citations = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "Memo", lines = "773-785" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeClassicMemoSCVal", lines = "2252-2270" },
+]
+
+[[field]]
+id = "tx.operations"
+xdr_path = "Transaction.operations"
+validated_by_core = "yes"
+checks = "at most 100 by xdr; empty gives txMISSING_OPERATION; soroban and classic operations cannot be mixed and a soroban transaction has exactly one operation (txMALFORMED); soroban operations before protocol 20 are txMALFORMED"
+protocol_min = 0
+risk = "low"
+handling = "safe; per-operation fields are covered by their own rows"
+go_accessors = ["xdr.Transaction.Operations", "xdr.TransactionEnvelope.Operations", "xdr.TransactionEnvelope.OperationsCount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1296-1313" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::validateSorobanOpsConsistency", lines = "734-753" },
+]
+
+[[field]]
+id = "tx.ext"
+xdr_path = "Transaction.ext"
+validated_by_core = "yes"
+checks = "a soroban transaction must use ext v1 with sorobanData (txMALFORMED otherwise); from protocol 21 a classic transaction with ext v1 is txMALFORMED"
+protocol_min = 20
+risk = "low"
+handling = "read sorobanData only when ext.v is 1"
+go_accessors = ["xdr.Transaction.Ext", "xdr.TransactionExt.V", "xdr.TransactionExt.SorobanData", "xdr.TransactionExt.GetSorobanData"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::XDRProvidesValidFee", lines = "1773-1790" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1415-1437" },
+]
+
+# --------------------------------------------------------- soroban tx data
+
+[[field]]
+id = "tx.soroban.resource_fee"
+xdr_path = "Transaction.ext(1).sorobanData.resourceFee"
+validated_by_core = "yes"
+checks = "must be in [0, 2^50] (txMALFORMED); must be <= tx.fee (from protocol 23 only when the fee is charged, so a fee bump inner transaction may exceed its own fee); must be >= the computed non-refundable plus refundable resource fee (txSOROBAN_INVALID)"
+protocol_min = 20
+risk = "declared, not charged; the refundable part is returned"
+handling = "use feeCharged and the soroban fee fields in meta for what was paid"
+go_accessors = ["xdr.SorobanTransactionData.ResourceFee"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::XDRProvidesValidFee", lines = "1773-1790" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1336-1383" },
+]
+notes = "MAX_RESOURCE_FEE = 1LL << 50, TransactionFrame.cpp line 65"
+
+[[field]]
+id = "tx.soroban.resources.limits"
+xdr_path = "Transaction.ext(1).sorobanData.resources.{instructions,diskReadBytes,writeBytes}"
+validated_by_core = "yes"
+checks = "each must be <= the network per-transaction limit (txSOROBAN_INVALID); the whole transaction size must be <= txMaxSizeBytes. they are upper bounds enforced during execution, not consumption"
+protocol_min = 20
+risk = "treating declared resources as usage overstates cost"
+handling = "read actual consumption from soroban meta and diagnostic or metrics events"
+go_accessors = ["xdr.SorobanResources.Instructions", "xdr.SorobanResources.DiskReadBytes", "xdr.SorobanResources.WriteBytes"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources", lines = "755-973" },
+]
+
+[[field]]
+id = "tx.soroban.footprint"
+xdr_path = "Transaction.ext(1).sorobanData.resources.footprint.{readOnly,readWrite}"
+validated_by_core = "partial"
+checks = "key types limited to ACCOUNT, TRUSTLINE (valid non-native asset, account not issuer), CONTRACT_DATA, CONTRACT_CODE; each key xdr size <= maxContractDataKeySizeBytes; entry counts within network limits (from protocol 23 total entries <= txMaxFootprintEntries); no duplicate keys within or across the two sets. keys need not exist, and the host enforces only that accesses stay inside the footprint"
+protocol_min = 20
+risk = "the footprint is what the submitter allowed the contract to touch, not what it touched; keys can name entries that do not exist or were never read or written"
+handling = "derive touched entries and participants from ledger entry changes in meta, never from the footprint"
+go_accessors = ["xdr.SorobanResources.Footprint", "xdr.LedgerFootprint.ReadOnly", "xdr.LedgerFootprint.ReadWrite"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources", lines = "792-907" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1385-1413" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/e2e_invoke.rs", symbol = "invoke_host_function", lines = "470-578" },
+]
+
+[[field]]
+id = "tx.soroban.ext.archived_soroban_entries"
+xdr_path = "Transaction.ext(1).sorobanData.ext(1).resourceExt.archivedSorobanEntries"
+validated_by_core = "yes"
+checks = "ext v1 before protocol 23 is txSOROBAN_INVALID; indexes must be strictly ascending, < readWrite length, and point at persistent CONTRACT_DATA or CONTRACT_CODE keys"
+protocol_min = 23
+risk = "low; it marks entries the submitter claims are archived, the restore itself shows in meta"
+handling = "use meta restore changes to learn what was restored"
+go_accessors = ["xdr.SorobanTransactionData.Ext", "xdr.SorobanTransactionDataExt.ResourceExt", "xdr.SorobanTransactionDataExt.GetResourceExt", "xdr.SorobanResourcesExtV0.ArchivedSorobanEntries"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::checkSorobanResources", lines = "919-970" },
+]
+
+# ---------------------------------------------------------------- fee bump
+
+[[field]]
+id = "feebump.fee_source"
+xdr_path = "FeeBumpTransaction.feeSource"
+validated_by_core = "yes"
+checks = "reduced to its base key; must exist (txNO_ACCOUNT), its signers must reach the low threshold over the fee bump contents hash (txBAD_AUTH), must afford the fee (txINSUFFICIENT_BALANCE)"
+protocol_min = 13
+risk = "the fee source pays but is not the inner transaction source"
+handling = "record the fee payer separately from the transaction source"
+go_accessors = ["xdr.FeeBumpTransaction.FeeSource", "xdr.TransactionEnvelope.FeeBumpAccount", "xdr.TransactionEnvelope.FeeAccount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::commonValidPreSeqNum", lines = "456-463" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::commonValid", lines = "466-506" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::getFeeSourceID", lines = "675-679" },
+]
+
+[[field]]
+id = "feebump.fee_source.mux_id"
+xdr_path = "FeeBumpTransaction.feeSource(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "discarded by toAccountID in getFeeSourceID; not checked"
+protocol_min = 13
+risk = "submitter-chosen 64-bit value with no account behind it (stellar-etl#477 historical fee_account_muxed rows)"
+handling = "store base account and mux id separately"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::getFeeSourceID", lines = "675-679" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
+]
+
+[[field]]
+id = "feebump.fee"
+xdr_path = "FeeBumpTransaction.fee"
+validated_by_core = "yes"
+checks = "must be >= 0 (txMALFORMED); inclusion fee must be >= baseFee times (inner ops + 1); the per-op inclusion rate must be >= the inner rate (txINSUFFICIENT_FEE), and the inner inclusion fee must be >= 0 except, from protocol 23, for soroban inner transactions (txFEE_BUMP_INNER_FAILED)"
+protocol_min = 13
+risk = "a bid; the inner transaction fee is not what was paid"
+handling = "use feeCharged from the fee bump result"
+go_accessors = ["xdr.FeeBumpTransaction.Fee", "xdr.TransactionEnvelope.FeeBumpFee"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::XDRProvidesValidFee", lines = "572-580" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::commonValidPreSeqNum", lines = "387-464" },
+]
+
+[[field]]
+id = "feebump.signatures"
+xdr_path = "FeeBumpTransactionEnvelope.signatures"
+validated_by_core = "yes"
+checks = "checked against the fee source over sha256(networkID, ENVELOPE_TYPE_TX_FEE_BUMP, feeBump.tx); every signature must be used (txBAD_AUTH_EXTRA)"
+protocol_min = 13
+risk = "outer and inner signature lists sign different hashes"
+handling = "keep outer and inner signatures apart"
+go_accessors = ["xdr.FeeBumpTransactionEnvelope.Signatures", "xdr.TransactionEnvelope.FeeBumpSignatures"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::checkValidImpl", lines = "287-350" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::getContentsHash", lines = "615-624" },
+]
+
+[[field]]
+id = "feebump.inner_tx"
+xdr_path = "FeeBumpTransaction.innerTx(ENVELOPE_TYPE_TX).v1"
+validated_by_core = "yes"
+checks = "only the ENVELOPE_TYPE_TX arm exists in xdr. core rebuilds a v1 envelope and runs the full transaction validation on it without charging its fee, so inner signatures are checked over the inner contents hash and every inner field row applies"
+protocol_min = 13
+risk = "using the outer hash for the inner transaction, or the inner fee as paid"
+handling = "index the inner transaction with both hashes (outer full hash and inner hash) and the outer fee source as payer"
+go_accessors = ["xdr.FeeBumpTransaction.InnerTx", "xdr.FeeBumpTransactionInnerTx.V1", "xdr.FeeBumpTransactionInnerTx.GetV1"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::convertInnerTxToV1", lines = "35-41" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::checkValidImpl", lines = "343-347" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "FeeBumpTransaction", lines = "975-991" },
+]
+
+# --------------------------------------------------------------- operation
+
+[[field]]
+id = "op.source_account"
+xdr_path = "Operation.sourceAccount"
+validated_by_core = "yes"
+checks = "optional; when absent the transaction source is used. reduced to its base key; must exist (opNO_ACCOUNT) and its signers must reach the operation threshold (opBAD_AUTH)"
+protocol_min = 0
+risk = "an operation source is a real account, but not every affected account"
+handling = "use the base key; resolve the absent case to the transaction source"
+go_accessors = ["xdr.Operation.SourceAccount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OperationFrame.cpp", symbol = "OperationFrame::checkSignature", lines = "216-262" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OperationFrame.cpp", symbol = "OperationFrame::checkValid", lines = "282-363" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OperationFrame.cpp", symbol = "OperationFrame::getSourceID", lines = "264-269" },
+]
+
+[[field]]
+id = "op.source_account.mux_id"
+xdr_path = "Operation.sourceAccount(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "discarded by toAccountID; copied into events only. from protocol 25 a muxed operation source on INVOKE_HOST_FUNCTION is txSOROBAN_INVALID; the soroban host is given only the base AccountID"
+protocol_min = 13
+risk = "same as the transaction source mux id; a muxed operation source plus its base account can collide as two keys for one account (wallet-backend#753)"
+handling = "store base account and mux id separately; de-duplicate participants by base account"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OperationFrame.cpp", symbol = "OperationFrame::getSourceID", lines = "264-269" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::validateSorobanMemo", lines = "340-369" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionApplyHelper::invokeHostFunction", lines = "664-712" },
+]
+
+[[field]]
+id = "op.create_account.destination"
+xdr_path = "CreateAccountOp.destination"
+validated_by_core = "yes"
+checks = "must differ from the source (CREATE_ACCOUNT_MALFORMED); must not exist at apply (CREATE_ACCOUNT_ALREADY_EXIST)"
+protocol_min = 0
+risk = "low on success"
+handling = "confirm creation from the account entry created in meta"
+go_accessors = ["xdr.CreateAccountOp.Destination"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateAccountOpFrame.cpp", symbol = "CreateAccountOpFrame::doCheckValid", lines = "174-193" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateAccountOpFrame.cpp", symbol = "CreateAccountOpFrame::doApply", lines = "140-149" },
+]
+
+[[field]]
+id = "op.create_account.starting_balance"
+xdr_path = "CreateAccountOp.startingBalance"
+validated_by_core = "yes"
+checks = "must be >= 0 from protocol 14, > 0 before (CREATE_ACCOUNT_MALFORMED); reserve and source balance checked at apply"
+protocol_min = 0
+risk = "low"
+handling = "safe on success; 0 is legal from protocol 14 with sponsorship"
+go_accessors = ["xdr.CreateAccountOp.StartingBalance"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateAccountOpFrame.cpp", symbol = "CreateAccountOpFrame::doCheckValid", lines = "174-193" },
+]
+
+[[field]]
+id = "op.payment.destination"
+xdr_path = "PaymentOp.destination"
+validated_by_core = "yes"
+checks = "base key must exist at apply (PAYMENT_NO_DESTINATION through the internal path payment) and hold a trustline for non-native assets; a native payment to self succeeds instantly"
+protocol_min = 0
+risk = "on a failed payment the destination may not exist at all"
+handling = "only treat the destination as a participant when the payment succeeded or meta shows a change"
+go_accessors = ["xdr.PaymentOp.Destination", "xdr.MuxedAccount.ToAccountId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PaymentOpFrame.cpp", symbol = "PaymentOpFrame::doApply", lines = "36-136" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictReceiveOpFrame.cpp", symbol = "PathPaymentStrictReceiveOpFrame::doApply", lines = "63-71" },
+]
+
+[[field]]
+id = "op.payment.destination.mux_id"
+xdr_path = "PaymentOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "reduced away by toAccountID; copied into the transfer event as to_muxed_id (protocol 23 event format)"
+protocol_min = 13
+risk = "an arbitrary id that does not correspond to anything on ledger; truncating M addresses to 32 bytes loses it (wallet-backend#716)"
+handling = "store base account plus unsigned 64-bit id; read the id from the event when present"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PaymentOpFrame.cpp", symbol = "PaymentOpFrame::doApply", lines = "50-64" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/EventManager.cpp", symbol = "getPossibleMuxedData", lines = "104-136" },
+]
+
+[[field]]
+id = "op.payment.asset"
+xdr_path = "PaymentOp.asset"
+validated_by_core = "partial"
+checks = "isAssetValid: alphanum4 code 1 to 4 and alphanum12 code 5 to 12 ascii [a-zA-Z0-9] characters with only trailing zero padding (PAYMENT_MALFORMED). from protocol 13 the issuer is not checked for existence"
+protocol_min = 0
+risk = "the issuer account may not exist; codes compare by raw bytes including padding"
+handling = "key assets by (type, raw code bytes, issuer key bytes), not by display string"
+go_accessors = ["xdr.PaymentOp.Asset"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PaymentOpFrame.cpp", symbol = "PaymentOpFrame::doCheckValid", lines = "138-152" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/util/types.cpp", symbol = "isAssetValid", lines = "147-214" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentOpFrameBase.cpp", symbol = "PathPaymentOpFrameBase::checkIssuer", lines = "76-90" },
+]
+
+[[field]]
+id = "op.payment.amount"
+xdr_path = "PaymentOp.amount"
+validated_by_core = "yes"
+checks = "must be > 0 (PAYMENT_MALFORMED); balance, limits and authorization checked at apply"
+protocol_min = 0
+risk = "low; int64 stroops lose precision as float64 (stellar-etl#454)"
+handling = "store as int64 or decimal, never float"
+go_accessors = ["xdr.PaymentOp.Amount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PaymentOpFrame.cpp", symbol = "PaymentOpFrame::doCheckValid", lines = "138-152" },
+]
+
+[[field]]
+id = "op.path_payment.destination"
+xdr_path = "PathPaymentStrictReceiveOp.destination | PathPaymentStrictSendOp.destination"
+validated_by_core = "yes"
+checks = "base key must exist at apply (NO_DESTINATION) unless the issuer bypass applies; trustline checked when crediting"
+protocol_min = 0
+risk = "as for payment destination"
+handling = "as for payment destination"
+go_accessors = ["xdr.PathPaymentStrictReceiveOp.Destination", "xdr.PathPaymentStrictSendOp.Destination"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictReceiveOpFrame.cpp", symbol = "PathPaymentStrictReceiveOpFrame::doApply", lines = "63-71" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictSendOpFrame.cpp", symbol = "PathPaymentStrictSendOpFrame::doApply", lines = "61-69" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentOpFrameBase.cpp", symbol = "PathPaymentOpFrameBase::getDestID", lines = "25-29" },
+]
+
+[[field]]
+id = "op.path_payment.destination.mux_id"
+xdr_path = "PathPaymentStrictReceiveOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id | PathPaymentStrictSendOp.destination(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "discarded by getDestID (toAccountID); copied into the transfer event"
+protocol_min = 13
+risk = "as for payment mux id"
+handling = "as for payment mux id"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentOpFrameBase.cpp", symbol = "PathPaymentOpFrameBase::getDestID", lines = "25-29" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
+]
+
+[[field]]
+id = "op.path_payment.amounts"
+xdr_path = "PathPaymentStrictReceiveOp.{sendMax,destAmount} | PathPaymentStrictSendOp.{sendAmount,destMin}"
+validated_by_core = "yes"
+checks = "all must be > 0 (MALFORMED); sendMax and destMin are limits, the exchanged amounts come from the result"
+protocol_min = 0
+risk = "sendMax and destMin are bounds, not amounts moved"
+handling = "take actual amounts from the operation result (claim atoms and last amount) or from events"
+go_accessors = ["xdr.PathPaymentStrictReceiveOp.SendMax", "xdr.PathPaymentStrictReceiveOp.DestAmount", "xdr.PathPaymentStrictSendOp.SendAmount", "xdr.PathPaymentStrictSendOp.DestMin"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictReceiveOpFrame.cpp", symbol = "PathPaymentStrictReceiveOpFrame::doCheckValid", lines = "155-179" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictSendOpFrame.cpp", symbol = "PathPaymentStrictSendOpFrame::doCheckValid", lines = "148-172" },
+]
+
+[[field]]
+id = "op.path_payment.path"
+xdr_path = "PathPaymentStrictReceiveOp.path | PathPaymentStrictSendOp.path"
+validated_by_core = "partial"
+checks = "at most 5 by xdr; each asset must pass isAssetValid (MALFORMED); send, dest and path assets are all checked with isAssetValid. distinctness and existence of order books are not checked"
+protocol_min = 0
+risk = "the path is the submitter's route request; hops with no liquidity or repeated assets are legal and the trades actually made are only in the result"
+handling = "derive trades from claim atoms in the result and from meta, not from the path"
+go_accessors = ["xdr.PathPaymentStrictReceiveOp.Path", "xdr.PathPaymentStrictSendOp.Path", "xdr.PathPaymentStrictReceiveOp.SendAsset", "xdr.PathPaymentStrictReceiveOp.DestAsset", "xdr.PathPaymentStrictSendOp.SendAsset", "xdr.PathPaymentStrictSendOp.DestAsset"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictReceiveOpFrame.cpp", symbol = "PathPaymentStrictReceiveOpFrame::doCheckValid", lines = "155-179" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentStrictSendOpFrame.cpp", symbol = "PathPaymentStrictSendOpFrame::doCheckValid", lines = "148-172" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "PathPaymentStrictReceiveOp", lines = "110-122" },
+]
+
+[[field]]
+id = "op.manage_offer.offer_id"
+xdr_path = "ManageSellOfferOp.offerID | ManageBuyOfferOp.offerID"
+validated_by_core = "yes"
+checks = "from protocol 15 must be >= 0 (MALFORMED); 0 with a delete (amount 0) is MALFORMED from protocol 11; a nonzero id must name an offer owned by the source at apply (NOT_FOUND). 0 means create, and the new id is assigned by core and returned in the result"
+protocol_min = 0
+risk = "offerID 0 is not the offer's id; ids above 2^53-1 lose precision in js; negative ids appear in pre-15 history"
+handling = "take the created or updated offer id from the operation result or meta; store as int64"
+go_accessors = ["xdr.ManageSellOfferOp.OfferId", "xdr.ManageBuyOfferOp.OfferId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageOfferOpFrameBase.cpp", symbol = "ManageOfferOpFrameBase::doCheckValid", lines = "599-644" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageOfferOpFrameBase.cpp", symbol = "ManageOfferOpFrameBase::doApply", lines = "248-255" },
+]
+
+[[field]]
+id = "op.manage_offer.assets_amount_price"
+xdr_path = "ManageSellOfferOp.{selling,buying,amount,price} | ManageBuyOfferOp.{selling,buying,buyAmount,price} | CreatePassiveSellOfferOp.{selling,buying,amount,price}"
+validated_by_core = "yes"
+checks = "both assets isAssetValid and different; amount >= 0; price n and d > 0 (MALFORMED). trustlines and authorization at apply (only before protocol 13 also issuer existence)"
+protocol_min = 0
+risk = "an offer may be fully or partly crossed immediately, so the envelope amount is not the resting amount"
+handling = "read offer state and trades from meta and the result"
+go_accessors = ["xdr.ManageSellOfferOp.Selling", "xdr.ManageSellOfferOp.Buying", "xdr.ManageSellOfferOp.Amount", "xdr.ManageSellOfferOp.Price", "xdr.ManageBuyOfferOp.BuyAmount", "xdr.CreatePassiveSellOfferOp.Amount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageOfferOpFrameBase.cpp", symbol = "ManageOfferOpFrameBase::doCheckValid", lines = "599-644" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageOfferOpFrameBase.cpp", symbol = "ManageOfferOpFrameBase::checkOfferValid", lines = "34-105" },
+]
+
+[[field]]
+id = "op.set_options.home_domain"
+xdr_path = "SetOptionsOp.homeDomain"
+validated_by_core = "partial"
+checks = "xdr string32 (at most 32 bytes); every byte must be printable ascii 0x20 to 0x7e (SET_OPTIONS_INVALID_HOME_DOMAIN). empty is allowed. not checked to be a domain name"
+protocol_min = 0
+risk = "any printable ascii, not necessarily a resolvable domain; fetching stellar.toml from it is an outbound request to a submitter-chosen host"
+handling = "store as text; validate as a hostname before any network use"
+go_accessors = ["xdr.SetOptionsOp.HomeDomain"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetOptionsOpFrame.cpp", symbol = "SetOptionsOpFrame::doCheckValid", lines = "318-325" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/util/types.cpp", symbol = "isStringValid", lines = "105-116" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/util/types.h", symbol = "isAsciiNonControl", lines = "196-201" },
+]
+
+[[field]]
+id = "op.set_options.inflation_dest"
+xdr_path = "SetOptionsOp.inflationDest"
+validated_by_core = "yes"
+checks = "must be the source or an existing account at apply (SET_OPTIONS_INVALID_INFLATION)"
+protocol_min = 0
+risk = "low; inflation has been disabled since protocol 12 but the field can still be set"
+handling = "safe on success"
+go_accessors = ["xdr.SetOptionsOp.InflationDest"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetOptionsOpFrame.cpp", symbol = "SetOptionsOpFrame::doApply", lines = "133-145" },
+]
+
+[[field]]
+id = "op.set_options.signer"
+xdr_path = "SetOptionsOp.signer"
+validated_by_core = "yes"
+checks = "key must not be the source's own key; weight <= 255 from protocol 10; non-ed25519 keys are rejected before protocol 3; a signed-payload key is rejected before protocol 19 and when its payload is empty (SET_OPTIONS_BAD_SIGNER). weight 0 removes the signer. the key need not be an existing account"
+protocol_min = 0
+risk = "signer keys of four types, including P keys with up to 64 payload bytes; a 32-byte signer column halts ingestion or truncates (wallet-backend#729)"
+handling = "store signer type, key and full payload; take the resulting signer set from the account entry in meta"
+go_accessors = ["xdr.SetOptionsOp.Signer", "xdr.Signer.Key", "xdr.Signer.Weight", "xdr.SignerKey.Type"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetOptionsOpFrame.cpp", symbol = "SetOptionsOpFrame::doCheckValid", lines = "287-316" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "Signer", lines = "106-110" },
+]
+
+[[field]]
+id = "op.set_options.thresholds_and_flags"
+xdr_path = "SetOptionsOp.{clearFlags,setFlags,masterWeight,lowThreshold,medThreshold,highThreshold}"
+validated_by_core = "yes"
+checks = "flags must be within the protocol's account flag mask (SET_OPTIONS_UNKNOWN_FLAG) and set and clear must not overlap (SET_OPTIONS_BAD_FLAGS); weight and thresholds <= 255 (SET_OPTIONS_THRESHOLD_OUT_OF_RANGE); auth flags cannot change on an immutable account at apply"
+protocol_min = 0
+risk = "low"
+handling = "take resulting flags and thresholds from the account entry in meta"
+go_accessors = ["xdr.SetOptionsOp.ClearFlags", "xdr.SetOptionsOp.SetFlags", "xdr.SetOptionsOp.MasterWeight", "xdr.SetOptionsOp.LowThreshold", "xdr.SetOptionsOp.MedThreshold", "xdr.SetOptionsOp.HighThreshold"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetOptionsOpFrame.cpp", symbol = "SetOptionsOpFrame::doCheckValid", lines = "230-284" },
+]
+
+[[field]]
+id = "op.change_trust.line"
+xdr_path = "ChangeTrustOp.line"
+validated_by_core = "yes"
+checks = "isAssetValid; native rejected from protocol 10; the source must not be the issuer from protocol 16 (CHANGE_TRUST_MALFORMED). issuer existence is not checked"
+protocol_min = 0
+risk = "the issuer may not exist"
+handling = "key the trustline asset by raw bytes"
+go_accessors = ["xdr.ChangeTrustOp.Line", "xdr.ChangeTrustAsset.Type", "xdr.ChangeTrustAsset.AlphaNum4", "xdr.ChangeTrustAsset.AlphaNum12"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ChangeTrustOpFrame.cpp", symbol = "ChangeTrustOpFrame::doCheckValid", lines = "311-342" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ChangeTrustOpFrame.cpp", symbol = "ChangeTrustOpFrame::doApply", lines = "158-170" },
+]
+
+[[field]]
+id = "op.change_trust.line.liquidity_pool"
+xdr_path = "ChangeTrustOp.line(ASSET_TYPE_POOL_SHARE).liquidityPool.constantProduct"
+validated_by_core = "yes"
+checks = "from protocol 18; assetA and assetB must each pass isAssetValid, assetA < assetB under the xdr-generated operator< (type, then raw code bytes with padding, then issuer key bytes), fee must equal LIQUIDITY_POOL_FEE_V18 = 30, else CHANGE_TRUST_MALFORMED"
+protocol_min = 18
+risk = "an sdk that orders issuers by strkey text builds a pool id core rejects (js-stellar-sdk#1766); the pool id is sha256 of these parameters"
+handling = "order assets by raw xdr bytes, never by display string; take the pool id from meta"
+go_accessors = ["xdr.ChangeTrustAsset.LiquidityPool", "xdr.ChangeTrustAsset.GetLiquidityPool", "xdr.LiquidityPoolParameters.ConstantProduct", "xdr.LiquidityPoolConstantProductParameters.AssetA", "xdr.LiquidityPoolConstantProductParameters.AssetB", "xdr.LiquidityPoolConstantProductParameters.Fee", "xdr.Asset.LessThan"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/util/types.cpp", symbol = "isPoolShareAssetValid(ChangeTrustAsset)", lines = "132-144" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "LiquidityPoolConstantProductParameters", lines = "457-462" },
+]
+notes = "operator< on Asset is generated by xdrpp from the xdr definition (lib/xdrpp, not read here); the field order it compares is the xdr field order. plan R5 records the byte rule"
+
+[[field]]
+id = "op.change_trust.limit"
+xdr_path = "ChangeTrustOp.limit"
+validated_by_core = "yes"
+checks = "must be >= 0 (CHANGE_TRUST_MALFORMED); at apply must be >= current balance plus buying liabilities (CHANGE_TRUST_INVALID_LIMIT); 0 deletes the trustline"
+protocol_min = 0
+risk = "low"
+handling = "take the resulting limit from the trustline entry in meta"
+go_accessors = ["xdr.ChangeTrustOp.Limit"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ChangeTrustOpFrame.cpp", symbol = "ChangeTrustOpFrame::doCheckValid", lines = "311-342" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ChangeTrustOpFrame.cpp", symbol = "ChangeTrustOpFrame::doApply", lines = "190-200" },
+]
+
+[[field]]
+id = "op.allow_trust"
+xdr_path = "AllowTrustOp.{trustor,asset,authorize}"
+validated_by_core = "yes"
+checks = "asset not native and its code valid; authorize <= AUTHORIZED_TO_MAINTAIN_LIABILITIES_FLAG and a valid trustline flag for the protocol; trustor must differ from the source from protocol 16 (ALLOW_TRUST_MALFORMED)"
+protocol_min = 0
+risk = "low"
+handling = "take authorization state from the trustline entry in meta"
+go_accessors = ["xdr.AllowTrustOp.Trustor", "xdr.AllowTrustOp.Asset", "xdr.AllowTrustOp.Authorize"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/AllowTrustOpFrame.cpp", symbol = "AllowTrustOpFrame::doCheckValid", lines = "155-191" },
+]
+
+[[field]]
+id = "op.manage_data.data_name"
+xdr_path = "ManageDataOp.dataName"
+validated_by_core = "partial"
+checks = "xdr string64 (at most 64 bytes); at least 1 byte and every byte printable ascii 0x20 to 0x7e (MANAGE_DATA_INVALID_NAME). no other content check"
+protocol_min = 2
+risk = "printable ascii only, but any printable ascii, including quotes and separators"
+handling = "store as text with proper escaping; key data entries by (account, name bytes)"
+go_accessors = ["xdr.ManageDataOp.DataName"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageDataOpFrame.cpp", symbol = "ManageDataOpFrame::doCheckValid", lines = "104-122" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/util/types.cpp", symbol = "isStringValid", lines = "105-116" },
+]
+
+[[field]]
+id = "op.manage_data.data_value"
+xdr_path = "ManageDataOp.dataValue"
+validated_by_core = "no"
+checks = "xdr opaque up to 64 bytes; doCheckValid does not read it and doApply copies it verbatim into the data entry. null deletes the entry (MANAGE_DATA_NAME_NOT_FOUND when absent)"
+protocol_min = 2
+risk = "arbitrary binary; decoding as text or as base64 of text fails or corrupts"
+handling = "store as bytes"
+go_accessors = ["xdr.ManageDataOp.DataValue"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ManageDataOpFrame.cpp", symbol = "ManageDataOpFrame::doApply", lines = "31-102" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "DataValue", lines = "16-16" },
+]
+
+[[field]]
+id = "op.bump_sequence.bump_to"
+xdr_path = "BumpSequenceOp.bumpTo"
+validated_by_core = "yes"
+checks = "must be >= 0 (BUMP_SEQUENCE_BAD_SEQ); applied only when greater than the current sequence"
+protocol_min = 10
+risk = "a lower bumpTo is a successful no-op"
+handling = "read the resulting sequence from meta"
+go_accessors = ["xdr.BumpSequenceOp.BumpTo"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/BumpSequenceOpFrame.cpp", symbol = "BumpSequenceOpFrame::doCheckValid", lines = "71-81" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/BumpSequenceOpFrame.cpp", symbol = "BumpSequenceOpFrame::doApply", lines = "38-69" },
+]
+
+[[field]]
+id = "op.create_claimable_balance.claimants.destination"
+xdr_path = "CreateClaimableBalanceOp.claimants[].v0.destination"
+validated_by_core = "partial"
+checks = "1 to 10 claimants (xdr upper bound, core rejects empty); destinations must be unique within the operation (CREATE_CLAIMABLE_BALANCE_MALFORMED). destinations are not checked for existence"
+protocol_min = 14
+risk = "claimants can be accounts that do not exist and never will; they are not participants of the transaction"
+handling = "record claimants as potential claimers only; a claimant participates when a claim succeeds"
+go_accessors = ["xdr.CreateClaimableBalanceOp.Claimants", "xdr.Claimant.V0", "xdr.ClaimantV0.Destination"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "CreateClaimableBalanceOpFrame::doCheckValid", lines = "263-298" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "CreateClaimableBalanceOpFrame::doApply", lines = "143-261" },
+]
+
+[[field]]
+id = "op.create_claimable_balance.claimants.predicate"
+xdr_path = "CreateClaimableBalanceOp.claimants[].v0.predicate"
+validated_by_core = "yes"
+checks = "recursion depth at most 4 (the claimant predicate is depth 1); AND and OR must have exactly 2 children; NOT must be non-null; absBefore and relBefore must be >= 0 (CREATE_CLAIMABLE_BALANCE_MALFORMED). at apply every relBefore is rewritten to absBefore = close time + relBefore, so the stored entry differs from the envelope"
+protocol_min = 14
+risk = "a recursive structure; the envelope predicate and the ledger entry predicate differ for relative times"
+handling = "bound recursion at depth 4 when walking; read the stored predicate from the claimable balance entry in meta"
+go_accessors = ["xdr.ClaimantV0.Predicate", "xdr.ClaimPredicate.Type", "xdr.ClaimPredicate.AndPredicates", "xdr.ClaimPredicate.OrPredicates", "xdr.ClaimPredicate.NotPredicate", "xdr.ClaimPredicate.AbsBefore", "xdr.ClaimPredicate.RelBefore"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "validatePredicate", lines = "75-126" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "updatePredicatesForApply", lines = "30-73" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-ledger-entries.x", symbol = "ClaimPredicate", lines = "379-394" },
+]
+
+[[field]]
+id = "op.create_claimable_balance.asset_amount"
+xdr_path = "CreateClaimableBalanceOp.{asset,amount}"
+validated_by_core = "yes"
+checks = "isAssetValid and amount > 0 (MALFORMED); funds, trustline and authorization at apply. the balance id is derived by core and returned in the result"
+protocol_min = 14
+risk = "the balance id is not in the envelope"
+handling = "take the balance id from the result or meta"
+go_accessors = ["xdr.CreateClaimableBalanceOp.Asset", "xdr.CreateClaimableBalanceOp.Amount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/CreateClaimableBalanceOpFrame.cpp", symbol = "CreateClaimableBalanceOpFrame::doCheckValid", lines = "263-298" },
+]
+
+[[field]]
+id = "op.claim_claimable_balance.balance_id"
+xdr_path = "ClaimClaimableBalanceOp.balanceID"
+validated_by_core = "yes"
+checks = "no static check (doCheckValid returns true); at apply the entry must exist (CLAIM_CLAIMABLE_BALANCE_DOES_NOT_EXIST) and the source must be a claimant whose predicate holds (CANNOT_CLAIM)"
+protocol_min = 14
+risk = "on a failed claim the id may name nothing"
+handling = "trust only on success"
+go_accessors = ["xdr.ClaimClaimableBalanceOp.BalanceId", "xdr.ClaimableBalanceId.V0"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClaimClaimableBalanceOpFrame.cpp", symbol = "ClaimClaimableBalanceOpFrame::doCheckValid", lines = "197-202" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClaimClaimableBalanceOpFrame.cpp", symbol = "ClaimClaimableBalanceOpFrame::doApply", lines = "111-141" },
+]
+
+[[field]]
+id = "op.clawback.from"
+xdr_path = "ClawbackOp.from"
+validated_by_core = "yes"
+checks = "compared as a full MuxedAccount against the source (CLAWBACK_MALFORMED when equal); at apply reduced to its base key, which must hold a clawback-enabled trustline (CLAWBACK_NO_TRUST, CLAWBACK_NOT_CLAWBACK_ENABLED)"
+protocol_min = 17
+risk = "low on success"
+handling = "use the base key"
+go_accessors = ["xdr.ClawbackOp.From"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackOpFrame.cpp", symbol = "ClawbackOpFrame::doCheckValid", lines = "63-98" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackOpFrame.cpp", symbol = "ClawbackOpFrame::doApply", lines = "28-61" },
+]
+
+[[field]]
+id = "op.clawback.from.mux_id"
+xdr_path = "ClawbackOp.from(KEY_TYPE_MUXED_ED25519).med25519.id"
+validated_by_core = "no"
+checks = "discarded by toAccountID at apply; copied into the clawback event"
+protocol_min = 17
+risk = "arbitrary 64-bit value"
+handling = "store separately from the base account"
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackOpFrame.cpp", symbol = "ClawbackOpFrame::doApply", lines = "28-61" },
+]
+
+[[field]]
+id = "op.clawback.asset_amount"
+xdr_path = "ClawbackOp.{asset,amount}"
+validated_by_core = "yes"
+checks = "amount >= 1; asset not native, valid, and issued by the source (CLAWBACK_MALFORMED); balance checked at apply"
+protocol_min = 17
+risk = "low"
+handling = "safe on success"
+go_accessors = ["xdr.ClawbackOp.Asset", "xdr.ClawbackOp.Amount"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackOpFrame.cpp", symbol = "ClawbackOpFrame::doCheckValid", lines = "63-98" },
+]
+
+[[field]]
+id = "op.clawback_claimable_balance.balance_id"
+xdr_path = "ClawbackClaimableBalanceOp.balanceID"
+validated_by_core = "yes"
+checks = "no static check; at apply the entry must exist (DOES_NOT_EXIST), the source must be the asset issuer (NOT_ISSUER) and clawback must be enabled on the balance"
+protocol_min = 17
+risk = "on failure the id may name nothing"
+handling = "trust only on success"
+go_accessors = ["xdr.ClawbackClaimableBalanceOp.BalanceId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackClaimableBalanceOpFrame.cpp", symbol = "ClawbackClaimableBalanceOpFrame::doApply", lines = "29-84" },
+]
+
+[[field]]
+id = "op.set_trust_line_flags"
+xdr_path = "SetTrustLineFlagsOp.{trustor,asset,clearFlags,setFlags}"
+validated_by_core = "yes"
+checks = "asset not native, valid and issued by the source; trustor differs from source; set and clear disjoint; setFlags a valid trustline flag set without the clawback flag; clearFlags within the mask (SET_TRUST_LINE_FLAGS_MALFORMED)"
+protocol_min = 17
+risk = "low"
+handling = "take resulting flags from the trustline entry in meta"
+go_accessors = ["xdr.SetTrustLineFlagsOp.Trustor", "xdr.SetTrustLineFlagsOp.Asset", "xdr.SetTrustLineFlagsOp.ClearFlags", "xdr.SetTrustLineFlagsOp.SetFlags"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/SetTrustLineFlagsOpFrame.cpp", symbol = "SetTrustLineFlagsOpFrame::doCheckValid", lines = "100-151" },
+]
+
+[[field]]
+id = "op.begin_sponsoring.sponsored_id"
+xdr_path = "BeginSponsoringFutureReservesOp.sponsoredID"
+validated_by_core = "partial"
+checks = "must differ from the source (BEGIN_SPONSORING_FUTURE_RESERVES_MALFORMED); at apply must not already be sponsored or sponsoring (ALREADY_SPONSORED, RECURSIVE). the account is not loaded, so it need not exist (it may be created later in the same transaction); from protocol 14 a transaction that leaves a sponsorship open fails with txBAD_SPONSORSHIP"
+protocol_min = 14
+risk = "the sponsored id may be an account that does not exist yet"
+handling = "derive sponsorship relations from sponsoring ids on ledger entries in meta"
+go_accessors = ["xdr.BeginSponsoringFutureReservesOp.SponsoredId"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/BeginSponsoringFutureReservesOpFrame.cpp", symbol = "BeginSponsoringFutureReservesOpFrame::doCheckValid", lines = "105-115" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/BeginSponsoringFutureReservesOpFrame.cpp", symbol = "BeginSponsoringFutureReservesOpFrame::doApply", lines = "64-103" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::applyOperations", lines = "2418-2423" },
+]
+
+[[field]]
+id = "op.revoke_sponsorship"
+xdr_path = "RevokeSponsorshipOp.ledgerKey | RevokeSponsorshipOp.signer"
+validated_by_core = "partial"
+checks = "for ledger keys only ACCOUNT, TRUSTLINE (valid non-native asset, account not issuer), OFFER (offerID > 0), DATA (name 1 to 64 printable ascii) and CLAIMABLE_BALANCE are allowed (REVOKE_SPONSORSHIP_MALFORMED); existence and sponsorship are checked at apply. the signer arm is not checked statically"
+protocol_min = 14
+risk = "on failure the key may name nothing"
+handling = "read sponsorship changes from meta"
+go_accessors = ["xdr.RevokeSponsorshipOp.Type", "xdr.RevokeSponsorshipOp.LedgerKey", "xdr.RevokeSponsorshipOp.Signer"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/RevokeSponsorshipOpFrame.cpp", symbol = "RevokeSponsorshipOpFrame::doCheckValid", lines = "402-456" },
+]
+
+[[field]]
+id = "op.account_merge.destination"
+xdr_path = "Operation.body(ACCOUNT_MERGE).destination"
+validated_by_core = "yes"
+checks = "base key must differ from the source (ACCOUNT_MERGE_MALFORMED) and exist at apply (ACCOUNT_MERGE_NO_ACCOUNT); the mux id is discarded by toAccountID and copied into the transfer event"
+protocol_min = 0
+risk = "the mux id part is unvalidated as for payments"
+handling = "store base account and mux id separately; take the merged amount from the result"
+go_accessors = ["xdr.OperationBody.Destination", "xdr.OperationBody.GetDestination"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/MergeOpFrame.cpp", symbol = "MergeOpFrame::doCheckValid", lines = "277-287" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/MergeOpFrame.cpp", symbol = "MergeOpFrame::doApplyFromV16", lines = "196-205" },
+]
+
+[[field]]
+id = "op.liquidity_pool_deposit"
+xdr_path = "LiquidityPoolDepositOp.{liquidityPoolID,maxAmountA,maxAmountB,minPrice,maxPrice}"
+validated_by_core = "yes"
+checks = "max amounts > 0, both prices with n and d > 0, minPrice <= maxPrice (LIQUIDITY_POOL_DEPOSIT_MALFORMED); the pool id must have a pool-share trustline of the source at apply (NO_TRUST)"
+protocol_min = 18
+risk = "max amounts are limits, not deposited amounts"
+handling = "take deposited amounts from meta or events"
+go_accessors = ["xdr.LiquidityPoolDepositOp.LiquidityPoolId", "xdr.LiquidityPoolDepositOp.MaxAmountA", "xdr.LiquidityPoolDepositOp.MaxAmountB", "xdr.LiquidityPoolDepositOp.MinPrice", "xdr.LiquidityPoolDepositOp.MaxPrice"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/LiquidityPoolDepositOpFrame.cpp", symbol = "LiquidityPoolDepositOpFrame::doCheckValid", lines = "376-414" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/LiquidityPoolDepositOpFrame.cpp", symbol = "LiquidityPoolDepositOpFrame::doApply", lines = "231-246" },
+]
+
+[[field]]
+id = "op.liquidity_pool_withdraw"
+xdr_path = "LiquidityPoolWithdrawOp.{liquidityPoolID,amount,minAmountA,minAmountB}"
+validated_by_core = "yes"
+checks = "amount > 0, min amounts >= 0 (LIQUIDITY_POOL_WITHDRAW_MALFORMED); pool-share trustline must exist at apply (NO_TRUST)"
+protocol_min = 18
+risk = "min amounts are bounds"
+handling = "take withdrawn amounts from meta or events"
+go_accessors = ["xdr.LiquidityPoolWithdrawOp.LiquidityPoolId", "xdr.LiquidityPoolWithdrawOp.Amount", "xdr.LiquidityPoolWithdrawOp.MinAmountA", "xdr.LiquidityPoolWithdrawOp.MinAmountB"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/LiquidityPoolWithdrawOpFrame.cpp", symbol = "LiquidityPoolWithdrawOpFrame::doCheckValid", lines = "164-176" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/LiquidityPoolWithdrawOpFrame.cpp", symbol = "LiquidityPoolWithdrawOpFrame::doApply", lines = "71-84" },
+]
+
+# ------------------------------------------------------ invoke host function
+
+[[field]]
+id = "op.invoke_host_function.invoke_contract.contract_address"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.contractAddress"
+validated_by_core = "partial"
+checks = "core validation does not read it (doCheckValidForSoroban checks only wasm size and asset preimages). the host resolves it at execution, where a missing contract or one outside the footprint fails the operation; the transaction is still in the ledger"
+protocol_min = 20
+risk = "on a failed invocation the address can name nothing; even on success the called contract is not the full set of contracts touched"
+handling = "take invoked contracts from events and meta; treat the envelope address as the submitter's target only"
+go_accessors = ["xdr.HostFunction.InvokeContract", "xdr.HostFunction.GetInvokeContract", "xdr.InvokeContractArgs.ContractAddress"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/e2e_invoke.rs", symbol = "invoke_host_function", lines = "517-541" },
+]
+
+[[field]]
+id = "op.invoke_host_function.invoke_contract.function_name"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.functionName"
+validated_by_core = "partial"
+checks = "xdr limit 32 bytes only in core. the host checks the [a-zA-Z0-9_] symbol character set when converting it at execution"
+protocol_min = 20
+risk = "on a failed transaction the name can contain any bytes up to 32"
+handling = "store as bytes or validate the symbol charset before treating as text"
+go_accessors = ["xdr.InvokeContractArgs.FunctionName"]
+citations = [
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "SCSymbol", lines = "11-12" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-common/src/symbol.rs", symbol = "SymbolError", lines = "60-85" },
+]
+
+[[field]]
+id = "op.invoke_host_function.invoke_contract.args"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.args"
+validated_by_core = "partial"
+checks = "core checks only that the envelope parses within the xdr depth limit and that the transaction fits txMaxSizeBytes. the host converts args to host values at execution, rejecting maps not strictly sorted by key and invalid symbols; a failed conversion fails the operation, not inclusion"
+protocol_min = 20
+risk = "nested ScVal trees bounded only by xdr depth and tx size; unsorted or colliding map keys and invalid symbols can appear in failed transactions (js-stellar-sdk#1789)"
+handling = "decode with depth and length limits; treat map key order and uniqueness as untrusted; tolerate refusal per value"
+go_accessors = ["xdr.InvokeContractArgs.Args"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol", lines = "1349-1380" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/metered_map.rs", symbol = "MeteredOrdMap::from_map_with_host", lines = "324-346" },
+]
+
+[[field]]
+id = "op.invoke_host_function.upload_wasm"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM).wasm"
+validated_by_core = "partial"
+checks = "size must be <= the network maxContractSizeBytes at validation; whether it is a valid module is decided by the host at execution"
+protocol_min = 20
+risk = "large opaque blob; may not be valid wasm on failed transactions"
+handling = "store by hash with a size cap; take the uploaded code entry from meta"
+go_accessors = ["xdr.HostFunction.Wasm", "xdr.HostFunction.GetWasm"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1446-1456" },
+]
+
+[[field]]
+id = "op.invoke_host_function.create_contract.preimage"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage"
+validated_by_core = "partial"
+checks = "core checks only that an asset preimage passes isAssetValid (v1 create only). the host requires the address in an address preimage to authorize the creation, and rejects mismatched preimage and executable pairs, at execution"
+protocol_min = 20
+risk = "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746)"
+handling = "take the created contract id and its creator from meta (new contract instance entry) and events"
+go_accessors = ["xdr.HostFunction.CreateContract", "xdr.HostFunction.CreateContractV2", "xdr.CreateContractArgs.ContractIdPreimage", "xdr.CreateContractArgsV2.ContractIdPreimage", "xdr.ContractIdPreimage.FromAddress", "xdr.ContractIdPreimage.FromAsset"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1457-1468" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
+]
+
+[[field]]
+id = "op.invoke_host_function.create_contract_v2.constructor_args"
+xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).createContractV2.constructorArgs"
+validated_by_core = "partial"
+checks = "not read by core validation; converted and passed to the constructor by the host at execution"
+protocol_min = 22
+risk = "as for invoke args"
+handling = "as for invoke args"
+go_accessors = ["xdr.CreateContractArgsV2.ConstructorArgs"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
+]
+
+[[field]]
+id = "op.invoke_host_function.auth"
+xdr_path = "InvokeHostFunctionOp.auth"
+validated_by_core = "partial"
+checks = "core never inspects auth entries; it serializes them and hands them to the host. at the start of execution the host decodes every entry and converts its address, signature ScVal and invocation tree to host objects, so an entry that cannot be converted fails the operation. signatures, nonces and expiration are then checked lazily, only for an entry that a require_auth call matches. there is no check that every entry was used, so a declared entry that is never matched is never authenticated"
+protocol_min = 20
+risk = "declared auth entries are submitter claims; an unmatched entry can name any address with any signature and still appear in a successful transaction. unbounded trees halted wallet-backend ingestion"
+handling = "never derive participants or authorizations from declared entries; use events and meta; cap recursion when walking"
+go_accessors = ["xdr.InvokeHostFunctionOp.Auth", "xdr.SorobanAuthorizationEntry.Credentials", "xdr.SorobanAuthorizationEntry.RootInvocation"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionApplyHelper::invokeHostFunction", lines = "664-712" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/e2e_invoke.rs", symbol = "invoke_host_function", lines = "517-522" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizationManager::new_enforcing", lines = "945-965" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizationManager::require_auth_enforcing", lines = "1227-1295" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::maybe_authorize_invocation", lines = "2474-2520" },
+]
+
+[[field]]
+id = "auth.credentials.source_account"
+xdr_path = "SorobanAuthorizationEntry.credentials(SOROBAN_CREDENTIALS_SOURCE_ACCOUNT)"
+validated_by_core = "partial"
+checks = "binds the entry to the operation source account (the base AccountID core passes to the host); no signature, nonce or expiration; authenticate and verify_and_consume_nonce return immediately. authorization rests on the transaction signatures"
+protocol_min = 20
+risk = "no per-entry proof exists"
+handling = "attribute to the operation source only when a matching authorization shows in events or meta"
+go_accessors = ["xdr.SorobanCredentials.Type"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::from_authorization_entry", lines = "2348-2410" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::authenticate", lines = "2665-2720" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host.rs", symbol = "Host::source_account_address", lines = "513-521" },
+]
+
+[[field]]
+id = "auth.credentials.address.address"
+xdr_path = "SorobanAddressCredentials.address"
+validated_by_core = "partial"
+checks = "not checked by core. converted to a host address object up front; checked only when the entry is matched, then an account address must authenticate with signatures and a contract address through __check_auth; any other address type fails authentication with an internal error"
+protocol_min = 20
+risk = "an unmatched entry can name any address, including muxed, claimable balance or liquidity pool addresses"
+handling = "do not treat the address as a participant unless meta or events confirm it"
+go_accessors = ["xdr.SorobanCredentials.Address", "xdr.SorobanCredentials.GetAddress", "xdr.SorobanCredentials.AddressV2", "xdr.SorobanAddressCredentials.Address"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::authenticate", lines = "2665-2720" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::from_authorization_entry", lines = "2348-2410" },
+]
+
+[[field]]
+id = "auth.credentials.address.nonce"
+xdr_path = "SorobanAddressCredentials.nonce"
+validated_by_core = "partial"
+checks = "consumed by the host only when the entry is matched: the nonce must not already exist as a temporary ledger entry for the address (Auth ExistingValue) and must be in the footprint; it is then written. unmatched entries consume nothing"
+protocol_min = 20
+risk = "a nonce in an unmatched entry was never consumed and proves nothing"
+handling = "read consumed nonces from contract data changes in meta"
+go_accessors = ["xdr.SorobanAddressCredentials.Nonce"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::verify_and_consume_nonce", lines = "2586-2626" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "Host::consume_nonce", lines = "2958-3014" },
+]
+
+[[field]]
+id = "auth.credentials.address.signature_expiration_ledger"
+xdr_path = "SorobanAddressCredentials.signatureExpirationLedger"
+validated_by_core = "partial"
+checks = "checked by the host only when the entry is matched: ledger seq must be <= it (signature has expired) and it must be <= the maximum live-until ledger (signature expiration is too late)"
+protocol_min = 20
+risk = "unchecked on unmatched entries"
+handling = "do not use it as evidence of a live authorization"
+go_accessors = ["xdr.SorobanAddressCredentials.SignatureExpirationLedger"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::verify_and_consume_nonce", lines = "2586-2626" },
+]
+
+[[field]]
+id = "auth.credentials.address.signature"
+xdr_path = "SorobanAddressCredentials.signature"
+validated_by_core = "partial"
+checks = "converted to a host value up front (so it must be a convertible ScVal). verified only when matched: for an account address it must be a vec of 1 to 20 {public_key, signature} entries in strictly increasing key order, each an ed25519 signature over sha256 of the HashIdPreimage (network id, nonce, expiration, invocation, plus the address for the v2 and delegates credential types), each key a signer of the account, total weight >= the medium threshold; for a contract address the value is passed to the contract's __check_auth"
+protocol_min = 20
+risk = "an arbitrary nested ScVal on unmatched entries; even on matched contract entries its shape is contract-defined"
+handling = "treat as opaque; decode with depth limits; never infer signers from it"
+go_accessors = ["xdr.SorobanAddressCredentials.Signature"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/builtin_contracts/account_contract.rs", symbol = "check_account_authentication", lines = "175-263" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/builtin_contracts/account_contract.rs", symbol = "check_account_contract_auth", lines = "151-172" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::get_signature_payload", lines = "2631-2662" },
+]
+
+[[field]]
+id = "auth.credentials.address_with_delegates.delegates"
+xdr_path = "SorobanAddressCredentialsWithDelegates.delegates"
+validated_by_core = "partial"
+checks = "decoded by the host up front for every entry: at each level delegate addresses must be strictly increasing with no duplicates, and each nested signature is converted to a host value; signatures are only used when the entry is matched"
+protocol_min = 27
+risk = "a recursive tree of addresses and signatures that core never looks at"
+handling = "cap recursion; never derive participants from delegates"
+go_accessors = ["xdr.SorobanCredentials.AddressWithDelegates", "xdr.SorobanAddressCredentialsWithDelegates.Delegates", "xdr.SorobanDelegateSignature.Address", "xdr.SorobanDelegateSignature.Signature", "xdr.SorobanDelegateSignature.NestedDelegates"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "DelegatedAccountAuthSignerTreeNode::from_xdr", lines = "2093-2149" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "SorobanDelegateSignature", lines = "572-583" },
+]
+notes = "protocol 27 is taken from plan R7 (CAP-71 family); the xdr arm exists at stellar-xdr v30.0"
+
+[[field]]
+id = "auth.root_invocation"
+xdr_path = "SorobanAuthorizationEntry.rootInvocation"
+validated_by_core = "partial"
+checks = "core does not look at it. the host converts the whole tree up front (contract addresses, function names as symbols, args to host values), then matches nodes lazily against actual require_auth calls; subtrees that never match are never compared with anything that ran"
+protocol_min = 20
+risk = "recursive, bounded only by xdr depth and tx size; an unmatched subtree can describe calls that never happened"
+handling = "cap depth and node count when walking; take actual calls from events"
+go_accessors = ["xdr.SorobanAuthorizationEntry.RootInvocation", "xdr.SorobanAuthorizedInvocation.Function", "xdr.SorobanAuthorizedInvocation.SubInvocations"]
+citations = [
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizedInvocation::from_xdr", lines = "813-826" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizedFunction::from_xdr", lines = "769-789" },
+  { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "SorobanAuthorizedInvocation", lines = "558-562" },
+]
+
+[[field]]
+id = "op.extend_footprint_ttl.extend_to"
+xdr_path = "ExtendFootprintTTLOp.extendTo"
+validated_by_core = "yes"
+checks = "must be <= maxEntryTTL - 1; the read-write footprint must be empty and every read-only key must be contract data or code (EXTEND_FOOTPRINT_TTL_MALFORMED)"
+protocol_min = 20
+risk = "the requested extension, not the resulting live-until ledger"
+handling = "read new TTLs from meta"
+go_accessors = ["xdr.ExtendFootprintTtlOp.ExtendTo"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ExtendFootprintTTLOpFrame.cpp", symbol = "ExtendFootprintTTLOpFrame::doCheckValidForSoroban", lines = "324-372" },
+]
+
+[[field]]
+id = "op.restore_footprint"
+xdr_path = "Operation.body(RESTORE_FOOTPRINT) with footprint"
+validated_by_core = "yes"
+checks = "the read-only footprint must be empty and every read-write key must be a persistent soroban entry (RESTORE_FOOTPRINT_MALFORMED)"
+protocol_min = 20
+risk = "keys that were not archived are legal and restore nothing"
+handling = "read restored entries from meta"
+go_accessors = ["xdr.OperationBody.RestoreFootprintOp", "xdr.LedgerFootprint.ReadWrite"]
+citations = [
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/RestoreFootprintOpFrame.cpp", symbol = "RestoreFootprintOpFrame::doCheckValidForSoroban", lines = "430-460" },
+]
