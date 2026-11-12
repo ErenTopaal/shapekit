@@ -1,0 +1,785 @@
+# shape families: one record per structural pattern the corpus must carry.
+#
+# signature fragments use the grammar in crates/shapekit-manifest/src/signature.rs. each fragment
+# names one rare shape of the family; an entry belongs to the family when its signature matches
+# at least one fragment, and coverage reports which fragments have entries. a fragment is either
+# anchored at a type (`SignerKey:ed25519_signed_payload`, `ContractEventType=contract`) or a path
+# suffix that starts with a delimiter (`.extra_signers#max`). every fragment below was checked
+# against the stellar-xdr 30.0.0 json schema of LedgerCloseMeta and its reachable union arms.
+#
+# priority 1 is the highest demonstrated damage. 1 to 12 follow the evidence ordering: signed
+# payload, muxed accounts, muxed contract, sac trust, auth trees, pool asset order, scmap order and
+# collisions, max length, non-utf8 bytes, unified events, fee-bump muxed, lcm version transitions.
+# 13 is shapes the plan names without a sighting, 14 is shapes added only so every
+# indexer-visible cap has a family.
+
+schema_version = 1
+
+[[family]]
+id = "cap40.signed-payload-signer"
+title = "Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship revokes"
+caps = ["CAP-0040"]
+protocol_introduced = 19
+protocol_valid = { min = 19 }
+signature = [
+    "SignerKey:ed25519_signed_payload",
+    ":ed25519_signed_payload.payload#one",
+    ":ed25519_signed_payload.payload#many",
+    ":ed25519_signed_payload.payload#max",
+    ".body:set_options.signer.key:ed25519_signed_payload",
+    ".extra_signers[]:ed25519_signed_payload",
+    ".body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload",
+    ".signers[].key:ed25519_signed_payload",
+]
+source_classes = ["local-core", "testnet-history"]
+fields = [
+    "signer_key.signed_payload.payload",
+    "op.set_options.signer",
+    "tx.cond.extra_signers",
+    "op.revoke_sponsorship",
+    "tx.signatures.hint",
+    "tx.signatures",
+]
+linked_issues = [
+    "https://github.com/stellar/wallet-backend/pull/729",
+    "https://github.com/stellar/wallet-backend/issues/716",
+]
+priority = 1
+notes = "payloads of 1, 4, 32 and 64 bytes give the one, many and max buckets. a second chain is recorded at protocol 28 for the pre-fix wallet-backend commits. testnet-history is ledger 4437357, named by wallet-backend#729. the hint xor and use of the signer to authorise a transaction are checked by the recipe; the grammar has no fragment for a decorated signature matched to a signer"
+
+[[family]]
+id = "cap27.muxed-accounts"
+title = "Muxed accounts as transaction source, operation source and every muxed destination"
+caps = ["CAP-0027"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = [
+    "MuxedAccount:muxed_ed25519",
+    ".source_account:muxed_ed25519",
+    ".body:payment.destination:muxed_ed25519",
+    ".body:path_payment_strict_receive.destination:muxed_ed25519",
+    ".body:path_payment_strict_send.destination:muxed_ed25519",
+    ".body:account_merge:muxed_ed25519",
+    ".body:clawback.from:muxed_ed25519",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.source_account",
+    "tx.source_account.mux_id",
+    "op.source_account",
+    "op.source_account.mux_id",
+    "op.payment.destination",
+    "op.payment.destination.mux_id",
+    "op.path_payment.destination",
+    "op.path_payment.destination.mux_id",
+    "op.account_merge.destination",
+    "op.clawback.from",
+    "op.clawback.from.mux_id",
+]
+linked_issues = ["https://github.com/stellar/wallet-backend/issues/716"]
+priority = 2
+notes = "mux ids 0, 1, 2^53 and 2^64-1. core discards the mux id when it resolves the account, so the id never reaches a ledger entry. a second chain is recorded at protocol 28 for the pre-fix wallet-backend commits. the clawback-from fragment needs cap-0035 ops but is a muxed shape, so it stays here"
+
+[[family]]
+id = "soroban.muxed-source"
+title = "Soroban operations and transactions with a muxed source account"
+caps = ["CAP-0027", "CAP-0046"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "TransactionResultResult:tx_soroban_invalid",
+    "OperationBody:extend_footprint_ttl",
+    "OperationBody:restore_footprint",
+    ".source_account:muxed_ed25519",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.source_account",
+    "tx.source_account.mux_id",
+    "op.source_account",
+    "op.source_account.mux_id",
+]
+linked_issues = [
+    "https://github.com/stellar/wallet-backend/pull/753",
+    "https://github.com/stellar/wallet-backend/issues/716",
+]
+priority = 2
+notes = "at protocol 30 extend-ttl and restore with a muxed source apply and the invoke twin is rejected with txSOROBAN_INVALID (consensus from protocol 25). at protocol 24 the muxed invoke is accepted if phase 3 shows that chain is possible. at protocol 28 a muxed soroban source and its base account appear in one ledger. the grammar cannot tie the muxed source to the soroban body of the same operation, so the recipe asserts that pairing"
+
+[[family]]
+id = "sep41.muxed-addresses"
+title = "SEP-41 token transfers whose address arguments are muxed account addresses"
+caps = ["CAP-0067"]
+protocol_introduced = 23
+protocol_valid = { min = 23 }
+signature = [
+    "ScAddress:muxed_account",
+    ".args[]:address:muxed_account",
+]
+source_classes = ["local-core"]
+fields = ["op.invoke_host_function.invoke_contract.args"]
+linked_issues = [
+    "https://github.com/stellar/wallet-backend/issues/716",
+    "https://github.com/stellar/stellar-etl/issues/467",
+]
+priority = 2
+notes = "SC_ADDRESS_TYPE_MUXED_ACCOUNT comes from cap-0067. recorded at protocol 28 and 30"
+
+[[family]]
+id = "cap84.muxed-contract"
+title = "Muxed contract addresses (strkey W) as SAC transfer destinations"
+caps = ["CAP-0084"]
+protocol_introduced = 30
+protocol_valid = { min = 30 }
+signature = [
+    "ScAddress:muxed_contract",
+    ".args[]:address:muxed_contract",
+]
+source_classes = ["local-core"]
+fields = ["op.invoke_host_function.invoke_contract.args"]
+linked_issues = ["https://github.com/stellar/wallet-backend/pull/792"]
+priority = 3
+notes = "the transfer and mint events carry to_muxed_id as a u64 in the data map"
+
+[[family]]
+id = "cap73.sac-trust"
+title = "SAC trust(address) creating an unlimited trustline with no event, XLM SAC transfer creating an account"
+caps = ["CAP-0073", "CAP-0046-06"]
+protocol_introduced = 26
+protocol_valid = { min = 26 }
+signature = [
+    "ContractIdPreimage:asset",
+    "ContractExecutable:stellar_asset",
+    "OperationBody:invoke_host_function",
+    ".changes[]:created.data:trustline",
+    ".changes[]:created.data:account",
+]
+source_classes = ["local-core"]
+fields = [
+    "op.invoke_host_function.invoke_contract.contract_address",
+    "op.invoke_host_function.invoke_contract.function_name",
+    "op.invoke_host_function.invoke_contract.args",
+    "op.invoke_host_function.create_contract.preimage",
+]
+linked_issues = [
+    "https://github.com/stellar/wallet-backend/issues/731",
+    "https://github.com/stellar/stellar-etl/issues/460",
+]
+priority = 4
+notes = "recorded at protocol 30 and 28. the defining combination, an invoke_host_function operation whose meta creates a trustline with limit i64::MAX and carries no contract event, cannot be written as one fragment; phase 5 asserts it in a test. the created-trustline and created-account fragments alone also match classic operations"
+
+[[family]]
+id = "soroban.auth-trees"
+title = "Soroban authorization trees: deep, wide, source-account and address credentials, unmatched entries"
+caps = ["CAP-0046-11"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "SorobanCredentials:source_account",
+    "SorobanCredentials:address",
+    ".sub_invocations#many",
+    ".root_invocation.sub_invocations[].sub_invocations[].sub_invocations[]",
+    "SorobanAuthorizedFunction:create_contract_host_fn",
+]
+source_classes = ["local-core", "synthetic"]
+fields = [
+    "op.invoke_host_function.auth",
+    "auth.credentials.source_account",
+    "auth.credentials.address.address",
+    "auth.credentials.address.nonce",
+    "auth.credentials.address.signature_expiration_ledger",
+    "auth.credentials.address.signature",
+    "auth.root_invocation",
+]
+linked_issues = ["https://github.com/stellar/wallet-backend/issues/746"]
+priority = 5
+notes = "the depth fragment marks a tree at least four invocations deep; the recipe goes to the deepest tree the network limits accept. the declared create-contract entry that require_auth never matches is the wallet-backend#746 case, and its meta must show no contract creation. a failed transaction carrying auth is also recorded. synthetic entries nest beyond auth.invocation.depth in caps-limits.toml and are must-reject"
+
+[[family]]
+id = "cap38.liquidity-pools"
+title = "Pool-share trustlines with issuers ordered by key bytes, deposits, withdrawals and revocation redemptions"
+caps = ["CAP-0038"]
+protocol_introduced = 18
+protocol_valid = { min = 18 }
+signature = [
+    "ChangeTrustAsset:pool_share",
+    "TrustLineAsset:pool_share",
+    "LedgerEntryData:liquidity_pool",
+    "OperationBody:liquidity_pool_deposit",
+    "OperationBody:liquidity_pool_withdraw",
+    "ClaimAtom:liquidity_pool",
+    "TrustLineEntryV1Ext:v2",
+    "ChangeTrustResult:malformed",
+]
+source_classes = ["local-core", "testnet-history"]
+fields = [
+    "op.change_trust.line",
+    "op.change_trust.line.liquidity_pool",
+    "op.change_trust.limit",
+    "op.liquidity_pool_deposit",
+    "op.liquidity_pool_withdraw",
+]
+linked_issues = [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766",
+    "https://github.com/StellarCN/py-stellar-base/issues/1246",
+    "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257",
+]
+priority = 6
+notes = "the issuer pair is chosen so strkey order and raw key order disagree; the strkey-ordered twin is rejected with CHANGE_TRUST_MALFORMED. testnet-history is pool c2a730127d006897b021d6fcb279da68b4f65f9b6a408c74eb2cdd85ea862d5e, transaction 0126748091930959a3aefac9296e1773b947f964a9b73f37ce856c4df32d346f, ledger 5521432. the issuer order itself is a leaf value and has no fragment; the ordering vectors of phase 6 check it. revocation that redeems pool shares into claimable balances is recorded but has no single fragment"
+
+[[family]]
+id = "soroban.scval-shapes"
+title = "ScVal shapes: deep nesting, mixed-type map keys in host order, colliding keys, integer extremes"
+caps = ["CAP-0046-01"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "ScVal:map",
+    ":map[].key:u32",
+    ":map[].key:string",
+    ":map[].key:symbol",
+    ":map[].val:map[].val:map",
+    ":vec[]:vec[]:vec[]:vec",
+    "ScVal:i128",
+    "ScVal:u128",
+    "ScVal:i256",
+    "ScVal:u256",
+    "ScVal:string",
+    "ScVal:symbol",
+    "ScVal:bytes",
+]
+source_classes = ["local-core", "synthetic"]
+fields = [
+    "op.invoke_host_function.invoke_contract.args",
+    "op.invoke_host_function.create_contract_v2.constructor_args",
+]
+linked_issues = [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766",
+    "https://github.com/stellar/js-stellar-sdk/issues/1789",
+]
+priority = 7
+notes = "the nesting fragments mark at least four levels; the recipe goes to the deepest level the host accepts. key collisions after native conversion use u32 1, string 1 and symbol 1 in one map. the unsorted-map twin is rejected by the host. non-utf8 strings and symbols are recorded where the host accepts them. key order and byte content are leaf values with no fragment. synthetic entries nest beyond scval.depth and are must-reject"
+
+[[family]]
+id = "classic.max-length"
+title = "Every bounded classic vector at its maximum length"
+caps = ["CAP-0019", "CAP-0024"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = [
+    ".operations#max",
+    ".signatures#max",
+    ".memo:text#max",
+    ".data_value#max",
+    ".path#max",
+    ".signers#max",
+]
+source_classes = ["local-core", "synthetic"]
+fields = [
+    "tx.operations",
+    "tx.signatures",
+    "tx.memo.text",
+    "op.manage_data.data_value",
+    "op.path_payment.path",
+    "op.set_options.signer",
+]
+linked_issues = []
+priority = 8
+notes = "100 operations, 20 signatures, 28-byte memo text, 64-byte data value, a 5-asset path and 20 signers on an account. these bounds predate the cap process; cap-0019 is named because the entries use the v1 envelope it defined and cap-0024 because the 5-asset path is recorded on strict-send as well as strict-receive. synthetic entries go one past each bound and are must-reject"
+
+[[family]]
+id = "classic.memo-bytes"
+title = "Memo text holding bytes that are not valid UTF-8"
+caps = ["CAP-0019"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = ["Memo:text"]
+source_classes = ["local-core"]
+fields = ["tx.memo.type", "tx.memo.text"]
+linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1823"]
+priority = 9
+notes = "core checks only the 28-byte xdr bound, so non-utf8 text is accepted. the fragment is coarse: byte content is a leaf value, so any text memo matches and the recipe flags the non-utf8 entries. memo text predates the cap process; cap-0019 is named because the entries use the v1 envelope it defined"
+
+[[family]]
+id = "cap67.unified-events"
+title = "Unified asset events from classic operations, fee events and to_muxed_id map data"
+caps = ["CAP-0067"]
+protocol_introduced = 23
+protocol_valid = { min = 23 }
+signature = [
+    "TransactionMeta:v4",
+    "TransactionEventStage=before_all_txs",
+    "TransactionEventStage=after_all_txs",
+    ".operations[].events[].type=contract",
+    ".operations[].events[].body:v0.data:map",
+    "ScAddress:muxed_account",
+    "ScAddress:claimable_balance",
+    "ScAddress:liquidity_pool",
+]
+source_classes = ["local-core"]
+fields = [
+    "op.payment.destination.mux_id",
+    "op.path_payment.destination.mux_id",
+    "tx.memo.id",
+    "tx.memo.text",
+    "tx.memo.hash",
+]
+linked_issues = []
+priority = 10
+notes = "classic operations producing transfer, mint, burn, clawback, set_authorized and fee events, with EMIT_CLASSIC_EVENTS on as on the public networks. the map-data fragment is coarse: the to_muxed_id key is a leaf value. a protocol 22 chain with pre-cap-67 meta and the backfill variant are recorded as contrast entries if phase 3 shows they are possible; they sit below protocol_valid and are tagged so"
+
+[[family]]
+id = "cap15.fee-bump"
+title = "Fee-bump envelopes over successful and failed inner transactions, with a muxed fee source"
+caps = ["CAP-0015"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = [
+    "TransactionEnvelope:tx_fee_bump",
+    "FeeBumpTransactionInnerTx:tx",
+    "TransactionResultResult:tx_fee_bump_inner_success",
+    "TransactionResultResult:tx_fee_bump_inner_failed",
+    ".fee_source:muxed_ed25519",
+]
+source_classes = ["local-core", "mainnet-history"]
+fields = [
+    "tx.envelope.type",
+    "feebump.fee_source",
+    "feebump.fee_source.mux_id",
+    "feebump.fee",
+    "feebump.signatures",
+    "feebump.inner_tx",
+]
+linked_issues = ["https://github.com/stellar/stellar-etl/issues/477"]
+priority = 11
+notes = "mainnet-history is ledger 36196205, named by stellar-etl#477; phase 6 research confirms what it holds"
+
+[[family]]
+id = "cap63.parallel-txset"
+title = "Parallel Soroban transaction sets and LedgerCloseMetaV2"
+caps = ["CAP-0063"]
+protocol_introduced = 23
+protocol_valid = { min = 23 }
+signature = [
+    "LedgerCloseMeta:v2",
+    "TransactionPhase:v1",
+    ".execution_stages[]#many",
+    ".post_tx_apply_fee_processing#many",
+    "ConfigSettingEntry:contract_parallel_compute_v0",
+]
+source_classes = ["local-core"]
+fields = []
+linked_issues = []
+priority = 12
+notes = "a ledger with several soroban transactions in more than one dependent cluster. post-apply fee processing holds the soroban refund changes"
+
+[[family]]
+id = "cap42.generalized-txset"
+title = "Generalized transaction sets and LedgerCloseMetaV1"
+caps = ["CAP-0042"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "GeneralizedTransactionSet:v1",
+    "TransactionPhase:v0",
+    "TxSetComponent:txset_comp_txs_maybe_discounted_fee",
+    "LedgerCloseMeta:v1",
+]
+source_classes = ["local-core", "mainnet-history"]
+fields = []
+linked_issues = []
+priority = 12
+notes = "a protocol 30 local core emits the generalized set with a v0 classic phase inside LedgerCloseMetaV2. LedgerCloseMeta v1 exists only for protocol 20 to 22 ledgers, so it comes from mainnet history captured in phase 6"
+
+[[family]]
+id = "cap88.ms-close-time"
+title = "Millisecond close times in StellarValue"
+caps = ["CAP-0088"]
+protocol_introduced = 30
+protocol_valid = { min = 30 }
+signature = [
+    "StellarValueExt:signed_ms",
+    "StellarValueExt:empty_tx_set_ms",
+]
+source_classes = ["local-core", "testnet-history"]
+fields = []
+linked_issues = []
+priority = 12
+notes = "manual close uses whole seconds, so local core gives signed_ms with a zero millisecond part. a non-zero millisecond close time and an empty_tx_set_ms value come from testnet history in phase 6. the millisecond value is a leaf, so zero and non-zero share a signature"
+
+[[family]]
+id = "cap83.empty-txset"
+title = "Ledgers whose transaction set was dropped by validator vote"
+caps = ["CAP-0083"]
+protocol_introduced = 28
+protocol_valid = { min = 28, max = 30 }
+signature = ["StellarValueExt:empty_tx_set"]
+source_classes = ["testnet-history", "mainnet-history"]
+fields = []
+linked_issues = []
+priority = 12
+notes = "from protocol 30 the whole-second value is invalid except in the ledger that performs the upgrade to 30, which is why max is 30; the millisecond form belongs to cap88.ms-close-time. a standalone core cannot vote to drop its own tx set, so no local-core entry is possible; phase 6 searches testnet and mainnet history for one"
+
+[[family]]
+id = "classic.failed-tx"
+title = "Failed transactions whose envelope names accounts the ledger never touched"
+caps = ["CAP-0002", "CAP-0028"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = [
+    "TransactionResultResult:tx_failed",
+    "PaymentResult:no_destination",
+    "SignerKey:pre_auth_tx",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.source_account",
+    "op.source_account",
+    "op.payment.destination",
+    "op.create_account.destination",
+]
+linked_issues = []
+priority = 13
+notes = "the participants-from-meta case: accounts named only in the envelope of a failed transaction. cap-0028 removes a pre-auth signer even when the transaction fails, and cap-0002 puts signature and one-time signer changes in tx-level meta, so failed transactions still change state"
+
+[[family]]
+id = "cap23.claimable-balances"
+title = "Claimable balances with ten claimants and predicates at the maximum depth"
+caps = ["CAP-0023"]
+protocol_introduced = 14
+protocol_valid = { min = 14 }
+signature = [
+    "OperationBody:create_claimable_balance",
+    "OperationBody:claim_claimable_balance",
+    "LedgerEntryData:claimable_balance",
+    ".claimants#max",
+    ".predicate:and[]:or[]:not:before_absolute_time",
+    "ClaimPredicate:before_relative_time",
+    "CreateClaimableBalanceResult:malformed",
+]
+source_classes = ["local-core"]
+fields = [
+    "op.create_claimable_balance.claimants.destination",
+    "op.create_claimable_balance.claimants.predicate",
+    "op.create_claimable_balance.asset_amount",
+    "op.claim_claimable_balance.balance_id",
+]
+linked_issues = []
+priority = 13
+notes = "the and, or, not, leaf chain is one predicate at depth 4, the deepest core accepts; the one-deeper twin is rejected with CREATE_CLAIMABLE_BALANCE_MALFORMED"
+
+[[family]]
+id = "cap21.preconditions"
+title = "Version 2 preconditions: ledger bounds, minimum sequence, age, ledger gap, two extra signers"
+caps = ["CAP-0021"]
+protocol_introduced = 19
+protocol_valid = { min = 19 }
+signature = [
+    "Preconditions:v2",
+    ".ledger_bounds.max_ledger",
+    ".extra_signers#max",
+    "AccountEntryExtensionV2Ext:v3",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.cond.type",
+    "tx.cond.time_bounds",
+    "tx.cond.ledger_bounds",
+    "tx.cond.min_seq_num",
+    "tx.cond.min_seq_age",
+    "tx.cond.min_seq_ledger_gap",
+    "tx.cond.extra_signers",
+]
+linked_issues = []
+priority = 13
+notes = "a present min_seq_num is a leaf and has no fragment of its own; min_seq_age and min_seq_ledger_gap are always present in v2. the v3 account extension records seq_ledger and seq_time"
+
+[[family]]
+id = "cap33.sponsorship"
+title = "Sponsored accounts, trustlines, signers and claimable balances, and sponsorship revokes"
+caps = ["CAP-0033"]
+protocol_introduced = 14
+protocol_valid = { min = 14 }
+signature = [
+    "OperationBody:begin_sponsoring_future_reserves",
+    "OperationBody:end_sponsoring_future_reserves",
+    "OperationBody:revoke_sponsorship",
+    "RevokeSponsorshipOp:ledger_entry",
+    "RevokeSponsorshipOp:signer",
+    "LedgerEntryExt:v1",
+    "AccountEntryExtensionV1Ext:v2",
+    ".signer_sponsoring_i_ds[]:public_key_type_ed25519",
+]
+source_classes = ["local-core"]
+fields = ["op.begin_sponsoring.sponsored_id", "op.revoke_sponsorship"]
+linked_issues = []
+priority = 13
+notes = "signer_sponsoring_i_ds is how the crate's serde renders signerSponsoringIDs"
+
+[[family]]
+id = "cap35.clawback"
+title = "Clawback, claimable balance clawback and trustline flag changes"
+caps = ["CAP-0035"]
+protocol_introduced = 17
+protocol_valid = { min = 17 }
+signature = [
+    "OperationBody:clawback",
+    "OperationBody:clawback_claimable_balance",
+    "OperationBody:set_trust_line_flags",
+    "ClaimableBalanceEntryExt:v1",
+]
+source_classes = ["local-core"]
+fields = [
+    "op.clawback.from",
+    "op.clawback.asset_amount",
+    "op.clawback_claimable_balance.balance_id",
+    "op.set_trust_line_flags",
+]
+linked_issues = []
+priority = 13
+
+[[family]]
+id = "soroban.invoke-basics"
+title = "Wasm upload, contract creation with and without constructor, invocation, TTL extension, restore"
+caps = [
+    "CAP-0046",
+    "CAP-0046-02",
+    "CAP-0046-05",
+    "CAP-0046-07",
+    "CAP-0046-08",
+    "CAP-0046-12",
+    "CAP-0054",
+    "CAP-0058",
+]
+protocol_introduced = 22
+protocol_valid = { min = 22 }
+signature = [
+    "HostFunction:upload_contract_wasm",
+    "HostFunction:create_contract",
+    "HostFunction:create_contract_v2",
+    "HostFunction:invoke_contract",
+    "OperationBody:extend_footprint_ttl",
+    "OperationBody:restore_footprint",
+    "InvokeHostFunctionResult:trapped",
+    "ContractCodeEntryExt:v1",
+    "ContractExecutable:wasm",
+    "LedgerEntryData:contract_code",
+    "LedgerEntryData:contract_data",
+    "LedgerEntryData:ttl",
+    "ContractDataDurability=temporary",
+    "ContractEventType=contract",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.ext",
+    "tx.soroban.resource_fee",
+    "tx.soroban.resources.limits",
+    "tx.soroban.footprint",
+    "op.invoke_host_function.invoke_contract.contract_address",
+    "op.invoke_host_function.invoke_contract.function_name",
+    "op.invoke_host_function.invoke_contract.args",
+    "op.invoke_host_function.upload_wasm",
+    "op.invoke_host_function.create_contract.preimage",
+    "op.invoke_host_function.create_contract_v2.constructor_args",
+    "op.extend_footprint_ttl.extend_to",
+    "op.restore_footprint",
+]
+linked_issues = []
+priority = 13
+notes = "protocol_introduced is 22 because create v2 with a constructor needs cap-0058; the other shapes exist from protocol 20. a failed invocation discards its events, so the trapped entry carries none"
+
+[[family]]
+id = "soroban.events-max"
+title = "Contract events and return values at the configured size limits"
+caps = ["CAP-0046-08"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "ContractEventType=contract",
+    ".operations[].events#many",
+    ".body:v0.topics#many",
+    ".body:v0.data:bytes",
+    ".return_value:bytes",
+]
+source_classes = ["local-core"]
+fields = []
+linked_issues = []
+priority = 13
+notes = "sizes come from events.contract.bytes_per_tx and events.contract.per_tx in caps-limits.toml; size itself is not in the grammar, so the recipe records the measured byte count"
+
+[[family]]
+id = "cap71.credentials"
+title = "Address-v2 and with-delegates Soroban credentials"
+caps = ["CAP-0071", "CAP-0071-01", "CAP-0071-02"]
+protocol_introduced = 27
+protocol_valid = { min = 27 }
+signature = [
+    "SorobanCredentials:address_v2",
+    "SorobanCredentials:address_with_delegates",
+    ".delegates[].nested_delegates[]",
+]
+source_classes = ["local-core"]
+fields = [
+    "auth.credentials.address_with_delegates.delegates",
+    "auth.credentials.address.address",
+    "auth.credentials.address.signature",
+]
+linked_issues = []
+priority = 13
+notes = "SorobanDelegateSignature is recursive through nested_delegates"
+
+[[family]]
+id = "cap66.archival"
+title = "Archived entries restored explicitly and automatically, and evicted keys"
+caps = ["CAP-0066", "CAP-0062"]
+protocol_introduced = 23
+protocol_valid = { min = 23 }
+signature = [
+    "LedgerEntryChange:restored",
+    "SorobanTransactionDataExt:v1",
+    ".archived_soroban_entries#one",
+    ".evicted_keys[]:contract_data",
+]
+source_classes = ["local-core"]
+fields = [
+    "tx.soroban.ext.archived_soroban_entries",
+    "tx.soroban.footprint",
+    "op.restore_footprint",
+]
+linked_issues = []
+priority = 13
+notes = "entries are archived quickly by lowering the minimum ttl settings through a config upgrade on the private network. hot archive bucket types are not in ledger close meta"
+
+[[family]]
+id = "cap85.executable-tag"
+title = "Externally managed contract executables and the executable-tag value"
+caps = ["CAP-0085"]
+protocol_introduced = 28
+protocol_valid = { min = 28 }
+signature = [
+    "ContractExecutable:external_ref",
+    "ScVal:executable_tag",
+]
+source_classes = ["local-core"]
+fields = ["op.invoke_host_function.create_contract.preimage"]
+linked_issues = []
+priority = 13
+
+[[family]]
+id = "cap77.frozen-keys"
+title = "Frozen ledger keys: config settings and operations failing on a frozen trustline"
+caps = ["CAP-0077"]
+protocol_introduced = 26
+protocol_valid = { min = 26 }
+signature = [
+    "ConfigSettingEntry:frozen_ledger_keys",
+    "ConfigSettingEntry:frozen_ledger_keys_delta",
+    "ConfigSettingEntry:freeze_bypass_txs",
+    "ConfigSettingEntry:freeze_bypass_txs_delta",
+    "ClaimClaimableBalanceResult:trustline_frozen",
+    "LiquidityPoolDepositResult:trustline_frozen",
+    "LiquidityPoolWithdrawResult:trustline_frozen",
+    "TransactionResultResult:tx_frozen_key_accessed",
+]
+source_classes = ["local-core", "core-golden"]
+fields = []
+linked_issues = []
+priority = 13
+notes = "local-core if freezing is producible through config upgrades on a private network (phase 5); otherwise only the FrozenLedgerKeysTests goldens imported in phase 6 supply entries, and local-core is removed here"
+
+[[family]]
+id = "cap46.config-upgrades"
+title = "Soroban network config upgrades and cost parameter entries in upgrade meta"
+caps = ["CAP-0046-09", "CAP-0046-10"]
+protocol_introduced = 20
+protocol_valid = { min = 20 }
+signature = [
+    "LedgerUpgrade:config",
+    "LedgerUpgrade:max_soroban_tx_set_size",
+    "LedgerEntryData:config_setting",
+    "ConfigSettingEntry:contract_cost_params_cpu_instructions",
+    "ConfigSettingEntry:contract_cost_params_memory_bytes",
+]
+source_classes = ["local-core"]
+fields = []
+linked_issues = []
+priority = 14
+notes = "every fresh standalone network is upgraded through config upgrade sets, so the upgrade ledgers of each chain carry these shapes"
+
+[[family]]
+id = "cap70.scp-timing"
+title = "SCP timing config setting in upgrade meta"
+caps = ["CAP-0070"]
+protocol_introduced = 23
+protocol_valid = { min = 23 }
+signature = ["ConfigSettingEntry:scp_timing"]
+source_classes = ["local-core"]
+fields = []
+linked_issues = []
+priority = 14
+
+[[family]]
+id = "cap76.archival-remediation"
+title = "The protocol 24 upgrade ledger and later restores of amended hot archive entries"
+caps = ["CAP-0076"]
+protocol_introduced = 24
+protocol_valid = { min = 24 }
+signature = ["LedgerUpgrade:version", "LedgerEntryChange:restored"]
+source_classes = ["mainnet-history"]
+fields = []
+linked_issues = []
+priority = 14
+notes = "no new xdr. the mainnet upgrade ledger adds 31879035 stroops to the header fee pool with no matching meta, and amended entries show only when later restored. both exist only on mainnet, so phase 6 captures the upgrade ledger and one later restore. the fragments are coarse; the fee pool delta is a leaf value"
+
+[[family]]
+id = "cap01.bump-sequence"
+title = "Bump sequence and merges refused for a sequence number too far ahead"
+caps = ["CAP-0001"]
+protocol_introduced = 10
+protocol_valid = { min = 10 }
+signature = [
+    "OperationBody:bump_sequence",
+    "BumpSequenceResult:bad_seq",
+    "AccountMergeResult:seqnum_too_far",
+]
+source_classes = ["local-core"]
+fields = ["op.bump_sequence.bump_to", "op.account_merge.destination"]
+linked_issues = []
+priority = 14
+
+[[family]]
+id = "cap03.offer-liabilities"
+title = "Offers with buying and selling liabilities, including manage-buy offers"
+caps = ["CAP-0003", "CAP-0006"]
+protocol_introduced = 11
+protocol_valid = { min = 11 }
+signature = [
+    "OperationBody:manage_buy_offer",
+    "AccountEntryExt:v1",
+    "TrustLineEntryExt:v1",
+    "ManageOfferSuccessResultOffer:created",
+    "ClaimAtom:order_book",
+    "AccountMergeResult:dest_full",
+]
+source_classes = ["local-core"]
+fields = ["op.manage_offer.offer_id", "op.manage_offer.assets_amount_price"]
+linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1785"]
+priority = 14
+notes = "offer ids come from the header id pool, so ids above 2^53 cannot be produced on a fresh network; those stay textual-id vectors in phase 6"
+
+[[family]]
+id = "cap18.maintain-liabilities"
+title = "Trustlines authorized to maintain liabilities through allow trust"
+caps = ["CAP-0018"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = [
+    "OperationBody:allow_trust",
+    ".body:allow_trust.asset:credit_alphanum4",
+    ".body:allow_trust.asset:credit_alphanum12",
+]
+source_classes = ["local-core"]
+fields = ["op.allow_trust", "op.set_trust_line_flags"]
+linked_issues = []
+priority = 14
+notes = "the authorize value 2 and the trustline flag are leaf values, so the fragments are coarse and the recipe records which entries carry the maintain-liabilities flag"
