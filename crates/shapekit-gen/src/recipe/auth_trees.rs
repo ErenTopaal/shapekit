@@ -620,7 +620,7 @@ fn fanout(
     if std::env::var("P5_FANOUT_PROBE").is_ok() {
         let k = ctx.account("wide-signer");
         let addr = account_address(&k.verifying_key());
-        for f in [325u32, 320, 310, 300, 290, 280, 260, 240, 200] {
+        for f in [324u32, 323, 322, 321, 320] {
             let levels = [(addr.clone(), f), (addr.clone(), 0)];
             let hf = call(&trees[0], "node", node_args(&trees[1..2], &levels)?)?;
             let (env, _) = authorized_prefetched(ctx, source, hf.clone(), RECORD, prefetch, |ctx, e| sign_with(ctx, e, &k))?;
