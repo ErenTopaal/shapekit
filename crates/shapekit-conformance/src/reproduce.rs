@@ -49,6 +49,11 @@ pub struct Reproduction {
     /// encode_json).
     #[serde(default, rename = "probe")]
     pub probes: Vec<Probe>,
+    /// Why unsupported checks may be left out of this row, when some inputs of the named
+    /// entries have no API in the sdk at all. Without it an unsupported check makes the cell
+    /// inconclusive. With it, a cell is still inconclusive when no counted check remains.
+    #[serde(default)]
+    pub unsupported_not_counted: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -237,6 +242,7 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
             let (entries, checks) = &row_checks[r.id.as_str()];
             let mut notes = Vec::new();
             let mut worst = ResultClass::Pass;
+            let mut counted = 0usize;
             for (owner, check) in checks {
                 let v = runner::run_check(check, &mut testees)?
                     .into_iter()
@@ -250,9 +256,14 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
                         v.detail.map(|d| format!(", {d}")).unwrap_or_default()
                     ));
                 }
+                if v.result == ResultClass::Unsupported && r.unsupported_not_counted.is_some() {
+                    continue;
+                }
+                counted += 1;
                 worst = worst.max(v.result);
             }
             let observed = match worst {
+                _ if counted == 0 => Observed::Inconclusive,
                 ResultClass::Pass => Observed::Pass,
                 ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers => Observed::Fail,
                 ResultClass::Unsupported | ResultClass::Error => Observed::Inconclusive,

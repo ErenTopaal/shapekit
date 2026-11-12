@@ -312,13 +312,22 @@ pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     std::fs::create_dir_all(&opts.out)
         .with_context(|| format!("creating {}", opts.out.display()))?;
     let keep: BTreeSet<&str> = drafts.iter().map(|d| d.file.as_str()).collect();
+    // a matrix run for one sdk says nothing about another sdk's drafts, so only those sdks are pruned
+    let prefixes: BTreeSet<String> = matrix
+        .testees
+        .iter()
+        .map(|t| format!("{}-", t.sdk))
+        .collect();
     let mut removed = Vec::new();
     for item in
         std::fs::read_dir(&opts.out).with_context(|| format!("listing {}", opts.out.display()))?
     {
         let item = item.with_context(|| format!("listing {}", opts.out.display()))?;
         let name = item.file_name().to_string_lossy().to_string();
-        if !name.ends_with(".md") || keep.contains(name.as_str()) {
+        if !name.ends_with(".md")
+            || keep.contains(name.as_str())
+            || !prefixes.iter().any(|p| name.starts_with(p.as_str()))
+        {
             continue;
         }
         let text = std::fs::read_to_string(item.path())

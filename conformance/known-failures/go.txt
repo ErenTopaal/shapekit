@@ -21,14 +21,6 @@ cap38.liquidity-pools.synth-assets-dotnet257 v0.7.1 diverges-from-network findin
 cap38.liquidity-pools.synth-assets-equal v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-equal.md
 cap38.liquidity-pools.synth-assets-js1766-issuers v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-js1766-issuers.md
 cap38.liquidity-pools.synth-assets-py1246-testnet-pool v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md
-# xdr.SignerKey.GetAddress writes an empty signed payload as a P strkey, which strkey.Decode
-# refuses from v0.7.2 and sep-23 does not allow; stellar-xdr renders a marked invalid value
-# instead, so the two sdks' XDR-JSON disagree. the p30 entries are past v0.7.x's protocol
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network findings/issues/go-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network findings/issues/go-cap40.signed-payload-signer.p28-set-options-empty-payload.md
-cap40.signed-payload-signer.p30-extra-signer-empty-payload v0.8.0 diverges-from-network findings/issues/go-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p30-set-options-empty-payload v0.8.0 diverges-from-network findings/issues/go-cap40.signed-payload-signer.p30-set-options-empty-payload.md
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network findings/issues/go-cap40.signed-payload-signer.synth-empty-payload-signer.md
 # xdr.DecodeOptions.MaxDepth spends about half the levels per nesting that rs-stellar-xdr's limit
 # does (a bare ScVal holds 499 ScVec levels at MaxDepth 1000), so at the depth core applies the
 # sdk decodes envelopes core refuses

@@ -283,6 +283,12 @@ Per manifest entry kind (`crates/shapekit-manifest/src/model.rs`). Vector cases
 | `textual-id` | `id_parse` | the ID equals `expected.id`, or `rejected` when the case expects a rejection. A case whose `expected` is `{"either": [{"id": ...}, {"reject": ...}]}` passes with exactly that ID or with `rejected`; any other ID diverges. This covers JSON numbers above 2^53-1 that an SDK may read exactly or refuse, so the case is decided against its own expectation even when the entry is `implementation-defined` |
 | `native-projection` | `to_native` | `rejected`, or a native map that keeps every entry of the input map |
 
+Where the expected XDR-JSON contains stellar-xdr's `<INVALID:` marker (it writes one for a
+value with no strkey form, such as a signed-payload signer with an empty payload), SEP-51 has
+no canonical rendering of the value. `decode_json` then passes with any JSON the SDK renders
+(it still fails if the SDK refuses), and `encode_json` is not sent, since there is no
+canonical JSON to encode from. `decode_encode` checks the byte round trip as usual.
+
 Decode requests carry `depth_limit` 1000 (`DECODE_DEPTH`, the depth core's Rust parser
 applies to envelopes from protocol 28) and `len_limit` equal to the input length, the limits
 the corpus expectations were computed under.

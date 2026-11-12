@@ -6,13 +6,6 @@
 # plus sign, negative values); numbers past 2^53-1 moved to the unsafe-number entries, which
 # rust reads exactly and passes
 cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
-# an empty signed-payload signer renders as text the json reader refuses (28.x renders a P
-# strkey that differs from the 30.0.0 rendering; on 28.x the protocol 30 entries are unsupported)
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network findings/issues/rust-cap40.signed-payload-signer.synth-empty-payload-signer.md
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network findings/issues/rust-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network findings/issues/rust-cap40.signed-payload-signer.p28-set-options-empty-payload.md
-cap40.signed-payload-signer.p30-extra-signer-empty-payload 30.0.0 diverges-from-network findings/issues/rust-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p30-set-options-empty-payload 30.0.0 diverges-from-network findings/issues/rust-cap40.signed-payload-signer.p30-set-options-empty-payload.md
 # the json reader stops at serde_json's 128-level recursion limit, below the xdr depth the
 # decoder accepts, so values the crate renders cannot be read back
 soroban.auth-trees.synth-auth-depth-492-deepest-accepted * diverges-from-network findings/issues/rust-soroban.auth-trees.synth-auth-depth-492-deepest-accepted.md

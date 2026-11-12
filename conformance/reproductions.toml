@@ -5,7 +5,9 @@
 # errored check makes a cell inconclusive, which also fails the command.
 #
 # a row fails on a version when at least one counted check diverges, and passes when every
-# counted check passes.
+# counted check passes. a row with unsupported_not_counted (which must say why) leaves its
+# unsupported checks out of the count; they are still listed in the output, and a cell with
+# no counted check left is inconclusive.
 
 schema = 1
 
@@ -46,6 +48,7 @@ entries = [
 ops = ["id_parse"]
 fail = ["17.2.1"]
 pass = ["17.3.0"]
+unsupported_not_counted = "MuxedAccount takes the id only as a string, so the muxed json-number cases have no api to call; the text cases and every offer case still count"
 
 [[reproduction]]
 id = "js-1789-colliding-map-keys"

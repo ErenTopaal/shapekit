@@ -12,6 +12,9 @@ use stellar_xdr::{Limits, ReadXdr, ScVal};
 
 use crate::testee::parse_deep;
 
+/// What stellar-xdr writes in XDR-JSON for a value it cannot render as a strkey.
+pub const INVALID_MARKER: &str = "<INVALID:";
+
 /// What a check's answer is compared with.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expect {
@@ -21,6 +24,9 @@ pub enum Expect {
     Accepted,
     /// `result.json` equals this value.
     Json(Value),
+    /// Any `result.json` passes; the value is the reference rendering, kept for reports. Used
+    /// when the reference rendering is not canonical SEP-51 (see `INVALID_MARKER`).
+    AnyJson(Value),
     /// The sdk must refuse the input.
     Rejected,
     Order(i64),
@@ -113,14 +119,28 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                         "corpus/{json_file}: SEP-51 rendering by stellar-xdr {}",
                         shapekit_manifest::STELLAR_XDR_VERSION.pkg
                     );
+                    // stellar-xdr writes "<INVALID:...>" where a value has no strkey form (an
+                    // empty signed payload); sep-51 defines no rendering for it, so any rendering
+                    // passes and there is no canonical json to encode back from
+                    let canonical = !text.contains(INVALID_MARKER);
                     out.push(Check {
                         name: format!("{variant}/decode_json"),
                         op: "decode_json".into(),
                         request: decode_request("decode_json"),
-                        expect: Expect::Json(expected.clone()),
-                        source: json_source.clone(),
+                        expect: if canonical {
+                            Expect::Json(expected.clone())
+                        } else {
+                            Expect::AnyJson(expected.clone())
+                        },
+                        source: if canonical {
+                            json_source.clone()
+                        } else {
+                            format!(
+                                "{json_source}; holds {INVALID_MARKER}, which has no canonical SEP-51 form, so any rendering is accepted"
+                            )
+                        },
                     });
-                    if entry.expected.roundtrip {
+                    if entry.expected.roundtrip && canonical {
                         out.push(Check {
                             name: format!("{variant}/encode_json"),
                             op: "encode_json".into(),

@@ -103,6 +103,7 @@ pub fn expected_view(expect: &Expect) -> Value {
         Expect::Bytes(b) => json!({"xdr": b}),
         Expect::Accepted => json!("decodes"),
         Expect::Json(j) => json!({"json": j}),
+        Expect::AnyJson(j) => json!({"any json, reference": j}),
         Expect::Rejected => json!("rejected"),
         Expect::Order(o) => json!({"order": o}),
         Expect::PoolId(p) => json!({"pool_id": p}),
@@ -220,6 +221,10 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
         Expect::Bytes(b) => match member("xdr").and_then(Value::as_str) {
             Some(x) => compare(x == b, "the sdk's bytes differ from the expected bytes"),
             None => missing("xdr"),
+        },
+        Expect::AnyJson(_) => match member("json") {
+            Some(_) => verdict(ResultClass::Pass, None, result.clone()),
+            None => missing("json"),
         },
         Expect::Json(j) => match member("json") {
             Some(x) => compare(x == j, "the sdk's XDR-JSON differs from the expected value"),

@@ -94,29 +94,24 @@ soroban.scval-shapes.synth-map-void-and-text 16.4.1 diverges-from-network findin
 soroban.scval-shapes.synth-map-void-and-text 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
 soroban.scval-shapes.synth-map-void-and-text 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
 #
-# js-stellar-sdk#1785: ids in non-canonical text or unsafe numbers. 17.3.0 still accepts leading
-# zeros ("016", "00": documented as removed) and the json number 16.0, which javascript cannot
-# tell from 16
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.3.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.3.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.4.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical * diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
-#
-# an empty signed payload (CAP-40 allows 1 to 64 bytes): the sdk writes a P strkey with no payload
-# where the expected json, from stellar-xdr, holds its <INVALID:...> marker, and the sdk's json
-# reader (17.x) refuses that marker
-cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network findings/issues/js-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network findings/issues/js-cap40.signed-payload-signer.p28-set-options-empty-payload.md
-cap40.signed-payload-signer.p30-extra-signer-empty-payload 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p30-extra-signer-empty-payload 17.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p30-extra-signer-empty-payload 17.4.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
-cap40.signed-payload-signer.p30-set-options-empty-payload 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
-cap40.signed-payload-signer.p30-set-options-empty-payload 17.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
-cap40.signed-payload-signer.p30-set-options-empty-payload 17.4.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
-cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-empty-payload-signer.md
+# js-stellar-sdk#1785: ids in non-canonical text or unsafe numbers, fixed in 17.3.0. from 17.3.0
+# the offer entries pass; the muxed non-canonical entry passes its text cases there and is
+# unsupported overall, because MuxedAccount takes the id only as a string, not as a number
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.3.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.3.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.4.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.3.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.3.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.4.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.3.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.3.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.4.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
 #
 # 16.x js-xdr 4 stops at 200 nested types, below depths the network accepts
 soroban.auth-trees.synth-auth-depth-492-deepest-accepted 16.3.0 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-492-deepest-accepted.md
