@@ -1,36 +1,18 @@
-// shapekit javascript testee. speaks newline-delimited json on stdin and stdout,
-// one reply per request line. only `hello` exists until the full testee protocol lands.
+// shapekit javascript testee: answers testee protocol requests (docs/testee-protocol.md) with
+// @stellar/stellar-sdk, one json object per line on stdin and stdout.
 
 import { createInterface } from "node:readline";
 
-type Reply = Record<string, unknown>;
-
-// version stays null until @stellar/stellar-sdk is an actual dependency,
-// so the runner never sees a version this testee does not load
-const hello: Reply = {
-  sdk: "@stellar/stellar-sdk",
-  version: null,
-  ops: ["hello"],
-};
-
-function handle(line: string): Reply {
-  let request: unknown;
-  try {
-    request = JSON.parse(line);
-  } catch {
-    return { error: "invalid json" };
-  }
-  if (typeof request === "object" && request !== null && "op" in request && request.op === "hello") {
-    return hello;
-  }
-  return { error: "unsupported op" };
-}
+import { Ops } from "./ops.js";
+import { handle } from "./request.js";
+import { loadSdk } from "./sdk.js";
 
 async function main(): Promise<void> {
+  const ops = new Ops(await loadSdk());
   const lines = createInterface({ input: process.stdin, crlfDelay: Infinity });
   for await (const line of lines) {
-    if (line.trim() === "") continue;
-    process.stdout.write(`${JSON.stringify(handle(line))}\n`);
+    if (line === "") continue;
+    process.stdout.write(`${JSON.stringify(handle(ops, line))}\n`);
   }
 }
 

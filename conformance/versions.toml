@@ -23,9 +23,12 @@
 # go: one source (testees/go) built per version with an alternate module file
 # testees/go/versions/<version>.mod (and its .sum) through go's -modfile flag, outside the
 # go.work workspace, which -modfile cannot be combined with.
-# js: the compiled testee (testees/js/dist) is copied next to a per-version install of the
+# js: one compiled testee (testees/js/dist) is copied next to a per-version install of the
 # sdk under target/testees/js/<version>/, so node resolves @stellar/stellar-sdk to that
-# version.
+# version. each install is `npm ci` from the package.json and lock file committed under
+# testees/js/versions/<version>/, so the sdk's own dependencies (js-xdr above all) are pinned
+# too. 16.3.x and 17.2.x carry the stellar-xdr v28.0 definitions without cap-84, so they
+# know protocol 29 (no xdr change); 16.4.1, 17.3.0 and 17.4.0 carry protocol 30.
 
 schema = 1
 
@@ -74,6 +77,7 @@ build = [
   { argv = ["go", "build", "-modfile", "versions/v0.7.1.mod", "-o", "../../target/testees/go/v0.7.1/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.1/testee"]
+max_protocol = 29
 
 [[sdk.go.versions]]
 version = "v0.7.2"
@@ -81,6 +85,7 @@ build = [
   { argv = ["go", "build", "-modfile", "versions/v0.7.2.mod", "-o", "../../target/testees/go/v0.7.2/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.2/testee"]
+max_protocol = 29
 
 [[sdk.go.versions]]
 version = "v0.7.3"
@@ -88,6 +93,7 @@ build = [
   { argv = ["go", "build", "-modfile", "versions/v0.7.3.mod", "-o", "../../target/testees/go/v0.7.3/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.3/testee"]
+max_protocol = 29
 
 [[sdk.go.versions]]
 version = "v0.8.0"
@@ -95,6 +101,7 @@ build = [
   { argv = ["go", "build", "-modfile", "versions/v0.8.0.mod", "-o", "../../target/testees/go/v0.8.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.8.0/testee"]
+max_protocol = 30
 
 [sdk.js]
 package = "@stellar/stellar-sdk"
@@ -106,69 +113,97 @@ memory = { resource = "data", mib = 4096 }
 [[sdk.js.versions]]
 version = "16.3.0"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/16.3.0", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@16.3.0"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.0/"] },
+  { argv = ["rm", "-rf", "target/testees/js/16.3.0"] },
+  { argv = ["mkdir", "-p", "target/testees/js/16.3.0"] },
+  { argv = ["cp", "testees/js/versions/16.3.0/package.json", "testees/js/versions/16.3.0/package-lock.json", "target/testees/js/16.3.0/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.3.0" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.0/dist"] },
 ]
 command = ["node", "target/testees/js/16.3.0/dist/main.js"]
+max_protocol = 29
 
 [[sdk.js.versions]]
 version = "16.3.1"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/16.3.1", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@16.3.1"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.1/"] },
+  { argv = ["rm", "-rf", "target/testees/js/16.3.1"] },
+  { argv = ["mkdir", "-p", "target/testees/js/16.3.1"] },
+  { argv = ["cp", "testees/js/versions/16.3.1/package.json", "testees/js/versions/16.3.1/package-lock.json", "target/testees/js/16.3.1/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.3.1" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.1/dist"] },
 ]
 command = ["node", "target/testees/js/16.3.1/dist/main.js"]
+max_protocol = 29
 
 [[sdk.js.versions]]
 version = "16.4.1"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/16.4.1", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@16.4.1"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.4.1/"] },
+  { argv = ["rm", "-rf", "target/testees/js/16.4.1"] },
+  { argv = ["mkdir", "-p", "target/testees/js/16.4.1"] },
+  { argv = ["cp", "testees/js/versions/16.4.1/package.json", "testees/js/versions/16.4.1/package-lock.json", "target/testees/js/16.4.1/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.4.1" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.4.1/dist"] },
 ]
 command = ["node", "target/testees/js/16.4.1/dist/main.js"]
+max_protocol = 30
 
 [[sdk.js.versions]]
 version = "17.2.0"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/17.2.0", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@17.2.0"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.0/"] },
+  { argv = ["rm", "-rf", "target/testees/js/17.2.0"] },
+  { argv = ["mkdir", "-p", "target/testees/js/17.2.0"] },
+  { argv = ["cp", "testees/js/versions/17.2.0/package.json", "testees/js/versions/17.2.0/package-lock.json", "target/testees/js/17.2.0/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.2.0" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.2.0/dist/main.js"]
+max_protocol = 29
 
 [[sdk.js.versions]]
 version = "17.2.1"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/17.2.1", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@17.2.1"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.1/"] },
+  { argv = ["rm", "-rf", "target/testees/js/17.2.1"] },
+  { argv = ["mkdir", "-p", "target/testees/js/17.2.1"] },
+  { argv = ["cp", "testees/js/versions/17.2.1/package.json", "testees/js/versions/17.2.1/package-lock.json", "target/testees/js/17.2.1/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.2.1" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.1/dist"] },
 ]
 command = ["node", "target/testees/js/17.2.1/dist/main.js"]
+max_protocol = 29
 
 [[sdk.js.versions]]
 version = "17.3.0"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/17.3.0", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@17.3.0"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.3.0/"] },
+  { argv = ["rm", "-rf", "target/testees/js/17.3.0"] },
+  { argv = ["mkdir", "-p", "target/testees/js/17.3.0"] },
+  { argv = ["cp", "testees/js/versions/17.3.0/package.json", "testees/js/versions/17.3.0/package-lock.json", "target/testees/js/17.3.0/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.3.0" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.3.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.3.0/dist/main.js"]
+max_protocol = 30
 
 [[sdk.js.versions]]
 version = "17.4.0"
 build = [
-  { argv = ["npm", "ci"], dir = "testees/js" },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
   { argv = ["npm", "run", "build"], dir = "testees/js" },
-  { argv = ["npm", "install", "--prefix", "target/testees/js/17.4.0", "--no-audit", "--no-fund", "--save-exact", "@stellar/stellar-sdk@17.4.0"] },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.4.0/"] },
+  { argv = ["rm", "-rf", "target/testees/js/17.4.0"] },
+  { argv = ["mkdir", "-p", "target/testees/js/17.4.0"] },
+  { argv = ["cp", "testees/js/versions/17.4.0/package.json", "testees/js/versions/17.4.0/package-lock.json", "target/testees/js/17.4.0/"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.4.0" },
+  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.4.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.4.0/dist/main.js"]
+max_protocol = 30

@@ -1,0 +1,148 @@
+# known failures of the javascript testee (@stellar/stellar-sdk, versions in versions.toml).
+# format: <entry-id> <version|*> <result> <issue>; see crates/shapekit-conformance/src/known.rs.
+# issues point at the drafted bodies until they are filed upstream with owner approval.
+#
+# 16.x StrKey decoders accept payloads of the wrong length (fixed in 17.x)
+cap23.claimable-balances.synth-strkey-b-invalid 16.3.0 diverges-from-network findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md
+cap23.claimable-balances.synth-strkey-b-invalid 16.3.1 diverges-from-network findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md
+cap23.claimable-balances.synth-strkey-b-invalid 16.4.1 diverges-from-network findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md
+cap27.muxed-accounts.synth-strkey-g-invalid 16.3.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md
+cap27.muxed-accounts.synth-strkey-g-invalid 16.3.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md
+cap27.muxed-accounts.synth-strkey-g-invalid 16.4.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md
+cap27.muxed-accounts.synth-strkey-m-invalid 16.3.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md
+cap27.muxed-accounts.synth-strkey-m-invalid 16.3.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md
+cap27.muxed-accounts.synth-strkey-m-invalid 16.4.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md
+cap27.muxed-accounts.synth-strkey-s-invalid 16.3.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md
+cap27.muxed-accounts.synth-strkey-s-invalid 16.3.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md
+cap27.muxed-accounts.synth-strkey-s-invalid 16.4.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md
+cap38.liquidity-pools.synth-strkey-l-invalid 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md
+cap38.liquidity-pools.synth-strkey-l-invalid 16.3.1 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md
+cap38.liquidity-pools.synth-strkey-l-invalid 16.4.1 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md
+cap40.signed-payload-signer.synth-strkey-p-invalid 16.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md
+cap40.signed-payload-signer.synth-strkey-p-invalid 16.3.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md
+cap40.signed-payload-signer.synth-strkey-p-invalid 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md
+cap40.signed-payload-signer.synth-strkey-t-invalid 16.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md
+cap40.signed-payload-signer.synth-strkey-t-invalid 16.3.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md
+cap40.signed-payload-signer.synth-strkey-t-invalid 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md
+cap40.signed-payload-signer.synth-strkey-x-invalid 16.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md
+cap40.signed-payload-signer.synth-strkey-x-invalid 16.3.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md
+cap40.signed-payload-signer.synth-strkey-x-invalid 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md
+soroban.invoke-basics.synth-strkey-c-invalid 16.3.0 diverges-from-network findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md
+soroban.invoke-basics.synth-strkey-c-invalid 16.3.1 diverges-from-network findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md
+soroban.invoke-basics.synth-strkey-c-invalid 16.4.1 diverges-from-network findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md
+#
+# 16.4.1 carries the protocol 30 xdr (MuxedContract) but no StrKey codec for W addresses
+cap84.muxed-contract.synth-strkey-w-valid 16.4.1 diverges-from-network findings/issues/js-cap84.muxed-contract.synth-strkey-w-valid.md
+#
+# js-stellar-sdk#1766: Asset.compare ordered issuers by strkey text (16.3.0, 17.2.0); pool ids follow
+cap38.liquidity-pools.synth-assets-dotnet257 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md
+cap38.liquidity-pools.synth-assets-dotnet257 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md
+cap38.liquidity-pools.synth-assets-js1766-issuers 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md
+cap38.liquidity-pools.synth-assets-js1766-issuers 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md
+#
+# js-stellar-sdk#1766: scvSortedMap ordered keys by their native form (17.2.0; never fixed on 16.x)
+soroban.scval-shapes.synth-map-keys-addresses 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md
+soroban.scval-shapes.synth-map-keys-addresses 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md
+soroban.scval-shapes.synth-map-keys-addresses 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md
+soroban.scval-shapes.synth-map-keys-addresses 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md
+soroban.scval-shapes.synth-map-keys-bytes 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-bytes.md
+soroban.scval-shapes.synth-map-keys-mixed-types 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md
+soroban.scval-shapes.synth-map-keys-mixed-types 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md
+soroban.scval-shapes.synth-map-keys-mixed-types 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md
+soroban.scval-shapes.synth-map-keys-mixed-types 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md
+#
+# js-stellar-sdk#1789: scValToNative merges map keys that collide as object keys (up to 17.2.1;
+# only 16.x loses an entry of the bytes-and-string map)
+soroban.scval-shapes.synth-map-address-and-string 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md
+soroban.scval-shapes.synth-map-address-and-string 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md
+soroban.scval-shapes.synth-map-address-and-string 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md
+soroban.scval-shapes.synth-map-address-and-string 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md
+soroban.scval-shapes.synth-map-address-and-string 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md
+soroban.scval-shapes.synth-map-bool-and-text 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md
+soroban.scval-shapes.synth-map-bool-and-text 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md
+soroban.scval-shapes.synth-map-bool-and-text 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md
+soroban.scval-shapes.synth-map-bool-and-text 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md
+soroban.scval-shapes.synth-map-bool-and-text 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md
+soroban.scval-shapes.synth-map-bytes-and-string 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md
+soroban.scval-shapes.synth-map-bytes-and-string 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md
+soroban.scval-shapes.synth-map-bytes-and-string 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md
+soroban.scval-shapes.synth-map-js1789-u32-symbol 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md
+soroban.scval-shapes.synth-map-js1789-u32-symbol 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md
+soroban.scval-shapes.synth-map-js1789-u32-symbol 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md
+soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md
+soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md
+soroban.scval-shapes.synth-map-numeric-types 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md
+soroban.scval-shapes.synth-map-numeric-types 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md
+soroban.scval-shapes.synth-map-numeric-types 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md
+soroban.scval-shapes.synth-map-numeric-types 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md
+soroban.scval-shapes.synth-map-numeric-types 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md
+soroban.scval-shapes.synth-map-u32-string-symbol 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md
+soroban.scval-shapes.synth-map-u32-string-symbol 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md
+soroban.scval-shapes.synth-map-u32-string-symbol 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md
+soroban.scval-shapes.synth-map-u32-string-symbol 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md
+soroban.scval-shapes.synth-map-u32-string-symbol 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md
+soroban.scval-shapes.synth-map-vec-and-string 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md
+soroban.scval-shapes.synth-map-vec-and-string 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md
+soroban.scval-shapes.synth-map-vec-and-string 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md
+soroban.scval-shapes.synth-map-vec-and-string 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md
+soroban.scval-shapes.synth-map-vec-and-string 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md
+soroban.scval-shapes.synth-map-void-and-text 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
+soroban.scval-shapes.synth-map-void-and-text 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
+soroban.scval-shapes.synth-map-void-and-text 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
+soroban.scval-shapes.synth-map-void-and-text 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
+soroban.scval-shapes.synth-map-void-and-text 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md
+#
+# js-stellar-sdk#1785: ids in non-canonical text or unsafe numbers. 17.3.0 still accepts leading
+# zeros ("016", "00": documented as removed) and the json number 16.0, which javascript cannot
+# tell from 16
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.3.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
+cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.3.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
+cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 16.4.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
+cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
+cap03.offer-liabilities.synth-textual-offer-id-unsafe-number 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-unsafe-number.md
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical * diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md
+#
+# an empty signed payload (CAP-40 allows 1 to 64 bytes): the sdk writes a P strkey with no payload
+# where the expected json, from stellar-xdr, holds its <INVALID:...> marker, and the sdk's json
+# reader (17.x) refuses that marker
+cap40.signed-payload-signer.p28-extra-signer-empty-payload * diverges-from-network findings/issues/js-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md
+cap40.signed-payload-signer.p28-set-options-empty-payload * diverges-from-network findings/issues/js-cap40.signed-payload-signer.p28-set-options-empty-payload.md
+cap40.signed-payload-signer.p30-extra-signer-empty-payload 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
+cap40.signed-payload-signer.p30-extra-signer-empty-payload 17.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
+cap40.signed-payload-signer.p30-extra-signer-empty-payload 17.4.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-extra-signer-empty-payload.md
+cap40.signed-payload-signer.p30-set-options-empty-payload 16.4.1 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
+cap40.signed-payload-signer.p30-set-options-empty-payload 17.3.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
+cap40.signed-payload-signer.p30-set-options-empty-payload 17.4.0 diverges-from-network findings/issues/js-cap40.signed-payload-signer.p30-set-options-empty-payload.md
+cap40.signed-payload-signer.synth-empty-payload-signer * diverges-from-network findings/issues/js-cap40.signed-payload-signer.synth-empty-payload-signer.md
+#
+# 16.x js-xdr 4 stops at 200 nested types, below depths the network accepts
+soroban.auth-trees.synth-auth-depth-492-deepest-accepted 16.3.0 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-492-deepest-accepted.md
+soroban.auth-trees.synth-auth-depth-492-deepest-accepted 16.3.1 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-492-deepest-accepted.md
+soroban.auth-trees.synth-auth-depth-492-deepest-accepted 16.4.1 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-492-deepest-accepted.md
+soroban.scval-shapes.synth-event-vec-depth-101 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md
+soroban.scval-shapes.synth-event-vec-depth-101 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md
+soroban.scval-shapes.synth-event-vec-depth-101 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.3.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.4.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md
+#
+# 17.x decodes under js-xdr 5's default limit of 1500 nested schemas and its fromXdr takes no
+# limit, so it accepts transactions nested deeper than core does
+soroban.auth-trees.synth-auth-depth-494-over-cap 17.2.0 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md
+soroban.auth-trees.synth-auth-depth-494-over-cap 17.2.1 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md
+soroban.auth-trees.synth-auth-depth-494-over-cap 17.3.0 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md
+soroban.auth-trees.synth-auth-depth-494-over-cap 17.4.0 diverges-from-network findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.4.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.4.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md
