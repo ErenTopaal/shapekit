@@ -1,5 +1,9 @@
 name: nightly
 
+# the full tier: every chain regenerated under both passphrases, the whole sdk matrix and its
+# reproductions, the wallet-backend reproductions, both delivery modes, memory bounds, core's
+# own golden check, the docker-backed tests and coverage. what pr.yml samples, this runs whole.
+
 on:
   schedule:
     - cron: "0 3 * * *"
@@ -12,33 +16,252 @@ concurrency:
   group: nightly
   cancel-in-progress: false
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
 jobs:
-  goldens:
-    # literal golden agreement: the committed golden index must describe exactly the files at
-    # the pinned core tag, and core 30.0.0's own --check-lcm run must accept those files
+  build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - run: cargo build --release --locked -p shapekit-cli
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shapekit
+          path: target/release/shapekit
+          retention-days: 3
+          if-no-files-found: error
+
+  goldens:
+    # literal golden agreement: the committed golden index must describe exactly the files at
+    # the pinned core tag, and core's own --check-lcm run must accept those files
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
       - name: fetch test-lcm-current at the pinned stellar-core tag
         run: |
           set -euo pipefail
-          tag=v30.0.0
-          pinned=$(awk '/^\[\[git\]\]/{n=""} /^name = "stellar-core"$/{n=1} n && /^sha = /{gsub(/"/,"",$3); print $3; exit}' pins.toml)
+          tag=$(scripts/pin.sh tag stellar-core)
+          pinned=$(scripts/pin.sh git stellar-core)
           git clone --quiet --depth 1 --branch "$tag" --filter=blob:none --sparse \
             https://github.com/stellar/stellar-core "$RUNNER_TEMP/core"
           git -C "$RUNNER_TEMP/core" sparse-checkout set test-lcm-current
-          git -C "$RUNNER_TEMP/core" fetch --quiet --depth 1 origin "refs/tags/$tag:refs/tags/$tag"
           head=$(git -C "$RUNNER_TEMP/core" rev-parse HEAD)
           if [ "$head" != "$pinned" ]; then
             echo "tag $tag is $head upstream, pins.toml pins $pinned" >&2
             exit 1
           fi
       - name: committed golden index matches upstream
-        run: cargo run --release -p shapekit-cli -- goldens verify --core-src "$RUNNER_TEMP/core"
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          tag=$(scripts/pin.sh tag stellar-core)
+          "$RUNNER_TEMP/bin/shapekit" goldens verify --core-src "$RUNNER_TEMP/core" --tag "$tag" \
+            --index "corpus/goldens/core-$tag/index.json"
+      - name: pull the pinned core test build by digest
+        run: docker pull --quiet "$(scripts/pin.sh image stellar-core-buildtests)"
       - name: core's own check-lcm run
         run: scripts/check-lcm.sh "$RUNNER_TEMP/core" 2 5
       - name: structural agreement with local-core and history entries
-        run: cargo run --release -p shapekit-cli -- goldens agree
+        run: |
+          "$RUNNER_TEMP/bin/shapekit" goldens agree
+          "$RUNNER_TEMP/bin/shapekit" coverage --check
+
+  repro-select:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: select
+        run: echo "matrix=$(scripts/select-repro.sh all /dev/null)" >>"$GITHUB_OUTPUT"
+
+  repro:
+    # every chain under both passphrases, compared byte for byte with the corpus
+    needs: [build, repro-select]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.repro-select.outputs.matrix) }}
+    name: repro (${{ matrix.shard }})
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
+      - name: gen verify-repro
+        env:
+          FAMILIES: ${{ matrix.families }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          args=()
+          for f in $FAMILIES; do args+=(--family "$f"); done
+          "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2 "${args[@]}"
+
+  docker-tests:
+    # the core driver and generator tests that start stellar-core, skipped in pr.yml's cargo
+    # test because they need the image; also the serve memory bound in a release build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: debug
+      - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
+      - name: cargo test with docker
+        env:
+          SHAPEKIT_DOCKER_TESTS: "1"
+        run: cargo test --workspace --locked --no-fail-fast
+      - name: serve memory bound (release build)
+        run: cargo test --release --locked -p shapekit-cli --test serve_memory
+
+  conformance:
+    # every sdk version in conformance/versions.toml, then the upstream sightings
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: testees/js/**/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance run, all versions
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --all-versions
+      - name: conformance reproduce
+        # the run above built every version, so the reproductions reuse those builds
+        run: |
+          "$RUNNER_TEMP/bin/shapekit" conformance reproduce --no-build
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance/MATRIX.md ]; then cat target/conformance/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: conformance
+          path: target/conformance/
+          retention-days: 30
+
+  harness:
+    # every chain through the wallet-backend adapter at the current pin, once per delivery mode;
+    # the rpc run goes twice in one process and fails if the second round's peak memory grows
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - delivery: rpc
+            network: both
+            repeat: 2
+          - delivery: sep54-s3
+            network: testnet
+            repeat: 1
+    name: harness (${{ matrix.delivery }})
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pull the pinned images by digest
+        run: |
+          docker pull --quiet "$(scripts/pin.sh image timescaledb)"
+          docker pull --quiet "$(scripts/pin.sh image seaweedfs)"
+      - run: cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter
+      - name: harness run
+        env:
+          DELIVERY: ${{ matrix.delivery }}
+          NETWORK: ${{ matrix.network }}
+          REPEAT: ${{ matrix.repeat }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          pin=$(scripts/pin.sh git wallet-backend)
+          "$RUNNER_TEMP/bin/shapekit" harness run \
+            --adapter "adapters/bin/wb-adapter --commit $pin" \
+            --delivery "$DELIVERY" --network "$NETWORK" --repeat "$REPEAT" \
+            --out harness-out
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: harness-${{ matrix.delivery }}
+          path: harness-out/
+          retention-days: 30
+
+  harness-reproduce:
+    # wallet-backend#729, #731, #716 and the beyond-rfp #753 and #792 on their pre-fix and
+    # fixed commits
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - run: docker pull --quiet "$(scripts/pin.sh image timescaledb)"
+      - name: harness reproduce
+        run: |
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" harness reproduce \
+            --table adapters/walletbackend/reproductions.toml --out harness-reproduce
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-reproduce/REPRODUCTIONS.md ]; then cat harness-reproduce/REPRODUCTIONS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: harness-reproduce
+          path: harness-reproduce/
+          retention-days: 30

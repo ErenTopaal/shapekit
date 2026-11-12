@@ -1,5 +1,9 @@
 name: upstream-drift
 
+# weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr or sdk
+# release, or change to core's golden index, gets a tracking issue carrying the checklist of
+# docs/protocol-upgrade-runbook.md
+
 on:
   schedule:
     - cron: "0 6 * * 1"
@@ -16,13 +20,14 @@ concurrency:
 jobs:
   drift:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
       - name: verify every pin still exists upstream
         run: cargo run -p shapekit-cli -- pins verify
-      - name: report newer upstream releases
+      - name: tracking issues for new upstream releases and golden index changes
         # runs even when a pin is broken, since that is exactly when the report is wanted
         if: ${{ !cancelled() }}
         env:

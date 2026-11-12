@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# compares the newest upstream releases with what pins.toml pins, and keeps one
-# open issue in this repo up to date while they differ.
+# compares the newest upstream releases and core's golden index with what pins.toml and the
+# committed golden snapshot hold, and opens one tracking issue, carrying the protocol upgrade
+# runbook's checklist, for each new upstream item.
 #
 # usage: scripts/upstream-releases.sh [--dry-run]
 #   --dry-run  print the report and skip every gh call
@@ -18,7 +19,6 @@ esac
 
 root=$(git rev-parse --show-toplevel)
 pins="$root/pins.toml"
-issue_title="upstream releases newer than pins.toml"
 
 # crates.io rejects requests without a user agent
 ua="shapekit-upstream-releases (https://github.com/${GH_REPO:-shapekit})"
@@ -90,6 +90,11 @@ fi
 names=("stellar-core" "stellar-xdr (definitions)" "@stellar/stellar-sdk" "github.com/stellar/go-stellar-sdk" "stellar-xdr (crate)")
 upstream=("$upstream_core" "$upstream_xdr" "$upstream_js" "$upstream_go" "$upstream_crate")
 
+# one tracking issue per new upstream item; the title names the item, so a later run finds
+# the issue (open or closed) instead of opening it again
+titles=()
+details=()
+
 differ=0
 report="| component | pinned | newest upstream | |
 |---|---|---|---|"
@@ -98,44 +103,77 @@ for i in "${!names[@]}"; do
   if [ "${pinned[$i]}" != "${upstream[$i]}" ]; then
     mark="differs"
     differ=$((differ + 1))
+    titles+=("upstream: ${names[$i]} ${upstream[$i]}")
+    details+=("${names[$i]} ${upstream[$i]} is out; pins.toml pins ${pinned[$i]}.")
   fi
   report+=$'\n'"| ${names[$i]} | ${pinned[$i]} | ${upstream[$i]} | $mark |"
 done
 
+# the golden index: at the newest core release when it is not the pinned one (the pinned one
+# is checked every night by nightly.yml), and the stamps on core's default branch, where a
+# protocol bump of the goldens shows up before any release
+golden_lines=""
+if [ "$upstream_core" != "${pinned[0]}" ]; then
+  golden_lines+=$("$root/scripts/golden-drift.sh" "$upstream_core")
+fi
+master_lines=$("$root/scripts/golden-drift.sh" master stamps)
+if [ -n "$master_lines" ]; then
+  golden_lines+="${golden_lines:+$'\n'}$master_lines"
+fi
+if [ -n "$golden_lines" ]; then
+  differ=$((differ + 1))
+  digest=$(printf '%s\n' "$golden_lines" | sha256sum | cut -c1-12)
+  titles+=("upstream: core golden index changed ($digest)")
+  details+=("The core golden index differs from corpus/goldens:"$'\n\n'"$(printf '%s\n' "$golden_lines" | sed 's/^/- /')")
+fi
+
 echo "$report"
+echo
+if [ -n "$golden_lines" ]; then
+  echo "golden index differences:"
+  echo "$golden_lines"
+else
+  echo "golden index: no stamp or index change upstream"
+fi
 echo
 if [ "$differ" -eq 0 ]; then
   echo "all pins match the newest upstream releases"
 else
-  echo "$differ of ${#names[@]} pins differ from the newest upstream release"
+  echo "$differ upstream changes need a tracking issue"
+fi
+
+# the checklist is kept in one place, the runbook, between two marker comments
+checklist=$(awk '/<!-- checklist:end -->/{p=0} p; /<!-- checklist:start -->/{p=1}' \
+  "$root/docs/protocol-upgrade-runbook.md")
+if [ -z "$checklist" ]; then
+  echo "no checklist between the markers in docs/protocol-upgrade-runbook.md" >&2
+  exit 1
 fi
 
 if $dry_run; then
-  echo "dry run, skipping the issue update"
+  for t in "${titles[@]}"; do echo "would open: $t"; done
+  echo "dry run, skipping the issue updates"
   exit 0
 fi
 
-existing=$(gh issue list --state open --search "\"$issue_title\" in:title" --json number,title \
-  --jq ".[] | select(.title == \"$issue_title\") | .number" | head -n 1)
-
-if [ "$differ" -eq 0 ]; then
+for i in "${!titles[@]}"; do
+  title=${titles[$i]}
+  existing=$(gh issue list --state all --search "\"$title\" in:title" --json number,title \
+    --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
   if [ -n "$existing" ]; then
-    gh issue close "$existing" --comment "all pins match the newest upstream releases again."
+    echo "#$existing already tracks: $title"
+    continue
   fi
-  exit 0
-fi
+  body="Found on $(date -u +%Y-%m-%d) by the upstream-drift workflow.
 
-body="Checked on $(date -u +%Y-%m-%d) by the upstream-drift workflow.
+${details[$i]}
 
 $report
 
-A difference is not an error by itself. Moving a pin means updating pins.toml, running
-\`shapekit pins verify\` and getting CI green on the new versions. This issue is closed by the
-same workflow once every pin matches again."
+Not every upstream change needs a pin move. If this one does not, close this issue with the
+reason. Otherwise work through docs/protocol-upgrade-runbook.md (for a release without a
+protocol change, steps 2, 3 and 8 to 11 usually suffice):
 
-if [ -n "$existing" ]; then
-  gh issue edit "$existing" --body "$body"
-  echo "updated issue #$existing"
-else
-  gh issue create --title "$issue_title" --body "$body"
-fi
+$checklist"
+  gh issue create --title "$title" --body "$body"
+done

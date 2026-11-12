@@ -2,6 +2,57 @@
 
 A dated public log of what has landed. Newest entry first.
 
+## 2026-11-12: CI tiers, release workflow, maintenance plan
+
+The CI and release side of the project: per pull request and nightly tiers, upstream tracking,
+a release workflow, a reusable workflow for SDK repositories, and the maintenance documents.
+
+What landed:
+
+- `pr.yml`: one release build of the CLI shared by parallel jobs for Rust (fmt, clippy, tests),
+  Go (vet, tests, golangci-lint, `indexerlint` over `adapters/`), the JavaScript testee, the
+  corpus (registry, manifest round trip, regenerated synthetic entries and manifest compared
+  with the committed files, coverage, guide, goldens agreement, committed chains, the release
+  archive, em dashes), `gen verify-repro` under both passphrases, conformance on the current
+  SDK versions and the wallet-backend harness on three testnet chains.
+- `gen verify-repro` per pull request covers a rotating window of four families (moved by the
+  pull request number) plus every family the change touches, and every family when shared
+  generator code, the registry, the contracts or the pins change. `scripts/select-repro.sh`
+  makes the choice, deterministically, and shards it over up to four runners.
+- `nightly.yml`: every chain regenerated under both passphrases, the docker-backed tests and the
+  `serve` memory bound, the whole SDK matrix and its reproductions, the harness over every chain
+  in both delivery modes with the memory growth check, the wallet-backend reproductions, core's
+  `--check-lcm` on the goldens, coverage.
+- `upstream-drift.yml` now opens one tracking issue, carrying the runbook checklist, per new
+  stellar-core, stellar-xdr or SDK release and per change to core's golden index
+  (`scripts/golden-drift.sh`).
+- `release.yml`: runs on a tag whose signature GitHub verifies, builds `shapekit`, `indexerlint`
+  and the wallet-backend adapter, the corpus archive and the golden snapshot, requires two
+  independent builds of the archives to have equal checksums, and publishes everything with
+  `SHA256SUMS`, build provenance attestations and notes taken from this file.
+- `sdk-conformance.yml`: a reusable workflow an SDK repository calls to run its testee over a
+  pinned corpus release with its own known-failures list.
+- Docs: `docs/protocol-upgrade-runbook.md`, `docs/maintenance.md`, `docs/sdk-ci.md`, the final
+  `docs/infrastructure.md` and `README.md`.
+
+Decisions:
+
+- The per pull request budget is 15 minutes of wall clock. Measured locally (cold cargo cache,
+  two build jobs on a shared machine), the longest chain of jobs is the release build (366 s)
+  followed by the slowest verify-repro shard (about 230 s). The checks were split into parallel
+  jobs and the regeneration into shards to stay under the budget; no check was dropped from the
+  per pull request tier. The numbers are in `docs/infrastructure.md` and will be replaced by
+  those of the first runs on GitHub.
+- The harness per pull request runs three chains (`cap40.signed-payload-signer.p30`,
+  `cap73.sac-trust.p30`, `cap27.muxed-accounts.p30`, 88 s locally); a testnet pass over 33
+  chains took 1351 s locally, over the budget, so every chain runs nightly.
+- `go-stellar-sdk` v0.9.0 was released on 2026-11-10. The pin stays at v0.8.0, the version the
+  current wallet-backend commit uses, until it goes through the runbook; the drift workflow
+  opens its tracking issue.
+
+None of the workflows has run on GitHub yet; the repository is not published. Every workflow
+passes actionlint 1.7.12 with shellcheck 0.11.0, and their commands were run locally.
+
 ## 2026-11-12: repository foundation
 
 The first phase: a licensed repository that builds, with every upstream reference pinned and

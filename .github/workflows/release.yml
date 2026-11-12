@@ -1,0 +1,183 @@
+name: release
+
+# publishes a release from a signed tag: the shapekit and indexerlint binaries, the corpus
+# archive and the golden snapshot, one SHA256SUMS over all of them, a build provenance
+# attestation per asset, and release notes from the newest STATUS.md section. the archives are
+# built twice on separate runners and must have equal checksums before anything is published.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  signed-tag:
+    # github records whether a tag object's signature verifies against a key on the tagger's
+    # account; a lightweight or unverified tag stops the release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: the tag is annotated and its signature verifies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG")
+          type=$(jq -r .object.type <<<"$ref")
+          if [ "$type" != "tag" ]; then
+            echo "::error::$TAG is a lightweight tag; releases need a signed annotated tag (git tag -s)"
+            exit 1
+          fi
+          sha=$(jq -r .object.sha <<<"$ref")
+          verification=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$sha" --jq .verification)
+          echo "$verification"
+          if [ "$(jq -r .verified <<<"$verification")" != "true" ]; then
+            echo "::error::the signature of $TAG does not verify: $(jq -r .reason <<<"$verification")"
+            exit 1
+          fi
+
+  archives:
+    # the corpus archive and the golden snapshot, built on two runners that share nothing
+    needs: signed-tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        build: [a, b]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - run: cargo build --release --locked -p shapekit-cli
+      - name: corpus archive
+        run: target/release/shapekit corpus pack --out "$RUNNER_TEMP/assets"
+      - name: fetch test-lcm-current at the pinned stellar-core tag
+        run: |
+          set -euo pipefail
+          tag=$(scripts/pin.sh tag stellar-core)
+          pinned=$(scripts/pin.sh git stellar-core)
+          git clone --quiet --depth 1 --branch "$tag" --filter=blob:none --sparse \
+            https://github.com/stellar/stellar-core "$RUNNER_TEMP/core"
+          git -C "$RUNNER_TEMP/core" sparse-checkout set test-lcm-current
+          head=$(git -C "$RUNNER_TEMP/core" rev-parse HEAD)
+          if [ "$head" != "$pinned" ]; then
+            echo "tag $tag is $head upstream, pins.toml pins $pinned" >&2
+            exit 1
+          fi
+      - name: golden snapshot
+        run: |
+          set -euo pipefail
+          tag=$(scripts/pin.sh tag stellar-core)
+          # the committed index must describe exactly these files before they are shipped
+          target/release/shapekit goldens verify --core-src "$RUNNER_TEMP/core" --tag "$tag" \
+            --index "corpus/goldens/core-$tag/index.json"
+          tar --sort=name --owner=0 --group=0 --numeric-owner --mtime=@0 --format=gnu \
+            -C "$RUNNER_TEMP/core" -c test-lcm-current |
+            zstd -19 -T1 -q -o "$RUNNER_TEMP/assets/goldens-core-$tag.tar.zst"
+      - name: checksums of this build
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/assets"
+          rm -f SHA256SUMS
+          sha256sum -- *.tar.zst | tee "$RUNNER_TEMP/archives-${{ matrix.build }}.sha256"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: archives-${{ matrix.build }}
+          path: |
+            ${{ runner.temp }}/assets/*.tar.zst
+            ${{ runner.temp }}/archives-${{ matrix.build }}.sha256
+          retention-days: 7
+          if-no-files-found: error
+
+  binaries:
+    needs: signed-tag
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache: false
+      - name: shapekit
+        env:
+          # no checkout or home paths inside the binary
+          RUSTFLAGS: --remap-path-prefix=${{ github.workspace }}=/shapekit --remap-path-prefix=/home/runner=/home
+        run: |
+          cargo build --release --locked -p shapekit-cli
+          mkdir -p "$RUNNER_TEMP/bin"
+          cp target/release/shapekit "$RUNNER_TEMP/bin/shapekit-linux-x86_64"
+      - name: indexerlint
+        working-directory: lint
+        env:
+          CGO_ENABLED: "0"
+        run: go build -trimpath -o "$RUNNER_TEMP/bin/indexerlint-linux-x86_64" ./cmd/indexerlint
+      - name: wallet-backend adapter
+        # the reference adapter, so the harness quick start needs no go toolchain
+        working-directory: adapters
+        env:
+          CGO_ENABLED: "0"
+        run: go build -trimpath -o "$RUNNER_TEMP/bin/wb-adapter-linux-x86_64" ./walletbackend/cmd/wb-adapter
+      - uses: actions/upload-artifact@v7
+        with:
+          name: binaries
+          path: ${{ runner.temp }}/bin/
+          retention-days: 7
+          if-no-files-found: error
+
+  publish:
+    needs: [archives, binaries]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/in
+      - name: both archive builds agree byte for byte
+        run: |
+          set -euo pipefail
+          a="$RUNNER_TEMP/in/archives-a/archives-a.sha256"
+          b="$RUNNER_TEMP/in/archives-b/archives-b.sha256"
+          if ! diff -u "$a" "$b"; then
+            echo "::error::the two independent archive builds differ"
+            exit 1
+          fi
+      - name: collect assets and SHA256SUMS
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/release"
+          mkdir -p "$out"
+          cp "$RUNNER_TEMP"/in/archives-a/assets/*.tar.zst "$out/"
+          cp "$RUNNER_TEMP"/in/binaries/* "$out/"
+          chmod +x "$out"/*-linux-x86_64
+          (cd "$out" && sha256sum -- * >SHA256SUMS && cat SHA256SUMS)
+      - uses: actions/attest@v4
+        with:
+          subject-checksums: ${{ runner.temp }}/release/SHA256SUMS
+      - name: release notes and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/release"
+          scripts/release-notes.sh "$TAG" "$out/SHA256SUMS" >"$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --verify-tag --title "shapekit $TAG" \
+            --notes-file "$RUNNER_TEMP/notes.md" "$out"/*

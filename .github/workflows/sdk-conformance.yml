@@ -1,0 +1,136 @@
+name: sdk-conformance
+
+# reusable workflow for sdk repositories: runs one sdk's testee over a pinned shapekit corpus
+# release, with the calling repository's own versions file and known-failures list. every
+# downloaded asset is checked against a sha256 the caller pins. how to call it is in
+# docs/sdk-ci.md.
+
+on:
+  workflow_call:
+    inputs:
+      sdk:
+        description: "testee to run: rust, go or js"
+        required: true
+        type: string
+      shapekit-tag:
+        description: "shapekit release tag, for example v0.1.0"
+        required: true
+        type: string
+      corpus-asset:
+        description: "corpus archive name in that release, for example corpus-0.1.0.tar.zst"
+        required: true
+        type: string
+      corpus-sha256:
+        description: "sha256 of the corpus archive, as listed in the release's SHA256SUMS"
+        required: true
+        type: string
+      shapekit-sha256:
+        description: "sha256 of the shapekit-linux-x86_64 asset, as listed in SHA256SUMS"
+        required: true
+        type: string
+      versions-file:
+        description: "path, in the calling repository, of the versions.toml describing the sdk build under test"
+        required: true
+        type: string
+      known-failures:
+        description: "directory, in the calling repository, holding <sdk>.txt"
+        required: true
+        type: string
+      shapekit-repository:
+        description: "repository the release comes from"
+        required: false
+        type: string
+        default: ErenTopaal/shapekit
+    outputs:
+      matrix-artifact:
+        description: "name of the uploaded artifact with divergence-matrix.json and MATRIX.md"
+        value: ${{ jobs.conformance.outputs.artifact }}
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      artifact: ${{ steps.names.outputs.artifact }}
+    steps:
+      - id: names
+        env:
+          SDK: ${{ inputs.sdk }}
+        run: |
+          case "$SDK" in
+            rust|go|js) ;;
+            *) echo "::error::sdk must be rust, go or js, not $SDK"; exit 1 ;;
+          esac
+          echo "artifact=shapekit-conformance-$SDK" >>"$GITHUB_OUTPUT"
+      - name: check out the sdk under test
+        uses: actions/checkout@v7
+        with:
+          path: sdk
+      - name: check out shapekit at the release tag (testee sources)
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ inputs.shapekit-repository }}
+          ref: ${{ inputs.shapekit-tag }}
+          path: shapekit
+      - name: download and verify the release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ inputs.shapekit-repository }}
+          TAG: ${{ inputs.shapekit-tag }}
+          CORPUS: ${{ inputs.corpus-asset }}
+          CORPUS_SHA256: ${{ inputs.corpus-sha256 }}
+          SHAPEKIT_SHA256: ${{ inputs.shapekit-sha256 }}
+        run: |
+          set -euo pipefail
+          dl="$RUNNER_TEMP/shapekit-release"
+          mkdir -p "$dl"
+          gh release download "$TAG" --repo "$REPO" --dir "$dl" \
+            --pattern "$CORPUS" --pattern shapekit-linux-x86_64
+          (cd "$dl" && printf '%s  %s\n%s  %s\n' \
+            "$CORPUS_SHA256" "$CORPUS" "$SHAPEKIT_SHA256" shapekit-linux-x86_64 | sha256sum -c -)
+          chmod +x "$dl/shapekit-linux-x86_64"
+          mkdir -p "$dl/corpus"
+          tar --zstd -xf "$dl/$CORPUS" -C "$dl/corpus"
+          manifest=$(find "$dl/corpus" -mindepth 2 -maxdepth 2 -name manifest.json)
+          if [ "$(printf '%s\n' "$manifest" | grep -c .)" -ne 1 ]; then
+            echo "::error::the archive must hold exactly one <dir>/manifest.json"
+            exit 1
+          fi
+          echo "SHAPEKIT=$dl/shapekit-linux-x86_64" >>"$GITHUB_ENV"
+          echo "MANIFEST=$manifest" >>"$GITHUB_ENV"
+      - if: ${{ inputs.sdk == 'rust' }}
+        uses: dtolnay/rust-toolchain@1.99.1
+      - if: ${{ inputs.sdk == 'go' }}
+        uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache: false
+      - if: ${{ inputs.sdk == 'js' }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+      - name: conformance run
+        working-directory: shapekit
+        env:
+          SDK: ${{ inputs.sdk }}
+          VERSIONS: ${{ github.workspace }}/sdk/${{ inputs.versions-file }}
+          KNOWN: ${{ github.workspace }}/sdk/${{ inputs.known-failures }}
+        run: |
+          "$SHAPEKIT" conformance run --sdk "$SDK" \
+            --manifest "$MANIFEST" --versions-file "$VERSIONS" --known-failures "$KNOWN" \
+            --out "$RUNNER_TEMP/conformance"
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f "$RUNNER_TEMP/conformance/MATRIX.md" ]; then
+            cat "$RUNNER_TEMP/conformance/MATRIX.md" >>"$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ steps.names.outputs.artifact }}
+          path: ${{ runner.temp }}/conformance/
+          retention-days: 30

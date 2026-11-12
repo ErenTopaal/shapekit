@@ -4,7 +4,8 @@
 #
 # usage: scripts/select-repro.sh <rotation> <changed-files> [rotating] [shards]
 #
-#   <rotation>       a number that moves the rotating window, the pull request number in ci
+#   <rotation>       a number that moves the rotating window, the pull request number in ci,
+#                    or "all" for every family (the nightly run)
 #   <changed-files>  file with one changed path per line (may be empty)
 #   [rotating]       families in the rotating window (default 4)
 #   [shards]         matrix width when every family is selected (default 4)
@@ -21,6 +22,11 @@ changed_file=${2:?usage: scripts/select-repro.sh <rotation> <changed-files> [rot
 rotating=${3:-4}
 shards=${4:-4}
 
+all=false
+if [ "$rotation" = all ]; then
+  all=true
+  rotation=0
+fi
 case "$rotation$rotating$shards" in
   *[!0-9]*) echo "rotation, rotating and shards must be whole numbers" >&2; exit 2 ;;
 esac
@@ -44,8 +50,8 @@ if [ "${#families[@]}" -eq 0 ]; then
 fi
 
 declare -A pick=()
-all=false
-why=()
+why=("requested")
+$all || why=()
 
 # rotating window over the sorted family list
 n=${#families[@]}
@@ -110,7 +116,7 @@ done <"$changed_file"
 
 if $all; then
   selected=("${families[@]}")
-  echo "every family: shared generator inputs changed (${why[*]:0:5}${why[5]:+ ...})" >&2
+  echo "every family: ${why[*]:0:5}${why[5]:+ ...}" >&2
 else
   mapfile -t selected < <(printf '%s\n' "${!pick[@]}" | sort)
   echo "rotation $rotation: ${#selected[@]} of $n families" >&2
