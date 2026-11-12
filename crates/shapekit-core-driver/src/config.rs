@@ -1,0 +1,362 @@
+//! Standalone node configuration and the stellar-core cfg file it renders to.
+//!
+//! The rendered text is a pure function of [`NodeConfig`], so two runs with
+//! the same config boot byte-identical nodes. Nothing in it depends on the
+//! host, the time or the working directory: every path is a fixed path inside
+//! the container, and the workdir is bind-mounted there.
+//!
+//! The node seed is SHA-256 of [`NODE_SEED_DOMAIN`] followed by the passphrase
+//! bytes, with no separator or length prefix (the domain is fixed, so the
+//! split is unambiguous). The seed signs every SCP value and so ends up in each
+//! ledger header, which is why it must be derived and not random. It depends on
+//! the passphrase only so that the testnet and mainnet chains have distinct
+//! validators, the way the real networks do.
+
+use std::path::Path;
+
+use sha2::{Digest, Sha256};
+use stellar_strkey::ed25519::{PrivateKey, PublicKey};
+
+/// Domain string hashed in front of the passphrase to get the node seed.
+/// Changing it changes every recorded ledger header.
+pub const NODE_SEED_DOMAIN: &[u8] = b"shapekit/node-seed/v1";
+
+/// The `name` of the core image entry in `pins.toml`.
+pub const CORE_IMAGE_PIN: &str = "stellar-core";
+
+/// Highest ledger protocol stellar-core 30.0.0 can run.
+pub const MAX_PROTOCOL: u32 = 30;
+
+/// Command port inside the container. Bound to the container's loopback only.
+pub const HTTP_PORT: u16 = 11626;
+
+/// Query server port inside the container, also loopback only.
+pub const HTTP_QUERY_PORT: u16 = 11627;
+
+/// Where the workdir is mounted inside the container.
+pub const CONTAINER_DATA_DIR: &str = "/data";
+
+/// File names inside the workdir.
+pub const CFG_FILE: &str = "stellar-core.cfg";
+pub const META_FILE: &str = "meta.xdr";
+pub const HISTORY_DIR: &str = "history";
+pub const HISTORY_ARCHIVE_NAME: &str = "local";
+
+/// Close time of the first ledger the driver closes is derived from this
+/// epoch (2026-01-01T00:00:00Z). stellar-core runs a virtual clock under
+/// `RUN_STANDALONE` plus `MANUAL_CLOSE`, so a close time before the wall
+/// clock is accepted (manualclose compares against that clock, not the
+/// wall clock: `ApplicationImpl::setManualCloseVirtualTime`, v30.0.0).
+pub const CHAIN_EPOCH: u64 = 1_767_225_600;
+
+/// Seconds between consecutive ledger close times.
+///
+/// The standalone virtual clock is not frozen between closes: whenever the
+/// main loop is idle it jumps straight to the next pending timer, so virtual
+/// time runs ahead of the last close time at roughly a thousand virtual
+/// seconds per wall second (with `FLOOD_DEMAND_PERIOD_MS=1`, about a hundred
+/// times more without it). manualclose rejects a close time behind that
+/// clock. One day per ledger leaves about a minute of wall time between
+/// closes before a close is refused, and still fits 63,000 ledgers below
+/// core's year-2200 cap.
+pub const CLOSE_STEP: u64 = 86_400;
+
+/// Largest close time manualclose accepts (first second of 2200, UTC).
+pub const MAX_CLOSE_TIME: u64 = 7_258_118_400;
+
+/// Deterministic close time for a ledger sequence.
+pub fn close_time(ledger_seq: u32) -> u64 {
+    CHAIN_EPOCH + u64::from(ledger_seq) * CLOSE_STEP
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum ConfigError {
+    #[error("passphrase must be non-empty printable ascii without quotes or backslashes: {0:?}")]
+    BadPassphrase(String),
+    #[error("protocol {0} is outside 1..={MAX_PROTOCOL}")]
+    BadProtocol(u32),
+    #[error("BACKFILL_STELLAR_ASSET_EVENTS requires EMIT_CLASSIC_EVENTS (Config.cpp, v30.0.0)")]
+    BackfillWithoutClassicEvents,
+    #[error("reading {path}: {source}")]
+    Read {
+        path: String,
+        source: std::io::Error,
+    },
+    #[error("parsing {path}: {source}")]
+    Parse {
+        path: String,
+        source: toml::de::Error,
+    },
+    #[error("{path} has no [[image]] named {name:?}")]
+    MissingImage { path: String, name: String },
+    #[error("image pin {name:?} has a malformed digest {digest:?}")]
+    BadDigest { name: String, digest: String },
+}
+
+/// A container image pinned by manifest digest. The tag is kept only for
+/// humans; docker is always given the digest reference.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+pub struct CoreImage {
+    pub repository: String,
+    pub tag: String,
+    pub digest: String,
+}
+
+#[derive(serde::Deserialize)]
+struct PinsImages {
+    #[serde(default)]
+    image: Vec<ImageEntry>,
+}
+
+#[derive(serde::Deserialize)]
+struct ImageEntry {
+    name: String,
+    repository: String,
+    tag: String,
+    digest: String,
+}
+
+impl CoreImage {
+    /// Reads the core image pin from a `pins.toml`.
+    pub fn from_pins(path: &Path) -> Result<Self, ConfigError> {
+        let shown = path.display().to_string();
+        let text = std::fs::read_to_string(path).map_err(|source| ConfigError::Read {
+            path: shown.clone(),
+            source,
+        })?;
+        let pins: PinsImages = toml::from_str(&text).map_err(|source| ConfigError::Parse {
+            path: shown.clone(),
+            source,
+        })?;
+        let entry = pins
+            .image
+            .into_iter()
+            .find(|i| i.name == CORE_IMAGE_PIN)
+            .ok_or_else(|| ConfigError::MissingImage {
+                path: shown,
+                name: CORE_IMAGE_PIN.to_owned(),
+            })?;
+        let hex_part = entry.digest.strip_prefix("sha256:").unwrap_or("");
+        if hex_part.len() != 64 || !hex_part.bytes().all(|b| b.is_ascii_hexdigit()) {
+            return Err(ConfigError::BadDigest {
+                name: entry.name,
+                digest: entry.digest,
+            });
+        }
+        Ok(Self {
+            repository: entry.repository,
+            tag: entry.tag,
+            digest: entry.digest,
+        })
+    }
+
+    /// `repository@sha256:...`, the only form handed to docker.
+    pub fn reference(&self) -> String {
+        format!("{}@{}", self.repository, self.digest)
+    }
+}
+
+/// Everything that decides what a standalone node produces.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NodeConfig {
+    pub passphrase: String,
+    pub image: CoreImage,
+    /// Ledger protocol the chain is upgraded to after genesis.
+    pub protocol: u32,
+    /// `TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE`: the Soroban settings created at
+    /// the protocol 20 upgrade use core's test override values instead of the
+    /// tiny initial ones.
+    pub soroban_high_limits: bool,
+    pub emit_classic_events: bool,
+    pub backfill_stellar_asset_events: bool,
+    /// `ENABLE_SOROBAN_DIAGNOSTIC_EVENTS`.
+    pub diagnostic_events: bool,
+}
+
+/// Node seed for a passphrase, see the module docs for the layout.
+pub fn node_seed(passphrase: &str) -> [u8; 32] {
+    let mut h = Sha256::new();
+    h.update(NODE_SEED_DOMAIN);
+    h.update(passphrase.as_bytes());
+    h.finalize().into()
+}
+
+/// The validator's public key as a `G...` strkey.
+pub fn node_public_key(passphrase: &str) -> String {
+    let signing = ed25519_dalek::SigningKey::from_bytes(&node_seed(passphrase));
+    PublicKey(signing.verifying_key().to_bytes())
+        .to_string()
+        .as_str()
+        .to_owned()
+}
+
+fn passphrase_ok(p: &str) -> bool {
+    !p.is_empty()
+        && p.bytes()
+            .all(|b| (0x20..0x7f).contains(&b) && b != b'"' && b != b'\\')
+}
+
+impl NodeConfig {
+    pub fn validate(&self) -> Result<(), ConfigError> {
+        // core's cfg parser takes a toml basic string, so quotes and
+        // backslashes would need escaping; no real passphrase has them
+        if !passphrase_ok(&self.passphrase) {
+            return Err(ConfigError::BadPassphrase(self.passphrase.clone()));
+        }
+        if self.protocol == 0 || self.protocol > MAX_PROTOCOL {
+            return Err(ConfigError::BadProtocol(self.protocol));
+        }
+        if self.backfill_stellar_asset_events && !self.emit_classic_events {
+            return Err(ConfigError::BackfillWithoutClassicEvents);
+        }
+        Ok(())
+    }
+
+    /// Renders the stellar-core cfg. Deterministic: same config, same bytes.
+    pub fn render(&self) -> Result<String, ConfigError> {
+        self.validate()?;
+        let seed = PrivateKey(node_seed(&self.passphrase));
+        let data = CONTAINER_DATA_DIR;
+        let mut s = String::new();
+        let mut line = |l: String| {
+            s.push_str(&l);
+            s.push('\n');
+        };
+        line("# rendered by shapekit-core-driver from a NodeConfig, do not edit".into());
+        line(format!("NETWORK_PASSPHRASE=\"{}\"", self.passphrase));
+        line(format!("NODE_SEED=\"{} self\"", seed.as_unredacted()));
+        line("NODE_IS_VALIDATOR=true".into());
+        line("RUN_STANDALONE=true".into());
+        line("MANUAL_CLOSE=true".into());
+        line("UNSAFE_QUORUM=true".into());
+        line("FAILURE_SAFETY=0".into());
+        line(format!("HTTP_PORT={HTTP_PORT}"));
+        // loopback only: the driver talks to core through docker exec
+        line("PUBLIC_HTTP_PORT=false".into());
+        line(format!("HTTP_QUERY_PORT={HTTP_QUERY_PORT}"));
+        line("QUERY_THREAD_POOL_SIZE=2".into());
+        line(format!("DATABASE=\"sqlite3://{data}/stellar.db\""));
+        line(format!("BUCKET_DIR_PATH=\"{data}/buckets\""));
+        line(format!("METADATA_OUTPUT_STREAM=\"{data}/{META_FILE}\""));
+        line("METADATA_DEBUG_LEDGERS=0".into());
+        line("LOG_FILE_PATH=\"\"".into());
+        line("LOG_COLOR=false".into());
+        // apply on the main thread, as core's own standalone example does
+        line("PARALLEL_LEDGER_APPLY=false".into());
+        // the shortest recurring timer bounds each idle jump of the virtual
+        // clock, so 1 ms keeps it close behind the last close (see CLOSE_STEP)
+        line("FLOOD_DEMAND_PERIOD_MS=1".into());
+        line(format!(
+            "ENABLE_SOROBAN_DIAGNOSTIC_EVENTS={}",
+            self.diagnostic_events
+        ));
+        line(format!("EMIT_CLASSIC_EVENTS={}", self.emit_classic_events));
+        line(format!(
+            "BACKFILL_STELLAR_ASSET_EVENTS={}",
+            self.backfill_stellar_asset_events
+        ));
+        line(format!(
+            "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE={}",
+            self.soroban_high_limits
+        ));
+        line(String::new());
+        line("[QUORUM_SET]".into());
+        line("THRESHOLD_PERCENT=100".into());
+        line("VALIDATORS=[\"$self\"]".into());
+        line(String::new());
+        line(format!("[HISTORY.{HISTORY_ARCHIVE_NAME}]"));
+        let hist = format!("{data}/{HISTORY_DIR}");
+        line(format!("get=\"cp {hist}/{{0}} {{1}}\""));
+        line(format!("put=\"cp {{0}} {hist}/{{1}}\""));
+        line(format!("mkdir=\"mkdir -p {hist}/{{0}}\""));
+        Ok(s)
+    }
+}
+
+/// Upgrade time handed to core's `upgrades` command. Core nominates an armed
+/// upgrade once the last closed ledger's close time has reached it, and
+/// genesis closes at 0, so the epoch of unix time makes the upgrade land in
+/// the very next ledger whatever close time that ledger gets.
+pub const UPGRADE_TIME: &str = "1970-01-01T00:00:00Z";
+
+/// Renders a summary line for logs and error context.
+pub fn describe(cfg: &NodeConfig) -> String {
+    format!(
+        "{} protocol {} image {}",
+        cfg.passphrase,
+        cfg.protocol,
+        cfg.image.reference()
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample(passphrase: &str) -> NodeConfig {
+        NodeConfig {
+            passphrase: passphrase.to_owned(),
+            image: CoreImage {
+                repository: "stellar/stellar-core".into(),
+                tag: "t".into(),
+                digest: format!("sha256:{}", "0".repeat(64)),
+            },
+            protocol: 30,
+            soroban_high_limits: true,
+            emit_classic_events: true,
+            backfill_stellar_asset_events: true,
+            diagnostic_events: true,
+        }
+    }
+
+    #[test]
+    fn render_is_deterministic_and_passphrase_bound() {
+        let a = sample("Test SDF Network ; September 2015");
+        let b = sample("Public Global Stellar Network ; September 2015");
+        assert_eq!(a.render().unwrap(), a.render().unwrap());
+        let ra = a.render().unwrap();
+        let rb = b.render().unwrap();
+        assert_ne!(ra, rb);
+        assert!(ra.contains("NETWORK_PASSPHRASE=\"Test SDF Network ; September 2015\"\n"));
+        assert!(ra.contains("put=\"cp {0} /data/history/{1}\"\n"));
+        assert_ne!(node_seed(&a.passphrase), node_seed(&b.passphrase));
+    }
+
+    #[test]
+    fn node_seed_layout() {
+        let mut h = Sha256::new();
+        h.update(b"shapekit/node-seed/v1Test SDF Network ; September 2015");
+        let want: [u8; 32] = h.finalize().into();
+        assert_eq!(node_seed("Test SDF Network ; September 2015"), want);
+    }
+
+    #[test]
+    fn rejects_bad_configs() {
+        let mut c = sample("bad \" quote");
+        assert!(matches!(c.render(), Err(ConfigError::BadPassphrase(_))));
+        c = sample("ok");
+        c.protocol = 31;
+        assert!(matches!(c.render(), Err(ConfigError::BadProtocol(31))));
+        c.protocol = 30;
+        c.emit_classic_events = false;
+        assert!(matches!(
+            c.render(),
+            Err(ConfigError::BackfillWithoutClassicEvents)
+        ));
+    }
+
+    #[test]
+    fn close_schedule() {
+        assert_eq!(close_time(2), CHAIN_EPOCH + 2 * CLOSE_STEP);
+        let max_seq = (MAX_CLOSE_TIME - CHAIN_EPOCH) / CLOSE_STEP;
+        assert!(max_seq > 60_000);
+    }
+
+    #[test]
+    fn reads_the_repo_pin() {
+        let pins = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml");
+        let img = CoreImage::from_pins(&pins).unwrap();
+        assert_eq!(img.repository, "stellar/stellar-core");
+        assert!(img.reference().starts_with("stellar/stellar-core@sha256:"));
+    }
+}

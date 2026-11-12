@@ -1,0 +1,32 @@
+{
+  "fixture": "testnet-sac-snapshot.json",
+  "source": "https://soroban-testnet.stellar.org",
+  "network": "testnet",
+  "fetched_at": "2026-11-12T15:06:26Z",
+  "requests": [
+    {
+      "method": "getLedgerEntries",
+      "params": {
+        "keys": "CONFIG_SETTING ids 0 to 19, then the CONTRACT_DATA instance key (persistent, SCV_LEDGER_KEY_CONTRACT_INSTANCE) of the native asset contract"
+      },
+      "result_latest_ledger": 5694468
+    },
+    {
+      "method": "getLedgers",
+      "params": {
+        "startLedger": 5694468,
+        "pagination": {
+          "limit": 1
+        }
+      },
+      "kept": "headerXdr (LedgerHeaderHistoryEntry) of the ledger getLedgerEntries reported as latest"
+    }
+  ],
+  "native_asset_contract": "sha256 of HashIdPreimage ENVELOPE_TYPE_CONTRACT_ID with the testnet network id and CONTRACT_ID_PREIMAGE_FROM_ASSET native",
+  "entry_shape": "rpc returns LedgerEntryData; the test rebuilds a LedgerEntry with lastModifiedLedgerSeq and ext v0, which is what core stores for unsponsored config and contract entries",
+  "returned_entries": 20,
+  "requested_keys": 21,
+  "absent_keys": [
+    "CONFIG_SETTING 18 (CONFIG_SETTING_FROZEN_LEDGER_KEYS_DELTA): rpc returned no entry for it"
+  ]
+}

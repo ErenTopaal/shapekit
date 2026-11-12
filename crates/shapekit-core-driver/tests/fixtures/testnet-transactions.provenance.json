@@ -1,0 +1,46 @@
+{
+  "fixture": "testnet-transactions.json",
+  "source": "https://soroban-testnet.stellar.org",
+  "network": "testnet",
+  "fetched_at": "2026-11-12T15:04:20Z",
+  "discovery": "successful transactions from getTransactions pages starting at ledger 5694222, classified by decoding the envelope with stellar-xdr 30.0.0",
+  "requests": [
+    {
+      "method": "getTransaction",
+      "params": {
+        "hash": "743135f448b1f1cfc19e62fd8ca8d8a01ba2e981ca549d24b9f537d5850e73f9"
+      }
+    },
+    {
+      "method": "getTransaction",
+      "params": {
+        "hash": "de14ca02dd0f95a3cdf848c717f634d422bc015f909f2bef065de44422eba523"
+      }
+    },
+    {
+      "method": "getTransaction",
+      "params": {
+        "hash": "7ff17393cd6a22daa116022cf71a13ef0a92c0514c5026d06a84b81dec34ccaf"
+      }
+    },
+    {
+      "method": "getTransaction",
+      "params": {
+        "hash": "c721e28be189a151656af6e8b455227c3983bcdbc057b96a85b6c6c366599b99"
+      }
+    }
+  ],
+  "selection": {
+    "classic": "v1 envelope, no invoke host function",
+    "feebump": "fee-bump envelope",
+    "soroban_auth_address": "v1 envelope with SOROBAN_CREDENTIALS_ADDRESS for an account address",
+    "soroban_auth_address_v2": "v1 envelope with SOROBAN_CREDENTIALS_ADDRESS_V2 (CAP-71) for an account address"
+  },
+  "kept_fields": [
+    "txHash",
+    "ledger",
+    "applicationOrder",
+    "status",
+    "envelopeXdr"
+  ]
+}
