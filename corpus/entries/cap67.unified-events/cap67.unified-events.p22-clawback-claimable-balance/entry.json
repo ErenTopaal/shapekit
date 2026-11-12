@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.clawback_claimable_balance.balance_id"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-clawback-claimable-balance",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "the issuer claws back a claimable balance: a clawback event from the claimable balance address. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 20,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-clawback-claimable-balance/mainnet.expected.json",
+      "expected_json_sha256": "375f77d71ee628264a1671a300545e4154e58e4c89ece79be61020d628e93adf",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-clawback-claimable-balance/mainnet.xdr",
+      "xdr_sha256": "f3699a635cbc0472d9d7c960aea7f04f1294badccb10e831f38a46678e4ee824"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-clawback-claimable-balance/testnet.expected.json",
+      "expected_json_sha256": "3820dc7206c1fef0ac9d6d3bee98eff2f95561e735e8d8ccc57422f887304509",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-clawback-claimable-balance/testnet.xdr",
+      "xdr_sha256": "79198491a85c39f6833986c47d747f0d6ae1ff130599a2de1ebe4b6dfab8834e"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

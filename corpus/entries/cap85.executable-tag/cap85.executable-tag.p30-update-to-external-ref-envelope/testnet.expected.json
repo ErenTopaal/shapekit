@@ -1,0 +1,79 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "39880b98",
+        "signature": "f677cf5ddf6dc80f48c0af25010b4d2fbc524cdc7612365c1403bdaf1d3b77eaf9e887fa1d1ae608f44f2fd536917ac9b90d0c818d288662966d5677c9804e0f"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "9949",
+          "resources": {
+            "disk_read_bytes": 0,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CCYZFQNYW6TJWNAZ4PRJ46I2CZ7UPIXYXNM54U53EDVH7CPLJSFM7TCH",
+                    "durability": "persistent",
+                    "key": {
+                      "executable_tag": "echo"
+                    }
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "fc092d245c9837370ad5dbe23a54ab59d779ec66c9f76be2452420ff2b1a872a"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CARLLM4E6F45J7YDT3DAI2LBLHECLOUV5IOVPOV6OSOK5UAOEIJ3XEBB",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                }
+              ]
+            },
+            "instructions": 411488,
+            "write_bytes": 116
+          }
+        }
+      },
+      "fee": 10049,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "address": "CCYZFQNYW6TJWNAZ4PRJ46I2CZ7UPIXYXNM54U53EDVH7CPLJSFM7TCH"
+                    },
+                    {
+                      "string": "echo"
+                    }
+                  ],
+                  "contract_address": "CARLLM4E6F45J7YDT3DAI2LBLHECLOUV5IOVPOV6OSOK5UAOEIJ3XEBB",
+                  "function_name": "adopt"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "30064771080",
+      "source_account": "GC55G47PRGLLJHXTZLM7ZF6SRXZKYEXTM2KPA3H5DQJZVBRZRAFZQROF"
+    }
+  }
+}

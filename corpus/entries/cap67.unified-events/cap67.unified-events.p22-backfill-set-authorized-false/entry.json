@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.set_trust_line_flags"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-backfill-set-authorized-false",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "SetTrustLineFlags clears the authorized flag on a trustline, a set_authorized event with bool data",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events-backfill.p22",
+    "class": "local-core",
+    "ledger_seq": 15,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events-backfill"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-set-authorized-false/mainnet.expected.json",
+      "expected_json_sha256": "8a65f8bec3aae70c0760166df0a6532b826db1e922d2512ae916e05da7bfc98c",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-set-authorized-false/mainnet.xdr",
+      "xdr_sha256": "cbbbf1d668673e61a672f60cbc3f1d2d789bc42974328f933d7174e171f61614"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-set-authorized-false/testnet.expected.json",
+      "expected_json_sha256": "cc066d1b90702171911a839e980a20ef8005b456f8c2610fe5be7f6812072228",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-set-authorized-false/testnet.xdr",
+      "xdr_sha256": "faf6800a49e495cc43a15260265cc5d1a8b8d61a2d2969c4f75a90216e36ac56"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

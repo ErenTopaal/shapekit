@@ -248,7 +248,7 @@ fn get_ledgers_matches_captured_stellar_rpc() {
             // the captured testnet server backfills from a data lake, which widens its
             // range to ledger 2 and, misconfigured, fails these with -32603 from the
             // datastore; a server without one answers per ValidatePagination and
-            // parseCursor in stellar-rpc v30.0.0, which is what is checked here
+            // parseCursor in stellar-rpc v30.0.1, which is what is checked here
             "start-before-oldest" | "cursor-before-oldest" => {
                 assert_eq!(summary["code"], json!(-32603));
                 assert!(summary["message"].as_str().unwrap().contains("datastore"));
@@ -260,7 +260,7 @@ fn get_ledgers_matches_captured_stellar_rpc() {
                 } else {
                     (
                         -32602,
-                        "cursor ('<n>') must be between the oldest ledger: <n> and the latest ledger: <n> for this rpc instance",
+                        "cursor ('<n>') must be at or above the oldest ledger: <n> for this rpc instance",
                     )
                 };
                 check_error(
@@ -317,5 +317,33 @@ fn other_methods_match_captured_shapes() {
             .unwrap()
             .starts_with("shapekit-replay ")
     );
+    srv.stop().unwrap();
+}
+
+/// A poller whose cursor reached the head gets an empty page with its cursor back, not an
+/// error (stellar-rpc v30.0.1 `getLedgers`); a startLedger past the head stays an error.
+#[test]
+fn caught_up_cursor_gets_an_empty_page() {
+    let srv = serve(chain(), Some(100));
+    let url = srv.url();
+    for cursor in ["100", "150", "4294967294"] {
+        let r = call(
+            &url,
+            "getLedgers",
+            Some(json!({"pagination": {"cursor": cursor}})),
+        );
+        let res = &r["result"];
+        assert_eq!(res["ledgers"], json!([]), "{r}");
+        assert_eq!(res["cursor"], cursor);
+        assert_eq!(res["latestLedger"], 100);
+    }
+    let wrapped = call(
+        &url,
+        "getLedgers",
+        Some(json!({"pagination": {"cursor": "4294967295"}})),
+    );
+    assert_eq!(wrapped["error"]["code"], -32602);
+    let past = call(&url, "getLedgers", Some(json!({"startLedger": 101})));
+    assert_eq!(past["error"]["code"], -32600);
     srv.stop().unwrap();
 }

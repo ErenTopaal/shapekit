@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0046-01"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.scval-shapes",
+  "fields_exercised": [
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [
+    "colliding-map-keys"
+  ],
+  "id": "soroban.scval-shapes.p30-map-keys-collide-native-envelope",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766",
+    "https://github.com/stellar/js-stellar-sdk/issues/1789"
+  ],
+  "notes": "a map keyed by u32 1, i32 1, u64 1, i64 1, u128 1, i128 1, u256 1, i256 1, bytes \"1\", string \"1\" and symbol \"1\": eleven distinct ScVal keys that collapse to one or two keys in a native map that turns numbers and text into the same key",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.scval-shapes.p30",
+    "class": "local-core",
+    "ledger_seq": 16,
+    "recipe": "soroban.scval-shapes",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-map-keys-collide-native-envelope/mainnet.expected.json",
+      "expected_json_sha256": "83b2f5eb7d41e3d4879f006b27d31d9b4779c9101eda635d978757a9eef14522",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-map-keys-collide-native-envelope/mainnet.xdr",
+      "xdr_sha256": "e31b1bdafbd06b471b5fb0d890080d0ec9cb3fac12ef2337f10bbe6f07d89f83"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-map-keys-collide-native-envelope/testnet.expected.json",
+      "expected_json_sha256": "703516e6dc95c59204b341d91ee92a28b4a1dbe6037f14a8d79d2a28f2052cc4",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-map-keys-collide-native-envelope/testnet.xdr",
+      "xdr_sha256": "06a42aeeeec0db0eabfce7905ee481c267203ed7dfd8429d1f5331e669ee3b4b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -222,3 +222,38 @@ impl Recipe for EventsMax {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use stellar_xdr::Hash;
+
+    #[test]
+    fn echo_fill_reaches_the_limit_exactly() {
+        let c = ContractId(Hash([7; 32]));
+        let last = vec![ScVal::Symbol(ScSymbol("last".try_into().unwrap()))];
+        let n = fill(16384, |n| {
+            let v = bytes_val(n)?;
+            counted(&c, &last, &v, &v)
+        })
+        .unwrap();
+        // ext, contract id, type, body arm, one symbol topic, then the
+        // bytes twice (event data and return value)
+        assert_eq!(n, 8152);
+        let v = bytes_val(n + 4).unwrap();
+        assert_eq!(counted(&c, &last, &v, &v).unwrap(), 16392);
+    }
+
+    #[test]
+    fn fill_refuses_a_limit_it_cannot_hit() {
+        let c = ContractId(Hash([7; 32]));
+        let last = vec![ScVal::Symbol(ScSymbol("last".try_into().unwrap()))];
+        // the echo count is 80 plus twice a multiple of four, so it is
+        // always a multiple of eight
+        let r = fill(16388, |n| {
+            let v = bytes_val(n)?;
+            counted(&c, &last, &v, &v)
+        });
+        assert!(r.is_err());
+    }
+}

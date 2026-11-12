@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.account_merge.destination"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-backfill-account-merge-muxed-destination",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "an account merged into a muxed account with mux id 2^64-1: the remaining lumens move in a transfer event with to_muxed_id",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events-backfill.p22",
+    "class": "local-core",
+    "ledger_seq": 23,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events-backfill"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-account-merge-muxed-destination/mainnet.expected.json",
+      "expected_json_sha256": "c85e30390365f06e5cd96f2dd396f0e452ecc8b49f53610c0e42f7bfb87ee4d3",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-account-merge-muxed-destination/mainnet.xdr",
+      "xdr_sha256": "49cb4d7bf8415ef00fdc613f67ce073033c263c0371d6289037454d2d18c18d9"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-account-merge-muxed-destination/testnet.expected.json",
+      "expected_json_sha256": "496db3505e95b5c7b18d740a853eecd2aff890e47967208fa5a1732af7b10934",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-account-merge-muxed-destination/testnet.xdr",
+      "xdr_sha256": "bc5be251fbd0cd3f01d8e02ccc613451a47bfabe52eb6999a203dc1d61f9cca6"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

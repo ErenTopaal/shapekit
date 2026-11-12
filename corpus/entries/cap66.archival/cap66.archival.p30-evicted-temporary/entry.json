@@ -1,0 +1,50 @@
+{
+  "caps": [
+    "CAP-0066",
+    "CAP-0062"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap66.archival",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap66.archival.p30-evicted-temporary",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a ledger whose eviction scan removed an expired temporary contract data entry, which is deleted, listed in evictedKeys with its ttl key",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap66.archival.p30",
+    "class": "local-core",
+    "ledger_seq": 32,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap66.archival"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap66.archival/cap66.archival.p30-evicted-temporary/mainnet.expected.json",
+      "expected_json_sha256": "7529b9cc55e32a56a526e7bd11ae570ee57a75dfd9cccae03eb2cf1b3386643d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap66.archival/cap66.archival.p30-evicted-temporary/mainnet.xdr",
+      "xdr_sha256": "a4c44cc44510fcc7d450b188beb11ff350ac7f720e01ef084ce11377e7e524ee"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap66.archival/cap66.archival.p30-evicted-temporary/testnet.expected.json",
+      "expected_json_sha256": "658c757ca677b40740e1eaccfc0968a645b8851fd269f789604779258902e0a4",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap66.archival/cap66.archival.p30-evicted-temporary/testnet.xdr",
+      "xdr_sha256": "3315f1df6e9058fdd9a19e99b212b970bd74a71ceda17c71a1ced52267cc4aa2"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

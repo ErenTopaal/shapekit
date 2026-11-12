@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.create_claimable_balance.asset_amount"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-create-claimable-balance",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "a claimable balance created from a holder: a transfer event to the claimable balance address (strkey B). recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 17,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-create-claimable-balance/mainnet.expected.json",
+      "expected_json_sha256": "dba0ea4a7aae7dbdb5004f336789bbf38412697c4aaf9b3e5547f4fe0d0de863",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-create-claimable-balance/mainnet.xdr",
+      "xdr_sha256": "9b454a2791063b5bee49e25bb4149d0459a9da6bbcda17a3e48c8b6bb4dd7e00"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-create-claimable-balance/testnet.expected.json",
+      "expected_json_sha256": "c70771f06bfebd09db340c2fbee7a914c257a7e3f904ef53018ed296232c6567",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-create-claimable-balance/testnet.xdr",
+      "xdr_sha256": "f728c01f119df14f87be913ed3de5a29937cbd680f4ffbb858151208466898e8"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

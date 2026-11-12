@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-backfill-liquidity-pool-deposit",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "a deposit into a constant product pool: one transfer event per asset to the liquidity pool address (strkey L)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events-backfill.p22",
+    "class": "local-core",
+    "ledger_seq": 22,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events-backfill"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-liquidity-pool-deposit/mainnet.expected.json",
+      "expected_json_sha256": "54162f4ebc9d7fc4a088d83ec06e55100c54a1c5a9508c8fe0fb4df6d171af12",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-liquidity-pool-deposit/mainnet.xdr",
+      "xdr_sha256": "be43d401b14629e22ab1b1dc0c2fb776ec9ed7776ac964ed6d65f1c37089ca46"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-liquidity-pool-deposit/testnet.expected.json",
+      "expected_json_sha256": "4ace0f5c9618f23061be384d657e9f25810735d500b923a890c035d357a83f59",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-liquidity-pool-deposit/testnet.xdr",
+      "xdr_sha256": "805014be8f9709fd8766c6aaa9fc7f149efd3ab9441f5e3d66a62980fd2e060b"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

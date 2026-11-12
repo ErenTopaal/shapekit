@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.account_merge.destination"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-account-merge-muxed-destination",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "an account merged into a muxed account with mux id 2^64-1: the remaining lumens move in a transfer event with to_muxed_id. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 23,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-account-merge-muxed-destination/mainnet.expected.json",
+      "expected_json_sha256": "4617739a91ff1793cf5122c63bf471ddb876504bd7108abf63963f7acc329787",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-account-merge-muxed-destination/mainnet.xdr",
+      "xdr_sha256": "5538e071b5b51a2d017606328aaf29c3fe1489ddc8ad4164d00e5f0d133eeca9"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-account-merge-muxed-destination/testnet.expected.json",
+      "expected_json_sha256": "e66e852b4d789b58c2ea955ea5771e777f03302060a1af51508bdddc15068e03",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-account-merge-muxed-destination/testnet.xdr",
+      "xdr_sha256": "02d84b42f31da627b790acdf002be638436fe130971efbdc85f8e1724b31c828"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

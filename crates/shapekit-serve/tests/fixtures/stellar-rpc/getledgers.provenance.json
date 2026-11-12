@@ -1,0 +1,14 @@
+{
+  "fixture": "getledgers.json",
+  "source": "https://soroban-testnet.stellar.org",
+  "network": "testnet",
+  "captured_at": "2026-11-12T17:32:30Z",
+  "server_version": "30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d",
+  "capture_tool": "capture.py in this directory, run once as `python3 -I capture.py https://soroban-testnet.stellar.org .`",
+  "notes": [
+    "the public testnet endpoint ran stellar-rpc 30.0.1 at capture time, not 30.0.0; 30.0.1 changes getLedgers so a cursor at or past the tip returns an empty page and a cursor below the oldest ledger has a shorter message. shapekit serve follows 30.0.1",
+    "the endpoint backfills from a data lake, so its validation range starts at ledger 2 (see the start-after-latest and start-missing messages) and requests below its local oldest ledger fail with -32603 from a misconfigured datastore reader (start-before-oldest, cursor-before-oldest). those two cases are kept as captured and the replay server is checked against the stellar-rpc source for them instead",
+    "the tip advanced while the capture ran, so every response's latestLedger is at or above range_at_start.latestLedger",
+    "responses holding ledgers are summarised by capture.py (key sets, value types, counts, cursor, outer xdr-json structure); error responses are kept whole; response_sha256 is the hash of each raw response body"
+  ]
+}

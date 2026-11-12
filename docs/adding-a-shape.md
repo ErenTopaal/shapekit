@@ -152,7 +152,7 @@ family apart.
   replace the minimum before `run`, so only entries created before that upgrade (the settings
   writer's code and instance) archive quickly. `soroban.muxed-source` does both.
 - **Classic events.** Chains run with `EMIT_CLASSIC_EVENTS` and `BACKFILL_STELLAR_ASSET_EVENTS`
-  on, as captive cores serving the public networks do. Below protocol 23 the backfill flag gives
+  on by default, so protocol 23 and later ledgers carry the CAP-67 events. Below protocol 23 the backfill flag gives
   TransactionMeta v4 with CAP-67 events, which is what a current core replaying old history
   emits; set both hooks to `false` for the meta a pre-23 ledger had in its day (v3, no classic
   events, `EventManager.cpp` and `TransactionMeta.cpp`, v30.0.0). From protocol 23 on the
@@ -214,6 +214,15 @@ corpus/entries/<family>/<entry-id>/
   testnet.xdr, testnet.expected.json
   mainnet.xdr, mainnet.expected.json
 ```
+
+`gen chains` writes chains in this form directly. `shapekit pack sep54` converts a chain still
+in the recorder's own form (`ledgers.canonical.xdr` and an `archive/` directory) and leaves
+converted ones alone; `shapekit pack verify` checks every chain against its `chain.json` and
+that the lake holds exactly the canonical form of `ledgers.xdr`. `shapekit pack archive-at
+--checkpoint N` writes the archive as it stood at one checkpoint, and `shapekit serve --chain
+<chain-id> --network <network>` replays a chain over HTTP: the lake, the archive and a
+read-only JSON-RPC endpoint shaped like stellar-rpc, with `POST /control/head` to release
+ledgers one at a time.
 
 Entry fields filled by the generator: `source.class = local-core`, `source.recipe`,
 `source.chain`, `source.ledger_seq` (absent for refused envelopes), `source.tx_index`,

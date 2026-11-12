@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.set_trust_line_flags"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-set-authorized-false",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "SetTrustLineFlags clears the authorized flag on a trustline, a set_authorized event with bool data. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 15,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-false/mainnet.expected.json",
+      "expected_json_sha256": "1ae33252546379b1566d00e455510dafcdba4c7d1c9aa484b43c12a1de4b789f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-false/mainnet.xdr",
+      "xdr_sha256": "9a96da58eb896ea7d098d668e6234c90edbdd6a3ac5b2d623c1e4cd532ea7e67"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-false/testnet.expected.json",
+      "expected_json_sha256": "76137357cc1f673e443d06e2a0d36059eb79b4efe9a4ace6d062b562eaf3a01b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-false/testnet.xdr",
+      "xdr_sha256": "07aad70f3fcfe05b73e4b849e7de0cdffdc6f560d331f05bf89600e365e7fdf1"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

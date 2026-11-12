@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.payment.destination",
+    "op.payment.asset"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-payment-burn",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "a payment back to the issuer, which CAP-67 reports as a burn event. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-burn/mainnet.expected.json",
+      "expected_json_sha256": "31877c5efb243390aabc36564379db1356cb6d095088252251db9926d48390db",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-burn/mainnet.xdr",
+      "xdr_sha256": "e335146ba86d92bea42af0f56a775c15c43328efe1b2708c4a0cffa064685319"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-burn/testnet.expected.json",
+      "expected_json_sha256": "a21a03374718b4b0cc0eda41fa3284a20bd2f9734b2dfce13b4ae81bfe2b720f",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-burn/testnet.xdr",
+      "xdr_sha256": "1194f8b1e8efee416caa8459cee71c481fb31aafd5739fe3a71b35382ef2eaab"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -21,6 +21,8 @@
 //! | 8 to n  | empty ledgers until the writer's code and instance archive  |
 //! | n+1     | restore of both from muxed alice                            |
 //! | n+2     | extend TTL of both from muxed alice                         |
+//! | n+3     | extend TTL below their remaining TTL, no change             |
+//! | n+4     | the same restore again on live entries, no change           |
 //!
 //! Protocol 28: no settings upgrade, so alice's own echo contract archives.
 //! The last ledger holds the wallet-backend#753 shape: an extend-TTL from
@@ -52,10 +54,11 @@ use shapekit_core_driver::tx::{
 };
 use stellar_xdr::{
     Asset, ContractDataDurability, ContractId, ExtendFootprintTtlOp, ExtensionPoint, Hash,
-    HostFunction, InvokeContractArgs, InvokeHostFunctionOp, LedgerEntryChange, LedgerKey,
-    LedgerKeyContractCode, LedgerKeyContractData, OperationBody, PaymentOp, RestoreFootprintOp,
-    ScAddress, ScSymbol, ScVal, SorobanAuthorizationEntry, SorobanCredentials,
-    SorobanTransactionData, TransactionEnvelope, TransactionResultResult,
+    HostFunction, InvokeContractArgs, InvokeHostFunctionOp, LedgerCloseMeta, LedgerEntryChange,
+    LedgerEntryData, LedgerKey, LedgerKeyContractCode, LedgerKeyContractData, OperationBody,
+    PaymentOp, RestoreFootprintOp, ScAddress, ScSymbol, ScVal, SorobanAuthorizationEntry,
+    SorobanCredentials, SorobanTransactionData, TransactionEnvelope, TransactionMeta,
+    TransactionResultResult,
 };
 
 use super::cap73::operation_changes;
@@ -72,8 +75,10 @@ const MIN_PERSISTENT_TTL: u32 = 10;
 /// Upper bound on the empty ledgers closed while waiting for archival.
 const MAX_WAIT: u32 = 3 * MIN_PERSISTENT_TTL;
 
-/// Ledgers past the current one the extend-TTL asks for.
-const EXTEND_TO: u32 = 10_000;
+/// How far past the longest remaining TTL the extend-TTL reaches. A
+/// restore at protocol 30 leaves testnet's minimum persistent TTL, so a
+/// fixed target could fall short of it and the extend would change nothing.
+const EXTEND_MARGIN: u32 = 10_000;
 
 const MUX_RESTORE: u64 = 1;
 const MUX_EXTEND: u64 = u64::MAX;
@@ -215,12 +220,14 @@ fn refused_invoke(
 }
 
 /// Restores `keys` from muxed alice and checks the meta restored each.
-fn restore(ctx: &mut ChainCtx, alice: &SigningKey, keys: &[LedgerKey]) -> Result<()> {
+/// Returns the transaction data, for the no-op restore that repeats it.
+fn restore(
+    ctx: &mut ChainCtx,
+    alice: &SigningKey,
+    keys: &[LedgerKey],
+) -> Result<SorobanTransactionData> {
     let data = simulator(ctx)?.simulate_restore(keys)?;
-    let body = OperationBody::RestoreFootprint(RestoreFootprintOp {
-        ext: ExtensionPoint::V0,
-    });
-    let env = muxed_soroban(ctx, alice, MUX_RESTORE, body, data, None)?;
+    let env = muxed_soroban(ctx, alice, MUX_RESTORE, restore_body(), data.clone(), None)?;
     let applied = ctx.submit_and_close(&env)?;
     let restored = operation_changes(&applied.meta)
         .into_iter()
@@ -246,7 +253,14 @@ fn restore(ctx: &mut ChainCtx, alice: &SigningKey, keys: &[LedgerKey]) -> Result
             "op.restore_footprint",
             "tx.soroban.footprint",
         ]),
-    )
+    )?;
+    Ok(data)
+}
+
+fn restore_body() -> OperationBody {
+    OperationBody::RestoreFootprint(RestoreFootprintOp {
+        ext: ExtensionPoint::V0,
+    })
 }
 
 /// An extend-TTL of `keys` from muxed alice, unsigned by anything else.
@@ -255,14 +269,32 @@ fn extend(
     alice: &SigningKey,
     keys: &[LedgerKey],
 ) -> Result<TransactionEnvelope> {
-    let sim = simulator(ctx)?.simulate_extend_ttl(keys, EXTEND_TO)?;
+    let last = ctx.driver().last_closed();
+    let mut remaining = 0;
+    for e in ctx.driver().node().ledger_entries(keys)?.entries {
+        let until = e
+            .live_until_ledger_seq
+            .context("an extended entry has no live-until ledger")?;
+        remaining = remaining.max(until.saturating_sub(last));
+    }
+    extend_by(ctx, alice, keys, remaining + EXTEND_MARGIN)
+}
+
+/// An extend-TTL of `keys` to `extend_to` ledgers past the current one.
+fn extend_by(
+    ctx: &mut ChainCtx,
+    alice: &SigningKey,
+    keys: &[LedgerKey],
+    extend_to: u32,
+) -> Result<TransactionEnvelope> {
+    let sim = simulator(ctx)?.simulate_extend_ttl(keys, extend_to)?;
     ensure!(
         sim.restore.is_none(),
         "the extended entries should be live, simulation asks for a restore"
     );
     let body = OperationBody::ExtendFootprintTtl(ExtendFootprintTtlOp {
         ext: ExtensionPoint::V0,
-        extend_to: EXTEND_TO,
+        extend_to,
     });
     muxed_soroban(ctx, alice, MUX_EXTEND, body, sim.transaction_data, None)
 }
@@ -294,10 +326,11 @@ impl MuxedSource {
 
         refused_invoke(ctx, &alice, &writer, "last")?;
         wait_archived(ctx, &keys)?;
-        restore(ctx, &alice, &keys)?;
+        let data = restore(ctx, &alice, &keys)?;
 
         let env = extend(ctx, &alice, &keys)?;
         let applied = ctx.submit_and_close(&env)?;
+        ensure_ttls_extended(&applied.meta, keys.len())?;
         ctx.capture(
             "extend-ttl-muxed-source",
             Selector::ledger_of(&applied),
@@ -305,6 +338,36 @@ impl MuxedSource {
                 "an extend-TTL of contract code and instance whose transaction source is a muxed account",
             )
             .fields(&EXTEND_FIELDS),
+        )?;
+
+        // the no-op twins: core applies both and changes nothing, the
+        // shape of core's own goldens for these operations
+        let env = extend_by(ctx, &alice, &keys, EXTEND_MARGIN)?;
+        let applied = ctx.submit_and_close(&env)?;
+        ensure_no_operation_changes(&applied.meta, "an extend below the current ttl")?;
+        ctx.capture(
+            "extend-ttl-noop-muxed-source",
+            Selector::ledger_of(&applied),
+            Spec::new(
+                "an extend-TTL from a muxed source whose target is below the entries' remaining TTL, applied without any ledger change",
+            )
+            .fields(&EXTEND_FIELDS),
+        )?;
+        let env = muxed_soroban(ctx, &alice, MUX_RESTORE, restore_body(), data, None)?;
+        let applied = ctx.submit_and_close(&env)?;
+        ensure_no_operation_changes(&applied.meta, "a restore of live entries")?;
+        ctx.capture(
+            "restore-noop-muxed-source",
+            Selector::ledger_of(&applied),
+            Spec::new(
+                "a restore from a muxed source whose footprint entries are all live, applied without any ledger change",
+            )
+            .fields(&[
+                "tx.source_account",
+                "tx.source_account.mux_id",
+                "op.restore_footprint",
+                "tx.soroban.footprint",
+            ]),
         )
     }
 
@@ -354,13 +417,18 @@ impl MuxedSource {
         }
         let ledger = ctx.driver().close_empty()?;
         let results = ledger_results(ctx.driver().last_meta());
-        for h in &hashes {
-            match results.iter().find(|(rh, _)| rh == h) {
-                Some((_, ok)) => ensure!(
-                    *ok,
-                    "ledger {ledger}: transaction {} failed",
-                    hex::encode(h)
-                ),
+        for (i, h) in hashes.iter().enumerate() {
+            match results.iter().find(|(rh, _, _)| rh == h) {
+                Some((_, ok, meta)) => {
+                    ensure!(
+                        *ok,
+                        "ledger {ledger}: transaction {} failed",
+                        hex::encode(h)
+                    );
+                    if i == 0 {
+                        ensure_ttls_extended(meta, keys.len())?;
+                    }
+                }
                 None => bail!(
                     "ledger {ledger}: transaction {} is not in the ledger",
                     hex::encode(h)
@@ -384,26 +452,67 @@ impl MuxedSource {
     }
 }
 
-/// Transaction hash and success flag of every transaction in a ledger.
-fn ledger_results(lcm: &stellar_xdr::LedgerCloseMeta) -> Vec<([u8; 32], bool)> {
+/// Hash, success flag and meta of every transaction in a ledger.
+fn ledger_results(lcm: &LedgerCloseMeta) -> Vec<([u8; 32], bool, TransactionMeta)> {
     let ok = |r: &TransactionResultResult| matches!(r, TransactionResultResult::TxSuccess(_));
     match lcm {
-        stellar_xdr::LedgerCloseMeta::V0(m) => m
+        LedgerCloseMeta::V0(m) => m
             .tx_processing
             .iter()
-            .map(|t| (t.result.transaction_hash.0, ok(&t.result.result.result)))
+            .map(|t| {
+                (
+                    t.result.transaction_hash.0,
+                    ok(&t.result.result.result),
+                    t.tx_apply_processing.clone(),
+                )
+            })
             .collect(),
-        stellar_xdr::LedgerCloseMeta::V1(m) => m
+        LedgerCloseMeta::V1(m) => m
             .tx_processing
             .iter()
-            .map(|t| (t.result.transaction_hash.0, ok(&t.result.result.result)))
+            .map(|t| {
+                (
+                    t.result.transaction_hash.0,
+                    ok(&t.result.result.result),
+                    t.tx_apply_processing.clone(),
+                )
+            })
             .collect(),
-        stellar_xdr::LedgerCloseMeta::V2(m) => m
+        LedgerCloseMeta::V2(m) => m
             .tx_processing
             .iter()
-            .map(|t| (t.result.transaction_hash.0, ok(&t.result.result.result)))
+            .map(|t| {
+                (
+                    t.result.transaction_hash.0,
+                    ok(&t.result.result.result),
+                    t.tx_apply_processing.clone(),
+                )
+            })
             .collect(),
     }
+}
+
+fn ensure_no_operation_changes(meta: &TransactionMeta, what: &str) -> Result<()> {
+    let changes = operation_changes(meta);
+    ensure!(
+        changes.is_empty(),
+        "{what} should change nothing, meta has {changes:?}"
+    );
+    Ok(())
+}
+
+/// An extend that changed nothing would still succeed, so check it moved
+/// the TTL of every key.
+fn ensure_ttls_extended(meta: &TransactionMeta, keys: usize) -> Result<()> {
+    let updated = operation_changes(meta)
+        .into_iter()
+        .filter(|c| matches!(c, LedgerEntryChange::Updated(e) if matches!(e.data, LedgerEntryData::Ttl(_))))
+        .count();
+    ensure!(
+        updated == keys,
+        "the extend should update {keys} ttl entries, updated {updated}"
+    );
+    Ok(())
 }
 
 impl Recipe for MuxedSource {

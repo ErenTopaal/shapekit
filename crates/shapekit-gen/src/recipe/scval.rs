@@ -645,3 +645,39 @@ impl Recipe for ScvalShapes {
         .context("capturing the refused symbol")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use stellar_xdr::{AccountId, PublicKey, Uint256};
+
+    fn addr() -> ScAddress {
+        ScAddress::Account(AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([1; 32]))))
+    }
+
+    #[test]
+    fn mixed_keys_are_listed_in_host_order() {
+        let listed = mixed_key_entries(addr()).unwrap();
+        let sorted = ScMap::sorted_from(listed.clone()).unwrap();
+        assert_eq!(sorted.0.to_vec(), listed);
+        assert_eq!(listed.len(), 19);
+    }
+
+    #[test]
+    fn colliding_keys_are_distinct_scvals() {
+        let listed = colliding_entries().unwrap();
+        let sorted = ScMap::sorted_from(listed.clone()).unwrap();
+        assert_eq!(sorted.0.len(), listed.len());
+    }
+
+    #[test]
+    fn nesting_counts_containers() {
+        let mut v = nested_vec(3).unwrap();
+        let mut levels = 0;
+        while let ScVal::Vec(Some(items)) = v {
+            levels += 1;
+            v = items[0].clone();
+        }
+        assert_eq!((levels, v), (3, ScVal::U32(3)));
+    }
+}

@@ -218,8 +218,12 @@ impl Drop for Server {
 /// Opens the chain, binds the listener and serves on a background thread.
 pub fn start(cfg: ServeConfig) -> Result<Server, ServeError> {
     let replay = Arc::new(Replay::open(&cfg.chain_dir, cfg.head, cfg.cache_bytes)?);
+    // a small fixed set of long-lived threads: each new thread can bring its own malloc
+    // arena, so letting idle threads expire and respawn ratchets resident memory up
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
+        .max_blocking_threads(4)
+        .thread_keep_alive(std::time::Duration::from_secs(24 * 3600))
         .enable_all()
         .build()
         .map_err(|e| ServeError::Io(format!("starting the runtime: {e}")))?;

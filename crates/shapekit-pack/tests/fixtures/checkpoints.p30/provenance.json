@@ -1,0 +1,17 @@
+{
+  "fixture": "checkpoints.p30/testnet",
+  "written_by": "shapekit gen checkpoints --network testnet --last 127 --out crates/shapekit-pack/tests/fixtures/checkpoints.p30/testnet",
+  "recorded_at": "2026-11-12",
+  "core_image": {
+    "repository": "stellar/stellar-core",
+    "tag": "30.0.0-3642.0e49751aa.noble",
+    "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51"
+  },
+  "content": "protocol upgrade to 30 at ledger 2, then empty ledgers through 127, so the history archive holds checkpoints 63 and 127. the corpus chains end before ledger 63 and have no checkpoint",
+  "used_by": [
+    "crates/shapekit-pack/tests/pack.rs",
+    "crates/shapekit-serve/tests/getledgers.rs",
+    "crates/shapekit-cli/tests/serve_memory.rs",
+    "adapters/protocol/consumercheck"
+  ]
+}

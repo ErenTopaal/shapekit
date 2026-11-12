@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.set_trust_line_flags"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-set-authorized-true",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "SetTrustLineFlags sets the authorized flag on a trustline, a set_authorized event with bool data. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 16,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-true/mainnet.expected.json",
+      "expected_json_sha256": "65cdb869c37201154b2d5d74d5b56e205f72e6a2ae98328537c02292305a8bde",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-true/mainnet.xdr",
+      "xdr_sha256": "54910e44277d1006563e7e39b769d24cb9f8b40a03222b5842d06ca37ad2a7e0"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-true/testnet.expected.json",
+      "expected_json_sha256": "9e7d6e7ed325aef520fc16830c581283cb873fa29df4adb1655d03564a156e53",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-set-authorized-true/testnet.xdr",
+      "xdr_sha256": "58a1026408c2b11eb88f7fdf3694b120364a6342d17d4ad9b5015461daa21a75"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "tx.memo.text",
+    "tx.memo.type",
+    "op.payment.destination"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-payment-memo-text",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "an XLM payment to a plain account in a transaction with a memo-text: the memo value becomes to_muxed_id in the transfer event data. recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-memo-text/mainnet.expected.json",
+      "expected_json_sha256": "666a06b7757edd3032339e6e303b1155da6bb4ae5f672e7c4c2ff4c0ac92026d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-memo-text/mainnet.xdr",
+      "xdr_sha256": "62c79f4f5a2fdedd5559cb1afc79dafcd56cea24238bcd6f3c1d3aff0a86e009"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-memo-text/testnet.expected.json",
+      "expected_json_sha256": "bc70ffffb0e59f6a2cd05d8efed2abe3263958b09f199079abb21b3449a396cf",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-payment-memo-text/testnet.xdr",
+      "xdr_sha256": "11138b18eb518f5a697b59d6939d17379d1aa74e7bca55d2a96f222f8c3e367a"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,0 +1,106 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "39880b98",
+        "signature": "252472b5ae51f0bc0b568a70ea996806bc0d91fc4c044f1ec96ed2e9c766ef8c4b54787ca454a258f333c5acc045d267528216c73ae37a3e2773f9bbc739bd07"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "22775",
+          "resources": {
+            "disk_read_bytes": 0,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CDWQAO4XBGW44CP5A5OKJ2GJMDDFTHZGW7ZAKSSB2BANEYIOLOIA2OMF",
+                    "durability": "persistent",
+                    "key": {
+                      "executable_tag": "echo"
+                    }
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "f9b16f83ec2b943d5ac11524c410c5e8b6cd13955e15935e99b3923ffa9c8c06"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CBMAE7MW2IGOWJ244ORZRN4KMKLVMQXOXM6P5PVSSFIXJFD5MMD3ZBJK",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                }
+              ]
+            },
+            "instructions": 623432,
+            "write_bytes": 116
+          }
+        }
+      },
+      "fee": 22875,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": "source_account",
+                  "root_invocation": {
+                    "function": {
+                      "create_contract_v2_host_fn": {
+                        "constructor_args": [],
+                        "contract_id_preimage": {
+                          "address": {
+                            "address": "GC55G47PRGLLJHXTZLM7ZF6SRXZKYEXTM2KPA3H5DQJZVBRZRAFZQROF",
+                            "salt": "c9537f744af54d32e4afa45eb4e0adb7106e724ed5365df32ff35a2235cb566d"
+                          }
+                        },
+                        "executable": {
+                          "external_ref": {
+                            "executable_owner": "CDWQAO4XBGW44CP5A5OKJ2GJMDDFTHZGW7ZAKSSB2BANEYIOLOIA2OMF",
+                            "tag": "echo"
+                          }
+                        }
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "create_contract_v2": {
+                  "constructor_args": [],
+                  "contract_id_preimage": {
+                    "address": {
+                      "address": "GC55G47PRGLLJHXTZLM7ZF6SRXZKYEXTM2KPA3H5DQJZVBRZRAFZQROF",
+                      "salt": "c9537f744af54d32e4afa45eb4e0adb7106e724ed5365df32ff35a2235cb566d"
+                    }
+                  },
+                  "executable": {
+                    "external_ref": {
+                      "executable_owner": "CDWQAO4XBGW44CP5A5OKJ2GJMDDFTHZGW7ZAKSSB2BANEYIOLOIA2OMF",
+                      "tag": "echo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "30064771076",
+      "source_account": "GC55G47PRGLLJHXTZLM7ZF6SRXZKYEXTM2KPA3H5DQJZVBRZRAFZQROF"
+    }
+  }
+}

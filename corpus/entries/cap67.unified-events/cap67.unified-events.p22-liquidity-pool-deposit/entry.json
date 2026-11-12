@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.liquidity_pool_deposit"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-liquidity-pool-deposit",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "a deposit into a constant product pool: one transfer event per asset to the liquidity pool address (strkey L). recorded at protocol 22 with classic events off, so the meta is v3 and carries none of them",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p22",
+    "class": "local-core",
+    "ledger_seq": 22,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 3,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-liquidity-pool-deposit/mainnet.expected.json",
+      "expected_json_sha256": "12fbb8cbccfcb3ec5c9f53b4ba44b40439218288c2d37f9b0daac786e999bbd5",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-liquidity-pool-deposit/mainnet.xdr",
+      "xdr_sha256": "ad520bd0fa09f20dad15544a4df562578da59e29f15499d6290742dacc9ac515"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-liquidity-pool-deposit/testnet.expected.json",
+      "expected_json_sha256": "d114020ddc0ff661ab92647b99f7201474d31a5d97c3dcea4d6e90deff4aba22",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-liquidity-pool-deposit/testnet.xdr",
+      "xdr_sha256": "4713d29d5c738367dc33ee7759e213e8204eaae699c46069dfb7f150e215fd0b"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

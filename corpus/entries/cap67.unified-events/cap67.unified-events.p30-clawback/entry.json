@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.clawback.from",
+    "op.clawback.asset_amount"
+  ],
+  "flags": [],
+  "id": "cap67.unified-events.p30-clawback",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "the issuer claws back part of a holder's balance, a clawback event",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p30",
+    "class": "local-core",
+    "ledger_seq": 18,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p30-clawback/mainnet.expected.json",
+      "expected_json_sha256": "aef8c967008031ae5c9df654b4f9d010b12fa1e83fb13a7317716857477e82ea",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p30-clawback/mainnet.xdr",
+      "xdr_sha256": "3302aeb2e9068a6c96bd9463bb30b6bc38bd5cdd0d11632811da0a9b456619e4"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p30-clawback/testnet.expected.json",
+      "expected_json_sha256": "8ad0882e011aca876390bb2edb557c10e5718647bd2e0c9b795fb5e4c5287212",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p30-clawback/testnet.xdr",
+      "xdr_sha256": "31c5e721e9fb6db833d9022fe70e8e4ca93a89155ad4c3c1cb646d7ef5ed7540"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

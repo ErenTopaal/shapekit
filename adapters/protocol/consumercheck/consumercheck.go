@@ -143,8 +143,9 @@ func Hash(b []byte) string {
 
 // Server is a running `shapekit serve`.
 type Server struct {
-	URL string
-	cmd *exec.Cmd
+	URL     string
+	cmd     *exec.Cmd
+	stopped bool
 }
 
 // Serve starts `shapekit serve` for a chain directory on a free loopback port and waits
@@ -187,8 +188,15 @@ func Serve(ctx context.Context, bin, chainDir string, extra ...string) (*Server,
 	}
 }
 
-// Stop kills the server and reaps it.
+// Stop kills the server and reaps it. Stopping twice is a no-op, so a test can both stop
+// a server on its normal path and register Stop as cleanup for its failure paths.
 func (s *Server) Stop() error {
+	if s.stopped {
+		return nil
+	}
+
+	s.stopped = true
+
 	if err := s.cmd.Process.Kill(); err != nil {
 		return err
 	}

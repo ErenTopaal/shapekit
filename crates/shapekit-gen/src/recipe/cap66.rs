@@ -21,8 +21,12 @@
 //! | then     | empty ledgers until the stored values are archived        |
 //! | next     | bob restores the restore instance's value                 |
 //! | next     | carol's call to auto restores its value on the way        |
-//! | then     | empty ledgers until the scan evicts the evict instance's  |
-//! |          | persistent and temporary values                           |
+//! | then     | empty ledgers until the scan has evicted the evict        |
+//! |          | instance's persistent and temporary values               |
+//!
+//! The scan runs every ledger, so evictions can land in any ledger after
+//! the values expire, the restore ledger included; the entries' notes say
+//! which, and whether each restore read the live state or the hot archive.
 
 use anyhow::{Context, Result, bail, ensure};
 use shapekit_core_driver::node::EntryState;
@@ -94,6 +98,40 @@ fn evicted(lcm: &LedgerCloseMeta) -> &[LedgerKey] {
     match lcm {
         LedgerCloseMeta::V2(m) => m.evicted_keys.as_slice(),
         LedgerCloseMeta::V0(_) | LedgerCloseMeta::V1(_) => &[],
+    }
+}
+
+/// The recorded meta of one ledger.
+fn frame_meta(ctx: &mut ChainCtx, ledger: u32) -> Option<&LedgerCloseMeta> {
+    ctx.driver()
+        .recorder()
+        .frames()
+        .iter()
+        .find(|f| f.ledger_seq == ledger)
+        .map(|f| &f.meta)
+}
+
+/// Where a restore in `restored_in` took `key` from: the hot archive if an
+/// eviction scan after `stored_after` evicted it, else the live state.
+fn restored_from(
+    ctx: &mut ChainCtx,
+    key: &LedgerKey,
+    stored_after: u32,
+    restored_in: u32,
+) -> String {
+    let evicted_in = ctx
+        .driver()
+        .recorder()
+        .frames()
+        .iter()
+        .filter(|f| f.ledger_seq > stored_after && f.ledger_seq < restored_in)
+        .find(|f| evicted(&f.meta).contains(key))
+        .map(|f| f.ledger_seq);
+    match evicted_in {
+        Some(seq) => {
+            format!("from the hot archive, where the eviction scan moved it in ledger {seq}")
+        }
+        None => "from the live state, where it had expired but was not yet evicted".to_owned(),
     }
 }
 
@@ -208,14 +246,7 @@ impl Recipe for Archival {
             "ledger {}: the restore's meta has no restored change for the archived value",
             applied.ledger
         );
-        ctx.capture(
-            "restore-footprint",
-            Selector::ledger_of(&applied),
-            Spec::new(
-                "a ledger with a RestoreFootprint transaction bringing back an archived persistent contract data entry; its meta shows the entry and its ttl as restored changes",
-            )
-            .fields(&["op.restore_footprint", "tx.soroban.footprint"]),
-        )?;
+        let restore_ledger = applied.ledger;
 
         let hf = call(&auto_id, "echo", vec![ScVal::U32(4)])?;
         let env = ctx.driver().soroban(&carol, hf)?;
@@ -242,21 +273,16 @@ impl Recipe for Archival {
             "ledger {}: the call's meta has no restored change for the archived value",
             applied.ledger
         );
-        ctx.capture(
-            "auto-restore-invoke",
-            Selector::transaction(&applied),
-            Spec::new(
-                "an invocation whose read-write footprint holds an archived persistent entry, marked by index in SorobanResourcesExtV0, which core restores before the call writes it",
-            )
-            .fields(&[
-                "tx.soroban.ext.archived_soroban_entries",
-                "tx.soroban.footprint",
-            ]),
-        )?;
+        let auto_applied = applied;
 
         // the scan may have run while the chain waited for archival, so
         // every ledger since the values were stored is searched
-        let mut pending = vec![evict_key.clone(), temp_key.clone()];
+        let mut pending = vec![
+            restore_key.clone(),
+            auto_key.clone(),
+            evict_key.clone(),
+            temp_key.clone(),
+        ];
         let mut found: Vec<(u32, Vec<LedgerKey>)> = Vec::new();
         let mut scanned = stored_after;
         let mut waited = 0;
@@ -286,28 +312,66 @@ impl Recipe for Archival {
             ctx.driver().close_empty()?;
             waited += 1;
         }
+        let restore_from = restored_from(ctx, &restore_key, stored_after, restore_ledger);
+        let also_evicted = match frame_meta(ctx, restore_ledger) {
+            Some(lcm) if !evicted(lcm).is_empty() => format!(
+                "; the same ledger's eviction scan evicts {} keys",
+                evicted(lcm).len()
+            ),
+            _ => String::new(),
+        };
+        ctx.capture(
+            "restore-footprint",
+            Selector::Ledger(restore_ledger),
+            Spec::new(format!(
+                "a ledger with a RestoreFootprint transaction bringing back an archived persistent contract data entry {restore_from}; its meta shows the entry and its ttl as restored changes{also_evicted}"
+            ))
+            .fields(&["op.restore_footprint", "tx.soroban.footprint"]),
+        )?;
+        let auto_from = restored_from(ctx, &auto_key, stored_after, auto_applied.ledger);
+        ctx.capture(
+            "auto-restore-invoke",
+            Selector::transaction(&auto_applied),
+            Spec::new(format!(
+                "an invocation whose read-write footprint holds an archived persistent entry, marked by index in SorobanResourcesExtV0, which core restores {auto_from} before the call writes it"
+            ))
+            .fields(&[
+                "tx.soroban.ext.archived_soroban_entries",
+                "tx.soroban.footprint",
+            ]),
+        )?;
+
+        // one entry per kind of eviction, from the first ledger showing it
+        let mut kinds = std::collections::BTreeSet::new();
         for (seq, gone) in found {
-            let (slug, what) = if gone.len() == 2 {
-                (
+            // that ledger is already an entry, its notes name the eviction
+            if seq == restore_ledger {
+                continue;
+            }
+            let temporary = gone.contains(&temp_key);
+            let persistent = gone.iter().any(|k| *k != temp_key);
+            let (slug, what) = match (persistent, temporary) {
+                (true, true) => (
                     "evicted-persistent-and-temporary",
-                    "an expired persistent and an expired temporary contract data entry",
-                )
-            } else if gone[0] == evict_key {
-                (
+                    "an expired persistent contract data entry, which moves to the hot archive, and an expired temporary one, which is deleted",
+                ),
+                (true, false) => (
                     "evicted-persistent",
-                    "an expired persistent contract data entry",
-                )
-            } else {
-                (
+                    "an expired persistent contract data entry, which moves to the hot archive",
+                ),
+                _ => (
                     "evicted-temporary",
-                    "an expired temporary contract data entry",
-                )
+                    "an expired temporary contract data entry, which is deleted",
+                ),
             };
+            if !kinds.insert(slug) {
+                continue;
+            }
             ctx.capture(
                 slug,
                 Selector::Ledger(seq),
                 Spec::new(format!(
-                    "a ledger whose eviction scan removed {what}, listed in evictedKeys"
+                    "a ledger whose eviction scan removed {what}, listed in evictedKeys with its ttl key"
                 )),
             )
             .with_context(|| format!("capturing the eviction in ledger {seq}"))?;

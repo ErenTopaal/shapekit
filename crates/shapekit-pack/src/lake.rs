@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use stellar_xdr::{LedgerCloseMeta, Limited, Limits, ReadXdr};
 
-use crate::layout::{BATCH_EXTENSION, Layout, parse_batch_name};
+use crate::layout::{Layout, parse_batch_name};
 use crate::{PackError, io_err};
 
 pub const CONFIG_FILE: &str = ".config.json";
@@ -527,9 +527,4 @@ pub fn lake_digest(dir: &Path) -> Result<String, PackError> {
         h.update(Sha256::digest(std::fs::read(&p).map_err(io_err(&p))?));
     }
     Ok(hex::encode(h.finalize()))
-}
-
-/// True for a lake object key, the files `Lake::open` accepts besides the config.
-pub fn is_batch_key(key: &str) -> bool {
-    key.ends_with(BATCH_EXTENSION)
 }

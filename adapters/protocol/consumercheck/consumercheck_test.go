@@ -155,6 +155,13 @@ func TestRPCLedgerBackendReadsEveryChain(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		// a failed check must not leave the server running
+		t.Cleanup(func() {
+			if err := srv.Stop(); err != nil {
+				t.Error(err)
+			}
+		})
+
 		backend := ledgerbackend.NewRPCLedgerBackend(ledgerbackend.RPCLedgerBackendOptions{
 			RPCServerURL: srv.URL,
 			BufferSize:   10,

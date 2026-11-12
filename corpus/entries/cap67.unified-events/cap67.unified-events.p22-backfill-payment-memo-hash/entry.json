@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "tx.memo.hash",
+    "tx.memo.type",
+    "op.payment.destination"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "cap67.unified-events.p22-backfill-payment-memo-hash",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "an XLM payment to a plain account in a transaction with a memo-hash: the memo value becomes to_muxed_id in the transfer event data",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events-backfill.p22",
+    "class": "local-core",
+    "ledger_seq": 12,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events-backfill"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-payment-memo-hash/mainnet.expected.json",
+      "expected_json_sha256": "0efc2453b9cf227e47bcf020ca1a3f6a0f7824c011aa40c140748394e1a97277",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-payment-memo-hash/mainnet.xdr",
+      "xdr_sha256": "8cd5363761119c7fa9652a9813c7b093322ecca07ca0d95309e33d22f7d60110"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-payment-memo-hash/testnet.expected.json",
+      "expected_json_sha256": "33ed19894b737af1af996e96a1e976437e287252acdf1582834f4aba63c384bc",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p22-backfill-payment-memo-hash/testnet.xdr",
+      "xdr_sha256": "d76aa75b8d6b887f7ea2f407c429b67fab9909a78734b1cc37ead726806844bb"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

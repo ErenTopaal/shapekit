@@ -126,99 +126,57 @@ impl Recipe for AuthTrees {
                 },
             ));
         }
-        for d in [
-            120u32, 240, 245, 246, 247, 248, 249, 250, 255, 300, 400, 490, 493, 494, 500,
-        ] {
-            let levels = vec![(alice_addr.clone(), 0)];
+        let roles: Vec<String> = (0..60).map(|i| format!("probe-{i}")).collect();
+        let role_refs: Vec<&str> = roles.iter().map(|s| s.as_str()).collect();
+        ctx.fund(&role_refs, 1_000_000_000)?;
+        let mut next = 0usize;
+        let mut fresh = |ctx: &mut ChainCtx| { let k = ctx.account(&roles[next]); next += 1; k };
+        let mut base: Option<stellar_xdr::SorobanTransactionData> = None;
+        for d in [240u32, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 252, 300, 490, 491, 492, 493, 494, 495, 496] {
+            let p = fresh(ctx);
+            let pa = account_address(&p.verifying_key());
+            let levels = vec![(pa.clone(), 0)];
             let hf = call(&ts[0], "node", node_args(&[], &levels)?)?;
-            let rec = simulate(
-                ctx,
-                &source,
-                &hf,
-                AuthMode::Record {
-                    allow_non_root: false,
-                    address_v2: false,
-                },
-            )?;
-            let mut e = rec.auth[0].clone();
-            e.root_invocation.sub_invocations = chain_of(&ts[1], d)?.try_into()?;
-            let e = sign(ctx, e)?;
-            let sim = simulate(ctx, &source, &hf, AuthMode::Enforce(vec![e.clone()]));
-            let data = match sim {
-                Ok(s) => s.transaction_data,
+            let root = SorobanAuthorizedInvocation { function: SorobanAuthorizedFunction::ContractFn(InvokeContractArgs { contract_address: contract_address(&ts[0]), function_name: ScSymbol("node".try_into()?), args: node_args(&[], &levels)?.try_into()? }), sub_invocations: chain_of(&ts[1], d)?.try_into()? };
+            let e = SorobanAuthorizationEntry { credentials: SorobanCredentials::Address(stellar_xdr::SorobanAddressCredentials { address: pa.clone(), nonce: 7, signature_expiration_ledger: 0, signature: ScVal::Void }), root_invocation: root };
+            let exp = expiration(ctx);
+            let e = sign_authorization_entry(e, &ctx.network_id(), exp, &[&p])?;
+            let data = match simulate(ctx, &source, &hf, AuthMode::Enforce(vec![e.clone()])) {
+                Ok(s) => { base = Some(s.transaction_data.clone()); s.transaction_data },
                 Err(err) => {
                     eprintln!("EXPLORE declared {d}: enforce sim failed: {err:#}");
-                    let mut d2 = rec.transaction_data.clone();
-                    d2.resource_fee += 2_000_000;
-                    d2.resources.instructions += 20_000_000;
-                    d2
+                    let mut b = base.clone().ok_or_else(|| anyhow::anyhow!("no base"))?;
+                    // same footprint shape, but the nonce key belongs to this signer
+                    let mut rw = b.resources.footprint.read_write.to_vec();
+                    for k in rw.iter_mut() {
+                        if let stellar_xdr::LedgerKey::ContractData(cd) = k { if matches!(cd.key, ScVal::LedgerKeyNonce(_)) { cd.contract = pa.clone(); } }
+                    }
+                    b.resources.footprint.read_write = rw.try_into()?;
+                    let mut ro = b.resources.footprint.read_only.to_vec();
+                    for k in ro.iter_mut() {
+                        if let stellar_xdr::LedgerKey::Account(a) = k { if a.account_id != shapekit_core_driver::keys::account_id(&source.verifying_key()) { a.account_id = shapekit_core_driver::keys::account_id(&p.verifying_key()); } }
+                    }
+                    b.resources.footprint.read_only = ro.try_into()?;
+                    b.resource_fee *= 3;
+                    b
                 }
             };
             let env = ctx.driver().soroban_with(&source, hf, data, vec![e])?;
             let len = env.to_xdr(Limits::none())?.len();
             match ctx.driver().apply(&env) {
-                Ok(a) => eprintln!(
-                    "EXPLORE declared {d}: applied ledger {} len {len} result {:?}",
-                    a.ledger, a.result.result
-                ),
+                Ok(a) => eprintln!("EXPLORE declared {d}: applied ledger {} len {len} result {:?}", a.ledger, a.result.result),
                 Err(err) => eprintln!("EXPLORE declared {d}: not applied len {len}: {err}"),
             }
         }
-        for f in (300u32..=400).step_by(10) {
-            let levels = vec![(alice_addr.clone(), f), (alice_addr.clone(), 0)];
+        for f in 321u32..=339 {
+            let p = fresh(ctx);
+            let pa = account_address(&p.verifying_key());
+            let levels = vec![(pa.clone(), f), (pa.clone(), 0)];
             let hf = call(&ts[0], "node", node_args(&ts[1..2], &levels)?)?;
-            let t = std::time::Instant::now();
-            match super::soroban_steps::authorized_prefetched(
-                ctx,
-                &source,
-                hf,
-                AuthMode::Record {
-                    allow_non_root: false,
-                    address_v2: false,
-                },
-                &keys,
-                sign,
-            ) {
-                Ok((env, _)) => eprintln!(
-                    "EXPLORE fanout {f}: ok {} bytes {:?}",
-                    env.to_xdr(Limits::none())?.len(),
-                    t.elapsed()
-                ),
-                Err(e) => {
-                    eprintln!("EXPLORE fanout {f}: failed {e:#}");
-                    break;
-                }
-            }
-        }
-        for d in [30u32, 31, 32] {
-            let levels: Vec<(ScAddress, u32)> = (0..d)
-                .map(|i| (alice_addr.clone(), if i + 1 == d { 0 } else { 1 }))
-                .collect();
-            let hf = call(&ts[0], "node", node_args(&ts[1..d as usize], &levels)?)?;
-            let t = std::time::Instant::now();
-            match super::soroban_steps::authorized_prefetched(
-                ctx,
-                &source,
-                hf,
-                AuthMode::Record {
-                    allow_non_root: false,
-                    address_v2: false,
-                },
-                &keys,
-                sign,
-            ) {
-                Ok((env, _)) => {
-                    let data = super::soroban_steps::soroban_data(&env)?;
-                    eprintln!(
-                        "EXPLORE matched {d}: ok {} bytes {:?} instr {} fp {}",
-                        env.to_xdr(Limits::none())?.len(),
-                        t.elapsed(),
-                        data.resources.instructions,
-                        data.resources.footprint.read_only.len()
-                            + data.resources.footprint.read_write.len()
-                    );
-                }
-                Err(e) => eprintln!("EXPLORE matched {d}: failed {e:#} {:?}", t.elapsed()),
+            let signp = |ctx: &mut ChainCtx, e: SorobanAuthorizationEntry| -> Result<SorobanAuthorizationEntry> { let exp = expiration(ctx); Ok(sign_authorization_entry(e, &ctx.network_id(), exp, &[&p])?) };
+            match super::soroban_steps::authorized_prefetched(ctx, &source, hf, AuthMode::Record { allow_non_root: false, address_v2: false }, &keys, signp) {
+                Ok((env, _)) => { let dd = super::soroban_steps::soroban_data(&env)?; eprintln!("EXPLORE fanout {f}: ok {} bytes instr {}", env.to_xdr(Limits::none())?.len(), dd.resources.instructions) },
+                Err(e) => { eprintln!("EXPLORE fanout {f}: failed {e:#}"); break; }
             }
         }
         anyhow::bail!("exploration only")

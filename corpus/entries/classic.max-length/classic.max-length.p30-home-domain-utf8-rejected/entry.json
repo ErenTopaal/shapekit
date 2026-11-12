@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0019",
+    "CAP-0024"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "classic.max-length",
+  "fields_exercised": [
+    "op.set_options.home_domain",
+    "tx.signatures"
+  ],
+  "flags": [
+    "max-length-vec"
+  ],
+  "id": "classic.max-length.p30-home-domain-utf8-rejected",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "set options with a 32 byte home domain holding c3a9, valid UTF-8 for U+00E9 but not ascii, which core refuses as SET_OPTIONS_INVALID_HOME_DOMAIN; hex 7e73686170656b697420686f6d652f64c3a961696e20617420626f756e64207e. submitted with ledger 23 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.max-length.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////9wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "classic.max-length"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.max-length/classic.max-length.p30-home-domain-utf8-rejected/mainnet.expected.json",
+      "expected_json_sha256": "810c0583ef1aa1e0da5aeea96919b263f668e290b71fde12b79371a7c4497271",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.max-length/classic.max-length.p30-home-domain-utf8-rejected/mainnet.xdr",
+      "xdr_sha256": "facb7e74454b1b8378a59debacfb797eca4273c314465a374ea1e474a0d03934"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.max-length/classic.max-length.p30-home-domain-utf8-rejected/testnet.expected.json",
+      "expected_json_sha256": "599174d9ebd37398903b3e50c03f7540192262d349d53ba8e7e6796092c8e8e4",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.max-length/classic.max-length.p30-home-domain-utf8-rejected/testnet.xdr",
+      "xdr_sha256": "222be2ad25c7f041b916647b08d512a5a8a9ce7fddf3ce30ebc00e13d997d77e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

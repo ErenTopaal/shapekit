@@ -1,7 +1,9 @@
-//! JSON-RPC 2.0 methods, shaped after stellar-rpc v30.0.0
-//! (`cmd/stellar-rpc/internal/methods`) and the request and response types of
-//! go-stellar-sdk v0.8.0 `protocols/rpc` (R10). Error codes and messages follow those
-//! sources, so clients that branch on them behave as they would against stellar-rpc.
+//! JSON-RPC 2.0 methods, shaped after stellar-rpc (`cmd/stellar-rpc/internal/methods`)
+//! and the request and response types of go-stellar-sdk v0.8.0 `protocols/rpc` (R10).
+//! Error codes and messages follow those sources, so clients that branch on them behave as
+//! they would against stellar-rpc. Where v30.0.0 and v30.0.1 differ (getLedgers with a
+//! cursor at or past the tip), v30.0.1 is followed: it is the current release and the one
+//! the conformance fixtures were captured from.
 
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
@@ -303,12 +305,15 @@ fn get_ledgers(replay: &Replay, req: GetLedgersRequest) -> Result<Value, RpcErro
                     .cursor
                     .parse()
                     .map_err(|_| RpcError::new(INVALID_PARAMS, go_parse_uint_error(&p.cursor)))?;
+                // only below the oldest ledger is an error; a cursor at or past the head is
+                // a caught-up poller and gets an empty page with its cursor echoed (v30.0.1).
+                // a cursor of u32::MAX wraps to 0 and lands here too
                 start = c.wrapping_add(1);
-                if start < first || start > head {
+                if start < first {
                     return Err(RpcError::new(
                         INVALID_PARAMS,
                         format!(
-                            "cursor ('{}') must be between the oldest ledger: {first} and the latest ledger: {head} for this rpc instance",
+                            "cursor ('{}') must be at or above the oldest ledger: {first} for this rpc instance",
                             p.cursor
                         ),
                     ));
@@ -335,7 +340,7 @@ fn get_ledgers(replay: &Replay, req: GetLedgersRequest) -> Result<Value, RpcErro
             _ => (start - 1).to_string(),
         },
     };
-    let (head, head_time) = latest(replay)?;
+    let head_time = replay.close_time(head).map_err(internal)?;
     Ok(json!({
         "ledgers": ledgers,
         "latestLedger": head,

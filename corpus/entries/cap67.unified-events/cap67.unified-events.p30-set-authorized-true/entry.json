@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap67.unified-events",
+  "fields_exercised": [
+    "op.set_trust_line_flags"
+  ],
+  "flags": [],
+  "id": "cap67.unified-events.p30-set-authorized-true",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "SetTrustLineFlags sets the authorized flag on a trustline, a set_authorized event with bool data",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap67.unified-events.p30",
+    "class": "local-core",
+    "ledger_seq": 20,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap67.unified-events"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p30-set-authorized-true/mainnet.expected.json",
+      "expected_json_sha256": "84c207a9ea268742db128cef0c5cff0abf99826f4dbddae959a6128429c723a2",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p30-set-authorized-true/mainnet.xdr",
+      "xdr_sha256": "0dddf2acfb82ce8e7b4fab1ad98db4cca1f59b577e0ce0d1c6abb2c7c0d28790"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.p30-set-authorized-true/testnet.expected.json",
+      "expected_json_sha256": "943dde0f54220586b0b2ac0ca5da1e57fcc98d037076bd517823b6a9dad144a2",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap67.unified-events/cap67.unified-events.p30-set-authorized-true/testnet.xdr",
+      "xdr_sha256": "d5f883f098560bcebb778afc61c5693d85847e990afaff02b6bac297d4a75056"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

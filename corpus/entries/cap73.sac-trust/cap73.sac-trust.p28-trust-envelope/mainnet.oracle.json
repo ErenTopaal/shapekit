@@ -1,0 +1,150 @@
+{
+  "ledgers": [
+    {
+      "close_time": "1767744000",
+      "evicted": [],
+      "ledger_hash": "a3d43ff3e13a20af6be3abe7c1cb84f69c8559205918bd74090e11af58b86c4f",
+      "ledger_seq": 6,
+      "protocol": 28,
+      "transactions": [
+        {
+          "apply_index": 0,
+          "changes": [
+            {
+              "after": "99999810773",
+              "asset": "native",
+              "before": "99999953702",
+              "delta": "-142929",
+              "held_in": "account",
+              "holder": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "kind": "balance-change",
+              "scope": "fee-processing"
+            },
+            {
+              "amount": "142929",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "kind": "token-event",
+              "scope": "fee-processing",
+              "stage": "before-all-txs"
+            },
+            {
+              "account": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "after": "12884901890",
+              "before": "12884901889",
+              "kind": "sequence",
+              "scope": "tx-before"
+            },
+            {
+              "account": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "asset": "TRST:GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+              "flags": 1,
+              "kind": "trustline-created",
+              "limit": "9223372036854775807",
+              "op_index": 0,
+              "scope": "operation"
+            },
+            {
+              "action": "updated",
+              "after": 120966,
+              "before": 4099,
+              "key_hash": "7b786fb83ae7034d3781495fc8aeedc643d7c5448abef0ce9b2222da02c95d3c",
+              "kind": "ttl",
+              "op_index": 0,
+              "scope": "operation",
+              "target": "contract data of CCAX6J6ZIX67K7GZFH3F5C347VRSGLTCH27IVTH4G2EMPAWCCCK2SDS6 key 00000014"
+            },
+            {
+              "after": "99999825057",
+              "asset": "native",
+              "before": "99999810773",
+              "delta": "14284",
+              "held_in": "account",
+              "holder": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "kind": "balance-change",
+              "scope": "post-apply-fee"
+            },
+            {
+              "amount": "-14284",
+              "asset": "native",
+              "contract": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "event": "fee",
+              "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "kind": "token-event",
+              "scope": "post-apply-fee",
+              "stage": "after-all-txs"
+            }
+          ],
+          "declared": {
+            "participants": [
+              {
+                "address": "CCAX6J6ZIX67K7GZFH3F5C347VRSGLTCH27IVTH4G2EMPAWCCCK2SDS6",
+                "kind": "contract",
+                "roles": [
+                  "auth-invocation",
+                  "footprint",
+                  "invoked-contract"
+                ]
+              },
+              {
+                "address": "GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+                "kind": "account",
+                "roles": [
+                  "footprint"
+                ]
+              },
+              {
+                "address": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+                "kind": "account",
+                "roles": [
+                  "argument",
+                  "footprint",
+                  "tx-source"
+                ]
+              }
+            ],
+            "source": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ"
+          },
+          "fee": {
+            "balance_delta": "-128645",
+            "charged": "128645",
+            "source": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ"
+          },
+          "hash": "b0529ddaa35080a7699a835577207c7b3c1d01037de8c6e68d2e09547e14e90e",
+          "participants": [
+            {
+              "address": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+              "kind": "contract",
+              "roles": [
+                "event-contract"
+              ]
+            },
+            {
+              "address": "CCAX6J6ZIX67K7GZFH3F5C347VRSGLTCH27IVTH4G2EMPAWCCCK2SDS6",
+              "kind": "contract",
+              "roles": [
+                "entry-changed"
+              ]
+            },
+            {
+              "address": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+              "kind": "account",
+              "roles": [
+                "entry-changed",
+                "event-address",
+                "fee-source"
+              ]
+            }
+          ],
+          "result": "tx_success",
+          "successful": true
+        }
+      ],
+      "upgrades": []
+    }
+  ],
+  "network_passphrase": "Public Global Stellar Network ; September 2015",
+  "oracle_vocab_version": 1
+}

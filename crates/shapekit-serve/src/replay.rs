@@ -2,10 +2,10 @@
 //! through a cache bounded in bytes, the history archive, a transaction index and the
 //! ledger state at the visible head.
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, Mutex};
 
 use shapekit_oracle::view::LedgerView;
 use shapekit_oracle::{LedgerState, Network, decode_lcm};
@@ -21,40 +21,53 @@ use crate::ServeError;
 pub const DEFAULT_CACHE_BYTES: usize = 64 * 1024 * 1024;
 
 /// Decompressed batches, least recently used first out, held under a byte budget. A batch
-/// larger than the whole budget is returned without being kept.
+/// larger than the whole budget is returned without being kept. Recency is a counter per
+/// use, so both lookup and eviction are logarithmic.
 struct BatchCache {
     budget: usize,
     used: usize,
-    order: VecDeque<usize>,
-    items: HashMap<usize, std::sync::Arc<Batch>>,
+    tick: u64,
+    by_use: BTreeMap<u64, usize>,
+    items: HashMap<usize, (Arc<Batch>, u64)>,
 }
 
 impl BatchCache {
-    fn get(&mut self, i: usize) -> Option<std::sync::Arc<Batch>> {
-        let b = self.items.get(&i)?.clone();
-        if let Some(p) = self.order.iter().position(|x| *x == i) {
-            self.order.remove(p);
+    fn new(budget: usize) -> Self {
+        BatchCache {
+            budget,
+            used: 0,
+            tick: 0,
+            by_use: BTreeMap::new(),
+            items: HashMap::new(),
         }
-        self.order.push_back(i);
-        Some(b)
     }
 
-    fn put(&mut self, i: usize, b: std::sync::Arc<Batch>) {
+    fn get(&mut self, i: usize) -> Option<Arc<Batch>> {
+        self.tick += 1;
+        let (b, used) = self.items.get_mut(&i)?;
+        self.by_use.remove(used);
+        *used = self.tick;
+        self.by_use.insert(self.tick, i);
+        Some(b.clone())
+    }
+
+    fn put(&mut self, i: usize, b: Arc<Batch>) {
         let size = b.len_bytes();
         if size > self.budget || self.items.contains_key(&i) {
             return;
         }
         while self.used + size > self.budget {
-            let Some(old) = self.order.pop_front() else {
+            let Some((_, old)) = self.by_use.pop_first() else {
                 break;
             };
-            if let Some(o) = self.items.remove(&old) {
+            if let Some((o, _)) = self.items.remove(&old) {
                 self.used -= o.len_bytes();
             }
         }
+        self.tick += 1;
         self.used += size;
-        self.order.push_back(i);
-        self.items.insert(i, b);
+        self.by_use.insert(self.tick, i);
+        self.items.insert(i, (b, self.tick));
     }
 }
 
@@ -141,12 +154,7 @@ impl Replay {
             network: network.clone(),
             lake,
             lake_keys,
-            cache: Mutex::new(BatchCache {
-                budget: cache_bytes,
-                used: 0,
-                order: VecDeque::new(),
-                items: HashMap::new(),
-            }),
+            cache: Mutex::new(BatchCache::new(cache_bytes)),
             head: AtomicU32::new(head),
             first,
             last,
@@ -169,28 +177,24 @@ impl Replay {
         Ok(())
     }
 
-    fn batch(&self, r: &BatchRef) -> Result<std::sync::Arc<Batch>, ServeError> {
-        let i = self
-            .lake
-            .batches()
-            .iter()
-            .position(|b| b.key == r.key)
-            .expect("the ref comes from this lake");
+    fn batch(&self, i: usize, r: &BatchRef) -> Result<Arc<Batch>, ServeError> {
         if let Some(b) = self.cache.lock().expect("cache lock").get(i) {
             return Ok(b);
         }
-        let b = std::sync::Arc::new(self.lake.read_batch(r)?);
+        let b = Arc::new(self.lake.read_batch(r)?);
         self.cache.lock().expect("cache lock").put(i, b.clone());
         Ok(b)
     }
 
     /// The canonical XDR of a recorded ledger, whether or not it is visible yet.
     pub fn ledger_xdr(&self, seq: u32) -> Result<Vec<u8>, ServeError> {
-        let r = self
-            .lake
-            .batch_for(seq)
+        let batches = self.lake.batches();
+        let i = batches.partition_point(|b| b.key_last < seq);
+        let r = batches
+            .get(i)
+            .filter(|b| b.key_first <= seq)
             .ok_or_else(|| ServeError::Chain(format!("ledger {seq} is not in the lake")))?;
-        let b = self.batch(r)?;
+        let b = self.batch(i, r)?;
         b.ledger(seq)
             .map(<[u8]>::to_vec)
             .ok_or_else(|| ServeError::Chain(format!("ledger {seq} is not in batch {}", r.key)))
