@@ -12,8 +12,9 @@ use shapekit_oracle::network::CORE_TEST_PASSPHRASE;
 use shapekit_oracle::*;
 use stellar_xdr::{
     AccountId, AlphaNum4, Asset, AssetCode4, Hash, HashIdPreimage, HashIdPreimageOperationId,
-    LedgerCloseMeta, LedgerEntryChange, LedgerEntryData, LedgerKey, LedgerKeyTtl, Limits,
-    OperationBody, PublicKey, SequenceNumber, SignerKey, TransactionEnvelope, Uint256, WriteXdr,
+    LedgerCloseMeta, LedgerEntryChange, LedgerEntryData, LedgerKey, LedgerKeyTtl, Limits, Memo,
+    MuxedAccount, OperationBody, PublicKey, SequenceNumber, SignerKey, TransactionEnvelope,
+    Uint256, WriteXdr,
 };
 
 const TESTNET: &str = "Test SDF Network ; September 2015";
@@ -632,12 +633,14 @@ fn kat_sac_trust_creates_max_trustline_without_token_event() {
 }
 
 #[test]
-fn kat_muxed_contract_mint_carries_mux_id() {
+fn kat_muxed_contract_mint_carries_to_muxed_id() {
     // InvokeHostFunctionTests.cpp "Stellar asset contract transfer to muxed contract
     // (CAP-0084)", section "custom asset|issuer transfer emits mint": root (the USDC
     // issuer) transfers 500000000 to the muxed contract address of the deployed
     // sac_transfer contract with mux id 987654321987654321. The SAC credits the base
     // contract and reports the mint with to_muxed_id (makeMintOrBurnEvent in the test).
+    // The mint topic holds the base contract, so meta has no muxed address and the
+    // participant gets no mux id: a u64 to_muxed_id may as well be a memo id.
     let net = core_net();
     let root_s = root();
     let usdc = Asset::CreditAlphanum4(AlphaNum4 {
@@ -681,12 +684,74 @@ fn kat_muxed_contract_mint_carries_mux_id() {
     assert_eq!(m.asset.as_deref(), Some(usdc_id.as_str()));
     assert_eq!(m.to.as_deref(), Some(dest.as_str()));
     assert_eq!(m.amount, Some(Int(500_000_000)));
-    assert_eq!(m.to_muxed_id.as_deref(), Some("id:987654321987654321"));
+    assert_eq!(
+        m.to_muxed_id,
+        Some(ToMuxedId::U64(Int(987_654_321_987_654_321)))
+    );
     let p = tx.participants.iter().find(|p| &p.address == dest).unwrap();
     assert_eq!(p.kind, AddressKind::Contract);
-    assert_eq!(p.mux_ids, [Int(987_654_321_987_654_321)]);
+    assert!(p.mux_ids.is_empty());
     assert!(tx.changes.iter().any(|c| balance(c)
         == Some((dest.as_str(), usdc_id.as_str(), "contract", 500_000_000))));
+}
+
+#[test]
+fn memo_id_to_muxed_id_is_not_a_participant_mux_id() {
+    // corpus entry cap67.unified-events.p30-payment-memo-id: an XLM payment to a plain G
+    // account in a transaction with memo id 2^64-1. Core copies the memo into the transfer
+    // event's to_muxed_id (getPossibleMuxedData, makeClassicMemoSCVal), which is the same
+    // u64 a muxed destination would produce, so the destination must not gain a mux id.
+    // Memo and destination are read from the envelope, not from the oracle.
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../corpus/entries/cap67.unified-events/cap67.unified-events.p30-payment-memo-id");
+    let net = Network::new(TESTNET);
+    let lcm = decode_lcm(&std::fs::read(dir.join("testnet.xdr")).unwrap()).unwrap();
+    let view = shapekit_oracle::view::LedgerView::new(&lcm, &net).unwrap();
+    let mut found = None;
+    for tx in &view.txs {
+        let TransactionEnvelope::Tx(e) = tx.envelope else {
+            continue;
+        };
+        let Memo::Id(memo) = e.tx.memo else {
+            continue;
+        };
+        for op in e.tx.operations.iter() {
+            if let OperationBody::Payment(p) = &op.body {
+                let MuxedAccount::Ed25519(k) = &p.destination else {
+                    panic!("the destination is a plain account");
+                };
+                let dest = AccountId(PublicKey::PublicKeyTypeEd25519(k.clone())).to_string();
+                found = Some((hex::encode(tx.result.transaction_hash.0), dest, memo));
+            }
+        }
+    }
+    let (hash, dest, memo) = found.expect("a memo-id payment in the ledger");
+    assert_eq!(memo, u64::MAX);
+    let facts = interpret(&lcm, &net).unwrap();
+    let tx = facts.iter().find(|t| t.hash == hash).unwrap();
+    assert!(tx.successful);
+    let transfers: Vec<&TokenEvent> = tx
+        .changes
+        .iter()
+        .filter_map(|c| match &c.change {
+            Change::TokenEvent(e) if e.event == "transfer" => Some(e),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(transfers.len(), 1);
+    assert_eq!(transfers[0].to.as_deref(), Some(dest.as_str()));
+    assert_eq!(
+        transfers[0].to_muxed_id,
+        Some(ToMuxedId::U64(Int::from(memo)))
+    );
+    let v = serde_json::to_value(transfers[0]).unwrap();
+    assert_eq!(
+        v["to_muxed_id"],
+        serde_json::json!({"type": "u64", "value": "18446744073709551615"})
+    );
+    let p = tx.participants.iter().find(|p| p.address == dest).unwrap();
+    assert!(p.mux_ids.is_empty(), "{p:?}");
+    assert!(tx.participants.iter().all(|p| p.mux_ids.is_empty()));
 }
 
 #[test]

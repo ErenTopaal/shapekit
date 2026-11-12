@@ -119,12 +119,6 @@ impl ParticipantSet {
         slot.2.insert(role.to_string());
     }
 
-    pub fn add_mux(&mut self, address: &str, mux: u64) {
-        if let Some(slot) = self.map.get_mut(address) {
-            slot.1.insert(mux);
-        }
-    }
-
     pub fn into_vec(self) -> Vec<Participant> {
         self.map
             .into_iter()

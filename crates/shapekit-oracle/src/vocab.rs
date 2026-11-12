@@ -9,7 +9,11 @@ use serde::{Deserialize, Serialize};
 use stellar_xdr::{Asset, TrustLineAsset};
 
 /// Bumped whenever a kind, field or rule below changes meaning.
-pub const ORACLE_VOCAB_VERSION: u32 = 1;
+///
+/// Version 2: `to_muxed_id` keeps the type the event gave it ([`ToMuxedId`]) and no longer
+/// adds a mux id to the destination participant, since core fills it with the transaction
+/// memo as well as with mux ids.
+pub const ORACLE_VOCAB_VERSION: u32 = 2;
 
 /// i128, i64 and u64 values as decimal strings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -61,7 +65,9 @@ impl From<u32> for Int {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
 #[serde(rename_all = "kebab-case")]
 pub enum AddressKind {
     Account,
@@ -75,7 +81,10 @@ pub enum AddressKind {
 pub struct Participant {
     pub address: String,
     pub kind: AddressKind,
-    /// Mux ids this address carried, from event `to_muxed_id` values or muxed addresses.
+    /// Mux ids this address carried, only from addresses that are muxed in the meta itself:
+    /// `SC_ADDRESS_TYPE_MUXED_ACCOUNT` or muxed contract (CAP-84) addresses in event topics.
+    /// A token event's `to_muxed_id` never lands here, because core also fills it with the
+    /// transaction memo and the two cannot be told apart.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub mux_ids: Vec<Int>,
     /// Why the address is a participant, sorted. Actual participants: `fee-source`,
@@ -364,13 +373,30 @@ pub struct TokenEvent {
     pub spender: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub amount: Option<Int>,
-    /// `id:<u64>`, `hash:<hex>` or `text:<hex>`, from the data map's `to_muxed_id`.
+    /// The data map's `to_muxed_id` as the event typed it: `{"type": "u64", "value":
+    /// "<decimal>"}`, `{"type": "string", "value": "<hex>"}` or `{"type": "bytes", "value":
+    /// "<hex>"}`. Core writes the destination's mux id here when the destination is muxed
+    /// and otherwise the transaction memo (id as u64, text as string, hash and return as
+    /// bytes), so a u64 may be either a mux id or a memo id. It is not a participant mux id.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub to_muxed_id: Option<String>,
+    pub to_muxed_id: Option<ToMuxedId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub authorized: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub live_until_ledger: Option<u32>,
+}
+
+/// A CAP-67 `to_muxed_id` value, one variant per `ScVal` type core can put there
+/// (`getPossibleMuxedData` and `makeClassicMemoSCVal` in stellar-core v30.0.0).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "type", content = "value", rename_all = "lowercase")]
+pub enum ToMuxedId {
+    /// `SCV_U64`: a mux id or a memo id.
+    U64(Int),
+    /// `SCV_STRING` as hex: memo text, which core copies without any utf-8 check.
+    String(String),
+    /// `SCV_BYTES` as hex: memo hash or memo return, indistinguishable in the event.
+    Bytes(String),
 }
 
 /// What the envelope says, kept apart from what the meta shows.

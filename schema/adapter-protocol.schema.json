@@ -1875,6 +1875,62 @@
       ],
       "type": "object"
     },
+    "ToMuxedId": {
+      "description": "A CAP-67 `to_muxed_id` value, one variant per `ScVal` type core can put there\n(`getPossibleMuxedData` and `makeClassicMemoSCVal` in stellar-core v30.0.0).",
+      "oneOf": [
+        {
+          "description": "`SCV_U64`: a mux id or a memo id.",
+          "properties": {
+            "type": {
+              "const": "u64",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`SCV_STRING` as hex: memo text, which core copies without any utf-8 check.",
+          "properties": {
+            "type": {
+              "const": "string",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "`SCV_BYTES` as hex: memo hash or memo return, indistinguishable in the event.",
+          "properties": {
+            "type": {
+              "const": "bytes",
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "TokenEvent": {
       "properties": {
         "amount": {
@@ -1944,11 +2000,15 @@
           ]
         },
         "to_muxed_id": {
-          "description": "`id:<u64>`, `hash:<hex>` or `text:<hex>`, from the data map's `to_muxed_id`.",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToMuxedId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The data map's `to_muxed_id` as the event typed it: `{\"type\": \"u64\", \"value\":\n\"<decimal>\"}`, `{\"type\": \"string\", \"value\": \"<hex>\"}` or `{\"type\": \"bytes\", \"value\":\n\"<hex>\"}`. Core writes the destination's mux id here when the destination is muxed\nand otherwise the transaction memo (id as u64, text as string, hash and return as\nbytes), so a u64 may be either a mux id or a memo id. It is not a participant mux id."
         }
       },
       "required": [

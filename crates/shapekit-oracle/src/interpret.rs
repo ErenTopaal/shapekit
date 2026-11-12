@@ -398,6 +398,8 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
             );
         }
         let stellar_xdr::ContractEventBody::V0(body) = &e.event.body;
+        // the only meta source of participant mux ids. sac and classic events never carry
+        // a muxed topic (cap-67 puts the id in to_muxed_id), but any contract may emit one
         for t in body.topics.iter() {
             if let ScVal::Address(a) = t {
                 let (s, kind, mux) = addr::sc_address(a);
@@ -423,18 +425,11 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
             });
             continue;
         };
-        {
-            if let (Some(to), Some(m)) = (&te.to, &te.to_muxed_id)
-                && let Some(id) = m.strip_prefix("id:").and_then(|v| v.parse::<u64>().ok())
-            {
-                parts.add_mux(to, id);
-            }
-            changes.push(StateChange {
-                scope,
-                op_index,
-                change: Change::TokenEvent(te),
-            });
-        }
+        changes.push(StateChange {
+            scope,
+            op_index,
+            change: Change::TokenEvent(te),
+        });
     }
 
     trades(&tx.result.result.result, &mut changes);
@@ -1338,7 +1333,7 @@ fn token_event(
         authorized: None,
         live_until_ledger: None,
     };
-    let amount_data = |d: &ScVal| -> Option<(i128, Option<String>)> {
+    let amount_data = |d: &ScVal| -> Option<(i128, Option<ToMuxedId>)> {
         match d {
             ScVal::I128(p) => Some((i128_of(p), None)),
             ScVal::Map(Some(m)) => {
@@ -1351,9 +1346,9 @@ fn token_event(
                         }
                         (ScVal::Symbol(k), v) if k.0.as_slice() == b"to_muxed_id" => {
                             mux = Some(match v {
-                                ScVal::U64(id) => format!("id:{id}"),
-                                ScVal::Bytes(b) => format!("hash:{}", hex::encode(b.0.as_slice())),
-                                ScVal::String(s) => format!("text:{}", hex::encode(s.0.as_slice())),
+                                ScVal::U64(id) => ToMuxedId::U64(Int::from(*id)),
+                                ScVal::String(s) => ToMuxedId::String(hex::encode(s.0.as_slice())),
+                                ScVal::Bytes(b) => ToMuxedId::Bytes(hex::encode(b.0.as_slice())),
                                 _ => return None,
                             })
                         }
