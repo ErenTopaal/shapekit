@@ -58,6 +58,11 @@ impl Recipe for MyRecipe {
     fn family(&self) -> &str { "cap99.my-shape" }  // registry family of every capture
     fn protocol(&self) -> u32 { self.protocol }    // ledger protocol of the chain
     fn soroban_settings(&self) -> bool { false }   // true: testnet Soroban settings first (protocol 30 only)
+    fn soroban_limits(&self) -> bool { self.soroban_settings() } // core's high Soroban limits, any protocol
+    fn min_persistent_ttl(&self) -> Option<u32> { None } // genesis minimum persistent TTL, at least 10
+    fn emit_classic_events(&self) -> bool { true }  // EMIT_CLASSIC_EVENTS
+    fn backfill_stellar_asset_events(&self) -> bool { true } // BACKFILL_STELLAR_ASSET_EVENTS, needs the above
+    fn below_protocol_valid(&self) -> bool { false } // contrast chain below the family's valid range
     fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()> { /* steps and captures */ Ok(()) }
 }
 ```
@@ -136,6 +141,28 @@ family apart.
   supports protocol 30 only, and accepts source-account auth only. Below protocol 29 the
   committed contracts trap (soroban-sdk 29 declares interface protocol 29); see the Phase 3 status
   in the plan before writing an older-protocol Soroban recipe.
+- **Soroban below protocol 30.** Return `soroban_limits() -> true` and `soroban_settings() -> false`:
+  the node starts with `TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE` and no settings upgrade. The driver
+  simulates with the host of the chain's protocol (`sim_legacy`, protocols 22, 24 and 28), and
+  `shapekit_core_driver::contracts::echo_wasm_for(protocol)` gives an echo build that runs there.
+- **Archived entries.** `min_persistent_ttl() -> Some(10)` sets
+  `TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME` (parsed by release builds, floor 10), so persistent
+  entries created under the genesis settings archive ten ledgers after creation; close empty
+  ledgers until the query server reports them archived. At protocol 30 the testnet settings
+  replace the minimum before `run`, so only entries created before that upgrade (the settings
+  writer's code and instance) archive quickly. `soroban.muxed-source` does both.
+- **Classic events.** Chains run with `EMIT_CLASSIC_EVENTS` and `BACKFILL_STELLAR_ASSET_EVENTS`
+  on, as captive cores serving the public networks do. Below protocol 23 the backfill flag gives
+  TransactionMeta v4 with CAP-67 events, which is what a current core replaying old history
+  emits; set both hooks to `false` for the meta a pre-23 ledger had in its day (v3, no classic
+  events, `EventManager.cpp` and `TransactionMeta.cpp`, v30.0.0). From protocol 23 on the
+  backfill flag has no effect. `cap67.unified-events` records both variants at protocol 22.
+- **Contrast chains.** A chain that shows what a ledger looked like before its family's shape
+  existed runs below `protocol_valid.min`. Return `below_protocol_valid() -> true`: the
+  generator then requires the protocol to be below the range (and no longer refuses it), and
+  flags every entry of the chain `below-protocol-valid`. Two chains of one family at the same
+  protocol need different recipe ids (the chain id is `<id>.p<protocol>`) and different slugs
+  (entry ids are `<family>.p<protocol>-<slug>`).
 
 ## 3. Generating
 
@@ -163,7 +190,7 @@ core container, `--jobs` at a time. Then, for each chain:
 committed entry, so passphrase dependence is still decided on both.
 
 `gen verify-repro` regenerates under both passphrases into a temporary directory and compares
-with the corpus: per chain the canonical ledger hashes, ledger range and canonical stream; per
+with the corpus: per chain the canonical ledger hashes, ledger range and the SEP-54 lake files; per
 entry the set of ids, `entry.json` (oracle references excluded) and every `.xdr` and
 `.expected.json` file byte for byte. Exit status 1 when anything differs.
 
@@ -171,11 +198,17 @@ entry the set of ids, `entry.json` (oracle references excluded) and every `.xdr`
 
 ```
 corpus/chains/<chain-id>/<network>/
-  chain.json               protocol, passphrase, validator, core image, close schedule,
-                           ledger range, per-ledger sha256 (canonical and raw), normalization
-  ledgers.canonical.xdr    framed LedgerCloseMeta, canonical change order, reproducible
+  chain.json               schema 2: protocol, passphrase, validator, core image, close
+                           schedule, ledger range, per-ledger sha256 (canonical and raw),
+                           normalization, the lake's batches with their sha256 and the zstd
+                           level and library, and the archive members with the sha256 of
+                           their decompressed content
+  ledgers/                 SEP-54 lake of the canonical LedgerCloseMeta: .config.json and one
+                           zstd LedgerCloseMetaBatch per ledger, 64000 per partition (the
+                           galexie layout), reproducible byte for byte
   ledgers.xdr              core's raw framed stream, kept as provenance, not reproducible
-  archive/                 the node's history archive (checkpoints only once a chain reaches 63)
+  archive.tar              the node's history archive (checkpoints only once a chain reaches
+                           63); gzip members differ per run, their contents do not
 corpus/entries/<family>/<entry-id>/
   entry.json
   testnet.xdr, testnet.expected.json

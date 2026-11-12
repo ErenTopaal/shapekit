@@ -1,0 +1,50 @@
+{
+  "caps": [
+    "CAP-0063"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap63.parallel-txset",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap63.parallel-txset.p30-four-calls-parallel-phase",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase with stages and clusters [[1, 2, 1]]: two calls writing the same entry share a cluster, two independent calls get their own; each result meta carries the post-apply fee refund changes",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap63.parallel-txset.p30",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap63.parallel-txset"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-four-calls-parallel-phase/mainnet.expected.json",
+      "expected_json_sha256": "c84a26a66be3cef9e765340efda4117c54d070dac996f2bbec0ad4a0ad6abb15",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-four-calls-parallel-phase/mainnet.xdr",
+      "xdr_sha256": "fcfb04f49583768b4cec26b3de0673026cc689b571a4ec7981c7831cc1492bb7"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-four-calls-parallel-phase/testnet.expected.json",
+      "expected_json_sha256": "834d0be349e47dee4fbd205de21d0bba1a938fca18580b5606010c53369b568b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap63.parallel-txset/cap63.parallel-txset.p30-four-calls-parallel-phase/testnet.xdr",
+      "xdr_sha256": "a0affe2b9bf6382fa592efe9424db4214bc11cbdbf13dd6d4e147e1b460a9da3"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

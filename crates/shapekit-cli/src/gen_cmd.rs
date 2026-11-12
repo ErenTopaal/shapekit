@@ -163,3 +163,58 @@ pub fn verify_repro(families: &[String], jobs: u16, paths: &GenPaths<'_>) -> Res
     );
     Ok(repro.differences.is_empty())
 }
+
+/// `shapekit gen checkpoints`: a chain with no transactions that runs through `last`, so
+/// its archive holds real checkpoints. Used to test history archive delivery, which the
+/// short recipe chains (no checkpoint before ledger 63) cannot exercise. Written into `out`
+/// in the committed form.
+pub fn checkpoints(
+    network: &str,
+    protocol: u32,
+    last: u32,
+    out: &Path,
+    pins: &Path,
+) -> Result<bool> {
+    use shapekit_core_driver::config::close_time;
+    use shapekit_core_driver::node::CoreNode;
+    use shapekit_core_driver::recorder::{ChainRecorder, FIRST_LEDGER};
+
+    let passphrase = match network {
+        "testnet" => TESTNET_PASSPHRASE,
+        "mainnet" => MAINNET_PASSPHRASE,
+        other => bail!("unknown network {other:?}, expected testnet or mainnet"),
+    };
+    if last <= FIRST_LEDGER {
+        bail!("--last must be above {FIRST_LEDGER}");
+    }
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let image = CoreImage::from_pins(pins)
+        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    let mut cfg = smoke::node_config(passphrase, image);
+    cfg.protocol = protocol;
+    cfg.soroban_high_limits = false;
+    let work = tempfile::Builder::new()
+        .prefix("shapekit-checkpoints-")
+        .tempdir()
+        .context("creating the node workdir")?;
+    let node = CoreNode::start(cfg, work.path()).context("starting core")?;
+    let mut rec = ChainRecorder::new(&node);
+    node.upgrade_to(protocol, FIRST_LEDGER, close_time(FIRST_LEDGER))?;
+    for seq in FIRST_LEDGER + 1..=last {
+        node.close(seq, close_time(seq))?;
+    }
+    rec.collect_through(last)?;
+    let summary = rec.finish(&node, out)?;
+    node.stop()?;
+    shapekit_pack::pack_chain(out, shapekit_pack::Layout::default())?;
+    println!(
+        "{}: ledgers {} to {}, checkpoints {:?}",
+        out.display(),
+        summary.ledger_range.first,
+        summary.ledger_range.last,
+        summary.checkpoints
+    );
+    Ok(true)
+}

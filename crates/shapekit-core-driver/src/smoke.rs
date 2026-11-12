@@ -62,6 +62,7 @@ pub fn node_config(passphrase: &str, image: CoreImage) -> NodeConfig {
         emit_classic_events: true,
         backfill_stellar_asset_events: true,
         diagnostic_events: false,
+        min_persistent_ttl: None,
     }
 }
 

@@ -1,0 +1,58 @@
+{
+  "caps": [
+    "CAP-0027",
+    "CAP-0046"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "soroban.muxed-source",
+  "fields_exercised": [
+    "tx.source_account",
+    "tx.source_account.mux_id"
+  ],
+  "flags": [],
+  "id": "soroban.muxed-source.p30-invoke-muxed-source",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/753",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a contract invocation whose transaction source is a muxed account, refused by core with txSOROBAN_INVALID before it reaches a ledger. submitted with ledger 7 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.muxed-source.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAAAAGVH////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "soroban.muxed-source"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-invoke-muxed-source/mainnet.expected.json",
+      "expected_json_sha256": "22ce2c28ceccf030cc76e5e93c38cc1b7274edfa4432dc416d02b7fa19725b6b",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-invoke-muxed-source/mainnet.xdr",
+      "xdr_sha256": "653d2120f29073d6c43478df8247853c009bc2f82925562ba18c0f9d740ab1b1"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-invoke-muxed-source/testnet.expected.json",
+      "expected_json_sha256": "945de57b1754a9dc4fbc34349744599fac874895665d6ee96138505aa92b362c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-invoke-muxed-source/testnet.xdr",
+      "xdr_sha256": "25e07445da1316aeed9fe48e35ec3f75fa9b4fd843651cd454b12d14889850ba"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

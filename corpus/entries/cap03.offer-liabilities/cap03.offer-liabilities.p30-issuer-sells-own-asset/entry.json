@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.manage_offer.offer_id",
+    "op.manage_offer.assets_amount_price"
+  ],
+  "flags": [],
+  "id": "cap03.offer-liabilities.p30-issuer-sells-own-asset",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "an issuer offers its own GBP for XLM: native buying liabilities on its account, and no trustline because issuers hold none for their own asset",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 11,
+    "valid_min": 11
+  },
+  "source": {
+    "chain": "cap03.offer-liabilities.p30",
+    "class": "local-core",
+    "ledger_seq": 16,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap03.offer-liabilities"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-issuer-sells-own-asset/mainnet.expected.json",
+      "expected_json_sha256": "23aacf719ec8fb849ae826ef9124759ee6a42f77856d87954bfd66e08a702809",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-issuer-sells-own-asset/mainnet.xdr",
+      "xdr_sha256": "7ab4ba46f8af44a97668ff5c4bc7a6f464ecb8b912f7cebc510226d6a815afc3"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-issuer-sells-own-asset/testnet.expected.json",
+      "expected_json_sha256": "0c2087b561e8e89681771392f15ff5f55343e0964a18c00d0326df05716683e5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-issuer-sells-own-asset/testnet.xdr",
+      "xdr_sha256": "6e3ddcc38a2b9a044c24c4c8e5e11fce73151dbb60232e947fc87de7184a222e"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

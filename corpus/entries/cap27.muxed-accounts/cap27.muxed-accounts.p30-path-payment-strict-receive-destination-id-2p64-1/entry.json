@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [
+    "op.path_payment.destination",
+    "op.path_payment.destination.mux_id"
+  ],
+  "flags": [],
+  "id": "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a path payment strict receive whose destination is a muxed account with id 2^64-1",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap27.muxed-accounts.p30",
+    "class": "local-core",
+    "ledger_seq": 9,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap27.muxed-accounts"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1/mainnet.expected.json",
+      "expected_json_sha256": "f4acb7e1ac019aeb57e33fa9939779bf9316bf5c05fe8a84d75c5c7f726d16ac",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1/mainnet.xdr",
+      "xdr_sha256": "205973f0d14b32c1c362710589994a3b3dbe80e98d7d6e23528ddc91fe0470b3"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1/testnet.expected.json",
+      "expected_json_sha256": "89257d1c9ed40557b7209ed923a3df99a810bd6bb5e9a41e8135f8c900fc9bcf",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1/testnet.xdr",
+      "xdr_sha256": "21e7499f3d91c77c398384b5b62c48c308cc05b6a75138d6223c4c1042e178d7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

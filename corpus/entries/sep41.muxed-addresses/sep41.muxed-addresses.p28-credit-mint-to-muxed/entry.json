@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0067"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "sep41.muxed-addresses",
+  "fields_exercised": [
+    "op.invoke_host_function.invoke_contract.contract_address",
+    "op.invoke_host_function.invoke_contract.function_name",
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [],
+  "id": "sep41.muxed-addresses.p28-credit-mint-to-muxed",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/716",
+    "https://github.com/stellar/stellar-etl/issues/467"
+  ],
+  "notes": "the issuer's SAC transfer to a muxed account address with mux id 0, which the SAC reports as a mint carrying to_muxed_id 0",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "sep41.muxed-addresses.p28",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "sep41.muxed-addresses"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/sep41.muxed-addresses/sep41.muxed-addresses.p28-credit-mint-to-muxed/mainnet.expected.json",
+      "expected_json_sha256": "df7b8bb680566e96bc5ae8c08820ce0924b3996b614dffd79b59999a42839082",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/sep41.muxed-addresses/sep41.muxed-addresses.p28-credit-mint-to-muxed/mainnet.xdr",
+      "xdr_sha256": "db13d1432811a56066dd15a7a20a24c8ae3ead6a865305bf89b330413bd938ae"
+    },
+    "testnet": {
+      "expected_json_file": "entries/sep41.muxed-addresses/sep41.muxed-addresses.p28-credit-mint-to-muxed/testnet.expected.json",
+      "expected_json_sha256": "f622a94e5c874cafd23383626ca7a667ded68b546cb87a6e11b7f9f10d667548",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/sep41.muxed-addresses/sep41.muxed-addresses.p28-credit-mint-to-muxed/testnet.xdr",
+      "xdr_sha256": "7c7b2d7165dc42392a0b87db969ec5aa829bffb2f4a43bc79e60e13630c93e48"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

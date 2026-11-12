@@ -467,20 +467,40 @@ fn local_strkey_encoder_matches_stellar_strkey() {
 fn textual_ids_follow_the_canonical_rule() {
     let mut accepted = 0;
     let mut rejected = 0;
-    let mut unsafe_numbers = 0;
+    let mut lenient = 0;
     for v in vectors(EntryKind::TextualId) {
         let muxed = v.entry.id.contains("muxed");
         let max = if muxed { u64::MAX } else { i64::MAX as u64 };
         if v.entry.expected.decode == DecodeExpectation::ImplementationDefined {
-            // in-range json numbers above 2^53-1: the exact id or a refusal
-            assert!(v.entry.id.ends_with("-unsafe-number"), "{}", v.entry.id);
+            // forms that name one in-range id: the exact id or a refusal
+            assert!(
+                v.entry.id.ends_with("-implementation-defined"),
+                "{}",
+                v.entry.id
+            );
             for case in &v.cases {
-                let n = case["input"]["number"].as_u64().expect("an integer number");
-                assert!(n > MAX_SAFE_INTEGER && n <= max, "{}: {n}", v.entry.id);
+                let (id, reason) = if let Some(t) = case["input"]["text"].as_str() {
+                    assert!(t.len() > 1 && t.starts_with('0'), "{t:?}");
+                    (t.parse::<u64>().expect("digits"), "leading-zero")
+                } else {
+                    let n = case["input"]["number"].as_number().expect("number");
+                    match n.as_u64() {
+                        Some(u) => {
+                            assert!(u > MAX_SAFE_INTEGER, "{u}");
+                            (u, "unsafe-integer")
+                        }
+                        None => {
+                            let f = n.as_f64().expect("float");
+                            assert_eq!(f.fract(), 0.0);
+                            (f as u64, "integral-fraction")
+                        }
+                    }
+                };
+                assert!(id <= max, "{}: {id}", v.entry.id);
                 let either = case["expected"]["either"].as_array().expect("either");
-                assert_eq!(either[0]["id"], n.to_string());
-                assert_eq!(either[1]["reject"], "unsafe-integer");
-                unsafe_numbers += 1;
+                assert_eq!(either[0]["id"], id.to_string());
+                assert_eq!(either[1]["reject"], reason);
+                lenient += 1;
             }
             continue;
         }
@@ -518,15 +538,15 @@ fn textual_ids_follow_the_canonical_rule() {
             }
         }
     }
-    // the js-stellar-sdk#1785 inputs are all refused
-    for t in ["0x10", "016", " 16 ", ""] {
+    // the js-stellar-sdk#1785 inputs that encode a different id are all refused
+    for t in ["0x10", " 16 ", ""] {
         assert!(parse_text(t, u64::MAX).is_err(), "{t:?}");
     }
     // negative offer ids and non-canonical text stay refused
-    for t in ["-16", "016", "00", "+16", "-0", " 16", "0x10"] {
+    for t in ["-16", "+16", "-0", " 16", "0x10", ""] {
         assert!(parse_text(t, i64::MAX as u64).is_err(), "{t:?}");
     }
-    assert_eq!((accepted, rejected, unsafe_numbers), (22, 53, 7));
+    assert_eq!((accepted, rejected, lenient), (22, 47, 13));
 }
 
 #[test]

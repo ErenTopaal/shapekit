@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.set_options.signer"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-add-pre-auth-signer-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the owner adds a pre-auth signer for the hash of its next transaction, which pays an account that does not exist",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 5,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-add-pre-auth-signer-meta/mainnet.expected.json",
+      "expected_json_sha256": "2338b46ab79d1bcf303394dede3ea2e820e02bd389b743ae152688c8a47f4e1d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-add-pre-auth-signer-meta/mainnet.xdr",
+      "xdr_sha256": "cae812107386d8ee00ae88068b285cca7be3f5554957b189962ff14d216d28ca"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-add-pre-auth-signer-meta/testnet.expected.json",
+      "expected_json_sha256": "92d1b6d7139f47c0de9fb753db78236965e636804b3a011d00610974985b3973",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-add-pre-auth-signer-meta/testnet.xdr",
+      "xdr_sha256": "d388aef384d0f65c692c3983b0e94205d2ddf4dffd8bec0379448c2d7da59256"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

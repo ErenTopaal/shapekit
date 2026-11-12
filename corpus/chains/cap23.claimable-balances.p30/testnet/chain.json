@@ -1,0 +1,100 @@
+{
+  "schema": 2,
+  "protocol": 30,
+  "passphrase": "Test SDF Network ; September 2015",
+  "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "validator": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+  "core_image": {
+    "repository": "stellar/stellar-core",
+    "tag": "30.0.0-3642.0e49751aa.noble",
+    "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51"
+  },
+  "close_schedule": {
+    "epoch": 1767225600,
+    "step": 86400
+  },
+  "ledger_range": {
+    "first": 2,
+    "last": 5
+  },
+  "checkpoints": [],
+  "normalization": "core-normalize-meta",
+  "lake": {
+    "dir": "ledgers",
+    "ledgers_per_batch": 1,
+    "batches_per_partition": 64000,
+    "compression": "zstd",
+    "zstd_level": 19,
+    "zstd_library": "1.5.7",
+    "batches": [
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFD--2.xdr.zst",
+        "first": 2,
+        "last": 2,
+        "sha256": "519818b83b48eef10508bc91815fc0450996d1f68b3b2accbf60942cc264787d"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFC--3.xdr.zst",
+        "first": 3,
+        "last": 3,
+        "sha256": "2ad134a196b359778d8839a19265fa30bcda5ed5e97002f8d4f9145159a09782"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFB--4.xdr.zst",
+        "first": 4,
+        "last": 4,
+        "sha256": "5db621396d744c92eb7ddd88b2aa678284a2cac391c7749258a15415f0115bfc"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFA--5.xdr.zst",
+        "first": 5,
+        "last": 5,
+        "sha256": "5150d0fc30935624888c097dd958d3a8fd252548d272270a0b228120e8ac066f"
+      }
+    ]
+  },
+  "canonical_stream_sha256": "81d954484991e93c855c11744a0752efe33ea7b2a34b97bf7de11a29e34a5ae0",
+  "stream_file": "ledgers.xdr",
+  "stream_sha256": "97f9c898a506f40688a3f4b0c5c7ea8930bee6c09b5c53c457875d6baf435cb4",
+  "archive": {
+    "file": "archive.tar",
+    "files": [
+      {
+        "path": ".well-known/stellar-history.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      },
+      {
+        "path": "history/00/00/00/history-00000000.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      }
+    ]
+  },
+  "ledgers": [
+    {
+      "ledger_seq": 2,
+      "sha256": "33e3bfba5baae8fa7d53464d9afee7f96e693e006a63707d95a955fe8cb99a9b",
+      "raw_sha256": "34825c007dc39684f62c0f3ebb689439fba99f2e66bbbd478648b032652db8e5",
+      "xdr_len": 5244
+    },
+    {
+      "ledger_seq": 3,
+      "sha256": "572d5afe1c4d1dc6c885e1c03ce9c60b6e5812bccb1a409e9ce684f8bd1e31e2",
+      "raw_sha256": "84b22a863a2eb2454151a7db66ca467b6d76f59f2a3eb866b09e1d9c7d9c7adc",
+      "xdr_len": 8652
+    },
+    {
+      "ledger_seq": 4,
+      "sha256": "c7965e23f57f207c60f1b7b800a15bfab89e384c7b9ca31d53357297f6e3642e",
+      "raw_sha256": "0870af5fcafc43edfac5f693345aa808881aa6f16e521800a41507e936717f47",
+      "xdr_len": 3616
+    },
+    {
+      "ledger_seq": 5,
+      "sha256": "a2721aa91ebafb0a473ff290af64d62f71f6026c03b2b7e70148f2930dc95601",
+      "raw_sha256": "a5ab093c5396d0fc63291578776ef36139765df71199437cf06b6f12ea7692f3",
+      "xdr_len": 3172
+    }
+  ]
+}

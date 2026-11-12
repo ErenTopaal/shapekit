@@ -15,9 +15,12 @@ use std::time::{Duration, Instant};
 
 use stellar_xdr::{LedgerCloseMeta, Limits, ReadXdr};
 
-/// Nesting limit for decoding. Real meta stays far below this; the limit is
-/// there so a corrupt stream fails instead of exhausting the stack.
-pub const DECODE_DEPTH: u32 = 512;
+/// Nesting limit for decoding, `xdr.meta.depth` in registry/caps-limits.toml:
+/// envelopes in the transaction set reach depth 1000 and sit 12 levels
+/// down. Core does emit meta past 512 (an argument of 98 nested maps, the
+/// soroban.scval-shapes chain). The limit is there so a corrupt stream
+/// fails instead of exhausting the stack.
+pub const DECODE_DEPTH: u32 = 1012;
 
 /// Frames larger than this are treated as corruption. Core caps a ledger's
 /// meta well below it.

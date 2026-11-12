@@ -1,0 +1,64 @@
+{
+  "caps": [
+    "CAP-0046",
+    "CAP-0046-02",
+    "CAP-0046-05",
+    "CAP-0046-07",
+    "CAP-0046-08",
+    "CAP-0046-12",
+    "CAP-0054",
+    "CAP-0058"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.invoke-basics",
+  "fields_exercised": [
+    "tx.ext",
+    "tx.soroban.resource_fee",
+    "tx.soroban.footprint",
+    "op.invoke_host_function.invoke_contract.contract_address",
+    "op.invoke_host_function.invoke_contract.function_name",
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [
+    "failed-tx"
+  ],
+  "id": "soroban.invoke-basics.p30-failed-trapped-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a factory call that deploys a contract whose constructor needs an argument it does not get, so the host traps and nothing is created",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "chain": "soroban.invoke-basics.p30",
+    "class": "local-core",
+    "ledger_seq": 30,
+    "recipe": "soroban.invoke-basics",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-failed-trapped-envelope/mainnet.expected.json",
+      "expected_json_sha256": "10834a468278fbcbd19db4461c62d2e20c13431fec28b466aec2c3c7c41cee00",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-failed-trapped-envelope/mainnet.xdr",
+      "xdr_sha256": "42ee0b1541cf414783125a9c83e84a2d658f007b1b7c1932f23593d0a8818123"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-failed-trapped-envelope/testnet.expected.json",
+      "expected_json_sha256": "8875368511616caad656541c7e91142e6c24411f38b967abd7ed1182cd562553",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-failed-trapped-envelope/testnet.xdr",
+      "xdr_sha256": "9643a93815c21d50c57c48f8a9eec81074355ff717852d697ea770c76adf2429"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

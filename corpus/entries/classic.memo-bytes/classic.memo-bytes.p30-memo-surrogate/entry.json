@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.memo-bytes",
+  "fields_exercised": [
+    "tx.memo.type",
+    "tx.memo.text"
+  ],
+  "flags": [
+    "non-utf8"
+  ],
+  "id": "classic.memo-bytes.p30-memo-surrogate",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1823"
+  ],
+  "notes": "a payment whose 3 byte text memo is eda080, not valid UTF-8, accepted by core",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.memo-bytes.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.memo-bytes"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-surrogate/mainnet.expected.json",
+      "expected_json_sha256": "466b197e23e7b0276d19f4001a6d268260687d840e3791d65a64e74c25757f62",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-surrogate/mainnet.xdr",
+      "xdr_sha256": "65fd67739f262c89357a056f25c412bf6c3cd5ac329abb865627ff381275c1ac"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-surrogate/testnet.expected.json",
+      "expected_json_sha256": "5020fb32996ed062f86c35e442cd233e7592a998500ebfb59f3f2e12c32317e5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-surrogate/testnet.xdr",
+      "xdr_sha256": "c2a56c678e3ca11a94557b3130d47f00118fccf108028b282217508dbc7ab267"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

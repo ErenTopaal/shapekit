@@ -1,0 +1,79 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "5f9118b9",
+        "signature": "658eee831f8594014dac31e4145a333381625978246d1fc3247f7e64796ce26a9a0867a7fc4470b01b400464af5e7c3d74f877283dda442f9e55ec438d49fc01"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "9217",
+          "resources": {
+            "disk_read_bytes": 0,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CARPN5XDNYHAMKZSCDA2UUIS7TTUBBLSJNSYMROABYOK64SOXKU3OZUG",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "f9b16f83ec2b943d5ac11524c410c5e8b6cd13955e15935e99b3923ffa9c8c06"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CARPN5XDNYHAMKZSCDA2UUIS7TTUBBLSJNSYMROABYOK64SOXKU3OZUG",
+                    "durability": "temporary",
+                    "key": {
+                      "symbol": "temp"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 362210,
+            "write_bytes": 80
+          }
+        }
+      },
+      "fee": 9317,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "symbol": "temp"
+                    },
+                    {
+                      "u64": "18446744073709551615"
+                    }
+                  ],
+                  "contract_address": "CARPN5XDNYHAMKZSCDA2UUIS7TTUBBLSJNSYMROABYOK64SOXKU3OZUG",
+                  "function_name": "put_temp"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "30064771075",
+      "source_account": "GDZ4SET55XMKMNMHZSCEUFBFDQSI6SY6HCTM75EIZLXTI6K7SEMLST4Q"
+    }
+  }
+}

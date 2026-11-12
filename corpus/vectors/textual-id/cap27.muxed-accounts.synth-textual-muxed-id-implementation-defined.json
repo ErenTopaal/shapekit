@@ -1,0 +1,195 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "16",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAACDRTA",
+              "xdr": "AAABAAAAAAAAAAAQOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAACDRTA"
+          },
+          {
+            "reject": "leading-zero"
+          }
+        ]
+      },
+      "input": {
+        "text": "016"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "0",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAAADJCE",
+              "xdr": "AAABAAAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAAADJCE"
+          },
+          {
+            "reject": "leading-zero"
+          }
+        ]
+      },
+      "input": {
+        "text": "00"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740992",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAASEY",
+              "xdr": "AAABAAAgAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAASEY"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740992
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740993",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAECVY",
+              "xdr": "AAABAAAgAAAAAAABOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUABAAAAAAAAAAECVY"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740993
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9223372036854775807",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DU7777777777776ZHS",
+              "xdr": "AAABAH//////////Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DU7777777777776ZHS"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9223372036854775807
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "18446744073709551615",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DV7777777777774ZYI",
+              "xdr": "AAABAP//////////Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DV7777777777774ZYI"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 18446744073709551615
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "16",
+            "muxed_account": {
+              "json": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAACDRTA",
+              "xdr": "AAABAAAAAAAAAAAQOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+            },
+            "muxed_address": "MA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUAAAAAAAAAAACDRTA"
+          },
+          {
+            "reject": "integral-fraction"
+          }
+        ]
+      },
+      "input": {
+        "number": 16.0
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "valid"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "lenient-id-form",
+      "muxed-account",
+      "non-canonical-id",
+      "unsafe-json-number"
+    ],
+    "id": "cap27.muxed-accounts.synth-textual-muxed-id-implementation-defined",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785",
+      "https://www.rfc-editor.org/rfc/rfc8259#section-6"
+    ],
+    "notes": "in-range muxed account ids (uint64, 0 to 2^64-1). accepted cases carry the M address and MuxedAccount XDR for key 0x3a..3a with that id, in forms that name exactly one id but are not its canonical spelling, so a decoder may accept them or refuse them. (1) decimal text with leading zeros (016, 00): js-stellar-sdk 17.3.0, the release that fixed js-stellar-sdk#1785, deliberately accepts these and its JSDoc for the muxed and offer id parameters says so, because they encode the id the caller wrote. (2) integral JSON numbers written with a zero fraction (16.0), which RFC 8259 treats as the same number. (3) JSON numbers above 2^53-1: not a network rule but a JSON interoperability limit, since RFC 8259 section 6 says integers outside [-(2^53)+1, 2^53-1] are not interoperable when implementations hold numbers as IEEE-754 doubles; js-stellar-sdk#1785 is that failure, where such a number lost precision and a different id was encoded. each case expects either the exact id or a refusal (leading-zero, integral-fraction or unsafe-integer); encoding any other id fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

@@ -4,10 +4,13 @@ mod capture_cmd;
 mod conformance_cmd;
 mod gen_cmd;
 mod golden_cmd;
+mod guide_cmd;
 mod manifest_cmd;
 mod oracle_cmd;
+mod pack_cmd;
 mod pins;
 mod registry_cmd;
+mod serve_cmd;
 mod synth_cmd;
 
 use std::path::PathBuf;
@@ -80,6 +83,19 @@ enum Command {
         #[command(subcommand)]
         command: SynthCommand,
     },
+    /// The indexer-hardening guide: generated tables and their checks.
+    Guide {
+        #[command(subcommand)]
+        command: guide_cmd::GuideCommand,
+    },
+    /// Chains in their committed form: SEP-54 lake, archive tar, verification.
+    Pack {
+        #[command(subcommand)]
+        command: pack_cmd::PackCommand,
+    },
+    /// Replay one recorded chain over HTTP: the SEP-54 lake, the history archive and a
+    /// read-only JSON-RPC endpoint shaped like stellar-rpc.
+    Serve(serve_cmd::ServeArgs),
 }
 
 #[derive(Subcommand)]
@@ -128,6 +144,22 @@ enum GenCommand {
         corpus: PathBuf,
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
+    /// Record a chain with no transactions through --last, so its history archive holds
+    /// checkpoints, and write it in the committed form.
+    Checkpoints {
+        #[arg(long, value_parser = ["testnet", "mainnet"])]
+        network: String,
+        #[arg(long, default_value_t = 30)]
+        protocol: u32,
+        /// Last ledger; checkpoints end at 63, 127, 191 and so on.
+        #[arg(long, default_value_t = 127)]
+        last: u32,
+        /// Directory to write the chain into; must not exist.
+        #[arg(long)]
+        out: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -347,6 +379,16 @@ fn main() -> ExitCode {
         } => gen_cmd::smoke(&network, &out, &pins),
         Command::Gen {
             command:
+                GenCommand::Checkpoints {
+                    network,
+                    protocol,
+                    last,
+                    out,
+                    pins,
+                },
+        } => gen_cmd::checkpoints(&network, protocol, last, &out, &pins),
+        Command::Gen {
+            command:
                 GenCommand::Chains {
                     family,
                     network,
@@ -439,6 +481,9 @@ fn main() -> ExitCode {
             registry: &registry,
         }),
         Command::Conformance { command } => conformance_cmd::run(command),
+        Command::Guide { command } => guide_cmd::run(command),
+        Command::Pack { command } => pack_cmd::run(command),
+        Command::Serve(args) => serve_cmd::run(args),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

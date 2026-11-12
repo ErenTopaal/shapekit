@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0021"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap21.preconditions",
+  "fields_exercised": [
+    "tx.cond.type",
+    "tx.cond.extra_signers",
+    "tx.signatures",
+    "tx.signatures.hint"
+  ],
+  "flags": [],
+  "id": "cap21.preconditions.p30-two-extra-signers-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a payment requiring two extra signers, an ed25519 key that is no signer of the account and a hash-x, signed by the source, that key and the preimage",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 19,
+    "valid_min": 19
+  },
+  "source": {
+    "chain": "cap21.preconditions.p30",
+    "class": "local-core",
+    "ledger_seq": 10,
+    "recipe": "cap21.preconditions",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap21.preconditions/cap21.preconditions.p30-two-extra-signers-envelope/mainnet.expected.json",
+      "expected_json_sha256": "cfdfb3ac54e0164567f4a0a2ec52203d822d5537d3123e7099d38bfa408296f0",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap21.preconditions/cap21.preconditions.p30-two-extra-signers-envelope/mainnet.xdr",
+      "xdr_sha256": "f91a7789da398575b4169ce6aa5e24b46b77475b2e9c938d462d9e8637ea00c9"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap21.preconditions/cap21.preconditions.p30-two-extra-signers-envelope/testnet.expected.json",
+      "expected_json_sha256": "368746db52d5ce988c50e8b7dc7645a727b5c70cc9f3280303fc5f5a95903fd3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap21.preconditions/cap21.preconditions.p30-two-extra-signers-envelope/testnet.xdr",
+      "xdr_sha256": "23d1125a75aee01cf671e5d51130f67980b767ed0b74479588d98538682c84e4"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

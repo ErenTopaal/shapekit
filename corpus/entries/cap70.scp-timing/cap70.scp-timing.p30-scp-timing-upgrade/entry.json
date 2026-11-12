@@ -1,0 +1,49 @@
+{
+  "caps": [
+    "CAP-0070"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap70.scp-timing",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap70.scp-timing.p30-scp-timing-upgrade",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a ledger whose config upgrade set holds only the scp timing setting, lowering the ledger close time target to 4000 ms, so the upgrade meta rewrites that entry",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 23,
+    "valid_min": 23
+  },
+  "source": {
+    "chain": "cap70.scp-timing.p30",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap70.scp-timing"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap70.scp-timing/cap70.scp-timing.p30-scp-timing-upgrade/mainnet.expected.json",
+      "expected_json_sha256": "750d43b6151f28f072c236f96afbc87dd440cee39b3f3a36b05e2f2677f6f25d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap70.scp-timing/cap70.scp-timing.p30-scp-timing-upgrade/mainnet.xdr",
+      "xdr_sha256": "8fecb787bdbb6a6e64536ed055ddbe4aff42fba90fb1e4b80bcededb9910b7d1"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap70.scp-timing/cap70.scp-timing.p30-scp-timing-upgrade/testnet.expected.json",
+      "expected_json_sha256": "e7f6128fd97ab4fb47ba80cc4ab1bb5ba58217df113ac1853cc31fc1d2d171b4",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap70.scp-timing/cap70.scp-timing.p30-scp-timing-upgrade/testnet.xdr",
+      "xdr_sha256": "cfb3330fca2c2cf6309051eabb3faa00a70de47936dbcce47e2699c08099a41c"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

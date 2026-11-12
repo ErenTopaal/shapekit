@@ -1,0 +1,102 @@
+# golden (operation, change-kind multiset) combinations that `shapekit goldens agree` accepts
+# without a matching local-core or history entry. each names the golden entry, the operation
+# and its change kinds exactly as the agree report prints them, and says why no local entry
+# shows the same combination. change kinds follow pre-state (which offers sit on the book,
+# which assets and sponsors are involved), so a different pre-state is a reason; a different
+# core behaviour is not, and must be fixed or reported instead.
+
+[[exception]]
+golden = "cap03.offer-liabilities.golden-00c0553ff45607f9-10"
+op = "manage_sell_offer"
+kinds = ["state:account", "state:offer", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "updated:account", "updated:offer", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline"]
+reason = "core test 'offer crossing with minimal receive cap': a credit-for-credit taker offer fully taken against a resting offer, so two trustlines of each side change. the local recipes trade native against one credit asset and touch one trustline"
+
+[[exception]]
+golden = "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8"
+op = "manage_sell_offer"
+kinds = ["created:offer", "state:account", "updated:account"]
+reason = "core test 'txresults' (fees with liabilities): the issuer offers its own asset for native, and an issuer holds no trustline for its own asset, so none is loaded. the local sell recipes always hold a trustline for one side"
+
+[[exception]]
+golden = "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20"
+op = "manage_buy_offer"
+kinds = ["removed:offer", "state:account", "state:account", "state:account", "state:offer", "state:offer", "state:trustline", "state:trustline", "state:trustline", "updated:account", "updated:account", "updated:account", "updated:offer", "updated:trustline", "updated:trustline", "updated:trustline"]
+reason = "core test 'frozen ledger keys DEX offer operations': the buy offer crosses two resting offers from different accounts, consuming one and partially filling the other. the local buy-offer-crosses-and-rests recipe crosses one offer and leaves the remainder on the book"
+
+[[exception]]
+golden = "cap21.preconditions.golden-27d2533d64835282-0"
+op = "payment"
+kinds = []
+reason = "core test 'minSeqAge under sub-second ledgers' pays native to the source account itself, which core applies without any ledger change. the local precondition recipes pay another account"
+
+[[exception]]
+golden = "cap21.preconditions.golden-27d2533d64835282-1"
+op = "payment"
+kinds = []
+reason = "same self-payment as golden-27d2533d64835282-0, in the following ledger"
+
+[[exception]]
+golden = "cap33.sponsorship.golden-3635a80135f66ca8-0"
+op = "create_claimable_balance"
+kinds = ["created:claimable_balance", "state:account", "updated:account"]
+reason = "core test 'claimable balance absBefore under sub-second ledgers' creates an unsponsored balance (the golden is in this family through another fragment), so only the creator account changes. the local recipe creates a sponsored balance, which also updates the sponsor"
+
+[[exception]]
+golden = "cap35.clawback.golden-3f24be68a9962089-11"
+op = "set_trust_line_flags"
+kinds = ["removed:offer", "state:account", "state:offer", "state:trustline", "updated:account", "updated:trustline"]
+reason = "core test 'deauth removes offers on frozen account': the deauthorized holder has a resting offer, which core removes with its liabilities. the local set-flags recipes act on holders with no offers"
+
+[[exception]]
+golden = "classic.max-length.golden-34519f44ec59503a-22"
+op = "path_payment_strict_receive"
+kinds = ["state:offer", "state:offer", "state:offer", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "state:trustline", "updated:offer", "updated:offer", "updated:offer", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline", "updated:trustline"]
+reason = "core test 'path payment uses all offers in a loop': every hop is credit to credit and source and destination hold only trustlines, so no account changes. the local five-hop recipe starts or ends in native and crosses a different number of offers"
+
+[[exception]]
+golden = "soroban.scval-shapes.golden-3c107a86e830c499-7"
+op = "invoke_host_function"
+kinds = ["created:contract_data", "created:contract_data", "created:ttl", "created:ttl"]
+reason = "core test 'loadgen Wasm executes properly': the loadgen contract writes two new data entries. invocation changes are whatever the called contract stores; the mainnet slices in this family call different contracts that update existing entries"
+
+[[exception]]
+golden = "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7"
+op = "invoke_host_function"
+kinds = ["created:contract_data", "created:ttl"]
+reason = "core test 'complex contract': the contract writes one new data entry. invocation changes are whatever the called contract stores; the mainnet slices in this family call different contracts that update existing entries"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-04667ce620bffee7-24"
+op = "extend_footprint_ttl"
+kinds = []
+reason = "core test 'persistent entry archival' (restore op): the footprint entries already live past the requested ledger, so the extension changes nothing. the local extend-ttl recipe extends entries that need it"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-04667ce620bffee7-26"
+op = "restore_footprint"
+kinds = ["restored:contract_data", "restored:ttl"]
+reason = "core test 'persistent entry archival': only one archived data entry is in the footprint. the local restore recipe restores a contract instance together with its code"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-a8c5079e2141c975-31"
+op = "restore_footprint"
+kinds = ["restored:contract_data", "restored:ttl"]
+reason = "core test 'state archival' (restore contract instance, not wasm): the code entry is still live, so only the instance is restored. the local recipe archives and restores both"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-bf1c69a28fed2564-6"
+op = "invoke_host_function"
+kinds = ["created:contract_data", "created:contract_data", "created:contract_data", "created:ttl", "created:ttl", "created:ttl"]
+reason = "core test 'contract constructor support': that test contract's constructor writes two storage entries next to the new instance. the local deploy recipe's constructor writes none, so only the instance is created"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-e55ad2d584383867-44"
+op = "restore_footprint"
+kinds = []
+reason = "core test 'state archival' (restoreOp skips when currentLedger == liveUntilLedger): the entry is still live, so the restore changes nothing. the local restore recipe restores entries that are archived"
+
+[[exception]]
+golden = "soroban.invoke-basics.golden-ee9b88dc9e59dfba-32"
+op = "extend_footprint_ttl"
+kinds = ["state:ttl", "updated:ttl"]
+reason = "core test 'state archival' (lifetime extensions): one footprint entry is extended. the local extend-ttl recipe extends two entries in one operation"

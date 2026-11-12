@@ -653,12 +653,34 @@ impl CoreNode {
         ledger_seq: u32,
         close_time: u64,
     ) -> Result<ClosedLedger, NodeError> {
-        let what = "config upgrade".to_owned();
-        let body = self.http.command(&format!(
-            "upgrades?mode=set&upgradetime={}&configupgradesetkey={}",
-            percent_encode(UPGRADE_TIME),
-            percent_encode(key_base64)
-        ))?;
+        self.upgrade_with(
+            &[("configupgradesetkey", key_base64)],
+            ledger_seq,
+            close_time,
+        )
+    }
+
+    /// Arms the upgrades named by `params`, pairs of core's `upgrades`
+    /// query parameters (`maxsorobantxsetsize`, `basefee`,
+    /// `configupgradesetkey` and so on, `CommandHandler::upgrades`, v30.0.0),
+    /// and closes `ledger_seq` with them. The call replaces every pending
+    /// upgrade parameter.
+    pub fn upgrade_with(
+        &self,
+        params: &[(&str, &str)],
+        ledger_seq: u32,
+        close_time: u64,
+    ) -> Result<ClosedLedger, NodeError> {
+        let names: Vec<&str> = params.iter().map(|(k, _)| *k).collect();
+        let what = format!("upgrade {}", names.join(", "));
+        let mut query = format!(
+            "upgrades?mode=set&upgradetime={}",
+            percent_encode(UPGRADE_TIME)
+        );
+        for (k, v) in params {
+            query.push_str(&format!("&{k}={}", percent_encode(v)));
+        }
+        let body = self.http.command(&query)?;
         if !body.trim().is_empty() {
             let message = exception(&body).unwrap_or(body);
             return Err(NodeError::Rejected { what, message });

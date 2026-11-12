@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.manage_offer.offer_id",
+    "op.manage_offer.assets_amount_price"
+  ],
+  "flags": [],
+  "id": "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "a manage-buy offer for 150 XLM that takes the maker's 100 XLM offer from the book and rests with the remaining 50, so its result holds an order-book claim atom and a created offer",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 11,
+    "valid_min": 11
+  },
+  "source": {
+    "chain": "cap03.offer-liabilities.p30",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap03.offer-liabilities",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta/mainnet.expected.json",
+      "expected_json_sha256": "43413dc16ca333fe4c3da35b1cd3f557cbe14ddb5c65e99f5ccd8243733954df",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta/mainnet.xdr",
+      "xdr_sha256": "fa1be6d56aac335794ec50699f01e36c291480f7804270ae4f6922aba6dd93ad"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta/testnet.expected.json",
+      "expected_json_sha256": "ed5cb67be0c088c514b24dcc8f05b928f70ac1e80ef05d5f6563f5bb36e7ea6a",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta/testnet.xdr",
+      "xdr_sha256": "7101ecf8581468a8be322700cdb92a2bb88e575043147ab3fa5499defe9f8253"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

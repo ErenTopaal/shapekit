@@ -1,0 +1,250 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "16",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "16",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAQAAAAAAAAAQ"
+            }
+          },
+          {
+            "reject": "leading-zero"
+          }
+        ]
+      },
+      "input": {
+        "text": "016"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "0",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "0",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAQAAAAAAAAAA"
+            }
+          },
+          {
+            "reject": "leading-zero"
+          }
+        ]
+      },
+      "input": {
+        "text": "00"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740992",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "9007199254740992",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAQAgAAAAAAAA"
+            }
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740992
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740993",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "9007199254740993",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAQAgAAAAAAAB"
+            }
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740993
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9223372036854775807",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "9223372036854775807",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAX//////////"
+            }
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9223372036854775807
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "16",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "16",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAQAAAAAAAAAQ"
+            }
+          },
+          {
+            "reject": "integral-fraction"
+          }
+        ]
+      },
+      "input": {
+        "number": 16.0
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "valid"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "lenient-id-form",
+      "non-canonical-id",
+      "unsafe-json-number"
+    ],
+    "id": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785",
+      "https://www.rfc-editor.org/rfc/rfc8259#section-6"
+    ],
+    "notes": "in-range offer ids (int64 in XDR, 0 to 2^63-1 because core refuses negative ids from protocol 15). accepted cases carry a ManageSellOfferOp with that offer id, in forms that name exactly one id but are not its canonical spelling, so a decoder may accept them or refuse them. (1) decimal text with leading zeros (016, 00): js-stellar-sdk 17.3.0, the release that fixed js-stellar-sdk#1785, deliberately accepts these and its JSDoc for the muxed and offer id parameters says so, because they encode the id the caller wrote. (2) integral JSON numbers written with a zero fraction (16.0), which RFC 8259 treats as the same number. (3) JSON numbers above 2^53-1: not a network rule but a JSON interoperability limit, since RFC 8259 section 6 says integers outside [-(2^53)+1, 2^53-1] are not interoperable when implementations hold numbers as IEEE-754 doubles; js-stellar-sdk#1785 is that failure, where such a number lost precision and a different id was encoded. each case expects either the exact id or a refusal (leading-zero, integral-fraction or unsafe-integer); encoding any other id fails.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

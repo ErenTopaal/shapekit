@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0018"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap18.maintain-liabilities",
+  "fields_exercised": [
+    "op.allow_trust"
+  ],
+  "flags": [],
+  "id": "cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "AllowTrust with authorize 2 on an unauthorized alphanum12 trustline, which goes straight to AUTHORIZED_TO_MAINTAIN_LIABILITIES",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap18.maintain-liabilities.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap18.maintain-liabilities"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12/mainnet.expected.json",
+      "expected_json_sha256": "cae2d94095183b6acf7dd57bb4a5577a5cd7d1057c6eeab48d38ac80b277baf2",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12/mainnet.xdr",
+      "xdr_sha256": "b13832d24a0da28969dfaf27cbb4f00bd84ba862442c86d8e128977e2eaba468"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12/testnet.expected.json",
+      "expected_json_sha256": "70f308dfff7586d64f1463bf908a040f90472f496ff7389abbb01fa07abd7136",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12/testnet.xdr",
+      "xdr_sha256": "bf624af6ff31c39e494784886ae3992c17021ef5d15baca2133745bbc3d60fd7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

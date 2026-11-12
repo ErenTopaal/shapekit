@@ -1,0 +1,58 @@
+{
+  "caps": [
+    "CAP-0073",
+    "CAP-0046-06"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap73.sac-trust",
+  "fields_exercised": [
+    "op.invoke_host_function.invoke_contract.contract_address",
+    "op.invoke_host_function.invoke_contract.function_name",
+    "op.invoke_host_function.invoke_contract.args"
+  ],
+  "flags": [],
+  "id": "cap73.sac-trust.p30-trust-again",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/731",
+    "https://github.com/stellar/stellar-etl/issues/460"
+  ],
+  "notes": "a second SAC trust(address) for an existing trustline succeeds without changing any ledger entry or emitting an event",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 26,
+    "valid_min": 26
+  },
+  "source": {
+    "chain": "cap73.sac-trust.p30",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap73.sac-trust"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.p30-trust-again/mainnet.expected.json",
+      "expected_json_sha256": "9cfd4a5ed849e488da5f7569ce85fc354aa633ecfeac58ae0752814fd4cf4897",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.p30-trust-again/mainnet.xdr",
+      "xdr_sha256": "6a7e672581f44c0dfaced435b92f9ee676e1f43b0c927c4ef13e2850a8847aba"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.p30-trust-again/testnet.expected.json",
+      "expected_json_sha256": "c9ea08e0d673a7466bc93d7bcf1d01f26231603c77c872844e0bd2ac373f7b85",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.p30-trust-again/testnet.xdr",
+      "xdr_sha256": "8800bfe94dd961ce0a6e256485f6f9d58caa1b632064be6be26bd1247f7470d3"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

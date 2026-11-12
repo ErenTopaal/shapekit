@@ -1,0 +1,56 @@
+{
+  "caps": [
+    "CAP-0003",
+    "CAP-0006"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap03.offer-liabilities",
+  "fields_exercised": [
+    "op.manage_offer.offer_id",
+    "op.manage_offer.assets_amount_price"
+  ],
+  "flags": [],
+  "id": "cap03.offer-liabilities.p30-sell-credit-trustline-liabilities",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1785"
+  ],
+  "notes": "a resting offer selling USD, which gives the trustline its v1 extension with selling liabilities and adds native buying liabilities to the account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 11,
+    "valid_min": 11
+  },
+  "source": {
+    "chain": "cap03.offer-liabilities.p30",
+    "class": "local-core",
+    "ledger_seq": 10,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap03.offer-liabilities"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-sell-credit-trustline-liabilities/mainnet.expected.json",
+      "expected_json_sha256": "1e05f2b8ef211012b2587a2de6e934a4f0d76717c5930326b241ceea09ec8444",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-sell-credit-trustline-liabilities/mainnet.xdr",
+      "xdr_sha256": "51d62ca8f30174bcd2a6cb8492290f98821724d8f2b1de2a90ec29d5c41a6258"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-sell-credit-trustline-liabilities/testnet.expected.json",
+      "expected_json_sha256": "2f00e207a8de484b1c95191dfb0cfdc69cccb6ce274e50c95ccaa3a4c62a030e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.p30-sell-credit-trustline-liabilities/testnet.xdr",
+      "xdr_sha256": "518205755b2d7b271d2aaacec22a47f073052e570f37a4fab462c6ce34668ae7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

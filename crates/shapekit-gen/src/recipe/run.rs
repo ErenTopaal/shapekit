@@ -11,10 +11,12 @@ use anyhow::{Context, Result, anyhow, bail, ensure};
 use shapekit_core_driver::chain::ChainDriver;
 use shapekit_core_driver::config::{CoreImage, NodeConfig};
 use shapekit_core_driver::contracts::ECHO_WASM;
-use shapekit_core_driver::recorder::{CANONICAL_STREAM_FILE, CHAIN_FILE};
+use shapekit_core_driver::recorder::CHAIN_FILE;
 use shapekit_core_driver::settings::NetworkSettings;
 use shapekit_manifest::build::ENTRY_FILE;
-use shapekit_manifest::{GeneratedWith, MANIFEST_SCHEMA_VERSION, Manifest, sha256_hex, validate};
+use shapekit_manifest::{GeneratedWith, MANIFEST_SCHEMA_VERSION, Manifest, validate};
+use shapekit_pack::chain::LEDGERS_DIR;
+use shapekit_pack::{Layout, lake_digest, pack_chain};
 use shapekit_registry::{Family, Registry};
 
 use super::ctx::{Captured, ChainCtx};
@@ -56,6 +58,9 @@ pub struct GenReport {
     pub seconds: f64,
 }
 
+/// Flag on every entry of a chain recorded below its family's valid range.
+pub const BELOW_PROTOCOL_VALID: &str = "below-protocol-valid";
+
 /// The node every recipe chain runs on. Diagnostic events stay off: core
 /// would add wall-clock timings to them (see the smoke chain).
 fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> NodeConfig {
@@ -63,10 +68,11 @@ fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> Node
         passphrase: network.passphrase().to_owned(),
         image: image.clone(),
         protocol: recipe.protocol(),
-        soroban_high_limits: recipe.soroban_settings(),
-        emit_classic_events: true,
-        backfill_stellar_asset_events: true,
+        soroban_high_limits: recipe.soroban_limits(),
+        emit_classic_events: recipe.emit_classic_events(),
+        backfill_stellar_asset_events: recipe.backfill_stellar_asset_events(),
         diagnostic_events: false,
+        min_persistent_ttl: recipe.min_persistent_ttl(),
     }
 }
 
@@ -87,6 +93,9 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
     }
     recipe.run(&mut ctx)?;
     let (summary, captured) = ctx.finish(target)?;
+    // the committed form: canonical ledgers as a sep-54 lake, the archive as a tar
+    pack_chain(target, Layout::default())
+        .with_context(|| format!("packing the chain in {}", target.display()))?;
     Ok((
         ChainRun {
             chain_id: chain_id(recipe),
@@ -106,6 +115,15 @@ fn family_of<'r>(registry: &'r Registry, recipe: &dyn Recipe) -> Result<&'r Fami
         .family(recipe.family())
         .with_context(|| format!("recipe {}: unknown family {}", recipe.id(), recipe.family()))?;
     let p = recipe.protocol();
+    if recipe.below_protocol_valid() {
+        ensure!(
+            p < family.protocol_valid.min,
+            "recipe {} records contrast entries below {}'s valid range, but runs protocol {p}",
+            recipe.id(),
+            family.id
+        );
+        return Ok(family);
+    }
     ensure!(
         p >= family.protocol_valid.min && family.protocol_valid.max.is_none_or(|m| p <= m),
         "recipe {} runs protocol {p}, outside {}'s valid range",
@@ -195,8 +213,13 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
     let mut checks = Vec::new();
     let mut installs: Vec<(String, String, Vec<String>)> = Vec::new();
     let mut all_entries = Vec::new();
-    for (i, caps) in &by_chain {
+    for (i, caps) in &mut by_chain {
         let r = recipes[*i];
+        if r.below_protocol_valid() {
+            for c in caps.values_mut().flatten() {
+                c.spec.flags.push(BELOW_PROTOCOL_VALID.to_owned());
+            }
+        }
         let family = family_of(opts.registry, r)?;
         let cid = chain_id(r);
         let pending = merge(family, r.id(), &cid, r.protocol(), caps, &opts.corpus)?;
@@ -268,7 +291,7 @@ pub struct Repro {
 
 /// Regenerates `recipes` under both passphrases into a temporary corpus and
 /// compares it with `opts.corpus`: every chain's canonical ledger hashes and
-/// canonical stream, the set of entries each chain owns, and every file the
+/// SEP-54 lake, the set of entries each chain owns, and every file the
 /// generator writes for them, byte for byte.
 pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Repro> {
     let fresh = tempfile::Builder::new()
@@ -306,11 +329,11 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
                     rel.display()
                 ));
             }
-            let a = std::fs::read(committed.join(CANONICAL_STREAM_FILE))
+            let a = lake_digest(&committed.join(LEDGERS_DIR))
                 .map_err(|e| anyhow!("{}: {e}", rel.display()))?;
-            let b = std::fs::read(regenerated.join(CANONICAL_STREAM_FILE))?;
-            if sha256_hex(&a) != sha256_hex(&b) {
-                diffs.push(format!("{}: canonical stream differs", rel.display()));
+            let b = lake_digest(&regenerated.join(LEDGERS_DIR))?;
+            if a != b {
+                diffs.push(format!("{}: ledger lake differs", rel.display()));
             }
         }
         let family = r.family();

@@ -1,0 +1,61 @@
+{
+  "caps": [
+    "CAP-0038"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "cap38.liquidity-pools",
+  "fields_exercised": [
+    "op.change_trust.line",
+    "op.change_trust.line.liquidity_pool",
+    "op.change_trust.limit"
+  ],
+  "flags": [
+    "issuer-order-differs"
+  ],
+  "id": "cap38.liquidity-pools.p30-change-trust-pool-strkey-order",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766",
+    "https://github.com/StellarCN/py-stellar-base/issues/1246",
+    "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257"
+  ],
+  "notes": "the same pool-share trustline with assets ordered by strkey text (USD:GA66MKR5EGOIZDEXN32LU3UOZTZB3LW6VAZQKSXGZ73ADSIUEFE24Y5C first), which core refuses as CHANGE_TRUST_MALFORMED. submitted with ledger 9 as the last closed ledger",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 18,
+    "valid_min": 18
+  },
+  "source": {
+    "chain": "cap38.liquidity-pools.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "cap38.liquidity-pools"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-change-trust-pool-strkey-order/mainnet.expected.json",
+      "expected_json_sha256": "48a1576bda9539c0b3fd3758bb76ca3add17c11b8bd0407106f06f8cb08d8dd1",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-change-trust-pool-strkey-order/mainnet.xdr",
+      "xdr_sha256": "5052d701635e3cba3c3f9b5b869caca5dccfb6bb07170e2b19a893da7ddaf9fb"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-change-trust-pool-strkey-order/testnet.expected.json",
+      "expected_json_sha256": "bf6d7fd09b71865aa61b4551eb4d24fa5cd72482603d098b199027b454541602",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-change-trust-pool-strkey-order/testnet.xdr",
+      "xdr_sha256": "35230058198c348410fd50afa0b12118a124efaa059ec748995d6a1b2879011a"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

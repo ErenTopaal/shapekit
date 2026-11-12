@@ -1,0 +1,80 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "5f9118b9",
+        "signature": "ea66b138bc9ded792ff670c4fa1e9c7d1af5872d7ffc2d00f537aaab962479177fc5deb289618600c919b2536c3c97e2cd8f4d0523bccd2cdcae00956af1670d"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "28519",
+          "resources": {
+            "disk_read_bytes": 0,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CDMLQVMFIWM55F722XEQWAX4UFQD3TGZFOCZHSXPZ3XJT426G63OBZ76",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "63e9f248927c79505c45dc62c462cae6d67e49c013f0cc36bdbf61d2f29af7ae"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CDPFWIHPCMF2FKY7D4IKG2CA3YVU4U3X46SVFODLP77KHG2BETJGRBZM",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                }
+              ]
+            },
+            "instructions": 901465,
+            "write_bytes": 168
+          }
+        }
+      },
+      "fee": 28619,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "bytes": "63e9f248927c79505c45dc62c462cae6d67e49c013f0cc36bdbf61d2f29af7ae"
+                    },
+                    {
+                      "bytes": "fe351ec143e090c399dfa40b4329eae96717e69158f1544f62af11e74dc196fb"
+                    },
+                    {
+                      "vec": []
+                    }
+                  ],
+                  "contract_address": "CDMLQVMFIWM55F722XEQWAX4UFQD3TGZFOCZHSXPZ3XJT426G63OBZ76",
+                  "function_name": "deploy_with_args"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "30064771078",
+      "source_account": "GDZ4SET55XMKMNMHZSCEUFBFDQSI6SY6HCTM75EIZLXTI6K7SEMLST4Q"
+    }
+  }
+}

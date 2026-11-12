@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0033"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap33.sponsorship",
+  "fields_exercised": [
+    "op.revoke_sponsorship"
+  ],
+  "flags": [],
+  "id": "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the sponsor revokes its sponsorship of an ed25519 signer, so the account's signer sponsoring id becomes empty and it pays the reserve",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 14,
+    "valid_min": 14
+  },
+  "source": {
+    "chain": "cap33.sponsorship.p30",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap33.sponsorship",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-revoke-signer-sponsorship-meta/mainnet.expected.json",
+      "expected_json_sha256": "80389bac2f1178585faf2abfcdfb906cf431c4d74cc606860d6d7c1302f068fa",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-revoke-signer-sponsorship-meta/mainnet.xdr",
+      "xdr_sha256": "14c976a5d785c879644406dbed2c2afa38d7a3cb5d94336874bc07858b900373"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-revoke-signer-sponsorship-meta/testnet.expected.json",
+      "expected_json_sha256": "8dfd64d620392929fc9d9620f938ef48748e9c003fc3c80236114e7affeb7942",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-revoke-signer-sponsorship-meta/testnet.xdr",
+      "xdr_sha256": "4ed4e60d11469ae4d2bf2e3c3c6fc4c7870bcda25036f137165c89b94eb2d6f1"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

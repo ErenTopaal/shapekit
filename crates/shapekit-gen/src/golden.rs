@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail, ensure};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use shapekit_manifest::framing::FramedReader;
 use shapekit_manifest::signature::XdrSchema;
@@ -630,7 +630,20 @@ pub fn verify_index(set: &GoldenSet, committed: &Value) -> Vec<String> {
 /// `account_merge -> {removed:account, state:account, updated:account}`.
 pub type OpChangeKinds = BTreeMap<String, BTreeSet<String>>;
 
+/// One successful operation: its type and the sorted multiset of its change kinds.
+pub type Observation = (String, Vec<String>);
+
 pub fn op_change_kinds(lcm: &LedgerCloseMeta) -> Result<OpChangeKinds> {
+    let mut out = OpChangeKinds::new();
+    for (op, kinds) in ledger_observations(lcm)? {
+        out.entry(op).or_default().extend(kinds);
+    }
+    Ok(out)
+}
+
+/// The distinct (operation type, change-kind multiset) pairs of every successful operation in
+/// a ledger.
+pub fn ledger_observations(lcm: &LedgerCloseMeta) -> Result<BTreeSet<Observation>> {
     let results: Vec<(&TransactionResultResult, &TransactionMeta)> = match lcm {
         LedgerCloseMeta::V0(v) => v
             .tx_processing
@@ -648,14 +661,14 @@ pub fn op_change_kinds(lcm: &LedgerCloseMeta) -> Result<OpChangeKinds> {
             .map(|t| (&t.result.result.result, &t.tx_apply_processing))
             .collect(),
     };
-    change_kinds_of(results)
+    observations_of(results)
 }
 
-/// [`op_change_kinds`] over (result, apply meta) pairs, for ledgers and transaction slices.
-pub fn change_kinds_of<'a>(
+/// [`ledger_observations`] over (result, apply meta) pairs, for ledgers and transaction slices.
+pub fn observations_of<'a>(
     results: impl IntoIterator<Item = (&'a TransactionResultResult, &'a TransactionMeta)>,
-) -> Result<OpChangeKinds> {
-    let mut out = OpChangeKinds::new();
+) -> Result<BTreeSet<Observation>> {
+    let mut out = BTreeSet::new();
     for (result, meta) in results {
         let op_results = match result {
             TransactionResultResult::TxSuccess(ops) => ops,
@@ -679,10 +692,9 @@ pub fn change_kinds_of<'a>(
                     op.name()
                 );
             };
-            let kinds = out.entry(snake(tr.name())).or_default();
-            for change in changes.iter() {
-                kinds.insert(change_kind(change));
-            }
+            let mut kinds: Vec<String> = changes.iter().map(change_kind).collect();
+            kinds.sort();
+            out.insert((snake(tr.name()), kinds));
         }
     }
     Ok(out)
@@ -709,65 +721,132 @@ fn change_kind(change: &LedgerEntryChange) -> String {
     format!("{kind}:{}", snake(entry_type))
 }
 
-/// One golden entry compared with one local-core or history entry of the same family.
-#[derive(Debug, Clone)]
-pub struct PairReport {
-    pub family: String,
+/// A golden (operation type, change kinds) combination accepted without a local or history
+/// match, from `corpus/goldens/agree-exceptions.toml`.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AgreeException {
+    /// Golden entry id.
     pub golden: String,
-    pub other: String,
-    pub other_class: SourceClass,
-    pub shared_fragments: Vec<String>,
-    pub golden_only_fragments: Vec<String>,
-    pub other_only_fragments: Vec<String>,
-    /// Operation types named by the shared fragments that occur successfully in both.
-    pub compared_ops: Vec<String>,
-    pub op_mismatches: Vec<OpMismatch>,
+    pub op: String,
+    /// The change-kind multiset, in any order.
+    pub kinds: Vec<String>,
+    pub reason: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ExceptionsFile {
+    #[serde(default, rename = "exception")]
+    exceptions: Vec<AgreeException>,
+}
+
+pub const EXCEPTIONS_FILE: &str = "goldens/agree-exceptions.toml";
+
+/// Reads the exceptions file; a missing file means no exceptions. Every exception needs a
+/// reason.
+pub fn load_exceptions(path: &Path) -> Result<Vec<AgreeException>> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let text =
+        std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+    let file: ExceptionsFile =
+        toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))?;
+    for e in &file.exceptions {
+        ensure!(
+            !e.reason.trim().is_empty(),
+            "{}: the exception for {} {} has no reason",
+            path.display(),
+            e.golden,
+            e.op
+        );
+    }
+    Ok(file.exceptions)
+}
+
+/// A golden combination checked against the family's local-core and history entries.
+#[derive(Debug, Clone)]
+pub struct GoldenCombination {
+    pub golden: String,
+    pub op: String,
+    pub kinds: Vec<String>,
+    /// Entries observing the same combination; empty when unmatched.
+    pub matched_by: Vec<String>,
+    /// The reason from the exceptions file, when unmatched and excepted.
+    pub excepted: Option<String>,
+}
+
+impl GoldenCombination {
+    pub fn failed(&self) -> bool {
+        self.matched_by.is_empty() && self.excepted.is_none()
+    }
 }
 
 #[derive(Debug, Clone)]
-pub struct OpMismatch {
-    pub op: String,
-    pub golden: BTreeSet<String>,
-    pub other: BTreeSet<String>,
+pub struct FamilyAgreement {
+    pub family: String,
+    pub goldens: Vec<String>,
+    pub others: Vec<(String, SourceClass)>,
+    /// Operation types with a successful operation in both a golden and another entry.
+    pub shared_ops: Vec<String>,
+    pub combinations: Vec<GoldenCombination>,
+    /// Combinations of shared operation types that only local-core or history entries show;
+    /// informational.
+    pub local_only: Vec<(String, Vec<String>, String)>,
+    /// Family fragments matched by some golden and by some other entry.
+    pub shared_fragments: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct AgreeReport {
-    pub pairs: Vec<PairReport>,
-    /// Families with golden and other entries where no pair shares a fragment, so nothing in
-    /// them can be compared. Reported, not counted as a failure: history captures and goldens
-    /// are chosen independently and may carry different fragments of one family.
-    pub no_shared_fragment: Vec<String>,
+    pub families: Vec<FamilyAgreement>,
     pub golden_only_families: Vec<String>,
+    /// Exceptions naming a golden combination that does not exist (a typo or a removed
+    /// golden); these fail.
+    pub unknown_exceptions: Vec<AgreeException>,
+    /// Exceptions whose combination is now matched by a local or history entry; they can be
+    /// deleted. Informational.
+    pub stale_exceptions: Vec<AgreeException>,
 }
 
 impl AgreeReport {
     pub fn failures(&self) -> usize {
-        self.pairs
-            .iter()
-            .filter(|p| !p.op_mismatches.is_empty())
-            .count()
+        self.unknown_exceptions.len()
+            + self
+                .families
+                .iter()
+                .flat_map(|f| &f.combinations)
+                .filter(|c| c.failed())
+                .count()
     }
 }
 
-/// One comparable item: a whole ledger, or a transaction slice (its envelope and result meta
-/// entries taken together).
+/// One comparable item: a whole ledger variant, or a transaction's result meta (with the
+/// signature of its envelope entry when the corpus has one).
 struct Unit {
+    entry: String,
     id: String,
     class: SourceClass,
     signature: BTreeSet<String>,
-    kinds: OpChangeKinds,
+    observations: BTreeSet<Observation>,
 }
 
 const SLICE_META_TYPES: [&str; 2] = ["TransactionResultMeta", "TransactionResultMetaV1"];
 
-/// The structural agreement check. Within each family, every golden entry is paired with every
-/// local-core, testnet-history and mainnet-history ledger entry and transaction slice. A pair
-/// is comparable when both match at least one common family fragment; for comparable pairs,
-/// every operation type that occurs successfully in both must produce the same change kinds. A
-/// family whose golden and other entries share no fragment in any pair fails, because then
-/// they do not carry the same shape.
-pub fn agree(manifest: &Manifest, registry: &Registry, root: &Path) -> Result<AgreeReport> {
+/// The structural agreement check. Change kinds depend on pre-state (an AllowTrust revoke
+/// removes offers only when the holder has some), so entries are not compared pairwise.
+/// Instead, per family and per operation type with a successful operation in both a golden and
+/// a local-core or history entry, every distinct (operation type, change-kind multiset) that
+/// the goldens show must be shown by at least one local-core or history entry of the family,
+/// or be listed with a reason in the exceptions. Combinations only the local side shows are
+/// reported, not failed.
+pub fn agree(
+    manifest: &Manifest,
+    registry: &Registry,
+    root: &Path,
+    exceptions: &[AgreeException],
+) -> Result<AgreeReport> {
     let mut by_family: BTreeMap<&str, (Vec<&Entry>, Vec<&Entry>)> = BTreeMap::new();
     for e in &manifest.entries {
         if e.kind != EntryKind::Xdr {
@@ -783,12 +862,31 @@ pub fn agree(manifest: &Manifest, registry: &Registry, root: &Path) -> Result<Ag
         }
     }
     let mut report = AgreeReport::default();
+    let mut used = vec![false; exceptions.len()];
+    let mut known = vec![false; exceptions.len()];
     for (family_id, (goldens, others)) in by_family {
         let goldens = units(&goldens, &goldens, root)?;
         if goldens.is_empty() {
             continue;
         }
         let others = units(&others, &others, root)?;
+        let golden_ops: BTreeSet<&str> = goldens
+            .iter()
+            .flat_map(|u| u.observations.iter().map(|(op, _)| op.as_str()))
+            .collect();
+        let other_ops: BTreeSet<&str> = others
+            .iter()
+            .flat_map(|u| u.observations.iter().map(|(op, _)| op.as_str()))
+            .collect();
+        for (i, x) in exceptions.iter().enumerate() {
+            let mut kinds = x.kinds.clone();
+            kinds.sort();
+            if goldens.iter().any(|g| {
+                g.entry == x.golden && g.observations.contains(&(x.op.clone(), kinds.clone()))
+            }) {
+                known[i] = true;
+            }
+        }
         if others.is_empty() {
             report.golden_only_families.push(family_id.to_string());
             continue;
@@ -796,24 +894,106 @@ pub fn agree(manifest: &Manifest, registry: &Registry, root: &Path) -> Result<Ag
         let family = registry
             .family(family_id)
             .with_context(|| format!("unknown family {family_id}"))?;
-        let mut any_shared = false;
+        let shared_ops: Vec<String> = golden_ops
+            .intersection(&other_ops)
+            .map(|s| s.to_string())
+            .collect();
+
+        let mut combinations: BTreeMap<(String, Observation), GoldenCombination> = BTreeMap::new();
         for g in &goldens {
-            for o in &others {
-                let pair = compare(family, g, o);
-                any_shared |= !pair.shared_fragments.is_empty();
-                report.pairs.push(pair);
+            for obs in &g.observations {
+                if !shared_ops.contains(&obs.0) {
+                    continue;
+                }
+                let key = (g.entry.clone(), obs.clone());
+                if combinations.contains_key(&key) {
+                    continue;
+                }
+                let matched_by: Vec<String> = others
+                    .iter()
+                    .filter(|o| o.observations.contains(obs))
+                    .map(|o| o.id.clone())
+                    .collect();
+                let mut excepted = None;
+                for (i, x) in exceptions.iter().enumerate() {
+                    let mut kinds = x.kinds.clone();
+                    kinds.sort();
+                    if x.golden == g.entry
+                        && x.op == obs.0
+                        && kinds == obs.1
+                        && matched_by.is_empty()
+                    {
+                        used[i] = true;
+                        excepted = Some(x.reason.clone());
+                    }
+                }
+                combinations.insert(
+                    key,
+                    GoldenCombination {
+                        golden: g.entry.clone(),
+                        op: obs.0.clone(),
+                        kinds: obs.1.clone(),
+                        matched_by,
+                        excepted,
+                    },
+                );
             }
         }
-        if !any_shared {
-            report.no_shared_fragment.push(family_id.to_string());
+        let golden_obs: BTreeSet<&Observation> =
+            goldens.iter().flat_map(|g| &g.observations).collect();
+        let mut local_only = Vec::new();
+        for o in &others {
+            for obs in &o.observations {
+                if shared_ops.contains(&obs.0) && !golden_obs.contains(obs) {
+                    local_only.push((obs.0.clone(), obs.1.clone(), o.id.clone()));
+                }
+            }
+        }
+        let shared_fragments = family
+            .signature
+            .iter()
+            .filter(|f| {
+                goldens.iter().any(|g| fragment_matches(&g.signature, f))
+                    && others.iter().any(|o| fragment_matches(&o.signature, f))
+            })
+            .cloned()
+            .collect();
+        report.families.push(FamilyAgreement {
+            family: family_id.to_string(),
+            goldens: dedup(goldens.iter().map(|g| g.entry.clone())),
+            others: {
+                let mut v: Vec<(String, SourceClass)> =
+                    others.iter().map(|o| (o.entry.clone(), o.class)).collect();
+                v.dedup();
+                v
+            },
+            shared_ops,
+            combinations: combinations.into_values().collect(),
+            local_only,
+            shared_fragments,
+        });
+    }
+    for (i, x) in exceptions.iter().enumerate() {
+        if !known[i] {
+            report.unknown_exceptions.push(x.clone());
+        } else if !used[i] {
+            report.stale_exceptions.push(x.clone());
         }
     }
     Ok(report)
 }
 
-// ledger entries become one unit per variant; a result meta entry becomes a unit together with
-// the envelope entry of the same family, ledger and transaction. envelope entries are only
-// read through their meta, other xdr types are not compared
+fn dedup(items: impl Iterator<Item = String>) -> Vec<String> {
+    let mut v: Vec<String> = items.collect();
+    v.dedup();
+    v
+}
+
+// a ledger entry gives one unit per variant. a result meta entry gives one unit per variant,
+// and the envelope entry of the same transaction, when the corpus holds one, adds its
+// signature. a sibling envelope is not required: recipes may capture only the meta, and the
+// change kinds come from the meta alone. envelope entries are read only through their meta;
+// other xdr types are not compared
 fn units(entries: &[&Entry], siblings: &[&Entry], root: &Path) -> Result<Vec<Unit>> {
     let mut out = Vec::new();
     for e in entries {
@@ -822,55 +1002,69 @@ fn units(entries: &[&Entry], siblings: &[&Entry], root: &Path) -> Result<Vec<Uni
             for (variant, bytes) in variant_bytes(e, root)? {
                 let lcm = decode_lcm(&bytes).with_context(|| e.id.clone())?;
                 out.push(Unit {
+                    entry: e.id.clone(),
                     id: format!("{} ({variant})", e.id),
                     class: e.source.class,
                     signature: shape_signature(LCM_TYPE, &bytes, decode_limits(bytes.len()))?,
-                    kinds: op_change_kinds(&lcm)?,
+                    observations: ledger_observations(&lcm)?,
                 });
             }
         } else if SLICE_META_TYPES.contains(&xdr_type) {
-            let envelope = siblings
-                .iter()
-                .find(|s| {
-                    s.xdr_type.as_deref() == Some("TransactionEnvelope")
-                        && s.source.tx_hash.is_some()
-                        && s.source.tx_hash == e.source.tx_hash
-                        && s.source.ledger_seq == e.source.ledger_seq
-                })
-                .with_context(|| format!("{} has no envelope entry for its transaction", e.id))?;
-            let envelopes = variant_bytes(envelope, root)?;
+            let envelope = siblings.iter().find(|s| {
+                s.xdr_type.as_deref() == Some("TransactionEnvelope")
+                    && s.family == e.family
+                    && s.source.ledger_seq == e.source.ledger_seq
+                    && same_transaction(&s.source, &e.source)
+            });
+            let envelopes = match envelope {
+                Some(env) => variant_bytes(env, root)?,
+                None => Vec::new(),
+            };
             for (variant, bytes) in variant_bytes(e, root)? {
-                let (_, env) = envelopes
-                    .iter()
-                    .find(|(v, _)| *v == variant)
-                    .with_context(|| format!("{} has no {variant} variant", envelope.id))?;
-                let mut signature =
-                    shape_signature("TransactionEnvelope", env, decode_limits(env.len()))?;
-                signature.extend(shape_signature(
-                    xdr_type,
-                    &bytes,
-                    decode_limits(bytes.len()),
-                )?);
-                let limits = decode_limits(bytes.len());
-                let kinds = match xdr::decode(xdr_type, &bytes, limits)? {
+                let mut signature = shape_signature(xdr_type, &bytes, decode_limits(bytes.len()))?;
+                if let Some((_, env)) = envelopes.iter().find(|(v, _)| *v == variant) {
+                    signature.extend(shape_signature(
+                        "TransactionEnvelope",
+                        env,
+                        decode_limits(env.len()),
+                    )?);
+                }
+                let observations = match xdr::decode(xdr_type, &bytes, decode_limits(bytes.len()))?
+                {
                     stellar_xdr::Type::TransactionResultMeta(m) => {
-                        change_kinds_of([(&m.result.result.result, &m.tx_apply_processing)])?
+                        observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
                     }
                     stellar_xdr::Type::TransactionResultMetaV1(m) => {
-                        change_kinds_of([(&m.result.result.result, &m.tx_apply_processing)])?
+                        observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
                     }
                     other => bail!("{} decoded as {}", e.id, other.name()),
                 };
                 out.push(Unit {
-                    id: format!("{} ({variant}, with {})", e.id, envelope.id),
+                    entry: e.id.clone(),
+                    id: format!("{} ({variant})", e.id),
                     class: e.source.class,
                     signature,
-                    kinds,
+                    observations,
                 });
             }
         }
     }
     Ok(out)
+}
+
+// history entries name their transaction by hash. local-core entries carry no hash, because it
+// covers the network id and differs between the variants, so they pair by chain and position
+fn same_transaction(a: &Source, b: &Source) -> bool {
+    match (&a.tx_hash, &b.tx_hash) {
+        (Some(x), Some(y)) => x == y,
+        (None, None) => {
+            a.chain.is_some()
+                && a.chain == b.chain
+                && a.tx_index.is_some()
+                && a.tx_index == b.tx_index
+        }
+        _ => false,
+    }
 }
 
 fn variant_bytes(entry: &Entry, root: &Path) -> Result<Vec<(&'static str, Vec<u8>)>> {
@@ -884,61 +1078,6 @@ fn variant_bytes(entry: &Entry, root: &Path) -> Result<Vec<(&'static str, Vec<u8
             Ok((name, bytes))
         })
         .collect()
-}
-
-fn compare(family: &Family, golden: &Unit, other: &Unit) -> PairReport {
-    let (gsig, osig) = (&golden.signature, &other.signature);
-    let (gkinds, okinds) = (&golden.kinds, &other.kinds);
-    let mut shared = Vec::new();
-    let mut golden_only = Vec::new();
-    let mut other_only = Vec::new();
-    for f in &family.signature {
-        match (fragment_matches(gsig, f), fragment_matches(osig, f)) {
-            (true, true) => shared.push(f.clone()),
-            (true, false) => golden_only.push(f.clone()),
-            (false, true) => other_only.push(f.clone()),
-            (false, false) => {}
-        }
-    }
-    // only operations a shared fragment names carry the shape; the change kinds of any other
-    // operation depend on what that particular transaction did, not on the family
-    let named: BTreeSet<&str> = shared.iter().filter_map(|f| named_op(f)).collect();
-    let mut compared_ops = Vec::new();
-    let mut op_mismatches = Vec::new();
-    for op in named {
-        if let (Some(gk), Some(ok)) = (gkinds.get(op), okinds.get(op)) {
-            compared_ops.push(op.to_string());
-            if gk != ok {
-                op_mismatches.push(OpMismatch {
-                    op: op.to_string(),
-                    golden: gk.clone(),
-                    other: ok.clone(),
-                });
-            }
-        }
-    }
-    PairReport {
-        family: family.id.clone(),
-        golden: golden.id.clone(),
-        other: other.id.clone(),
-        other_class: other.class,
-        shared_fragments: shared,
-        golden_only_fragments: golden_only,
-        other_only_fragments: other_only,
-        compared_ops,
-        op_mismatches,
-    }
-}
-
-/// The operation type a fragment names through `OperationBody:<op>` or `.body:<op>`.
-pub fn named_op(fragment: &str) -> Option<&str> {
-    let rest = fragment
-        .split_once("OperationBody:")
-        .or_else(|| fragment.split_once(".body:"))?
-        .1;
-    let end = rest.find(['.', ':', '=', '[', '#']).unwrap_or(rest.len());
-    let op = &rest[..end];
-    (!op.is_empty()).then_some(op)
 }
 
 // shared xdr helpers

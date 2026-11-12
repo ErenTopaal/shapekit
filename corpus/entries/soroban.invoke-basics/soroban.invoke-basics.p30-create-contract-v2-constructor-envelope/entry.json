@@ -1,0 +1,59 @@
+{
+  "caps": [
+    "CAP-0046",
+    "CAP-0046-02",
+    "CAP-0046-05",
+    "CAP-0046-07",
+    "CAP-0046-08",
+    "CAP-0046-12",
+    "CAP-0054",
+    "CAP-0058"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.invoke-basics",
+  "fields_exercised": [
+    "op.invoke_host_function.create_contract.preimage",
+    "op.invoke_host_function.create_contract_v2.constructor_args",
+    "tx.ext"
+  ],
+  "flags": [],
+  "id": "soroban.invoke-basics.p30-create-contract-v2-constructor-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "CreateContractV2 deploys the factory contract and passes its owner to the constructor, which writes instance storage",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "chain": "soroban.invoke-basics.p30",
+    "class": "local-core",
+    "ledger_seq": 25,
+    "recipe": "soroban.invoke-basics",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-envelope/mainnet.expected.json",
+      "expected_json_sha256": "ef156b3b537bf9b6ce2dff1d35ee6d97bd4eb6be73b3440e9524e283c99300a8",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-envelope/mainnet.xdr",
+      "xdr_sha256": "a1d5831eaece5c25b4f20a6ffbd3d918aac7bf4b26df4a5bae672c2078781bc5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-envelope/testnet.expected.json",
+      "expected_json_sha256": "2d40a946c0252f7b6d7db3c8400833067033ec4d0123a59d3590f4c3723628e2",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-envelope/testnet.xdr",
+      "xdr_sha256": "6aa4dc9c7575fb9e070f5aae535d4464061d8ac64df2708b96369799fec77eec"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

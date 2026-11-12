@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.memo-bytes",
+  "fields_exercised": [
+    "tx.memo.type",
+    "tx.memo.text"
+  ],
+  "flags": [
+    "non-utf8"
+  ],
+  "id": "classic.memo-bytes.p30-memo-above-max-code-point",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/issues/1823"
+  ],
+  "notes": "a payment whose 4 byte text memo is f4908080, not valid UTF-8, accepted by core",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.memo-bytes.p30",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.memo-bytes"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-above-max-code-point/mainnet.expected.json",
+      "expected_json_sha256": "dc691c9019f5b0e0c7be181fa890cc8e67bdfe2c72c775f10e3ded5773cd21a3",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-above-max-code-point/mainnet.xdr",
+      "xdr_sha256": "7987872b41864e41f2f30b48604afa7494a99d9cd55022335f8da1bbc7287667"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-above-max-code-point/testnet.expected.json",
+      "expected_json_sha256": "4bae2f883f20bbf768e0158b793bd0697d9272444f582665a6569ed8b748c3ea",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.memo-bytes/classic.memo-bytes.p30-memo-above-max-code-point/testnet.xdr",
+      "xdr_sha256": "e8cfa3174944505884d3066c5c7c39e1a54c5f3f294a994715e388a11a66e84b"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

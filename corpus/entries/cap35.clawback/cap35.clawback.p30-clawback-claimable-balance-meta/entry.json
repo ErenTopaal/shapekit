@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0035"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap35.clawback",
+  "fields_exercised": [
+    "op.clawback_claimable_balance.balance_id"
+  ],
+  "flags": [],
+  "id": "cap35.clawback.p30-clawback-claimable-balance-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the issuer claws back a whole claimable balance, which deletes the entry without any claimant acting",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 17,
+    "valid_min": 17
+  },
+  "source": {
+    "chain": "cap35.clawback.p30",
+    "class": "local-core",
+    "ledger_seq": 8,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap35.clawback",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap35.clawback/cap35.clawback.p30-clawback-claimable-balance-meta/mainnet.expected.json",
+      "expected_json_sha256": "32a1d9725697d77a07bc19b0599d7f386b50227d5a3a83fa971aaaec0c9ca86f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap35.clawback/cap35.clawback.p30-clawback-claimable-balance-meta/mainnet.xdr",
+      "xdr_sha256": "23972670bbf7b82e90318064fc9668570fb35860a87e72eaf5fa13361ffb17cc"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap35.clawback/cap35.clawback.p30-clawback-claimable-balance-meta/testnet.expected.json",
+      "expected_json_sha256": "94913cfc95257fc26d6dab5c86f91792018657b73728af8f9f8f913b90b0056c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap35.clawback/cap35.clawback.p30-clawback-claimable-balance-meta/testnet.xdr",
+      "xdr_sha256": "a2bd9d2ef155a945f2bdd74173b685df1c2f0d0e6e26c8e0fd26ee29c99a529c"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

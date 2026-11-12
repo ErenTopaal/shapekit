@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [
+    "op.clawback.from",
+    "op.clawback.from.mux_id"
+  ],
+  "flags": [],
+  "id": "cap27.muxed-accounts.p30-clawback-from-id-2p64-1",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "an issuer claws its asset back from a holder named as a muxed account with id 2^64-1",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap27.muxed-accounts.p30",
+    "class": "local-core",
+    "ledger_seq": 14,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap27.muxed-accounts"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-clawback-from-id-2p64-1/mainnet.expected.json",
+      "expected_json_sha256": "5934d2e5f0178990bf2b08df9b6ba8033798f04d955556b19463e0852113b402",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-clawback-from-id-2p64-1/mainnet.xdr",
+      "xdr_sha256": "ac86053622d478421485c17b931cb5f2fb39e5a3e65e3170abbaeaef906aeb65"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-clawback-from-id-2p64-1/testnet.expected.json",
+      "expected_json_sha256": "926df31e3df5c77490e5b0125cf09b792669db32e0f946bbbcddf4d677c5b36d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p30-clawback-from-id-2p64-1/testnet.xdr",
+      "xdr_sha256": "f20c3cbcc773b3988d0480d147b757a43184cd9b52cd3feacbbe37fc3bc0eb54"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

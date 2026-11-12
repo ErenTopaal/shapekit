@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0033"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap33.sponsorship",
+  "fields_exercised": [
+    "op.begin_sponsoring.sponsored_id",
+    "op.create_claimable_balance.asset_amount"
+  ],
+  "flags": [],
+  "id": "cap33.sponsorship.p30-sponsored-claimable-balance-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a claimable balance created inside begin and end sponsoring, so its reserve is the sponsor's and not its creator's",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 14,
+    "valid_min": 14
+  },
+  "source": {
+    "chain": "cap33.sponsorship.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap33.sponsorship",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-meta/mainnet.expected.json",
+      "expected_json_sha256": "d83addfe3e955093c36a93af2e44ccce8c155b7dbdb9f6ba1f717a592650c02a",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-meta/mainnet.xdr",
+      "xdr_sha256": "7dc9a56d775cadbed21f739cb7ae88a1d704073b58aa8070281f31f3a301486d"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-meta/testnet.expected.json",
+      "expected_json_sha256": "752211616ec07effcc162f54ee8e5f0e64ddf14f1686fd3809771cfe0e1fc3f3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-meta/testnet.xdr",
+      "xdr_sha256": "ceebe24c4aaa9cd56c9af942e368fa3fcbed9fca1041fd873d2619daeebd9dc2"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

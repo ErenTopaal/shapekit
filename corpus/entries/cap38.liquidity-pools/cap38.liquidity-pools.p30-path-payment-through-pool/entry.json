@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0038"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap38.liquidity-pools",
+  "fields_exercised": [
+    "op.path_payment.amounts",
+    "op.path_payment.path"
+  ],
+  "flags": [],
+  "id": "cap38.liquidity-pools.p30-path-payment-through-pool",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/js-stellar-sdk/pull/1766",
+    "https://github.com/StellarCN/py-stellar-base/issues/1246",
+    "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257"
+  ],
+  "notes": "a strict-send path payment to the sender itself that converts through the pool, so its result holds a liquidity pool claim atom",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 18,
+    "valid_min": 18
+  },
+  "source": {
+    "chain": "cap38.liquidity-pools.p30",
+    "class": "local-core",
+    "ledger_seq": 11,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap38.liquidity-pools"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-path-payment-through-pool/mainnet.expected.json",
+      "expected_json_sha256": "fe540ab3952353fa0c8cd69bdb1d06918555244bba0dad8bd02d34e454b254ac",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-path-payment-through-pool/mainnet.xdr",
+      "xdr_sha256": "d5f1bcc60778833f271fcc15650900f9aa5484cebb9097d3195656f57be6c95f"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-path-payment-through-pool/testnet.expected.json",
+      "expected_json_sha256": "4350517893759073fffeced1ad9f663c51652af7cf3d577b6073a5c8a0467510",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap38.liquidity-pools/cap38.liquidity-pools.p30-path-payment-through-pool/testnet.xdr",
+      "xdr_sha256": "a4acf32d17db49ba9f08aaf05b5a6f388233bd12c42ec3fb4afcf078e1538555"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

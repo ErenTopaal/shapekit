@@ -1,0 +1,53 @@
+{
+  "caps": [
+    "CAP-0018"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap18.maintain-liabilities",
+  "fields_exercised": [
+    "op.allow_trust",
+    "op.set_trust_line_flags"
+  ],
+  "flags": [],
+  "id": "cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "one transaction moving an alphanum12 trustline from maintain liabilities to authorized with SetTrustLineFlags and an alphanum4 trustline from unauthorized to maintain liabilities with AllowTrust",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap18.maintain-liabilities.p30",
+    "class": "local-core",
+    "ledger_seq": 12,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap18.maintain-liabilities"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain/mainnet.expected.json",
+      "expected_json_sha256": "beec7225c54a9a00344b8899902889060aa68558279ae86d2940891d6b964584",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain/mainnet.xdr",
+      "xdr_sha256": "c4eea6837f30b24e4eb69a8ee88f07dd26c836b51583ac436205720f03e472f5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain/testnet.expected.json",
+      "expected_json_sha256": "15305148b581a0ee925d4a85ebbd78265e96718a54364ea4cbb6d14037bbf83f",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap18.maintain-liabilities/cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain/testnet.xdr",
+      "xdr_sha256": "e390a38893166a8b53899763c606aecb6e59d49eb6a9d97ab000091c7b0f6371"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

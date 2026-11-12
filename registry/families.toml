@@ -315,6 +315,7 @@ signature = [
     "ScAddress:muxed_account",
     "ScAddress:claimable_balance",
     "ScAddress:liquidity_pool",
+    "TransactionMeta:v3",
 ]
 source_classes = ["local-core", "synthetic"]
 fields = [
@@ -326,7 +327,7 @@ fields = [
 ]
 linked_issues = []
 priority = 10
-notes = "classic operations producing transfer, mint, burn, clawback, set_authorized and fee events, with EMIT_CLASSIC_EVENTS on as on the public networks. the map-data fragment is coarse: the to_muxed_id key is a leaf value. a protocol 22 chain with pre-cap-67 meta and the backfill variant are recorded as contrast entries if phase 3 shows they are possible; they sit below protocol_valid and are tagged so"
+notes = "classic operations producing transfer, mint, burn, clawback, set_authorized and fee events, with EMIT_CLASSIC_EVENTS on as on the public networks. the map-data fragment is coarse: the to_muxed_id key is a leaf value. two protocol 22 chains run the same classic steps as contrast entries, flagged below-protocol-valid: one with both event flags off (TransactionMeta v3 and no events, what core wrote in protocol 22's day, matched by the TransactionMeta:v3 fragment, which marks the absence of the shape) and one with BACKFILL_STELLAR_ASSET_EVENTS (TransactionMeta v4 with the same events, what a current core replaying old history emits)"
 
 [[family]]
 id = "cap15.fee-bump"

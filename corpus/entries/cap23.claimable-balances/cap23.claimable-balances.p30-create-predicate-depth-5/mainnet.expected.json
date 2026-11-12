@@ -1,0 +1,73 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "ea6f8ec1",
+        "signature": "7f27ae4ed12c8d946eed729da2ee48c56f62756566130f791ba0d6f515dda6528eb6a60f47093613d8c9418b7a8b20830df29969b00956c5aac38bf4cc292f0b"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": "v0",
+      "fee": 100,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "1000000000",
+              "asset": "native",
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6",
+                    "predicate": {
+                      "and": [
+                        {
+                          "or": [
+                            {
+                              "not": {
+                                "and": [
+                                  {
+                                    "before_absolute_time": "1"
+                                  },
+                                  {
+                                    "before_absolute_time": "4102444800"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "not": {
+                                "before_relative_time": "1"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "or": [
+                            {
+                              "not": {
+                                "before_absolute_time": "2"
+                              }
+                            },
+                            {
+                              "before_absolute_time": "4102444800"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "12884901890",
+      "source_account": "GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG"
+    }
+  }
+}

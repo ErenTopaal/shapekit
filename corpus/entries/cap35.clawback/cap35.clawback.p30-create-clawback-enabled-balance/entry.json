@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0035"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap35.clawback",
+  "fields_exercised": [
+    "op.create_claimable_balance.asset_amount"
+  ],
+  "flags": [],
+  "id": "cap35.clawback.p30-create-clawback-enabled-balance",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a claimable balance created from a clawback-enabled trustline, which core marks clawback enabled in the entry's extension v1 flags; the whole ledger, since the envelope alone names no CAP-35 arm",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 17,
+    "valid_min": 17
+  },
+  "source": {
+    "chain": "cap35.clawback.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap35.clawback"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap35.clawback/cap35.clawback.p30-create-clawback-enabled-balance/mainnet.expected.json",
+      "expected_json_sha256": "f4319e7900ec1ec5e48567a0d6362342b2e339e1b2ef8ef9feaf81b275c0465e",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap35.clawback/cap35.clawback.p30-create-clawback-enabled-balance/mainnet.xdr",
+      "xdr_sha256": "453f7e189479e71dc4aeac1085e05d27f8aacb9d1cd7bfcca5ac797683e060d1"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap35.clawback/cap35.clawback.p30-create-clawback-enabled-balance/testnet.expected.json",
+      "expected_json_sha256": "3ef5241fd72cd72c545785f4691c6ff42a8a5ee7f58331c4ea52c7c64cac8bbe",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap35.clawback/cap35.clawback.p30-create-clawback-enabled-balance/testnet.xdr",
+      "xdr_sha256": "c3258d15fe5bce0195fa3f79d46caf76f9b75dc9dea4d181c1a6520be2594fe1"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

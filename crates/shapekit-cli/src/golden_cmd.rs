@@ -74,37 +74,39 @@ pub fn agree(manifest_file: &Path, registry_dir: &Path) -> Result<bool> {
     let manifest = build::load(manifest_file)
         .with_context(|| format!("loading {}", manifest_file.display()))?;
     let root = manifest_file.parent().unwrap_or(Path::new("."));
-    let report = golden::agree(&manifest, &registry, root)?;
-    for p in &report.pairs {
-        let verdict = if p.shared_fragments.is_empty() {
-            "not comparable (no common fragment)"
-        } else if p.op_mismatches.is_empty() {
-            "agree"
-        } else {
-            "DISAGREE"
-        };
+    let exceptions = golden::load_exceptions(&root.join(golden::EXCEPTIONS_FILE))?;
+    let report = golden::agree(&manifest, &registry, root, &exceptions)?;
+    for f in &report.families {
         println!(
-            "{}: {} vs {} [{}]: {verdict}",
-            p.family,
-            p.golden,
-            p.other,
-            p.other_class.as_str()
+            "{}: {} golden, {} local-core or history entries; operations in both: {}",
+            f.family,
+            f.goldens.len(),
+            f.others.len(),
+            if f.shared_ops.is_empty() {
+                "none".to_string()
+            } else {
+                f.shared_ops.join(", ")
+            }
         );
-        if !p.shared_fragments.is_empty() {
-            println!("  shared fragments: {}", p.shared_fragments.join(", "));
-            println!("  operations compared: {}", list(&p.compared_ops));
+        if !f.shared_fragments.is_empty() {
+            println!("  shared fragments: {}", f.shared_fragments.join(", "));
         }
-        for m in &p.op_mismatches {
+        for c in &f.combinations {
+            let verdict = match (&c.matched_by.first(), &c.excepted) {
+                (Some(by), _) => format!("matched by {by}"),
+                (None, Some(reason)) => format!("excepted: {reason}"),
+                (None, None) => "DISAGREE: no local-core or history entry shows it".to_string(),
+            };
             println!(
-                "  {}: golden {{{}}} vs {{{}}}",
-                m.op,
-                m.golden.iter().cloned().collect::<Vec<_>>().join(", "),
-                m.other.iter().cloned().collect::<Vec<_>>().join(", ")
+                "  {} {} {{{}}}: {verdict}",
+                c.golden,
+                c.op,
+                c.kinds.join(", ")
             );
         }
-    }
-    for f in &report.no_shared_fragment {
-        println!("{f}: no comparable pair, the golden and other entries share no family fragment");
+        for (op, kinds, by) in &f.local_only {
+            println!("  info: only {by} shows {op} {{{}}}", kinds.join(", "));
+        }
     }
     if !report.golden_only_families.is_empty() {
         println!(
@@ -112,27 +114,29 @@ pub fn agree(manifest_file: &Path, registry_dir: &Path) -> Result<bool> {
             report.golden_only_families.join(", ")
         );
     }
-    if report.pairs.is_empty() {
-        println!("no pairs: no family has both a golden entry and a local-core or history entry");
-        return Ok(true);
+    for x in &report.stale_exceptions {
+        println!(
+            "info: exception for {} {} is now matched and can be removed",
+            x.golden, x.op
+        );
     }
+    for x in &report.unknown_exceptions {
+        println!(
+            "DISAGREE: exception for {} {} {{{}}} names no golden combination",
+            x.golden,
+            x.op,
+            x.kinds.join(", ")
+        );
+    }
+    if report.families.is_empty() {
+        println!("no pairs: no family has both a golden entry and a local-core or history entry");
+        return Ok(report.failures() == 0);
+    }
+    let checked: usize = report.families.iter().map(|f| f.combinations.len()).sum();
     let failures = report.failures();
     println!(
-        "{} pairs, {} comparable, {failures} failures",
-        report.pairs.len(),
-        report
-            .pairs
-            .iter()
-            .filter(|p| !p.shared_fragments.is_empty())
-            .count()
+        "{} families compared, {checked} golden combinations checked, {failures} failures",
+        report.families.len()
     );
     Ok(failures == 0)
-}
-
-fn list(items: &[String]) -> String {
-    if items.is_empty() {
-        "none (no shared fragment names an operation both carry)".to_string()
-    } else {
-        items.join(", ")
-    }
 }

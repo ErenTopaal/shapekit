@@ -1,0 +1,59 @@
+{
+  "caps": [
+    "CAP-0027",
+    "CAP-0046"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.muxed-source",
+  "fields_exercised": [
+    "tx.source_account",
+    "tx.source_account.mux_id",
+    "op.restore_footprint",
+    "tx.soroban.footprint"
+  ],
+  "flags": [],
+  "id": "soroban.muxed-source.p28-restore-muxed-source",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/753",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a restore of an archived contract code and instance whose transaction source is a muxed account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.muxed-source.p28",
+    "class": "local-core",
+    "ledger_seq": 16,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.muxed-source"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p28-restore-muxed-source/mainnet.expected.json",
+      "expected_json_sha256": "fc434f20be5c1a0eb642af757d1457b8918b765e5e5660483c28c5490af68840",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p28-restore-muxed-source/mainnet.xdr",
+      "xdr_sha256": "6869bba5c1072d13ec2863f7d3cf0ebc08c7f7ebf862169608ff89d129717e1f"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p28-restore-muxed-source/testnet.expected.json",
+      "expected_json_sha256": "45b556dec0f881b29b5eab344df27e4f0ef6ac15d8c1a9d8e6d45c0183454b3e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p28-restore-muxed-source/testnet.xdr",
+      "xdr_sha256": "c9e5fc5a919a1d2525353c24f43e86afdf718e4085d84e86a9d1462ca84f431d"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

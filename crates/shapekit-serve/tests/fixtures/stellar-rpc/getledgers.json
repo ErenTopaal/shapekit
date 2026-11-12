@@ -1,0 +1,824 @@
+{
+  "capture_tool": "crates/shapekit-serve/tests/fixtures/stellar-rpc/capture.py",
+  "captured_at": "2026-11-12T17:32:30Z",
+  "getLedgers": [
+    {
+      "name": "start-default-limit",
+      "params": {
+        "startLedger": 5576262
+      },
+      "response_sha256": "9ebfb4eee858a09abd3e8185a51f09737bed993892cf92381cea62fbe333a3cd",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576311",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576311,
+        "latestLedger": 5696221,
+        "ledger_count": 50,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575262,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "start-near-latest",
+      "params": {
+        "startLedger": 5696217
+      },
+      "response_sha256": "51320eaba9e7d77741fb7fdb7d5bef85d884bce60cfa490591b2f5168f472635",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5696222",
+        "first_sequence": 5696217,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5696222,
+        "latestLedger": 5696222,
+        "ledger_count": 6,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575263,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "startLedger": "$latest-4"
+      }
+    },
+    {
+      "name": "start-at-latest",
+      "params": {
+        "startLedger": 5696221
+      },
+      "response_sha256": "a11a5977aa794ed001d5b681e2ed815f3bfbd0ded93fd97d81d7aeb18ddc4b17",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5696222",
+        "first_sequence": 5696221,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5696222,
+        "latestLedger": 5696222,
+        "ledger_count": 2,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575263,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "startLedger": "$latest"
+      }
+    },
+    {
+      "name": "limit-1",
+      "params": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": 5576262
+      },
+      "response_sha256": "470b52441f540febf2034b55e56148986946bf5827489b811f1496e29307117a",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576262",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576262,
+        "latestLedger": 5696222,
+        "ledger_count": 1,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575263,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "limit-0-means-default",
+      "params": {
+        "pagination": {
+          "limit": 0
+        },
+        "startLedger": 5576262
+      },
+      "response_sha256": "3837c870a56ac1db0b759b4d96719cf5ff1a161873df616190fbddbd0d9cd384",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576311",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576311,
+        "latestLedger": 5696222,
+        "ledger_count": 50,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575263,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 0
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "limit-50",
+      "params": {
+        "pagination": {
+          "limit": 50
+        },
+        "startLedger": 5576262
+      },
+      "response_sha256": "972950b04e685fa56b00289643b7f27566218294c4ecdb5fd621f9a77441adaa",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576311",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576311,
+        "latestLedger": 5696222,
+        "ledger_count": 50,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575263,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 50
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "limit-200",
+      "params": {
+        "pagination": {
+          "limit": 200
+        },
+        "startLedger": 5576262
+      },
+      "response_sha256": "801e60675c132fb5b86a518a2f2596ed813b67b01a8e614fcbb5f20b3702ea59",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576461",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576461,
+        "latestLedger": 5696223,
+        "ledger_count": 200,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575264,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 200
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "limit-201",
+      "params": {
+        "pagination": {
+          "limit": 201
+        },
+        "startLedger": 5576262
+      },
+      "response": {
+        "error": {
+          "code": -32600,
+          "message": "limit must not exceed 200"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "a06fe5dbbc855dbe9bb27eb04568da961ea5aa95b838494a709c9de18292d386",
+      "summary": {
+        "code": -32600,
+        "kind": "error",
+        "message": "limit must not exceed 200",
+        "message_template": "limit must not exceed <n>"
+      },
+      "template": {
+        "pagination": {
+          "limit": 201
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "cursor-page",
+      "params": {
+        "pagination": {
+          "cursor": "5576262",
+          "limit": 3
+        }
+      },
+      "response_sha256": "8a97cec63b517d81ce973fe7c6979215368f847b7641e2602da60aace196fb4f",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576265",
+        "first_sequence": 5576263,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576265,
+        "latestLedger": 5696223,
+        "ledger_count": 3,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575264,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "cursor": "#oldest+1000",
+          "limit": 3
+        }
+      }
+    },
+    {
+      "name": "cursor-at-latest",
+      "params": {
+        "pagination": {
+          "cursor": "5696221"
+        }
+      },
+      "response_sha256": "acd04f9fcd7d441873b32efe7ef503142d50c7b8c3e0878723ebf7625ba5e3b3",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5696223",
+        "first_sequence": 5696222,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5696223,
+        "latestLedger": 5696223,
+        "ledger_count": 2,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575264,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "cursor": "#latest"
+        }
+      }
+    },
+    {
+      "name": "cursor-before-oldest",
+      "params": {
+        "pagination": {
+          "cursor": "5575260"
+        }
+      },
+      "response": {
+        "error": {
+          "code": -32603,
+          "message": "[-32603] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > 0"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "1de7ab329ab84a4e749afcb51d5bde7814659977f465cdc449d820a3ef6bc8b7",
+      "summary": {
+        "code": -32603,
+        "kind": "error",
+        "message": "[-32603] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > 0",
+        "message_template": "[-<n>] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > <n>"
+      },
+      "template": {
+        "pagination": {
+          "cursor": "#oldest-2"
+        }
+      }
+    },
+    {
+      "name": "cursor-not-a-number",
+      "params": {
+        "pagination": {
+          "cursor": "abc"
+        }
+      },
+      "response": {
+        "error": {
+          "code": -32602,
+          "message": "strconv.ParseUint: parsing \"abc\": invalid syntax"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "c37f2278b1d77398f6f6be2b90f70b728bd615f538c71c7cf52aed9c17982bda",
+      "summary": {
+        "code": -32602,
+        "kind": "error",
+        "message": "strconv.ParseUint: parsing \"abc\": invalid syntax",
+        "message_template": "strconv.ParseUint: parsing \"abc\": invalid syntax"
+      },
+      "template": {
+        "pagination": {
+          "cursor": "abc"
+        }
+      }
+    },
+    {
+      "name": "cursor-and-start",
+      "params": {
+        "pagination": {
+          "cursor": "5576262"
+        },
+        "startLedger": 5576262
+      },
+      "response": {
+        "error": {
+          "code": -32600,
+          "message": "startLedger (5576262) and cursor (5576262) cannot both be set"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "6867ea69c7bbb955f278954b296f5fc6f5da09bcf1f11909f57b08f23014e04a",
+      "summary": {
+        "code": -32600,
+        "kind": "error",
+        "message": "startLedger (5576262) and cursor (5576262) cannot both be set",
+        "message_template": "startLedger (<n>) and cursor (<n>) cannot both be set"
+      },
+      "template": {
+        "pagination": {
+          "cursor": "#oldest+1000"
+        },
+        "startLedger": "$oldest+1000"
+      }
+    },
+    {
+      "name": "start-before-oldest",
+      "params": {
+        "startLedger": 5575261
+      },
+      "response": {
+        "error": {
+          "code": -32603,
+          "message": "[-32603] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > 0"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "1de7ab329ab84a4e749afcb51d5bde7814659977f465cdc449d820a3ef6bc8b7",
+      "summary": {
+        "code": -32603,
+        "kind": "error",
+        "message": "[-32603] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > 0",
+        "message_template": "[-<n>] error fetching ledgers from datastore: failed to create buffered storage backend: buffer size must be > <n>"
+      },
+      "template": {
+        "startLedger": "$oldest-1"
+      }
+    },
+    {
+      "name": "start-after-latest",
+      "params": {
+        "startLedger": 5696321
+      },
+      "response": {
+        "error": {
+          "code": -32600,
+          "message": "start ledger (5696321) must be between the oldest ledger: 2 and the latest ledger: 5696224 for this rpc instance"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "a80d1ca2913716d02191df8721c15d9fa9fdd8122aa25be8a5d23473423f4cbe",
+      "summary": {
+        "code": -32600,
+        "kind": "error",
+        "message": "start ledger (5696321) must be between the oldest ledger: 2 and the latest ledger: 5696224 for this rpc instance",
+        "message_template": "start ledger (<n>) must be between the oldest ledger: <n> and the latest ledger: <n> for this rpc instance"
+      },
+      "template": {
+        "startLedger": "$latest+100"
+      }
+    },
+    {
+      "name": "start-missing",
+      "params": {},
+      "response": {
+        "error": {
+          "code": -32600,
+          "message": "start ledger (0) must be between the oldest ledger: 2 and the latest ledger: 5696224 for this rpc instance"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "b105a6fe65e966bca0a88d490c9e0082836df4411eb1c842233f34de70fe121d",
+      "summary": {
+        "code": -32600,
+        "kind": "error",
+        "message": "start ledger (0) must be between the oldest ledger: 2 and the latest ledger: 5696224 for this rpc instance",
+        "message_template": "start ledger (<n>) must be between the oldest ledger: <n> and the latest ledger: <n> for this rpc instance"
+      },
+      "template": {}
+    },
+    {
+      "name": "format-json-limit-1",
+      "params": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": 5576262,
+        "xdrFormat": "json"
+      },
+      "response_sha256": "8bb441e6e7b34eeac8a55db74de2169434dcb00c8bc05974d7e4e258b275ffc3",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576262",
+        "first_sequence": 5576262,
+        "json_shapes": {
+          "headerJson": [
+            "ext",
+            "hash",
+            "header"
+          ],
+          "metadataJson": {
+            "v2": [
+              "evicted_keys",
+              "ext",
+              "ledger_header",
+              "scp_info",
+              "total_byte_size_of_live_soroban_state",
+              "tx_processing",
+              "tx_set",
+              "upgrades_processing"
+            ]
+          }
+        },
+        "kind": "result",
+        "last_sequence": 5576262,
+        "latestLedger": 5696224,
+        "ledger_count": 1,
+        "ledger_keys": {
+          "hash": "string",
+          "headerJson": "object",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataJson": "object",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575265,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": "$oldest+1000",
+        "xdrFormat": "json"
+      }
+    },
+    {
+      "name": "format-base64-limit-1",
+      "params": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": 5576262,
+        "xdrFormat": "base64"
+      },
+      "response_sha256": "acb4d690ed27ac77fd9be8adfbfb5f47090f637ec82b6852d7cba88069000b74",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576262",
+        "first_sequence": 5576262,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576262,
+        "latestLedger": 5696224,
+        "ledger_count": 1,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575265,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "limit": 1
+        },
+        "startLedger": "$oldest+1000",
+        "xdrFormat": "base64"
+      }
+    },
+    {
+      "name": "format-unknown",
+      "params": {
+        "startLedger": 5576262,
+        "xdrFormat": "yaml"
+      },
+      "response": {
+        "error": {
+          "code": -32600,
+          "message": "got 'yaml': expected base64, json for optional 'xdrFormat'"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "d5e994d94a4dedd0b65889df8a3c5576649da608f08065ee4f309ba533a493d9",
+      "summary": {
+        "code": -32600,
+        "kind": "error",
+        "message": "got 'yaml': expected base64, json for optional 'xdrFormat'",
+        "message_template": "got 'yaml': expected base<n>, json for optional 'xdrFormat'"
+      },
+      "template": {
+        "startLedger": "$oldest+1000",
+        "xdrFormat": "yaml"
+      }
+    },
+    {
+      "name": "start-wrong-type",
+      "params": {
+        "startLedger": "ten"
+      },
+      "response": {
+        "error": {
+          "code": -32602,
+          "data": "json: cannot unmarshal string into Go struct field GetLedgersRequest.startLedger of type uint32",
+          "message": "invalid parameters"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      },
+      "response_sha256": "c9dfb5bdc0f83f7be8804a632084ef8c251f4b7bd1bfc0fbe98060fd3df15948",
+      "summary": {
+        "code": -32602,
+        "kind": "error",
+        "message": "invalid parameters",
+        "message_template": "invalid parameters"
+      },
+      "template": {
+        "startLedger": "ten"
+      }
+    },
+    {
+      "name": "cursor-page-next",
+      "params": {
+        "pagination": {
+          "cursor": "5576265",
+          "limit": 3
+        }
+      },
+      "response_sha256": "a7318de0af1362a9e19b6d7a04c6090380d93e9931f5c3607729c627c34d16e4",
+      "summary": {
+        "contiguous": true,
+        "cursor": "5576268",
+        "first_sequence": 5576266,
+        "json_shapes": {},
+        "kind": "result",
+        "last_sequence": 5576268,
+        "latestLedger": 5696224,
+        "ledger_count": 3,
+        "ledger_keys": {
+          "hash": "string",
+          "headerXdr": "string",
+          "ledgerCloseTime": "string",
+          "metadataXdr": "string",
+          "sequence": "number"
+        },
+        "oldestLedger": 5575265,
+        "top_keys": {
+          "cursor": "string",
+          "latestLedger": "number",
+          "latestLedgerCloseTime": "number",
+          "ledgers": "array",
+          "oldestLedger": "number",
+          "oldestLedgerCloseTime": "number"
+        }
+      },
+      "template": {
+        "pagination": {
+          "cursor": "<cursor of cursor-page>",
+          "limit": 3
+        }
+      }
+    }
+  ],
+  "other_methods": [
+    {
+      "method": "noSuchMethod",
+      "name": "unknown-method",
+      "response": {
+        "error": {
+          "code": -32601,
+          "data": "noSuchMethod",
+          "message": "method not found"
+        },
+        "id": 1,
+        "jsonrpc": "2.0"
+      }
+    },
+    {
+      "method": "getHealth",
+      "name": "getHealth",
+      "response_sha256": "f1dda7f533535b197433c0dd4afbfbb11da15b5de05fb1232a0cd95fe393651b",
+      "top_keys": {
+        "latestLedger": "number",
+        "latestLedgerCloseTime": "string",
+        "ledgerRetentionWindow": "number",
+        "oldestLedger": "number",
+        "oldestLedgerCloseTime": "string",
+        "status": "string"
+      }
+    },
+    {
+      "method": "getNetwork",
+      "name": "getNetwork",
+      "response_sha256": "bc783791debb8635055318cb1293ec678a9367d6d39874937533901f89087b00",
+      "top_keys": {
+        "friendbotUrl": "string",
+        "passphrase": "string",
+        "protocolVersion": "number"
+      }
+    },
+    {
+      "method": "getVersionInfo",
+      "name": "getVersionInfo",
+      "response_sha256": "943f8f1b51d81b689ca10b448a4c9e65aa460cd04100fecb56019e7c06761511",
+      "top_keys": {
+        "buildTimestamp": "string",
+        "captiveCoreVersion": "string",
+        "commitHash": "string",
+        "protocolVersion": "number",
+        "version": "string"
+      }
+    },
+    {
+      "method": "getLatestLedger",
+      "name": "getLatestLedger",
+      "response_sha256": "bc49095eac53854be1ce20e71515105f24b14837055dfbd72f1de02de11048ac",
+      "top_keys": {
+        "closeTime": "string",
+        "headerXdr": "string",
+        "id": "string",
+        "metadataXdr": "string",
+        "protocolVersion": "number",
+        "sequence": "number"
+      }
+    }
+  ],
+  "range_at_start": {
+    "latestLedger": 5696221,
+    "oldestLedger": 5575262
+  },
+  "server_version": {
+    "buildTimestamp": "2026-11-11T20:15:56",
+    "captiveCoreVersion": "stellar-core 30.0.0 (0e49751aa9ddf892302cca02cea7f3f5d97df9f1)",
+    "commitHash": "6b6ec60c8bde5a93984b6290065d3882d384b25d",
+    "protocolVersion": 30,
+    "version": "30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d"
+  },
+  "source": "https://soroban-testnet.stellar.org"
+}

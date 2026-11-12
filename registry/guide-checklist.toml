@@ -1,0 +1,121 @@
+# language-neutral checklist items for the indexer-hardening guide.
+#
+# the guide checklist is the three indexerlint rules from lint-rules.toml,
+# followed by these items. each item names the fields.toml rows and
+# caps-limits.toml caps it rests on, and links an upstream source for
+# anything those rows do not cover. `shapekit guide check` fails when a
+# named row or cap no longer exists.
+
+schema_version = 1
+
+[[item]]
+id = "muxed-storage"
+title = "Muxed accounts are stored as a base account plus an id."
+text = "Every M address is reduced to its 32-byte G key for account identity, and its 64-bit id is kept in a separate unsigned 64-bit column or as a decimal string. No column truncates an M address to 32 bytes."
+fields = ["tx.source_account.mux_id", "op.source_account.mux_id", "feebump.fee_source.mux_id", "op.payment.destination.mux_id", "op.path_payment.destination.mux_id", "op.clawback.from.mux_id"]
+links = [
+  { label = "SEP-23", url = "https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0023.md" },
+  { label = "wallet-backend#716", url = "https://github.com/stellar/wallet-backend/issues/716" },
+]
+
+[[item]]
+id = "muxed-contract-storage"
+title = "Muxed contract (W) addresses are handled."
+text = "From protocol 30 an ScAddress can be a muxed contract. Its contract id (C) and its 64-bit id are stored separately, and a W address anywhere in events or arguments does not fail the ledger."
+links = [
+  { label = "CAP-84", url = "https://github.com/stellar/stellar-protocol/blob/master/core/cap-0084.md" },
+  { label = "wallet-backend#792", url = "https://github.com/stellar/wallet-backend/pull/792" },
+]
+
+[[item]]
+id = "signer-key-storage"
+title = "Signer keys keep their type and full payload."
+text = "Signer columns store the key type with the key, and are wide enough for a signed-payload (P) key with a 64-byte payload. Signers are never stored in an account column."
+fields = ["signer_key.signed_payload.payload", "op.set_options.signer", "tx.cond.extra_signers", "op.revoke_sponsorship"]
+limits = ["signer.signed_payload.len"]
+links = [
+  { label = "wallet-backend#729", url = "https://github.com/stellar/wallet-backend/pull/729" },
+]
+
+[[item]]
+id = "strkey-strict"
+title = "Strkeys and textual ids are decoded strictly."
+text = "Strkey decoding rejects every form SEP-23 lists as invalid, and a textual mux id or offer id is accepted only in its canonical decimal form."
+fields = ["tx.source_account.mux_id", "op.manage_offer.offer_id"]
+links = [
+  { label = "SEP-23", url = "https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0023.md" },
+  { label = "js-stellar-sdk#1785", url = "https://github.com/stellar/js-stellar-sdk/issues/1785" },
+]
+
+[[item]]
+id = "uint64-exact"
+title = "64-bit ids stay exact."
+text = "Mux ids and memo ids are unsigned 64-bit values and can exceed 2^63-1. They are not stored in signed 64-bit columns or converted to floating point numbers, and amounts are never stored as floats."
+fields = ["tx.memo.id", "tx.source_account.mux_id", "op.manage_offer.offer_id", "op.payment.amount"]
+
+[[item]]
+id = "memo-bytes"
+title = "Memo text is stored as bytes."
+text = "MEMO_TEXT is kept as its raw bytes (at most 28). If a text form is needed, UTF-8 is validated explicitly and the raw bytes are kept alongside it."
+fields = ["tx.memo.text"]
+limits = ["tx.memo_text.len"]
+links = [
+  { label = "js-stellar-sdk#1823", url = "https://github.com/stellar/js-stellar-sdk/issues/1823" },
+]
+
+[[item]]
+id = "network-order"
+title = "Ordering follows the network's rules."
+text = "Liquidity pool assets are ordered by asset type, raw code bytes and raw issuer key bytes, never by strkey text. Code that sorts or checks ScMap keys uses the Soroban host's ScVal comparison, not string order and not XDR byte order."
+fields = ["op.change_trust.line.liquidity_pool", "op.invoke_host_function.invoke_contract.args"]
+links = [
+  { label = "js-stellar-sdk#1766", url = "https://github.com/stellar/js-stellar-sdk/pull/1766" },
+]
+
+[[item]]
+id = "failed-transactions"
+title = "Failed transactions are not treated as effects."
+text = "An envelope value is only treated as having taken effect when the transaction result and the operation result are successes. For a failed transaction only the fee changes in meta are recorded as effects."
+fields = ["tx.signatures", "op.payment.destination", "op.invoke_host_function.invoke_contract.contract_address"]
+
+[[item]]
+id = "decode-caps"
+title = "Caps are applied when decoding."
+text = "Every XDR decode of external input sets an explicit depth limit and a length limit no larger than the input buffer, using the caps in the table. A decoder is never run with its limits turned off."
+limits = ["xdr.envelope.depth", "xdr.envelope.len", "xdr.meta.depth", "xdr.meta.len"]
+
+[[item]]
+id = "query-caps"
+title = "Serving limits stay at query time."
+text = "Limits that protect an API, such as rows per transaction on a history page, are applied when serving. Ingestion stores every row."
+limits = ["state_changes.per_tx.query"]
+
+[[item]]
+id = "network-settings"
+title = "Caps that come from network settings are re-read."
+text = "Caps marked as network settings are read from the CONFIG_SETTING ledger entries the network currently uses, not hardcoded, because validators can change them by vote."
+limits = ["xdr.envelope.len", "soroban.footprint.entries", "soroban.contract_data.entry_bytes", "events.contract.bytes_per_tx"]
+
+[[item]]
+id = "refusal-policy"
+title = "There is a written refusal policy."
+text = "For every place a decoder can throw or a value can exceed a cap, the indexer has a tested, documented choice: skip the value and count it, or halt. Nothing is dropped without being counted, and SDK upgrades are checked for new refusals."
+links = [
+  { label = "js-stellar-sdk 17.3.0 release notes", url = "https://github.com/stellar/js-stellar-sdk/releases/tag/v17.3.0" },
+  { label = "stellar-etl#467", url = "https://github.com/stellar/stellar-etl/issues/467" },
+]
+
+[[item]]
+id = "quarantine"
+title = "One poison transaction cannot stop ingestion."
+text = "When a single transaction cannot be stored, the indexer records it in a quarantine with the error, stores the rest of the ledger, advances the cursor and alerts, instead of retrying the same ledger forever."
+links = [
+  { label = "wallet-backend#729", url = "https://github.com/stellar/wallet-backend/pull/729" },
+  { label = "wallet-backend#753", url = "https://github.com/stellar/wallet-backend/pull/753" },
+]
+
+[[item]]
+id = "soroban-memo-protocol"
+title = "Soroban invocations before protocol 25 can carry a memo or a muxed source."
+text = "Code that handles INVOKE_HOST_FUNCTION transactions accepts a memo and muxed source accounts in ledgers before protocol 25, where the rule was only a transaction queue policy."
+fields = ["tx.memo.type", "tx.source_account.mux_id", "op.source_account.mux_id"]

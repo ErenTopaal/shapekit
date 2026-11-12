@@ -1,0 +1,54 @@
+{
+  "caps": [
+    "CAP-0023"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap23.claimable-balances",
+  "fields_exercised": [
+    "op.create_claimable_balance.claimants.destination",
+    "op.create_claimable_balance.claimants.predicate",
+    "op.create_claimable_balance.asset_amount"
+  ],
+  "flags": [
+    "max-length-vec"
+  ],
+  "id": "cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "CreateClaimableBalance with ten claimants whose predicates use every arm and nest and, or and not down to depth 4, the deepest core accepts",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 14,
+    "valid_min": 14
+  },
+  "source": {
+    "chain": "cap23.claimable-balances.p30",
+    "class": "local-core",
+    "ledger_seq": 4,
+    "recipe": "cap23.claimable-balances",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap23.claimable-balances/cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope/mainnet.expected.json",
+      "expected_json_sha256": "fc04f90baff4cd3232f02324b183765a3f243809bc0e4c28a04751af9767994b",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap23.claimable-balances/cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope/mainnet.xdr",
+      "xdr_sha256": "df772d12feb2fbb42603a7eaabd70a74caa1e2d3e58d39825a896d502268d708"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap23.claimable-balances/cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope/testnet.expected.json",
+      "expected_json_sha256": "342478dd2056ab1f33336b8b8f25199e57eb726507dd645049ce1f47d3a35386",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap23.claimable-balances/cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope/testnet.xdr",
+      "xdr_sha256": "adea3900103625b88a44c1d664e5561ce759a4d1f7296b7fb7d4bd76ad2db1d4"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

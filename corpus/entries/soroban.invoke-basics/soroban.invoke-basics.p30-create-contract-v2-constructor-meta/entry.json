@@ -1,0 +1,61 @@
+{
+  "caps": [
+    "CAP-0046",
+    "CAP-0046-02",
+    "CAP-0046-05",
+    "CAP-0046-07",
+    "CAP-0046-08",
+    "CAP-0046-12",
+    "CAP-0054",
+    "CAP-0058"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.invoke-basics",
+  "fields_exercised": [
+    "op.invoke_host_function.create_contract.preimage",
+    "op.invoke_host_function.create_contract_v2.constructor_args",
+    "tx.ext"
+  ],
+  "flags": [],
+  "id": "soroban.invoke-basics.p30-create-contract-v2-constructor-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "CreateContractV2 deploys the factory contract and passes its owner to the constructor, which writes instance storage",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "chain": "soroban.invoke-basics.p30",
+    "class": "local-core",
+    "ledger_seq": 25,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.invoke-basics",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-meta/mainnet.expected.json",
+      "expected_json_sha256": "b0c88f91de9cecea33c95a362efc5e6ccd9e5ed1e9440be18503566dc785e07a",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-meta/mainnet.xdr",
+      "xdr_sha256": "d2e19ee6275527d5807e3654fa5a8596e9f5e34ce4cccf5bf5c7a94548c00ec8"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-meta/testnet.expected.json",
+      "expected_json_sha256": "f3799fad6326835e9547edda8fce8eee49f82d489685cba2dba4494b91017681",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.p30-create-contract-v2-constructor-meta/testnet.xdr",
+      "xdr_sha256": "4fce592cbb15e18ffd3e9a4291643339f915899a328de382baef12a781805428"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

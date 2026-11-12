@@ -1,7 +1,23 @@
 [package]
 name = "shapekit-pack"
+description = "SEP-54 ledger lakes and history archive bundling for recorded chains."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[dependencies]
+flate2.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+shapekit-manifest.workspace = true
+stellar-xdr.workspace = true
+tar.workspace = true
+thiserror.workspace = true
+zstd.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

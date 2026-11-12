@@ -1,0 +1,50 @@
+{
+  "caps": [
+    "CAP-0077"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap77.frozen-keys",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap77.frozen-keys.p30-withdraw-frozen-trustline",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a liquidity pool withdrawal that fails with LIQUIDITY_POOL_WITHDRAW_TRUSTLINE_FROZEN because the withdrawer's trustline for one pool asset is frozen",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 26,
+    "valid_min": 26
+  },
+  "source": {
+    "chain": "cap77.frozen-keys.p30",
+    "class": "local-core",
+    "ledger_seq": 17,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap77.frozen-keys"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap77.frozen-keys/cap77.frozen-keys.p30-withdraw-frozen-trustline/mainnet.expected.json",
+      "expected_json_sha256": "92c26ac091d3c0ff71609bacfe11dc2033911c788d967c1b22eb7eb905919f3a",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap77.frozen-keys/cap77.frozen-keys.p30-withdraw-frozen-trustline/mainnet.xdr",
+      "xdr_sha256": "a783cbc89f0098b399704d50973a95e60f44c1597c9411db61c149268a0249b5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap77.frozen-keys/cap77.frozen-keys.p30-withdraw-frozen-trustline/testnet.expected.json",
+      "expected_json_sha256": "cf0231aaf55cd4a9ede31ce0951aac1f825047ddea552535d6ffa4613c9d438a",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap77.frozen-keys/cap77.frozen-keys.p30-withdraw-frozen-trustline/testnet.xdr",
+      "xdr_sha256": "9a67cd1af3a08ba985371723e922af8f582aea301739dbe46d614eeb40bcf9f8"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

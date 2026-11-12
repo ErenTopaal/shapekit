@@ -147,24 +147,6 @@ fn change_kinds_of_real_goldens_follow_core_meta_rules() {
     }
 }
 
-#[test]
-fn fragment_named_operations() {
-    assert_eq!(
-        golden::named_op("OperationBody:set_options"),
-        Some("set_options")
-    );
-    assert_eq!(
-        golden::named_op(".body:set_options.signer.key:ed25519_signed_payload"),
-        Some("set_options")
-    );
-    assert_eq!(
-        golden::named_op(".body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload"),
-        Some("revoke_sponsorship")
-    );
-    assert_eq!(golden::named_op("SignerKey:ed25519_signed_payload"), None);
-    assert_eq!(golden::named_op(".body:v0.topics#many"), Some("v0"));
-}
-
 // a two-file core tree built from committed golden bytes goes through scan, import, index
 // verification and manifest validation, the same path `shapekit import goldens` takes
 #[test]
@@ -266,70 +248,134 @@ fn scan_rejects_an_index_that_disagrees_with_the_files() {
     assert!(format!("{err:#}").contains("without a file"), "{err:#}");
 }
 
+fn exceptions() -> Vec<golden::AgreeException> {
+    golden::load_exceptions(&corpus().join(golden::EXCEPTIONS_FILE)).unwrap()
+}
+
 #[test]
 fn committed_corpus_goldens_agree_with_history() {
     let registry = registry();
     let manifest = build::build(&corpus(), "test", generated_with()).unwrap();
-    let report = golden::agree(&manifest, &registry, &corpus()).unwrap();
-    assert_eq!(report.failures(), 0, "{:#?}", report.pairs);
-    let pool = report
-        .pairs
+    let report = golden::agree(&manifest, &registry, &corpus(), &exceptions()).unwrap();
+    let failed: Vec<_> = report
+        .families
         .iter()
-        .find(|p| {
-            p.family == "cap38.liquidity-pools"
-                && p.other
-                    .starts_with("cap38.liquidity-pools.testnet-5521432 ")
-                && !p.shared_fragments.is_empty()
-        })
-        .expect("the py-stellar-base#1246 ledger pairs with a pool golden");
-    assert_eq!(pool.other_class, SourceClass::TestnetHistory);
+        .flat_map(|f| &f.combinations)
+        .filter(|c| c.failed())
+        .collect();
+    assert_eq!(
+        report.failures(),
+        0,
+        "{failed:#?} {:#?}",
+        report.unknown_exceptions
+    );
+    let pool = report
+        .families
+        .iter()
+        .find(|f| f.family == "cap38.liquidity-pools")
+        .expect("the py-stellar-base#1246 ledger is compared with the pool goldens");
     assert!(
-        report
-            .pairs
+        pool.others
             .iter()
-            .any(|p| p.other.contains("-meta (mainnet, with ") && !p.shared_fragments.is_empty()),
-        "transaction slices take part"
+            .any(|(id, class)| id == "cap38.liquidity-pools.testnet-5521432"
+                && *class == SourceClass::TestnetHistory)
+    );
+    assert!(!pool.shared_fragments.is_empty());
+}
+
+// a result meta entry is compared on its own; the envelope entry next to it is optional
+#[test]
+fn meta_entries_need_no_envelope_entry() {
+    let registry = registry();
+    let manifest = build::build(&corpus(), "test", generated_with()).unwrap();
+    let mut m = manifest.clone();
+    m.entries.retain(|e| {
+        e.family == "soroban.scval-shapes" && e.xdr_type.as_deref() != Some("TransactionEnvelope")
+    });
+    let report = golden::agree(&m, &registry, &corpus(), &[]).unwrap();
+    let family = &report.families[0];
+    assert!(
+        family
+            .others
+            .iter()
+            .any(|(id, _)| id == "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta")
     );
 }
 
-// goldens relabelled as local-core entries stand in for recipe output: a copy agrees with its
-// golden, and two goldens whose named operation changes different entry types disagree
+// goldens relabelled as local-core entries stand in for recipe output: a copy covers every
+// combination of its golden, while a ledger that restores less than the golden leaves the
+// golden's combination unmatched until an exception names it
 #[test]
-fn agreement_compares_named_operation_change_kinds() {
+fn agreement_requires_every_golden_combination() {
     let registry = registry();
     let manifest = build::build(&corpus(), "test", generated_with()).unwrap();
-    let family = "cap23.claimable-balances";
     let goldens: Vec<Entry> = manifest
         .entries
         .iter()
-        .filter(|e| e.family == family && e.source.class == SourceClass::CoreGolden)
+        .filter(|e| {
+            e.family == "cap23.claimable-balances" && e.source.class == SourceClass::CoreGolden
+        })
         .cloned()
         .collect();
     assert!(goldens.len() >= 2);
+    let mut checked = 0;
     for g in &goldens {
         let mut copy = g.clone();
         copy.id = format!("{}-copy", g.id);
         copy.source.class = SourceClass::LocalCore;
         let mut m = manifest.clone();
         m.entries = vec![g.clone(), copy];
-        let report = golden::agree(&m, &registry, &corpus()).unwrap();
+        let report = golden::agree(&m, &registry, &corpus(), &[]).unwrap();
         assert_eq!(report.failures(), 0);
-        assert_eq!(report.pairs.len(), 1);
-        assert!(!report.pairs[0].shared_fragments.is_empty());
+        assert!(report.families[0].local_only.is_empty());
+        checked += report.families[0].combinations.len();
     }
+    assert!(checked > 0);
 
-    // both restore a footprint, but only one of them restores contract code
-    let restore_data = entry("soroban.invoke-basics.golden-04667ce620bffee7-26");
-    let mut restore_code = entry("soroban.invoke-basics.golden-7b59aa36c1776fe1-32");
-    restore_code.source.class = SourceClass::LocalCore;
+    // only the golden restores contract code
+    let restore_code = entry("soroban.invoke-basics.golden-7b59aa36c1776fe1-32");
+    let mut restore_data = entry("soroban.invoke-basics.golden-04667ce620bffee7-26");
+    restore_data.source.class = SourceClass::LocalCore;
     let mut m = manifest.clone();
-    m.entries = vec![restore_data, restore_code];
-    let report = golden::agree(&m, &registry, &corpus()).unwrap();
-    assert_eq!(report.failures(), 1);
-    let mismatch = &report.pairs[0].op_mismatches[0];
-    assert_eq!(mismatch.op, "restore_footprint");
-    assert!(!mismatch.golden.contains("restored:contract_code"));
-    assert!(mismatch.other.contains("restored:contract_code"));
+    m.entries = vec![restore_data.clone(), restore_code.clone()];
+    m.entries.sort_by(|a, b| a.id.cmp(&b.id));
+    let report = golden::agree(&m, &registry, &corpus(), &[]).unwrap();
+    let family = &report.families[0];
+    let restore = family
+        .combinations
+        .iter()
+        .find(|c| c.op == "restore_footprint")
+        .unwrap();
+    assert!(restore.failed());
+    assert!(
+        restore
+            .kinds
+            .contains(&"restored:contract_code".to_string())
+    );
+    assert!(
+        family
+            .local_only
+            .iter()
+            .any(|(op, kinds, _)| op == "restore_footprint"
+                && !kinds.contains(&"restored:contract_code".to_string()))
+    );
+    let before = report.failures();
+
+    let exception = golden::AgreeException {
+        golden: restore_code.id.clone(),
+        op: "restore_footprint".into(),
+        kinds: restore.kinds.iter().rev().cloned().collect(),
+        reason: "the local ledger had no archived code to restore".into(),
+    };
+    let report = golden::agree(&m, &registry, &corpus(), std::slice::from_ref(&exception)).unwrap();
+    assert_eq!(report.failures(), before - 1);
+    assert!(report.stale_exceptions.is_empty());
+
+    let mut typo = exception;
+    typo.op = "restore_footprnt".into();
+    let report = golden::agree(&m, &registry, &corpus(), &[typo]).unwrap();
+    assert_eq!(report.unknown_exceptions.len(), 1);
+    assert_eq!(report.failures(), before + 1);
 }
 
 #[test]

@@ -69,6 +69,10 @@ pub fn close_time(ledger_seq: u32) -> u64 {
     CHAIN_EPOCH + u64::from(ledger_seq) * CLOSE_STEP
 }
 
+/// Smallest `TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME` core accepts
+/// (`MinimumSorobanNetworkConfig::MINIMUM_PERSISTENT_ENTRY_LIFETIME`).
+pub const MIN_PERSISTENT_TTL_FLOOR: u32 = 10;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ConfigError {
     #[error("passphrase must be non-empty printable ascii without quotes or backslashes: {0:?}")]
@@ -77,6 +81,10 @@ pub enum ConfigError {
     BadProtocol(u32),
     #[error("BACKFILL_STELLAR_ASSET_EVENTS requires EMIT_CLASSIC_EVENTS (Config.cpp, v30.0.0)")]
     BackfillWithoutClassicEvents,
+    #[error(
+        "TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME {0} is below core's floor of {MIN_PERSISTENT_TTL_FLOOR} (Config.cpp, v30.0.0)"
+    )]
+    MinPersistentTtl(u32),
     #[error("reading {path}: {source}")]
     Read {
         path: String,
@@ -177,6 +185,12 @@ pub struct NodeConfig {
     /// every run. Core's golden check zeroes that value; the recorder keeps
     /// values as core wrote them, so the event is left out instead.
     pub diagnostic_events: bool,
+    /// `TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME`, parsed by release builds:
+    /// the minimum persistent TTL written into the state archival settings
+    /// created at the protocol 20 upgrade. Lets a chain archive a persistent
+    /// entry within a few ledgers instead of core's initial 4096. A later
+    /// settings upgrade replaces it, entries created before keep their TTL.
+    pub min_persistent_ttl: Option<u32>,
 }
 
 /// Node seed for a passphrase, see the module docs for the layout.
@@ -214,6 +228,11 @@ impl NodeConfig {
         }
         if self.backfill_stellar_asset_events && !self.emit_classic_events {
             return Err(ConfigError::BackfillWithoutClassicEvents);
+        }
+        if let Some(ttl) = self.min_persistent_ttl
+            && ttl < MIN_PERSISTENT_TTL_FLOOR
+        {
+            return Err(ConfigError::MinPersistentTtl(ttl));
         }
         Ok(())
     }
@@ -265,6 +284,9 @@ impl NodeConfig {
             "TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE={}",
             self.soroban_high_limits
         ));
+        if let Some(ttl) = self.min_persistent_ttl {
+            line(format!("TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME={ttl}"));
+        }
         line(String::new());
         line("[QUORUM_SET]".into());
         line("THRESHOLD_PERCENT=100".into());
@@ -312,6 +334,7 @@ mod tests {
             emit_classic_events: true,
             backfill_stellar_asset_events: true,
             diagnostic_events: true,
+            min_persistent_ttl: None,
         }
     }
 
@@ -349,6 +372,15 @@ mod tests {
             c.render(),
             Err(ConfigError::BackfillWithoutClassicEvents)
         ));
+        c.emit_classic_events = true;
+        c.min_persistent_ttl = Some(9);
+        assert!(matches!(c.render(), Err(ConfigError::MinPersistentTtl(9))));
+        c.min_persistent_ttl = Some(10);
+        assert!(
+            c.render()
+                .unwrap()
+                .contains("TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME=10\n")
+        );
     }
 
     #[test]

@@ -1,0 +1,50 @@
+{
+  "caps": [
+    "CAP-0046-09",
+    "CAP-0046-10"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap46.config-upgrades",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap46.config-upgrades.p30-testnet-settings-upgrade",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a ledger whose only upgrade is a config upgrade set carrying every upgradeable Soroban setting of testnet, so its upgrade meta rewrites the config setting entries, cost parameters included",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "cap46.config-upgrades.p30",
+    "class": "local-core",
+    "ledger_seq": 6,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap46.config-upgrades"
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap46.config-upgrades/cap46.config-upgrades.p30-testnet-settings-upgrade/mainnet.expected.json",
+      "expected_json_sha256": "4613f7664dfb4051b9baaf4817184ef7c10f42a2951bf3621efd90c5d20f9d99",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap46.config-upgrades/cap46.config-upgrades.p30-testnet-settings-upgrade/mainnet.xdr",
+      "xdr_sha256": "2782a0ed9bafee57c4618cc9d32099e6c1f9e151197ca632a0d23ff44d4a743b"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap46.config-upgrades/cap46.config-upgrades.p30-testnet-settings-upgrade/testnet.expected.json",
+      "expected_json_sha256": "fadf9cb70d17806754fe3b6b4ac7204f50fcfb39c91b4ff049009648189a1077",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap46.config-upgrades/cap46.config-upgrades.p30-testnet-settings-upgrade/testnet.xdr",
+      "xdr_sha256": "4e60e02210f9fc390870e51fa6724f51bd0763a53b138f0c3b0e4b233afc98a4"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

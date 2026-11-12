@@ -1,0 +1,52 @@
+{
+  "caps": [
+    "CAP-0001"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap01.bump-sequence",
+  "fields_exercised": [
+    "op.bump_sequence.bump_to"
+  ],
+  "flags": [],
+  "id": "cap01.bump-sequence.p30-bump-to-i64-max",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "bump sequence to i64::MAX, after which the account can never submit another transaction",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 10,
+    "valid_min": 10
+  },
+  "source": {
+    "chain": "cap01.bump-sequence.p30",
+    "class": "local-core",
+    "ledger_seq": 6,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap01.bump-sequence"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap01.bump-sequence/cap01.bump-sequence.p30-bump-to-i64-max/mainnet.expected.json",
+      "expected_json_sha256": "0b768a8dc420e073d1c7286d79255c067e436a862809a1082ce35d8a7d00ef42",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap01.bump-sequence/cap01.bump-sequence.p30-bump-to-i64-max/mainnet.xdr",
+      "xdr_sha256": "7b4c574ad4b70085f2eefb9481b70af41c0e9984dd4d8c396555e0c8b331a818"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap01.bump-sequence/cap01.bump-sequence.p30-bump-to-i64-max/testnet.expected.json",
+      "expected_json_sha256": "c9b5933dbafa3456e37b56695a2aab996e6472df918d7d1b45c1629a0c84a556",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap01.bump-sequence/cap01.bump-sequence.p30-bump-to-i64-max/testnet.xdr",
+      "xdr_sha256": "b12e8436a74039c4d4a9dec8c10e0d8f9114a382649f8771c6c6b7e6dbc780f7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "protocol": 30,
   "passphrase": "Test SDF Network ; September 2015",
   "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
@@ -19,10 +19,94 @@
   },
   "checkpoints": [],
   "normalization": "core-normalize-meta",
-  "canonical_stream_file": "ledgers.canonical.xdr",
+  "lake": {
+    "dir": "ledgers",
+    "ledgers_per_batch": 1,
+    "batches_per_partition": 64000,
+    "compression": "zstd",
+    "zstd_level": 19,
+    "zstd_library": "1.5.7",
+    "batches": [
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFD--2.xdr.zst",
+        "first": 2,
+        "last": 2,
+        "sha256": "519818b83b48eef10508bc91815fc0450996d1f68b3b2accbf60942cc264787d"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFC--3.xdr.zst",
+        "first": 3,
+        "last": 3,
+        "sha256": "4a48f2369496a331339ea73aa996a061be58e37b9b6e4ebdd88332ae3ebdada6"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFB--4.xdr.zst",
+        "first": 4,
+        "last": 4,
+        "sha256": "d6df9087ddf7f083aa832e871fd89829cbfcb6d7d50ba675cd43f3356c0f9354"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFA--5.xdr.zst",
+        "first": 5,
+        "last": 5,
+        "sha256": "3be31f6ed3295d4a30602b5be6d92cf312ffbb41335b0362344ed200044989e5"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF9--6.xdr.zst",
+        "first": 6,
+        "last": 6,
+        "sha256": "155da62b61098e4e4b71ac73147f69f85edcc352c85911eb2124154ef0c90f3e"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF8--7.xdr.zst",
+        "first": 7,
+        "last": 7,
+        "sha256": "1e558fa25a41930ef5c99f66893e8b83205986ce79742f1bbd06de501bd0eac8"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF7--8.xdr.zst",
+        "first": 8,
+        "last": 8,
+        "sha256": "9fc067df2c153be37a8a9af0f5d3d8958bcd7d51b35259439cc379fb69ae9db1"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF6--9.xdr.zst",
+        "first": 9,
+        "last": 9,
+        "sha256": "bbaca3bddc2da08f6cc32bd88c65b5cef58e5b69f4b45b907edeef5e67cf836d"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF5--10.xdr.zst",
+        "first": 10,
+        "last": 10,
+        "sha256": "6095746c29398bca0eacc0706eb54a36573d57e0b755fb494d571c6692920473"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF4--11.xdr.zst",
+        "first": 11,
+        "last": 11,
+        "sha256": "7362f5e9ccec39d6ad78d2dafc7518b01c8038582bf8bc0a06444db0f345ffcc"
+      }
+    ]
+  },
   "canonical_stream_sha256": "b936d04eb7b7de1bd6febce3cf8dd521e3594dafb7915c0afd6e0164649f2849",
   "stream_file": "ledgers.xdr",
   "stream_sha256": "54c3834c2d50c8255581a398198534db287139d13c6f0264b3efd258d2723d3b",
+  "archive": {
+    "file": "archive.tar",
+    "files": [
+      {
+        "path": ".well-known/stellar-history.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      },
+      {
+        "path": "history/00/00/00/history-00000000.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      }
+    ]
+  },
   "ledgers": [
     {
       "ledger_seq": 2,

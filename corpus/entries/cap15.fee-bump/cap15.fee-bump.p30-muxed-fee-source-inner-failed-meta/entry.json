@@ -1,0 +1,59 @@
+{
+  "caps": [
+    "CAP-0015"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [
+    "tx.envelope.type",
+    "feebump.fee_source",
+    "feebump.fee_source.mux_id",
+    "feebump.fee",
+    "feebump.signatures",
+    "feebump.inner_tx"
+  ],
+  "flags": [],
+  "id": "cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/stellar-etl/issues/477"
+  ],
+  "notes": "a fee bump whose fee source is a muxed account with id 1, over an inner payment that fails with payment no_destination",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap15.fee-bump.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap15.fee-bump",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta/mainnet.expected.json",
+      "expected_json_sha256": "d187674ce64e978d728f7a45b5e2441225c718aff26724e6a8eaad25f614d48b",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta/mainnet.xdr",
+      "xdr_sha256": "64b9e5920acec25ba3bafa42dc2e20e86c268faacd22fa43a4e63ac5adee7f95"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta/testnet.expected.json",
+      "expected_json_sha256": "fc674b8ad639ea608cc886a247d105b0914d96d6476bb45210e6e066551a1dfd",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta/testnet.xdr",
+      "xdr_sha256": "f72f59c716212484511c4bcf5e4e34b389e797c7fc636f86056f4fb2ca7c1270"
+    }
+  },
+  "xdr_type": "TransactionResultMetaV1"
+}

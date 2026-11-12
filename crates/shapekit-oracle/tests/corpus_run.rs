@@ -130,8 +130,13 @@ fn run_writes_and_records_oracle_files() {
         })
         .unwrap();
     let env_bytes = env.to_xdr(Limits::none()).unwrap();
-    let framed = framing::frame_records([chain_lcm.as_slice()]).unwrap();
-    put(root, "chains/test-chain/testnet/ledgers.xdr", &framed);
+    shapekit_pack::write_sep54(
+        [Ok(chain_lcm.clone())],
+        TESTNET,
+        &root.join("chains/test-chain/testnet/ledgers"),
+        shapekit_pack::Layout::default(),
+    )
+    .unwrap();
     put(
         root,
         "chains/test-chain/testnet/chain.json",
@@ -257,4 +262,60 @@ fn run_writes_and_records_oracle_files() {
         std::fs::read(root.join(d1).join("entry.json")).unwrap()
     );
     assert_eq!(text1, std::fs::read(root.join(&path1)).unwrap());
+}
+
+/// Every transaction-level entry of a committed chain finds its transaction in the chain's
+/// lake. The entries were cut from canonical meta, so reading core's raw stream instead
+/// fails on every `-meta` entry whose ledger had a reordered change list.
+#[test]
+fn committed_chain_entries_match_the_canonical_lake() {
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path();
+    let family = "cap40.signed-payload-signer";
+    let chain = "cap40.signed-payload-signer.p30";
+    copy_tree(
+        &repo.join("corpus/chains").join(chain),
+        &root.join("chains").join(chain),
+    );
+    let mut copied = 0;
+    for item in std::fs::read_dir(repo.join("corpus/entries").join(family)).unwrap() {
+        let dir = item.unwrap().path();
+        let text = std::fs::read_to_string(dir.join("entry.json")).unwrap();
+        let e: Entry = serde_json::from_str(&text).unwrap();
+        if e.source.chain.as_deref() != Some(chain) {
+            continue;
+        }
+        copy_tree(
+            &dir,
+            &root
+                .join("entries")
+                .join(family)
+                .join(dir.file_name().unwrap()),
+        );
+        copied += 1;
+    }
+    assert!(copied > 0);
+    let summary = run(root).unwrap();
+    let meta: Vec<_> = summary
+        .written
+        .iter()
+        .filter(|(id, _, _)| id.ends_with("-meta"))
+        .collect();
+    // run() fails outright when a transaction is not found, so reaching here means every
+    // transaction-level variant matched
+    assert!(!meta.is_empty(), "no -meta entry was interpreted");
+}
+
+fn copy_tree(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for item in std::fs::read_dir(from).unwrap() {
+        let p = item.unwrap().path();
+        let dst = to.join(p.file_name().unwrap());
+        if p.is_dir() {
+            copy_tree(&p, &dst);
+        } else {
+            std::fs::copy(&p, &dst).unwrap();
+        }
+    }
 }

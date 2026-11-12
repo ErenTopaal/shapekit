@@ -1,0 +1,51 @@
+{
+  "caps": [
+    "CAP-0033"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap33.sponsorship",
+  "fields_exercised": [
+    "op.begin_sponsoring.sponsored_id",
+    "op.create_claimable_balance.asset_amount"
+  ],
+  "flags": [],
+  "id": "cap33.sponsorship.p30-sponsored-claimable-balance-envelope",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a claimable balance created inside begin and end sponsoring, so its reserve is the sponsor's and not its creator's",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 14,
+    "valid_min": 14
+  },
+  "source": {
+    "chain": "cap33.sponsorship.p30",
+    "class": "local-core",
+    "ledger_seq": 7,
+    "recipe": "cap33.sponsorship",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-envelope/mainnet.expected.json",
+      "expected_json_sha256": "46a2ca63debcadd79617cbaa74af9d81e868f26859e9baa229109516acaee48c",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-envelope/mainnet.xdr",
+      "xdr_sha256": "99af0b08534123d6f9b27b0c35e60e2b9e5b814abe95da8803ffb048f448e2a5"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-envelope/testnet.expected.json",
+      "expected_json_sha256": "9a90da109ceec017329cf55057f8c585a718df2447ede82665a204329edbf0d1",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap33.sponsorship/cap33.sponsorship.p30-sponsored-claimable-balance-envelope/testnet.xdr",
+      "xdr_sha256": "c92c56e4b09f4436b603af36e52d4662df19e646c1eb883d407dbcb71c620fb3"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

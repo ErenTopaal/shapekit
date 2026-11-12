@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0027"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap27.muxed-accounts",
+  "fields_exercised": [
+    "tx.source_account",
+    "tx.source_account.mux_id",
+    "op.payment.destination",
+    "op.payment.destination.mux_id"
+  ],
+  "flags": [],
+  "id": "cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "a payment whose transaction source and destination are both muxed accounts with id 0",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 28,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap27.muxed-accounts.p28",
+    "class": "local-core",
+    "ledger_seq": 4,
+    "normalization": "core-normalize-meta",
+    "recipe": "cap27.muxed-accounts"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0/mainnet.expected.json",
+      "expected_json_sha256": "58eb59f85f4a818e22e551dff9e603f6d22f0cb9c3c3e0cd05a4d161e14ca767",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0/mainnet.xdr",
+      "xdr_sha256": "266eb595cf2d65e71287ac00a35f22ae7a9730facc1de85381f5678e19c8773b"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0/testnet.expected.json",
+      "expected_json_sha256": "19c127da62cf184c8edf1ab542d9de0d3ae53a9f2a31fba5b61b9502c3d957ed",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/cap27.muxed-accounts/cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0/testnet.xdr",
+      "xdr_sha256": "1b5ac982592124731ea95fbde3541ee7b6cb41152bba2c0d1fdc8c36fbabcb89"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

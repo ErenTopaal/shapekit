@@ -1,0 +1,59 @@
+{
+  "caps": [
+    "CAP-0027",
+    "CAP-0046"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.muxed-source",
+  "fields_exercised": [
+    "tx.source_account",
+    "tx.source_account.mux_id",
+    "op.extend_footprint_ttl.extend_to",
+    "tx.soroban.footprint"
+  ],
+  "flags": [],
+  "id": "soroban.muxed-source.p30-extend-ttl-muxed-source",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/pull/753",
+    "https://github.com/stellar/wallet-backend/issues/716"
+  ],
+  "notes": "an extend-TTL of contract code and instance whose transaction source is a muxed account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.muxed-source.p30",
+    "class": "local-core",
+    "ledger_seq": 16,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.muxed-source"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-extend-ttl-muxed-source/mainnet.expected.json",
+      "expected_json_sha256": "3ac80321fb12c4da5adc5116fe8457b6638f7e715e99183e79da36cf35594f90",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-extend-ttl-muxed-source/mainnet.xdr",
+      "xdr_sha256": "1fb8306223f7a7fcad43c460efe333ea2d1f48b372b973648e31d80741e3c539"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-extend-ttl-muxed-source/testnet.expected.json",
+      "expected_json_sha256": "54f743629adf1c264b2dd43a79c3801c7191b30cf4a1833e217fe85b5fe34f2f",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/soroban.muxed-source/soroban.muxed-source.p30-extend-ttl-muxed-source/testnet.xdr",
+      "xdr_sha256": "088a6c1993ca8ff4ecde1a8592c6d2c5d876f4164d89b7ac61926e5a016a8157"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

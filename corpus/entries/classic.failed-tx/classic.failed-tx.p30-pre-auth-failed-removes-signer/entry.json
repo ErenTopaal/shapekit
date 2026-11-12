@@ -1,0 +1,55 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "tx.source_account",
+    "tx.signatures",
+    "op.payment.destination"
+  ],
+  "flags": [],
+  "id": "classic.failed-tx.p30-pre-auth-failed-removes-signer",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "a pre-authorised transaction with no signatures fails on a payment to an account that does not exist; core still removes the pre-auth signer (CAP-28), and the destination appears only in the envelope",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.failed-tx.p30",
+    "class": "local-core",
+    "ledger_seq": 6,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.failed-tx"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-pre-auth-failed-removes-signer/mainnet.expected.json",
+      "expected_json_sha256": "a74086f184f0032add65599667080542f96f4011b897eaf04312975f5d158bb2",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-pre-auth-failed-removes-signer/mainnet.xdr",
+      "xdr_sha256": "dd692b234541ff13255c4eb0ff2cc434dfd6be10f0f545455c469338ed71eadd"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p30-pre-auth-failed-removes-signer/testnet.expected.json",
+      "expected_json_sha256": "fd22c0e7b2e15ec2eb316b32860fb4a012692623490153ad0ae2961373d2f4cf",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p30-pre-auth-failed-removes-signer/testnet.xdr",
+      "xdr_sha256": "490e7d793c9f0ca80488a3e505cfe71e1244179b1758299d1c886f338202a321"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

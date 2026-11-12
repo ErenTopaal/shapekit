@@ -1,0 +1,112 @@
+{
+  "schema": 2,
+  "protocol": 30,
+  "passphrase": "Test SDF Network ; September 2015",
+  "network_id": "cee0302d59844d32bdca915c8203dd44b33fbb7edc19051ea37abedf28ecd472",
+  "validator": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+  "core_image": {
+    "repository": "stellar/stellar-core",
+    "tag": "30.0.0-3642.0e49751aa.noble",
+    "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51"
+  },
+  "close_schedule": {
+    "epoch": 1767225600,
+    "step": 86400
+  },
+  "ledger_range": {
+    "first": 2,
+    "last": 6
+  },
+  "checkpoints": [],
+  "normalization": "core-normalize-meta",
+  "lake": {
+    "dir": "ledgers",
+    "ledgers_per_batch": 1,
+    "batches_per_partition": 64000,
+    "compression": "zstd",
+    "zstd_level": 19,
+    "zstd_library": "1.5.7",
+    "batches": [
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFD--2.xdr.zst",
+        "first": 2,
+        "last": 2,
+        "sha256": "519818b83b48eef10508bc91815fc0450996d1f68b3b2accbf60942cc264787d"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFC--3.xdr.zst",
+        "first": 3,
+        "last": 3,
+        "sha256": "25f539e612e1a426c3fa16eed1de068359b9b7339879f60c42e45f44858750e6"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFB--4.xdr.zst",
+        "first": 4,
+        "last": 4,
+        "sha256": "85dc4e527e537cafda5b21e862be5419da99239d488e74aab16e6f0bbba43ede"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFFA--5.xdr.zst",
+        "first": 5,
+        "last": 5,
+        "sha256": "544383799aafd6305fb0a7e24af36a436b27dd9480a757bb08ff931c16ccfff9"
+      },
+      {
+        "key": "FFFFFFFF--0-63999/FFFFFFF9--6.xdr.zst",
+        "first": 6,
+        "last": 6,
+        "sha256": "fa48dac74e368e0cdbc4c490e4fed805e499034472570e00db913e00f506c0e6"
+      }
+    ]
+  },
+  "canonical_stream_sha256": "85552f3cf3c554ac69bf0409bd436297b79872941de030b65729871fe5e7e8d8",
+  "stream_file": "ledgers.xdr",
+  "stream_sha256": "ba8004a16d6f477f5b44157910b824e93b128c438e514d222ef8d62e3391e7e6",
+  "archive": {
+    "file": "archive.tar",
+    "files": [
+      {
+        "path": ".well-known/stellar-history.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      },
+      {
+        "path": "history/00/00/00/history-00000000.json",
+        "sha256": "5f599189a9f69af87c8673fd473ce164dd1f1b45e0a942bbca51b315b39864df",
+        "gzip": false
+      }
+    ]
+  },
+  "ledgers": [
+    {
+      "ledger_seq": 2,
+      "sha256": "33e3bfba5baae8fa7d53464d9afee7f96e693e006a63707d95a955fe8cb99a9b",
+      "raw_sha256": "cf4634d1a069afc8fa6a7fbfbfac2ada2281a3fca80bd0ca6815ec3567217a16",
+      "xdr_len": 5244
+    },
+    {
+      "ledger_seq": 3,
+      "sha256": "d6f1a05155f0d976f3acde85bcd26b696eac39df19925a1bff15b5a12101222c",
+      "raw_sha256": "d6f1a05155f0d976f3acde85bcd26b696eac39df19925a1bff15b5a12101222c",
+      "xdr_len": 2712
+    },
+    {
+      "ledger_seq": 4,
+      "sha256": "f17b2cc47faa7930482ffbc4a640e9ad8ab25671fc3cfdff8d40b60ad2dd29b9",
+      "raw_sha256": "f17b2cc47faa7930482ffbc4a640e9ad8ab25671fc3cfdff8d40b60ad2dd29b9",
+      "xdr_len": 1632
+    },
+    {
+      "ledger_seq": 5,
+      "sha256": "b6e7cb52422b04ac7bb62ee19dc73336c83f5334a2405d0415b01b451b155a32",
+      "raw_sha256": "b6e7cb52422b04ac7bb62ee19dc73336c83f5334a2405d0415b01b451b155a32",
+      "xdr_len": 1996
+    },
+    {
+      "ledger_seq": 6,
+      "sha256": "490e7d793c9f0ca80488a3e505cfe71e1244179b1758299d1c886f338202a321",
+      "raw_sha256": "490e7d793c9f0ca80488a3e505cfe71e1244179b1758299d1c886f338202a321",
+      "xdr_len": 1676
+    }
+  ]
+}

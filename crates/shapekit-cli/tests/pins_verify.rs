@@ -66,6 +66,9 @@ fn registered_commands() {
             "capture",
             "gen",
             "synth",
+            "guide",
+            "pack",
+            "serve",
             "help"
         ]
     );

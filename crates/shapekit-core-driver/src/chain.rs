@@ -8,10 +8,11 @@ use std::path::Path;
 use ed25519_dalek::SigningKey;
 use sha2::{Digest, Sha256};
 use stellar_xdr::{
-    ContractExecutable, ContractId, CreateContractArgsV2, Hash, HostFunction, InvokeContractArgs,
-    InvokeHostFunctionOp, LedgerCloseMeta, LedgerUpgrade, OperationBody, ScAddress, ScSymbol,
-    ScVal, SorobanAuthorizationEntry, SorobanCredentials, SorobanTransactionData,
-    TransactionEnvelope, TransactionMeta, TransactionResult, TransactionResultResult,
+    ConfigUpgradeSet, ContractExecutable, ContractId, CreateContractArgsV2, Hash, HostFunction,
+    InvokeContractArgs, InvokeHostFunctionOp, LedgerCloseMeta, LedgerUpgrade, OperationBody,
+    ScAddress, ScSymbol, ScVal, SorobanAuthorizationEntry, SorobanCredentials,
+    SorobanTransactionData, TransactionEnvelope, TransactionMeta, TransactionResult,
+    TransactionResultResult,
 };
 
 use crate::config::{NodeConfig, close_time};
@@ -441,25 +442,7 @@ impl ChainDriver {
         let code = self.upload(deployer, writer_wasm)?;
         let salt: [u8; 32] = Sha256::digest(SETTINGS_WRITER_SALT_DOMAIN).into();
         let writer = self.deploy(deployer, &code, &salt)?;
-        let upgrade = PreparedUpgrade::new(settings.upgrade_set()?, writer.clone())?;
-        self.invoke(
-            deployer,
-            &writer,
-            "put_temp",
-            vec![upgrade.storage_key()?, upgrade.storage_value()?],
-        )?;
-
-        let seq = self.last_closed + 1;
-        self.node
-            .config_upgrade(&upgrade.key_base64()?, seq, close_time(seq))?;
-        self.closed(seq)?;
-        let applied = upgrades(self.last_meta());
-        if applied != [LedgerUpgrade::Config(upgrade.key.clone())] {
-            return Err(ChainError::Unexpected {
-                ledger: seq,
-                what: format!("expected exactly the config upgrade, meta has {applied:?}"),
-            });
-        }
+        let (upgrade, seq) = self.apply_upgrade_set(settings.upgrade_set()?, &writer, deployer)?;
         let live = self.node.soroban_upgrade_set()?;
         if live != upgrade.set {
             return Err(ChainError::Unexpected {
@@ -473,6 +456,103 @@ impl ChainDriver {
             upgrade_ledger: seq,
             soroban_info: self.node.soroban_info()?,
         })
+    }
+
+    /// The settings writer [`Self::apply_settings`] deploys from `deployer`.
+    pub fn settings_writer(&self, deployer: &SigningKey) -> Result<ContractId, ChainError> {
+        let salt: [u8; 32] = Sha256::digest(SETTINGS_WRITER_SALT_DOMAIN).into();
+        Ok(contract_id_from_address(
+            &self.network_id,
+            &account_address(&deployer.verifying_key()),
+            &salt,
+        )?)
+    }
+
+    /// Applies one config upgrade set (CAP-46-09) on top of the live
+    /// settings: `source` stores it through `writer`'s `put_temp`, then the
+    /// upgrade is armed and the next ledger closes with it. Fails unless
+    /// that ledger's meta reports exactly this upgrade. Returns the prepared
+    /// upgrade and the upgrade ledger.
+    pub fn apply_upgrade_set(
+        &mut self,
+        set: ConfigUpgradeSet,
+        writer: &ContractId,
+        source: &SigningKey,
+    ) -> Result<(PreparedUpgrade, u32), ChainError> {
+        let upgrade = PreparedUpgrade::new(set, writer.clone())?;
+        self.invoke(
+            source,
+            writer,
+            "put_temp",
+            vec![upgrade.storage_key()?, upgrade.storage_value()?],
+        )?;
+        let seq = self.close_with_upgrades(&[("configupgradesetkey", &upgrade.key_base64()?)])?;
+        let applied = upgrades(self.last_meta());
+        if applied != [LedgerUpgrade::Config(upgrade.key.clone())] {
+            return Err(ChainError::Unexpected {
+                ledger: seq,
+                what: format!("expected exactly the config upgrade, meta has {applied:?}"),
+            });
+        }
+        Ok((upgrade, seq))
+    }
+
+    /// Arms the upgrades in `params` (see [`CoreNode::upgrade_with`]) and
+    /// closes the next ledger with them. Fails if the ledger's meta reports
+    /// no upgrade at all; the caller checks which ones.
+    pub fn close_with_upgrades(&mut self, params: &[(&str, &str)]) -> Result<u32, ChainError> {
+        let seq = self.last_closed + 1;
+        self.node.upgrade_with(params, seq, close_time(seq))?;
+        self.closed(seq)?;
+        if upgrades(self.last_meta()).is_empty() {
+            return Err(ChainError::Unexpected {
+                ledger: seq,
+                what: format!("core applied none of the armed upgrades {params:?}"),
+            });
+        }
+        Ok(seq)
+    }
+
+    /// Submits every envelope, then closes one ledger, so they share its
+    /// transaction set. Returns what core applied for each, in the order
+    /// given, successful or not. Fails if core refuses one at submission or
+    /// leaves one out of the ledger.
+    pub fn apply_together(
+        &mut self,
+        envs: &[TransactionEnvelope],
+    ) -> Result<Vec<Applied>, ChainError> {
+        let mut hashes = Vec::with_capacity(envs.len());
+        for env in envs {
+            hashes.push(envelope_hash(env, &self.network_id)?);
+            let sub = self.node.submit(env)?;
+            if sub.status != SubmitStatus::Pending {
+                return Err(ChainError::NotQueued {
+                    status: sub.status,
+                    result: sub.error.map(Box::new),
+                });
+            }
+        }
+        let seq = self.close_empty()?;
+        let txs = transactions(self.last_meta());
+        hashes
+            .into_iter()
+            .map(|hash| {
+                let (_, result, meta) = txs
+                    .iter()
+                    .find(|(h, _, _)| h.0 == hash)
+                    .cloned()
+                    .ok_or_else(|| ChainError::Missing {
+                        ledger: seq,
+                        hash: hex::encode(hash),
+                    })?;
+                Ok(Applied {
+                    ledger: seq,
+                    hash,
+                    result,
+                    meta,
+                })
+            })
+            .collect()
     }
 
     /// Writes the recorded chain into `target` and stops the node.

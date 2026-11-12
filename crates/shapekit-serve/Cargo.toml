@@ -1,7 +1,26 @@
 [package]
 name = "shapekit-serve"
+description = "Replay server for recorded chains: SEP-54 lake, history archive and a read-only stellar-rpc shaped JSON-RPC endpoint."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
+
+[dependencies]
+axum.workspace = true
+base64.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+shapekit-manifest.workspace = true
+shapekit-oracle.workspace = true
+shapekit-pack.workspace = true
+stellar-xdr = { workspace = true, features = ["base64"] }
+tempfile.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+reqwest.workspace = true

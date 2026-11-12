@@ -5,9 +5,10 @@
 //! - `xdr_type = LedgerCloseMeta`: the oracle file holds that ledger's facts;
 //! - transaction-level entries (`TransactionEnvelope`, `TransactionMeta`,
 //!   `TransactionResultMeta`, `TransactionResultMetaV1`, `TransactionResultPair`) whose
-//!   source names a chain and a ledger: the ledger is read from
-//!   `chains/<chain>/<variant>/ledgers.xdr`, and the transaction is the one whose XDR in that
-//!   ledger is byte-equal to the variant's bytes, which needs no per-variant hash.
+//!   source names a chain and a ledger: the ledger is read from the chain's SEP-54 lake
+//!   `chains/<chain>/<variant>/ledgers/`, which holds the canonical meta the entries were cut
+//!   from, and the transaction is the one whose XDR in that ledger is byte-equal to the
+//!   variant's bytes, which needs no per-variant hash.
 //!
 //! Every ledger read must also pass the conservation check before its facts are written.
 //! Both need `expected.validity = valid`: an entry core would reject or never emit has no
@@ -23,14 +24,16 @@ use shapekit_manifest::{
 use stellar_xdr::{LedgerCloseMeta, Limits, WriteXdr};
 
 use crate::conservation::check_ledger;
-use crate::decode::{LcmStream, decode_lcm};
+use crate::decode::decode_lcm;
 use crate::interpret::interpret_ledger;
 use crate::network::Network;
 use crate::view::LedgerView;
 use crate::vocab::{LedgerFacts, ORACLE_VOCAB_VERSION, OracleFile};
 
 pub const CHAINS_DIR: &str = "chains";
-pub const CHAIN_STREAM: &str = "ledgers.xdr";
+/// The chain's lake of canonical ledgers. Core's raw stream beside it orders change lists
+/// differently, so entries cut from canonical meta would not match it.
+pub const CHAIN_LAKE: &str = shapekit_pack::chain::LEDGERS_DIR;
 pub const CHAIN_FILE: &str = "chain.json";
 
 #[derive(Debug, thiserror::Error)]
@@ -273,14 +276,18 @@ fn chain_ledger(
         .join(CHAINS_DIR)
         .join(chain)
         .join(variant)
-        .join(CHAIN_STREAM);
-    for item in LcmStream::open(&path).map_err(|e| e.to_string())? {
-        let item = item.map_err(|e| format!("{}: {e}", path.display()))?;
-        if crate::view::ledger_seq(&item.meta) == seq {
-            return Ok(item.meta);
-        }
-    }
-    Err(format!("{} has no ledger {seq}", path.display()))
+        .join(CHAIN_LAKE);
+    let lake = shapekit_pack::Lake::open(&path).map_err(|e| e.to_string())?;
+    let batch = lake
+        .batch_for(seq)
+        .ok_or_else(|| format!("{} has no ledger {seq}", path.display()))?;
+    let batch = lake
+        .read_batch(batch)
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+    let xdr = batch
+        .ledger(seq)
+        .ok_or_else(|| format!("{} has no ledger {seq}", path.display()))?;
+    decode_lcm(xdr).map_err(|e| format!("{} ledger {seq}: {e}", path.display()))
 }
 
 fn find_tx(
