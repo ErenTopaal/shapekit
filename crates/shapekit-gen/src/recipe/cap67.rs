@@ -6,7 +6,9 @@
 //! Three chains run the same classic steps:
 //!
 //! - protocol 30, `EMIT_CLASSIC_EVENTS` on as on the public networks, plus
-//!   one Soroban invocation for the refund stage of the fee events
+//!   one Soroban invocation for the refund stage of the fee events and an
+//!   issuer transfer through the asset's SAC to a muxed contract (a mint
+//!   with `to_muxed_id`)
 //! - protocol 22 with both event flags off: the meta core wrote for those
 //!   operations in protocol 22's day, TransactionMeta v3 with no events
 //! - protocol 22 with `BACKFILL_STELLAR_ASSET_EVENTS`: TransactionMeta v4
@@ -22,18 +24,21 @@ use anyhow::{Context, Result, bail, ensure};
 use ed25519_dalek::SigningKey;
 use sha2::{Digest, Sha256};
 use shapekit_core_driver::chain::Applied;
-use shapekit_core_driver::keys::{account_id, muxed_account, muxed_account_with_id};
+use shapekit_core_driver::keys::{
+    account_address, account_id, muxed_account, muxed_account_with_id,
+};
 use stellar_xdr::{
     AccountFlags, Asset, ChangeTrustAsset, ChangeTrustOp, ClaimClaimableBalanceOp, ClaimPredicate,
     ClaimableBalanceId, Claimant, ClaimantV0, ClawbackClaimableBalanceOp, ClawbackOp,
     ContractEvent, ContractEventBody, CreateClaimableBalanceResult, Hash, Limits,
     LiquidityPoolConstantProductParameters, LiquidityPoolDepositOp, LiquidityPoolParameters, Memo,
-    MuxedAccount, OperationBody, OperationResult, OperationResultTr, PathPaymentStrictReceiveOp,
-    PaymentOp, PoolId, Price, ScVal, SetOptionsOp, SetTrustLineFlagsOp, TransactionEventStage,
-    TransactionMeta, TransactionResultResult, TrustLineFlags, WriteXdr,
+    MuxedAccount, MuxedContract, OperationBody, OperationResult, OperationResultTr,
+    PathPaymentStrictReceiveOp, PaymentOp, PoolId, Price, ScAddress, ScVal, SetOptionsOp,
+    SetTrustLineFlagsOp, TransactionEventStage, TransactionMeta, TransactionResultResult,
+    TrustLineFlags, WriteXdr,
 };
 
-use super::cap73::credit;
+use super::cap73::{call, credit, deploy_sac, i128_val};
 use super::scval::{BALANCE, deploy_echo};
 use super::{ChainCtx, Recipe, Selector, Spec};
 
@@ -345,6 +350,22 @@ impl Recipe for UnifiedEvents {
                 .fields(&["op.payment.destination", "op.payment.asset"]),
         )?;
 
+        // core applies a payment to oneself without a ledger change
+        let env = ctx.classic(&alice, vec![payment(mux(&alice), Asset::Native, UNIT)])?;
+        let applied = ctx.submit_and_close(&env)?;
+        ensure_events(&applied, emits, &["transfer"])?;
+        ensure!(
+            super::cap73::operation_changes(&applied.meta).is_empty(),
+            "ledger {}: a self payment changed ledger entries",
+            applied.ledger
+        );
+        ctx.capture(
+            &self.slug("payment-to-self"),
+            Selector::ledger_of(&applied),
+            note("an XLM payment from an account to itself: no ledger entry changes, yet a transfer event whose from and to are the same account")
+                .fields(&["op.payment.destination"]),
+        )?;
+
         let mux_id = 1u64 << 53;
         let to = muxed_account_with_id(&bob.verifying_key(), mux_id);
         let env = ctx.classic(&alice, vec![payment(to, Asset::Native, 5 * UNIT)])?;
@@ -594,6 +615,37 @@ impl Recipe for UnifiedEvents {
                     "a Soroban invocation whose transaction events are the fee charge before all transactions and the refund of unused resource fee after all transactions",
                 )
                 .fields(&["tx.soroban.resource_fee"]),
+            )?;
+
+            // the SAC side of the same events: an issuer transfer through the
+            // asset's contract to a muxed contract address is a mint whose data
+            // carries to_muxed_id, the case core's own CAP-84 test covers
+            let (_, sac) = deploy_sac(ctx, &issuer, asset.clone())?;
+            let mux_id = 67u64;
+            let to = ScVal::Address(ScAddress::MuxedContract(MuxedContract {
+                id: mux_id,
+                contract_id: echo,
+            }));
+            let hf = call(
+                &sac,
+                "transfer",
+                vec![
+                    ScVal::Address(account_address(&issuer.verifying_key())),
+                    to,
+                    i128_val(i128::from(UNIT)),
+                ],
+            )?;
+            let env = ctx.driver().soroban(&issuer, hf)?;
+            let applied = ctx.submit_and_close(&env)?;
+            ensure_events(&applied, emits, &["mint"])?;
+            ensure_muxed_data(&applied, "mint", &ScVal::U64(mux_id))?;
+            ctx.capture(
+                "sac-issuer-transfer-to-muxed-contract",
+                Selector::ledger_of(&applied),
+                Spec::new(
+                    "the issuer transfers its asset through the Stellar Asset Contract to a muxed contract address: a mint event whose data is {amount, to_muxed_id}",
+                )
+                .fields(&["op.invoke_host_function.invoke_contract.args"]),
             )?;
         }
         Ok(())

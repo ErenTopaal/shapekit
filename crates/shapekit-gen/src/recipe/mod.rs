@@ -34,6 +34,7 @@ pub mod events_max;
 pub mod failed_tx;
 pub mod invoke_basics;
 pub mod max_length;
+pub mod memo_arms;
 pub mod memo_bytes;
 pub mod muxed_source;
 mod output;
@@ -129,6 +130,7 @@ pub fn all() -> Vec<Box<dyn Recipe>> {
         Box::new(cap03::OfferLiabilities { protocol: 30 }),
         Box::new(max_length::MaxLength { protocol: 30 }),
         Box::new(memo_bytes::MemoBytes { protocol: 30 }),
+        Box::new(memo_arms::MemoArms { protocol: 30 }),
         Box::new(failed_tx::FailedTx { protocol: 30 }),
         Box::new(cap15::FeeBump { protocol: 30 }),
         Box::new(cap27::MuxedAccounts { protocol: 30 }),

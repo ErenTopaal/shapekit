@@ -3203,6 +3203,22 @@ dependencies = [
 [[package]]
 name = "shapekit-harness"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "jsonschema",
+ "reqwest",
+ "schemars 1.2.3",
+ "serde",
+ "serde_json",
+ "shapekit-manifest",
+ "shapekit-oracle",
+ "shapekit-pack",
+ "shapekit-serve",
+ "stellar-strkey 1.0.0",
+ "tempfile",
+ "thiserror 2.0.21",
+ "toml",
+]
 
 [[package]]
 name = "shapekit-manifest"
@@ -3226,6 +3242,7 @@ version = "0.1.0"
 dependencies = [
  "ed25519-dalek 3.0.0",
  "hex",
+ "schemars 1.2.3",
  "serde",
  "serde_json",
  "sha2 0.11.1",

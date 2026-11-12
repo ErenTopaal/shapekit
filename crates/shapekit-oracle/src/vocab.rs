@@ -4,6 +4,7 @@
 //! reader never routes it through a float. Addresses are canonical strkeys (G, C, L, B);
 //! signers keep their own form (G, T, X, P). Mux ids never replace the base address.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use stellar_xdr::{Asset, TrustLineAsset};
 
@@ -28,6 +29,20 @@ impl TryFrom<String> for Int {
     }
 }
 
+impl JsonSchema for Int {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        "Int".into()
+    }
+
+    fn json_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "description": "A signed integer of up to 128 bits as a decimal string.",
+            "type": "string",
+            "pattern": "^(0|-?[1-9][0-9]*)$"
+        })
+    }
+}
+
 impl From<i64> for Int {
     fn from(v: i64) -> Self {
         Int(v.into())
@@ -46,7 +61,7 @@ impl From<u32> for Int {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum AddressKind {
     Account,
@@ -56,7 +71,7 @@ pub enum AddressKind {
 }
 
 /// An address an indexer should attribute the transaction to.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Participant {
     pub address: String,
     pub kind: AddressKind,
@@ -70,7 +85,7 @@ pub struct Participant {
 }
 
 /// Where a change came from.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum ChangeScope {
     FeeProcessing,
@@ -81,7 +96,7 @@ pub enum ChangeScope {
     Upgrade,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum Action {
     Created,
@@ -90,7 +105,7 @@ pub enum Action {
     Restored,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Thresholds {
     pub low: u8,
     pub medium: u8,
@@ -98,7 +113,7 @@ pub struct Thresholds {
 }
 
 /// One normalized state change. `scope` and `op_index` say where in the meta it was found.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct StateChange {
     pub scope: ChangeScope,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -107,7 +122,7 @@ pub struct StateChange {
     pub change: Change,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum Change {
     AccountCreated {
@@ -328,7 +343,7 @@ pub enum Change {
     TokenEvent(TokenEvent),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TokenEvent {
     pub event: String,
     /// `before-all-txs`, `operation`, `after-tx` or `after-all-txs`.

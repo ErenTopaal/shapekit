@@ -1,16 +1,17 @@
-//! `cap63.parallel-txset`: CAP-63 parallel Soroban transaction sets. Four
+//! `cap63.parallel-txset`: CAP-63 parallel Soroban transaction sets. Five
 //! Soroban invocations are queued and closed in one ledger, so its
 //! generalized transaction set carries a parallel Soroban phase. Two of them
-//! write the same entry and must share a dependent cluster; the other two
-//! are independent of everything and get clusters of their own.
+//! write the same entry and must share a dependent cluster; two others are
+//! independent of everything and get clusters of their own; the fifth only
+//! reads, changes nothing, and is packed into whichever cluster has room.
 //!
 //! | ledger  | content                                                     |
 //! |---------|-------------------------------------------------------------|
 //! | 2       | protocol upgrade                                            |
 //! | 3 to 6  | testnet Soroban settings (three dependent clusters a stage) |
-//! | 7       | root funds four sources                                     |
-//! | 8 to 10 | three echo instances deployed                               |
-//! | 11      | four echo calls in one parallel phase                       |
+//! | 7       | root funds five sources                                     |
+//! | 8 to 11 | four echo instances deployed                                |
+//! | 12      | five echo calls in one parallel phase                       |
 //!
 //! Core packs independent clusters first-fit into at most
 //! `ledgerMaxDependentTxClusters` bins of `ledgerMaxInstructions / stages`
@@ -141,9 +142,8 @@ pub(crate) fn invocation(
     ctx.sign(tx, &[source])
 }
 
-/// The clusters of every stage of the ledger's parallel Soroban phase, as
-/// transaction counts.
-fn stages(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<usize>>> {
+/// The clusters of every stage of the ledger's parallel Soroban phase.
+fn stages(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<Vec<TransactionEnvelope>>>> {
     let LedgerCloseMeta::V2(m) = lcm else {
         anyhow::bail!("the ledger's meta is not LedgerCloseMetaV2");
     };
@@ -159,7 +159,7 @@ fn stages(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<usize>>> {
     Ok(parallel
         .execution_stages
         .iter()
-        .map(|stage| stage.iter().map(|cluster| cluster.len()).collect())
+        .map(|stage| stage.iter().map(|cluster| cluster.to_vec()).collect())
         .collect())
 }
 
@@ -201,12 +201,12 @@ impl Recipe for ParallelTxSet {
             ),
         )?;
 
-        let roles = ["s1", "s2", "s3", "s4"];
+        let roles = ["s1", "s2", "s3", "s4", "s5"];
         ctx.fund(&roles, BALANCE)?;
         let keys: Vec<SigningKey> = roles.iter().map(|r| ctx.account(r)).collect();
         let code = echo_code();
         let mut instances = Vec::new();
-        for name in ["a", "b", "c"] {
+        for name in ["a", "b", "c", "d"] {
             let id = ctx.driver().deploy(&keys[0], &code, &salt(FAMILY, name))?;
             instances.push(id);
         }
@@ -243,6 +243,11 @@ impl Recipe for ParallelTxSet {
             let env = invocation(ctx, &keys[*who], hf, *fee, Some(*declared))?;
             envs.push(env);
         }
+        // s5 only reads instance d, which nothing ever stored into, so its
+        // call changes no entry and conflicts with nobody
+        let hf = call(&instances[3], "last", vec![])?;
+        envs.push(invocation(ctx, &keys[4], hf, 500, None)?);
+
         let applied = ctx.driver().apply_together(&envs)?;
         for a in &applied {
             ensure!(
@@ -254,9 +259,17 @@ impl Recipe for ParallelTxSet {
             );
         }
         let ledger = applied[0].ledger;
-        let shape = stages(ctx.driver().last_meta())?;
+        let built = stages(ctx.driver().last_meta())?;
+        let shape: Vec<Vec<usize>> = built
+            .iter()
+            .map(|stage| stage.iter().map(Vec::len).collect())
+            .collect();
+        let pair_shared = built
+            .iter()
+            .flatten()
+            .any(|c| c.contains(&envs[0]) && c.contains(&envs[3]));
         ensure!(
-            shape.len() == 1 && shape[0].len() == 3 && shape[0].contains(&2),
+            shape.len() == 1 && shape[0].len() == 3 && pair_shared,
             "ledger {ledger}: expected one stage of three clusters, the conflicting calls sharing one, core built {shape:?}"
         );
         ensure!(
@@ -265,10 +278,11 @@ impl Recipe for ParallelTxSet {
             envs.len()
         );
         ctx.capture(
-            "four-calls-parallel-phase",
+            "five-calls-parallel-phase",
             Selector::Ledger(ledger),
             Spec::new(format!(
-                "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase with stages and clusters {shape:?}: two calls writing the same entry share a cluster, two independent calls get their own; each result meta carries the post-apply fee refund changes"
+                "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of {:?} transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+                shape[0]
             )),
         )
     }

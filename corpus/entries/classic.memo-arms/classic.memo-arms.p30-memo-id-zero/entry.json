@@ -1,0 +1,57 @@
+{
+  "caps": [
+    "CAP-0019"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.memo-arms",
+  "fields_exercised": [
+    "tx.memo.type",
+    "tx.memo.id"
+  ],
+  "flags": [],
+  "id": "classic.memo-arms.p30-memo-id-zero",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "an XLM payment to a plain account with memo-id-zero, accepted by core; the memo value reappears as to_muxed_id in the transfer event",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "classic.memo-arms.p30",
+    "class": "local-core",
+    "ledger_seq": 4,
+    "normalization": "core-normalize-meta",
+    "recipe": "classic.memo-arms"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/mainnet.expected.json",
+      "expected_json_sha256": "e9e94564a65650885d57986485b52f61cf2b6c8f54e87f3db056060fb8bc8e2d",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/mainnet.oracle.json",
+      "oracle_sha256": "c1c32e09bc2758ff3f97c32e3d9a3d7b5e1e32498a8031b0f19988129acf66af",
+      "xdr_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/mainnet.xdr",
+      "xdr_sha256": "749c83885083093899359c1fa48aad0704d2ef51bac3ca4b43203ded8bef021a"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/testnet.expected.json",
+      "expected_json_sha256": "940f8fdbe0f193b69be2c5482b2c67f6c806255e3607a3cdd6953818a485dc36",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/testnet.oracle.json",
+      "oracle_sha256": "33c89b50c2e531e7570de976484024e75afc9392a5e2048d1537c8b3ff76dd96",
+      "xdr_file": "entries/classic.memo-arms/classic.memo-arms.p30-memo-id-zero/testnet.xdr",
+      "xdr_sha256": "4dea3aaf2e2b3a298f7d781b4ed1660ff2990a9bbfea05aba7a331c4fefe9419"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

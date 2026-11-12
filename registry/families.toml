@@ -301,6 +301,19 @@ priority = 9
 notes = "core checks only the 28-byte xdr bound, so non-utf8 text is accepted. the fragment is coarse: byte content is a leaf value, so any text memo matches and the recipe flags the non-utf8 entries. memo text predates the cap process; cap-0019 is named because the entries use the v1 envelope it defined"
 
 [[family]]
+id = "classic.memo-arms"
+title = "Memo id, hash and return values core never checks"
+caps = ["CAP-0019"]
+protocol_introduced = 13
+protocol_valid = { min = 13 }
+signature = ["Memo:id", "Memo:hash", "Memo:return"]
+source_classes = ["local-core"]
+fields = ["tx.memo.type", "tx.memo.id", "tx.memo.hash", "tx.memo.return"]
+linked_issues = []
+priority = 13
+notes = "memo id, hash and return are opaque to core beyond their xdr shape, and memo id reappears as to_muxed_id in classic transfer events (fields.toml tx.memo.id). split from classic.memo-bytes so that family keeps its text-only meaning. memo arms predate the cap process; cap-0019 is named because the entries use the v1 envelope it defined"
+
+[[family]]
 id = "cap67.unified-events"
 title = "Unified asset events from classic operations, fee events and to_muxed_id map data"
 caps = ["CAP-0067"]
