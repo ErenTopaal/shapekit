@@ -1,0 +1,568 @@
+# every upstream reference the project depends on, checked against the live
+# source by `shapekit pins verify`. values were resolved from the upstream
+# registries and git remotes, never typed in by hand.
+#
+# tables:
+#   [[toolchain]]  name (rust, go, node), version, release artifact and its sha256
+#   [[image]]      docker hub repository, tag and manifest digest (the index digest for multi-arch images)
+#   [[git]]        remote url, optional ref, commit sha. a ref without a sha is a
+#                  deliberately floating ref (only checked to exist). a sha without a
+#                  ref is a bare commit (checked by fetching it)
+#   [[crate]]      crates.io name, exact version and the .crate sha256
+#   [[npm]]        npm package, version and dist integrity
+#   [[gomod]]      go module, version and the vcs commit the go proxy reports
+
+schema = 1
+
+# toolchains (plan 2.1)
+
+[[toolchain]]
+name = "rust"
+version = "1.99.1"
+artifact = "channel-rust-1.99.1.toml"
+sha256 = "fb152be80975c194aa5fc684b2aec3a6e14e2b855efe2faa4e5f8ae6e590f463"
+purpose = "rust toolchain for the workspace, also pinned in rust-toolchain.toml"
+
+[[toolchain]]
+name = "go"
+version = "1.27.4"
+artifact = "go1.27.4.linux-amd64.tar.gz"
+sha256 = "7226736c2339719cda28fbf3a54d71aa63bcefe376e98cef00034268dab24840"
+purpose = "go toolchain for adapters, lint and the go testee"
+
+[[toolchain]]
+name = "node"
+version = "26.13.1"
+artifact = "node-v26.13.1-linux-x64.tar.xz"
+sha256 = "5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864"
+purpose = "node lts for the js testee"
+
+# container images (plan 2.2 and 2.6)
+
+[[image]]
+name = "stellar-core"
+repository = "stellar/stellar-core"
+tag = "30.0.0-3642.0e49751aa.noble"
+digest = "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51"
+purpose = "standalone core used to generate and record chains"
+
+[[image]]
+name = "stellar-core-buildtests"
+repository = "stellar/unsafe-stellar-core"
+tag = "30.0.0-3642.0e49751aa.noble-buildtests"
+digest = "sha256:a8cb428ce497695321fdffc8cdb23b8102c1074ebe480f1c9e923fe1052e22ff"
+purpose = "core test build, only for the test --check-lcm run"
+
+[[image]]
+name = "timescaledb"
+repository = "timescale/timescaledb"
+tag = "2.28.2-pg17"
+digest = "sha256:909e2c7577c074517c8936b6d8799294b33f25fb5bad978a2199250665f1ce1a"
+purpose = "wallet-backend database in the reference adapter"
+
+[[image]]
+name = "seaweedfs"
+repository = "chrislusf/seaweedfs"
+tag = "4.46"
+digest = "sha256:08d516132314207d10c8e37cbffc1f32b147d870169688734cc61c6231625b62"
+purpose = "s3 store for wallet-backend datastore mode"
+
+[[image]]
+name = "fake-gcs-server"
+repository = "fsouza/fake-gcs-server"
+tag = "1.56.1"
+digest = "sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef"
+purpose = "gcs emulator for the stellar-etl adapter"
+
+# stellar repositories (plan 2.2, R2, R3, R4, R10, R13)
+
+[[git]]
+name = "stellar-core"
+url = "https://github.com/stellar/stellar-core"
+ref = "refs/tags/v30.0.0"
+sha = "0e49751aa9ddf892302cca02cea7f3f5d97df9f1"
+purpose = "core source, config keys and --check-lcm goldens"
+
+[[git]]
+name = "stellar-xdr"
+url = "https://github.com/stellar/stellar-xdr"
+ref = "refs/tags/v30.0"
+sha = "4f524bbac80c781c06e4fb5fc93a2d0d331d6705"
+purpose = "protocol 30 xdr definitions"
+
+[[git]]
+name = "stellar-rpc"
+url = "https://github.com/stellar/stellar-rpc"
+ref = "refs/tags/v30.0.0"
+sha = "13e53516633c3ce1281c7edbacb607107d3a4e55"
+purpose = "rpc method shapes served by the replay rpc"
+
+[[git]]
+name = "stellar-etl"
+url = "https://github.com/stellar/stellar-etl"
+ref = "refs/tags/v2.8.34"
+sha = "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+purpose = "second harness target (beyond rfp)"
+
+[[git]]
+name = "stellar-protocol"
+url = "https://github.com/stellar/stellar-protocol"
+sha = "ced008c3727005ca4a775f430fe6fe346c30f58f"
+purpose = "cap and sep texts (sep-23 1.4.0, sep-51 2.0.1, sep-54 0.2.0) as read on 2026-11-12"
+
+# wallet-backend has no tags, so every pin is a bare commit (R12)
+
+[[git]]
+name = "wallet-backend"
+url = "https://github.com/stellar/wallet-backend"
+sha = "e967ce8b7362b79c277e700e789181d76fbb5967"
+purpose = "current wallet-backend, also the fixed side for issue 716"
+
+[[git]]
+name = "wallet-backend-pr729-fixed"
+url = "https://github.com/stellar/wallet-backend"
+sha = "2c873353c1f0f3c9b145e25a7d009023ad104a1c"
+purpose = "pr 729 signed-payload signers, fixed"
+
+[[git]]
+name = "wallet-backend-pr729-prefix"
+url = "https://github.com/stellar/wallet-backend"
+sha = "2a0a84ea12523b6c92e278c0c84b443041240095"
+purpose = "pr 729 signed-payload signers, parent of the fix"
+
+[[git]]
+name = "wallet-backend-issue731-fixed"
+url = "https://github.com/stellar/wallet-backend"
+sha = "c152783c054c765c8b51fd26ed313fd1ebc1c50c"
+purpose = "issue 731 sac trust() state changes, fixed by pr 734"
+
+[[git]]
+name = "wallet-backend-issue731-prefix"
+url = "https://github.com/stellar/wallet-backend"
+sha = "764a4f5bcbff5abb0949d93da37f769063013ea0"
+purpose = "issue 731, parent of the pr 734 fix"
+
+[[git]]
+name = "wallet-backend-pr693"
+url = "https://github.com/stellar/wallet-backend"
+sha = "6e5a59101158dc2996295450190142366062cd05"
+purpose = "pr 693 muxed address reduction, first fix contributing to issue 716"
+
+[[git]]
+name = "wallet-backend-issue716-prefix"
+url = "https://github.com/stellar/wallet-backend"
+sha = "79ea2acd1dc65a07166133cc04b12e76db314db0"
+purpose = "issue 716 pre-fix default, parent of pr 693"
+
+[[git]]
+name = "wallet-backend-pr753-fixed"
+url = "https://github.com/stellar/wallet-backend"
+sha = "bb0b162b072583c7dabffbdee664d1c117e5ba56"
+purpose = "pr 753 muxed soroban source duplicate key, fixed (beyond rfp)"
+
+[[git]]
+name = "wallet-backend-pr753-prefix"
+url = "https://github.com/stellar/wallet-backend"
+sha = "f8e5786d22c04adad16318f2e126728beec5aac9"
+purpose = "pr 753, parent of the fix"
+
+[[git]]
+name = "wallet-backend-pr756"
+url = "https://github.com/stellar/wallet-backend"
+sha = "666a64d426263fa6bd2a0ee61ee8dfb1f4729019"
+purpose = "pr 756 sep-41 address kinds, contributing fix for issue 716"
+
+[[git]]
+name = "wallet-backend-pr792-fixed"
+url = "https://github.com/stellar/wallet-backend"
+sha = "09303667545a1effb09c779ff29d271c6c812de3"
+purpose = "pr 792 muxed contract addresses, fixed (beyond rfp, protocol 30)"
+
+[[git]]
+name = "wallet-backend-pr792-prefix"
+url = "https://github.com/stellar/wallet-backend"
+sha = "a9bac8d2f59f7590d393c3e72e67d95b7cb2fba1"
+purpose = "pr 792, base of the rebased commit range"
+
+# github actions (plan 2.7). workflows use these major-version refs, which
+# upstream moves on every release, so only their existence is checked
+
+[[git]]
+name = "actions-checkout"
+url = "https://github.com/actions/checkout"
+ref = "refs/tags/v7"
+purpose = "ci checkout"
+
+[[git]]
+name = "actions-setup-node"
+url = "https://github.com/actions/setup-node"
+ref = "refs/tags/v7"
+purpose = "ci node setup"
+
+[[git]]
+name = "actions-setup-go"
+url = "https://github.com/actions/setup-go"
+ref = "refs/tags/v7"
+purpose = "ci go setup"
+
+[[git]]
+name = "dtolnay-rust-toolchain"
+url = "https://github.com/dtolnay/rust-toolchain"
+ref = "refs/heads/1.99.1"
+purpose = "ci rust setup"
+
+[[git]]
+name = "swatinem-rust-cache"
+url = "https://github.com/Swatinem/rust-cache"
+ref = "refs/tags/v2"
+purpose = "ci cargo cache"
+
+[[git]]
+name = "actions-upload-artifact"
+url = "https://github.com/actions/upload-artifact"
+ref = "refs/tags/v7"
+purpose = "ci artifact upload"
+
+[[git]]
+name = "actions-cache"
+url = "https://github.com/actions/cache"
+ref = "refs/tags/v6"
+purpose = "ci cache"
+
+# rust crates: workspace dependencies (plan 2.3)
+
+[[crate]]
+name = "clap"
+version = "4.6.7"
+checksum = "aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946"
+purpose = "cli"
+
+[[crate]]
+name = "serde"
+version = "1.0.229"
+checksum = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+purpose = "serialization"
+
+[[crate]]
+name = "serde_json"
+version = "1.0.154"
+checksum = "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
+purpose = "json"
+
+[[crate]]
+name = "toml"
+version = "1.2.1+spec-1.1.0"
+checksum = "d5755c51863cdac711f1956baf8eb9588e060755f7d3c4c979e70ea1e1f32cd7"
+purpose = "registry and pins files"
+
+[[crate]]
+name = "thiserror"
+version = "2.0.21"
+checksum = "09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e"
+purpose = "library error types"
+
+[[crate]]
+name = "anyhow"
+version = "1.0.104"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
+purpose = "cli error handling"
+
+[[crate]]
+name = "sha2"
+version = "0.11.1"
+checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+purpose = "hashes"
+
+[[crate]]
+name = "hex"
+version = "0.4.3"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+purpose = "hex encoding"
+
+[[crate]]
+name = "base64"
+version = "0.23.1"
+checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
+purpose = "base64 xdr"
+
+[[crate]]
+name = "zstd"
+version = "0.14.3"
+checksum = "db3ae9bf90af6e40197bef767eeefc46ad6397420fe873830bd85e5fbbfb3c70"
+purpose = "sep-54 batch compression"
+
+[[crate]]
+name = "ed25519-dalek"
+version = "3.0.0"
+checksum = "6ebaa1a2bf1290ab3bfe5a7b771d050ebffab2711c19a81691c683a5144a25de"
+purpose = "transaction signing"
+
+[[crate]]
+name = "tokio"
+version = "1.54.1"
+checksum = "b52fd3255258d26fac7264ab5a76b53c13367136dc011d3d6ad4f8ed070396a3"
+purpose = "async runtime for the servers"
+
+[[crate]]
+name = "axum"
+version = "0.8.9"
+checksum = "31b698c5f9a010f6573133b09e0de5408834d0c82f8d7475a89fc1867a71cd90"
+purpose = "replay rpc and static file server"
+
+[[crate]]
+name = "reqwest"
+version = "0.13.5"
+checksum = "16a1cfa75cc186dd73d5818e510e042e40927bccc9c236b061cea97e1eb08029"
+purpose = "http client"
+
+[[crate]]
+name = "jsonschema"
+version = "0.60.2"
+checksum = "a42a11b47492e6a2cc76e9c7bcc8077776cb31dac444e0795d7f61bcc6441c08"
+purpose = "manifest schema validation"
+
+[[crate]]
+name = "schemars"
+version = "1.2.3"
+checksum = "ab508826f74a77ca9d5aba6ff19b522583ee3eaf28a19384ff3d0e5835fadf6e"
+purpose = "json schema generation"
+
+[[crate]]
+name = "tar"
+version = "0.4.46"
+checksum = "3f6221d9a6003c78398e3b239969f352578258df48c8eb051caadae0015bc840"
+purpose = "history archive bundles"
+
+[[crate]]
+name = "flate2"
+version = "1.1.10"
+checksum = "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
+purpose = "gzip for history archives"
+
+[[crate]]
+name = "walkdir"
+version = "2.5.0"
+checksum = "29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b"
+purpose = "corpus traversal"
+
+[[crate]]
+name = "tempfile"
+version = "3.27.0"
+checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
+purpose = "scratch directories"
+
+[[crate]]
+name = "tracing"
+version = "0.1.44"
+checksum = "63e71662fa4b2a2c3a26f570f037eb95bb1f85397f3cd8076caed2f026a6d100"
+purpose = "logging"
+
+[[crate]]
+name = "tracing-subscriber"
+version = "0.3.23"
+checksum = "cb7f578e5945fb242538965c2d0b04418d38ec25c79d160cd279bf0731c8d319"
+purpose = "logging output"
+
+[[crate]]
+name = "assert_cmd"
+version = "2.2.2"
+checksum = "2aa3a22042e45de04255c7bf3626e239f450200fd0493c1e382263544b20aea6"
+purpose = "cli tests"
+
+[[crate]]
+name = "insta"
+version = "1.49.0"
+checksum = "b67d3d2e287e4b86c10b3f3b641033d1f89b74bdb39d05f34952e2b9a6fe21cd"
+purpose = "snapshot tests"
+
+[[crate]]
+name = "arbitrary"
+version = "1.5.0"
+checksum = "3bc62ac97cc33321f50863d514c3bc38a453947a8f9e781137e47c7401020aed"
+purpose = "fuzzing"
+
+[[crate]]
+name = "libfuzzer-sys"
+version = "0.4.13"
+checksum = "a9fd2f41a1cba099f79a0b6b6c35656cf7c03351a7bae8ff0f28f25270f929d2"
+purpose = "fuzzing"
+
+[[crate]]
+name = "cargo-fuzz"
+version = "0.13.2"
+checksum = "5acfd01930e49823e58c30dd8012d3338a620377d7c7d4cc140ca4b2169400e2"
+purpose = "fuzzing driver"
+
+# rust crates: stellar stack (plan 2.2) and the rust sdk matrix (plan 2.2, R14)
+
+[[crate]]
+name = "stellar-xdr"
+version = "30.0.0"
+checksum = "56f2fb2008b42fc746c0f6b46e375600068dd91f07748e9f1737c6341a2255f2"
+purpose = "protocol 30 xdr, round-trip checks, current rust testee"
+
+[[crate]]
+name = "stellar-xdr"
+version = "28.0.0"
+checksum = "f93d09ff8b9f919b084f664003c4c546ac66a76affd5429460dbe29f4b326f8e"
+purpose = "rust testee matrix, last version before GHSA-3xhm-p452-9wjh fix"
+
+[[crate]]
+name = "stellar-xdr"
+version = "28.0.1"
+checksum = "52599dcc4daa661c19d912f5ad55322772515a198c0da3c985ef3922f7f40b77"
+purpose = "rust testee matrix, first version with GHSA-3xhm-p452-9wjh fix"
+
+[[crate]]
+name = "stellar-strkey"
+version = "1.0.0"
+checksum = "5038ed2bf4e11842210d118f65791d8ca4747622daddd222338b3d06b6051bc1"
+purpose = "strkey encoding, rust testee matrix"
+
+[[crate]]
+name = "soroban-env-host"
+version = "30.0.0"
+checksum = "136f5fa76934f7ad340b57c038ed5da5574a028bedff4ae55bbaf5e3d77fd1dc"
+purpose = "protocol 30 host"
+
+[[crate]]
+name = "soroban-env-host"
+version = "29.0.2"
+checksum = "04997ca846c78e92904739d3bbf4b6c335a9e2c5c206a1408f1f8cca80a4f74b"
+purpose = "protocol 29 host, referenced for comparison only"
+
+[[crate]]
+name = "soroban-simulation"
+version = "30.0.0"
+checksum = "f06e64f1d6756c9a46e5c5376065bb487d55883ab6504f14370fc7aba1e5b9b2"
+purpose = "soroban transaction simulation"
+
+[[crate]]
+name = "soroban-sdk"
+version = "29.0.1"
+checksum = "6a3b97a76c88f413859bb670903b63af54d7ddb03303a5bd585fee8b9f2a3d8f"
+purpose = "test contracts"
+
+# npm (plan 2.2, 2.5, js sdk matrix)
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "16.3.0"
+integrity = "sha512-pnB1t4bdnkN8M7tRIcLXnNboq+Hof62NzPMnQrl5MWBNC/d1vUbdrzXgy7yw8I+0hbfz5YN64uVb84BqzIpYiQ=="
+purpose = "js testee matrix, before js-stellar-sdk 1766 asset order backport"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "16.3.1"
+integrity = "sha512-PPM1JA51NChSPyMkh+T9sHxJtP/v9e9Gcyc2BMNvnGvbZwqoKJclRSdPgmalLDAmTnTewGs7VMM9nRxDeCzzgQ=="
+purpose = "js testee matrix, Asset.compare backport of 1766"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "16.4.1"
+integrity = "sha512-0kT+ShOUE6dc0smLEsajuizss1hvlGDsCooM88FqgxNOCKpY8IuQPzCs75RNKMSMITz+dX7KZ5qGhQ2EWGMTTg=="
+purpose = "js testee matrix, latest v16"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "17.2.0"
+integrity = "sha512-hGdbvhnOMFwAe+QOAUVPrtLf8U+arO2XG+0osEeY87Ti5scj1R52YSw8HW828gf6UG4PW/jtAlfnyaGCj8t6UA=="
+purpose = "js testee matrix, before the 1766 fix"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "17.2.1"
+integrity = "sha512-kIyfnZ2zCOqV8SUJcsk9buBOvhH1wsLU7KAzqAJyY7AgmD+KdvLTMpI1gcYdhGSakuDG5s6xSO4EN9HZTxpm8g=="
+purpose = "js testee matrix, 1766 fixed, before the 1785 and 1789 fixes"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "17.3.0"
+integrity = "sha512-E9olNBk1FDTYSdGphd+U4EMlbRdkCQfveuK7/fhEtlEBl7GIoXtHHr0Hh6WcxIiO0/sRutsgapZDhhGpdd/Bqg=="
+purpose = "js testee matrix, 1785 and 1789 fixed"
+
+[[npm]]
+name = "@stellar/stellar-sdk"
+version = "17.4.0"
+integrity = "sha512-IX6gi62yWQ+6Oz56LsVEEeSViSOWJL3BkttftwVmVsu+62nLTWNVsCmTWEzwgNLT/q5HGP25OnlU+hhy2E4wwA=="
+purpose = "js testee matrix, current"
+
+[[npm]]
+name = "@stellar/stellar-xdr-json"
+version = "30.0.0"
+integrity = "sha512-8kU8er2N5j6eOc1nMPHPlcZSO+QD9XMZ8LILN7i8k/TnKp/VTV7rgHEIWm7pW6Fz11e+DMpI+pffKsrdhPapmw=="
+purpose = "xdr-json for the js testee, if phase 8 selects it"
+
+[[npm]]
+name = "typescript"
+version = "7.0.2"
+integrity = "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="
+purpose = "js testee build"
+
+# go modules (plan 2.2, 2.4, go sdk matrix, R14)
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.6.0"
+origin_hash = "dd844ab32ac8bef7984c76ad1e59c2209a4aacc5"
+purpose = "R14 reference, Asset.LessThan without the issuer order fix"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.6.1"
+origin_hash = "16b2ed4dea1a2be82202ada3304fb939030add88"
+purpose = "R14 reference, Asset.LessThan with the issuer order fix"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.7.1"
+origin_hash = "3114a80b8ca3e1adfac01a458961a29847bee4bb"
+purpose = "go testee matrix, before the Asset.LessThan fix"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.7.2"
+origin_hash = "b46a4639ccc5e9249fe8775b24ae718306f829ad"
+purpose = "go testee matrix, Asset.LessThan fixed"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.7.3"
+origin_hash = "83d77301a1966946cc5864856b08694b5a82c662"
+purpose = "go testee matrix, protocol 28 sdk of the pre-fix wallet-backend commits"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-sdk"
+version = "v0.8.0"
+origin_hash = "921a5b16af9a72d973ab9ba666e96ad8bf2f6ce4"
+purpose = "go testee matrix and adapters, current, first protocol 30 release"
+
+[[gomod]]
+module = "github.com/stellar/go-stellar-xdr-json"
+version = "v0.0.0-20261030210117-c68093a10a8a"
+origin_hash = "c68093a10a8a75b4fbd98b1a64f8cf8368ded9f9"
+purpose = "xdr-json for the go testee, if phase 8 selects it"
+
+[[gomod]]
+module = "golang.org/x/tools"
+version = "v0.52.0"
+origin_hash = "16517d951552611e7bd358c48ee1051fd0e57b0c"
+purpose = "go/analysis for the linter"
+
+[[gomod]]
+module = "github.com/jackc/pgx/v5"
+version = "v5.12.0"
+origin_hash = "b2ef08bbb951384e3936e45de60de60609f2d2ba"
+purpose = "wallet-backend read-back in the adapter"
+
+[[gomod]]
+module = "github.com/stretchr/testify"
+version = "v1.12.1"
+origin_hash = "959dbdacf1533e155162811ea90c90117a420463"
+purpose = "go tests"
+
+[[gomod]]
+module = "github.com/golangci/golangci-lint/v2"
+version = "v2.15.0"
+origin_hash = "25c5369a93aacb8cccea0d46e1569ca4a194564d"
+purpose = "lints this repo's go code"
