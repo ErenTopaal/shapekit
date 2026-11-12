@@ -23,9 +23,10 @@ For each chain (one recorded ledger sequence per shape family, protocol and pass
    The visible head is set to the bootstrap ledger (see "Bootstrap").
 2. Starts the adapter program, sends `describe`, then `start`.
 3. Waits until `status` reports `last_ingested_ledger` at or past the bootstrap ledger.
-4. For every later ledger of the chain in order: moves the server's head to it, sends
-   `advance`, and polls `status` until the target has ingested it, the target died, or it
-   stopped making progress.
+4. For every later ledger of the chain in order: moves the server's head to it, checks that
+   the server answers `getLedgers` for it (a ledger the server cannot serve is a harness
+   error, never a target verdict), sends `advance`, and polls `status` until the target has
+   ingested it, the target died, or it stopped making progress.
 5. Sends `export` for every ledger the target ingested and compares the records with the
    oracle files of the chain's corpus entries.
 6. Sends `stop`, keeps the returned logs, removes the network and the work directory.
@@ -340,7 +341,9 @@ exported.
   ledger, last ingested ledger, target peak memory, stop reason) and one row per entry with
   `verdict`, `reason`, the problems found and any unmapped rows.
 - `HARNESS.md`: the same as tables, one row per entry.
-- `logs/`: adapter stderr and target logs per chain.
+- `logs/`: adapter stderr (`<chain>.<network>.adapter.log`) and the target logs `stop`
+  returned (`<chain>.<network>.target.log`) per chain; with `--repeat`, one `logs/round-<n>/`
+  per round.
 
 `--repeat N` runs the whole selection N times in one process and fails when a later round's
 peak resident memory exceeds the first round's by more than `--memory-slack` (default 10% or
@@ -379,7 +382,9 @@ expect = [
 ]
 ```
 
-A case holds when every listed entry has the listed verdict (and reason, when given). The
+The command runs with the harness's environment, so `go` must be on `PATH` for the table
+in `adapters/walletbackend/reproductions.toml`. A case holds when every listed entry has the
+listed verdict (and reason, when given), and its chain ran without a harness error. The
 command exits non-zero when any case does not hold, and writes `reproductions.json` and
 `REPRODUCTIONS.md` next to each case's full report.
 
@@ -462,7 +467,7 @@ go-stellar-sdk's strict strkey decoder; account columns accept `G` and `C`, sign
 | FLAGS SET / CLEAR | `account-flags`, one per account and operation | `account` |
 | HOME_DOMAIN SET / UPDATE / CLEAR | `home-domain` | `account`, `before`, `after` from `key_value` old/new (absent as `""`) |
 | DATA_ENTRY ADD / UPDATE / REMOVE | `data-entry` | `account`, `action`, `name_hex`, `value_before_hex`, `value_after_hex` (base64 `key_value` as hex) |
-| TRUSTLINE ADD | `trustline-created` | `account`, `asset`, `limit`; `flags` from the BALANCE_AUTHORIZATION SET row written with it |
+| TRUSTLINE ADD | `trustline-created` | `account`, `asset`, `limit` (stored in horizon's 7-decimal amount form, converted to stroops); `flags` from the BALANCE_AUTHORIZATION SET row written with it |
 | TRUSTLINE UPDATE / REMOVE | `trustline-limit` / `trustline-removed` | `account`, `asset`, `before`, `after` |
 | BALANCE_AUTHORIZATION SET / CLEAR, G holder | `trustline-flags`, one per holder, asset and operation | `account`, `asset` |
 | BALANCE_AUTHORIZATION SET / CLEAR, C holder | `token-event` `set_authorized` (not claimed) | `contract`, `to`, `authorized` |
@@ -477,8 +482,9 @@ whose transaction has no `transactions` row come out as `unattributed` records.
 Claims follow from the table: participants of kind `account` only (wallet-backend does not record
 event-emitting contracts as participants, and keeps no mux ids), every kind above on the
 fields it stores, `token-event` `transfer`/`mint`/`burn`/`clawback` on `event`, `contract`,
-`from`, `to`, `amount`, `to_muxed_id`, `fee` on `event`, `contract`, `from` (the stored fee is net
-of the refund), and `approve`. Values wallet-backend does not keep (starting balances, threshold
+`from`, `to`, `amount`, `to_muxed_id`, the `fee` event of stage `before-all-txs` on `event`,
+`contract`, `from` (the stored fee row is net of any refund, so its amount and the refund event
+are not claimed), and `approve`. Values wallet-backend does not keep (starting balances, threshold
 values, account flag values, trustline flag values after authorization changes, executables)
 are not claimed.
 
@@ -738,7 +744,7 @@ A contract instance entry appeared. Read from meta, never from auth entries.
 | field | type | always present | meaning |
 |---|---|---|---|
 | `contract` | string | yes |  |
-| `executable` | string | yes | `wasm:<hex hash>` or `stellar-asset`. |
+| `executable` | string | yes | `wasm:<hex hash>`, `stellar-asset`, or `external-ref:<owner>:<hex tag>` (CAP-85). |
 
 ### `contract-code`
 

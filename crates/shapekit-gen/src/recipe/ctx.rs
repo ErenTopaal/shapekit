@@ -10,8 +10,8 @@ use shapekit_core_driver::keys::{account_id, derive_key, muxed_account};
 use shapekit_core_driver::node::SubmitStatus;
 use shapekit_core_driver::recorder::{ChainSummary, FIRST_LEDGER, canonical_frame};
 use shapekit_core_driver::tx::{TransactionBuilder, envelope_hash, sign_transaction};
-use shapekit_manifest::xdr::result_code;
-use shapekit_manifest::{CoreRejection, RejectionStage, Validity};
+use shapekit_manifest::xdr::{self, result_code};
+use shapekit_manifest::{CoreRejection, RejectionStage, Validity, decode_limits};
 use stellar_xdr::{
     CreateAccountOp, Limits, OperationBody, Transaction, TransactionEnvelope, TransactionResult,
     WriteXdr,
@@ -28,6 +28,9 @@ pub struct Spec {
     pub fields_exercised: Vec<String>,
     pub flags: Vec<String>,
     pub linked_issues: Option<Vec<String>>,
+    /// The bytes do not decode under the shared bounds (`shapekit_manifest::decode_limits`),
+    /// so the entry is `decode = must-reject`.
+    pub must_reject: bool,
 }
 
 impl Spec {
@@ -51,6 +54,13 @@ impl Spec {
 
     pub fn issues(mut self, urls: &[&str]) -> Self {
         self.linked_issues = Some(urls.iter().map(|s| s.to_string()).collect());
+        self
+    }
+
+    /// For an envelope core refuses because its own parser cannot read it: the shared decode
+    /// bounds refuse it as well, so a decoder must too.
+    pub fn must_reject(mut self) -> Self {
+        self.must_reject = true;
         self
     }
 }
@@ -210,6 +220,10 @@ impl ChainCtx {
     /// already closed ledger as entry `<family>.p<protocol>-<slug>` (plus
     /// `-envelope` and `-meta` for a transaction).
     pub fn capture(&mut self, slug: &str, selector: Selector, spec: Spec) -> Result<()> {
+        ensure!(
+            !spec.must_reject,
+            "capture {slug}: what a closed ledger holds always decodes"
+        );
         let full = self.claim_slug(slug)?;
         let ledger = selector.ledger();
         let frames = self.driver.recorder().frames();
@@ -253,6 +267,22 @@ impl ChainCtx {
         spec: Spec,
     ) -> Result<TransactionResult> {
         let full = self.claim_slug(slug)?;
+        let bytes = env.to_xdr(Limits::none())?;
+        let decodes = xdr::decode(
+            "TransactionEnvelope",
+            &bytes,
+            decode_limits("TransactionEnvelope", bytes.len()),
+        )
+        .is_ok();
+        ensure!(
+            decodes != spec.must_reject,
+            "capture {slug}: the envelope {} under the shared decode limits",
+            if decodes {
+                "decodes, so it is not must-reject"
+            } else {
+                "does not decode, so it has to be marked must-reject"
+            }
+        );
         let sub = self.driver.node().submit(env)?;
         let result = match (sub.status, sub.error) {
             (SubmitStatus::Error, Some(r)) => r,
@@ -267,7 +297,7 @@ impl ChainCtx {
             selected: Selected {
                 suffix: "",
                 xdr_type: "TransactionEnvelope",
-                bytes: env.to_xdr(Limits::none())?,
+                bytes,
                 lcm_version: None,
                 tx_meta_version: None,
                 tx_index: None,

@@ -176,7 +176,7 @@ func TestMapTrustlineMergesInitialFlags(t *testing.T) {
 	acct := stored(t, testAccount)
 	op := int64(65)<<32 | 1
 	got := m.mapTransaction([]row{
-		scRow(catTrustline, reasonAdd, op, 1, map[string]any{"account_id": acct, "token_id": usd, "trustline_limit_new": "9223372036854775807"}),
+		scRow(catTrustline, reasonAdd, op, 1, map[string]any{"account_id": acct, "token_id": usd, "trustline_limit_new": "922337203685.4775807"}),
 		scRow(catBalanceAuth, reasonSet, op, 2, map[string]any{"account_id": acct, "token_id": usd, "flags": int16(wbFlagAuthorized)}),
 	})
 	cs := changesJSON(t, got)
@@ -195,7 +195,7 @@ func TestUnknownTokenAndBlendRowsAreUnmapped(t *testing.T) {
 	other := contractOf(t, xdr.MustNewCreditAsset("EUR", testIssuer))
 	op := int64(65)<<32 | 1
 	got := m.mapTransaction([]row{
-		scRow(catTrustline, reasonAdd, op, 1, map[string]any{"account_id": acct, "token_id": other, "trustline_limit_new": "1"}),
+		scRow(catTrustline, reasonAdd, op, 1, map[string]any{"account_id": acct, "token_id": other, "trustline_limit_new": "0.0000001"}),
 		scRow("BLEND_SUPPLY", reasonCredit, op, 2, map[string]any{"account_id": acct}),
 	})
 	if len(got.changes) != 0 || len(got.unmapped) != 2 {
@@ -240,6 +240,19 @@ func TestImagesMatchPins(t *testing.T) {
 			if !strings.Contains(string(pins), want) {
 				t.Errorf("pins.toml has no %s for %s", want, img)
 			}
+		}
+	}
+}
+
+func TestStroops(t *testing.T) {
+	for in, want := range map[string]string{"922337203685.4775807": "9223372036854775807", "1": "10000000", "0.5": "5000000", "12.0000001": "120000001"} {
+		if got, ok := stroops(in); !ok || got != want {
+			t.Errorf("%s: %q %v", in, got, ok)
+		}
+	}
+	for _, bad := range []string{"", "1.12345678", "-1", "1e5", ".5"} {
+		if _, ok := stroops(bad); ok {
+			t.Errorf("%q converted", bad)
 		}
 	}
 }

@@ -15,9 +15,9 @@
 use std::collections::BTreeMap;
 
 use stellar_xdr::{
-    AccountEntry, AccountEntryExt, ContractDataDurability, LedgerCloseMeta, LedgerEntry,
-    LedgerEntryChange, LedgerEntryData, LedgerEntryExt, LedgerHeader, LedgerKey, Limits,
-    SequenceNumber, String32, Thresholds, WriteXdr,
+    AccountEntry, AccountEntryExt, ConfigSettingId, ContractDataDurability, LedgerCloseMeta,
+    LedgerEntry, LedgerEntryChange, LedgerEntryData, LedgerEntryExt, LedgerHeader, LedgerKey,
+    Limits, SequenceNumber, String32, Thresholds, WriteXdr,
 };
 
 use crate::network::Network;
@@ -45,6 +45,12 @@ pub enum StateError {
     View(#[from] ViewError),
     #[error("ledger {got} does not follow the state's head ledger {head}")]
     Sequence { head: u32, got: u32 },
+    #[error("ledger {seq} {at}: {problem}")]
+    Order {
+        seq: u32,
+        at: String,
+        problem: String,
+    },
     #[error("ledger {seq} {at}: {problem} for {key}")]
     Inconsistent {
         seq: u32,
@@ -164,7 +170,8 @@ impl LedgerState {
     }
 
     /// The live entry for `key` at the head ledger. Archived and evicted entries are not
-    /// live, which is what `getLedgerEntries` answers too.
+    /// live, which is what `getLedgerEntries` answers too. For the keys
+    /// [`written_without_meta`] names this is the value the meta last showed.
     pub fn get(&self, key: &LedgerKey) -> Option<&LedgerEntry> {
         self.live.get(key)
     }
@@ -300,7 +307,17 @@ impl LedgerState {
         parallel: bool,
         report: &mut ApplyReport,
     ) -> Result<(), StateError> {
-        for change in changes {
+        // canonical lists are sorted, so a key with two groups in one list is first put
+        // back into an order that chains; a tracked key's stored value settles ambiguity
+        let ordered = crate::order::raw_order(changes, |k| {
+            (self.live.contains_key(k) || self.strict(k)).then(|| self.live.get(k))
+        })
+        .map_err(|problem| StateError::Order {
+            seq,
+            at: at.to_string(),
+            problem,
+        })?;
+        for change in ordered {
             match change {
                 LedgerEntryChange::Created(e) => {
                     let key = e.to_key();
@@ -325,6 +342,13 @@ impl LedgerState {
                                     }
                                     _ => false,
                                 };
+                            if cur != e && written_without_meta(&key) {
+                                // core moved it since the meta last showed it; this STATE
+                                // is the first sight of the new value
+                                report.unchecked += 1;
+                                self.live.insert(key, e.clone());
+                                continue;
+                            }
                             if cur != e && !lagging_ttl {
                                 return Err(bad(
                                     seq,
@@ -476,6 +500,26 @@ impl LedgerState {
             report.unchecked += 1;
         }
     }
+}
+
+/// Entries core rewrites while closing a ledger without reporting it in meta, so the state
+/// holds the value the meta last showed, which may be stale at the head. Both are config
+/// settings written after the transactions and upgrades, in
+/// `LedgerManagerImpl::finalizeLedgerTxnChanges` (v30.0.0): the eviction scan
+/// stores its new position on every Soroban ledger (`BucketManager::resolveBackgroundEvictionScan`,
+/// `SorobanNetworkConfig::updateEvictionIterator`), and every
+/// `liveSorobanStateSizeWindowSamplePeriod` ledgers the state size window drops its oldest
+/// sample and appends one (`SorobanNetworkConfig::maybeSnapshotSorobanStateSize`). Neither
+/// value can be derived from meta: one is a bucket file position, the other core's in-memory
+/// state size. A STATE that shows a newer value is taken, not treated as an inconsistency.
+pub fn written_without_meta(key: &LedgerKey) -> bool {
+    matches!(
+        key,
+        LedgerKey::ConfigSetting(k) if matches!(
+            k.config_setting_id,
+            ConfigSettingId::EvictionIterator | ConfigSettingId::LiveSorobanStateSizeWindow
+        )
+    )
 }
 
 fn is_persistent(data: &LedgerEntryData) -> bool {

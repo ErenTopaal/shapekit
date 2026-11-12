@@ -5,11 +5,9 @@ use std::path::Path;
 use anyhow::{Context, Result, bail};
 use shapekit_manifest::build::{ENTRIES_DIR, ENTRY_FILE};
 use shapekit_manifest::xdr::{render_json, to_xdr_json};
-use shapekit_manifest::{Entry, sha256_hex};
+use shapekit_manifest::{Entry, decode_limits, sha256_hex};
 use shapekit_registry::SourceClass;
 use walkdir::WalkDir;
-
-use crate::golden::decode_limits;
 
 /// Removes every entry directory whose `entry.json` has source class `class` and returns the
 /// removed ids, sorted.
@@ -77,7 +75,7 @@ pub fn write_xdr_entry(
     }
     std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
 
-    let json = to_xdr_json(&type_name, bytes, decode_limits(bytes.len()))
+    let json = to_xdr_json(&type_name, bytes, decode_limits(&type_name, bytes.len()))
         .with_context(|| format!("{}: rendering XDR-JSON", entry.id))?;
     let xdr_name = format!("{variant}.xdr");
     let json_name = format!("{variant}.expected.json");

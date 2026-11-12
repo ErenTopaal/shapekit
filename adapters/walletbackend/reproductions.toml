@@ -74,22 +74,24 @@ expect = [
 [[reproduction]]
 id = "wallet-backend-716-muxed"
 issue = "https://github.com/stellar/wallet-backend/issues/716"
-chain = "cap27.muxed-accounts.p28"
+chain = "soroban.muxed-source.p28"
 network = "testnet"
-notes = "muxed (40-byte) addresses are cut to 32 bytes and stored as rows that do not decode back"
+notes = "a muxed soroban source is stored as M version byte plus 32 key bytes, a participant that does not decode back. classic muxed destinations (cap27) already reduce to G at 79ea2acd"
 
 [[reproduction.case]]
 label = "pre-fix"
 commit = "79ea2acd1dc65a07166133cc04b12e76db314db0"
 expect = [
-  { entry = "cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1", verdict = "mishandled", reason = "undecodable-address" },
+  { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "mishandled", reason = "undecodable-address" },
+  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "mishandled", reason = "undecodable-address" },
 ]
 
 [[reproduction.case]]
 label = "fixed"
 commit = "e967ce8b7362b79c277e700e789181d76fbb5967"
 expect = [
-  { entry = "cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1", verdict = "pass" },
+  { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "pass" },
+  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "pass" },
 ]
 
 [[reproduction]]
@@ -97,19 +99,21 @@ id = "wallet-backend-753"
 issue = "https://github.com/stellar/wallet-backend/pull/753"
 chain = "soroban.muxed-source.p28"
 network = "testnet"
-notes = "beyond the rfp: a muxed soroban source plus its base account produce a duplicate key (23505) and ingestion halts"
+notes = "beyond the rfp: a muxed soroban source and its base account collide in transactions_accounts (23505); the first muxed-source ledger (77, a restore) already halts ingestion"
 
 [[reproduction.case]]
 label = "pre-fix"
 commit = "f8e5786d22c04adad16318f2e126728beec5aac9"
 expect = [
-  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "mishandled", reason = "halted" },
+  { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "mishandled", reason = "halted" },
+  { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "not-evaluated" },
 ]
 
 [[reproduction.case]]
 label = "fixed"
 commit = "bb0b162b072583c7dabffbdee664d1c117e5ba56"
 expect = [
+  { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "pass" },
   { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "pass" },
 ]
 
@@ -118,13 +122,14 @@ id = "wallet-backend-792"
 issue = "https://github.com/stellar/wallet-backend/pull/792"
 chain = "cap84.muxed-contract.p30"
 network = "testnet"
-notes = "beyond the rfp, protocol 30: a W address fails the whole ledger persist"
+notes = "beyond the rfp, protocol 30: SAC transfers and mints to a W address lose the destination mux id (fixed by 54e562e1 in #792). the ledger-persist failure #792 also fixes needs a W address in a custom SEP-41 token event or a storage key, which no corpus chain has, so it is not reproduced here"
 
 [[reproduction.case]]
 label = "pre-fix"
 commit = "a9bac8d2f59f7590d393c3e72e67d95b7cb2fba1"
 expect = [
-  { entry = "cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract", verdict = "mishandled", reason = "halted" },
+  { entry = "cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract", verdict = "mishandled", reason = "wrong-value" },
+  { entry = "cap84.muxed-contract.p30-issuer-transfer-to-muxed-contract", verdict = "mishandled", reason = "wrong-value" },
 ]
 
 [[reproduction.case]]
@@ -132,4 +137,5 @@ label = "fixed"
 commit = "09303667545a1effb09c779ff29d271c6c812de3"
 expect = [
   { entry = "cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract", verdict = "pass" },
+  { entry = "cap84.muxed-contract.p30-issuer-transfer-to-muxed-contract", verdict = "pass" },
 ]

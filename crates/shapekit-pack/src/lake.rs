@@ -27,9 +27,6 @@ pub const ZSTD_LEVEL: i32 = 19;
 /// Decompressed batches above this are treated as corrupt rather than read into memory.
 pub const MAX_BATCH_LEN: u64 = 1 << 30;
 
-/// Nesting limit while decoding meta, the bound the oracle uses too.
-pub const LCM_DEPTH: u32 = 1000;
-
 /// The zstd library the batches are compressed with, as `major.minor.patch`.
 pub fn zstd_library() -> &'static str {
     zstd::zstd_safe::version_string()
@@ -98,11 +95,10 @@ pub struct LakeSummary {
     pub batches: Vec<WrittenBatch>,
 }
 
+/// `xdr.meta.depth`, the bound every crate decodes a ledger with: a ledger holding the
+/// deepest envelope core accepts must pack.
 pub(crate) fn lcm_limits(len: usize) -> Limits {
-    Limits {
-        depth: LCM_DEPTH,
-        len,
-    }
+    shapekit_manifest::decode_limits("LedgerCloseMeta", len)
 }
 
 /// Sequence of one `LedgerCloseMeta` given as XDR, checking that it decodes exactly.

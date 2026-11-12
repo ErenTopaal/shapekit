@@ -1,15 +1,17 @@
 //! Corpus manifest types, XDR round-trip checks, XDR-JSON, shape signatures and coverage.
 
 pub mod build;
+mod depth;
 pub mod framing;
 mod model;
 pub mod signature;
 mod validate;
 pub mod xdr;
 
+pub use depth::{ENVELOPE_DEPTH, META_DEPTH, decode_depth, decode_limits};
 pub use model::*;
 pub use signature::{fragment_matches, reachable_arms, shape_signature};
-pub use validate::{DECODE_DEPTH, validate};
+pub use validate::validate;
 pub use xdr::{roundtrip_check, to_xdr_json};
 
 pub use shapekit_registry::Problem;

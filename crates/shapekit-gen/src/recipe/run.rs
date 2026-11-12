@@ -24,6 +24,7 @@ use super::output::{
     CHAINS_DIR, ChainCheck, chain_entries, check_entry, generator_entry_json, generator_files,
     install_chain, install_entries, merge, reproducible_chain_json, write_entry,
 };
+use super::state_check::{StateCheck, check_against_core};
 use super::{Network, Recipe, chain_id};
 
 pub struct GenOptions<'a> {
@@ -49,6 +50,8 @@ pub struct ChainRun {
     pub last_ledger: u32,
     pub captures: usize,
     pub canonical_stream_sha256: String,
+    /// The oracle's state at the head, compared with core's query server.
+    pub state_check: StateCheck,
 }
 
 #[derive(Debug, Clone)]
@@ -93,6 +96,12 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
             .apply_settings(&NetworkSettings::testnet()?, &root, ECHO_WASM)?;
     }
     recipe.run(&mut ctx)?;
+    // the node is still up: core's own answer for every touched key is the reference
+    let state_check = {
+        let d = ctx.driver();
+        check_against_core(d.node(), d.recorder().frames(), network.passphrase())
+            .context("checking the oracle state against core")?
+    };
     let (summary, captured) = ctx.finish(target)?;
     // the committed form: canonical ledgers as a sep-54 lake, the archive as a tar
     pack_chain(target, Layout::default())
@@ -106,6 +115,7 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
             last_ledger: summary.ledger_range.last,
             captures: captured.len(),
             canonical_stream_sha256: summary.canonical_stream_sha256,
+            state_check,
         },
         captured,
     ))
@@ -192,13 +202,19 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
                         .with_context(|| format!("chain {} ({})", chain_id(r), n.name()));
                     if let Ok((run, _)) = &out {
                         eprintln!(
-                            "recorded {} ({}): ledgers {} to {}, {} captures, {:.1}s",
+                            "recorded {} ({}): ledgers {} to {}, {} captures, {:.1}s, \
+                             state matches core on {} keys ({} ttls by owner, {} ttls not \
+                             live, {} by presence only)",
                             run.chain_id,
                             n.name(),
                             run.first_ledger,
                             run.last_ledger,
                             run.captures,
-                            run.seconds
+                            run.seconds,
+                            run.state_check.keys_compared,
+                            run.state_check.ttls_compared,
+                            run.state_check.ttls_not_live,
+                            run.state_check.presence_only
                         );
                     }
                     results

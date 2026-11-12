@@ -4,20 +4,16 @@ use std::collections::BTreeSet;
 use std::path::{Component, Path};
 
 use shapekit_registry::{Problem, Registry, SourceClass};
-use stellar_xdr::{Limits, ReadXdr};
+use stellar_xdr::ReadXdr;
 
 use crate::model::*;
-use crate::{sha256_hex, xdr};
-
-/// Depth limit used when the validator decodes entries: core's own transaction depth bound
-/// from protocol 28, and low enough that a hostile file cannot overflow the stack.
-pub const DECODE_DEPTH: u32 = 1000;
+use crate::{decode_limits, sha256_hex, xdr};
 
 /// Every problem with `manifest`, checked against `registry` and the files under `root`
 /// (the directory that holds `manifest.json`). Empty means valid.
 ///
 /// Content checks run for `kind = xdr` entries that must decode: every variant must decode
-/// under depth [`DECODE_DEPTH`], re-encode to the same bytes when `expected.roundtrip` is set,
+/// under [`crate::decode_depth`] for its type, re-encode to the same bytes when `expected.roundtrip` is set,
 /// and render to exactly its expected XDR-JSON file. `must-reject` entries are not decoded
 /// here, because whether they are rejected depends on the caps in `caps-limits.toml`.
 pub fn validate(manifest: &Manifest, registry: &Registry, root: &Path) -> Vec<Problem> {
@@ -216,10 +212,7 @@ impl Checker<'_> {
                 "source.core_rejection is set but expected.validity is not invalid-by-core",
             );
         }
-        let limits = Limits {
-            depth: DECODE_DEPTH,
-            len: r.result_xdr.len(),
-        };
+        let limits = decode_limits("TransactionResult", r.result_xdr.len());
         let decoded = stellar_xdr::TransactionResult::from_xdr_base64(&r.result_xdr, limits)
             .map_err(|e| e.to_string());
         match decoded.and_then(|t| xdr::result_code(&t).map_err(|e| e.to_string())) {
@@ -361,10 +354,7 @@ impl Checker<'_> {
         bytes: &[u8],
         expected_json: Option<&[u8]>,
     ) {
-        let limits = Limits {
-            depth: DECODE_DEPTH,
-            len: bytes.len(),
-        };
+        let limits = decode_limits(type_name, bytes.len());
         if self.entry.expected.roundtrip
             && let Err(err) = xdr::roundtrip_check(type_name, bytes, limits.clone())
         {

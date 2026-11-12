@@ -24,10 +24,6 @@ fn network_id() -> [u8; 32] {
     Sha256::digest(TESTNET_PASSPHRASE.as_bytes()).into()
 }
 
-fn limits(len: usize) -> Limits {
-    Limits { depth: 1000, len }
-}
-
 #[test]
 fn ledger_selector_returns_the_ledger_as_given() {
     let (lcm, bytes) = fixture();
@@ -59,7 +55,12 @@ fn transaction_selector_finds_every_transaction_of_the_ledger() {
         assert_eq!(meta.suffix, "-meta");
         assert_eq!(meta.xdr_type, "TransactionResultMetaV1");
         assert_eq!(env.tx_index, Some(i as u32));
-        roundtrip_check(env.xdr_type, &env.bytes, limits(env.bytes.len())).unwrap();
+        roundtrip_check(
+            env.xdr_type,
+            &env.bytes,
+            shapekit_manifest::decode_limits(env.xdr_type, env.bytes.len()),
+        )
+        .unwrap();
         let e = TransactionEnvelope::from_xdr(&env.bytes, Limits::none()).unwrap();
         assert_eq!(
             shapekit_core_driver::tx::envelope_hash(&e, &network_id()).unwrap(),

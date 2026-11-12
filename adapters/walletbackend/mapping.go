@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/ErenTopaal/shapekit/adapters/protocol/wire"
 )
@@ -189,6 +190,42 @@ func (b *built) addr(field, col string, r row, kind columnKind) {
 	b.fields[field] = *s
 }
 
+// limit reads a trustline limit column. wallet-backend stores limits in
+// horizon's amount form ("922337203685.4775807"), unlike token amounts, which
+// it stores in stroops; the vocabulary wants stroops. A missing column leaves
+// the field absent; a value that is not such an amount reports false.
+func (b *built) limit(field, col string, r row) bool {
+	v, ok := r.text(col)
+	if !ok {
+		return true
+	}
+	s, ok := stroops(v)
+	if !ok {
+		return false
+	}
+	b.fields[field] = s
+	return true
+}
+
+// stroops converts a decimal amount with at most 7 fraction digits into the
+// integer number of stroops, exactly.
+func stroops(v string) (string, bool) {
+	whole, frac, _ := strings.Cut(v, ".")
+	if whole == "" || len(frac) > 7 || strings.HasPrefix(whole, "-") {
+		return "", false
+	}
+	for _, c := range whole + frac {
+		if c < '0' || c > '9' {
+			return "", false
+		}
+	}
+	n, ok := new(big.Int).SetString(whole+frac+strings.Repeat("0", 7-len(frac)), 10)
+	if !ok {
+		return "", false
+	}
+	return n.String(), true
+}
+
 func (b *built) change(op int64) wire.Change {
 	if idx, ok := opIndexOf(op); ok {
 		b.fields["scope"] = "operation"
@@ -231,8 +268,10 @@ func (m *mapper) mapOperation(op int64, rows []row, out *txMapping) {
 		switch reason(r) {
 		case reasonAdd:
 			b = newBuilt("trustline-created", r)
-			if lim, ok := r.text("trustline_limit_new"); ok {
-				b.fields["limit"] = lim
+			if !b.limit("limit", "trustline_limit_new", r) {
+				used[i] = false
+				skip(i, "trustline_limit_new is not an amount with at most 7 decimals")
+				continue
 			}
 			if j := companionAuth(rows, used, i); j >= 0 {
 				used[j] = true
@@ -242,11 +281,10 @@ func (m *mapper) mapOperation(op int64, rows []row, out *txMapping) {
 			}
 		case reasonUpdate:
 			b = newBuilt("trustline-limit", r)
-			if v, ok := r.text("trustline_limit_old"); ok {
-				b.fields["before"] = v
-			}
-			if v, ok := r.text("trustline_limit_new"); ok {
-				b.fields["after"] = v
+			if !b.limit("before", "trustline_limit_old", r) || !b.limit("after", "trustline_limit_new", r) {
+				used[i] = false
+				skip(i, "a trustline limit is not an amount with at most 7 decimals")
+				continue
 			}
 		case reasonRemove:
 			b = newBuilt("trustline-removed", r)

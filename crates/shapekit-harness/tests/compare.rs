@@ -374,6 +374,7 @@ fn memory_growth_across_rounds_fails_the_check() {
         rss_after_bytes: peak,
         seconds: 1.0,
         same_verdicts_as_first: true,
+        chain_errors: Vec::new(),
     };
     let mem = MemoryOptions {
         rounds: 2,

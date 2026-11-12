@@ -7,7 +7,7 @@ use anyhow::{Context, Result, bail};
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::{Map, Value, json};
-use shapekit_manifest::{DECODE_DEPTH, DecodeExpectation, Entry, EntryKind, VectorFile};
+use shapekit_manifest::{DecodeExpectation, Entry, EntryKind, VectorFile, decode_depth};
 use stellar_xdr::{Limits, ReadXdr, ScVal};
 
 use crate::testee::parse_deep;
@@ -88,7 +88,7 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                 "op": op,
                 "type": xdr_type,
                 "xdr": b64,
-                "depth_limit": DECODE_DEPTH,
+                "depth_limit": decode_depth(xdr_type),
                 "len_limit": bytes.len(),
             }))
         };

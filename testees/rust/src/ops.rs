@@ -165,6 +165,18 @@ fn type_variant(req: &Request) -> Result<TypeVariant, Outcome> {
     })
 }
 
+/// `depth_limit` as a caller of the named type's own `from_xdr` would pass it, which is how
+/// core decodes. `Type` dispatch costs one level that call does not: every arm of
+/// `Type::read_xdr` is `r.with_limited_depth(|r| <type>::read_xdr(r))`, and `Type::write_xdr`
+/// writes through `Box<T>::write_xdr`, which wraps the same way (src/generated/type_enum.rs and
+/// src/generated.rs, in every pinned version). That one level is handed back.
+fn through_type(limits: &Limits) -> Limits {
+    Limits {
+        depth: limits.depth.saturating_add(1),
+        len: limits.len,
+    }
+}
+
 fn decode(req: &Request) -> Result<(Type, Limits), Outcome> {
     let variant = type_variant(req)?;
     let bytes = req.bytes("xdr")?;
@@ -172,14 +184,14 @@ fn decode(req: &Request) -> Result<(Type, Limits), Outcome> {
         depth: req.get("depth_limit", "an unsigned 32-bit integer")?,
         len: req.get("len_limit", "an unsigned integer")?,
     };
-    let mut reader = Limited::new(Cursor::new(bytes), limits.clone());
+    let mut reader = Limited::new(Cursor::new(bytes), through_type(&limits));
     let value = Type::read_xdr_to_end(variant, &mut reader).map_err(rejected)?;
     Ok((value, limits))
 }
 
 fn decode_encode(req: &Request) -> Result<Value, Outcome> {
     let (value, limits) = decode(req)?;
-    let again = value.to_xdr(limits).map_err(rejected)?;
+    let again = value.to_xdr(through_type(&limits)).map_err(rejected)?;
     Ok(json!({"xdr": B64.encode(again)}))
 }
 

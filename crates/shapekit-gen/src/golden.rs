@@ -16,8 +16,8 @@ use shapekit_manifest::framing::FramedReader;
 use shapekit_manifest::signature::XdrSchema;
 use shapekit_manifest::xdr::{self, render_json};
 use shapekit_manifest::{
-    DECODE_DEPTH, DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, Limits, Manifest,
-    Source, Upstream, Validity, Variant, Variants, fragment_matches, sha256_hex, shape_signature,
+    DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, Manifest, Source, Upstream,
+    Validity, Variant, Variants, decode_limits, fragment_matches, sha256_hex, shape_signature,
 };
 use shapekit_registry::{Family, Registry, SourceClass};
 use stellar_xdr::{
@@ -227,7 +227,7 @@ pub fn scan(core_src: &Path, tag: &str, commit: &str) -> Result<GoldenSet> {
             let mut records = Vec::new();
             for (i, record) in FramedReader::new(bytes.as_slice(), MAX_RECORD).enumerate() {
                 let record = record.with_context(|| format!("{rel}: framing"))?;
-                let limits = decode_limits(record.len());
+                let limits = decode_limits(LCM_TYPE, record.len());
                 xdr::roundtrip_check(LCM_TYPE, &record, limits.clone())
                     .with_context(|| format!("{rel} record {i}"))?;
                 let lcm = decode_lcm(&record)?;
@@ -1005,7 +1005,11 @@ fn units(entries: &[&Entry], siblings: &[&Entry], root: &Path) -> Result<Vec<Uni
                     entry: e.id.clone(),
                     id: format!("{} ({variant})", e.id),
                     class: e.source.class,
-                    signature: shape_signature(LCM_TYPE, &bytes, decode_limits(bytes.len()))?,
+                    signature: shape_signature(
+                        LCM_TYPE,
+                        &bytes,
+                        decode_limits(LCM_TYPE, bytes.len()),
+                    )?,
                     observations: ledger_observations(&lcm)?,
                 });
             }
@@ -1021,24 +1025,25 @@ fn units(entries: &[&Entry], siblings: &[&Entry], root: &Path) -> Result<Vec<Uni
                 None => Vec::new(),
             };
             for (variant, bytes) in variant_bytes(e, root)? {
-                let mut signature = shape_signature(xdr_type, &bytes, decode_limits(bytes.len()))?;
+                let mut signature =
+                    shape_signature(xdr_type, &bytes, decode_limits(xdr_type, bytes.len()))?;
                 if let Some((_, env)) = envelopes.iter().find(|(v, _)| *v == variant) {
                     signature.extend(shape_signature(
                         "TransactionEnvelope",
                         env,
-                        decode_limits(env.len()),
+                        decode_limits("TransactionEnvelope", env.len()),
                     )?);
                 }
-                let observations = match xdr::decode(xdr_type, &bytes, decode_limits(bytes.len()))?
-                {
-                    stellar_xdr::Type::TransactionResultMeta(m) => {
-                        observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
-                    }
-                    stellar_xdr::Type::TransactionResultMetaV1(m) => {
-                        observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
-                    }
-                    other => bail!("{} decoded as {}", e.id, other.name()),
-                };
+                let observations =
+                    match xdr::decode(xdr_type, &bytes, decode_limits(xdr_type, bytes.len()))? {
+                        stellar_xdr::Type::TransactionResultMeta(m) => {
+                            observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
+                        }
+                        stellar_xdr::Type::TransactionResultMetaV1(m) => {
+                            observations_of([(&m.result.result.result, &m.tx_apply_processing)])?
+                        }
+                        other => bail!("{} decoded as {}", e.id, other.name()),
+                    };
                 out.push(Unit {
                     entry: e.id.clone(),
                     id: format!("{} ({variant})", e.id),
@@ -1082,15 +1087,8 @@ fn variant_bytes(entry: &Entry, root: &Path) -> Result<Vec<(&'static str, Vec<u8
 
 // shared xdr helpers
 
-pub(crate) fn decode_limits(len: usize) -> Limits {
-    Limits {
-        depth: DECODE_DEPTH,
-        len,
-    }
-}
-
 pub fn decode_lcm(bytes: &[u8]) -> Result<LedgerCloseMeta> {
-    match xdr::decode(LCM_TYPE, bytes, decode_limits(bytes.len()))? {
+    match xdr::decode(LCM_TYPE, bytes, decode_limits(LCM_TYPE, bytes.len()))? {
         stellar_xdr::Type::LedgerCloseMeta(lcm) => Ok(*lcm),
         other => bail!("decoded {} instead of LedgerCloseMeta", other.name()),
     }

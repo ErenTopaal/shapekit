@@ -252,8 +252,24 @@ fn exceptions() -> Vec<golden::AgreeException> {
     golden::load_exceptions(&corpus().join(golden::EXCEPTIONS_FILE)).unwrap()
 }
 
+/// Runs `f` with room for a whole ledger at `xdr.meta.depth`: the corpus holds a ledger
+/// whose envelope core accepted at depth 1000, and an unoptimised decode of it needs more
+/// than a test thread's default stack.
+fn big(f: impl FnOnce() + Send + 'static) {
+    std::thread::Builder::new()
+        .stack_size(256 << 20)
+        .spawn(f)
+        .expect("spawn")
+        .join()
+        .expect("the check thread panicked");
+}
+
 #[test]
 fn committed_corpus_goldens_agree_with_history() {
+    big(committed_corpus_goldens_agree);
+}
+
+fn committed_corpus_goldens_agree() {
     let registry = registry();
     let manifest = build::build(&corpus(), "test", generated_with()).unwrap();
     let report = golden::agree(&manifest, &registry, &corpus(), &exceptions()).unwrap();

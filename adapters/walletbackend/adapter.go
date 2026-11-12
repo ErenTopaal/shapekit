@@ -81,10 +81,11 @@ func Claims() wire.Claims {
 				Fields: []string{"event", "contract", "from", "to", "amount", "to_muxed_id"},
 			},
 			{
-				// wallet-backend keeps one net fee row per transaction, so the amount
-				// differs from the charge whenever a refund follows
+				// wallet-backend keeps one net fee row per transaction: the charge
+				// event is claimed without its amount, and a soroban refund event
+				// (after-tx or after-all-txs) is not claimed at all
 				Kind:   "token-event",
-				Where:  map[string][]any{"event": {"fee"}},
+				Where:  map[string][]any{"event": {"fee"}, "stage": {"before-all-txs"}},
 				Fields: []string{"event", "contract", "from"},
 			},
 			{

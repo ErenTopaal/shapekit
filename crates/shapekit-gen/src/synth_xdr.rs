@@ -550,8 +550,8 @@ fn auth_chain(levels: u32) -> Result<x::SorobanAuthorizationEntry> {
 
 /// Decodes `bytes` as the named type directly, the way core and the host do
 /// (`TransactionEnvelope::read_xdr` in core's `can_parse_transaction`), rejecting trailing
-/// bytes. The toolkit's `xdr::decode` goes through `Type::read_xdr_to_end`, whose dispatch
-/// spends one extra depth level, so at the same `Limits` it is one level stricter.
+/// bytes. This is the reference the toolkit's `xdr::decode` is held to: it goes through
+/// `Type`, whose dispatch spends a level of its own that the toolkit hands back.
 pub fn decode_direct(
     ty: &str,
     bytes: &[u8],
@@ -583,7 +583,7 @@ pub fn decode_direct(
 enum Path {
     /// `decode_direct`, what core runs.
     Direct,
-    /// the toolkit's `xdr::decode`, what `manifest validate` runs.
+    /// the toolkit's `xdr::decode`, what `manifest validate` runs, which must agree.
     Toolkit,
 }
 
@@ -665,7 +665,12 @@ fn depth(registry: &Registry, out: &mut Vec<XdrItem>) -> Result<()> {
     ];
     for (limit_id, family, what, build, text) in cases {
         let deepest_core = deepest("TransactionEnvelope", envelope_depth, Path::Direct, build)?;
+        // the accepted twin has to pass `manifest validate`, which decodes through the toolkit
         let deepest_toolkit = deepest("TransactionEnvelope", envelope_depth, Path::Toolkit, build)?;
+        ensure!(
+            deepest_toolkit == deepest_core,
+            "{family} {what}: the toolkit decodes {deepest_toolkit} levels at depth {envelope_depth} where core decodes {deepest_core}"
+        );
         // the scvec cap in caps-limits is the measured scvec depth; the map bound is derived
         // from the same measurement, so each shape is checked against its own measurement
         let cap = match what {
@@ -709,28 +714,18 @@ fn depth(registry: &Registry, out: &mut Vec<XdrItem>) -> Result<()> {
             build(over)?,
             ENVELOPE_DEPTH,
         ));
-        // the accepted twin has to pass `manifest validate`, which decodes through the
-        // toolkit; when that path is one level stricter than core, the twin is one shallower
-        let twin = deepest_toolkit.min(cap);
-        let gap = if twin < cap {
-            format!(
-                " core's own decode accepts {cap} levels ({limit_id}); this entry stops at {twin} because shapekit's toolkit decode (Type::read_xdr_to_end) spends one depth level on type dispatch and refuses {cap} at depth {envelope_depth}."
-            )
-        } else {
-            String::new()
-        };
         out.push(item(
-            Spec::new(family, format!("{what}-depth-{twin}-deepest-accepted"), EntryKind::Xdr)
+            Spec::new(family, format!("{what}-depth-{cap}-deepest-accepted"), EntryKind::Xdr)
                 .flags(flags)
                 .flags(&["at-depth-cap"])
                 .fields(fields)
                 .notes(format!(
-                    "{}, at the deepest an envelope decodes at depth {envelope_depth}.{gap} core's depth check accepts it; the host converts at most 100 levels (scval.depth) and runs at most 100 frames, so an invocation this deep fails and the transaction lands in the ledger as failed with the full tree intact. a decoder must accept it.",
-                    text.replace("{n}", &twin.to_string()),
+                    "{}, at the deepest an envelope decodes at depth {envelope_depth}. core's depth check accepts it; the host converts at most 100 levels (scval.depth) and runs at most 100 frames, so an invocation this deep fails and the transaction lands in the ledger as failed with the full tree intact. a decoder must accept it.",
+                    text.replace("{n}", &cap.to_string()),
                 ))
                 .valid_from(28),
             "TransactionEnvelope",
-            build(twin)?,
+            build(cap)?,
             ENVELOPE_DEPTH,
         ));
     }

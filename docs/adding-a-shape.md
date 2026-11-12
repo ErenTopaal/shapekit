@@ -210,13 +210,19 @@ corpus/chains/<chain-id>/<network>/
                            zstd LedgerCloseMetaBatch per ledger, 64000 per partition (the
                            galexie layout), reproducible byte for byte
   ledgers.xdr              core's raw framed stream, kept as provenance, not reproducible
-  archive.tar              the node's history archive (checkpoints only once a chain reaches
-                           63); gzip members differ per run, their contents do not
+  archive.tar              the node's history archive, holding at least checkpoint 63;
+                           gzip members differ per run, their contents do not
 corpus/entries/<family>/<entry-id>/
   entry.json
   testnet.xdr, testnet.expected.json
   mainnet.xdr, mainnet.expected.json
 ```
+
+Every recipe chain starts the same way: the protocol upgrade in ledger 2, empty ledgers
+through ledger 63 (core's first history checkpoint), then the network settings and the
+recipe from ledger 64. Indexers that bootstrap from the archive's latest checkpoint, such as
+wallet-backend, can then start before the first shape (see `docs/adapter-interface.md`).
+A recipe never depends on absolute ledger numbers, only on `last_closed()`.
 
 `gen chains` writes chains in this form directly. `shapekit pack sep54` converts a chain still
 in the recorder's own form (`ledgers.canonical.xdr` and an `archive/` directory) and leaves

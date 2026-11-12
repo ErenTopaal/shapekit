@@ -1,0 +1,66 @@
+{
+  "caps": [
+    "CAP-0046-11"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.auth-trees",
+  "fields_exercised": [
+    "op.invoke_host_function.auth",
+    "auth.credentials.address.address",
+    "auth.credentials.address.nonce",
+    "auth.credentials.address.signature_expiration_ledger",
+    "auth.credentials.address.signature",
+    "auth.root_invocation"
+  ],
+  "flags": [
+    "failed-tx",
+    "at-depth-cap"
+  ],
+  "id": "soroban.auth-trees.p30-declared-depth-492",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [
+    "https://github.com/stellar/wallet-backend/issues/746"
+  ],
+  "notes": "an address entry declaring a chain 492 invocations deep below its root, 493 with the root, the deepest envelope core's depth check accepts (xdr.envelope.depth 1000): core includes it and the host, which decodes at depth 500, traps. the ledger needs xdr.meta.depth (1012) to decode",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "chain": "soroban.auth-trees.p30",
+    "class": "local-core",
+    "ledger_seq": 112,
+    "normalization": "core-normalize-meta",
+    "recipe": "soroban.auth-trees"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/mainnet.expected.json",
+      "expected_json_sha256": "fdfa4f5fdffd1e5e9c441976ee3fbb1f4e27835680329d7c29b5316e8ea021c5",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/mainnet.oracle.json",
+      "oracle_sha256": "b8667bf66a1896bd0af2c87fdf15a085438c38a7a5b8b2c9492674c82444f05e",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/mainnet.xdr",
+      "xdr_sha256": "cf9bad4abd608df4fe87af268202c7cc449657db803423ff43a12f1428755422"
+    },
+    "testnet": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/testnet.expected.json",
+      "expected_json_sha256": "5fce36406672ac8cb80b5b13b6ef0d1ff724951e12fddb74a1fd87cc28a4ad3e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/testnet.oracle.json",
+      "oracle_sha256": "6e3f3871107f086e3a991a066e60156b4ce2e2ff9a10a3d21b55c17ffa015de2",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-492/testnet.xdr",
+      "xdr_sha256": "abdaa9d2cb6f9254dffbe1e72173e1a56c8a6ba51361a226d933c79d1e7716a7"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

@@ -50,7 +50,7 @@ fn call(url: &str, method: &str, params: Value) -> Value {
 
 fn limits() -> Limits {
     Limits {
-        depth: 1000,
+        depth: shapekit_manifest::ENVELOPE_DEPTH,
         len: 64 * 1024 * 1024,
     }
 }
@@ -335,7 +335,7 @@ fn json_format_matches_the_xdr() {
     for (x, y) in bl.iter().zip(jl) {
         let lcm = stellar_xdr::LedgerCloseMeta::from_xdr_base64(
             x["metadataXdr"].as_str().unwrap(),
-            limits(),
+            shapekit_manifest::decode_limits("LedgerCloseMeta", 64 * 1024 * 1024),
         )
         .unwrap();
         let from_json: stellar_xdr::LedgerCloseMeta =

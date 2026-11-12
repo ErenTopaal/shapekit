@@ -482,6 +482,7 @@ fn drive_adapter(
         if stop.is_none() {
             for ledger in bootstrap + 1..=last {
                 set_head(&control, &base, ledger)?;
+                check_served(&control, &base, ledger)?;
                 let a: AdvanceResult =
                     adapter.call(Command::Advance { head: ledger }, t.advance)?;
                 if a.head != ledger {
@@ -513,14 +514,26 @@ fn drive_adapter(
     let net_removed = net.as_mut().map(dockernet::Network::remove).transpose();
     let workdir_removed = workdir.close();
 
-    let out = ingest?;
+    // a cleanup failure is reported even when ingestion already failed
+    let mut cleanup = Vec::new();
     if let Some(e) = stop_error {
-        return Err(e);
+        cleanup.push(format!("{e:#}"));
     }
-    server_stopped.context("stopping the replay server")?;
-    net_removed.context("removing the docker network")?;
-    workdir_removed.context("removing the adapter work directory")?;
-    Ok(out)
+    if let Err(e) = server_stopped {
+        cleanup.push(format!("stopping the replay server: {e}"));
+    }
+    if let Err(e) = net_removed {
+        cleanup.push(format!("removing the docker network: {e:#}"));
+    }
+    if let Err(e) = workdir_removed {
+        cleanup.push(format!("removing the adapter work directory: {e}"));
+    }
+    match (ingest, cleanup.is_empty()) {
+        (Ok(out), true) => Ok(out),
+        (Ok(_), false) => bail!("{}", cleanup.join("; ")),
+        (Err(e), true) => Err(e),
+        (Err(e), false) => Err(e.context(format!("and then: {}", cleanup.join("; ")))),
+    }
 }
 
 fn set_head(client: &reqwest::blocking::Client, base: &str, ledger: u32) -> Result<()> {
@@ -534,6 +547,35 @@ fn set_head(client: &reqwest::blocking::Client, base: &str, ledger: u32) -> Resu
     if !status.is_success() {
         let body = resp.text().unwrap_or_default();
         bail!("moving the replay head to {ledger}: {status} {body}");
+    }
+    Ok(())
+}
+
+/// Asks the replay server for the ledger the target is about to read, so a ledger the
+/// server cannot serve is a harness error and never counted against the target.
+fn check_served(client: &reqwest::blocking::Client, base: &str, ledger: u32) -> Result<()> {
+    let body = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getLedgers",
+        "params": {"startLedger": ledger, "pagination": {"limit": 1}},
+    });
+    let resp = client
+        .post(format!("{base}/rpc"))
+        .header("content-type", "application/json")
+        .body(body.to_string())
+        .send()
+        .with_context(|| format!("asking the replay server for ledger {ledger}"))?;
+    let v: serde_json::Value = serde_json::from_str(&resp.text().unwrap_or_default())
+        .with_context(|| format!("the replay server's answer for ledger {ledger}"))?;
+    if let Some(e) = v.get("error") {
+        bail!("the replay server cannot serve ledger {ledger}: {e}");
+    }
+    let got = v
+        .pointer("/result/ledgers/0/sequence")
+        .and_then(|s| s.as_u64());
+    if got != Some(u64::from(ledger)) {
+        bail!("the replay server answered getLedgers for {ledger} with {v}");
     }
     Ok(())
 }

@@ -43,6 +43,7 @@ pub mod scval;
 mod select;
 pub mod sep41;
 pub mod soroban_steps;
+mod state_check;
 
 pub use ctx::{Captured, ChainCtx, Spec};
 pub use output::{CHAINS_DIR, ChainCheck, EntryCheck};

@@ -40,6 +40,12 @@ pub enum ConservationError {
         delta: i128,
         fee: i128,
     },
+    #[error("ledger {seq} {at}: {message}")]
+    Order {
+        seq: u32,
+        at: String,
+        message: String,
+    },
     #[error("ledger {seq}: native balances moved by {delta} but fees charged total {fees}")]
     Ledger { seq: u32, delta: i128, fees: i128 },
     #[error("ledger {seq}: feePool moved by {pool_delta} but fees charged total {fees}")]
@@ -79,7 +85,12 @@ pub fn check_ledger(
     for tx in &view.txs {
         let mut delta = 0i128;
         for list in tx.all_lists() {
-            for d in diffs(list.changes) {
+            let ds = diffs(list.changes).map_err(|message| ConservationError::Order {
+                seq,
+                at: format!("tx {}", hex::encode(tx.result.transaction_hash.0)),
+                message,
+            })?;
+            for d in ds {
                 delta += native_amount(&ctx, d.after) - native_amount(&ctx, d.before);
             }
         }
@@ -100,7 +111,12 @@ pub fn check_ledger(
         }
     }
     for up in view.upgrades {
-        for d in diffs(&up.changes) {
+        let ds = diffs(&up.changes).map_err(|message| ConservationError::Order {
+            seq,
+            at: "upgrade".into(),
+            message,
+        })?;
+        for d in ds {
             ledger_delta += native_amount(&ctx, d.after) - native_amount(&ctx, d.before);
         }
     }

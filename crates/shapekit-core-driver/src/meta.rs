@@ -15,13 +15,6 @@ use std::time::{Duration, Instant};
 
 use stellar_xdr::{LedgerCloseMeta, Limits, ReadXdr};
 
-/// Nesting limit for decoding, `xdr.meta.depth` in registry/caps-limits.toml:
-/// envelopes in the transaction set reach depth 1000 and sit 12 levels
-/// down. Core does emit meta past 512 (an argument of 98 nested maps, the
-/// soroban.scval-shapes chain). The limit is there so a corrupt stream
-/// fails instead of exhausting the stack.
-pub const DECODE_DEPTH: u32 = 1012;
-
 /// Frames larger than this are treated as corruption. Core caps a ledger's
 /// meta well below it.
 pub const MAX_FRAME_LEN: u32 = 512 * 1024 * 1024;
@@ -79,9 +72,13 @@ pub fn ledger_seq(meta: &LedgerCloseMeta) -> u32 {
     }
 }
 
+/// Limits for what core hands over: `xdr.meta.depth`, since envelopes in the transaction set
+/// reach depth 1000 and sit 12 levels down, and core does emit meta past 512 (an argument of
+/// 98 nested maps, the soroban.scval-shapes chain). The bound is there so a corrupt stream
+/// fails instead of exhausting the stack.
 pub fn decode_limits(len: usize) -> Limits {
     Limits {
-        depth: DECODE_DEPTH,
+        depth: shapekit_manifest::META_DEPTH,
         len,
     }
 }

@@ -1,4 +1,7 @@
+use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::{Value, json};
+use stellar_xdr::{Limits, ReadXdr, ScVal};
 
 use crate::handle_line;
 
@@ -64,6 +67,30 @@ fn decode_honours_the_depth_limit() {
     };
     assert_eq!(ok(req(100))["xdr"], nested);
     assert_eq!(error_class(req(2)), "rejected");
+}
+
+#[test]
+fn depth_limit_counts_like_a_direct_decode() {
+    let nested = B64
+        .decode("AAAAEAAAAAEAAAABAAAAEAAAAAEAAAABAAAAAwAAAAc=")
+        .unwrap();
+    let direct = |depth| {
+        ScVal::from_xdr(
+            &nested,
+            Limits {
+                depth,
+                len: nested.len(),
+            },
+        )
+        .is_ok()
+    };
+    let needed = (1..32).find(|d| direct(*d)).expect("fits in 32 levels");
+    let req = |depth: u32| {
+        json!({"id": "4", "op": "decode_encode", "type": "ScVal", "xdr": B64.encode(&nested),
+               "depth_limit": depth, "len_limit": 1024})
+    };
+    assert_eq!(ok(req(needed))["xdr"], B64.encode(&nested));
+    assert_eq!(error_class(req(needed - 1)), "rejected");
 }
 
 #[test]

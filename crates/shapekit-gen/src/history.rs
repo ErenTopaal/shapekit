@@ -19,19 +19,18 @@ use anyhow::{Context, Result, bail, ensure};
 use serde::Deserialize;
 use shapekit_manifest::{
     DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, MAINNET_PASSPHRASE, Source,
-    TESTNET_PASSPHRASE, Validity, Variant, Variants, fragment_matches, roundtrip_check, sha256_hex,
-    shape_signature,
+    TESTNET_PASSPHRASE, Validity, Variant, Variants, decode_limits, fragment_matches,
+    roundtrip_check, sha256_hex, shape_signature,
 };
+use shapekit_pack::lake::Batch;
 use shapekit_registry::{Registry, SourceClass};
 use stellar_xdr::{
-    GeneralizedTransactionSet, LedgerCloseMeta, LedgerCloseMetaBatch, Limits, ReadXdr,
-    StellarValueExt, TransactionEnvelope, TransactionPhase, TxSetComponent, WriteXdr,
+    GeneralizedTransactionSet, LedgerCloseMeta, Limits, ReadXdr, StellarValueExt,
+    TransactionEnvelope, TransactionPhase, TxSetComponent, WriteXdr,
 };
 
 use crate::entry_io;
-use crate::golden::{
-    decode_lcm, decode_limits, header, lcm_version, ledger_seq, ledger_version, tx_meta_version,
-};
+use crate::golden::{decode_lcm, header, lcm_version, ledger_seq, ledger_version, tx_meta_version};
 
 pub const LAKE_ENDPOINT: &str = "https://aws-public-blockchain.s3.us-east-2.amazonaws.com";
 pub const PUBNET_LAKE_PREFIX: &str = "v1.1/stellar/ledgers/pubnet";
@@ -224,21 +223,22 @@ pub fn fetch_lake(
         .with_context(|| format!("ledger {seq} is not in the lake ({url} does not exist)"))?;
     let raw = zstd::stream::decode_all(compressed.as_slice())
         .with_context(|| format!("decompressing {url}"))?;
-    let batch = LedgerCloseMetaBatch::from_xdr(&raw, decode_limits(raw.len()))
-        .with_context(|| format!("decoding {url} as LedgerCloseMetaBatch"))?;
+    // each ledger is decoded on its own at xdr.meta.depth: decoded whole, the batch's struct
+    // and vector spend two more levels above every ledger
+    let batch =
+        Batch::parse(raw).with_context(|| format!("decoding {url} as LedgerCloseMetaBatch"))?;
     ensure!(
-        batch.start_sequence <= seq && seq <= batch.end_sequence,
+        batch.start <= seq && seq <= batch.end,
         "{url} holds ledgers {} to {}, not {seq}",
-        batch.start_sequence,
-        batch.end_sequence
+        batch.start,
+        batch.end
     );
-    let lcm = batch
-        .ledger_close_metas
-        .iter()
-        .find(|l| ledger_seq(l) == seq)
-        .with_context(|| format!("{url} has no ledger {seq}"))?;
+    let bytes = batch
+        .ledger(seq)
+        .with_context(|| format!("{url} has no ledger {seq}"))?
+        .to_vec();
     Ok(Fetched {
-        bytes: lcm.to_xdr(Limits::none())?,
+        bytes,
         path: LAKE_PATH,
         url,
     })
@@ -281,7 +281,7 @@ pub fn fetch_rpc(client: &reqwest::blocking::Client, rpc: &str, seq: u32) -> Res
         .context("getLedgers reply has no metadataXdr")?;
     // xdr decoding is strict (no trailing bytes, zero padding), so re-encoding gives back the
     // served bytes exactly
-    let lcm = LedgerCloseMeta::from_xdr_base64(b64, decode_limits(b64.len()))
+    let lcm = LedgerCloseMeta::from_xdr_base64(b64, decode_limits("LedgerCloseMeta", b64.len()))
         .context("decoding metadataXdr")?;
     Ok(Fetched {
         bytes: lcm.to_xdr(Limits::none())?,
@@ -349,7 +349,7 @@ pub fn write_capture(
     roundtrip_check(
         "LedgerCloseMeta",
         &fetched.bytes,
-        decode_limits(fetched.bytes.len()),
+        decode_limits("LedgerCloseMeta", fetched.bytes.len()),
     )?;
 
     let hashes = tx_hashes(&lcm);
@@ -384,7 +384,7 @@ pub fn write_capture(
         signature.extend(shape_signature(
             type_name,
             bytes,
-            decode_limits(bytes.len()),
+            decode_limits(type_name, bytes.len()),
         )?);
     }
     let matched: Vec<String> = family

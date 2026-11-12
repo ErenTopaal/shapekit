@@ -12,7 +12,9 @@ use shapekit_gen::synth_order::{core_asset_cmp, host_accepts, host_sort, pool_id
 use shapekit_gen::synth_strkey::{SEP23_INVALID, SEP23_VALID, base32, crc16};
 use shapekit_gen::synth_textid::{MAX_SAFE_INTEGER, parse_text};
 use shapekit_gen::synth_xdr::{GHSA_3XHM_BASE64, base64_decode, decode_direct};
-use shapekit_manifest::{DECODE_DEPTH, DecodeExpectation, EntryKind, Limits, VectorFile, xdr};
+use shapekit_manifest::{
+    DecodeExpectation, ENVELOPE_DEPTH, EntryKind, Limits, VectorFile, decode_limits, xdr,
+};
 use shapekit_registry::{Registry, SourceClass};
 use stellar_xdr::ReadXdr;
 
@@ -212,10 +214,7 @@ fn must_accept_vectors_round_trip_and_render() {
                 continue;
             }
             let ty = x.entry.xdr_type.as_deref().expect("xdr_type");
-            let limits = Limits {
-                depth: DECODE_DEPTH,
-                len: x.bytes.len(),
-            };
+            let limits = decode_limits(ty, x.bytes.len());
             xdr::roundtrip_check(ty, &x.bytes, limits.clone())
                 .unwrap_or_else(|e| panic!("{}: {e}", x.entry.id));
             let json = xdr::to_xdr_json(ty, &x.bytes, limits).expect("xdr-json");
@@ -223,6 +222,42 @@ fn must_accept_vectors_round_trip_and_render() {
             n += 1;
         }
         assert_eq!(n, 12);
+    });
+}
+
+#[test]
+fn auth_depth_twins_sit_where_core_draws_the_line() {
+    big(|| {
+        let find = |id: &str| {
+            synth()
+                .xdr
+                .iter()
+                .find(|x| x.entry.id == id)
+                .unwrap_or_else(|| panic!("no entry {id}"))
+        };
+        // core accepts 493 levels at depth 1000 and refuses 494 with txMALFORMED; the toolkit,
+        // which `manifest validate` runs, has to agree with it on both
+        for (id, accepted) in [
+            (
+                "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+                true,
+            ),
+            ("soroban.auth-trees.synth-auth-depth-494-over-cap", false),
+        ] {
+            let x = find(id);
+            let limits = Limits {
+                depth: ENVELOPE_DEPTH,
+                len: x.bytes.len(),
+            };
+            let direct = decode_direct("TransactionEnvelope", &x.bytes, limits.clone())
+                .expect("a direct decoder");
+            assert_eq!(direct.is_ok(), accepted, "{id}: direct");
+            assert_eq!(
+                xdr::decode("TransactionEnvelope", &x.bytes, limits).is_ok(),
+                accepted,
+                "{id}: toolkit"
+            );
+        }
     });
 }
 

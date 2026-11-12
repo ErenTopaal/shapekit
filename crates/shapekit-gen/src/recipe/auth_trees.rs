@@ -16,7 +16,9 @@
 //!   simulation accepts but the host refuses at apply;
 //! - declared trees far deeper than the call, whose nodes below the root
 //!   are never matched and never checked: the deepest the host decodes, and
-//!   one deeper, which core includes and the host traps on;
+//!   one deeper, which core includes and the host traps on; then the deepest
+//!   envelope core's own depth check accepts, also included and trapped, and
+//!   one deeper, which core refuses at submission;
 //! - a failed transaction whose address entry the host matched and checked
 //!   before the call trapped;
 //! - the three ways wallet-backend#746 reads contract creations that never
@@ -28,18 +30,17 @@
 //! Limits found on this chain (testnet settings, protocol 30). Each one is
 //! pinned by an entry at the limit and its twin past it:
 //!
-//! | shape                          | accepted | first refused | where                                |
-//! |--------------------------------|----------|---------------|--------------------------------------|
-//! | matched depth (invocations)    | 31       | 32            | host, at apply                       |
-//! | fan-out of one level           | 323      | 324           | host, at apply (simulation: 325)     |
-//! | declared levels below the root | 245      | 246           | host xdr depth 500, at apply         |
+//! | shape                          | accepted | first refused | where                                    |
+//! |--------------------------------|----------|---------------|------------------------------------------|
+//! | matched depth (invocations)    | 31       | 32            | host, at apply                           |
+//! | fan-out of one level           | 323      | 324           | host, at apply (simulation: 325)         |
+//! | declared levels below the root | 245      | 246           | host xdr depth 500, at apply             |
+//! | declared levels below the root | 492      | 493           | core envelope depth 1000, at submission  |
 //!
-//! Core itself accepts declared chains up to 492 levels below the root
-//! (envelope depth 1000, `validateXDRForProtocol`), includes them and fails
-//! them in the host, and refuses 493 as txMALFORMED at submission (measured
-//! on this chain). Those two are not recorded: a ledger holding a
-//! 492-level envelope needs decode depth 1012, and the SEP-54 packer and the
-//! oracle decode meta at 1000.
+//! Core includes declared chains up to 492 levels below the root (493 with
+//! the root, `auth.invocation.depth`) and the host traps on them; 493 below
+//! the root is refused as txMALFORMED (`validateXDRForProtocol`). A ledger
+//! holding the 492-level envelope is read at `xdr.meta.depth` (1012).
 //!
 //! Simulation (soroban-simulation 30.0.0) gives up before the network on
 //! declared trees: from 243 levels below the root it cannot size the
@@ -59,15 +60,16 @@ use shapekit_core_driver::keys::{account_address, account_id};
 use shapekit_core_driver::settings::NetworkSettings;
 use shapekit_core_driver::sim::AuthMode;
 use shapekit_core_driver::tx::{contract_preimage, sign_authorization_entry};
+use shapekit_manifest::{ENVELOPE_DEPTH, META_DEPTH, decode_limits, xdr};
 use stellar_xdr::{
     Asset, ClaimPredicate, Claimant, ClaimantV0, ConfigSettingEntry, ConfigSettingId,
     ContractDataDurability, ContractExecutable, ContractId, CreateClaimableBalanceOp,
     CreateClaimableBalanceResult, CreateContractArgs, CreateContractArgsV2, Hash,
     InvokeContractArgs, InvokeHostFunctionResult, LedgerKey, LedgerKeyAccount,
-    LedgerKeyContractData, OperationBody, OperationResult, OperationResultTr, ScAddress, ScMap,
-    ScMapEntry, ScNonceKey, ScSymbol, ScVal, SorobanAddressCredentials, SorobanAuthorizationEntry,
-    SorobanAuthorizedFunction, SorobanAuthorizedInvocation, SorobanCredentials,
-    SorobanTransactionData, TransactionResultResult,
+    LedgerKeyContractData, Limits, OperationBody, OperationResult, OperationResultTr, ScAddress,
+    ScMap, ScMapEntry, ScNonceKey, ScSymbol, ScVal, SorobanAddressCredentials,
+    SorobanAuthorizationEntry, SorobanAuthorizedFunction, SorobanAuthorizedInvocation,
+    SorobanCredentials, SorobanTransactionData, TransactionResultResult, WriteXdr,
 };
 
 use super::soroban_steps::{
@@ -96,6 +98,12 @@ pub const HOST_DECLARED_DEPTH: u32 = 245;
 
 /// Deepest declared chain simulation can size.
 const SIMULATED_DECLARED_DEPTH: u32 = 242;
+
+/// Deepest declared chain below a matched root whose envelope core still
+/// accepts: `auth.invocation.depth` in caps-limits.toml counts 493
+/// invocations, the root included (measured on this chain: 492 included and
+/// trapped, 493 refused txMALFORMED).
+pub const CORE_DECLARED_DEPTH: u32 = 492;
 
 pub struct AuthTrees {
     pub protocol: u32,
@@ -708,6 +716,8 @@ fn declared_depth(
     let cases = [
         ("declared-host-signer", HOST_DECLARED_DEPTH, "host-limit"),
         ("declared-host-signer", HOST_DECLARED_DEPTH + 1, "host-over"),
+        ("declared-host-signer", CORE_DECLARED_DEPTH, "core-limit"),
+        ("declared-host-signer", CORE_DECLARED_DEPTH + 1, "core-over"),
     ];
     for (role, depth, case) in cases {
         let k = ctx.account(role);
@@ -722,6 +732,21 @@ fn declared_depth(
         let hf = call(root, "node", node_args(&[], &[(addr, 0)])?)?;
         let env = ctx.driver().soroban_with(source, hf, data, vec![entry])?;
         let slug = format!("declared-depth-{depth}");
+        if case.starts_with("core-") {
+            // the line core draws is the toolkit's too, or the entries could not be validated
+            let bytes = env.to_xdr(Limits::none())?;
+            let limits = decode_limits("TransactionEnvelope", bytes.len());
+            ensure!(
+                xdr::decode("TransactionEnvelope", &bytes, limits).is_ok()
+                    == (case == "core-limit"),
+                "a chain {depth} levels below the root {} at depth {ENVELOPE_DEPTH}",
+                if case == "core-limit" {
+                    "does not decode"
+                } else {
+                    "still decodes"
+                }
+            );
+        }
         if case == "host-limit" {
             let applied = ctx.submit_and_close(&env)?;
             ctx.capture(
@@ -732,6 +757,23 @@ fn declared_depth(
                 ))
                 .fields(&ADDRESS_FIELDS),
             )?;
+        } else if case == "core-over" {
+            let r = ctx.capture_rejected(
+                &slug,
+                &env,
+                Spec::new(format!(
+                    "an address entry declaring a chain {depth} invocations deep below its root, {} with the root, one past what core's rust parser reads at depth {ENVELOPE_DEPTH} (can_parse_transaction): core refuses the envelope with txMALFORMED at submission",
+                    depth + 1
+                ))
+                .fields(&ADDRESS_FIELDS)
+                .flags(&["over-depth-cap"])
+                .must_reject(),
+            )?;
+            ensure!(
+                matches!(r.result, TransactionResultResult::TxMalformed),
+                "core answered {:?} for a chain {depth} levels below the root, expected tx_malformed",
+                r.result
+            );
         } else {
             let applied = ctx.submit_and_close_failing(&env)?;
             ensure_invoke_result(
@@ -739,14 +781,25 @@ fn declared_depth(
                 |r| matches!(r, InvokeHostFunctionResult::Trapped),
                 "invoke_host_function trapped",
             )?;
+            let note = if case == "core-limit" {
+                format!(
+                    "an address entry declaring a chain {depth} invocations deep below its root, {} with the root, the deepest envelope core's depth check accepts (xdr.envelope.depth {ENVELOPE_DEPTH}): core includes it and the host, which decodes at depth 500, traps. the ledger needs xdr.meta.depth ({META_DEPTH}) to decode",
+                    depth + 1
+                )
+            } else {
+                format!(
+                    "an address entry declaring a chain {depth} invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps"
+                )
+            };
+            let flags: &[&str] = if case == "core-limit" {
+                &["failed-tx", "at-depth-cap"]
+            } else {
+                &["failed-tx"]
+            };
             ctx.capture(
                 &slug,
                 Selector::ledger_of(&applied),
-                Spec::new(format!(
-                    "an address entry declaring a chain {depth} invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps"
-                ))
-                .fields(&ADDRESS_FIELDS)
-                .flags(&["failed-tx"]),
+                Spec::new(note).fields(&ADDRESS_FIELDS).flags(flags),
             )?;
         }
     }
@@ -1010,6 +1063,20 @@ mod tests {
         let t = matched_tree(&trees, &signer, 4).unwrap();
         assert_eq!(depth_of(&t), 4);
         assert_eq!(t.sub_invocations.len(), 1);
+    }
+
+    #[test]
+    fn core_declared_depth_is_the_caps_limits_chain_less_its_root() {
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../registry");
+        let registry = shapekit_registry::Registry::load(&dir).unwrap();
+        let chain = registry
+            .limits
+            .limits
+            .iter()
+            .find(|l| l.id == "auth.invocation.depth")
+            .unwrap()
+            .recommended;
+        assert_eq!(i64::from(CORE_DECLARED_DEPTH) + 1, chain);
     }
 
     #[test]

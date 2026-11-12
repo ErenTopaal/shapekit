@@ -13,17 +13,37 @@ pub fn type_variant(type_name: &str) -> Result<TypeVariant, ToolkitError> {
     TypeVariant::from_str(type_name).map_err(|_| ToolkitError::UnknownType(type_name.to_string()))
 }
 
-/// Decodes exactly one value of `type_name`, rejecting trailing bytes.
+/// The limits to hand `Type`'s own read and write so that `limits.depth` counts levels the
+/// way a direct `<type>::read_xdr` and `<type>::write_xdr` do, which is how core and the host
+/// decode.
+///
+/// Every arm of `Type::read_xdr` is `r.with_limited_depth(|r| <type>::read_xdr(r))`, and every
+/// arm of `Type::write_xdr` writes the boxed value through `Box<T>::write_xdr`, which is
+/// `w.with_limited_depth(|w| T::write_xdr(self, w))` (stellar-xdr 30.0.0,
+/// src/generated/type_enum.rs and src/generated.rs). Either way the dispatch costs exactly one
+/// level that a direct call does not. Core reads the type directly
+/// (`TransactionEnvelope::read_xdr` in `can_parse_transaction`), so that level is handed back.
+fn through_type(limits: Limits) -> Limits {
+    Limits {
+        depth: limits.depth.saturating_add(1),
+        len: limits.len,
+    }
+}
+
+/// Decodes exactly one value of `type_name`, rejecting trailing bytes, at the depth a direct
+/// `<type>::read_xdr` would be given.
 pub fn decode(type_name: &str, bytes: &[u8], limits: Limits) -> Result<Type, ToolkitError> {
     let variant = type_variant(type_name)?;
-    let mut reader = Limited::new(Cursor::new(bytes), limits);
+    let mut reader = Limited::new(Cursor::new(bytes), through_type(limits));
     Type::read_xdr_to_end(variant, &mut reader).map_err(ToolkitError::Decode)
 }
 
 /// Decodes under `limits`, re-encodes under the same limits and requires the bytes to be equal.
 pub fn roundtrip_check(type_name: &str, bytes: &[u8], limits: Limits) -> Result<(), ToolkitError> {
     let value = decode(type_name, bytes, limits.clone())?;
-    let again = value.to_xdr(limits).map_err(ToolkitError::Encode)?;
+    let again = value
+        .to_xdr(through_type(limits))
+        .map_err(ToolkitError::Encode)?;
     if again == bytes {
         return Ok(());
     }

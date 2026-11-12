@@ -30,7 +30,7 @@ const SCVAL: &str = "testnet-5694308.scval.xdr";
 
 fn limits(bytes: &[u8]) -> Limits {
     Limits {
-        depth: 1000,
+        depth: shapekit_manifest::META_DEPTH,
         len: bytes.len(),
     }
 }
@@ -411,10 +411,7 @@ fn framed_stream_round_trips() {
     let values = decode_framed(
         "LedgerCloseMeta",
         &stream,
-        Limits {
-            depth: 1000,
-            len: 1 << 20,
-        },
+        shapekit_manifest::decode_limits("LedgerCloseMeta", 1 << 20),
     )
     .unwrap();
     assert_eq!(values.len(), 2);

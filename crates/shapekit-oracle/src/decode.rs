@@ -7,10 +7,6 @@ use std::path::Path;
 use shapekit_manifest::framing::{FrameError, FramedReader};
 use stellar_xdr::{LedgerCloseMeta, Limited, Limits, ReadXdr};
 
-/// Nesting limit while decoding meta. Core's own transaction depth bound from protocol 28
-/// (R4) is 1000; meta nests a few levels above the envelope, and anything deeper is corrupt.
-pub const LCM_DEPTH: u32 = 1000;
-
 /// Upper bound for one framed ledger. Core's largest golden is about 5.3 MB and a full
 /// Soroban ledger stays far below this, so a bigger frame is treated as corruption.
 pub const MAX_LCM_LEN: usize = 256 * 1024 * 1024;
@@ -31,13 +27,11 @@ pub enum DecodeError {
     },
 }
 
-/// Limits for one ledger of `len` bytes: the length budget is the record itself, so the
+/// Limits for one ledger of `len` bytes: `xdr.meta.depth`, which leaves room for the deepest
+/// envelope core accepts 12 levels down, and the record itself as the length budget, so the
 /// decoder can never be talked into allocating more than it was given.
 pub fn lcm_limits(len: usize) -> Limits {
-    Limits {
-        depth: LCM_DEPTH,
-        len,
-    }
+    shapekit_manifest::decode_limits("LedgerCloseMeta", len)
 }
 
 /// Decodes exactly one `LedgerCloseMeta`, rejecting trailing bytes.

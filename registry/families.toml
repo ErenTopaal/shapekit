@@ -444,6 +444,8 @@ signature = [
     "TransactionResultResult:tx_failed",
     "PaymentResult:no_destination",
     "SignerKey:pre_auth_tx",
+    "TransactionResultResult:tx_bad_auth",
+    "TransactionResultResult:tx_no_account",
 ]
 source_classes = ["local-core"]
 fields = [
@@ -523,6 +525,9 @@ signature = [
     "LedgerEntryExt:v1",
     "AccountEntryExtensionV1Ext:v2",
     ".signer_sponsoring_i_ds[]:public_key_type_ed25519",
+    "BeginSponsoringFutureReservesResult:already_sponsored",
+    "BeginSponsoringFutureReservesResult:recursive",
+    "EndSponsoringFutureReservesResult:not_sponsored",
 ]
 source_classes = ["local-core"]
 fields = ["op.begin_sponsoring.sponsored_id", "op.revoke_sponsorship"]
@@ -582,6 +587,13 @@ signature = [
     "LedgerEntryData:ttl",
     "ContractDataDurability=temporary",
     "ContractEventType=contract",
+    "ContractCodeEntryExt:v0",
+    "ExtendFootprintTtlResult:insufficient_refundable_fee",
+    "ExtendFootprintTtlResult:resource_limit_exceeded",
+    "InvokeHostFunctionResult:insufficient_refundable_fee",
+    "RestoreFootprintResult:insufficient_refundable_fee",
+    "ScError:auth",
+    "ScError:crypto",
 ]
 source_classes = ["local-core", "synthetic"]
 fields = [
@@ -653,6 +665,7 @@ signature = [
     "SorobanTransactionDataExt:v1",
     ".archived_soroban_entries#one",
     ".evicted_keys[]:contract_data",
+    "InvokeHostFunctionResult:entry_archived",
 ]
 source_classes = ["local-core"]
 fields = [
@@ -774,6 +787,7 @@ signature = [
     "ManageOfferSuccessResultOffer:created",
     "ClaimAtom:order_book",
     "AccountMergeResult:dest_full",
+    "OperationBody:create_passive_sell_offer",
 ]
 source_classes = ["local-core", "synthetic"]
 fields = ["op.manage_offer.offer_id", "op.manage_offer.assets_amount_price"]

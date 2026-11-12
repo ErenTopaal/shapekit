@@ -295,7 +295,7 @@ pub enum Change {
     /// A contract instance entry appeared. Read from meta, never from auth entries.
     ContractDeployed {
         contract: String,
-        /// `wasm:<hex hash>` or `stellar-asset`.
+        /// `wasm:<hex hash>`, `stellar-asset`, or `external-ref:<owner>:<hex tag>` (CAP-85).
         executable: String,
     },
     ContractCode {

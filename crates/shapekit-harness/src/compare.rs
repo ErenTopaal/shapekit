@@ -186,12 +186,7 @@ fn key_of(m: &Map<String, Value>, kind: &str, claim: &ChangeClaim) -> Vec<Value>
 }
 
 /// The first claim of `kind` whose filter the change satisfies.
-fn claim_for(
-    claims: &Claims,
-    kind: &str,
-    m: &Map<String, Value>,
-    exported: bool,
-) -> Option<usize> {
+fn claim_for(claims: &Claims, kind: &str, m: &Map<String, Value>, exported: bool) -> Option<usize> {
     claims
         .changes
         .iter()

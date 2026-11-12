@@ -34,9 +34,10 @@ pub const MAX_KEYS: usize = 200;
 const FORMAT_BASE64: &str = "base64";
 const FORMAT_JSON: &str = "json";
 
-/// Limits for decoding request XDR, which a client controls.
-fn request_limits(len: usize) -> Limits {
-    Limits { depth: 500, len }
+/// Limits for decoding request XDR, which a client controls: the shared envelope bound, the
+/// one core puts on client XDR, and the request text as the length budget.
+fn request_limits(type_name: &str, len: usize) -> Limits {
+    shapekit_manifest::decode_limits(type_name, len)
 }
 
 #[derive(Debug)]
@@ -418,12 +419,13 @@ fn get_ledger_entries(replay: &Replay, req: GetLedgerEntriesRequest) -> Result<V
     }
     let mut keys = Vec::with_capacity(req.keys.len());
     for (i, k) in req.keys.iter().enumerate() {
-        let key = LedgerKey::from_xdr_base64(k, request_limits(k.len())).map_err(|_| {
-            RpcError::new(
-                INVALID_PARAMS,
-                format!("cannot unmarshal key value {k} at index {i}"),
-            )
-        })?;
+        let key =
+            LedgerKey::from_xdr_base64(k, request_limits("LedgerKey", k.len())).map_err(|_| {
+                RpcError::new(
+                    INVALID_PARAMS,
+                    format!("cannot unmarshal key value {k} at index {i}"),
+                )
+            })?;
         if matches!(key, LedgerKey::Ttl(_)) {
             return Err(RpcError::new(
                 INVALID_PARAMS,

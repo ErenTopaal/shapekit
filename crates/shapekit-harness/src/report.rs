@@ -27,6 +27,9 @@ pub struct Round {
     pub seconds: f64,
     /// Whether every verdict equals the first round's.
     pub same_verdicts_as_first: bool,
+    /// Chains of this round that could not be run, with the reason.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub chain_errors: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -76,7 +79,10 @@ impl Report {
         self.chains.iter().all(|c| c.error.is_none())
             && self.memory.flat
             && self.memory.within_budget
-            && self.rounds.iter().all(|r| r.same_verdicts_as_first)
+            && self
+                .rounds
+                .iter()
+                .all(|r| r.same_verdicts_as_first && r.chain_errors.is_empty())
     }
 }
 
@@ -108,6 +114,15 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
             rss_after_bytes: rss.current,
             seconds: started.elapsed().as_secs_f64(),
             same_verdicts_as_first: same,
+            chain_errors: result
+                .chains
+                .iter()
+                .filter_map(|c| {
+                    c.error
+                        .as_ref()
+                        .map(|e| format!("{} ({}): {e}", c.chain, c.network))
+                })
+                .collect(),
         });
         eprintln!(
             "harness: round {round}: peak rss {} MiB, {:.1}s",
@@ -232,6 +247,14 @@ pub fn markdown(r: &Report) -> String {
             } else {
                 "no"
             }
+        ));
+    }
+    for x in r.rounds.iter().filter(|x| !x.chain_errors.is_empty()) {
+        s.push_str(&format!(
+            "\nRound {} could not run {} chain(s): {}\n",
+            x.round,
+            x.chain_errors.len(),
+            cell(&x.chain_errors.join("; "))
         ));
     }
     s.push_str(&format!(

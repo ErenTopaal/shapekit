@@ -1,0 +1,42 @@
+{
+  "caps": [
+    "CAP-0046-11"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "soroban.auth-trees",
+  "fields_exercised": [
+    "auth.root_invocation",
+    "op.invoke_host_function.auth"
+  ],
+  "flags": [
+    "at-depth-cap",
+    "deep-nesting",
+    "nested-auth"
+  ],
+  "id": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "a source-account authorization entry whose invocation tree is a single chain 493 invocations deep, at the deepest an envelope decodes at depth 1000. core's depth check accepts it; the host converts at most 100 levels (scval.depth) and runs at most 100 frames, so an invocation this deep fails and the transaction lands in the ledger as failed with the full tree intact. a decoder must accept it.",
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 28
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/soroban.auth-trees/soroban.auth-trees.synth-auth-depth-493-deepest-accepted/any.expected.json",
+      "expected_json_sha256": "b1a74a2ca2d7ebf4222d4a14e4b497695fa70a6651c35c1d7ab51af054d4ef0d",
+      "xdr_file": "entries/soroban.auth-trees/soroban.auth-trees.synth-auth-depth-493-deepest-accepted/any.xdr",
+      "xdr_sha256": "03a5fbcb8fc97e01a5bcd0a9c8fbbb0b17da175a9ef69657e93ad3bb76e9926b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

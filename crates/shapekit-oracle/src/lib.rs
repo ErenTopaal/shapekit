@@ -8,6 +8,7 @@ pub mod declared;
 pub mod decode;
 pub mod interpret;
 pub mod network;
+pub mod order;
 pub mod state;
 pub mod view;
 pub mod vocab;

@@ -104,7 +104,10 @@ pub struct TesteeInfo {
 pub struct Matrix {
     pub schema_version: u32,
     pub corpus_version: String,
+    /// Depth limit of every decode request but a whole ledger's (`xdr.envelope.depth`).
     pub decode_depth: u32,
+    /// Depth limit of a `LedgerCloseMeta` decode request (`xdr.meta.depth`).
+    pub ledger_decode_depth: u32,
     pub testees: Vec<TesteeInfo>,
     /// Entry counts by result per testee.
     pub summary: BTreeMap<String, BTreeMap<ResultClass, usize>>,
@@ -419,7 +422,8 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     let matrix = Matrix {
         schema_version: MATRIX_SCHEMA,
         corpus_version: manifest.corpus_version.clone(),
-        decode_depth: shapekit_manifest::DECODE_DEPTH,
+        decode_depth: shapekit_manifest::ENVELOPE_DEPTH,
+        ledger_decode_depth: shapekit_manifest::META_DEPTH,
         testees: testee_info,
         summary,
         entries: rows,

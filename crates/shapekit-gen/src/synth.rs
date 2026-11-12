@@ -15,8 +15,8 @@ use anyhow::{Context, Result, bail, ensure};
 use serde_json::Value;
 use shapekit_manifest::build::{ENTRIES_DIR, ENTRY_FILE, VECTORS_DIR};
 use shapekit_manifest::{
-    DECODE_DEPTH, DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, Limits, Source,
-    Validity, Variant, Variants, VectorFile, sha256_hex, xdr,
+    DecodeExpectation, ENVELOPE_DEPTH, Entry, EntryKind, EntryProtocol, Expected, Limits, Source,
+    Validity, Variant, Variants, VectorFile, decode_limits, sha256_hex, xdr,
 };
 use shapekit_registry::{Registry, SourceClass};
 
@@ -354,10 +354,7 @@ fn check_xdr(registry: &Registry, item: XdrItem) -> Result<XdrOut> {
             if let Err(err) = direct {
                 bail!("{id}: stellar-xdr rejects this must-accept vector: {err:?}");
             }
-            let accept = Limits {
-                depth: DECODE_DEPTH,
-                len: item.bytes.len(),
-            };
+            let accept = decode_limits(item.xdr_type, item.bytes.len());
             xdr::roundtrip_check(item.xdr_type, &item.bytes, accept.clone())
                 .with_context(|| format!("{id}: round trip under the validator's limits"))?;
             Some(
@@ -551,7 +548,7 @@ where
 {
     let b64 = value
         .to_xdr_base64(Limits {
-            depth: DECODE_DEPTH,
+            depth: ENVELOPE_DEPTH,
             len: usize::MAX,
         })
         .context("encoding a vector value")?;

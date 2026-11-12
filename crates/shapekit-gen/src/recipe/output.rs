@@ -7,10 +7,10 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, bail, ensure};
 use serde_json::Value;
 use shapekit_manifest::build::{ENTRIES_DIR, ENTRY_FILE};
-use shapekit_manifest::xdr::{render_json, roundtrip_check, to_xdr_json};
+use shapekit_manifest::xdr::{self, render_json, roundtrip_check, to_xdr_json};
 use shapekit_manifest::{
-    DECODE_DEPTH, DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, Limits,
-    Normalization, RejectionStage, Source, Variant, Variants, fragment_matches, sha256_hex,
+    DecodeExpectation, Entry, EntryKind, EntryProtocol, Expected, Limits, Normalization,
+    RejectionStage, Source, Variant, Variants, decode_limits, fragment_matches, sha256_hex,
     shape_signature,
 };
 use shapekit_registry::{Family, SourceClass};
@@ -19,13 +19,6 @@ use super::Network;
 use super::ctx::Captured;
 
 pub const CHAINS_DIR: &str = "chains";
-
-pub(crate) fn limits(len: usize) -> Limits {
-    Limits {
-        depth: DECODE_DEPTH,
-        len,
-    }
-}
 
 /// One entry ready to write: its record and the bytes of each variant.
 #[derive(Debug, Clone)]
@@ -213,8 +206,12 @@ pub(crate) fn merge(
             vector: None,
             expected: Expected {
                 validity: first.validity,
-                decode: DecodeExpectation::MustAccept,
-                roundtrip: true,
+                decode: if s.must_reject {
+                    DecodeExpectation::MustReject
+                } else {
+                    DecodeExpectation::MustAccept
+                },
+                roundtrip: !s.must_reject,
             },
             flags: s.flags.clone(),
             fields_exercised: s.fields_exercised.clone(),
@@ -234,11 +231,28 @@ pub(crate) fn merge(
 pub(crate) fn check_entry(family: &Family, p: &PendingEntry) -> Result<EntryCheck> {
     let id = &p.entry.id;
     let t = p.entry.xdr_type.as_deref().expect("merge sets xdr_type");
+    let must_reject = p.entry.expected.decode == DecodeExpectation::MustReject;
     let mut matched: Option<BTreeSet<String>> = None;
     for (n, bytes) in &p.bytes {
-        roundtrip_check(t, bytes, limits(bytes.len()))
-            .with_context(|| format!("{id} {}: round trip", n.name()))?;
-        let sig = shape_signature(t, bytes, limits(bytes.len()))
+        let limits = decode_limits(t, bytes.len());
+        // a must-reject entry is still a member of its family by shape; its bytes were just
+        // built here and core read them, so they are decoded without a depth bound for that
+        let sig_limits = if must_reject {
+            ensure!(
+                xdr::decode(t, bytes, limits).is_err(),
+                "{id} {}: must-reject, but it decodes under the shared limits",
+                n.name()
+            );
+            Limits {
+                depth: u32::MAX,
+                len: bytes.len(),
+            }
+        } else {
+            roundtrip_check(t, bytes, limits.clone())
+                .with_context(|| format!("{id} {}: round trip", n.name()))?;
+            limits
+        };
+        let sig = shape_signature(t, bytes, sig_limits)
             .with_context(|| format!("{id} {}: shape signature", n.name()))?;
         let these: BTreeSet<String> = family
             .signature
@@ -274,20 +288,24 @@ pub(crate) fn write_entry(root: &Path, p: &PendingEntry) -> Result<Entry> {
     ensure!(!dir.exists(), "{} already exists", dir.display());
     std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
     let t = entry.xdr_type.clone().expect("merge sets xdr_type");
+    let must_accept = entry.expected.decode == DecodeExpectation::MustAccept;
     for (n, bytes) in &p.bytes {
-        let json = to_xdr_json(&t, bytes, limits(bytes.len()))
-            .with_context(|| format!("{}: rendering XDR-JSON", entry.id))?;
         let xdr_name = format!("{}.xdr", n.name());
-        let json_name = format!("{}.expected.json", n.name());
         std::fs::write(dir.join(&xdr_name), bytes)?;
-        std::fs::write(dir.join(&json_name), json.as_bytes())?;
         let v = variant_slot(&mut entry.variants, *n)
             .as_mut()
             .expect("merge creates a record per variant");
         v.xdr_file = format!("{rel_dir}/{xdr_name}");
         v.xdr_sha256 = sha256_hex(bytes);
-        v.expected_json_file = Some(format!("{rel_dir}/{json_name}"));
-        v.expected_json_sha256 = Some(sha256_hex(json.as_bytes()));
+        // a value a decoder must refuse has no rendering to compare against
+        if must_accept {
+            let json = to_xdr_json(&t, bytes, decode_limits(&t, bytes.len()))
+                .with_context(|| format!("{}: rendering XDR-JSON", entry.id))?;
+            let json_name = format!("{}.expected.json", n.name());
+            std::fs::write(dir.join(&json_name), json.as_bytes())?;
+            v.expected_json_file = Some(format!("{rel_dir}/{json_name}"));
+            v.expected_json_sha256 = Some(sha256_hex(json.as_bytes()));
+        }
     }
     let text = render_json(&serde_json::to_value(&entry)?);
     let path = dir.join(ENTRY_FILE);

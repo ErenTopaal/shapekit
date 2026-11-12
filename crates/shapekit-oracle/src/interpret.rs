@@ -55,7 +55,12 @@ pub fn interpret_ledger(
     let mut upgrades = Vec::new();
     for (i, up) in view.upgrades.iter().enumerate() {
         let mut changes = Vec::new();
-        for d in diffs(&up.changes) {
+        let up_diffs = diffs(&up.changes).map_err(|message| InterpretError::Tx {
+            seq,
+            tx: format!("upgrade {i}"),
+            message,
+        })?;
+        for d in up_diffs {
             entry_changes(
                 &ctx,
                 &d,
@@ -288,10 +293,12 @@ pub(crate) struct Diff<'a> {
     pub removed: bool,
 }
 
-pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Vec<Diff<'_>> {
+/// Reads `changes` in an order that chains (see [`crate::order`]), so a canonical list
+/// whose key has two groups gives the right before and after.
+pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Result<Vec<Diff<'_>>, String> {
     let mut out: Vec<Diff<'_>> = Vec::new();
     let mut at: BTreeMap<LedgerKey, usize> = BTreeMap::new();
-    for c in changes {
+    for c in crate::order::raw_order(changes, |_| None)? {
         let key = match c {
             LedgerEntryChange::Created(e)
             | LedgerEntryChange::Updated(e)
@@ -330,7 +337,7 @@ pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Vec<Diff<'_>> {
             }
         }
     }
-    out
+    Ok(out)
 }
 
 fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, InterpretError> {
@@ -344,7 +351,7 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
     let mut changes = Vec::new();
 
     // fee source: the one account fee processing touched
-    let fee_diffs = diffs(tx.fee_processing);
+    let fee_diffs = diffs(tx.fee_processing).map_err(err)?;
     let fee_accounts: BTreeSet<String> = fee_diffs
         .iter()
         .filter_map(|d| match &d.key {
@@ -368,7 +375,7 @@ fn tx_facts(ctx: &Context, seq: u32, tx: &TxView<'_>) -> Result<TxFacts, Interpr
             Scope::Operation(i) => Some(i),
             _ => None,
         };
-        for d in diffs(list.changes) {
+        for d in diffs(list.changes).map_err(err)? {
             if matches!(list.scope, Scope::FeeProcessing | Scope::PostApplyFee)
                 && let LedgerKey::Account(k) = &d.key
                 && addr::account(&k.account_id) == fee_source
