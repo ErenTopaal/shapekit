@@ -30,6 +30,10 @@ use serde_json::{Value, json};
 pub use crate::replay::DEFAULT_CACHE_BYTES;
 use crate::replay::Replay;
 
+/// Most threads that handle JSON-RPC requests at once. Each one can keep a malloc arena at
+/// the high-water mark of the largest response it built, so this multiplies the peak.
+pub const BLOCKING_THREADS: usize = 4;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ServeError {
     #[error("chain: {0}")]
@@ -74,7 +78,7 @@ async fn rpc_route(State(app): State<App>, body: Bytes) -> Response {
     let out = tokio::task::spawn_blocking(move || {
         let req: Value = match serde_json::from_slice(&body) {
             Ok(v) => v,
-            Err(e) => return Some(rpc::parse_error(&e)),
+            Err(e) => return Some(rpc::parse_error(&e).to_string()),
         };
         let one = |r: &Value| {
             if log {
@@ -85,20 +89,24 @@ async fn rpc_route(State(app): State<App>, body: Bytes) -> Response {
             }
             rpc::handle(&replay, r)
         };
-        match &req {
+        let v = match &req {
             Value::Array(items) if !items.is_empty() => {
                 let out: Vec<Value> = items.iter().filter_map(one).collect();
                 (!out.is_empty()).then_some(Value::Array(out))
             }
             other => one(other),
-        }
+        };
+        // the text is written on this thread, whose arena already held the larger value
+        // tree; written on an async worker, the first large body ratchets that worker's
+        // arena up as well
+        v.map(|v| v.to_string())
     })
     .await;
     match out {
-        Ok(Some(v)) => (
+        Ok(Some(text)) => (
             StatusCode::OK,
             [(header::CONTENT_TYPE, "application/json")],
-            v.to_string(),
+            text,
         )
             .into_response(),
         Ok(None) => StatusCode::NO_CONTENT.into_response(),
@@ -222,7 +230,7 @@ pub fn start(cfg: ServeConfig) -> Result<Server, ServeError> {
     // arena, so letting idle threads expire and respawn ratchets resident memory up
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
-        .max_blocking_threads(4)
+        .max_blocking_threads(BLOCKING_THREADS)
         .thread_keep_alive(std::time::Duration::from_secs(24 * 3600))
         .enable_all()
         .build()
