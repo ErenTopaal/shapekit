@@ -1,6 +1,8 @@
-//! The run report (`report.json`, `FUZZ.md`) and one reproducer per class in the corpus
-//! vector layout: `<id>/entry.json`, `<id>/any.xdr`, plus `<id>/class.json` with what the
-//! fuzzer saw.
+//! The run report (`report.json`, `FUZZ.md`, `timing.json`) and one reproducer per class in
+//! the corpus vector layout: `<id>/entry.json`, `<id>/any.xdr`, plus `<id>/class.json` with
+//! what the fuzzer saw. `report.json` holds nothing that depends on the clock, so two runs
+//! with one seed and one input budget compare equal; the wall-clock figures are in
+//! `timing.json` and `FUZZ.md`.
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -13,9 +15,6 @@ use shapekit_manifest::{DecodeExpectation, Entry, Validity, sha256_hex};
 use crate::oracle::Side;
 use crate::types::FuzzType;
 use crate::{Config, Minimized, Outcome, class_id};
-
-/// The protocol whose xdr both sides were built for; reproducers are checked against it only.
-const PROTOCOL: u32 = 30;
 
 pub struct Written {
     pub new: Vec<String>,
@@ -72,7 +71,9 @@ fn verdict(s: &Side) -> Value {
     }
 }
 
-pub fn entry_json(m: &Minimized, go_key: &str) -> Result<(String, Value)> {
+/// The reproducer's manifest entry. `protocol` is the newest protocol both sides know
+/// (versions.toml's max_protocol), the only one the verdicts were observed under.
+pub fn entry_json(m: &Minimized, go_key: &str, protocol: u32) -> Result<(String, Value)> {
     let c = &m.class;
     let id = class_id(c.ty, c.kind, &c.signature);
     let (decode, validity, source) = expectation(c.ty, &m.rust, &m.reproducer);
@@ -112,7 +113,7 @@ pub fn entry_json(m: &Minimized, go_key: &str) -> Result<(String, Value)> {
         "linked_issues": [],
         "notes": notes,
         "passphrase_dependent": false,
-        "protocol": {"introduced": PROTOCOL, "valid_min": PROTOCOL},
+        "protocol": {"introduced": protocol, "valid_min": protocol},
         "source": {"class": "synthetic"},
         "synthetic": true,
         "variants": {"any": {
@@ -127,8 +128,14 @@ pub fn entry_json(m: &Minimized, go_key: &str) -> Result<(String, Value)> {
     Ok((id, serde_json::to_value(entry)?))
 }
 
-fn write_reproducer(dir: &Path, m: &Minimized, go_key: &str, seed: u64) -> Result<String> {
-    let (id, entry) = entry_json(m, go_key)?;
+fn write_reproducer(
+    dir: &Path,
+    m: &Minimized,
+    go_key: &str,
+    seed: u64,
+    protocol: u32,
+) -> Result<String> {
+    let (id, entry) = entry_json(m, go_key, protocol)?;
     let at = dir.join(&id);
     std::fs::create_dir_all(&at).with_context(|| format!("creating {}", at.display()))?;
     std::fs::write(at.join("any.xdr"), &m.reproducer)?;
@@ -181,13 +188,13 @@ pub fn write(
     };
     let mut classes = Vec::new();
     for m in &outcome.classes {
-        let id = write_reproducer(&repro_dir, m, &go_key, cfg.seed)?;
+        let id = write_reproducer(&repro_dir, m, &go_key, cfg.seed, outcome.protocol)?;
         let is_known = known.contains_key(&id);
         if is_known {
             written.known.push(id.clone());
         } else {
             if let Some(f) = findings {
-                write_reproducer(f, m, &go_key, cfg.seed)?;
+                write_reproducer(f, m, &go_key, cfg.seed, outcome.protocol)?;
             }
             written.new.push(id.clone());
         }
@@ -219,6 +226,7 @@ pub fn write(
                 "both_reject": s.both_reject,
                 "filtered": s.filtered,
                 "disagreements": s.disagreements,
+                "generation_failures": s.generation_failures,
             }),
         );
     }
@@ -230,9 +238,11 @@ pub fn write(
     let report = json!({
         "seed": cfg.seed,
         "jobs": cfg.jobs,
-        "seconds": secs,
+        "max_inputs": cfg.max_inputs,
+        // false when the clock ended the run: then the inputs depend on the machine's speed
+        "reproducible": !outcome.time_cut,
+        "protocol": outcome.protocol,
         "inputs": inputs,
-        "inputs_per_second": inputs as f64 / secs.max(1e-9),
         "rust": format!("stellar-xdr {}", stellar_xdr::VERSION.pkg),
         "go": go_key,
         "types": per_type,
@@ -244,6 +254,13 @@ pub fn write(
     let mut text = serde_json::to_string_pretty(&report)?;
     text.push('\n');
     std::fs::write(out.join("report.json"), text)?;
+    let timing = json!({
+        "seconds": secs,
+        "inputs_per_second": inputs as f64 / secs.max(1e-9),
+    });
+    let mut text = serde_json::to_string_pretty(&timing)?;
+    text.push('\n');
+    std::fs::write(out.join("timing.json"), text)?;
     std::fs::write(out.join("FUZZ.md"), markdown(cfg, outcome, known))?;
     Ok(written)
 }
@@ -267,12 +284,17 @@ fn markdown(cfg: &Config, outcome: &Outcome, known: &BTreeMap<String, String>) -
     );
     let _ = writeln!(
         s,
-        "Seed {}, {} workers, {:.0} s, {} inputs ({:.0} per second).\n",
+        "Seed {}, {} workers, {:.0} s, {} inputs ({:.0} per second). {}\n",
         cfg.seed,
         cfg.jobs,
         secs,
         inputs,
-        inputs as f64 / secs.max(1e-9)
+        inputs as f64 / secs.max(1e-9),
+        if outcome.time_cut {
+            "The time budget ended the run, so it is not reproducible from the seed; give --max-inputs and enough --seconds for that."
+        } else {
+            "Every worker finished its share of --max-inputs, so the seed reproduces this run."
+        }
     );
     let _ = writeln!(
         s,
@@ -336,6 +358,7 @@ mod tests {
                 kind,
                 count: 1,
                 input: bytes.clone(),
+                input_worker: 0,
                 first: Sighting {
                     worker: 0,
                     iteration: 1,
@@ -360,7 +383,7 @@ mod tests {
             Side::Rejected("bool not 0 or 1".into()),
         );
         assert_eq!(m.class.kind, Kind::RustAcceptsGoRejects);
-        let (id, entry) = entry_json(&m, "go@test").unwrap();
+        let (id, entry) = entry_json(&m, "go@test", 30).unwrap();
         assert!(id.starts_with("fuzz.sc-val-rust-accepts-go-rejects-"));
         assert_eq!(entry["expected"]["decode"], "implementation-defined");
         assert_eq!(entry["expected"]["validity"], "not-emittable");
@@ -377,7 +400,7 @@ mod tests {
             vec![0, 0, 0],
             Side::Accepted(vec![0, 0, 0, 0]),
         );
-        let (_, entry) = entry_json(&m, "go@test").unwrap();
+        let (_, entry) = entry_json(&m, "go@test", 30).unwrap();
         assert_eq!(entry["expected"]["decode"], "must-reject");
         assert_eq!(entry["expected"]["validity"], "invalid-by-core");
     }

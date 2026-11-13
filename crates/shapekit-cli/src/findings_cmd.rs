@@ -1,11 +1,11 @@
-//! `shapekit findings collect|check`. The format and rules are documented on the shapekit-findings crate.
+//! `shapekit findings collect|check|import-inputs`. The format and rules are documented on the shapekit-findings crate.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::{Args, Subcommand};
 use shapekit_findings::collect::{Collection, collect};
-use shapekit_findings::{check, render, triage};
+use shapekit_findings::{check, import, render, triage};
 
 #[derive(Subcommand)]
 pub enum FindingsCommand {
@@ -13,8 +13,20 @@ pub enum FindingsCommand {
     /// FINDINGS.md.
     Collect(Common),
     /// Fail while any failure has no finding, or any finding has no upstream link or recorded
-    /// decision, or findings.json is not what collect would write now.
-    Check(Common),
+    /// decision, or findings.json or FINDINGS.md is not what collect would write now, or a
+    /// committed input changed since it was imported.
+    Check {
+        #[command(flatten)]
+        common: Common,
+        /// Report findings that are still drafts but do not fail on them; every other
+        /// problem still fails.
+        #[arg(long)]
+        allow_draft: bool,
+    },
+    /// Copy every run output the triage declares under [[inputs.import]] into findings/inputs/,
+    /// reduced to what collect reads, and record its provenance. Run it after new harness,
+    /// conformance or linter runs, then run collect.
+    ImportInputs(Common),
 }
 
 #[derive(Args)]
@@ -58,8 +70,31 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             println!("wrote {} and {}", json.display(), md.display());
             Ok(true)
         }
-        FindingsCommand::Check(c) => {
-            let col = fresh(&c)?;
+        FindingsCommand::ImportInputs(c) => {
+            let t = triage::load(&c.triage)?;
+            let p = import::import(&c.root, &t)?;
+            for e in &p.inputs {
+                println!(
+                    "{} <- {} ({}): {}",
+                    e.path,
+                    e.from,
+                    e.kind.name(),
+                    e.describes
+                );
+            }
+            println!(
+                "imported {} input(s), provenance in {}",
+                p.inputs.len(),
+                import::PROVENANCE_FILE
+            );
+            Ok(true)
+        }
+        FindingsCommand::Check {
+            common: c,
+            allow_draft,
+        } => {
+            let t = triage::load(&c.triage)?;
+            let col = collect(&c.root, &t)?;
             let path = c.out.join("findings.json");
             let written: Option<Collection> = match std::fs::read(&path) {
                 Ok(b) => Some(
@@ -69,7 +104,15 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
                 Err(e) => return Err(e).with_context(|| format!("reading {}", path.display())),
             };
-            let out = check::check(&c.root, &col, written.as_ref());
+            let md_path = c.out.join("FINDINGS.md");
+            let written_md = match std::fs::read_to_string(&md_path) {
+                Ok(s) => Some(s),
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
+                Err(e) => return Err(e).with_context(|| format!("reading {}", md_path.display())),
+            };
+            let mut out = check::check(&c.root, &col, written.as_ref(), written_md.as_deref());
+            out.problems.extend(import::verify(&c.root, &t));
+            out.ok = out.problems.is_empty() || (allow_draft && out.only_drafts());
             for p in &out.problems {
                 println!("{p}");
             }
@@ -86,6 +129,12 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                     format!(": {}", out.pending.join(", "))
                 }
             );
+            if allow_draft && !out.problems.is_empty() && out.ok {
+                println!(
+                    "{} draft finding(s) reported but allowed by --allow-draft",
+                    out.drafts.len()
+                );
+            }
             println!(
                 "findings check: {}",
                 if out.ok {

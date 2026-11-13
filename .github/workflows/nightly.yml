@@ -113,10 +113,8 @@ jobs:
         with:
           key: debug
       - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
-      - name: cargo test with docker
-        env:
-          SHAPEKIT_DOCKER_TESTS: "1"
-        run: cargo test --workspace --locked --no-fail-fast
+      - name: cargo test with docker and network, ignored tests included
+        run: cargo test --workspace --locked --no-fail-fast -- --include-ignored
       - name: serve memory bound (release build)
         run: cargo test --release --locked -p shapekit-cli --test serve_memory
 
@@ -298,7 +296,7 @@ jobs:
     # longer lands in its class. the seed is the date, so a failure replays from the log
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -315,7 +313,9 @@ jobs:
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           seed=$(date -u +%Y%m%d)
           echo "seed $seed"
-          "$RUNNER_TEMP/bin/shapekit" fuzz --seconds 1500 --seed "$seed" --jobs 4 \
+          # a fixed input budget makes the run reproducible from its seed; --seconds is only a
+          # safety stop sized well above the budget at the measured rate (about 73k inputs/s)
+          "$RUNNER_TEMP/bin/shapekit" fuzz --seconds 2400 --max-inputs 60000000 --seed "$seed" --jobs 4 \
             --out fuzz-out --findings fuzz-out/new
       - name: replay stored reproducers
         if: ${{ !cancelled() }}
@@ -396,10 +396,11 @@ jobs:
             "$RUNNER_TEMP/bin/shapekit" findings import-inputs
           fi
       - name: findings check, drafts tolerated
+        # --allow-draft passes when the only problems are findings still waiting to be filed;
+        # any other problem fails the job
         run: |
-          set -uo pipefail
-          out=$("$RUNNER_TEMP/bin/shapekit" findings check 2>&1)
-          status=$?
+          set -euo pipefail
+          out=$("$RUNNER_TEMP/bin/shapekit" findings check --allow-draft 2>&1) || { echo "$out"; exit 1; }
           echo "$out"
           {
             echo '## findings check'
@@ -407,17 +408,3 @@ jobs:
             echo "$out"
             echo '```'
           } >>"$GITHUB_STEP_SUMMARY"
-          if [ "$status" -eq 0 ]; then exit 0; fi
-          # the summary line counts the drafts, the last line counts every problem. the job
-          # passes only when the two are equal, so a draft is the only problem left
-          pending=$(sed -n -E 's/^.*; ([0-9]+) of [0-9]+ findings pending filing \(status draft\).*$/\1/p' <<<"$out")
-          problems=$(sed -n -E 's/^findings check: FAILED, ([0-9]+) problem\(s\)$/\1/p' <<<"$out")
-          if [ -z "$pending" ] || [ -z "$problems" ]; then
-            echo "::error::findings check failed without the expected summary lines (exit $status)"
-            exit 1
-          fi
-          if [ "$problems" -ne "$pending" ]; then
-            echo "::error::findings check: $problems problem(s), only $pending of them are drafts awaiting filing"
-            exit 1
-          fi
-          echo "::warning::findings check: $pending finding(s) still drafts, not yet filed upstream"

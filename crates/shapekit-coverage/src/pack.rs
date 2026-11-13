@@ -236,7 +236,9 @@ fn no_strays(files: &[String], manifest: &Manifest) -> Result<(), CoverageError>
         } else if f.starts_with("chains/") {
             !chains.iter().any(|c| f.starts_with(c.as_str()))
         } else {
-            false
+            // outside the entry directories only a closed set of members ships, so a stray
+            // anywhere else cannot ride along unverified
+            !outside_member(f)
         };
         if stray {
             return Err(CoverageError::Pack(format!(
@@ -247,10 +249,37 @@ fn no_strays(files: &[String], manifest: &Manifest) -> Result<(), CoverageError>
     Ok(())
 }
 
+/// The members allowed outside `entries/`, `vectors/` and `chains/`: the required files, the
+/// golden agreement exceptions and one `index.json` per golden snapshot.
+fn outside_member(f: &str) -> bool {
+    if REQUIRED.contains(&f) || f == "goldens/agree-exceptions.toml" {
+        return true;
+    }
+    let parts: Vec<&str> = f.split('/').collect();
+    matches!(parts.as_slice(), ["goldens", snapshot, "index.json"] if !snapshot.is_empty())
+}
+
 fn verify_manifest_files(corpus: &Path, manifest: &Manifest) -> Result<(), CoverageError> {
     let mut refs: Vec<(&str, &str, &str)> = Vec::new();
+    // a file named without its hash would ship unverified, so the pair is required
+    let pair = |id: &str, what: &str, f: &Option<String>, h: &Option<String>| match (f, h) {
+        (Some(_), None) => Err(CoverageError::Pack(format!(
+            "{id}: names an {what} file without its sha256, so packing cannot vouch for it"
+        ))),
+        (None, Some(_)) => Err(CoverageError::Pack(format!(
+            "{id}: records an {what} sha256 without its file"
+        ))),
+        _ => Ok(()),
+    };
     for e in &manifest.entries {
         for (_, v) in e.variants.iter() {
+            pair(
+                &e.id,
+                "expected_json",
+                &v.expected_json_file,
+                &v.expected_json_sha256,
+            )?;
+            pair(&e.id, "oracle", &v.oracle_file, &v.oracle_sha256)?;
             refs.push((&e.id, &v.xdr_file, &v.xdr_sha256));
             if let (Some(f), Some(h)) = (&v.expected_json_file, &v.expected_json_sha256) {
                 refs.push((&e.id, f, h));
@@ -264,14 +293,8 @@ fn verify_manifest_files(corpus: &Path, manifest: &Manifest) -> Result<(), Cover
         }
     }
     for (id, file, sha) in refs {
-        let path = corpus.join(file);
-        let bytes = std::fs::read(&path).map_err(io(&path))?;
-        let actual = sha256_hex(&bytes);
-        if actual != sha {
-            return Err(CoverageError::Pack(format!(
-                "{id}: {file} hashes to {actual}, the manifest records {sha}"
-            )));
-        }
+        shapekit_manifest::read_verified(corpus, file, Some(sha))
+            .map_err(|e| CoverageError::Pack(format!("{id}: {e}")))?;
     }
     Ok(())
 }

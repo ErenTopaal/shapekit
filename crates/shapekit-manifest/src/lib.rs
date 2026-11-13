@@ -4,12 +4,14 @@ pub mod build;
 mod depth;
 pub mod framing;
 mod model;
+pub mod paths;
 pub mod signature;
 mod validate;
 pub mod xdr;
 
 pub use depth::{ENVELOPE_DEPTH, META_DEPTH, decode_depth, decode_limits};
 pub use model::*;
+pub use paths::{is_safe_relative, read_verified};
 pub use signature::{fragment_matches, reachable_arms, shape_signature};
 pub use validate::validate;
 pub use xdr::{roundtrip_check, to_xdr_json};

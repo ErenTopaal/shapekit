@@ -4,6 +4,7 @@ pub mod adapter;
 pub mod compare;
 pub mod corpus;
 pub mod dockernet;
+pub mod expect;
 pub mod memory;
 pub mod protocol;
 pub mod report;

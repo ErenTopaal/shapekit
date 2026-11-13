@@ -202,13 +202,7 @@ impl ChainCtx {
     }
 
     fn claim_slug(&mut self, slug: &str) -> Result<String> {
-        ensure!(
-            !slug.is_empty()
-                && slug
-                    .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-'),
-            "capture slug {slug:?} must be lowercase kebab-case"
-        );
+        crate::entry_io::check_slug(slug)?;
         // protocol in the id keeps the chains of one family apart
         let full = format!("p{}-{slug}", self.protocol);
         ensure!(

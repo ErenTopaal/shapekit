@@ -219,13 +219,13 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     let mut input_refs = Vec::new();
     let mut input_problems = Vec::new();
     let manifest_path = root.join(&triage.inputs.manifest);
-    let (bytes, sha) = inputs::read(&manifest_path)?;
+    let (bytes, manifest_sha) = inputs::read(&manifest_path)?;
     let manifest: Manifest = serde_json::from_slice(&bytes)
         .with_context(|| format!("parsing {}", manifest_path.display()))?;
     input_refs.push(InputRef {
         kind: "manifest".into(),
         path: triage.inputs.manifest.clone(),
-        sha256: sha,
+        sha256: manifest_sha.clone(),
         detail: format!("corpus {}", manifest.corpus_version),
     });
 
@@ -247,11 +247,23 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         let path = root.join(rel);
         let (bytes, sha) = inputs::read(&path)?;
         let report = inputs::harness_report(&bytes, &path)?;
-        let (target, version) = report
-            .describe
-            .as_ref()
-            .map(|d| (d.target.clone(), d.target_version.clone()))
-            .unwrap_or_else(|| ("unknown".into(), "unknown".into()));
+        let (target, version) = match report.describe.as_ref() {
+            Some(d) => (d.target.clone(), d.target_version.clone()),
+            None => {
+                // target matchers cannot apply, so every failure would go unmapped or to a
+                // matcher without a target
+                input_problems.push(format!(
+                    "{rel}: the report has no describe, so its target and version are unknown"
+                ));
+                ("unknown".into(), "unknown".into())
+            }
+        };
+        if report.manifest_sha256 != manifest_sha {
+            input_problems.push(format!(
+                "{rel}: the harness ran against manifest {}, but {} is {manifest_sha}; rerun the harness and import its report",
+                report.manifest_sha256, triage.inputs.manifest
+            ));
+        }
         input_refs.push(InputRef {
             kind: "harness".into(),
             path: rel.clone(),
@@ -346,6 +358,12 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                     .join(" ")
             ),
         });
+        if m.corpus_version != manifest.corpus_version {
+            input_problems.push(format!(
+                "{rel}: the matrix is of corpus {}, but {} is corpus {}; rerun conformance and import the matrix",
+                m.corpus_version, triage.inputs.manifest, manifest.corpus_version
+            ));
+        }
         for p in &m.known_failure_problems {
             input_problems.push(format!("{rel}: known-failures: {p}"));
         }
@@ -360,7 +378,16 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                     continue;
                 }
                 failures += 1;
-                let (sdk, version) = testees.get(key.as_str()).copied().unwrap_or(("?", "?"));
+                let (sdk, version) = match testees.get(key.as_str()) {
+                    Some(t) => *t,
+                    None => {
+                        input_problems.push(format!(
+                            "{rel}: {} has a cell for {key}, which is not one of the matrix's testees",
+                            e.id
+                        ));
+                        ("?", "?")
+                    }
+                };
                 if cell.known_issue.is_none() {
                     input_problems.push(format!(
                         "{rel}: {} on {key} is {} and not in the known-failures list",
@@ -461,7 +488,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     let corpus_dir = manifest_path.parent().unwrap_or(root);
     let mut records: Vec<FindingRecord> = matched
         .iter()
-        .map(|m| record(m, triage, &by_id, corpus_dir))
+        .map(|m| record(m, triage, &by_id, corpus_dir, &mut input_problems))
         .collect();
     link_siblings(&mut records, triage);
 
@@ -495,10 +522,11 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     })
 }
 
-/// Size of the files that make up an entry, so the smallest one can be offered as the
-/// minimal reproduction.
-fn entry_size(e: &shapekit_manifest::Entry, corpus: &Path) -> u64 {
-    let files: Vec<&str> = e
+/// Size of the first file of an entry, so the smallest entry can be offered as the minimal
+/// reproduction. A file that cannot be read is an input problem, not an infinitely large
+/// entry, so it cannot silently drop out of the choice.
+fn entry_size(e: &shapekit_manifest::Entry, corpus: &Path) -> Result<u64, String> {
+    let first = e
         .variants
         .testnet
         .iter()
@@ -506,11 +534,18 @@ fn entry_size(e: &shapekit_manifest::Entry, corpus: &Path) -> u64 {
         .chain(e.variants.any.iter())
         .map(|v| v.xdr_file.as_str())
         .chain(e.vector.iter().map(|v| v.path.as_str()))
-        .collect();
-    files
-        .first()
-        .and_then(|f| std::fs::metadata(corpus.join(f)).ok())
-        .map_or(u64::MAX, |m| m.len())
+        .next()
+        .ok_or_else(|| format!("manifest entry {} names no file", e.id))?;
+    if !shapekit_manifest::is_safe_relative(first) {
+        return Err(format!(
+            "manifest entry {} names {first:?}, which is not a path inside the corpus",
+            e.id
+        ));
+    }
+    let path = corpus.join(first);
+    std::fs::metadata(&path)
+        .map(|m| m.len())
+        .map_err(|err| format!("entry {}: {}: {err}", e.id, path.display()))
 }
 
 fn record(
@@ -518,6 +553,7 @@ fn record(
     triage: &Triage,
     manifest: &BTreeMap<&str, &shapekit_manifest::Entry>,
     corpus: &Path,
+    problems: &mut Vec<String>,
 ) -> FindingRecord {
     let def = m.def;
     let entries: BTreeSet<String> = m
@@ -531,19 +567,23 @@ fn record(
             caps.extend(me.caps.iter().cloned());
         }
     }
-    let minimal = def.minimal_entry.clone().or_else(|| {
-        entries
-            .iter()
-            .min_by_key(|e| {
-                (
-                    manifest
-                        .get(e.as_str())
-                        .map_or(u64::MAX, |me| entry_size(me, corpus)),
-                    (*e).clone(),
-                )
-            })
-            .cloned()
-    });
+    let mut sized: Vec<(u64, &String)> = Vec::new();
+    for e in &entries {
+        match manifest.get(e.as_str()) {
+            None => problems.push(format!(
+                "{}: entry {e} is not in the manifest, so the input is from another corpus",
+                def.id
+            )),
+            Some(me) => match entry_size(me, corpus) {
+                Ok(n) => sized.push((n, e)),
+                Err(why) => problems.push(format!("{}: {why}", def.id)),
+            },
+        }
+    }
+    let minimal = def
+        .minimal_entry
+        .clone()
+        .or_else(|| sized.iter().min().map(|(_, e)| (*e).clone()));
     let reproduce = minimal
         .as_ref()
         .and_then(|e| {

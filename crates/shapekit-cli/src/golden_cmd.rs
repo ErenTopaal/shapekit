@@ -126,6 +126,12 @@ pub fn agree(manifest_file: &Path, registry_dir: &Path) -> Result<bool> {
             x.golden, x.op
         );
     }
+    for x in &report.inapplicable_exceptions {
+        println!(
+            "info: exception for {} {} is not compared (no local-core or history entry of its family performs {}), so it excuses nothing today",
+            x.golden, x.op, x.op
+        );
+    }
     for x in &report.unknown_exceptions {
         println!(
             "DISAGREE: exception for {} {} {{{}}} names no golden combination",

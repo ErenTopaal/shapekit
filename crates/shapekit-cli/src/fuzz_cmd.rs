@@ -11,13 +11,15 @@ pub struct FuzzArgs {
     /// Wall-clock budget of the generation phase; minimisation runs after it.
     #[arg(long, default_value_t = 60)]
     seconds: u64,
-    /// Seeds every worker's generator, so a run is reproducible from it.
+    /// Seeds every worker's generator. With --max-inputs, a run that finishes inside --seconds
+    /// writes the same report.json for the same seed whatever --jobs is set to.
     #[arg(long, default_value_t = 1)]
     seed: u64,
     /// Workers, each with its own go testee process.
     #[arg(long, default_value_t = 4)]
     jobs: usize,
-    /// Stop after this many inputs in total, whatever the time budget.
+    /// Inputs in total, split into a fixed share per worker. Without it the clock ends the
+    /// run and the run is not reproducible.
     #[arg(long)]
     max_inputs: Option<u64>,
     /// Types to fuzz, comma separated (default: every type both testees decode).
@@ -132,6 +134,12 @@ pub fn run(args: FuzzArgs) -> Result<bool> {
         println!(
             "new class {id}: reproducer under {}",
             args.findings.join(id).display()
+        );
+    }
+    if outcome.time_cut {
+        println!(
+            "the time budget ended the run before every worker finished its share, so it is not reproducible from --seed {}",
+            cfg.seed
         );
     }
     println!("report: {}", args.out.join("FUZZ.md").display());

@@ -21,7 +21,7 @@ pub fn harness_report(bytes: &[u8], path: &Path) -> Result<Report> {
 /// The parts of `divergence-matrix.json` findings need. The matrix's check records hold
 /// deeply nested XDR-JSON, so it is parsed without serde_json's recursion limit, on a thread
 /// with a stack large enough for that (see [`crate::parse_on_big_stack`]).
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MatrixView {
     pub corpus_version: String,
     pub testees: Vec<TesteeView>,
@@ -29,7 +29,7 @@ pub struct MatrixView {
     pub known_failure_problems: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TesteeView {
     pub key: String,
     pub sdk: String,
@@ -37,27 +37,27 @@ pub struct TesteeView {
     pub version: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MatrixEntry {
     pub id: String,
     pub cells: BTreeMap<String, CellView>,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CellView {
     pub result: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub known_issue: Option<String>,
     #[serde(default)]
     pub checks: Vec<CheckView>,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CheckView {
     pub check: String,
     pub op: String,
     pub result: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
 }
 

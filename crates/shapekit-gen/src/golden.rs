@@ -840,6 +840,10 @@ pub struct AgreeReport {
     /// Exceptions whose combination is now matched by a local or history entry; they can be
     /// deleted. Informational.
     pub stale_exceptions: Vec<AgreeException>,
+    /// Exceptions naming a golden combination that is not compared at all: its family has
+    /// no local-core or history entry, or none of them performs the operation. They are not
+    /// stale, since nothing matches them; they excuse nothing today. Informational.
+    pub inapplicable_exceptions: Vec<AgreeException>,
 }
 
 impl AgreeReport {
@@ -896,6 +900,8 @@ pub fn agree(
     let mut report = AgreeReport::default();
     let mut used = vec![false; exceptions.len()];
     let mut known = vec![false; exceptions.len()];
+    // the exception's combination was compared and some local or history entry shows it
+    let mut matched = vec![false; exceptions.len()];
     for (family_id, (goldens, others)) in by_family {
         let goldens = units(&goldens, &goldens, root)?;
         if goldens.is_empty() {
@@ -950,13 +956,13 @@ pub fn agree(
                 for (i, x) in exceptions.iter().enumerate() {
                     let mut kinds = x.kinds.clone();
                     kinds.sort();
-                    if x.golden == g.entry
-                        && x.op == obs.0
-                        && kinds == obs.1
-                        && matched_by.is_empty()
-                    {
-                        used[i] = true;
-                        excepted = Some(x.reason.clone());
+                    if x.golden == g.entry && x.op == obs.0 && kinds == obs.1 {
+                        if matched_by.is_empty() {
+                            used[i] = true;
+                            excepted = Some(x.reason.clone());
+                        } else {
+                            matched[i] = true;
+                        }
                     }
                 }
                 combinations.insert(
@@ -1008,8 +1014,10 @@ pub fn agree(
     for (i, x) in exceptions.iter().enumerate() {
         if !known[i] {
             report.unknown_exceptions.push(x.clone());
-        } else if !used[i] {
+        } else if matched[i] {
             report.stale_exceptions.push(x.clone());
+        } else if !used[i] {
+            report.inapplicable_exceptions.push(x.clone());
         }
     }
     Ok(report)

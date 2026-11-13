@@ -1,5 +1,5 @@
 //! Selection out of real ledger meta and the cap40 recipe's payloads. The
-//! end-to-end chain run is in the cli tests, behind SHAPEKIT_DOCKER_TESTS.
+//! end-to-end chain run is in the cli tests, ignored unless run with `--include-ignored`.
 
 use std::path::Path;
 

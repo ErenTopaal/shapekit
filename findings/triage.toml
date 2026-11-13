@@ -10,20 +10,50 @@ schema = 1
 
 [inputs]
 manifest = "corpus/manifest.json"
-# shapekit harness run --network both --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967" --out target/findings/wallet-backend-e967ce8b
-harness = ["target/findings/wallet-backend-e967ce8b/harness-report.json"]
-# shapekit conformance run --sdk <sdk> --all-versions --out target/conformance/<sdk>
+# every input below is a committed, reduced copy of a run output; [[inputs.import]] says where
+# each came from. after new runs: `shapekit findings import-inputs`, then `shapekit findings collect`.
+harness = ["findings/inputs/harness-wallet-backend-e967ce8b.json"]
 matrices = [
-  "target/conformance/rust/divergence-matrix.json",
-  "target/conformance/go/divergence-matrix.json",
-  "target/conformance/js/divergence-matrix.json",
+  "findings/inputs/conformance-rust.json",
+  "findings/inputs/conformance-go.json",
+  "findings/inputs/conformance-js.json",
 ]
 
 [[inputs.lint]]
 target = "wallet-backend"
 version = "e967ce8b7362b79c277e700e789181d76fbb5967"
-result = "target/findings/indexerlint-wallet-backend-e967ce8b.json"
+result = "findings/inputs/lint-wallet-backend-e967ce8b.json"
 command = "indexerlint -format json ./..."
+
+[[inputs.import]]
+kind = "harness"
+from = "target/findings/wallet-backend-e967ce8b/harness-report.json"
+to = "findings/inputs/harness-wallet-backend-e967ce8b.json"
+command = "shapekit harness run --network both --adapter \"adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967\" --out target/findings/wallet-backend-e967ce8b"
+
+[[inputs.import]]
+kind = "conformance"
+from = "target/conformance/rust/divergence-matrix.json"
+to = "findings/inputs/conformance-rust.json"
+command = "shapekit conformance run --sdk rust --all-versions --out target/conformance/rust"
+
+[[inputs.import]]
+kind = "conformance"
+from = "target/conformance/go/divergence-matrix.json"
+to = "findings/inputs/conformance-go.json"
+command = "shapekit conformance run --sdk go --all-versions --out target/conformance/go"
+
+[[inputs.import]]
+kind = "conformance"
+from = "target/conformance/js/divergence-matrix.json"
+to = "findings/inputs/conformance-js.json"
+command = "shapekit conformance run --sdk js --all-versions --out target/conformance/js"
+
+[[inputs.import]]
+kind = "lint"
+from = "target/findings/indexerlint-wallet-backend-e967ce8b.json"
+to = "findings/inputs/lint-wallet-backend-e967ce8b.json"
+command = "indexerlint -format json ./... (in a checkout of stellar/wallet-backend at e967ce8b7362b79c277e700e789181d76fbb5967)"
 
 [targets.wallet-backend]
 repo = "stellar/wallet-backend"

@@ -21,8 +21,8 @@ use shapekit_registry::{Family, Registry};
 
 use super::ctx::{Captured, ChainCtx};
 use super::output::{
-    CHAINS_DIR, ChainCheck, chain_entries, check_entry, generator_entry_json, generator_files,
-    install_chain, install_entries, merge, reproducible_chain_json, write_entry,
+    CHAINS_DIR, ChainCheck, Journal, chain_entries, check_entry, generator_entry_json,
+    generator_files, install_chain, install_entries, merge, reproducible_chain_json, write_entry,
 };
 use super::state_check::{StateCheck, check_against_core};
 use super::{Network, Recipe, chain_id};
@@ -161,7 +161,8 @@ fn family_of<'r>(registry: &'r Registry, recipe: &dyn Recipe) -> Result<&'r Fami
 
 /// Records every recipe under every requested network, checks the entries
 /// and installs chains and entries into the corpus. Nothing in the corpus
-/// changes unless every chain and every check succeeded.
+/// changes unless every chain and every check succeeded, and an install that
+/// fails part way is rolled back.
 pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenReport> {
     let started = Instant::now();
     ensure!(!recipes.is_empty(), "no recipes selected");
@@ -292,16 +293,41 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
         );
     }
 
-    for run in &runs {
-        let staged = staging
-            .path()
-            .join(CHAINS_DIR)
-            .join(&run.chain_id)
-            .join(run.network.name());
-        install_chain(&staged, &opts.corpus, &run.chain_id, run.network)?;
-    }
-    for (family, cid, ids) in &installs {
-        install_entries(staging.path(), &opts.corpus, family, cid, ids)?;
+    // every install goes through one journal, so a failure part way puts back what the
+    // earlier installs replaced and the corpus is as it was
+    let mut journal = Journal::new(staging.path());
+    let installed = (|| -> Result<()> {
+        for run in &runs {
+            let staged = staging
+                .path()
+                .join(CHAINS_DIR)
+                .join(&run.chain_id)
+                .join(run.network.name());
+            install_chain(
+                &mut journal,
+                &staged,
+                &opts.corpus,
+                &run.chain_id,
+                run.network,
+            )?;
+        }
+        for (family, cid, ids) in &installs {
+            install_entries(&mut journal, staging.path(), &opts.corpus, family, cid, ids)?;
+        }
+        Ok(())
+    })();
+    if let Err(e) = installed {
+        let failed = journal.roll_back();
+        if failed.is_empty() {
+            return Err(e.context("installing; the corpus was restored"));
+        }
+        // the staging directory still holds what could not be put back
+        let kept = staging.keep();
+        bail!(
+            "installing failed ({e:#}) and the corpus could not be fully restored; the replaced directories are under {}:\n{}",
+            kept.display(),
+            failed.join("\n")
+        );
     }
     staging.close().context("removing the staging directory")?;
     Ok(GenReport {

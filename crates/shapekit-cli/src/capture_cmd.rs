@@ -45,6 +45,9 @@ pub struct Args<'a> {
 }
 
 pub fn run(args: Args<'_>) -> Result<bool> {
+    // the slug becomes part of a directory the capture replaces, so refuse a bad one before
+    // anything is fetched
+    shapekit_gen::entry_io::check_slug(args.slug)?;
     let registry = Registry::load(args.registry)
         .with_context(|| format!("loading the registry in {}", args.registry.display()))?;
     let network = match args.network {

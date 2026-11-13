@@ -140,6 +140,9 @@ enum SynthCommand {
 
 #[derive(Subcommand)]
 enum GenCommand {
+    /// Print the family of every recipe `gen chains` can record, one per line, sorted and
+    /// without repeats.
+    Families,
     /// Record the smoke chain: protocol 30, testnet's Soroban settings, four
     /// funded accounts, a payment, a trustline and one echo contract call.
     Smoke {
@@ -406,6 +409,9 @@ fn main() -> ExitCode {
                 framed,
             } => oracle_cmd::interpret(&file, &passphrase, framed),
         },
+        Command::Gen {
+            command: GenCommand::Families,
+        } => gen_cmd::families(),
         Command::Gen {
             command: GenCommand::Smoke { network, out, pins },
         } => gen_cmd::smoke(&network, &out, &pins),

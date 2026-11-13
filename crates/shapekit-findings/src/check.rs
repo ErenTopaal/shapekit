@@ -13,6 +13,16 @@ pub struct Outcome {
     pub problems: Vec<String>,
     /// Findings waiting to be filed (status `draft`).
     pub pending: Vec<String>,
+    /// The members of `problems` that only say a finding is still a draft.
+    pub drafts: Vec<String>,
+}
+
+impl Outcome {
+    /// Whether every problem is a draft waiting to be filed, so a caller that allows drafts
+    /// can pass while anything else still fails.
+    pub fn only_drafts(&self) -> bool {
+        self.problems.iter().all(|p| self.drafts.contains(p))
+    }
 }
 
 fn https(link: &Option<String>) -> bool {
@@ -42,9 +52,15 @@ pub fn missing_decision(f: &FindingRecord) -> Option<String> {
     }
 }
 
-/// Checks a fresh collection. `written` is the committed `findings.json`, which must equal
-/// the fresh one, so the published record cannot lag the runs it claims to describe.
-pub fn check(root: &Path, fresh: &Collection, written: Option<&Collection>) -> Outcome {
+/// Checks a fresh collection. `written` is the committed `findings.json` and `written_md`
+/// the committed `FINDINGS.md`; both must equal what collect would write now, so the
+/// published record cannot lag the runs it claims to describe.
+pub fn check(
+    root: &Path,
+    fresh: &Collection,
+    written: Option<&Collection>,
+    written_md: Option<&str>,
+) -> Outcome {
     let mut out = Outcome::default();
     for o in &fresh.unmapped {
         out.problems.push(format!(
@@ -76,6 +92,7 @@ pub fn check(root: &Path, fresh: &Collection, written: Option<&Collection>) -> O
         if let Some(m) = missing_decision(f) {
             if f.status == Status::Draft {
                 out.pending.push(f.id.clone());
+                out.drafts.push(m.clone());
             }
             out.problems.push(m);
         }
@@ -86,6 +103,15 @@ pub fn check(root: &Path, fresh: &Collection, written: Option<&Collection>) -> O
             .push("findings/findings.json is missing; run `shapekit findings collect`".into()),
         Some(w) if w != fresh => out.problems.push(
             "findings/findings.json differs from a fresh collection of the inputs; run `shapekit findings collect`".into(),
+        ),
+        Some(_) => {}
+    }
+    match written_md {
+        None => out
+            .problems
+            .push("findings/FINDINGS.md is missing; run `shapekit findings collect`".into()),
+        Some(md) if md != crate::render::markdown(fresh) => out.problems.push(
+            "findings/FINDINGS.md differs from a fresh rendering of the inputs; run `shapekit findings collect`".into(),
         ),
         Some(_) => {}
     }
@@ -127,6 +153,10 @@ mod tests {
         }
     }
 
+    fn md(c: &Collection) -> String {
+        crate::render::markdown(c)
+    }
+
     fn collection(findings: Vec<FindingRecord>) -> Collection {
         Collection {
             schema: 1,
@@ -148,10 +178,19 @@ mod tests {
                 Some("https://github.com/o/r/issues/1"),
             ),
         ]);
-        let out = check(Path::new("."), &c, Some(&c));
+        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)));
         assert!(!out.ok);
         assert_eq!(out.pending, ["A"]);
         assert_eq!(out.problems.len(), 1, "{:?}", out.problems);
+        assert!(out.only_drafts());
+        let mut stale = c.clone();
+        stale.summary.failures += 1;
+        let out = check(Path::new("."), &stale, Some(&c), Some(&md(&stale)));
+        assert!(
+            !out.only_drafts(),
+            "a stale record is not a draft: {:?}",
+            out.problems
+        );
     }
 
     #[test]
@@ -160,16 +199,21 @@ mod tests {
         let wont = finding("W", Status::WontFix, None);
         let filed = finding("F", Status::Filed, Some("http://example.org/1"));
         let c = collection(vec![private.clone(), wont, filed]);
-        assert_eq!(check(Path::new("."), &c, Some(&c)).problems.len(), 3);
+        assert_eq!(
+            check(Path::new("."), &c, Some(&c), Some(&md(&c)))
+                .problems
+                .len(),
+            3
+        );
         private.reference = Some("GHSA-xxxx".into());
         let c = collection(vec![private]);
-        assert!(check(Path::new("."), &c, Some(&c)).ok);
+        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c))).ok);
     }
 
     #[test]
     fn unmapped_failures_and_a_stale_record_fail() {
         let mut c = collection(vec![finding("B", Status::DuplicateOf, Some("https://x/1"))]);
-        assert!(check(Path::new("."), &c, Some(&c)).ok);
+        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c))).ok);
         let written = c.clone();
         c.unmapped.push(Occurrence {
             source: "conformance".into(),
@@ -178,8 +222,10 @@ mod tests {
             at: "go@v0.8.0".into(),
             what: "diverges-from-network".into(),
         });
-        let out = check(Path::new("."), &c, Some(&written));
+        let out = check(Path::new("."), &c, Some(&written), Some(&md(&c)));
         assert_eq!(out.problems.len(), 2, "{:?}", out.problems);
-        assert!(!check(Path::new("."), &written, None).ok);
+        assert!(!check(Path::new("."), &written, None, Some(&md(&written))).ok);
+        assert!(!check(Path::new("."), &written, Some(&written), None).ok);
+        assert!(!check(Path::new("."), &written, Some(&written), Some("# stale\n")).ok);
     }
 }

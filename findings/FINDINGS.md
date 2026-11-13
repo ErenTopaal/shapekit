@@ -964,13 +964,17 @@ to_xdr_json renders nested values of any depth the decoder accepts, but the read
 
 </details>
 
+## Input problems
+
+- findings/inputs/harness-wallet-backend-e967ce8b.json: the harness ran against manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760, but corpus/manifest.json is 56f2976318aeb56531073fa336f2c3c442ee825efdbfc63388e7327d3dbd2a84; rerun the harness and import its report
+
 ## Inputs
 
 | kind | path | sha256 | detail |
 |---|---|---|---|
 | manifest | `corpus/manifest.json` | `56f2976318aeb565` | corpus 0.1.0 |
-| harness | `target/findings/wallet-backend-e967ce8b/harness-report.json` | `e4de2a361db1774c` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 890 entries, manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760 |
-| conformance | `target/conformance/rust/divergence-matrix.json` | `c497cc56ec0bbc0a` | corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0 |
-| conformance | `target/conformance/go/divergence-matrix.json` | `05ec9f52fcbf0e07` | corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
-| conformance | `target/conformance/js/divergence-matrix.json` | `a17075d463828685` | corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 |
-| lint | `target/findings/indexerlint-wallet-backend-e967ce8b.json` | `86903a4dd71e36e3` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 1 finding(s), 0 baselined, 0 suppressed |
+| harness | `findings/inputs/harness-wallet-backend-e967ce8b.json` | `e4de2a361db1774c` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 890 entries, manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760 |
+| conformance | `findings/inputs/conformance-rust.json` | `e2bbfbdea883fedb` | corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0 |
+| conformance | `findings/inputs/conformance-go.json` | `5b18d48e65f61941` | corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
+| conformance | `findings/inputs/conformance-js.json` | `b2e054f4d50d3dbd` | corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 |
+| lint | `findings/inputs/lint-wallet-backend-e967ce8b.json` | `86903a4dd71e36e3` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 1 finding(s), 0 baselined, 0 suppressed |

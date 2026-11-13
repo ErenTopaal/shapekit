@@ -475,7 +475,7 @@ fn stray_cases(p: Prefix) -> Result<Vec<Value>> {
         let mut case = json!({
             "op": "strkey_decode",
             "note": s.why,
-            "expected": { "reject": decode_error_name(&e) },
+            "expected": { "reject": refusal_name(&e) },
         });
         match std::str::from_utf8(&s.text) {
             Ok(t) => case["text"] = json!(t),
@@ -484,6 +484,30 @@ fn stray_cases(p: Prefix) -> Result<Vec<Value>> {
         out.push(case);
     }
     Ok(out)
+}
+
+/// Why the reference refused a string: stellar-strkey's own error, or a string it decoded
+/// as another kind than its prefix letter names, which stellar-strkey never reports itself.
+#[derive(Debug)]
+enum Refusal {
+    Strkey(DecodeError),
+    OtherKind(String),
+}
+
+impl std::fmt::Display for Refusal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Refusal::Strkey(e) => write!(f, "{e}"),
+            Refusal::OtherKind(k) => write!(f, "decodes as {k}, not the kind its prefix names"),
+        }
+    }
+}
+
+fn refusal_name(e: &Refusal) -> &'static str {
+    match e {
+        Refusal::Strkey(e) => decode_error_name(e),
+        Refusal::OtherKind(_) => "other-kind",
+    }
 }
 
 fn decode_error_name(e: &DecodeError) -> &'static str {
@@ -539,10 +563,12 @@ fn reference(p: Prefix, text: &[u8]) -> std::result::Result<Value, DecodeError> 
 }
 
 // the reference decoder for one prefix also has to agree on which prefix it decoded
-fn reference_for(p: Prefix, text: impl AsRef<[u8]>) -> std::result::Result<Value, DecodeError> {
-    let v = reference(p, text.as_ref())?;
+fn reference_for(p: Prefix, text: impl AsRef<[u8]>) -> std::result::Result<Value, Refusal> {
+    let v = reference(p, text.as_ref()).map_err(Refusal::Strkey)?;
     if v["kind"] != p.kind() {
-        return Err(DecodeError::UnsupportedVersion);
+        return Err(Refusal::OtherKind(
+            v["kind"].as_str().unwrap_or("an unknown kind").to_owned(),
+        ));
     }
     Ok(v)
 }
@@ -616,7 +642,7 @@ pub fn items() -> Result<Vec<VectorItem>> {
                     "op": "strkey_decode",
                     "text": b.text,
                     "note": b.why,
-                    "expected": { "reject": decode_error_name(&e) },
+                    "expected": { "reject": refusal_name(&e) },
                 })),
             }
         }
@@ -630,7 +656,7 @@ pub fn items() -> Result<Vec<VectorItem>> {
                     "op": "strkey_decode",
                     "text": s,
                     "note": "SEP-23 1.4.0 invalid test case",
-                    "expected": { "reject": decode_error_name(&e) },
+                    "expected": { "reject": refusal_name(&e) },
                 })),
             }
         }

@@ -49,6 +49,19 @@ pub fn smoke(network: &str, out: &Path, pins: &Path) -> Result<bool> {
     Ok(true)
 }
 
+/// Every recipe family, one per line, so scripts read the list from the binary instead of
+/// the source.
+pub fn families() -> Result<bool> {
+    let set: std::collections::BTreeSet<String> = recipe::all()
+        .iter()
+        .map(|r| r.family().to_owned())
+        .collect();
+    for f in set {
+        println!("{f}");
+    }
+    Ok(true)
+}
+
 /// Where `gen chains` and `gen verify-repro` read and write.
 pub struct GenPaths<'a> {
     pub corpus: &'a Path,

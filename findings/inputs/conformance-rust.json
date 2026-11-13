@@ -1,0 +1,569 @@
+{
+  "corpus_version": "0.1.0",
+  "testees": [
+    {
+      "key": "rust@28.0.0",
+      "sdk": "rust",
+      "package": "stellar-xdr",
+      "version": "28.0.0"
+    },
+    {
+      "key": "rust@28.0.1",
+      "sdk": "rust",
+      "package": "stellar-xdr",
+      "version": "28.0.1"
+    },
+    {
+      "key": "rust@30.0.0",
+      "sdk": "rust",
+      "package": "stellar-xdr",
+      "version": "30.0.0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+      "cells": {
+        "rust@28.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "rust@28.0.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-245",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 16252"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 16252"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-246",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.p30-declared-depth-246.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 15676"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 15676"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-492",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.p30-declared-depth-492.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 15676"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 15676"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+      "cells": {
+        "rust@28.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 9810"
+            }
+          ]
+        },
+        "rust@28.0.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 9810"
+            }
+          ]
+        },
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 9810"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-envelope",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-envelope.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 2277"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 2277"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-meta",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-meta.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 3679"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 3679"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-over",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-map-depth-over.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 7674"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 7674"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 4582"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 4582"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-envelope",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-envelope.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 1360"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 1360"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-meta",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-meta.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 3676"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 3676"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-over",
+      "cells": {
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.p30-vec-depth-over.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 6831"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 6831"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-event-vec-depth-101",
+      "cells": {
+        "rust@28.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 519"
+            }
+          ]
+        },
+        "rust@28.0.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 519"
+            }
+          ]
+        },
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 519"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+      "cells": {
+        "rust@28.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 1692"
+            }
+          ]
+        },
+        "rust@28.0.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 1692"
+            }
+          ]
+        },
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 1692"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+      "cells": {
+        "rust@28.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 970"
+            }
+          ]
+        },
+        "rust@28.0.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 970"
+            }
+          ]
+        },
+        "rust@30.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: recursion limit exceeded at line 1 column 970"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "known_failure_problems": []
+}

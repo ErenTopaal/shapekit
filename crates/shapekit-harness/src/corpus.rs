@@ -13,6 +13,8 @@ pub struct EntryRef {
     pub family: String,
     pub ledger: u32,
     pub oracle_file: PathBuf,
+    /// What the manifest records for the oracle file; the run refuses other bytes.
+    pub oracle_sha256: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -61,6 +63,10 @@ pub fn select(corpus: &Path, filter: &Filter<'_>) -> Result<Selection> {
             continue;
         }
         let chain = match (&e.source.chain, e.source.ledger_seq) {
+            // the chain name is one directory under chains/, never a path out of it
+            (Some(c), Some(_)) if !shapekit_manifest::is_safe_relative(c) || c.contains('/') => {
+                bail!("{}: chain {c:?} is not a directory name", e.id)
+            }
             (Some(c), Some(l)) => (c.clone(), l),
             _ => {
                 if filter.chains.is_empty() {
@@ -78,16 +84,24 @@ pub fn select(corpus: &Path, filter: &Filter<'_>) -> Result<Selection> {
                 "mainnet" => e.variants.mainnet.as_ref(),
                 other => bail!("unknown network {other:?}"),
             };
-            match variant.and_then(|v| v.oracle_file.as_ref()) {
-                Some(f) => jobs
-                    .entry((chain.0.clone(), network.clone()))
-                    .or_default()
-                    .push(EntryRef {
-                        id: e.id.clone(),
-                        family: e.family.clone(),
-                        ledger: chain.1,
-                        oracle_file: corpus.join(f),
-                    }),
+            match variant.and_then(|v| v.oracle_file.as_ref().map(|f| (f, v))) {
+                Some((f, v)) => {
+                    if !shapekit_manifest::is_safe_relative(f) {
+                        bail!(
+                            "{}: oracle_file {f:?} is not a path inside the corpus",
+                            e.id
+                        );
+                    }
+                    jobs.entry((chain.0.clone(), network.clone()))
+                        .or_default()
+                        .push(EntryRef {
+                            id: e.id.clone(),
+                            family: e.family.clone(),
+                            ledger: chain.1,
+                            oracle_file: corpus.join(f),
+                            oracle_sha256: v.oracle_sha256.clone(),
+                        })
+                }
                 None => sel.without_oracle += 1,
             }
         }

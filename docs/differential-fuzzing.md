@@ -33,8 +33,11 @@ still not used:
 
 So the fuzzer is an ordinary subcommand on the pinned toolchain. Values come from
 `stellar-xdr`'s own `arbitrary` feature (arbitrary 1.5.0) over bytes from a seeded generator,
-and from xdr-aware mutation of corpus entries. A run is reproducible from `--seed`, the worker
-index and the iteration, which every class records.
+and from xdr-aware mutation of corpus entries. Every class records the seed, worker index and
+iteration of its input. A whole run is reproducible from `--seed` for any `--jobs` when it is given
+`--max-inputs` and finishes before `--seconds` runs out: each worker then has a fixed share of the
+inputs and classes are merged in a fixed order. `report.json` says `reproducible: true` in that
+case; timing goes to `timing.json` so it does not affect the report.
 
 ## Inputs
 

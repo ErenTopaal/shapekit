@@ -185,7 +185,45 @@ pub struct Inputs {
     pub matrices: Vec<String>,
     #[serde(default)]
     pub lint: Vec<LintInput>,
+    /// Where each committed input under `findings/inputs/` came from;
+    /// `shapekit findings import-inputs` reads `from`, reduces it and writes `to`.
+    #[serde(default)]
+    pub import: Vec<ImportDef>,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum InputKind {
+    Harness,
+    Conformance,
+    Lint,
+}
+
+impl InputKind {
+    pub fn name(self) -> &'static str {
+        match self {
+            InputKind::Harness => "harness",
+            InputKind::Conformance => "conformance",
+            InputKind::Lint => "lint",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ImportDef {
+    pub kind: InputKind,
+    /// The raw run output, relative to the repository root (usually under the gitignored
+    /// `target/`).
+    pub from: String,
+    /// The committed, reduced copy that `[inputs]` names.
+    pub to: String,
+    /// The command that wrote `from`.
+    pub command: String,
+}
+
+/// The directory committed inputs live in, so a clean checkout can collect.
+pub const INPUTS_DIR: &str = "findings/inputs";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -227,12 +265,101 @@ pub fn validate(t: &Triage) -> Result<()> {
         if f.harness.is_empty() && f.conformance.is_empty() && f.lint.is_empty() {
             bail!("finding {} has no matcher, so nothing can map to it", f.id);
         }
+        // the first matcher that takes a failure keeps it, so one without a constraint would
+        // absorb every later finding's failures
+        for (i, m) in f.harness.iter().enumerate() {
+            if let Some(why) = harness_unconstrained(m) {
+                bail!("finding {} harness matcher {}: {why}", f.id, i + 1);
+            }
+        }
+        for (i, m) in f.conformance.iter().enumerate() {
+            if let Some(why) = conformance_unconstrained(m) {
+                bail!("finding {} conformance matcher {}: {why}", f.id, i + 1);
+            }
+        }
     }
+    validate_imports(&t.inputs)?;
     for f in &t.findings {
         for s in &f.siblings {
             if !seen.contains(s) {
                 bail!("finding {} names sibling {s}, which is not a finding", f.id);
             }
+        }
+    }
+    Ok(())
+}
+
+fn wildcard_only(pattern: &str) -> bool {
+    pattern.chars().all(|c| c == '*')
+}
+
+/// Why `m` would take every failure of its target, if it would.
+pub fn harness_unconstrained(m: &HarnessMatch) -> Option<String> {
+    if let Some(p) = m.entries.iter().find(|p| wildcard_only(p)) {
+        return Some(format!("entry pattern {p:?} matches every entry"));
+    }
+    let constrained = !m.entries.is_empty()
+        || !m.networks.is_empty()
+        || !m.verdicts.is_empty()
+        || !m.reasons.is_empty()
+        || !m.problems.is_empty()
+        || !m.facts.is_empty()
+        || !m.events.is_empty()
+        || !m.prefix.is_empty()
+        || !m.null.is_empty()
+        || m.detail_contains.as_deref().is_some_and(|d| !d.is_empty());
+    (!constrained).then(|| "no constraint beyond the target, so it takes every failure".into())
+}
+
+/// Why `m` would take every failure of its SDK, or none, if so.
+pub fn conformance_unconstrained(m: &ConformanceMatch) -> Option<String> {
+    if m.entries.is_empty() {
+        return Some("no entry pattern, so it can never match".into());
+    }
+    m.entries
+        .iter()
+        .find(|p| wildcard_only(p))
+        .map(|p| format!("entry pattern {p:?} matches every entry"))
+}
+
+fn validate_imports(inputs: &Inputs) -> Result<()> {
+    let named: std::collections::BTreeSet<&str> = inputs
+        .harness
+        .iter()
+        .chain(&inputs.matrices)
+        .map(String::as_str)
+        .chain(inputs.lint.iter().map(|l| l.result.as_str()))
+        .collect();
+    let mut tos = std::collections::BTreeSet::new();
+    for i in &inputs.import {
+        if !tos.insert(i.to.as_str()) {
+            bail!("import target {} is listed twice", i.to);
+        }
+        let under = Path::new(&i.to)
+            .strip_prefix(INPUTS_DIR)
+            .is_ok_and(|rest| shapekit_manifest::is_safe_relative(&rest.to_string_lossy()));
+        if !under {
+            bail!(
+                "import target {} is not a plain path under {INPUTS_DIR}/",
+                i.to
+            );
+        }
+        if !shapekit_manifest::is_safe_relative(&i.from) {
+            bail!(
+                "import source {} is not a relative path inside the repository",
+                i.from
+            );
+        }
+        if !named.contains(i.to.as_str()) {
+            bail!("import target {} is not named in [inputs]", i.to);
+        }
+        let listed = match i.kind {
+            InputKind::Harness => inputs.harness.contains(&i.to),
+            InputKind::Conformance => inputs.matrices.contains(&i.to),
+            InputKind::Lint => inputs.lint.iter().any(|l| l.result == i.to),
+        };
+        if !listed {
+            bail!("import target {} is not a {} input", i.to, i.kind.name());
         }
     }
     Ok(())
@@ -260,7 +387,38 @@ pub fn glob(pattern: &str, s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::glob;
+    use super::*;
+
+    #[test]
+    fn matchers_without_a_constraint_are_refused() {
+        let empty = HarnessMatch {
+            target: Some("t".into()),
+            ..HarnessMatch::default()
+        };
+        assert!(harness_unconstrained(&empty).is_some());
+        let star = HarnessMatch {
+            entries: vec!["*".into()],
+            problems: vec!["dropped".into()],
+            ..HarnessMatch::default()
+        };
+        assert!(harness_unconstrained(&star).is_some());
+        let narrow = HarnessMatch {
+            entries: vec!["*clawback*".into()],
+            ..HarnessMatch::default()
+        };
+        assert!(harness_unconstrained(&narrow).is_none());
+        let all = ConformanceMatch {
+            sdk: "go".into(),
+            entries: vec!["**".into()],
+            versions: vec![],
+        };
+        assert!(conformance_unconstrained(&all).is_some());
+        let none = ConformanceMatch {
+            sdk: "go".into(),
+            ..ConformanceMatch::default()
+        };
+        assert!(conformance_unconstrained(&none).is_some());
+    }
 
     #[test]
     fn globs() {

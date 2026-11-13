@@ -203,6 +203,11 @@ pub fn run(
     Ok(results)
 }
 
+/// The first 12 characters of a commit, never splitting a character.
+fn short(commit: &str) -> String {
+    commit.chars().take(12).collect()
+}
+
 pub fn markdown(results: &[CaseResult]) -> String {
     let mut s = String::from(
         "# Reproductions\n\n| reproduction | case | commit | entry | expected | observed | holds |\n|---|---|---|---|---|---|---|\n",
@@ -213,7 +218,7 @@ pub fn markdown(results: &[CaseResult]) -> String {
                 "| {} | {} | `{}` | {} | {} | {} | {} |\n",
                 c.reproduction,
                 c.label,
-                &c.commit[..c.commit.len().min(12)],
+                short(&c.commit),
                 e.entry,
                 e.expected,
                 e.observed,
@@ -225,7 +230,7 @@ pub fn markdown(results: &[CaseResult]) -> String {
                 "| {} | {} | `{}` | | | error: {} | no |\n",
                 c.reproduction,
                 c.label,
-                &c.commit[..c.commit.len().min(12)],
+                short(&c.commit),
                 err.replace('|', "\\|").replace('\n', " ")
             ));
         }
@@ -242,4 +247,16 @@ pub fn write(results: &[CaseResult], out: &Path) -> Result<()> {
     let md = out.join("REPRODUCTIONS.md");
     std::fs::write(&md, markdown(results)).with_context(|| format!("writing {}", md.display()))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::short;
+
+    #[test]
+    fn short_commits_never_split_a_character() {
+        assert_eq!(short("e967ce8b7362b79c277e"), "e967ce8b7362");
+        assert_eq!(short("abc"), "abc");
+        assert_eq!(short("ééééééééééééé"), "éééééééééééé");
+    }
 }

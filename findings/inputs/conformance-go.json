@@ -1,0 +1,1122 @@
+{
+  "corpus_version": "0.1.0",
+  "testees": [
+    {
+      "key": "go@v0.7.1",
+      "sdk": "go",
+      "package": "github.com/stellar/go-stellar-sdk",
+      "version": "v0.7.1"
+    },
+    {
+      "key": "go@v0.7.2",
+      "sdk": "go",
+      "package": "github.com/stellar/go-stellar-sdk",
+      "version": "v0.7.2"
+    },
+    {
+      "key": "go@v0.7.3",
+      "sdk": "go",
+      "package": "github.com/stellar/go-stellar-sdk",
+      "version": "v0.7.3"
+    },
+    {
+      "key": "go@v0.8.0",
+      "sdk": "go",
+      "package": "github.com/stellar/go-stellar-sdk",
+      "version": "v0.8.0"
+    },
+    {
+      "key": "go@v0.9.0",
+      "sdk": "go",
+      "package": "github.com/stellar/go-stellar-sdk",
+      "version": "v0.9.0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-g-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap27.muxed-accounts.synth-strkey-g-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-m-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap27.muxed-accounts.synth-strkey-m-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-s-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap27.muxed-accounts.synth-strkey-s-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-dotnet257",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap38.liquidity-pools.synth-assets-dotnet257.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: xdr.NewPoolId: AssetA must be < AssetB"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-equal",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap38.liquidity-pools.synth-assets-equal.md",
+          "checks": [
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-js1766-issuers",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap38.liquidity-pools.synth-assets-js1766-issuers.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: xdr.NewPoolId: AssetA must be < AssetB"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-py1246-testnet-pool",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: xdr.NewPoolId: AssetA must be < AssetB"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-strkey-l-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap38.liquidity-pools.synth-strkey-l-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap40.signed-payload-signer.synth-strkey-p-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 17/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-t-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap40.signed-payload-signer.synth-strkey-t-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-x-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-cap40.signed-payload-signer.synth-strkey-x-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-493",
+      "cells": {
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-494-over-cap",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.invoke-basics.synth-strkey-c-invalid",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.invoke-basics.synth-strkey-c-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+      "cells": {
+        "go@v0.7.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "known_failure_problems": []
+}

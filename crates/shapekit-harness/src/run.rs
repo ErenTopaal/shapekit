@@ -253,6 +253,15 @@ fn drive(
     for e in &job.entries {
         let bytes = std::fs::read(&e.oracle_file)
             .with_context(|| format!("reading {}", e.oracle_file.display()))?;
+        if let Some(want) = &e.oracle_sha256 {
+            let got = shapekit_manifest::sha256_hex(&bytes);
+            if &got != want {
+                bail!(
+                    "{} has sha256 {got}, the manifest records {want}; run `shapekit oracle run` and `shapekit manifest build`",
+                    e.oracle_file.display()
+                );
+            }
+        }
         let file: OracleFile = serde_json::from_slice(&bytes)
             .with_context(|| format!("parsing {}", e.oracle_file.display()))?;
         if file.oracle_vocab_version != ORACLE_VOCAB_VERSION {
@@ -284,7 +293,7 @@ fn drive(
 
     let mut adapter = Adapter::spawn(&opts.adapter, &opts.logs.join(log_name(job, "adapter")))?;
     let outcome = drive_adapter(ctx, opts, &chain, &wanted, &mut adapter, describe_out);
-    ctx.result.notes.append(&mut adapter.late_answers);
+    ctx.result.notes.extend(adapter.take_late_answers());
     ctx.result.adapter_exit = adapter.finish(Duration::from_secs(30));
     let (stop, records) = outcome?;
     let describe = describe_out.as_ref().expect("set before any ledger ran");
@@ -355,6 +364,21 @@ pub fn bootstrap_checkpoint(checkpoints: &[u32], before: u32) -> Option<u32> {
     checkpoints.iter().copied().filter(|c| *c < before).max()
 }
 
+/// Checkpoints that do not fall on [`CHECKPOINT_FREQUENCY`] boundaries. The target is told
+/// that frequency, so a chain recorded with another one would be read at the wrong ledgers.
+pub fn off_frequency_checkpoints(checkpoints: &[u32]) -> Vec<u32> {
+    checkpoints
+        .iter()
+        .copied()
+        .filter(|c| (u64::from(*c) + 1) % u64::from(CHECKPOINT_FREQUENCY) != 0)
+        .collect()
+}
+
+/// Whether `hash` is a transaction hash as the protocol writes it: 64 lowercase hex digits.
+pub fn is_protocol_hash(hash: &str) -> bool {
+    hash.len() == 64 && hash.bytes().all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'))
+}
+
 type Records = HashMap<String, TxRecord>;
 
 /// Talks to the adapter from `describe` to `stop`. Returns where the target stopped, if it
@@ -415,6 +439,12 @@ fn drive_adapter(
         .first()
         .map(|e| e.ledger)
         .ok_or_else(|| anyhow!("the chain has no entry to evaluate"))?;
+    let off = off_frequency_checkpoints(&chain.checkpoints);
+    if !off.is_empty() {
+        bail!(
+            "chain checkpoints {off:?} are not on the {CHECKPOINT_FREQUENCY}-ledger boundaries the target is told to expect"
+        );
+    }
     let bootstrap = match describe.bootstrap {
         Bootstrap::Checkpoint => {
             bootstrap_checkpoint(&chain.checkpoints, first_entry).ok_or_else(|| {
@@ -581,8 +611,14 @@ fn check_served(client: &reqwest::blocking::Client, base: &str, ledger: u32) -> 
         .body(body.to_string())
         .send()
         .with_context(|| format!("asking the replay server for ledger {ledger}"))?;
-    let v: serde_json::Value = serde_json::from_str(&resp.text().unwrap_or_default())
-        .with_context(|| format!("the replay server's answer for ledger {ledger}"))?;
+    let status = resp.status();
+    let text = resp.text().with_context(|| {
+        format!("reading the replay server's answer for ledger {ledger} (http {status})")
+    })?;
+    let v: serde_json::Value = serde_json::from_str(&text).with_context(|| {
+        let shown: String = text.chars().take(300).collect();
+        format!("the replay server's answer for ledger {ledger} (http {status}): {shown}")
+    })?;
     if let Some(e) = v.get("error") {
         bail!("the replay server cannot serve ledger {ledger}: {e}");
     }
@@ -611,6 +647,22 @@ fn wait_for(
         if let Some(p) = st.peak_memory_bytes {
             let peak = ctx.result.target_peak_memory_bytes.get_or_insert(0);
             *peak = (*peak).max(p);
+            // the adapter is meant to enforce the limit; a peak past it means it did not,
+            // and the target is judged as if it had been killed there
+            if p > opts.memory_limit_bytes {
+                let at = ctx
+                    .result
+                    .last_ingested
+                    .map_or(ledger, |l| (l + 1).min(ledger));
+                return Ok(Some(Stop {
+                    ledger: at,
+                    reason: Reason::Oom,
+                    message: format!(
+                        "peak memory {p} bytes exceeds the limit of {} bytes",
+                        opts.memory_limit_bytes
+                    ),
+                }));
+            }
         }
         if st.last_ingested_ledger > ctx.result.last_ingested {
             ctx.result.last_ingested = st.last_ingested_ledger;
@@ -677,9 +729,16 @@ fn export(
 ) -> Result<Records> {
     let mut records = Records::new();
     let mut notes = Vec::new();
+    let mut bad_hashes = Vec::new();
     let result = &mut ctx.result;
     let seen = adapter.export(from, to, timeout, &mut |rec| match rec {
         ExportRecord::Transaction(tx) => {
+            // an uppercase or short hash would match nothing and read as a dropped
+            // transaction, blaming the target's data for a protocol mistake
+            if !is_protocol_hash(&tx.hash) {
+                bad_hashes.push(tx.hash.clone());
+                return;
+            }
             if tx.ledger < from || tx.ledger > to {
                 notes.push(format!(
                     "export of {from} to {to} returned transaction {} of ledger {}",
@@ -701,6 +760,13 @@ fn export(
                 .extend(unmapped.into_iter().take(room));
         }
     })?;
+    if !bad_hashes.is_empty() {
+        let shown: Vec<&str> = bad_hashes.iter().take(3).map(String::as_str).collect();
+        bail!(
+            "protocol violation answering export: {} record(s) with a hash that is not 64 lowercase hex digits, for example {shown:?}",
+            bad_hashes.len()
+        );
+    }
     ctx.result.exported_records = seen;
     ctx.result.notes.extend(notes);
     Ok(records)
@@ -727,5 +793,25 @@ pub fn logs_dir(out: &Path, round: u32, rounds: u32) -> PathBuf {
         out.join("logs").join(format!("round-{round}"))
     } else {
         out.join("logs")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn checkpoints_must_sit_on_the_frequency() {
+        assert!(off_frequency_checkpoints(&[63, 127, 191]).is_empty());
+        assert_eq!(off_frequency_checkpoints(&[63, 100, 127, 31]), [100, 31]);
+    }
+
+    #[test]
+    fn only_lowercase_full_hashes_are_protocol_hashes() {
+        let h = "ab".repeat(32);
+        assert!(is_protocol_hash(&h));
+        assert!(!is_protocol_hash(&h.to_uppercase()));
+        assert!(!is_protocol_hash(&h[..62]));
+        assert!(!is_protocol_hash(&format!("{}zz", &h[..62])));
     }
 }

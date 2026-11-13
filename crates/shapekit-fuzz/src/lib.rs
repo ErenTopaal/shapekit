@@ -1,6 +1,13 @@
 //! Corpus-seeded differential fuzzing of XDR decode and re-encode: stellar-xdr in process
 //! against go-stellar-sdk through its conformance testee. docs/differential-fuzzing.md has the
 //! design, the known-divergence filter and how a class becomes a corpus entry.
+//!
+//! A run with `max_inputs` that finishes inside its time budget is reproducible from its seed
+//! for any number of workers: worker `w` evaluates a fixed share of the inputs from its own
+//! generator, keeps its own classes, and the classes are merged afterwards by a total order
+//! (the representative is the smallest input, then the lowest worker, then the earliest
+//! iteration), never by which worker reached a lock first. A run cut by the clock is not,
+//! and its report says so.
 
 pub mod minimize;
 pub mod mutate;
@@ -10,8 +17,7 @@ pub mod types;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail, ensure};
@@ -76,6 +82,9 @@ pub struct TypeStats {
     pub both_reject: u64,
     pub filtered: BTreeMap<&'static str, u64>,
     pub disagreements: u64,
+    /// Generated values `arbitrary` could not build from any of its buffers; counted as
+    /// inputs of the share but never evaluated.
+    pub generation_failures: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -94,6 +103,8 @@ pub struct Class {
     pub count: u64,
     /// The smallest input seen in the run, before minimisation.
     pub input: Vec<u8>,
+    /// The worker that saw `input` (the lowest one among equally small inputs).
+    pub input_worker: usize,
     pub first: Sighting,
     pub rust: Side,
     pub go: Side,
@@ -101,6 +112,11 @@ pub struct Class {
 
 pub struct Outcome {
     pub elapsed: Duration,
+    /// Whether some worker stopped at the time budget before its share of `max_inputs`
+    /// (always, without `max_inputs`). Such a run is not reproducible from its seed.
+    pub time_cut: bool,
+    /// The protocol both sides know, the newest the reproducers can claim.
+    pub protocol: u32,
     pub go: Target,
     pub seeds: BTreeMap<FuzzType, usize>,
     pub stats: BTreeMap<FuzzType, TypeStats>,
@@ -124,9 +140,10 @@ impl Outcome {
     }
 }
 
-/// Starts the go testee named in versions.toml (building it first when asked) and checks the
-/// in-process rust side is the version the matrix calls current.
-pub fn go_target(cfg: &Config) -> Result<Target> {
+/// The go testee named in versions.toml (built first when asked), after checking the
+/// in-process rust side is the version the matrix calls current, with the newest protocol
+/// both of them know.
+pub fn go_target(cfg: &Config) -> Result<(Target, u32)> {
     let file = VersionsFile::load(&cfg.versions)?;
     let rust = file.sdk("rust")?;
     ensure!(
@@ -140,10 +157,18 @@ pub fn go_target(cfg: &Config) -> Result<Target> {
         None => file.sdk("go")?.current.clone(),
     };
     let target = file.target("go", &version)?;
+    let rust_target = file.target("rust", &rust.current)?;
+    let protocol = match (rust_target.max_protocol, target.max_protocol) {
+        (Some(r), Some(g)) => r.min(g),
+        _ => bail!(
+            "versions.toml gives no max_protocol for rust {} or go {version}, so reproducers cannot name a protocol",
+            rust.current
+        ),
+    };
     if cfg.build {
         versions::build(&cfg.root, &target)?;
     }
-    Ok(target)
+    Ok((target, protocol))
 }
 
 /// Seeds per type: every corpus xdr entry of a fuzzed type, plus the values nested in them.
@@ -173,6 +198,14 @@ pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
             let Some(file) = entry["variants"][variant]["xdr_file"].as_str() else {
                 continue;
             };
+            // an edited manifest must not point outside the corpus or at stale bytes
+            ensure!(
+                shapekit_manifest::is_safe_relative(file),
+                "{id}: {variant} xdr_file {file:?} is not a path inside the corpus"
+            );
+            let sha = entry["variants"][variant]["xdr_sha256"]
+                .as_str()
+                .with_context(|| format!("{id}: {variant} has no xdr_sha256"))?;
             let path = cfg.corpus.join(file);
             let size = std::fs::metadata(&path)
                 .with_context(|| format!("{id}: {}", path.display()))?
@@ -180,8 +213,8 @@ pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
             if size > cfg.max_seed_bytes {
                 continue;
             }
-            let bytes =
-                std::fs::read(&path).with_context(|| format!("{id}: {}", path.display()))?;
+            let bytes = shapekit_manifest::read_verified(&cfg.corpus, file, Some(sha))
+                .map_err(|e| anyhow::anyhow!("{id}: {e}"))?;
             let mut found = vec![(ty, bytes.clone())];
             found.extend(types::nested_seeds(ty, &bytes));
             for (t, b) in found {
@@ -194,11 +227,43 @@ pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
     Ok(seeds)
 }
 
-/// What one worker counted: per type, and per input origin.
-type WorkerTotals = (BTreeMap<FuzzType, TypeStats>, BTreeMap<Origin, u64>);
-
-struct Shared {
+/// What one worker counted and saw.
+struct WorkerTotals {
+    stats: BTreeMap<FuzzType, TypeStats>,
+    origins: BTreeMap<Origin, u64>,
     classes: BTreeMap<String, Class>,
+    /// Stopped at the time budget before finishing its share.
+    time_cut: bool,
+}
+
+// a failed `arbitrary` call gets fresh buffers this many times before the input is given up
+const GENERATE_TRIES: usize = 8;
+
+/// Worker `index`'s fixed share of `max` inputs over `jobs` workers.
+pub fn share(max: u64, jobs: usize, index: usize) -> u64 {
+    let jobs = jobs as u64;
+    max / jobs + u64::from((index as u64) < max % jobs)
+}
+
+/// Folds `other` into `into` by a total order, so the result does not depend on which
+/// worker saw a class first in wall-clock time: the representative is the smallest input,
+/// then the lowest worker, then the earliest iteration; the first sighting is the earliest
+/// iteration, then the lowest worker.
+fn merge_class(into: &mut Class, other: Class) {
+    into.count += other.count;
+    // within one worker a tie already kept the earlier iteration
+    let rank = |c: &Class| (c.input.len(), c.input_worker);
+    let first_rank = |s: &Sighting| (s.iteration, s.worker);
+    let other_first = other.first.clone();
+    if rank(&other) < rank(into) {
+        into.input = other.input;
+        into.input_worker = other.input_worker;
+        into.rust = other.rust;
+        into.go = other.go;
+    }
+    if first_rank(&other_first) < first_rank(&into.first) {
+        into.first = other_first;
+    }
 }
 
 struct Worker<'a> {
@@ -213,7 +278,9 @@ struct Worker<'a> {
 }
 
 impl Worker<'_> {
-    fn next_input(&mut self, ty: FuzzType) -> (Vec<u8>, Origin) {
+    /// The next input of `ty`, or `None` (with its origin) when `arbitrary` could not build
+    /// a value.
+    fn next_input(&mut self, ty: FuzzType) -> (Option<Vec<u8>>, Origin) {
         let has_seeds = self.seeds.get(&ty).is_some_and(|s| !s.is_empty());
         let has_pool = self.pool.get(&ty).is_some_and(|p| !p.is_empty());
         let roll = self.rng.below(100);
@@ -224,15 +291,18 @@ impl Worker<'_> {
             _ => Origin::Arbitrary,
         };
         let donor = self.donor(ty);
-        let mut data = match origin {
-            Origin::SeedMutation => pick(&mut self.rng, &self.seeds[&ty]).clone(),
-            Origin::PoolMutation => pick(&mut self.rng, &self.pool[&ty]).clone(),
+        let data = match origin {
+            Origin::SeedMutation => Some(pick(&mut self.rng, &self.seeds[&ty]).clone()),
+            Origin::PoolMutation => Some(pick(&mut self.rng, &self.pool[&ty]).clone()),
             Origin::Arbitrary | Origin::ArbitraryMutation => self.generate(ty),
+        };
+        let Some(mut data) = data else {
+            return (None, origin);
         };
         if origin != Origin::Arbitrary {
             mutate(&mut self.rng, &mut data, donor.as_deref());
         }
-        (data, origin)
+        (Some(data), origin)
     }
 
     fn donor(&mut self, ty: FuzzType) -> Option<Vec<u8>> {
@@ -245,15 +315,22 @@ impl Worker<'_> {
         (!list.is_empty()).then(|| pick(&mut self.rng, list).clone())
     }
 
-    fn generate(&mut self, ty: FuzzType) -> Vec<u8> {
-        // mostly small buffers, now and then a large one, so both shallow values with every
-        // arm and long arrays or deep nesting come up
-        let cap = 1usize << (2 + self.rng.below(11));
-        let len = 1 + self.rng.below(cap.min(self.cfg.max_arbitrary_bytes));
-        let mut raw = vec![0u8; len];
-        self.rng.fill(&mut raw);
-        let mut u = Unstructured::new(&raw);
-        ty.arbitrary(&mut u).unwrap_or_default()
+    fn generate(&mut self, ty: FuzzType) -> Option<Vec<u8>> {
+        // an empty input in place of a failed value would test nothing while counting as
+        // coverage, so a failure gets fresh buffers and is then reported
+        for _ in 0..GENERATE_TRIES {
+            // mostly small buffers, now and then a large one, so both shallow values with
+            // every arm and long arrays or deep nesting come up
+            let cap = 1usize << (2 + self.rng.below(11));
+            let len = 1 + self.rng.below(cap.min(self.cfg.max_arbitrary_bytes));
+            let mut raw = vec![0u8; len];
+            self.rng.fill(&mut raw);
+            let mut u = Unstructured::new(&raw);
+            if let Some(v) = ty.arbitrary(&mut u) {
+                return Some(v);
+            }
+        }
+        None
     }
 
     fn remember(&mut self, ty: FuzzType, data: Vec<u8>) {
@@ -303,32 +380,33 @@ pub fn evaluate(go: &mut Testee, ty: FuzzType, bytes: &[u8]) -> Result<Evaluatio
 }
 
 pub fn run(cfg: &Config) -> Result<Outcome> {
+    let (target, protocol) = go_target(cfg)?;
+    run_against(cfg, target, protocol)
+}
+
+/// [`run`] against any testee speaking the conformance protocol in place of the go one.
+pub fn run_against(cfg: &Config, target: Target, protocol: u32) -> Result<Outcome> {
     ensure!(cfg.jobs > 0, "--jobs must be at least 1");
     ensure!(!cfg.types.is_empty(), "no types to fuzz");
-    let target = go_target(cfg)?;
     let seeds = load_seeds(cfg)?;
     let seed_counts: BTreeMap<FuzzType, usize> = cfg
         .types
         .iter()
         .map(|t| (*t, seeds.get(t).map_or(0, Vec::len)))
         .collect();
-    let shared = Mutex::new(Shared {
-        classes: BTreeMap::new(),
-    });
     let deadline = Instant::now() + Duration::from_secs(cfg.seconds);
     let started = Instant::now();
-    let done = AtomicU64::new(0);
     let stop = AtomicBool::new(false);
 
     let results: Vec<Result<WorkerTotals>> = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..cfg.jobs)
             .map(|w| {
-                let (target, seeds, shared, done, stop) = (&target, &seeds, &shared, &done, &stop);
+                let (target, seeds, stop) = (&target, &seeds, &stop);
                 std::thread::Builder::new()
                     .name(format!("fuzz-{w}"))
                     .stack_size(WORKER_STACK)
                     .spawn_scoped(scope, move || {
-                        let r = work(cfg, w, target, seeds, shared, deadline, done, stop);
+                        let r = work(cfg, w, target, seeds, deadline, stop);
                         if r.is_err() {
                             stop.store(true, Ordering::Relaxed);
                         }
@@ -346,8 +424,26 @@ pub fn run(cfg: &Config) -> Result<Outcome> {
 
     let mut stats: BTreeMap<FuzzType, TypeStats> = BTreeMap::new();
     let mut origins: BTreeMap<Origin, u64> = BTreeMap::new();
+    let mut classes: BTreeMap<String, Class> = BTreeMap::new();
+    let mut time_cut = cfg.max_inputs.is_none();
+    // results are in worker order, which the merge's tie-breaks rely on only through the
+    // worker index recorded in each class
     for r in results {
-        let (s, o) = r?;
+        let WorkerTotals {
+            stats: s,
+            origins: o,
+            classes: c,
+            time_cut: cut,
+        } = r?;
+        time_cut |= cut;
+        for (sig, class) in c {
+            match classes.get_mut(&sig) {
+                Some(into) => merge_class(into, class),
+                None => {
+                    classes.insert(sig, class);
+                }
+            }
+        }
         for (t, ts) in s {
             let into = stats.entry(t).or_default();
             into.inputs += ts.inputs;
@@ -355,6 +451,7 @@ pub fn run(cfg: &Config) -> Result<Outcome> {
             into.both_accept += ts.both_accept;
             into.both_reject += ts.both_reject;
             into.disagreements += ts.disagreements;
+            into.generation_failures += ts.generation_failures;
             for (k, n) in ts.filtered {
                 *into.filtered.entry(k).or_default() += n;
             }
@@ -364,13 +461,11 @@ pub fn run(cfg: &Config) -> Result<Outcome> {
         }
     }
 
-    let classes = shared
-        .into_inner()
-        .unwrap_or_else(|p| p.into_inner())
-        .classes;
     let classes = minimize_all(cfg, &target, classes.into_values().collect())?;
     Ok(Outcome {
         elapsed,
+        time_cut,
+        protocol,
         go: target,
         seeds: seed_counts,
         stats,
@@ -379,15 +474,12 @@ pub fn run(cfg: &Config) -> Result<Outcome> {
     })
 }
 
-#[allow(clippy::too_many_arguments)]
 fn work(
     cfg: &Config,
     index: usize,
     target: &Target,
     seeds: &BTreeMap<FuzzType, Vec<Vec<u8>>>,
-    shared: &Mutex<Shared>,
     deadline: Instant,
-    done: &AtomicU64,
     stop: &AtomicBool,
 ) -> Result<WorkerTotals> {
     let go = Testee::start(&cfg.root, target)?;
@@ -401,20 +493,26 @@ fn work(
         stats: BTreeMap::new(),
         origins: BTreeMap::new(),
     };
+    let share = cfg.max_inputs.map(|max| share(max, cfg.jobs, index));
+    let mut classes: BTreeMap<String, Class> = BTreeMap::new();
     let mut iteration = 0u64;
+    let mut time_cut = false;
     loop {
-        if stop.load(Ordering::Relaxed) || Instant::now() >= deadline {
+        if share.is_some_and(|s| iteration >= s) {
             break;
         }
-        if let Some(max) = cfg.max_inputs
-            && done.fetch_add(1, Ordering::Relaxed) >= max
-        {
+        if stop.load(Ordering::Relaxed) || Instant::now() >= deadline {
+            time_cut = true;
             break;
         }
         let ty = cfg.types[w.rng.below(cfg.types.len())];
         let (data, origin) = w.next_input(ty);
         iteration += 1;
         *w.origins.entry(origin).or_default() += 1;
+        let Some(data) = data else {
+            w.stats.entry(ty).or_default().generation_failures += 1;
+            continue;
+        };
         let ev = evaluate(&mut w.go, ty, &data)?;
         let st = w.stats.entry(ty).or_default();
         st.inputs += 1;
@@ -437,13 +535,13 @@ fn work(
             Some(kind) => {
                 st.disagreements += 1;
                 let sig = signature(ty, kind, &ev.rust, &ev.go);
-                let mut guard = shared.lock().unwrap_or_else(|p| p.into_inner());
-                let class = guard.classes.entry(sig.clone()).or_insert_with(|| Class {
+                let class = classes.entry(sig.clone()).or_insert_with(|| Class {
                     signature: sig,
                     ty,
                     kind,
                     count: 0,
                     input: data.clone(),
+                    input_worker: w.index,
                     first: Sighting {
                         worker: w.index,
                         iteration,
@@ -453,6 +551,7 @@ fn work(
                     go: ev.go.clone(),
                 });
                 class.count += 1;
+                // strictly smaller, so a tie keeps the earlier iteration
                 if data.len() < class.input.len() {
                     class.input = data;
                     class.rust = ev.rust;
@@ -461,7 +560,12 @@ fn work(
             }
         }
     }
-    Ok((w.stats, w.origins))
+    Ok(WorkerTotals {
+        stats: w.stats,
+        origins: w.origins,
+        classes,
+        time_cut,
+    })
 }
 
 /// Shrinks every class on one testee; a class whose input no longer reproduces (a go
@@ -571,13 +675,23 @@ pub struct Replayed {
 /// Re-runs every `<dir>/<id>/any.xdr` that has a `class.json`, so a fixed or changed
 /// disagreement shows up.
 pub fn replay(cfg: &Config, dir: &Path) -> Result<Vec<Replayed>> {
-    let target = go_target(cfg)?;
-    let mut ids: Vec<PathBuf> = std::fs::read_dir(dir)
-        .with_context(|| format!("reading {}", dir.display()))?
-        .filter_map(|e| e.ok().map(|e| e.path()))
-        .filter(|p| p.join("class.json").is_file())
-        .collect();
+    let (target, _) = go_target(cfg)?;
+    let mut ids: Vec<PathBuf> = Vec::new();
+    for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let p = e
+            .with_context(|| format!("reading {}", dir.display()))?
+            .path();
+        if p.join("class.json").is_file() {
+            ids.push(p);
+        }
+    }
     ids.sort();
+    // a replay of nothing would pass without having checked anything
+    ensure!(
+        !ids.is_empty(),
+        "{} holds no reproducer (no <id>/class.json), so there is nothing to replay",
+        dir.display()
+    );
     let target2 = target.clone();
     let root = cfg.root.clone();
     std::thread::Builder::new()
@@ -621,6 +735,62 @@ pub fn replay(cfg: &Config, dir: &Path) -> Result<Vec<Replayed>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shares_cover_the_budget_exactly() {
+        for (max, jobs) in [(30000u64, 3usize), (10, 4), (3, 4), (0, 2), (7, 1)] {
+            let total: u64 = (0..jobs).map(|w| share(max, jobs, w)).sum();
+            assert_eq!(total, max, "{max} over {jobs}");
+        }
+        assert_eq!(share(10, 4, 0), 3);
+        assert_eq!(share(10, 4, 3), 2);
+    }
+
+    fn class(worker: usize, iteration: u64, input: &[u8]) -> Class {
+        Class {
+            signature: "s".into(),
+            ty: FuzzType::ScVal,
+            kind: Kind::RustAcceptsGoRejects,
+            count: 1,
+            input: input.to_vec(),
+            input_worker: worker,
+            first: Sighting {
+                worker,
+                iteration,
+                origin: Origin::Arbitrary,
+            },
+            rust: Side::Accepted(input.to_vec()),
+            go: Side::Rejected(format!("w{worker}")),
+        }
+    }
+
+    #[test]
+    fn class_merge_does_not_depend_on_arrival_order() {
+        let parts = [
+            class(0, 50, &[1, 2, 3]),
+            class(1, 7, &[9, 9]),
+            class(2, 3, &[8, 8]),
+        ];
+        let merged = |order: &[usize]| {
+            let mut it = order.iter().map(|&i| parts[i].clone());
+            let mut into = it.next().unwrap();
+            for c in it {
+                merge_class(&mut into, c);
+            }
+            into
+        };
+        let a = merged(&[0, 1, 2]);
+        let b = merged(&[2, 1, 0]);
+        let c = merged(&[1, 0, 2]);
+        for m in [&a, &b, &c] {
+            assert_eq!(m.count, 3);
+            // two inputs of length 2: the lower worker wins
+            assert_eq!(m.input, vec![9, 9]);
+            assert_eq!(m.go, Side::Rejected("w1".into()));
+            // earliest iteration is worker 2's third input
+            assert_eq!((m.first.worker, m.first.iteration), (2, 3));
+        }
+    }
 
     #[test]
     fn kebab_names() {

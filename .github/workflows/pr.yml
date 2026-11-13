@@ -150,23 +150,11 @@ jobs:
       - name: committed chains match their chain.json
         run: shapekit pack verify
       - name: the repro selection knows every recipe family
-        # scripts/select-repro.sh reads the family list from the recipe sources. the cli rejects
-        # a --family no recipe records before it reads the pins, so pointing --pins at a missing
-        # file checks the list without starting anything; --check-chains then requires every
-        # committed chain to belong to a listed family, which covers recipes the list misses
+        # the selection script reads families from the recipe sources; the cli lists the ones it
+        # registers. they must agree, and every committed chain must belong to a listed family
         run: |
           set -euo pipefail
-          args=()
-          for f in $(scripts/select-repro.sh --families); do args+=(--family "$f"); done
-          if out=$(shapekit gen verify-repro "${args[@]}" --pins "$RUNNER_TEMP/no-pins.toml" 2>&1); then
-            echo "::error::gen verify-repro ran without its pins file"
-            exit 1
-          fi
-          case "$out" in
-            *"no recipe records family"*) echo "::error::$out"; exit 1 ;;
-            *"reading the core image pin"*) echo "$(( ${#args[@]} / 2 )) families, each has a recipe" ;;
-            *) echo "::error::unexpected output: $out"; exit 1 ;;
-          esac
+          diff <(scripts/select-repro.sh --families | sort) <(shapekit gen families | sort)
           scripts/select-repro.sh --check-chains
       - name: adapter protocol schema and docs are current
         run: shapekit harness schema
@@ -328,7 +316,8 @@ jobs:
             --network testnet --out harness-out \
             --chain cap40.signed-payload-signer.p30 \
             --chain cap73.sac-trust.p30 \
-            --chain cap27.muxed-accounts.p30
+            --chain cap27.muxed-accounts.p30 \
+            --expect crates/shapekit-harness/expect/wallet-backend-pr.toml
       - name: save the wallet-backend image for the cache
         if: ${{ !cancelled() && steps.wb-cache.outputs.cache-hit != 'true' }}
         env:

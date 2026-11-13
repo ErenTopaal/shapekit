@@ -1,0 +1,21 @@
+{
+  "findings": [
+    {
+      "rule": "IDX002",
+      "package": "github.com/stellar/wallet-backend/internal/indexer/processors",
+      "function": "(*ContractDeployProcessor).ProcessOperation",
+      "file": "internal/indexer/processors/contract_deploy.go",
+      "line": 116,
+      "column": 2,
+      "message": "walkInvocation (closure in (*ContractDeployProcessor).ProcessOperation) recurses over xdr.SorobanAuthorizedInvocation with no depth bound; carry a depth counter and stop at a fixed limit"
+    }
+  ],
+  "suppressed": [],
+  "baselined": [],
+  "unused_baseline_entries": [],
+  "counts": {
+    "findings": 1,
+    "suppressed": 0,
+    "baselined": 0
+  }
+}

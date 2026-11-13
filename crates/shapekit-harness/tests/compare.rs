@@ -16,7 +16,9 @@ use shapekit_harness::protocol::{
     ChangeClaim, Claims, ExportChange, ExportParticipant, ParticipantClaim, RawAddress, TxRecord,
     vocabulary_fields,
 };
-use shapekit_harness::report::{MemoryOptions, Round, memory_check};
+use shapekit_harness::report::{
+    MemoryOptions, Round, TARGET_SLACK_MIN_BYTES, memory_check, target_memory_check,
+};
 use shapekit_harness::run::bootstrap_checkpoint;
 use shapekit_oracle::vocab::{EventCoverage, OracleFile, TxFacts};
 
@@ -376,6 +378,7 @@ fn memory_growth_across_rounds_fails_the_check() {
         seconds: 1.0,
         same_verdicts_as_first: true,
         chain_errors: Vec::new(),
+        target_peak_memory_bytes: BTreeMap::new(),
     };
     let mem = MemoryOptions {
         rounds: 2,
@@ -488,4 +491,66 @@ fn soroban_v3_coverage_drops_only_claims_beyond_operation_events() {
     );
     assert_eq!(uncomparable_claims(EventCoverage::None, &c), vec![0, 1, 2]);
     assert!(uncomparable_claims(EventCoverage::Unified, &c).is_empty());
+}
+
+#[test]
+fn target_memory_is_checked_per_chain_against_the_limit_and_across_rounds() {
+    let round = |round, peaks: &[(&str, u64)]| Round {
+        round,
+        peak_rss_bytes: 1,
+        rss_after_bytes: 1,
+        seconds: 1.0,
+        same_verdicts_as_first: true,
+        chain_errors: Vec::new(),
+        target_peak_memory_bytes: peaks.iter().map(|(c, p)| (c.to_string(), *p)).collect(),
+    };
+    let mem = MemoryOptions {
+        rounds: 2,
+        slack_fraction: 0.1,
+        slack_min_bytes: 16 << 20,
+        budget_bytes: None,
+    };
+    let limit = 4u64 << 30;
+    let small = 100u64 << 20;
+    let big = 2u64 << 30;
+    let flat = target_memory_check(
+        &[
+            round(1, &[("a (testnet)", small), ("b (testnet)", big)]),
+            // within the floor on a, within 10% on b
+            round(
+                2,
+                &[
+                    ("a (testnet)", small + TARGET_SLACK_MIN_BYTES),
+                    ("b (testnet)", big + (150 << 20)),
+                ],
+            ),
+        ],
+        &mem,
+        limit,
+        vec![],
+    );
+    assert!(flat.flat && flat.within_limit, "{flat:?}");
+    assert_eq!(flat.peak_bytes, Some(big + (150 << 20)));
+    let grew = target_memory_check(
+        &[
+            round(1, &[("a (testnet)", small)]),
+            round(2, &[("a (testnet)", small + TARGET_SLACK_MIN_BYTES + 1)]),
+        ],
+        &mem,
+        limit,
+        vec![],
+    );
+    assert!(!grew.flat, "{grew:?}");
+    let over = target_memory_check(
+        &[round(1, &[("a (testnet)", limit + 1)])],
+        &mem,
+        limit,
+        vec![],
+    );
+    assert!(!over.within_limit, "{over:?}");
+    let silent = target_memory_check(&[round(1, &[])], &mem, limit, vec!["a (testnet)".into()]);
+    assert!(
+        silent.detail.contains("no peak reported for a (testnet)"),
+        "{silent:?}"
+    );
 }

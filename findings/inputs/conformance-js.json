@@ -1,0 +1,3899 @@
+{
+  "corpus_version": "0.1.0",
+  "testees": [
+    {
+      "key": "js@16.3.0",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "16.3.0"
+    },
+    {
+      "key": "js@16.3.1",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "16.3.1"
+    },
+    {
+      "key": "js@16.4.1",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "16.4.1"
+    },
+    {
+      "key": "js@17.2.0",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "17.2.0"
+    },
+    {
+      "key": "js@17.2.1",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "17.2.1"
+    },
+    {
+      "key": "js@17.3.0",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "17.3.0"
+    },
+    {
+      "key": "js@17.4.0",
+      "sdk": "js",
+      "package": "@stellar/stellar-sdk",
+      "version": "17.4.0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk reads a different id; it must read this one exactly or refuse"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk reads a different id; it must read this one exactly or refuse"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk reads a different id; it must read this one exactly or refuse"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk reads a different id; it must read this one exactly or refuse"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk reads a different id; it must read this one exactly or refuse"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 11/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 11/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 11/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 11/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 11/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 23/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 24/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-g-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-g-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-m-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-m-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-s-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-strkey-s-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 2/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 5/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 6/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "MuxedAccount takes the id only as a string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-dotnet257",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-js1766-issuers",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-py1246-testnet-pool",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-strkey-l-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-strkey-l-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 17/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 17/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-p-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 14/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 16/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 17/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 18/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 20/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 21/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-t-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-t-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-x-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap40.signed-payload-signer.synth-strkey-x-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap84.muxed-contract.synth-strkey-w-valid",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap84.muxed-contract.synth-strkey-w-valid.md",
+          "checks": [
+            {
+              "check": "case 0/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 0/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 1/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 1/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 2/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 3/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 4/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 4/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 5/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 5/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            },
+            {
+              "check": "case 6/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: StrKey.decodeMuxedContract does not exist in this sdk version"
+            },
+            {
+              "check": "case 6/strkey_encode",
+              "op": "strkey_encode",
+              "result": "unsupported",
+              "detail": "@stellar/stellar-sdk 16.4.1 has no StrKey.encodeMuxedContract"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-245",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-246",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.p30-declared-depth-246.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-492",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.p30-declared-depth-492.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-493",
+      "cells": {
+        "js@17.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.p30-declared-depth-493.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.p30-declared-depth-493.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-494-over-cap",
+      "cells": {
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.invoke-basics.synth-strkey-c-invalid",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.invoke-basics.synth-strkey-c-invalid.md",
+          "checks": [
+            {
+              "check": "case 2/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-envelope",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-map-depth-max-envelope.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-meta",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-map-depth-max-meta.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-over",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-map-depth-over.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-envelope",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-vec-depth-max-envelope.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-meta",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-vec-depth-max-meta.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-over",
+      "cells": {
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.p30-vec-depth-over.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-event-vec-depth-101",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-event-vec-depth-101.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-address-and-string",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-bool-and-text",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-bytes-and-string",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-bytes-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-keys-addresses",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement map_validate"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement map_validate"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement map_validate"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-keys-bytes",
+      "cells": {
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-bytes.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-keys-mixed-types",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement map_validate"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement map_validate"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement map_validate"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md",
+          "checks": [
+            {
+              "check": "case 0/map_sort",
+              "op": "map_sort",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "case 1/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            },
+            {
+              "check": "case 2/map_validate",
+              "op": "map_validate",
+              "result": "unsupported",
+              "detail": "js@17.2.0 does not implement map_validate"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-numeric-types",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 10 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 10 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 10 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 10 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 10 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-u32-string-symbol",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-vec-and-string",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 2 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-map-void-and-text",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md",
+          "checks": [
+            {
+              "check": "case 0/to_native",
+              "op": "to_native",
+              "result": "diverges-from-network",
+              "detail": "the native projection keeps 1 of 3 map entries; the rest were lost silently"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+      "cells": {
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.1 does not implement encode_json"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.4.1 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+      "cells": {
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "known_failure_problems": []
+}

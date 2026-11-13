@@ -30,6 +30,34 @@ pub struct Round {
     /// Chains of this round that could not be run, with the reason.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub chain_errors: Vec<String>,
+    /// Per `<chain> (<network>)`, the target's peak memory as the adapter reported it in
+    /// `status` (its container's peak). Chains whose adapter reported none are absent.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub target_peak_memory_bytes: BTreeMap<String, u64>,
+}
+
+/// A later round's target peak on a chain may exceed the first round's on that chain by
+/// the larger of `--memory-slack` of it and this floor. A container's peak includes page
+/// cache and database buffers that vary from run to run by tens of MiB, so the floor is
+/// wider than the harness's own.
+pub const TARGET_SLACK_MIN_BYTES: u64 = 64 * 1024 * 1024;
+
+/// The indexer side of the memory evidence: the target's peak per chain against the
+/// configured limit, and across `--repeat` rounds.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TargetMemoryCheck {
+    pub limit_bytes: u64,
+    /// The highest peak of any chain in any round.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub peak_bytes: Option<u64>,
+    /// No chain's peak exceeded `limit_bytes`. Such a chain also stops with reason `oom`.
+    pub within_limit: bool,
+    /// No chain's peak in a later round grew past its first-round peak plus slack.
+    pub flat: bool,
+    /// Chains whose adapter reported no peak, so there is no evidence for them.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub unreported: Vec<String>,
+    pub detail: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -66,6 +94,9 @@ pub struct Report {
     pub memory_limit_bytes: u64,
     pub rounds: Vec<Round>,
     pub memory: MemoryCheck,
+    /// Absent in reports written before the target's memory was checked.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_memory: Option<TargetMemoryCheck>,
     pub totals: Totals,
     /// The first round's chains and entries.
     pub chains: Vec<ChainResult>,
@@ -74,11 +105,13 @@ pub struct Report {
 
 impl Report {
     /// Whether the run itself worked: every chain ran (verdicts are findings, not failures)
-    /// and the memory checks hold.
+    /// and the memory checks hold, the harness's own and the target's growth across rounds.
+    /// A target over its limit is a finding (verdict `mishandled`, reason `oom`).
     pub fn ok(&self) -> bool {
         self.chains.iter().all(|c| c.error.is_none())
             && self.memory.flat
             && self.memory.within_budget
+            && self.target_memory.as_ref().is_none_or(|t| t.flat)
             && self
                 .rounds
                 .iter()
@@ -99,6 +132,7 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
     let mut rounds = Vec::new();
     let mut first = None;
     let mut first_digest = None;
+    let mut unreported_all = std::collections::BTreeSet::new();
     for round in 1..=mem.rounds.max(1) {
         let mut o = opts.clone();
         o.logs = logs_dir(out, round, mem.rounds);
@@ -123,7 +157,22 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
                         .map(|e| format!("{} ({}): {e}", c.chain, c.network))
                 })
                 .collect(),
+            target_peak_memory_bytes: result
+                .chains
+                .iter()
+                .filter_map(|c| {
+                    c.target_peak_memory_bytes
+                        .map(|p| (format!("{} ({})", c.chain, c.network), p))
+                })
+                .collect(),
         });
+        let unreported: Vec<String> = result
+            .chains
+            .iter()
+            .filter(|c| c.error.is_none() && c.target_peak_memory_bytes.is_none())
+            .map(|c| format!("{} ({})", c.chain, c.network))
+            .collect();
+        unreported_all.extend(unreported);
         eprintln!(
             "harness: round {round}: peak rss {} MiB, {:.1}s",
             rss.peak / (1024 * 1024),
@@ -136,6 +185,12 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
     }
     let first = first.expect("at least one round ran");
     let memory = memory_check(&rounds, mem);
+    let target_memory = target_memory_check(
+        &rounds,
+        mem,
+        opts.memory_limit_bytes,
+        unreported_all.into_iter().collect(),
+    );
     let mut by_verdict = BTreeMap::new();
     let mut by_reason = BTreeMap::new();
     for e in &first.entries {
@@ -157,6 +212,7 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
         memory_limit_bytes: opts.memory_limit_bytes,
         rounds,
         memory,
+        target_memory: Some(target_memory),
         totals: Totals {
             entries: first.entries.len(),
             by_verdict,
@@ -205,6 +261,75 @@ pub fn memory_check(rounds: &[Round], mem: &MemoryOptions) -> MemoryCheck {
         budget_bytes: mem.budget_bytes,
         flat: grown.is_empty(),
         within_budget: over.is_empty(),
+        detail,
+    }
+}
+
+/// The target's per-chain peaks against `limit` and across rounds. Growth is judged per
+/// chain, since chains differ in size far more than rounds of one chain should.
+pub fn target_memory_check(
+    rounds: &[Round],
+    mem: &MemoryOptions,
+    limit: u64,
+    unreported: Vec<String>,
+) -> TargetMemoryCheck {
+    let peak = rounds
+        .iter()
+        .flat_map(|r| r.target_peak_memory_bytes.values().copied())
+        .max();
+    let over: Vec<String> = rounds
+        .iter()
+        .flat_map(|r| {
+            r.target_peak_memory_bytes
+                .iter()
+                .filter(|(_, p)| **p > limit)
+                .map(move |(c, p)| format!("{c} in round {} peaked at {p} bytes", r.round))
+        })
+        .collect();
+    let mut grown = Vec::new();
+    if let Some(first) = rounds.first() {
+        for r in rounds.iter().skip(1) {
+            for (c, p) in &r.target_peak_memory_bytes {
+                let Some(base) = first.target_peak_memory_bytes.get(c) else {
+                    continue;
+                };
+                let slack =
+                    ((*base as f64 * mem.slack_fraction) as u64).max(TARGET_SLACK_MIN_BYTES);
+                if *p > base + slack {
+                    grown.push(format!(
+                        "{c} peaked at {p} bytes in round {}, {base} in round 1 (slack {slack})",
+                        r.round
+                    ));
+                }
+            }
+        }
+    }
+    let mut detail = match peak {
+        Some(p) => format!("target peak {p} bytes of a {limit}-byte limit"),
+        None => format!("the adapter reported no target peak memory (limit {limit} bytes)"),
+    };
+    if rounds.len() > 1 {
+        detail.push_str(&format!(
+            "; per chain a later round may exceed round 1 by {:.0}% or {} MiB, whichever is larger",
+            mem.slack_fraction * 100.0,
+            TARGET_SLACK_MIN_BYTES >> 20
+        ));
+    }
+    if !over.is_empty() {
+        detail.push_str(&format!("; over the limit: {}", over.join(", ")));
+    }
+    if !grown.is_empty() {
+        detail.push_str(&format!("; grew: {}", grown.join(", ")));
+    }
+    if !unreported.is_empty() {
+        detail.push_str(&format!("; no peak reported for {}", unreported.join(", ")));
+    }
+    TargetMemoryCheck {
+        limit_bytes: limit,
+        peak_bytes: peak,
+        within_limit: over.is_empty(),
+        flat: grown.is_empty(),
+        unreported,
         detail,
     }
 }
@@ -263,6 +388,23 @@ pub fn markdown(r: &Report) -> String {
         if r.memory.flat { "yes" } else { "no" },
         if r.memory.within_budget { "yes" } else { "no" }
     ));
+    if let Some(t) = &r.target_memory {
+        s.push_str(&format!(
+            "Target: {}. Within limit: {}. Flat: {}.\n\n",
+            cell(&t.detail),
+            if t.within_limit { "yes" } else { "no" },
+            if t.flat { "yes" } else { "no" }
+        ));
+        if r.rounds.len() > 1 {
+            s.push_str("| round | chain | target peak memory |\n|---|---|---|\n");
+            for x in &r.rounds {
+                for (c, p) in &x.target_peak_memory_bytes {
+                    s.push_str(&format!("| {} | {} | {p} |\n", x.round, cell(c)));
+                }
+            }
+            s.push('\n');
+        }
+    }
     s.push_str("## Chains\n\n| chain | network | protocol | delivery | bootstrap | last ingested | last ledger | stop | target peak memory | error |\n|---|---|---|---|---|---|---|---|---|---|\n");
     for c in &r.chains {
         s.push_str(&format!(

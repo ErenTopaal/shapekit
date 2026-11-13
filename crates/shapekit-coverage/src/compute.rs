@@ -212,11 +212,13 @@ fn entry_shape<'a>(entry: &'a Entry, corpus: &Path) -> Result<EntryShape<'a>, Co
             CoverageError::Entry(format!("{}: kind xdr with no xdr_type", entry.id))
         })?;
         for (name, variant) in entry.variants.iter() {
-            let path = corpus.join(&variant.xdr_file);
-            let bytes = std::fs::read(&path).map_err(|source| CoverageError::Io {
-                path: path.clone(),
-                source,
-            })?;
+            // an edited manifest must not point outside the corpus or at stale bytes
+            let bytes = shapekit_manifest::read_verified(
+                corpus,
+                &variant.xdr_file,
+                Some(&variant.xdr_sha256),
+            )
+            .map_err(|e| CoverageError::Entry(format!("{} variant {name}: {e}", entry.id)))?;
             match shape_signature(ty, &bytes, decode_limits(ty, bytes.len())) {
                 Ok(sig) => signature.extend(sig),
                 // an implementation-defined entry may legitimately fail to decode here

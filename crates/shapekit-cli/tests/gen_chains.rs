@@ -1,17 +1,9 @@
 //! `gen chains`, `manifest build`, `manifest validate` and `gen
 //! verify-repro` end to end on the cap40 recipe. Needs docker, the pinned
-//! core image and `SHAPEKIT_DOCKER_TESTS=1`.
+//! core image; the tests are ignored by default; run with `--include-ignored`.
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
-
-fn enabled(test: &str) -> bool {
-    let on = std::env::var("SHAPEKIT_DOCKER_TESTS").as_deref() == Ok("1");
-    if !on {
-        eprintln!("{test}: skipped, set SHAPEKIT_DOCKER_TESTS=1 to run against docker");
-    }
-    on
-}
 
 fn repo(rel: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -37,10 +29,8 @@ fn ok(out: &Output) -> String {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn cap40_chains_validate_and_reproduce() {
-    if !enabled("cap40_chains_validate_and_reproduce") {
-        return;
-    }
     let dir = tempfile::tempdir().unwrap();
     let corpus = dir.path().join("corpus");
     let c = corpus.to_str().unwrap();

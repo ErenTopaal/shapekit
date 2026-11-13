@@ -19,6 +19,14 @@ use crate::protocol::{
 /// longer line means the adapter is broken.
 const MAX_LINE: usize = 64 * 1024 * 1024;
 
+/// Late answers described one by one; beyond this only their number is kept, so an adapter
+/// that keeps answering abandoned requests cannot grow the report without bound.
+const MAX_LATE_NOTES: usize = 16;
+
+/// How long `finish` waits for the stdout reader after the adapter is gone. A process the
+/// adapter started can hold the pipe open past its death, and the reader would never end.
+const READER_GRACE: Duration = Duration::from_secs(2);
+
 #[derive(Debug, thiserror::Error)]
 pub enum AdapterFailure {
     #[error("starting the adapter {command:?}: {source}")]
@@ -26,8 +34,8 @@ pub enum AdapterFailure {
         command: Vec<String>,
         source: std::io::Error,
     },
-    #[error("no answer to {cmd} within {waited:?}")]
-    Timeout { cmd: String, waited: Duration },
+    #[error("no answer to {cmd} within {timeout:?}")]
+    Timeout { cmd: String, timeout: Duration },
     #[error("the adapter exited while answering {cmd} ({status})")]
     Exited { cmd: String, status: String },
     #[error("protocol violation answering {cmd}: {message}")]
@@ -47,7 +55,7 @@ fn class_name(e: &AdapterError) -> String {
 
 enum Line {
     Text(String),
-    TooLong(usize),
+    TooLong,
     Eof,
     ReadError(String),
 }
@@ -60,8 +68,10 @@ pub struct Adapter {
     reader: Option<std::thread::JoinHandle<()>>,
     /// Requests the harness stopped waiting for, whose answers may still arrive.
     abandoned: HashSet<String>,
-    /// Lines of abandoned requests that arrived later and were skipped, for the report.
+    /// Lines of abandoned requests that arrived later and were skipped, for the report: the
+    /// first [`MAX_LATE_NOTES`] described, then one line with the number of the rest.
     pub late_answers: Vec<String>,
+    late_beyond: u64,
 }
 
 fn cmd_name(c: &Command) -> &'static str {
@@ -108,7 +118,7 @@ impl Adapter {
                         .read_until(b'\n', &mut buf);
                     let msg = match read {
                         Ok(0) => Line::Eof,
-                        Ok(n) if n > MAX_LINE => Line::TooLong(n),
+                        Ok(n) if n > MAX_LINE => Line::TooLong,
                         Ok(_) => match String::from_utf8(std::mem::take(&mut buf)) {
                             Ok(s) => Line::Text(s),
                             Err(e) => Line::ReadError(format!("a line is not utf-8: {e}")),
@@ -130,6 +140,7 @@ impl Adapter {
             reader: Some(reader),
             abandoned: HashSet::new(),
             late_answers: Vec::new(),
+            late_beyond: 0,
         })
     }
 
@@ -168,9 +179,15 @@ impl Adapter {
     /// gave up on (see `abandoned`) is skipped, so an answer that arrives after its timeout,
     /// while the harness is already waiting on the next request (in practice `stop`), is not
     /// a protocol violation. Any other foreign id still is.
-    fn next(&mut self, cmd: &str, id: &str, deadline: Instant) -> Result<Response, AdapterFailure> {
+    fn next(
+        &mut self,
+        cmd: &str,
+        id: &str,
+        deadline: Instant,
+        timeout: Duration,
+    ) -> Result<Response, AdapterFailure> {
         loop {
-            let resp = self.next_line(cmd, id, deadline)?;
+            let resp = self.next_line(cmd, id, deadline, timeout)?;
             if resp.id == id {
                 return Ok(resp);
             }
@@ -178,6 +195,10 @@ impl Adapter {
                 let last = !matches!(resp.body, ResponseBody::Record { .. });
                 if last {
                     self.abandoned.remove(&resp.id);
+                }
+                if self.late_answers.len() >= MAX_LATE_NOTES {
+                    self.late_beyond += 1;
+                    continue;
                 }
                 self.late_answers.push(format!(
                     "a {} line for abandoned request {} arrived while waiting on {cmd}",
@@ -202,6 +223,7 @@ impl Adapter {
         cmd: &str,
         id: &str,
         deadline: Instant,
+        timeout: Duration,
     ) -> Result<Response, AdapterFailure> {
         let wait = deadline.saturating_duration_since(Instant::now());
         let line = match self.lines.recv_timeout(wait) {
@@ -209,9 +231,10 @@ impl Adapter {
             Err(RecvTimeoutError::Timeout) => {
                 // its answer may still come; the next request must not choke on it
                 self.abandoned.insert(id.to_owned());
+                // the configured timeout, not what was left of it at the last line
                 return Err(AdapterFailure::Timeout {
                     cmd: cmd.into(),
-                    waited: wait,
+                    timeout,
                 });
             }
             Err(RecvTimeoutError::Disconnected) => Line::Eof,
@@ -228,7 +251,9 @@ impl Adapter {
                     status: self.exit_status(),
                 });
             }
-            Line::TooLong(n) => return Err(protocol(format!("a line of more than {n} bytes"))),
+            Line::TooLong => {
+                return Err(protocol(format!("a line longer than {MAX_LINE} bytes")));
+            }
             Line::ReadError(e) => return Err(protocol(e)),
         };
         let resp: Response = serde_json::from_str(text.trim_end()).map_err(|e| {
@@ -247,7 +272,7 @@ impl Adapter {
         let name = cmd_name(&cmd);
         let deadline = Instant::now() + timeout;
         let id = self.send(cmd)?;
-        match self.next(name, &id, deadline)?.body {
+        match self.next(name, &id, deadline, timeout)?.body {
             ResponseBody::Ok { result } => {
                 serde_json::from_value(result).map_err(|e| AdapterFailure::Protocol {
                     cmd: name.into(),
@@ -277,7 +302,7 @@ impl Adapter {
         let id = self.send(Command::Export { from, to })?;
         let mut seen = 0u64;
         loop {
-            match self.next("export", &id, deadline)?.body {
+            match self.next("export", &id, deadline, timeout)?.body {
                 ResponseBody::Record { record } => {
                     seen += 1;
                     on_record(*record);
@@ -306,6 +331,19 @@ impl Adapter {
         }
     }
 
+    /// Late answers for the report, with the count of those not described.
+    pub fn take_late_answers(&mut self) -> Vec<String> {
+        let mut out = std::mem::take(&mut self.late_answers);
+        if self.late_beyond > 0 {
+            out.push(format!(
+                "{} more late lines for abandoned requests were skipped",
+                self.late_beyond
+            ));
+            self.late_beyond = 0;
+        }
+        out
+    }
+
     /// Closes stdin and waits up to `grace` for the adapter to exit, then kills it.
     pub fn finish(mut self, grace: Duration) -> String {
         self.stdin = None;
@@ -330,6 +368,17 @@ impl Adapter {
         if let Some(r) = self.reader.take() {
             // dropping the receiver unblocks a reader stuck on a full channel
             drop(std::mem::replace(&mut self.lines, sync_channel(1).1));
+            let until = Instant::now() + READER_GRACE;
+            while !r.is_finished() && Instant::now() < until {
+                std::thread::sleep(Duration::from_millis(20));
+            }
+            if !r.is_finished() {
+                // the thread ends when the last holder of the pipe exits; joining would block
+                // the run on a process the harness does not own
+                return format!(
+                    "{status}; stdout is still open after the adapter exited (a process it started holds it), its reader was left behind"
+                );
+            }
             if r.join().is_err() {
                 return format!("{status}; the stdout reader panicked");
             }
@@ -385,6 +434,47 @@ read b; echo '{"id":"1","status":"ok","result":{"logs":""}}'
         assert!(stop.is_ok(), "{stop:?}");
         assert_eq!(a.late_answers.len(), 1, "{:?}", a.late_answers);
         a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_timeout_names_the_configured_wait() {
+        let (mut a, _dir) = spawn(SLOW);
+        let err = a
+            .call::<StatusResult>(Command::Status, Duration::from_millis(300))
+            .unwrap_err();
+        assert!(err.to_string().ends_with("within 300ms"), "{err}");
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn late_answers_are_bounded() {
+        // nothing is answered until stop arrives, so every status request times out; then a
+        // flood of answers to all of them comes before stop's own
+        let script = r#"
+i=0; while [ $i -lt 41 ]; do read x; i=$((i+1)); done
+i=0; while [ $i -lt 40 ]; do echo "{\"id\":\"$i\",\"status\":\"ok\",\"result\":{}}"; i=$((i+1)); done
+echo '{"id":"40","status":"ok","result":{"logs":""}}'; read y
+"#;
+        let (mut a, _dir) = spawn(script);
+        for _ in 0..40 {
+            let st = a.call::<StatusResult>(Command::Status, Duration::from_millis(1));
+            assert!(matches!(st, Err(AdapterFailure::Timeout { .. })), "{st:?}");
+        }
+        let stop = a.call::<StopResult>(Command::Stop, Duration::from_secs(20));
+        assert!(stop.is_ok(), "{stop:?}");
+        let notes = a.take_late_answers();
+        assert_eq!(notes.len(), MAX_LATE_NOTES + 1, "{notes:?}");
+        assert!(notes.last().unwrap().starts_with("24 more"), "{notes:?}");
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn finish_does_not_wait_for_a_grandchild_holding_stdout() {
+        let (a, _dir) = spawn("sleep 30 & read x");
+        let started = Instant::now();
+        let status = a.finish(Duration::from_millis(200));
+        assert!(started.elapsed() < Duration::from_secs(10), "{status}");
+        assert!(status.contains("left behind"), "{status}");
     }
 
     #[test]

@@ -188,7 +188,58 @@ fn refuses_a_file_whose_hash_disagrees_with_the_manifest() {
     let m = fixture(&corpus);
     write(&corpus, VECTOR, b"{\"cases\":[1]}\n");
     let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
-    assert!(err.to_string().contains("hashes to"), "{err}");
+    assert!(err.to_string().contains("has sha256"), "{err}");
+}
+
+#[test]
+fn refuses_strays_outside_the_entry_directories() {
+    for stray in [
+        "notes.txt",
+        "coverage/old.json",
+        "goldens/core-v30.0.0/extra.json",
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let corpus = dir.path().join("corpus");
+        let m = fixture(&corpus);
+        write(&corpus, "goldens/agree-exceptions.toml", b"");
+        write(&corpus, stray, b"x");
+        let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+        assert!(
+            err.to_string().contains("belongs to no manifest entry"),
+            "{stray}: {err}"
+        );
+    }
+}
+
+#[test]
+fn refuses_a_file_named_without_its_hash() {
+    let dir = tempfile::tempdir().unwrap();
+    let corpus = dir.path().join("corpus");
+    let mut m = fixture(&corpus);
+    let rel = "entries/demo/demo.synth-one/testnet.xdr";
+    write(&corpus, rel, b"\0\0\0\0");
+    m.entries[0].variants.testnet = Some(shapekit_manifest::Variant {
+        network_passphrase: None,
+        xdr_file: rel.into(),
+        xdr_sha256: sha256_hex(b"\0\0\0\0"),
+        expected_json_file: Some("entries/demo/demo.synth-one/testnet.json".into()),
+        expected_json_sha256: None,
+        oracle_file: None,
+        oracle_sha256: None,
+    });
+    let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+    assert!(err.to_string().contains("without its sha256"), "{err}");
+}
+
+#[test]
+fn refuses_a_path_that_leaves_the_corpus() {
+    let dir = tempfile::tempdir().unwrap();
+    let corpus = dir.path().join("corpus");
+    let mut m = fixture(&corpus);
+    write(dir.path(), "outside.json", b"{\"cases\":[]}\n");
+    m.entries[0].vector.as_mut().unwrap().path = "../outside.json".into();
+    let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+    assert!(err.to_string().contains("not a relative path"), "{err}");
 }
 
 #[test]

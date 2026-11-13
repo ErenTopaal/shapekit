@@ -17,6 +17,13 @@
 //! the corpus `manifest` (for each entry's CAPs and size). `findings.json` records the path
 //! and sha256 of each, so a reader can tell which runs the record describes.
 //!
+//! Run outputs land in the gitignored `target/`, so the inputs collect reads are committed
+//! under `findings/inputs/` ([`import`]): `[[inputs.import]]` names each run output, the
+//! committed copy and the command that wrote it, and `shapekit findings import-inputs`
+//! reduces the outputs into place and records their provenance. A harness report must have
+//! run against the manifest collect reads (`manifest_sha256`) and a matrix must be of its
+//! corpus version; a mismatch is an input problem.
+//!
 //! # Failures
 //!
 //! - Harness: every entry with verdict `dropped`, `mishandled` or `not-evaluated`; one
@@ -34,7 +41,10 @@
 //! event, field prefixes, null fields and detail text. A matcher that sets a problem member
 //! never takes a whole entry; one that sets none takes entries without problems.
 //! Conformance matchers select by sdk, entry pattern and version (all when empty); linter
-//! matchers by target, rule, function and optionally package.
+//! matchers by target, rule, function and optionally package. A harness matcher must set
+//! something beyond its target, a conformance matcher at least one entry pattern, and no
+//! entry pattern may be `*` alone: as the first match such a matcher would take every later
+//! finding's failures.
 //!
 //! # Records
 //!
@@ -57,11 +67,13 @@
 //! matches no finding; an input reports a problem that can hide failures (a harness chain
 //! that did not run, a known-failures list out of step with the matrix, a failing cell not in
 //! it); a finding matches nothing; a named draft file is missing; a finding has no decision
-//! (`draft`, or the status's evidence is missing); or `findings/findings.json` differs from
-//! the fresh collection. The last lines give totals and the findings pending filing by id.
+//! (`draft`, or the status's evidence is missing); a committed input is missing, changed
+//! since import or lacks provenance; or `findings/findings.json` or `findings/FINDINGS.md`
+//! differs from the fresh collection. The last lines give totals and the findings pending filing by id.
 
 pub mod check;
 pub mod collect;
+pub mod import;
 pub mod inputs;
 pub mod render;
 pub mod triage;

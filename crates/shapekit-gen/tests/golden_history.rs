@@ -436,6 +436,7 @@ fn agreement_requires_every_golden_combination() {
     let report = golden::agree(&m, &registry, &corpus(), std::slice::from_ref(&exception)).unwrap();
     assert_eq!(report.failures(), before - 1);
     assert!(report.stale_exceptions.is_empty());
+    assert!(report.inapplicable_exceptions.is_empty());
 
     let mut typo = exception;
     typo.op = "restore_footprnt".into();
