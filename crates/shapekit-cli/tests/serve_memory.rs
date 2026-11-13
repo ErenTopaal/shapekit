@@ -165,7 +165,7 @@ impl Inputs {
 /// The peak may hold the process at startup, the cached lake and the ledger state, and one
 /// response's working set per request thread the server started, which it caps. Between
 /// warm rounds the peak may rise by allocator slack, or by one arena per thread started in
-/// that round; any other rise is growth with repetition.
+/// that round or the one before; any other rise is growth with repetition.
 fn check(samples: &[Sample], i: &Inputs) -> Result<(), String> {
     let last = samples.last().ok_or("no rounds")?;
     let request_threads = last.threads.saturating_sub(i.start_threads);
@@ -188,11 +188,18 @@ fn check(samples: &[Sample], i: &Inputs) -> Result<(), String> {
             i.largest_response
         ));
     }
+    // a thread started late in a round fills its arena in the next one, so what a round's
+    // new threads did not use carries over one round and no further
     let mut grew = 0;
+    let mut carry = 0;
     for w in samples[1..].windows(2) {
         let rise = w[1].peak_kib.saturating_sub(w[0].peak_kib);
-        let new_threads = w[1].threads.saturating_sub(w[0].threads);
-        grew += rise.saturating_sub(new_threads * i.arena_kib());
+        let fresh = w[1].threads.saturating_sub(w[0].threads) * i.arena_kib();
+        let from_carry = rise.min(carry);
+        let rest = rise - from_carry;
+        let from_fresh = rest.min(fresh);
+        grew += rest - from_fresh;
+        carry = fresh - from_fresh;
     }
     if grew > WARM_SLACK_KIB {
         return Err(format!(
@@ -307,6 +314,25 @@ fn the_check_catches_growth_and_excess() {
         threads[r] = 6;
     }
     assert_eq!(check(&rounds(&peaks, &threads), &inputs), Ok(()));
+
+    // a thread started at the end of round 3 fills its arena in round 4, as seen in ci
+    let mut peaks = [warm; 10];
+    let mut threads = [5; 10];
+    for t in threads.iter_mut().skip(3) {
+        *t = 6;
+    }
+    for p in peaks.iter_mut().skip(4) {
+        *p += arena;
+    }
+    assert_eq!(check(&rounds(&peaks, &threads), &inputs), Ok(()));
+
+    // an arena's worth that lands two rounds after its thread is growth
+    let mut peaks = [warm; 10];
+    for p in peaks.iter_mut().skip(5) {
+        *p += arena;
+    }
+    let err = check(&rounds(&peaks, &threads), &inputs).unwrap_err();
+    assert!(err.contains("grew"), "{err}");
 
     // a leak of 1 MiB a round with no new thread
     let leak: Vec<u64> = (0..10).map(|r| warm + r * 1024).collect();
