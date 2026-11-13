@@ -130,11 +130,8 @@ The expected verdict in `entry.json` follows core where core fixes it:
 | rejects | `TransactionEnvelope` | must-reject, invalid-by-core: from protocol 28 core refuses what its rust parser cannot read (`can_parse_transaction`) |
 | rejects | other | implementation-defined |
 
-core decodes an envelope with xdrpp, and from protocol 28 also requires stellar-xdr to parse
-xdrpp's re-encoding of it (`validateXDRForProtocol` in stellar-core v30.0.0
-src/transactions/TransactionUtils.cpp). Bytes that xdrpp normalises on the way are therefore
-never seen raw by stellar-xdr inside core, which is why any input stellar-xdr does not
-round-trip is left implementation-defined rather than given core's verdict.
+core decodes an envelope with its own decoder, so stellar-xdr's verdict on bytes it does not
+round-trip is not core's verdict, and such inputs are left implementation-defined.
 
 A reproducer is a finding, not a corpus entry. When a class is real and new, add a synthetic
 entry for it to `crates/shapekit-gen/src/synth_xdr.rs` (where the build recomputes the

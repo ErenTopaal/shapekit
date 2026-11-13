@@ -4,7 +4,7 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760",
+      "sha256": "56f2976318aeb56531073fa336f2c3c442ee825efdbfc63388e7327d3dbd2a84",
       "detail": "corpus 0.1.0"
     },
     {
@@ -16,19 +16,19 @@
     {
       "kind": "conformance",
       "path": "target/conformance/rust/divergence-matrix.json",
-      "sha256": "7703c67dd2a611fba8381570ab7f11cc10379573e8b08bf38ba41b4bf1ea1049",
+      "sha256": "c497cc56ec0bbc0aad70a32ef84a63a7c9d609ebedf1379c86d80d2bb93f8b9b",
       "detail": "corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
       "kind": "conformance",
       "path": "target/conformance/go/divergence-matrix.json",
-      "sha256": "3eaea643613b4660f3d65717185c3fb4aea1329a812d5389bb0c20fe9bb7df70",
-      "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0"
+      "sha256": "05ec9f52fcbf0e07485c640eda1fec3d80d8a549b182d2722318f68885286f5b",
+      "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
     },
     {
       "kind": "conformance",
       "path": "target/conformance/js/divergence-matrix.json",
-      "sha256": "8f245b26804a1df8ad7e862a3c7ceb3d52b8038ff1569c1a0c242bc7dd3041ff",
+      "sha256": "a17075d463828685ad3cd1a23749dc15a3b1dbc4edd6b1849915e367b70c6ac2",
       "detail": "corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0"
     },
     {
@@ -39,12 +39,12 @@
     }
   ],
   "summary": {
-    "findings": 21,
-    "failures": 477,
+    "findings": 22,
+    "failures": 494,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
-        "divergence": 3,
+        "divergence": 4,
         "robustness": 1
       },
       "js-stellar-sdk": {
@@ -62,13 +62,13 @@
     },
     "by_severity": {
       "data-loss": 7,
-      "divergence": 9,
+      "divergence": 10,
       "robustness": 3,
       "wrong-data": 2
     },
     "by_status": {
       "draft": 15,
-      "duplicate-of": 6
+      "duplicate-of": 7
     }
   },
   "findings": [
@@ -2430,7 +2430,7 @@
         "CAP-0023"
       ],
       "minimal_entry": "cap23.claimable-balances.synth-strkey-b-invalid",
-      "reproduce": "shapekit conformance run --sdk go --version v0.8.0 --entry cap23.claimable-balances.synth-strkey-b-invalid",
+      "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry cap23.claimable-balances.synth-strkey-b-invalid",
       "status": "draft",
       "draft": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
       "cause": "DecodeAny checks a B key's length but not its claimable balance id type byte, so ids of types core does not define decode.",
@@ -2468,6 +2468,13 @@
           "on": "go@v0.8.0",
           "entry": "cap23.claimable-balances.synth-strkey-b-invalid",
           "at": "go@v0.8.0",
+          "what": "diverges-from-network (2 check(s): case 13/strkey_decode, case 15/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "cap23.claimable-balances.synth-strkey-b-invalid",
+          "at": "go@v0.9.0",
           "what": "diverges-from-network (2 check(s): case 13/strkey_decode, case 15/strkey_decode)"
         }
       ]
@@ -2632,7 +2639,7 @@
         "CAP-0046-11"
       ],
       "minimal_entry": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
-      "reproduce": "shapekit conformance run --sdk go --version v0.8.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+      "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
       "status": "draft",
       "draft": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
       "cause": "A bare ScVal holds 499 ScVec levels at MaxDepth 1000, while rs-stellar-xdr (and core) spend one level per nesting. At the depth core applies, the sdk accepts auth trees and ScVals that core refuses.",
@@ -2737,6 +2744,142 @@
           "entry": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
           "at": "go@v0.8.0",
           "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "soroban.auth-trees.p30-declared-depth-493",
+          "at": "go@v0.9.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "soroban.auth-trees.synth-auth-depth-494-over-cap",
+          "at": "go@v0.9.0",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+          "at": "go@v0.9.0",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+          "at": "go@v0.9.0",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        }
+      ]
+    },
+    {
+      "id": "GO-5",
+      "title": "strkey decoders before v0.9.0 accept strkeys with carriage returns, newlines or 0xff bytes added",
+      "component": "go-stellar-sdk",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0027",
+        "CAP-0040"
+      ],
+      "minimal_entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "reproduce": "shapekit conformance run --sdk go --version v0.8.0 --entry cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/go-stellar-sdk/pull/6026",
+      "cause": "Decode, DecodeAny and Version checked the canonical length on the raw input, then go's encoding/base32 skipped carriage returns and newlines and read 0xff as padding, so such a string decoded to the payload of the strkey it was added to. Fixed in v0.9.0 by #6026, which rejects any byte outside the base32 alphabet first.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+        "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+        "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "go@v0.7.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "go@v0.7.1",
+          "what": "diverges-from-network (3 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "go@v0.7.1",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.1",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "go@v0.7.1",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.2",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "go@v0.7.2",
+          "what": "diverges-from-network (3 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.2",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "go@v0.7.2",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.2",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "go@v0.7.2",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.3",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "go@v0.7.3",
+          "what": "diverges-from-network (3 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.3",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "go@v0.7.3",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.3",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "go@v0.7.3",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.8.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "go@v0.8.0",
+          "what": "diverges-from-network (3 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.8.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "go@v0.8.0",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.8.0",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "go@v0.8.0",
+          "what": "diverges-from-network (4 check(s): case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode)"
         }
       ]
     },

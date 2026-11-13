@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"runtime/debug"
 	"slices"
@@ -159,6 +160,26 @@ func TestStrkey(t *testing.T) {
 	}
 	if got[2]["status"] != "error" || got[2]["error"].(map[string]any)["class"] != classRejected {
 		t.Errorf("leading space: %v", got[2])
+	}
+}
+
+// text_base64 carries input that is not utf-8; the bytes must reach the sdk unchanged, which a
+// valid account shows without depending on how a given sdk version treats stray bytes
+func TestStrkeyTextBase64(t *testing.T) {
+	const account = "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"
+	b64 := base64.StdEncoding.EncodeToString([]byte(account))
+	got := roundTrip(t, strings.Join([]string{
+		`{"id":"1","op":"strkey_decode","text_base64":"` + b64 + `"}`,
+		`{"id":"2","op":"strkey_decode","text":"` + account + `","text_base64":"` + b64 + `"}`,
+		`{"id":"3","op":"strkey_decode","text_base64":"!!"}`,
+	}, "\n")+"\n")
+	if r, _ := got[0]["result"].(map[string]any); r["kind"] != "account" {
+		t.Errorf("decode: %v", got[0])
+	}
+	for _, g := range got[1:] {
+		if g["status"] != "error" || g["error"].(map[string]any)["class"] != classBadRequest {
+			t.Errorf("want bad request: %v", g)
+		}
 	}
 }
 

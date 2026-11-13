@@ -1,9 +1,9 @@
 <!-- repo: stellar/go-stellar-sdk -->
-# github.com/stellar/go-stellar-sdk v0.7.1, v0.7.2, v0.7.3, v0.8.0: the sdk accepted a value the network refuses (cap23.claimable-balances.synth-strkey-b-invalid)
+# github.com/stellar/go-stellar-sdk v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0: the sdk accepted a value the network refuses (cap23.claimable-balances.synth-strkey-b-invalid)
 
 ## What happens
 
-`github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0 answers 10 of the checks of corpus entry `cap23.claimable-balances.synth-strkey-b-invalid` differently from the Stellar network.
+`github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 answers 12 of the checks of corpus entry `cap23.claimable-balances.synth-strkey-b-invalid` differently from the Stellar network.
 
 ## Minimal vector
 
@@ -39,7 +39,7 @@ Expected: `"rejected"`
 
 Actual: `{"kind":"claimable_balance","payload":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="}`
 
-### `case 13/strkey_decode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0
+### `case 13/strkey_decode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0
 
 the sdk accepted a value the network refuses
 
@@ -54,7 +54,7 @@ Expected: `"rejected"`
 
 Actual: `{"kind":"claimable_balance","payload":"AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}`
 
-### `case 15/strkey_decode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0
+### `case 15/strkey_decode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0
 
 the sdk accepted a value the network refuses
 

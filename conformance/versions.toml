@@ -103,6 +103,14 @@ build = [
 command = ["target/testees/go/v0.8.0/testee"]
 max_protocol = 30
 
+[[sdk.go.versions]]
+version = "v0.9.0"
+build = [
+  { argv = ["go", "build", "-modfile", "versions/v0.9.0.mod", "-o", "../../target/testees/go/v0.9.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+]
+command = ["target/testees/go/v0.9.0/testee"]
+max_protocol = 30
+
 [sdk.js]
 package = "@stellar/stellar-sdk"
 current = "17.4.0"

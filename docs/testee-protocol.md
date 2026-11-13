@@ -151,7 +151,13 @@ decoder accepts. No decode-side op can see it. SDKs without a SEP-51 reader answ
 ### strkey_decode
 
 Request: `text` (string, passed to the SDK unchanged, including any whitespace or case
-oddities).
+oddities), or instead `text_base64` (standard base64 of the input bytes) when the input is not
+UTF-8 and so has no JSON string form. Exactly one of the two is present.
+
+A testee passes the `text_base64` bytes to the SDK as they are when the SDK's decoder can take
+them (a Go `string`, a Rust `&[u8]`). An SDK whose decoder takes only Unicode text cannot be
+given bytes that are not UTF-8, so its testee answers `unsupported` for them rather than
+picking a lossy mapping to text.
 
 Result: `kind` (strkey kind) and `payload` (base64 of the raw payload, defined below).
 

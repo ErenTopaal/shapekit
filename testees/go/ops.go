@@ -202,7 +202,7 @@ var strkeyKinds = []struct {
 const versionByteMuxedContract = strkey.VersionByte(22 << 3)
 
 func strkeyDecode(req request) (map[string]any, error) {
-	text, err := req.str("text")
+	text, err := strkeyText(req)
 	if err != nil {
 		return nil, err
 	}
@@ -223,6 +223,22 @@ func strkeyDecode(req request) (map[string]any, error) {
 		}
 	}
 	return nil, internal("strkey.DecodeAny accepted version byte %d, which no protocol kind has", version)
+}
+
+// strkeyText reads text, or text_base64 for input that is not utf-8. a go string holds any
+// bytes, so both reach strkey.DecodeAny unchanged.
+func strkeyText(req request) (string, error) {
+	_, hasText := req.fields["text"]
+	_, hasBytes := req.fields["text_base64"]
+	switch {
+	case hasText && !hasBytes:
+		return req.str("text")
+	case hasBytes && !hasText:
+		b, err := req.bytes("text_base64")
+		return string(b), err
+	default:
+		return "", badRequest("strkey_decode needs exactly one of text and text_base64")
+	}
 }
 
 func strkeyEncode(req request) (map[string]any, error) {

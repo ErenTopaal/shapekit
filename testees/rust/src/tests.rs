@@ -157,6 +157,23 @@ fn strkey_decode_and_encode() {
 }
 
 #[test]
+fn strkey_decode_takes_bytes() {
+    let b64 = |b: &[u8]| B64.encode(b);
+    let r = ok(json!({"id": "1", "op": "strkey_decode", "text_base64": b64(ZERO_ACCOUNT.as_bytes())}));
+    assert_eq!(r["kind"], "account");
+    let stray = [ZERO_ACCOUNT.as_bytes(), &[0xff; 8]].concat();
+    assert_eq!(
+        error_class(json!({"id": "2", "op": "strkey_decode", "text_base64": b64(&stray)})),
+        "rejected"
+    );
+    assert_eq!(
+        error_class(json!({"id": "3", "op": "strkey_decode", "text": ZERO_ACCOUNT,
+                           "text_base64": b64(ZERO_ACCOUNT.as_bytes())})),
+        "bad-request"
+    );
+}
+
+#[test]
 fn every_strkey_kind_round_trips() {
     let key = [7u8; 32];
     let mut muxed = key.to_vec();

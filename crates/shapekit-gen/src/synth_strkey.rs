@@ -7,6 +7,8 @@
 //! crafted for, or with the verdict SEP-23 1.4.0 lists for its own test strings.
 
 use anyhow::{Context, Result, bail, ensure};
+use base64::Engine;
+use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::{Value, json};
 use shapekit_manifest::{EntryKind, Validity};
 use stellar_strkey::{DecodeError, Strkey, ed25519};
@@ -408,6 +410,82 @@ fn invalid_strings(p: Prefix) -> Vec<Bad> {
     out
 }
 
+/// A valid strkey with bytes outside the base32 alphabet inserted, and where.
+struct Stray {
+    text: Vec<u8>,
+    why: String,
+}
+
+/// Go's encoding/base32 skips `\r` and `\n` anywhere, and with NoPadding its pad rune is -1, so
+/// it reads the byte 0xff as padding near the end. go-stellar-sdk strkey before v0.9.0 checked
+/// the canonical length on the raw input, so a valid strkey stretched by enough of these bytes
+/// to keep a length that check accepts decoded to the strkey's own payload
+/// (go-stellar-sdk#6026). each run is that many bytes; the single-byte insertions are invalid
+/// for every decoder and are here so a fix that only counts length is still caught.
+fn stray_chars(p: Prefix) -> Vec<Stray> {
+    let base = strkey(p.version(), &valid_payloads(p).remove(0).1).into_bytes();
+    // the fewest bytes that bring the length back to a multiple of 8 symbols
+    let n = 8 - base.len() % 8;
+    let mid = base.len() / 2;
+    let insert = |at: usize, stray: &[u8]| [&base[..at], stray, &base[at..]].concat();
+    let run = |b: &[u8]| b.iter().copied().cycle().take(n).collect::<Vec<u8>>();
+    let len = base.len();
+    vec![
+        Stray {
+            text: insert(len, &run(b"\n")),
+            why: format!("{n} newlines appended, {} symbols in all", len + n),
+        },
+        Stray {
+            text: insert(0, &run(b"\r")),
+            why: format!("{n} carriage returns before the prefix letter"),
+        },
+        Stray {
+            text: insert(mid, &run(b"\r\n")),
+            why: format!("{n} bytes of alternating carriage return and newline after symbol {mid}"),
+        },
+        Stray {
+            text: insert(mid, b"\n"),
+            why: format!("one newline after symbol {mid}"),
+        },
+        Stray {
+            text: insert(len, &run(&[0xff])),
+            why: format!("{n} 0xff bytes appended, which go's unpadded decoder reads as padding"),
+        },
+        Stray {
+            text: insert(mid, &[0xff]),
+            why: format!("one 0xff byte after symbol {mid}"),
+        },
+    ]
+}
+
+/// The stray-character strings of one prefix as cases. text that is not utf-8 cannot travel as
+/// a json string, so it goes as `text_base64`.
+fn stray_cases(p: Prefix) -> Result<Vec<Value>> {
+    let mut out = Vec::new();
+    for s in stray_chars(p) {
+        let e = match reference_for(p, &s.text) {
+            Ok(v) => bail!(
+                "{}: stellar-strkey accepts {:?} ({}) as {v}",
+                p.letter(),
+                String::from_utf8_lossy(&s.text),
+                s.why
+            ),
+            Err(e) => e,
+        };
+        let mut case = json!({
+            "op": "strkey_decode",
+            "note": s.why,
+            "expected": { "reject": decode_error_name(&e) },
+        });
+        match std::str::from_utf8(&s.text) {
+            Ok(t) => case["text"] = json!(t),
+            Err(_) => case["text_base64"] = json!(B64.encode(&s.text)),
+        }
+        out.push(case);
+    }
+    Ok(out)
+}
+
 fn decode_error_name(e: &DecodeError) -> &'static str {
     match e {
         DecodeError::InvalidBase32 => "invalid-base32",
@@ -422,13 +500,15 @@ fn decode_error_name(e: &DecodeError) -> &'static str {
     }
 }
 
-/// stellar-strkey's verdict: the decoded value as a case expects it, or its error.
-fn reference(p: Prefix, text: &str) -> std::result::Result<Value, DecodeError> {
+/// stellar-strkey's verdict: the decoded value as a case expects it, or its error. it reads
+/// bytes because some invalid inputs are not utf-8, and from_string is from_slice on the
+/// string's bytes in 1.0.0.
+fn reference(p: Prefix, text: &[u8]) -> std::result::Result<Value, DecodeError> {
     if p == Prefix::S {
-        let k = ed25519::PrivateKey::from_string(text)?;
+        let k = ed25519::PrivateKey::from_slice(text)?;
         return Ok(json!({ "kind": p.kind(), "seed": hex::encode(k.0) }));
     }
-    let decoded = Strkey::from_string(text)?;
+    let decoded = Strkey::from_slice(text)?;
     Ok(match decoded {
         Strkey::PublicKeyEd25519(k) => {
             json!({ "kind": "public_key_ed25519", "ed25519": hex::encode(k.0) })
@@ -459,8 +539,8 @@ fn reference(p: Prefix, text: &str) -> std::result::Result<Value, DecodeError> {
 }
 
 // the reference decoder for one prefix also has to agree on which prefix it decoded
-fn reference_for(p: Prefix, text: &str) -> std::result::Result<Value, DecodeError> {
-    let v = reference(p, text)?;
+fn reference_for(p: Prefix, text: impl AsRef<[u8]>) -> std::result::Result<Value, DecodeError> {
+    let v = reference(p, text.as_ref())?;
     if v["kind"] != p.kind() {
         return Err(DecodeError::UnsupportedVersion);
     }
@@ -570,6 +650,24 @@ pub fn items() -> Result<Vec<VectorItem>> {
             .notes(format!("valid {common}")),
             cases: valid,
         });
+        if matches!(p, Prefix::G | Prefix::M | Prefix::P) {
+            out.push(VectorItem {
+                spec: Spec::new(
+                    p.family(),
+                    format!("strkey-{letter}-noncanonical-chars"),
+                    EntryKind::Strkey,
+                )
+                .reject(Validity::NotEmittable)
+                .flags(p.flags())
+                .flags(&["strkey-invalid"])
+                .links(&["https://github.com/stellar/go-stellar-sdk/pull/6026"])
+                .notes(format!(
+                    "{}, each with carriage returns, newlines or 0xff bytes inserted. SEP-23 1.4.0 (Specification, step 6 and the paragraph after it) defines a strkey as RFC 4648 base32 without padding and valid only if re-encoding its binary yields the exact same string, and RFC 4648 section 3.3 says a decoder must reject characters outside the base alphabet unless the referring specification says otherwise, which SEP-23 does not. so every case must be rejected; stellar-strkey 1.0.0 rejects each one. go-stellar-sdk before v0.9.0 decoded the runs of these bytes to the payload of the strkey they were inserted into, because go's encoding/base32 skips carriage returns and newlines and its unpadded decoder reads 0xff as padding; v0.9.0 rejects any byte outside the alphabet first (go-stellar-sdk#6026). cases that are not utf-8 carry the text as text_base64.",
+                    p.what()
+                )),
+                cases: stray_cases(p)?,
+            });
+        }
         out.push(VectorItem {
             spec: Spec::new(
                 p.family(),

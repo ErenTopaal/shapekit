@@ -8,9 +8,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 701 |
+| Entries | 704 |
 | Core-emitted entries | 584 |
-| Entries by source class | core-golden 106, local-core 481, mainnet-history 12, synthetic 99, testnet-history 3 |
+| Entries by source class | core-golden 106, local-core 481, mainnet-history 12, synthetic 102, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
@@ -63,7 +63,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0024 Make PathPayment Symmetrical | 12 | yes | `classic.max-length` | 26 | 14 | core-golden 2, local-core 12, mainnet-history 2, synthetic 10 | any 12, mainnet 14, testnet 12 | 26, 30 |  |
 | CAP-0025 Remove Bucket Shadowing | 12 | no |  | 0 | 0 |  |  |  | bucket merge semantics and history archive publishing only; no XDR change |
 | CAP-0026 Disable Inflation Mechanism | 12 | no | `cap26.inflation` | 3 | 2 | local-core 3 | mainnet 3, testnet 3 | 11 | INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape |
-| CAP-0027 First-class multiplexed accounts | 13 | yes | `cap27.muxed-accounts`, `soroban.muxed-source` | 43 | 30 | core-golden 2, local-core 28, mainnet-history 2, synthetic 11 | any 4, mainnet 30, testnet 28, vector 9 | 17, 28, 30 |  |
+| CAP-0027 First-class multiplexed accounts | 13 | yes | `cap27.muxed-accounts`, `soroban.muxed-source` | 45 | 30 | core-golden 2, local-core 28, mainnet-history 2, synthetic 13 | any 4, mainnet 30, testnet 28, vector 11 | 17, 28, 30 |  |
 | CAP-0028 Clear pre-auth transaction signer on failed transactions | 13 | yes | `classic.failed-tx` | 121 | 120 | core-golden 4, local-core 115, mainnet-history 2 | any 4, mainnet 117, testnet 115 | 12, 26, 30 |  |
 | CAP-0029 AllowTrust when not AUTH_REQUIRED | 16 | no |  | 0 | 0 |  |  |  | relaxes ALLOW_TRUST authorization rules; the specification defines no XDR change and results and meta keep existing shapes |
 | CAP-0030 Remove NO_ISSUER Operation Results | 13 | no |  | 0 | 0 |  |  |  | operations stop returning *_NO_ISSUER codes (except ChangeTrust); no new XDR or meta shape |
@@ -76,7 +76,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0037 Automated Market Makers |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed LiquidityStakeEntry and DepositPoolLiquidityOp are absent at v30.0 |
 | CAP-0038 Automated Market Makers | 18 | yes | `cap38.liquidity-pools` | 29 | 14 | core-golden 3, local-core 11, synthetic 14, testnet-history 1 | any 5, mainnet 11, testnet 12, vector 12 | 29, 30 |  |
 | CAP-0039 Not Auth Revocable Trustlines |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed AUTH_NOT_REVOCABLE_FLAG is absent at v30.0 |
-| CAP-0040 Signed-Payload: Ed25519 Signed Payload Signer for Atomic Transaction Signature Disclosure | 19 | yes | `cap40.signed-payload-signer` | 46 | 33 | local-core 36, synthetic 9, testnet-history 1 | any 3, mainnet 36, testnet 37, vector 6 | 28, 30 |  |
+| CAP-0040 Signed-Payload: Ed25519 Signed Payload Signer for Atomic Transaction Signature Disclosure | 19 | yes | `cap40.signed-payload-signer` | 47 | 33 | local-core 36, synthetic 10, testnet-history 1 | any 3, mainnet 36, testnet 37, vector 7 | 28, 30 |  |
 | CAP-0041 Concurrent Transactions |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed txMISSING_MEMO and txDUPLICATE are absent at v30.0 |
 | CAP-0042 Multi-Part Transaction Sets | 20 | yes | `cap42.generalized-txset` | 4 | 3 | core-golden 3, synthetic 1 | any 4 | 20, 23, 30 |  |
 | CAP-0043 ECDSA Signers with P-256 and secp256k1 Curves |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed KEY_TYPE_ECDSA_P256 is absent at v30.0 |
@@ -219,7 +219,7 @@ A fragment is covered when a core-emitted entry of any family matches it.
 
 ### `cap40.signed-payload-signer`
 
-Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship revokes. CAPs: CAP-0040. Entries: local-core 36, synthetic 9, testnet-history 1.
+Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship revokes. CAPs: CAP-0040. Entries: local-core 36, synthetic 10, testnet-history 1.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
@@ -234,7 +234,7 @@ Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship 
 
 ### `cap27.muxed-accounts`
 
-Muxed accounts as transaction source, operation source and every muxed destination. CAPs: CAP-0027. Entries: local-core 20, mainnet-history 2, synthetic 11.
+Muxed accounts as transaction source, operation source and every muxed destination. CAPs: CAP-0027. Entries: local-core 20, mainnet-history 2, synthetic 13.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|

@@ -1,15 +1,15 @@
 <!-- repo: stellar/go-stellar-sdk -->
-# github.com/stellar/go-stellar-sdk v0.7.1, v0.7.2, v0.7.3, v0.8.0: the sdk accepted a value the network refuses (soroban.auth-trees.synth-auth-depth-494-over-cap)
+# github.com/stellar/go-stellar-sdk v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0: the sdk accepted a value the network refuses (soroban.auth-trees.synth-auth-depth-494-over-cap)
 
 ## What happens
 
-`github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0 answers 4 of the checks of corpus entry `soroban.auth-trees.synth-auth-depth-494-over-cap` differently from the Stellar network.
+`github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 answers 5 of the checks of corpus entry `soroban.auth-trees.synth-auth-depth-494-over-cap` differently from the Stellar network.
 
 ## Minimal vector
 
 Entry `soroban.auth-trees.synth-auth-depth-494-over-cap` (kind Xdr, family `soroban.auth-trees`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
 
-### `any/decode_encode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0
+### `any/decode_encode` on v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0
 
 the sdk accepted a value the network refuses
 

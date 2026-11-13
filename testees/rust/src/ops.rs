@@ -111,6 +111,10 @@ impl Request {
         self.get(name, "a string")
     }
 
+    fn has(&self, name: &str) -> bool {
+        self.fields.contains_key(name)
+    }
+
     fn bytes(&self, name: &str) -> Result<Vec<u8>, Outcome> {
         let text = self.string(name)?;
         B64.decode(text.as_bytes())
@@ -210,14 +214,20 @@ fn encode_json(req: &Request) -> Result<Value, Outcome> {
 }
 
 fn strkey_decode(req: &Request) -> Result<Value, Outcome> {
-    let text = req.string("text")?;
+    // the crate decodes from bytes (from_string is from_slice on the string's bytes), so input
+    // that is not utf-8 reaches the same decoder through from_slice
+    let text = match (req.has("text"), req.has("text_base64")) {
+        (true, false) => req.string("text")?.into_bytes(),
+        (false, true) => req.bytes("text_base64")?,
+        _ => return Err(bad("strkey_decode needs exactly one of text and text_base64")),
+    };
     // the generic decoder refuses seeds on purpose (it does not zeroize), so seeds go through
     // the crate's dedicated private key type as a caller would
-    if text.starts_with('S') {
-        let key = ed25519::PrivateKey::from_string(&text).map_err(rejected)?;
+    if text.first() == Some(&b'S') {
+        let key = ed25519::PrivateKey::from_slice(&text).map_err(rejected)?;
         return Ok(strkey_result("seed", &key.0));
     }
-    let key = Strkey::from_string(&text).map_err(rejected)?;
+    let key = Strkey::from_slice(&text).map_err(rejected)?;
     let (kind, payload) = match &key {
         Strkey::PublicKeyEd25519(k) => ("account", k.0.to_vec()),
         Strkey::PreAuthTx(k) => ("pre_auth_tx", k.0.to_vec()),

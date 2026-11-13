@@ -6494,6 +6494,40 @@
         "CAP-0027"
       ],
       "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [],
+      "flags": [
+        "strkey-invalid"
+      ],
+      "id": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "kind": "strkey",
+      "linked_issues": [
+        "https://github.com/stellar/go-stellar-sdk/pull/6026"
+      ],
+      "notes": "ed25519 account public keys (G, 6 << 3), each with carriage returns, newlines or 0xff bytes inserted. SEP-23 1.4.0 (Specification, step 6 and the paragraph after it) defines a strkey as RFC 4648 base32 without padding and valid only if re-encoding its binary yields the exact same string, and RFC 4648 section 3.3 says a decoder must reject characters outside the base alphabet unless the referring specification says otherwise, which SEP-23 does not. so every case must be rejected; stellar-strkey 1.0.0 rejects each one. go-stellar-sdk before v0.9.0 decoded the runs of these bytes to the payload of the strkey they were inserted into, because go's encoding/base32 skips carriage returns and newlines and its unpadded decoder reads 0xff as padding; v0.9.0 rejects any byte outside the alphabet first (go-stellar-sdk#6026). cases that are not utf-8 carry the text as text_base64.",
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/strkey/cap27.muxed-accounts.synth-strkey-g-noncanonical-chars.json",
+        "sha256": "f7cae0a97e78e7c8eb67269cb702fb87151f345451428917b6acae15b7ba43b1"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
         "decode": "must-accept",
         "roundtrip": true,
         "validity": "valid"
@@ -6550,6 +6584,41 @@
       "vector": {
         "path": "vectors/strkey/cap27.muxed-accounts.synth-strkey-m-invalid.json",
         "sha256": "91d11d7202e9086cf8076da1f3fa8493db133b4d3fdef2d4d34c848869b9cb40"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [],
+      "flags": [
+        "muxed-account",
+        "strkey-invalid"
+      ],
+      "id": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+      "kind": "strkey",
+      "linked_issues": [
+        "https://github.com/stellar/go-stellar-sdk/pull/6026"
+      ],
+      "notes": "muxed accounts (M, 12 << 3, CAP-27): 32 key bytes then a big-endian u64 id, each with carriage returns, newlines or 0xff bytes inserted. SEP-23 1.4.0 (Specification, step 6 and the paragraph after it) defines a strkey as RFC 4648 base32 without padding and valid only if re-encoding its binary yields the exact same string, and RFC 4648 section 3.3 says a decoder must reject characters outside the base alphabet unless the referring specification says otherwise, which SEP-23 does not. so every case must be rejected; stellar-strkey 1.0.0 rejects each one. go-stellar-sdk before v0.9.0 decoded the runs of these bytes to the payload of the strkey they were inserted into, because go's encoding/base32 skips carriage returns and newlines and its unpadded decoder reads 0xff as padding; v0.9.0 rejects any byte outside the alphabet first (go-stellar-sdk#6026). cases that are not utf-8 carry the text as text_base64.",
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/strkey/cap27.muxed-accounts.synth-strkey-m-noncanonical-chars.json",
+        "sha256": "56d6aaa1a3a5a315ff9d0a9f73bf999a581dbde28ec3530f9519117de36f1e56"
       }
     },
     {
@@ -12054,6 +12123,41 @@
       "vector": {
         "path": "vectors/strkey/cap40.signed-payload-signer.synth-strkey-p-invalid.json",
         "sha256": "d2a395c86aec646d8a793dceebb4ae1cbe7935947770eb8f946868f32807b06b"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0040"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap40.signed-payload-signer",
+      "fields_exercised": [],
+      "flags": [
+        "signed-payload",
+        "strkey-invalid"
+      ],
+      "id": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+      "kind": "strkey",
+      "linked_issues": [
+        "https://github.com/stellar/go-stellar-sdk/pull/6026"
+      ],
+      "notes": "ed25519 signed-payload signers (P, 15 << 3, CAP-40): 32 key bytes, a u32 length, 1 to 64 payload bytes and zero padding to a multiple of four, each with carriage returns, newlines or 0xff bytes inserted. SEP-23 1.4.0 (Specification, step 6 and the paragraph after it) defines a strkey as RFC 4648 base32 without padding and valid only if re-encoding its binary yields the exact same string, and RFC 4648 section 3.3 says a decoder must reject characters outside the base alphabet unless the referring specification says otherwise, which SEP-23 does not. so every case must be rejected; stellar-strkey 1.0.0 rejects each one. go-stellar-sdk before v0.9.0 decoded the runs of these bytes to the payload of the strkey they were inserted into, because go's encoding/base32 skips carriage returns and newlines and its unpadded decoder reads 0xff as padding; v0.9.0 rejects any byte outside the alphabet first (go-stellar-sdk#6026). cases that are not utf-8 carry the text as text_base64.",
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 19,
+        "valid_min": 19
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/strkey/cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars.json",
+        "sha256": "9eb0699da868122eb18a17468407b043115700724d0abe6e75ba948f7f98201b"
       }
     },
     {

@@ -56,6 +56,26 @@ function bytes(req: Request, name: string): Buffer {
   return base64(str(req, name), name);
 }
 
+// text, or text_base64 for input that is not utf-8. StrKey decodes javascript strings only, and
+// bytes that are not utf-8 have no faithful string form, so they are unsupported rather than
+// mapped to text the testee picks.
+function strkeyText(req: Request): string {
+  const hasText = "text" in req.members;
+  const hasBytes = "text_base64" in req.members;
+  if (hasText === hasBytes) {
+    throw new BadRequest("strkey_decode needs exactly one of text and text_base64");
+  }
+  if (hasText) {
+    return str(req, "text");
+  }
+  const raw = bytes(req, "text_base64");
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(raw);
+  } catch {
+    throw new Unsupported("StrKey decodes javascript strings, which cannot hold bytes that are not utf-8");
+  }
+}
+
 export class Ops {
   private readonly m: Loose;
   private readonly xdr: Loose;
@@ -183,7 +203,7 @@ export class Ops {
   }
 
   private strkeyDecode(req: Request): Result {
-    const text = str(req, "text");
+    const text = strkeyText(req);
     const entry = Object.entries(STRKEY_KINDS).find(([, k]) => text.startsWith(k.prefix));
     if (entry === undefined) {
       throw new SdkError(new Error(`no StrKey decoder for a string starting with ${JSON.stringify(text.slice(0, 1))}`));

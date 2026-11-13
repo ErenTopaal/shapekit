@@ -10,6 +10,10 @@
 //! without one fails it; a line whose entry now has another result, passes, or is unsupported
 //! fails it too until the line is changed or removed. Lines for entries or versions outside
 //! the run are not checked, except that every line must name an entry that exists.
+//!
+//! A `diverges-from-peers` result exists only when other sdks answer the same check, so a run
+//! of one sdk cannot reproduce it: there such a line is not reported for passing, and it is
+//! checked in full whenever the run holds more than one sdk.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -168,12 +172,13 @@ impl std::fmt::Display for Problem {
 
 /// Checks one sdk's results against its list. `results` holds every (entry, version) the run
 /// covered; `all_entries` is every id in the manifest; `all_versions` every version of the sdk
-/// in versions.toml.
+/// in versions.toml; `other_sdks` says whether the run also held other sdks to compare with.
 pub fn evaluate(
     lines: &[KnownLine],
     results: &BTreeMap<(String, String), ResultClass>,
     all_entries: &BTreeSet<String>,
     all_versions: &BTreeSet<String>,
+    other_sdks: bool,
 ) -> Vec<Problem> {
     let mut problems = Vec::new();
     for l in lines {
@@ -210,6 +215,8 @@ pub fn evaluate(
                 actual,
                 line: l.line,
             }),
+            // without other sdks there were no peers to diverge from
+            (Some(l), false) if l.result == ResultClass::DivergesFromPeers && !other_sdks => {}
             (Some(l), false) => problems.push(Problem::NoLongerFails {
                 entry: entry.clone(),
                 version: version.clone(),

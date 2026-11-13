@@ -26,5 +26,22 @@ cap38.liquidity-pools.synth-assets-py1246-testnet-pool v0.7.1 diverges-from-netw
 # sdk decodes envelopes core refuses
 soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md
 soroban.auth-trees.p30-declared-depth-493 v0.8.0 diverges-from-network findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md
+soroban.auth-trees.p30-declared-depth-493 v0.9.0 diverges-from-network findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md
 soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md
 soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md
+# before v0.9.0 strkey.DecodeAny checks the canonical length on the raw input and then lets
+# go's base32 skip carriage returns and newlines and read 0xff as padding, so a valid strkey
+# with enough of those bytes added decodes to its own payload (fixed in v0.9.0,
+# go-stellar-sdk#6026)
+cap27.muxed-accounts.synth-strkey-g-noncanonical-chars v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-g-noncanonical-chars v0.7.2 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-g-noncanonical-chars v0.7.3 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-g-noncanonical-chars v0.8.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-m-noncanonical-chars v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-m-noncanonical-chars v0.7.2 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-m-noncanonical-chars v0.7.3 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap27.muxed-accounts.synth-strkey-m-noncanonical-chars v0.8.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.2 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.3 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026
+cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.8.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026

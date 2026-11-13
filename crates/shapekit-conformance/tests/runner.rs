@@ -1,6 +1,7 @@
 //! Runner tests: the protocol client against a stand-in testee, and full runs, reproductions
 //! and known-failures semantics against the real rust testee over a small corpus written here.
 
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
@@ -357,6 +358,26 @@ fn known_failures_semantics() {
         b"t.order-wrong * diverges-from-network x\nt.gone * error x\n",
     );
     assert!(!runner::run(&options(&c, 1)).unwrap().ok);
+}
+
+// a peers line can only be reproduced when other sdks ran, so a one-sdk run that passes the
+// entry must not ask for the line to be removed, while a run with other sdks must
+#[test]
+fn peers_lines_need_other_sdks() {
+    let lines = known::parse("a * diverges-from-peers x\n").unwrap();
+    let results = BTreeMap::from([(("a".to_string(), "1.0".to_string()), ResultClass::Pass)]);
+    let entries = BTreeSet::from(["a".to_string()]);
+    let versions = BTreeSet::from(["1.0".to_string()]);
+    assert!(known::evaluate(&lines, &results, &entries, &versions, false).is_empty());
+    assert_eq!(
+        known::evaluate(&lines, &results, &entries, &versions, true).len(),
+        1
+    );
+    let failing = BTreeMap::from([(
+        ("a".to_string(), "1.0".to_string()),
+        ResultClass::DivergesFromPeers,
+    )]);
+    assert!(known::evaluate(&lines, &failing, &entries, &versions, true).is_empty());
 }
 
 #[test]

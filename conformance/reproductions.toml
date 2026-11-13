@@ -70,6 +70,20 @@ ops = ["asset_order"]
 fail = ["v0.7.1"]
 pass = ["v0.7.2"]
 
+[[reproduction]]
+id = "go-strkey-noncanonical-chars"
+sighting = "go-stellar-sdk strkey Decode, DecodeAny and Version accepted strkeys with carriage returns, newlines or 0xff bytes added, which go's base32 decoder skips or reads as padding"
+link = "https://github.com/stellar/go-stellar-sdk/pull/6026"
+sdk = "go"
+entries = [
+  "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+  "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+  "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+]
+ops = ["strkey_decode"]
+fail = ["v0.8.0"]
+pass = ["v0.9.0"]
+
 # the advisory is a json-to-xdr flaw: 28.0.0 reads a ScSpecFunctionV0 with two outputs from
 # json (the xdr allows one) and writes bytes no decoder accepts. the corpus entry holds those
 # bytes, which every version refuses to decode; the probe sends the advisory's json through

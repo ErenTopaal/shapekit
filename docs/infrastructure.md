@@ -38,7 +38,7 @@ released binaries), and Docker for the commands that start containers (`gen`, `h
 | `soroban-env-host` / `soroban-simulation` | 30.0.0, plus renamed 22.1.4, 24.0.0 and 28.0.2 for older protocols | transaction simulation in the generator |
 | `soroban-sdk` | 29.0.1 (22.0.11, 23.5.3 and 28.0.0 for the legacy contracts) | test contracts in `contracts/` |
 | `@stellar/stellar-sdk` | 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1, 17.3.0, 17.4.0 (current) | JavaScript testee matrix |
-| `github.com/stellar/go-stellar-sdk` | v0.7.1, v0.7.2, v0.7.3, v0.8.0 (current) | Go testee matrix, the wallet-backend adapter, the linter's analysis target |
+| `github.com/stellar/go-stellar-sdk` | v0.7.1, v0.7.2, v0.7.3, v0.8.0 (current), v0.9.0 | Go testee matrix (all), the wallet-backend adapter and the linter's analysis target (v0.8.0 only) |
 | stellar-rpc | tag `v30.0.0` | the shape `shapekit serve` follows |
 | stellar/wallet-backend | commit `e967ce8b` (current), plus the pre-fix and fixed commits in `adapters/walletbackend/reproductions.toml` | reference harness target |
 

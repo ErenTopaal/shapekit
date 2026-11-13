@@ -272,6 +272,20 @@ entries = [
   "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
 ]
 
+[[finding]]
+id = "GO-5"
+title = "strkey decoders before v0.9.0 accept strkeys with carriage returns, newlines or 0xff bytes added"
+component = "go-stellar-sdk"
+severity = "divergence"
+status = "duplicate-of"
+link = "https://github.com/stellar/go-stellar-sdk/pull/6026"
+cause = "Decode, DecodeAny and Version checked the canonical length on the raw input, then go's encoding/base32 skipped carriage returns and newlines and read 0xff as padding, so such a string decoded to the payload of the strkey it was added to. Fixed in v0.9.0 by #6026, which rejects any byte outside the base32 alphabet first."
+
+[[finding.conformance]]
+sdk = "go"
+versions = ["v0.7.1", "v0.7.2", "v0.7.3", "v0.8.0"]
+entries = ["*.synth-strkey-*-noncanonical-chars"]
+
 # js-stellar-sdk
 
 [[finding]]

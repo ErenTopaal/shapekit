@@ -1,0 +1,82 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "8 newlines appended, 64 symbols in all",
+      "op": "strkey_decode",
+      "text": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\n\n\n\n\n\n\n\n"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "8 carriage returns before the prefix letter",
+      "op": "strkey_decode",
+      "text": "\r\r\r\r\r\r\r\rGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "8 bytes of alternating carriage return and newline after symbol 28",
+      "op": "strkey_decode",
+      "text": "GAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\n\r\n\r\n\r\nAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one newline after symbol 28",
+      "op": "strkey_decode",
+      "text": "GAAAAAAAAAAAAAAAAAAAAAAAAAAA\nAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "8 0xff bytes appended, which go's unpadded decoder reads as padding",
+      "op": "strkey_decode",
+      "text_base64": "R0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFXSEb//////////w=="
+    },
+    {
+      "expected": {
+        "reject": "invalid-base32"
+      },
+      "note": "one 0xff byte after symbol 28",
+      "op": "strkey_decode",
+      "text_base64": "R0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQf9BQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBV0hG"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [],
+    "flags": [
+      "strkey-invalid"
+    ],
+    "id": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+    "kind": "strkey",
+    "linked_issues": [
+      "https://github.com/stellar/go-stellar-sdk/pull/6026"
+    ],
+    "notes": "ed25519 account public keys (G, 6 << 3), each with carriage returns, newlines or 0xff bytes inserted. SEP-23 1.4.0 (Specification, step 6 and the paragraph after it) defines a strkey as RFC 4648 base32 without padding and valid only if re-encoding its binary yields the exact same string, and RFC 4648 section 3.3 says a decoder must reject characters outside the base alphabet unless the referring specification says otherwise, which SEP-23 does not. so every case must be rejected; stellar-strkey 1.0.0 rejects each one. go-stellar-sdk before v0.9.0 decoded the runs of these bytes to the payload of the strkey they were inserted into, because go's encoding/base32 skips carriage returns and newlines and its unpadded decoder reads 0xff as padding; v0.9.0 rejects any byte outside the alphabet first (go-stellar-sdk#6026). cases that are not utf-8 carry the text as text_base64.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

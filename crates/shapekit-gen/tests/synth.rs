@@ -6,6 +6,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
+use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::Value;
 use shapekit_gen::synth::{self, Synth};
 use shapekit_gen::synth_order::{core_asset_cmp, host_accepts, host_sort, pool_id};
@@ -91,7 +93,7 @@ fn every_entry_is_synthetic_and_counts_are_stable() {
     let counts = s.counts();
     assert_eq!(counts.get("xdr"), Some(&48));
     assert_eq!(counts.get("ordering"), Some(&17));
-    assert_eq!(counts.get("strkey"), Some(&20));
+    assert_eq!(counts.get("strkey"), Some(&23));
     assert_eq!(counts.get("textual-id"), Some(&6));
     assert_eq!(counts.get("native-projection"), Some(&8));
 }
@@ -399,12 +401,12 @@ fn map_order_matches_soroban_env_host() {
     assert_eq!(sets, 7);
 }
 
-fn strkey_verdict(text: &str) -> Result<String, stellar_strkey::DecodeError> {
-    if text.starts_with('S') {
-        let k = stellar_strkey::ed25519::PrivateKey::from_string(text)?;
+fn strkey_verdict(text: &[u8]) -> Result<String, stellar_strkey::DecodeError> {
+    if text.first() == Some(&b'S') {
+        let k = stellar_strkey::ed25519::PrivateKey::from_slice(text)?;
         return Ok(hex::encode(k.0));
     }
-    Ok(stellar_strkey::Strkey::from_string(text)?
+    Ok(stellar_strkey::Strkey::from_slice(text)?
         .to_string()
         .to_string())
 }
@@ -415,9 +417,31 @@ fn strkey_expectations_match_stellar_strkey_and_sep23() {
     for v in vectors(EntryKind::Strkey) {
         let must_accept = v.entry.expected.decode == DecodeExpectation::MustAccept;
         for case in &v.cases {
+            // input that is not utf-8 travels as text_base64, and only invalid strings need it
+            if let Some(b) = case["text_base64"].as_str() {
+                assert!(!must_accept, "{}: a valid strkey as bytes", v.entry.id);
+                assert!(
+                    case["text"].is_null(),
+                    "{}: text and text_base64",
+                    v.entry.id
+                );
+                let raw = B64.decode(b).expect("text_base64 is base64");
+                assert!(
+                    std::str::from_utf8(&raw).is_err(),
+                    "{}: utf-8 as bytes",
+                    v.entry.id
+                );
+                assert!(
+                    strkey_verdict(&raw).is_err(),
+                    "{}: {raw:?} accepted",
+                    v.entry.id
+                );
+                assert!(case["expected"]["reject"].is_string());
+                continue;
+            }
             let text = case["text"].as_str().expect("text");
             texts.push(text.to_string());
-            let verdict = strkey_verdict(text);
+            let verdict = strkey_verdict(text.as_bytes());
             if must_accept {
                 let got =
                     verdict.unwrap_or_else(|e| panic!("{}: {text} rejected: {e}", v.entry.id));
@@ -432,14 +456,14 @@ fn strkey_expectations_match_stellar_strkey_and_sep23() {
         }
     }
     for s in SEP23_VALID {
-        assert!(strkey_verdict(s).is_ok(), "{s}");
+        assert!(strkey_verdict(s.as_bytes()).is_ok(), "{s}");
         assert!(
             texts.iter().any(|t| t == s),
             "SEP-23 valid case {s} has no vector"
         );
     }
     for s in SEP23_INVALID {
-        assert!(strkey_verdict(s).is_err(), "{s}");
+        assert!(strkey_verdict(s.as_bytes()).is_err(), "{s}");
         assert!(
             texts.iter().any(|t| t == s),
             "SEP-23 invalid case {s} has no vector"

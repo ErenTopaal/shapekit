@@ -434,15 +434,22 @@ fn to_native(case: &Value) -> Mapped {
 /// A strkey_decode case, and for a valid string also the encode check back to the text.
 fn strkey(index: usize, case: &Value, source: &str) -> Vec<Check> {
     let decode_name = format!("case {index}/strkey_decode");
-    let Some(text) = case.get("text").and_then(Value::as_str) else {
-        return vec![unmappable(
-            decode_name,
-            "strkey_decode",
-            "case has no text".into(),
-            source,
-        )];
+    // text that is not utf-8 has no json string form, so such a case carries its bytes
+    let (text, request) = match (
+        case.get("text").and_then(Value::as_str),
+        case.get("text_base64").and_then(Value::as_str),
+    ) {
+        (Some(t), None) => (Some(t), obj(json!({"op": "strkey_decode", "text": t}))),
+        (None, Some(b)) => (None, obj(json!({"op": "strkey_decode", "text_base64": b}))),
+        _ => {
+            return vec![unmappable(
+                decode_name,
+                "strkey_decode",
+                "case needs exactly one of text and text_base64".into(),
+                source,
+            )];
+        }
     };
-    let request = obj(json!({"op": "strkey_decode", "text": text}));
     let e = match expected(case) {
         Ok(e) => e,
         Err(why) => return vec![unmappable(decode_name, "strkey_decode", why, source)],
@@ -456,6 +463,14 @@ fn strkey(index: usize, case: &Value, source: &str) -> Vec<Check> {
             source: source.to_string(),
         }];
     }
+    let Some(text) = text else {
+        return vec![unmappable(
+            decode_name,
+            "strkey_decode",
+            "a valid strkey is base32 text, so it cannot need text_base64".into(),
+            source,
+        )];
+    };
     match raw_strkey(e) {
         Ok((kind, payload)) => {
             let payload = B64.encode(payload);

@@ -216,6 +216,17 @@ for (const r of releases) {
       else assert.equal(errorClass(decoded), "rejected");
     });
 
+    test("strkey_decode text_base64: utf-8 decodes, other bytes are unsupported", async () => {
+      const asBytes = Buffer.from(ZERO_G).toString("base64");
+      assert.equal(ok(await ask(r.program, { op: "strkey_decode", text_base64: asBytes })).kind, "account");
+      const stray = Buffer.concat([Buffer.from(ZERO_G), Buffer.from([0xff, 0xff])]).toString("base64");
+      assert.equal((await ask(r.program, { op: "strkey_decode", text_base64: stray })).status, "unsupported");
+      assert.equal(
+        errorClass(await ask(r.program, { op: "strkey_decode", text: ZERO_G, text_base64: asBytes })),
+        "bad-request",
+      );
+    });
+
     test("asset_order compares issuers by key bytes", async () => {
       assert.deepEqual(ok(await ask(r.program, { op: "asset_order", a: ISSUER_3A, b: ISSUER_00 })), { order: 1 });
       assert.deepEqual(ok(await ask(r.program, { op: "asset_order", a: ISSUER_00, b: ISSUER_00 })), { order: 0 });

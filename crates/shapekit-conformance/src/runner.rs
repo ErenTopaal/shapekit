@@ -382,6 +382,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     let all_ids: BTreeSet<String> = manifest.entries.iter().map(|e| e.id.clone()).collect();
     let mut problems = Vec::new();
     let sdks: BTreeSet<&str> = targets.iter().map(|t| t.sdk.as_str()).collect();
+    let other_sdks = sdks.len() > 1;
     for sdk in sdks {
         let lines = known::load(&opts.known_dir, sdk)?;
         let mut results = BTreeMap::new();
@@ -401,7 +402,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
             .iter()
             .map(|v| v.version.clone())
             .collect();
-        for p in known::evaluate(&lines, &results, &all_ids, &all_versions) {
+        for p in known::evaluate(&lines, &results, &all_ids, &all_versions, other_sdks) {
             problems.push(format!(
                 "{}: {p}",
                 known::path(&opts.known_dir, sdk).display()

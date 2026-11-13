@@ -690,12 +690,27 @@
         },
         "text": {
           "type": "string"
+        },
+        "text_base64": {
+          "$ref": "#/$defs/Base64",
+          "description": "The input as bytes, for input that is not UTF-8 and so has no JSON string form."
         }
       },
       "required": [
         "id",
-        "op",
-        "text"
+        "op"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "text"
+          ]
+        },
+        {
+          "required": [
+            "text_base64"
+          ]
+        }
       ]
     },
     "StrkeyDecodeResult": {
