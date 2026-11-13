@@ -1,0 +1,107 @@
+name: site
+
+# the shapekit.org site in site/: landing page, docs and dashboard, prerendered to static
+# files. its data is derived from committed files by `shapekit site data` and its docs from
+# docs/ and README.md, so every build is reproducible from the checkout. this workflow only
+# builds and checks; the site is hosted on the owner's server and deployed with
+# deploy/site/deploy.sh. see docs/site.md.
+
+on:
+  pull_request:
+    paths:
+      - "site/**"
+      - "docs/**"
+      - "README.md"
+      - "deploy/site/**"
+      - "crates/**"
+      - "corpus/manifest.json"
+      - "corpus/coverage/**"
+      - "findings/**"
+      - "conformance/**"
+      - "registry/**"
+      - "pins.toml"
+      - "Cargo.lock"
+      - ".github/workflows/site.yml"
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "docs/**"
+      - "README.md"
+      - "deploy/site/**"
+      - "crates/**"
+      - "corpus/manifest.json"
+      - "corpus/coverage/**"
+      - "findings/**"
+      - "conformance/**"
+      - "registry/**"
+      - "pins.toml"
+      - "Cargo.lock"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - run: cargo build --release --locked -p shapekit-cli
+      - name: derive the site data from the committed files
+        run: target/release/shapekit site data --out site/public/data --commit "$GITHUB_SHA"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+        working-directory: site
+      - run: npm run typecheck
+        working-directory: site
+      - run: npm run lint
+        working-directory: site
+      - name: prerender every route
+        run: npm run build
+        working-directory: site
+      - name: check that every route has a static page
+        working-directory: site/dist/client
+        run: |
+          for f in index.html __spa-fallback.html api/search.json docs/index.html \
+            dashboard/index.html dashboard/coverage/index.html dashboard/sdk/index.html \
+            dashboard/indexer/index.html dashboard/findings/index.html; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
+          docs=$(find ../../content/docs -name '*.md*' | wc -l)
+          pages=$(find docs -name index.html | wc -l)
+          test "$docs" -eq "$pages" || { echo "$docs docs pages but $pages prerendered"; exit 1; }
+          caps=$(jq '.caps | length' data/coverage.json)
+          capdirs=$(find dashboard/coverage -mindepth 2 -name index.html | wc -l)
+          test "$caps" -eq "$capdirs" || { echo "$caps caps but $capdirs cap pages"; exit 1; }
+      - name: validate the caddy configurations
+        run: |
+          image=$(sed -n 's/^ *image: //p' deploy/site/docker-compose.yml)
+          docker run --rm -v "$PWD/deploy/site/Caddyfile:/etc/caddy/Caddyfile:ro" "$image" \
+            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+          docker run --rm -v "$PWD/deploy/site/shapekit.caddy:/etc/caddy/sites/shapekit.caddy:ro" "$image" sh -c \
+            'printf "import sites/*.caddy\n" > /etc/caddy/Caddyfile && caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile'
+      # the built site, for inspection; hosting is the owner's server, not github pages
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: site/dist/client
+          retention-days: 7
