@@ -50,7 +50,8 @@ Policy, in the order issues are looked at:
    the adapter interface let them be built outside this repository.
 
 No response time is promised beyond this ordering. Security-sensitive findings in other
-projects go through that project's private disclosure channel, not a public issue.
+projects go through that project's private disclosure channel, not a public issue; reports
+about shapekit itself go through GitHub security advisories, as `SECURITY.md` describes.
 
 ## Changes to expected values
 
@@ -63,6 +64,34 @@ generates them, and CI checks that the committed files are what the command writ
 
 While the project has one maintainer, the second review comes from a reviewer outside the
 project (an SDK maintainer or a stellar-core engineer) and is linked in the pull request.
+
+### Repository settings
+
+`.github/CODEOWNERS` names an owner for every path and marks the expected-value paths above
+(`corpus/`, `conformance/known-failures/`, both reproduction tables, the fuzz class list) and
+the workflows and pins. The rules are enforced by a branch ruleset on `main`, set in the
+repository's Settings, Rules:
+
+- require a pull request before merging, with **2** required approvals;
+- require review from Code Owners;
+- dismiss stale approvals when new commits are pushed, and require approval of the most recent
+  push;
+- require conversation resolution;
+- require the status checks of the `pr.yml` jobs that run on every pull request (build, rust,
+  go, js, corpus, repro-select, conformance, harness) and that the branch is up to date. The
+  `repro (<shard>)` jobs are not listed: their number depends on the selection, and a failing
+  shard fails the workflow run;
+- block force pushes and deletion.
+
+Also enable private vulnerability reporting (Settings, Code security), which `SECURITY.md`
+relies on.
+
+GitHub applies the approval count to the whole branch: a ruleset cannot ask for two approvals
+on some paths and one on others. Two approvals on every pull request is the setting that
+enforces the expected-value rule. GitHub also counts only approvals from accounts with write
+access. While the project has one maintainer, the outside reviewer of an expected-value change
+is added as a collaborator for that review, or the change waits; a review linked in the pull
+request description does not satisfy the ruleset.
 
 ## How SDKs pin a corpus release
 

@@ -104,11 +104,24 @@ func (s source) needsStellarEnvironment(ctx context.Context, commit string) (boo
 // imageTag is the image built from commit, cached by commit.
 func imageTag(commit string) string { return "shapekit-wallet-backend:" + commit }
 
-// ensureImage builds the commit with its own Dockerfile unless the image
-// already exists.
+// ensureImage builds the commit with its own Dockerfile unless an image built
+// from it on the same pinned base images already exists. Every FROM is
+// replaced by its digest in BaseImages.
 func (s source) ensureImage(ctx context.Context, commit string) (string, error) {
 	tag := imageTag(commit)
-	if _, err := docker(ctx, "image", "inspect", "--format", "{{.Id}}", tag); err == nil {
+	dockerfile, err := s.show(ctx, commit, "Dockerfile")
+	if err != nil {
+		return "", err
+	}
+	bases, err := dockerfileBases(dockerfile)
+	if err != nil {
+		return "", fmt.Errorf("the Dockerfile at %s: %w", commit, err)
+	}
+	contexts, baseSet, err := pinnedContexts(bases)
+	if err != nil {
+		return "", fmt.Errorf("the Dockerfile at %s: %w", commit, err)
+	}
+	if got, err := docker(ctx, "image", "inspect", "--format", "{{index .Config.Labels \""+baseLabel+"\"}}", tag); err == nil && got == baseSet {
 		return tag, nil
 	}
 	archive := exec.CommandContext(ctx, "git", "-C", s.dir, "archive", "--format=tar", commit) //nolint:gosec // commit was checked to be 40 hex digits
@@ -121,7 +134,12 @@ func (s source) ensureImage(ctx context.Context, commit string) (string, error) 
 	if err := archive.Start(); err != nil {
 		return "", fmt.Errorf("git archive: %w", err)
 	}
-	buildErr := dockerStream(ctx, out, "build", "--build-arg", "GIT_COMMIT="+commit, "--label", "shapekit.wallet-backend.commit="+commit, "-t", tag, "-")
+	args := append([]string{"buildx", "build", "--load"}, contexts...)
+	args = append(args, "--build-arg", "GIT_COMMIT="+commit,
+		"--label", "shapekit.wallet-backend.commit="+commit,
+		"--label", baseLabel+"="+baseSet,
+		"-t", tag, "-")
+	buildErr := dockerStream(ctx, out, args...)
 	// drain whatever docker did not read so git archive can exit
 	_, drainErr := io.Copy(io.Discard, out)
 	waitErr := archive.Wait()

@@ -171,6 +171,57 @@ func TestMapTransferMintAndBurnPairs(t *testing.T) {
 	}
 }
 
+// a liquidity-pool leg is one DEBIT row of its own; the next event's DEBIT and
+// CREDIT, with the same token and amount, pair with each other and not with it
+func TestBalancePairsStayWithinOneEvent(t *testing.T) {
+	m, _, usd := testMapper(t)
+	from := stored(t, testAccount)
+	other := stored(t, testIssuer)
+	to := stored(t, "GBVGV5HAF2I34PET27RK5KKBMTK2SH2O365ACCDMBSS45KWPGW2UB6C5")
+	op := int64(65)<<32 | 1
+	got := m.mapTransaction([]row{
+		scRow(catBalance, reasonDebit, op, 1, map[string]any{"account_id": from, "token_id": usd, "amount": "5"}),
+		scRow(catBalance, reasonDebit, op, 2, map[string]any{"account_id": other, "token_id": usd, "amount": "5"}),
+		scRow(catBalance, reasonCredit, op, 3, map[string]any{"account_id": to, "token_id": usd, "amount": "5"}),
+		// a gap in the ids: not one event, so no pair
+		scRow(catBalance, reasonDebit, op, 5, map[string]any{"account_id": from, "token_id": usd, "amount": "1"}),
+		scRow(catBalance, reasonCredit, op, 7, map[string]any{"account_id": to, "token_id": usd, "amount": "1"}),
+	})
+	cs := changesJSON(t, got)
+	if len(cs) != 4 || len(got.unmapped) != 0 {
+		t.Fatalf("changes %v unmapped %v", cs, got.unmapped)
+	}
+	if cs[0]["event"] != "transfer" || cs[0]["from"] != testAccount || cs[0]["to"] != nil {
+		t.Fatalf("one-sided pool leg: %v", cs[0])
+	}
+	if cs[1]["from"] != testIssuer || cs[1]["to"] != "GBVGV5HAF2I34PET27RK5KKBMTK2SH2O365ACCDMBSS45KWPGW2UB6C5" {
+		t.Fatalf("pair of the second event: %v", cs[1])
+	}
+	if cs[2]["to"] != nil || cs[3]["from"] != nil {
+		t.Fatalf("rows with non-consecutive ids paired: %v %v", cs[2], cs[3])
+	}
+}
+
+// a BALANCE_AUTHORIZATION holder that is neither G nor C is reported as
+// unmapped, not sent down the SAC set_authorized path
+func TestBalanceAuthorizationUnknownHolder(t *testing.T) {
+	m, _, usd := testMapper(t)
+	op := int64(65)<<32 | 1
+	muxed := append([]byte{byte(strkey.VersionByteMuxedAccount)}, stored(t, testAccount)[1:]...)
+	contract := append([]byte{byte(strkey.VersionByteContract)}, make([]byte, 32)...)
+	got := m.mapTransaction([]row{
+		scRow(catBalanceAuth, reasonSet, op, 1, map[string]any{"account_id": muxed, "token_id": usd}),
+		scRow(catBalanceAuth, reasonSet, op, 2, map[string]any{"account_id": contract, "token_id": usd}),
+	})
+	cs := changesJSON(t, got)
+	if len(got.unmapped) != 1 || !strings.Contains(got.unmapped[0].Note, "neither an account (G) nor a contract (C)") {
+		t.Fatalf("unmapped %+v", got.unmapped)
+	}
+	if len(cs) != 1 || cs[0]["event"] != "set_authorized" {
+		t.Fatalf("changes %v", cs)
+	}
+}
+
 func TestMapTrustlineMergesInitialFlags(t *testing.T) {
 	m, _, usd := testMapper(t)
 	acct := stored(t, testAccount)
@@ -264,5 +315,62 @@ func TestPoolShareAsset(t *testing.T) {
 	})
 	if len(got.changes) != 1 || got.changes[0].Fields["asset"] != "pool-share:LB45SWYS5MXFZG6GEWVF4BMTMDWDLIN6RJ5EU763SCQEZDS7QFF2IPOF" {
 		t.Fatalf("changes %+v unmapped %+v", got.changes, got.unmapped)
+	}
+}
+
+// every pinned base must be the image pins.toml verifies, by repository, tag and digest
+func TestBaseImagesMatchPins(t *testing.T) {
+	pins, err := os.ReadFile("../../pins.toml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for from, pinned := range BaseImages {
+		repo, tag, ok := strings.Cut(from, ":")
+		if !ok {
+			t.Fatalf("%s has no tag", from)
+		}
+		if !strings.Contains(repo, "/") {
+			repo = "library/" + repo
+		}
+		ref, digest, ok := strings.Cut(pinned, "@")
+		if !ok || ref != "docker.io/"+repo {
+			t.Fatalf("%s is pinned as %s, want docker.io/%s@<digest>", from, pinned, repo)
+		}
+		entry := `repository = "` + repo + `"` + "\n" + `tag = "` + tag + `"` + "\n" + `digest = "` + digest + `"`
+		if !strings.Contains(string(pins), entry) {
+			t.Errorf("pins.toml has no entry with\n%s", entry)
+		}
+	}
+}
+
+func TestDockerfileBases(t *testing.T) {
+	df := []byte(`# comment FROM nothing
+FROM golang:1.25.9-bookworm AS api-build
+RUN echo from here is not a FROM
+from --platform=linux/amd64 debian:bookworm-slim AS runtime
+FROM api-build AS again
+COPY --from=api-build /x /y
+FROM golang:1.25.9-bookworm
+FROM scratch
+`)
+	got, err := dockerfileBases(df)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(got, " ") != "golang:1.25.9-bookworm debian:bookworm-slim" {
+		t.Fatalf("bases %q", got)
+	}
+	flags, set, err := pinnedContexts(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(flags) != 4 || flags[1] != "golang:1.25.9-bookworm=docker-image://"+BaseImages["golang:1.25.9-bookworm"] || len(set) != 64 {
+		t.Fatalf("flags %q set %q", flags, set)
+	}
+	if _, _, err := pinnedContexts([]string{"alpine:3"}); err == nil {
+		t.Fatal("an unpinned base was accepted")
+	}
+	if _, err := dockerfileBases([]byte("FROM golang:${GO}\n")); err == nil {
+		t.Fatal("a FROM with a build argument was accepted")
 	}
 }

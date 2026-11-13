@@ -9,7 +9,7 @@ input on which they disagree:
   through its conformance testee and the `decode_encode` op of the
   [testee protocol](testee-protocol.md).
 
-The nightly workflow runs it for 25 minutes. It is a beyond-RFP item (plan section 1.4).
+The nightly workflow runs it for 25 minutes. It goes beyond what the RFP asks for.
 
 ```sh
 shapekit fuzz --seconds 1200 --seed 20261112 --jobs 4

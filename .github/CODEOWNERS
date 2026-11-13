@@ -1,0 +1,21 @@
+# code owners. GitHub requests a review from the owner of every path a pull request touches;
+# with "require review from Code Owners" on the main branch rule (docs/maintenance.md,
+# "Repository settings") the owner's approval is required to merge.
+
+*                                           @ErenTopaal
+
+# what counts as correct for every sdk and indexer that runs the corpus. a change here needs two
+# approving reviews and the upstream source that justifies it (docs/maintenance.md, "Changes to
+# expected values")
+/corpus/entries/                            @ErenTopaal
+/corpus/goldens/                            @ErenTopaal
+/corpus/vectors/                            @ErenTopaal
+/corpus/manifest.json                       @ErenTopaal
+/conformance/known-failures/                @ErenTopaal
+/conformance/reproductions.toml             @ErenTopaal
+/adapters/walletbackend/reproductions.toml  @ErenTopaal
+/findings/fuzz/known-classes.txt            @ErenTopaal
+
+# the workflows, the pins and this file decide what CI trusts
+/.github/                                   @ErenTopaal
+/pins.toml                                  @ErenTopaal

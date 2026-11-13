@@ -71,39 +71,59 @@ func hello() (map[string]any, error) {
 	if !ok {
 		return nil, internal("the binary has no build info to read the sdk version from")
 	}
-	sdkVersion, err := depVersion(info, sdkModule)
+	sdkVersion, sdkDir, err := depVersion(info, sdkModule, sdkVersionOverride)
 	if err != nil {
 		return nil, err
 	}
-	xdrVersion, err := depVersion(info, xdrModule)
+	xdrVersion, _, err := depVersion(info, xdrModule, "")
 	if err != nil {
 		return nil, err
+	}
+	components := map[string]string{xdrModule: xdrVersion}
+	if sdkDir != "" {
+		components[sdkModule+" directory"] = sdkDir
 	}
 	return map[string]any{
 		"protocol":    protocolVersion,
 		"sdk":         sdkModule,
 		"sdk_version": sdkVersion,
-		"components":  map[string]string{xdrModule: xdrVersion},
+		"components":  components,
 		"ops":         ops,
 		// DecodeOptions carries both: MaxDepth is the depth, MaxInputLen the length
 		"decode_limits": "honoured", //nolint:misspell // the protocol spells it this way
 	}, nil
 }
 
-func depVersion(info *debug.BuildInfo, path string) (string, error) {
+// sdkVersionOverride is the sdk version a build against a directory replace of the sdk
+// reports, set at link time with -ldflags "-X main.sdkVersionOverride=<version>". That is the
+// build an sdk's own pull request gets in its CI (docs/sdk-ci.md): the module system gives a
+// directory no version, so the version comes from the caller's versions file, which the runner
+// checks hello against. Empty in every other build, and ignored unless the sdk is replaced by
+// a directory.
+var sdkVersionOverride string
+
+// depVersion returns the version path is built at, and the directory it was replaced by when
+// that replace is a directory. A directory replace has no version of its own: it reports
+// override, and is refused when override is empty.
+func depVersion(info *debug.BuildInfo, path, override string) (version, dir string, err error) {
 	for _, d := range info.Deps {
 		if d.Path != path {
 			continue
 		}
 		if d.Replace != nil {
-			if d.Replace.Version == "" {
-				return "", internal("%s is replaced by %s, which has no version", path, d.Replace.Path)
+			// a directory replace has no module version; the build info shows it as (devel)
+			if d.Replace.Version != "" && d.Replace.Version != "(devel)" {
+				return d.Replace.Version, "", nil
 			}
-			return d.Replace.Version, nil
+			if override == "" {
+				return "", d.Replace.Path, internal("%s is replaced by %s, which has no version; "+
+					"build with -ldflags \"-X main.sdkVersionOverride=<version>\"", path, d.Replace.Path)
+			}
+			return override, d.Replace.Path, nil
 		}
-		return d.Version, nil
+		return d.Version, "", nil
 	}
-	return "", internal("%s is not in the build info", path)
+	return "", "", internal("%s is not in the build info", path)
 }
 
 // decode reads the request's bytes as one value of the named type through the sdk's decoder,

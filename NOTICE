@@ -24,3 +24,14 @@ Foundation and contributors) are imported, unmodified, as corpus entries with so
 core-golden under corpus/entries/. Each such entry names its upstream file under
 test-lcm-current/ and that file's SHA-256 in its entry.json, and corpus/goldens/core-v30.0.0/index.json
 lists every upstream golden file with its SHA-256 and the entries imported from it.
+
+Reduced excerpts of stellar/wallet-backend (https://github.com/stellar/wallet-backend, Apache
+License 2.0, copyright Stellar Development Foundation and contributors) are used, modified, as
+linter test data in lint/idx001/testdata/src/walletbackend/, lint/idx002/testdata/src/walletbackend/
+and lint/idx003/testdata/src/walletbackend/. They are cut down from
+internal/indexer/processors/contract_operations.go, internal/indexer/processors/contract_deploy.go,
+internal/indexer/processors/state_change_builder.go and internal/indexer/types/types.go at commits
+79ea2acd1dc65a07166133cc04b12e76db314db0, 9538b3caeaebfeb3d034146c0ce9643c3066cf8a,
+f8e5786d22c04adad16318f2e126728beec5aac9 and e967ce8b7362b79c277e700e789181d76fbb5967. Each file,
+or each function in it, names the upstream file and commit it was taken from and says that it
+was reduced or adapted.

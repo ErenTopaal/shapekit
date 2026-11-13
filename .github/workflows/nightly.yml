@@ -79,25 +79,13 @@ jobs:
           "$RUNNER_TEMP/bin/shapekit" goldens agree
           "$RUNNER_TEMP/bin/shapekit" coverage --check
 
-  repro-select:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    outputs:
-      matrix: ${{ steps.select.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v7
-      - id: select
-        run: echo "matrix=$(scripts/select-repro.sh all /dev/null)" >>"$GITHUB_OUTPUT"
-
   repro:
-    # every chain under both passphrases, compared byte for byte with the corpus
-    needs: [build, repro-select]
+    # every chain under both passphrases, compared byte for byte with the corpus. no --family
+    # filter, so the set is every recipe the binary registers and cannot drift from a list kept
+    # here or in scripts/select-repro.sh
+    needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.repro-select.outputs.matrix) }}
-    name: repro (${{ matrix.shard }})
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -105,15 +93,11 @@ jobs:
           name: shapekit
           path: ${{ runner.temp }}/bin
       - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
-      - name: gen verify-repro
-        env:
-          FAMILIES: ${{ matrix.families }}
+      - name: gen verify-repro, every chain
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
-          args=()
-          for f in $FAMILIES; do args+=(--family "$f"); done
-          "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2 "${args[@]}"
+          "$RUNNER_TEMP/bin/shapekit" gen verify-repro --jobs 2
 
   docker-tests:
     # the core driver and generator tests that start stellar-core, skipped in pr.yml's cargo
@@ -157,19 +141,28 @@ jobs:
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
-      - name: conformance run, all versions
+      - name: conformance run, all versions, one matrix per sdk
+        # one output directory per sdk, the layout findings/triage.toml reads in the findings job
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
-          "$RUNNER_TEMP/bin/shapekit" conformance run --all-versions
+          status=0
+          for sdk in rust go js; do
+            "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
+              --out "target/conformance/$sdk" || status=1
+          done
+          exit "$status"
       - name: conformance reproduce
         # the run above built every version, so the reproductions reuse those builds
         run: |
           "$RUNNER_TEMP/bin/shapekit" conformance reproduce --no-build
-      - name: matrix to the job summary
+      - name: matrices to the job summary
         if: ${{ !cancelled() }}
         run: |
-          if [ -f target/conformance/MATRIX.md ]; then cat target/conformance/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+          for sdk in rust go js; do
+            f="target/conformance/$sdk/MATRIX.md"
+            if [ -f "$f" ]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; fi
+          done
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
@@ -209,6 +202,30 @@ jobs:
           docker pull --quiet "$(scripts/pin.sh image timescaledb)"
           docker pull --quiet "$(scripts/pin.sh image seaweedfs)"
       - run: cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter
+      - name: wallet-backend cache key, the pinned commit and its base image digests
+        id: wb
+        run: |
+          set -euo pipefail
+          pin=$(scripts/pin.sh git wallet-backend)
+          bases=$(for n in wallet-backend-golang wallet-backend-debian wallet-backend-ubuntu; do
+            scripts/pin.sh image "$n"
+          done | sha256sum | cut -c1-16)
+          echo "pin=$pin" >>"$GITHUB_OUTPUT"
+          echo "key=wallet-backend-$pin-$bases" >>"$GITHUB_OUTPUT"
+      - name: cached wallet-backend clone and image
+        # the adapter's clone and the image it builds on the pinned bases (docker save output).
+        # with a hit the run needs no network for wallet-backend; caches written by main's
+        # pushes are visible to every pull request
+        id: wb-cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/shapekit/wallet-backend
+            ${{ runner.temp }}/wallet-backend-image.tar
+          key: ${{ steps.wb.outputs.key }}
+      - name: load the cached wallet-backend image
+        if: steps.wb-cache.outputs.cache-hit == 'true'
+        run: docker load --input "$RUNNER_TEMP/wallet-backend-image.tar"
       - name: harness run
         env:
           DELIVERY: ${{ matrix.delivery }}
@@ -222,6 +239,14 @@ jobs:
             --adapter "adapters/bin/wb-adapter --commit $pin" \
             --delivery "$DELIVERY" --network "$NETWORK" --repeat "$REPEAT" \
             --out harness-out
+      - name: save the wallet-backend image for the cache
+        if: ${{ !cancelled() && steps.wb-cache.outputs.cache-hit != 'true' }}
+        env:
+          PIN: ${{ steps.wb.outputs.pin }}
+        run: |
+          if docker image inspect "shapekit-wallet-backend:$PIN" >/dev/null 2>&1; then
+            docker save --output "$RUNNER_TEMP/wallet-backend-image.tar" "shapekit-wallet-backend:$PIN"
+          fi
       - name: report to the job summary
         if: ${{ !cancelled() }}
         run: |
@@ -307,3 +332,92 @@ jobs:
           name: fuzz
           path: fuzz-out/
           retention-days: 30
+
+  findings:
+    # every failure the nightly runs report must map to a triaged finding with an upstream link
+    # or a recorded decision (shapekit findings check, inputs as findings/triage.toml declares
+    # them, taken from tonight's runs). until the drafted issues are filed, the check reports
+    # each finding with status draft as a problem; this job tolerates exactly those and fails
+    # on any other problem: an unmapped failure, a finding that matches nothing, a missing
+    # draft file, a filed finding without a link, or a committed findings.json that differs
+    # from what tonight's runs give
+    needs: [build, conformance, harness]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: lint/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance matrices
+        uses: actions/download-artifact@v8
+        with:
+          name: conformance
+          path: target/conformance
+      - name: harness report, rpc delivery, both networks
+        uses: actions/download-artifact@v8
+        with:
+          name: harness-rpc
+          path: ${{ runner.temp }}/harness-rpc
+      - name: indexerlint on wallet-backend at the pin
+        run: |
+          set -euo pipefail
+          pin=$(scripts/pin.sh git wallet-backend)
+          (cd lint && go build -o "$RUNNER_TEMP/bin/indexerlint" ./cmd/indexerlint)
+          git init --quiet "$RUNNER_TEMP/wb"
+          git -C "$RUNNER_TEMP/wb" fetch --quiet --depth 1 https://github.com/stellar/wallet-backend "$pin"
+          git -C "$RUNNER_TEMP/wb" checkout --quiet FETCH_HEAD
+          mkdir -p target/findings
+          # exit 1 means findings, which the triage maps; 2 is a usage, load or type error
+          status=0
+          (cd "$RUNNER_TEMP/wb" && "$RUNNER_TEMP/bin/indexerlint" -format json ./...) \
+            >"target/findings/indexerlint-wallet-backend-${pin:0:8}.json" || status=$?
+          if [ "$status" -gt 1 ]; then exit "$status"; fi
+      - name: put the harness report where the triage reads it
+        run: |
+          set -euo pipefail
+          pin=$(scripts/pin.sh git wallet-backend)
+          dir="target/findings/wallet-backend-${pin:0:8}"
+          mkdir -p "$dir"
+          cp "$RUNNER_TEMP/harness-rpc/harness-report.json" "$dir/"
+      - name: import tonight's runs as the triage inputs
+        # the triage reads committed, reduced copies of the run outputs (findings/inputs);
+        # import-inputs replaces them with tonight's, so the check below judges these runs
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          if "$RUNNER_TEMP/bin/shapekit" findings --help | grep -q import-inputs; then
+            "$RUNNER_TEMP/bin/shapekit" findings import-inputs
+          fi
+      - name: findings check, drafts tolerated
+        run: |
+          set -uo pipefail
+          out=$("$RUNNER_TEMP/bin/shapekit" findings check 2>&1)
+          status=$?
+          echo "$out"
+          {
+            echo '## findings check'
+            echo '```'
+            echo "$out"
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
+          if [ "$status" -eq 0 ]; then exit 0; fi
+          # the summary line counts the drafts, the last line counts every problem. the job
+          # passes only when the two are equal, so a draft is the only problem left
+          pending=$(sed -n -E 's/^.*; ([0-9]+) of [0-9]+ findings pending filing \(status draft\).*$/\1/p' <<<"$out")
+          problems=$(sed -n -E 's/^findings check: FAILED, ([0-9]+) problem\(s\)$/\1/p' <<<"$out")
+          if [ -z "$pending" ] || [ -z "$problems" ]; then
+            echo "::error::findings check failed without the expected summary lines (exit $status)"
+            exit 1
+          fi
+          if [ "$problems" -ne "$pending" ]; then
+            echo "::error::findings check: $problems problem(s), only $pending of them are drafts awaiting filing"
+            exit 1
+          fi
+          echo "::warning::findings check: $pending finding(s) still drafts, not yet filed upstream"

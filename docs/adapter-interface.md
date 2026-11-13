@@ -452,9 +452,13 @@ shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit ha
 cloned from github.com/stellar/wallet-backend on first use); `--db-memory` caps the database
 container (default 1 GiB).
 
-- **Build.** `git archive <commit> | docker build -` with the commit's own `Dockerfile`, image
-  `shapekit-wallet-backend:<commit>`, reused when it exists. Building needs network access;
-  running does not.
+- **Build.** `git archive <commit> | docker buildx build --load -` with the commit's own
+  `Dockerfile`, image `shapekit-wallet-backend:<commit>`. Each `FROM` in that Dockerfile is
+  replaced by its base image pinned by digest (`--build-context <tag>=docker-image://<image>@<digest>`,
+  the table `BaseImages` in `docker.go`, the same digests as `pins.toml`); a Dockerfile naming a
+  base with no pin is refused. The image carries a label with the set of pinned bases it was
+  built on and is reused only when that label matches. Building needs network access; running
+  does not.
 - **Services.** `timescale/timescaledb:2.28.2-pg17` (by digest, as in `pins.toml`) with the
   settings of wallet-backend's `docker-compose.yaml`, the `timescaledb` extension created before
   `wallet-backend migrate up`, then `wallet-backend ingest` (live mode) with `--memory` and
@@ -492,9 +496,9 @@ go-stellar-sdk's strict strkey decoder; account columns accept `G` and `C`, sign
 | `state_change_category` / `reason` | vocabulary change | fields exported |
 |---|---|---|
 | BALANCE DEBIT/CREDIT, `operation_id` 0 | `token-event` `fee` | `contract` (token_id), `from` (account_id), `amount` (net: DEBIT as stored, CREDIT negated) |
-| BALANCE DEBIT + CREDIT, same token and amount | `token-event` `transfer` | `contract`, `from`, `to`, `amount`, `to_muxed_id` `{"type":"u64"}` from the CREDIT row |
-| BALANCE MINT (+ CREDIT) | `token-event` `mint` | `contract`, `to` (the CREDIT row, else the MINT row's account), `amount`, `to_muxed_id` |
-| BALANCE BURN (+ DEBIT) | `token-event` `burn` | `contract`, `from` (the DEBIT row, else the BURN row's account), `amount` |
+| BALANCE DEBIT + CREDIT, consecutive `state_change_id`, same token and amount | `token-event` `transfer` | `contract`, `from`, `to`, `amount`, `to_muxed_id` `{"type":"u64"}` from the CREDIT row |
+| BALANCE MINT (+ CREDIT at the next `state_change_id`) | `token-event` `mint` | `contract`, `to` (the CREDIT row, else the MINT row's account), `amount`, `to_muxed_id` |
+| BALANCE BURN (+ DEBIT at the next `state_change_id`) | `token-event` `burn` | `contract`, `from` (the DEBIT row, else the BURN row's account), `amount` |
 | BALANCE DEBIT or CREDIT without a partner | `token-event` `transfer` | the side wallet-backend stored only (`from` or `to`) |
 | ACCOUNT CREATE (G) | `account-created` | `account` |
 | ACCOUNT CREATE (C) | `contract-deployed` | `contract` |
@@ -509,12 +513,19 @@ go-stellar-sdk's strict strkey decoder; account columns accept `G` and `C`, sign
 | TRUSTLINE UPDATE / REMOVE | `trustline-limit` / `trustline-removed` | `account`, `asset`, `before`, `after` |
 | BALANCE_AUTHORIZATION SET / CLEAR, G holder | `trustline-flags`, one per holder, asset and operation | `account`, `asset` |
 | BALANCE_AUTHORIZATION SET / CLEAR, C holder | `token-event` `set_authorized` (not claimed) | `contract`, `to`, `authorized` |
+| BALANCE_AUTHORIZATION, holder byte neither `G` nor `C` | `unmapped` | the whole row; the version byte is compared with go-stellar-sdk's `strkey.VersionByteAccountID` and `VersionByteContract` |
 | ALLOWANCE UPDATE | `token-event` `approve` | `contract`, `from`, `spender`, `amount`, `live_until_ledger` |
 | BLEND_*, any other category, and rows the rules above cannot name (a token id of no known asset) | `unmapped` | the whole row, with the reason |
 
 wallet-backend's trustline flag bits (bit 0 authorized, bit 5 clawback enabled, bit 6 authorized
-to maintain liabilities) become core's `TrustLineFlags` values (1, 4, 2). Debit and credit rows
-pair in `state_change_id` order on equal token and amount. State change and participant rows
+to maintain liabilities) become core's `TrustLineFlags` values (1, 4, 2). Two BALANCE rows pair
+only when the second has the next `state_change_id` after the first, the reason the pair needs,
+and the same token and amount. wallet-backend writes the two rows of one token event next to
+each other (`createDebitCreditPair`, `handleMint`, `handleDefaultBurnOrClawback` in
+`internal/indexer/processors/token_transfer.go`) and numbers each stream's rows 1..N per
+operation in that order (`AssignStateChangeOrdinals`), so this pairs rows of one event and never
+joins rows of two events that happen to agree on token and amount, such as a one-sided
+liquidity-pool leg of a path payment followed by a transfer. State change and participant rows
 whose transaction has no `transactions` row come out as `unattributed` records.
 
 Claims follow from the table: participants of kind `account` only (wallet-backend does not record
@@ -525,6 +536,28 @@ fields it stores, `token-event` `transfer`/`mint`/`burn`/`clawback` on `event`, 
 are not claimed), and `approve`. Values wallet-backend does not keep (starting balances, threshold
 values, account flag values, trustline flag values after authorization changes, executables)
 are not claimed.
+
+Two claims cover facts that wallet-backend at the current pin does not store in the oracle's
+form, and they are kept on purpose:
+
+- **`clawback`.** wallet-backend's `TokenTransferProcessor` receives the token transfer
+  processor's `Clawback` event (`handleClawback`) and writes it as a BURN row for the issuer
+  plus a DEBIT row for the holder, the same rows a payment to the issuer produces. The oracle,
+  following CAP-67, records a `clawback` event. The information reaches wallet-backend and its
+  `state_change_reason` column is an open vocabulary, so the loss happens in wallet-backend's
+  mapping, not in what the ledger or its schema can carry. A wallet that shows this history
+  would show a clawback as a voluntary payment. Each clawback therefore counts as one dropped
+  `clawback` and one extra `burn`, which is finding WB-W3.
+- **`to_muxed_id` on every arm.** CAP-67 puts the destination's mux id or, without one, the
+  transaction memo into a transfer's `to_muxed_id`, typed as u64, string or bytes.
+  wallet-backend's `setToMuxedID` keeps only the u64 arm, although its `to_muxed_id` column is
+  `TEXT`. A text, hash or return memo is lost, which is finding WB-W4.
+
+The rule for both: a claim says what wallet-backend is expected to record of a fact it ingests
+and has a place for, judged against the oracle. Claiming only what it stores today would turn
+these losses into `out-of-scope` and hide them. The verdict detail and the finding's text
+name the cause, so a reader can see that the difference is a design choice in wallet-backend
+and decide whether it matters for their use.
 
 ## Oracle vocabulary
 

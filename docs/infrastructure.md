@@ -57,7 +57,23 @@ All pulled by digest, never by tag; `scripts/pin.sh image <name>` prints the ref
 | `fsouza/fake-gcs-server` | `1.56.1` | pinned for the stellar-etl adapter; no workflow uses it yet |
 
 The adapter also builds `shapekit-wallet-backend:<commit>` from wallet-backend's own
-`Dockerfile` at the requested commit.
+`Dockerfile` at the requested commit. That Dockerfile names its base images by tag; the adapter
+replaces each `FROM` with the digest pinned here, through `docker buildx build
+--build-context <tag>=docker-image://<repository>@<digest>`, and refuses to build a commit whose
+Dockerfile names a base it has no pin for (`BaseImages` in `adapters/walletbackend/docker.go`,
+checked against `pins.toml` by its tests):
+
+| Image | Tag | `FROM` in wallet-backend's Dockerfile |
+|---|---|---|
+| `golang` | `1.25.9-bookworm` | build stage, every pinned commit |
+| `debian` | `bookworm-slim` | runtime stage, the current pin and the newer reproduction commits |
+| `ubuntu` | `jammy` | runtime stage, the older reproduction commits |
+
+The packages the Dockerfile installs with `apt-get` and `go install` are not pinned by this
+repository; they come from wallet-backend's Dockerfile as it is. `pr.yml` and the nightly
+harness cache the adapter's clone and the built image (`docker save`) with `actions/cache`,
+keyed by the wallet-backend commit and the base image digests, so a run with a cache hit builds
+nothing and fetches nothing for wallet-backend.
 
 Containers are isolated from the network: the core driver runs stellar-core on a Docker network
 created with `--internal` and refuses to start otherwise, with all capabilities dropped; the
@@ -68,8 +84,8 @@ network's gateway address.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `pr.yml` | every pull request, pushes to `main` | Release build of the CLI shared by the other jobs. Rust: rustfmt, clippy with warnings denied, `cargo test`. Go: `go vet`, `go test`, golangci-lint per module, and `indexerlint` over `adapters/`. JavaScript testee: `npm ci`, typecheck, build, `node --test`. Corpus: registry check, manifest validation (round trip of every entry), synthetic entries and manifest regenerated and compared with the committed files, `coverage --check`, `guide check`, `goldens agree`, `pack verify`, adapter schema check, the release archive builds, no em dashes. `gen verify-repro` under both passphrases for a rotating window of four families plus every family the change touches (every family when shared generator code, the registry, the contracts or the pins change), sharded over up to four runners. `conformance run` on rust 30.0.0, go v0.8.0 and js 17.4.0. `harness run` with the wallet-backend adapter at the current pin, testnet variant, on three chains |
-| `nightly.yml` | daily 03:00 UTC, and by hand | `goldens verify` and core's own `--check-lcm` run against the pinned goldens; `gen verify-repro` of every chain under both passphrases; `cargo test` with the docker-backed tests and the `shapekit serve` memory bound; `conformance run --all-versions` and `conformance reproduce`; `harness run` over every chain in both delivery modes (rpc on both networks run twice in one process with the memory growth check, sep54-s3 on testnet); `harness reproduce` of the wallet-backend sightings; coverage |
+| `pr.yml` | every pull request, pushes to `main` | Release build of the CLI shared by the other jobs. Rust: rustfmt, clippy with warnings denied, `cargo test`. Go: `go vet`, `go test`, golangci-lint per module, and `indexerlint` over `adapters/`. JavaScript testee: `npm ci`, typecheck, build, `node --test`. Corpus: registry check, manifest validation (round trip of every entry), synthetic entries and manifest regenerated and compared with the committed files, `coverage --check`, `guide check`, `goldens agree`, `pack verify`, adapter schema check, the release archive builds, no em dashes. `gen verify-repro` under both passphrases for a rotating window of four families plus every family the change touches (every family when shared generator code, the registry, the contracts or the pins change), sharded over up to four runners; a corpus step checks that the selection script's family list is exactly the set of recipe families the CLI registers. `conformance run` on rust 30.0.0, go v0.8.0 and js 17.4.0. `harness run` with the wallet-backend adapter at the current pin, testnet variant, on three chains |
+| `nightly.yml` | daily 03:00 UTC, and by hand | `goldens verify` and core's own `--check-lcm` run against the pinned goldens; `gen verify-repro` with no family filter, so every chain of every registered recipe, under both passphrases; `cargo test` with the docker-backed tests and the `shapekit serve` memory bound; `conformance run --all-versions` and `conformance reproduce`; `harness run` over every chain in both delivery modes (rpc on both networks run twice in one process with the memory growth check, sep54-s3 on testnet); `harness reproduce` of the wallet-backend sightings; coverage; `findings check` over the night's conformance matrices, harness report and an `indexerlint` run on wallet-backend at the pin, failing on any problem other than findings still in status draft |
 | `upstream-drift.yml` | weekly, Monday 06:00 UTC, and by hand | `shapekit pins verify`, then `scripts/upstream-releases.sh`: opens one tracking issue, with the checklist of `docs/protocol-upgrade-runbook.md`, per new stellar-core, stellar-xdr or SDK release and per change to core's golden index (at the newest core release, and the index stamps on core's default branch) |
 | `release.yml` | a pushed `v*` tag | Refuses a tag whose signature GitHub does not verify. Builds `shapekit`, `indexerlint` and the wallet-backend adapter for linux x86-64, the corpus archive and the golden snapshot; builds the two archives twice on separate runners and requires equal checksums; publishes them with one `SHA256SUMS`, a build provenance attestation per asset and release notes from the newest `STATUS.md` section |
 | `sdk-conformance.yml` | `workflow_call` from an SDK repository | Downloads a pinned release, checks the archive and binary checksums, runs that SDK's testee with the caller's versions file and known-failures list. See [sdk-ci.md](sdk-ci.md) |
@@ -81,13 +97,18 @@ token used is the built-in `GITHUB_TOKEN`. No other secrets exist.
 
 ### Measured durations
 
-The plan's budget is 15 minutes of wall clock per pull request on standard hosted runners
+The budget is 15 minutes of wall clock per pull request on standard hosted runners
 (4 vCPUs). These numbers were measured on 2026-11-12 on the development machine, not yet on
 GitHub: a 10-core x86-64 box shared with other work (load average 8 to 11 during the runs),
 with builds limited to 2 parallel jobs (`CARGO_BUILD_JOBS=2`, `GOFLAGS=-p=2`,
 `verify-repro --jobs 2`) and a fresh cargo target directory, so they are the cold-cache case.
 The Go and npm download caches were warm. They will be replaced by the durations of the first
 three green runs on GitHub.
+
+The corpus has grown since these runs. It now holds 32 recipe families, 43 chains and 86
+recordings (one per chain and network; `shapekit pack verify` reports "86 chains checked"), so
+the full verify-repro and the nightly harness rows understate today's work by about the ratio of
+the chain counts (43 to 38, and 43 to 33). The rows say which corpus size they were measured on.
 
 | Job | Step | Cold | Dependencies cached |
 |---|---|---|---|
@@ -98,12 +119,12 @@ three green runs on GitHub.
 | go | vet, test and golangci-lint over three modules, indexerlint on `adapters/` | 22 s, plus 6 s to install golangci-lint | |
 | js | `npm ci`, typecheck, build, `node --test` | 10 s | |
 | corpus | every check listed above together | under 10 s | |
-| repro | `gen verify-repro` of all 31 families, 76 chains, on one machine | 661 s | |
+| repro | `gen verify-repro` of every chain the corpus held then (31 selectable families, 38 chains, 76 recordings), on one machine | 661 s | |
 | repro | slowest of four shards when every family is selected (chain seconds / 2 jobs) | about 230 s | |
 | repro | slowest single family, `soroban.auth-trees` (two chains of 67 s, run in parallel) | about 70 s | |
 | conformance | `conformance run`, current versions, including the testee builds | 47 s | |
 | harness | `harness run`, three chains, testnet, image already built | 88 s | |
-| nightly harness | `harness run`, testnet, rpc delivery, 33 chains in one round | 1351 s | |
+| nightly harness | `harness run`, testnet, rpc delivery, the 33 chains the harness ran then, in one round | 1351 s | |
 | harness | wallet-backend image build at the pin (`docker build --no-cache`, base images present) | 59 s | |
 
 Not measured locally: runner start, artifact upload and download, and `docker pull` of the

@@ -84,7 +84,7 @@ protocol 30 and 28 means two values in `all()`, as `cap40` does.
 | `submit_and_close_failing(env) -> Applied` | Same, but fails unless core included it and it failed (a failed transaction in a ledger) |
 | `capture(slug, selector, spec)` | Records an entry from the canonical meta of a closed ledger |
 | `capture_rejected(slug, env, spec) -> TransactionResult` | Submits an envelope core must refuse at submission and records it as an `invalid-by-core` entry with core's result. No ledger closes |
-| `driver() -> &mut ChainDriver` | The Phase 3 driver: `upload`, `deploy`, `invoke`, `soroban`, `soroban_with`, `apply`, `apply_together` (several transactions in one ledger), `close_empty`, `close_with_upgrades` (ledger upgrades such as `maxsorobantxsetsize`), `apply_upgrade_set` with `settings_writer` (a config upgrade set on top of the live settings), `node()` for `ledger_entries` queries |
+| `driver() -> &mut ChainDriver` | The chain driver: `upload`, `deploy`, `invoke`, `soroban`, `soroban_with`, `apply`, `apply_together` (several transactions in one ledger), `close_empty`, `close_with_upgrades` (ledger upgrades such as `maxsorobantxsetsize`), `apply_upgrade_set` with `settings_writer` (a config upgrade set on top of the live settings), `node()` for `ledger_entries` queries |
 | `network()`, `protocol()`, `network_id()` | The chain's network, protocol and network id |
 
 `Applied` carries the ledger, the transaction hash, core's `TransactionResult` and the meta.
@@ -127,8 +127,8 @@ family apart.
   signer on the account. `cap40` does this for the transaction authorised by a signed payload.
 - **Determinism.** No randomness, no wall-clock values, no iteration over hash maps. Keys come
   from `account(role)`, payloads and salts from hashes of fixed strings (see `cap40::payload`).
-  Close times are fixed by the driver: `1767225600 + seq * 86400` (Phase 3 decision; the
-  standalone virtual clock runs ahead of wall time, so close times step one day per ledger).
+  Close times are fixed by the driver: `1767225600 + seq * 86400` (the standalone virtual clock
+  runs ahead of wall time, so close times step one day per ledger).
 - **Assert what makes the shape.** Check core's answer where the shape depends on it (for
   example the result code of a refused twin, or the signers on an account) and fail with a
   message. A recipe never passes by accident.
@@ -142,8 +142,8 @@ family apart.
   `run` (protocol 30 only, they were captured there). Use `driver().upload`, `deploy`, `invoke`
   and `soroban_with`. `driver().soroban(...)` simulates with soroban-simulation 30.0.0, which
   supports protocol 30 only, and accepts source-account auth only. Below protocol 29 the
-  committed contracts trap (soroban-sdk 29 declares interface protocol 29); see the Phase 3 status
-  in the plan before writing an older-protocol Soroban recipe.
+  committed contracts trap (soroban-sdk 29 declares interface protocol 29), so an older-protocol
+  Soroban recipe uses the legacy contract builds and host of the next item.
 - **Soroban below protocol 30.** Return `soroban_limits() -> true` and `soroban_settings() -> false`:
   the node starts with `TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE` and no settings upgrade. The driver
   simulates with the host of the chain's protocol (`sim_legacy`, protocols 22, 24 and 28), and

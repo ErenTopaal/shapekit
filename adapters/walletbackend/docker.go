@@ -1,15 +1,94 @@
 package walletbackend
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 )
+
+// BaseImages maps every FROM reference in wallet-backend's Dockerfile, at the
+// commits this repository runs, to the same image by digest as pins.toml lists
+// it (checked by TestBaseImagesMatchPins). The build replaces each FROM with
+// the pinned digest through a buildx named context, so the tag a Dockerfile
+// names never decides which bytes are built on. A FROM missing here is an
+// error, not an unpinned build.
+var BaseImages = map[string]string{
+	"golang:1.25.9-bookworm": "docker.io/library/golang@sha256:298734aec230b5f3e8cee450ce6d7eccc39f1797ba548ee90d57e9803030c6c3",
+	"debian:bookworm-slim":   "docker.io/library/debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
+	"ubuntu:jammy":           "docker.io/library/ubuntu@sha256:74b12b11ffa550fba1929ad4d8d16533c34f6612728469671afba1b03b66881c",
+}
+
+// baseLabel is the image label recording the pinned bases an image was built
+// on, so an image built before the pins (or on other pins) is rebuilt.
+const baseLabel = "shapekit.wallet-backend.bases"
+
+// dockerfileBases returns the external images a Dockerfile builds FROM, in
+// order and without repeats. Stage names defined earlier in the file and
+// scratch are not images.
+func dockerfileBases(dockerfile []byte) ([]string, error) {
+	var bases []string
+	seen := map[string]bool{}
+	stages := map[string]bool{}
+	sc := bufio.NewScanner(bytes.NewReader(dockerfile))
+	for sc.Scan() {
+		f := strings.Fields(sc.Text())
+		if len(f) == 0 || !strings.EqualFold(f[0], "FROM") {
+			continue
+		}
+		args := f[1:]
+		for len(args) > 0 && strings.HasPrefix(args[0], "--") {
+			args = args[1:]
+		}
+		if len(args) == 0 {
+			return nil, fmt.Errorf("FROM with no image: %q", sc.Text())
+		}
+		ref := args[0]
+		if strings.Contains(ref, "$") {
+			return nil, fmt.Errorf("FROM %s uses a build argument; the base cannot be pinned", ref)
+		}
+		if !stages[strings.ToLower(ref)] && ref != "scratch" && !seen[ref] {
+			seen[ref] = true
+			bases = append(bases, ref)
+		}
+		// the stage name counts from the next FROM on
+		if len(args) >= 3 && strings.EqualFold(args[1], "AS") {
+			stages[strings.ToLower(args[2])] = true
+		}
+	}
+	if err := sc.Err(); err != nil {
+		return nil, err
+	}
+	if len(bases) == 0 {
+		return nil, fmt.Errorf("no FROM line")
+	}
+	return bases, nil
+}
+
+// pinnedContexts returns the --build-context flags that replace each base with
+// its pinned digest, and a stable digest of that set for the image label.
+func pinnedContexts(bases []string) ([]string, string, error) {
+	var flags, set []string
+	for _, b := range bases {
+		pinned, ok := BaseImages[b]
+		if !ok {
+			return nil, "", fmt.Errorf("base image %s has no pinned digest; add it to BaseImages and pins.toml", b)
+		}
+		flags = append(flags, "--build-context", b+"=docker-image://"+pinned)
+		set = append(set, b+"="+pinned)
+	}
+	sort.Strings(set)
+	sum := sha256.Sum256([]byte(strings.Join(set, "\n")))
+	return flags, hex.EncodeToString(sum[:]), nil
+}
 
 // docker runs the docker cli. Errors carry the command's stderr so a failure
 // is reported with docker's own words.

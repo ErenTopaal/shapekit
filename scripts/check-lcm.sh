@@ -59,7 +59,9 @@ for j in $(seq 0 $((jobs - 1))); do
   awk -v j="$j" -v n="$jobs" '(NR - 1) % n == j' "$work/tests.txt" >"$work/part-$j.txt"
 done
 
-# runs inside the container: one stellar-core process per batch of test names
+# runs inside the container: one stellar-core process per batch of test names. the single
+# quotes are intended: the container's shell expands these variables, not this one
+# shellcheck disable=SC2016
 runner='
 set -eu
 n=0

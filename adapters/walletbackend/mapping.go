@@ -319,7 +319,11 @@ func (m *mapper) mapOperation(op int64, rows []row, out *txMapping) {
 		tok, _ := r.bytes("token_id")
 		lp, _ := r.text("liquidity_pool_id")
 		k := key{kind: cat(r), account: hex.EncodeToString(acct), token: hex.EncodeToString(tok) + lp}
-		if cat(r) == catBalanceAuth && len(acct) > 0 && acct[0] != versionByte('G') {
+		if cat(r) == catBalanceAuth && len(acct) > 0 && strkey.VersionByte(acct[0]) != strkey.VersionByteAccountID {
+			if strkey.VersionByte(acct[0]) != strkey.VersionByteContract {
+				skip(i, fmt.Sprintf("BALANCE_AUTHORIZATION holder with version byte 0x%02x, neither an account (G) nor a contract (C)", acct[0]))
+				continue
+			}
 			// a contract holder's authorization comes from a SAC set_authorized
 			// event and has no trustline behind it
 			used[i] = true
@@ -413,16 +417,6 @@ func (m *mapper) mapOperation(op int64, rows []row, out *txMapping) {
 func cat(r row) string    { s, _ := r.text("state_change_category"); return s }
 func reason(r row) string { s, _ := r.text("state_change_reason"); return s }
 
-func versionByte(prefix byte) byte {
-	switch prefix {
-	case 'G':
-		return 6 << 3
-	case 'C':
-		return 2 << 3
-	}
-	return 0
-}
-
 // companionAuth finds the BALANCE_AUTHORIZATION SET row wallet-backend writes
 // right after a TRUSTLINE ADD for the same holder and asset.
 func companionAuth(rows []row, used []bool, at int) int {
@@ -477,7 +471,7 @@ func (m *mapper) trustlineAsset(r row) (string, string) {
 
 func (m *mapper) mapAccount(r row, emit func(*built), skip func(string)) {
 	acct, _ := r.bytes("account_id")
-	isContract := len(acct) > 0 && acct[0] == versionByte('C')
+	isContract := len(acct) > 0 && strkey.VersionByte(acct[0]) == strkey.VersionByteContract
 	switch reason(r) {
 	case reasonCreate:
 		if isContract {
@@ -570,6 +564,8 @@ func dataEntry(r row) (*built, string) {
 // balanceRow is a BALANCE row reduced to what pairing needs.
 type balanceRow struct {
 	i      int
+	id     int64
+	hasID  bool
 	reason string
 	token  string
 	amount string
@@ -579,9 +575,14 @@ type balanceRow struct {
 // events. wallet-backend writes a transfer as a DEBIT row for the sender and a
 // CREDIT row for the receiver, a classic mint as MINT on the issuer plus CREDIT
 // on the receiver, a burn or clawback as BURN on the issuer plus DEBIT on the
-// holder, and a SEP-41 mint or burn as one row. Rows pair up in state_change_id
-// order on equal token and amount; a row with no partner keeps only the side
-// wallet-backend stored.
+// holder, and a SEP-41 mint or burn as one row. wallet-backend builds the two
+// rows of one event next to each other and numbers a stream's rows 1..N per
+// operation in that order (AssignStateChangeOrdinals), so the two rows of an
+// event have consecutive state_change_id values. A row pairs only with the row
+// whose state_change_id is one higher, with the wanted reason, the same token
+// and the same amount. Rows of different events never pair, even when token and
+// amount agree: a liquidity-pool leg of a path payment is one row on its own.
+// A row with no partner keeps only the side wallet-backend stored.
 func (m *mapper) mapBalances(op int64, rows []row, used []bool, out *txMapping) {
 	var bal []balanceRow
 	for i, r := range rows {
@@ -590,7 +591,8 @@ func (m *mapper) mapBalances(op int64, rows []row, used []bool, out *txMapping) 
 		}
 		tok, _ := r.bytes("token_id")
 		amt, _ := r.text("amount")
-		bal = append(bal, balanceRow{i: i, reason: reason(r), token: hex.EncodeToString(tok), amount: amt})
+		id, hasID := r.integer("state_change_id")
+		bal = append(bal, balanceRow{i: i, id: id, hasID: hasID, reason: reason(r), token: hex.EncodeToString(tok), amount: amt})
 	}
 	emit := func(b *built) { out.changes = append(out.changes, b.change(op)) }
 	if op == 0 {
@@ -623,13 +625,18 @@ func (m *mapper) mapBalances(op int64, rows []row, used []bool, out *txMapping) 
 		return
 	}
 	taken := make([]bool, len(bal))
+	// the partner of bal[from-1] is the next balance row, if it is the event's
+	// other row: next state_change_id, wanted reason, same token and amount
 	partner := func(from int, want string, like balanceRow) int {
-		for j := from; j < len(bal); j++ {
-			if !taken[j] && bal[j].reason == want && bal[j].token == like.token && bal[j].amount == like.amount {
-				return j
-			}
+		if from >= len(bal) {
+			return -1
 		}
-		return -1
+		next := bal[from]
+		if taken[from] || !like.hasID || !next.hasID || next.id != like.id+1 ||
+			next.reason != want || next.token != like.token || next.amount != like.amount {
+			return -1
+		}
+		return from
 	}
 	for k, br := range bal {
 		if taken[k] {

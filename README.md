@@ -23,9 +23,9 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 | Replay harness and the wallet-backend reference adapter | `crates/shapekit-harness`, `adapters/` | [adapter interface](docs/adapter-interface.md) |
 | SDK conformance runner and the Rust, Go and JavaScript testees | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md) |
 | Linter for Go indexers built on go-stellar-sdk | `lint/` | [indexerlint](docs/linter.md) |
-| Indexer-hardening guide, written for developers.stellar.org | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
+| Indexer-hardening guide, written for developers.stellar.org; a draft until a stellar-core or platform engineer has reviewed it (see the publication gate in [STATUS.md](STATUS.md)) | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
 | Findings from running the corpus | `findings/` | |
-| CI, releases, maintenance | `.github/workflows/` | [infrastructure](docs/infrastructure.md), [maintenance](docs/maintenance.md), [protocol upgrade runbook](docs/protocol-upgrade-runbook.md) |
+| CI, releases, maintenance | `.github/workflows/` | [infrastructure](docs/infrastructure.md), [maintenance](docs/maintenance.md), [protocol upgrade runbook](docs/protocol-upgrade-runbook.md), [security policy](SECURITY.md) |
 
 ## Install
 

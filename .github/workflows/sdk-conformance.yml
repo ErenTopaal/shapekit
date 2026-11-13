@@ -112,6 +112,21 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26.13.1
+      - name: the package manager the sdk checkout declares
+        # a versions file that builds the checkout under test (docs/sdk-ci.md) runs the sdk's own
+        # build, which may need the pnpm or yarn version its package.json pins in packageManager
+        if: ${{ inputs.sdk == 'js' }}
+        run: |
+          set -euo pipefail
+          if [ ! -f sdk/package.json ]; then exit 0; fi
+          pm=$(node -p 'require("./sdk/package.json").packageManager || ""')
+          pm=${pm%%+*}
+          case "$pm" in
+            "") ;;
+            pnpm@[0-9]* | yarn@1.[0-9]*) npm install --global --no-audit --no-fund "$pm" ;;
+            npm@*) ;;
+            *) echo "::warning::packageManager $pm is not installed by this workflow" ;;
+          esac
       - name: conformance run
         working-directory: shapekit
         env:

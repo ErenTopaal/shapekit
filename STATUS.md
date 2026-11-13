@@ -2,6 +2,51 @@
 
 A dated public log of what has landed. Newest entry first.
 
+## 2026-11-13: CI coverage, pinned wallet-backend builds, guide publication gate
+
+Fixes from an audit of the CI workflows, the Go adapter and the documentation.
+
+What landed:
+
+- `gen verify-repro` in `nightly.yml` runs with no `--family` filter, so it regenerates every
+  chain of every recipe the CLI registers. Before, the nightly list came from
+  `scripts/select-repro.sh`, whose source grep missed `cap26.inflation` (declared as
+  `INFLATION_FAMILY`), so those two chains were never regenerated. The script now reads every
+  `pub const *FAMILY` constant, maps `cap67.unified-events-backfill` to its family, and a
+  `pr.yml` corpus step checks that its family list is exactly the set the CLI accepts and that
+  every committed chain belongs to a listed family.
+- `nightly.yml` runs `shapekit findings check` after the conformance and harness jobs, with an
+  `indexerlint` run on wallet-backend at the pin as its third input. Findings still in status
+  draft are reported as a warning; any other problem fails the job.
+- The wallet-backend adapter builds the image on base images pinned by digest: every `FROM` in
+  wallet-backend's Dockerfile is replaced through a buildx named context (golang
+  1.25.9-bookworm, debian bookworm-slim, ubuntu jammy, all in `pins.toml`). The per pull request
+  and nightly harness jobs cache the clone and the built image, keyed by commit and base digests.
+- The Go testee accepts a build against a directory `replace` of go-stellar-sdk when the version
+  is set at link time, so an SDK pull request can be tested on its own code.
+  `docs/sdk-ci.md` has tested versions files for Rust (path dependency), Go (`replace`) and
+  JavaScript (install from the packed checkout).
+- The adapter pairs BALANCE rows only within one token event (consecutive `state_change_id`),
+  and reports a BALANCE_AUTHORIZATION holder that is neither `G` nor `C` as unmapped.
+  `docs/adapter-interface.md` states why `clawback` and every arm of `to_muxed_id` stay claimed.
+- `.github/CODEOWNERS`, `SECURITY.md` (private reports through GitHub security advisories), the
+  branch ruleset to enable (`docs/maintenance.md`), and a `NOTICE` entry for the wallet-backend
+  excerpts in the linter's test data.
+
+### Guide publication gate
+
+The RFP gates publication of the guide on review by a stellar-core or platform engineer.
+
+- Guide: `docs/guide/indexer-hardening.mdx`.
+- Required reviewer: a stellar-core engineer or a platform engineer at SDF.
+- State: **not yet reviewed**. The guide is a draft and is not published.
+- stellar-docs pull request: drafted, not opened. It adds the page as
+  `docs/data/indexers/build-your-own/indexer-hardening.mdx` with an entry in `docs.json`, on a
+  local branch `indexer-hardening-guide` of stellar/stellar-docs that has not been pushed. The
+  tables in it are regenerated with `shapekit guide table` from the commit that is submitted.
+- When the review is done, this section records the reviewer, the date and the reviewed commit,
+  and the comment lines in the guide's front matter are removed.
+
 ## 2026-11-12: CI tiers, release workflow, maintenance plan
 
 The CI and release side of the project: per pull request and nightly tiers, upstream tracking,
@@ -65,7 +110,7 @@ What landed:
   Node toolchains with their release checksums, five container images by digest (stellar-core,
   the stellar-core test build, timescaledb, seaweedfs, fake-gcs-server), stellar-core,
   stellar-xdr, stellar-rpc, stellar-etl, stellar-protocol and wallet-backend commits, the
-  GitHub Actions used, every Rust crate, npm package and Go module the plan uses, and the SDK
+  GitHub Actions used, every Rust crate, npm package and Go module the project uses, and the SDK
   versions the conformance runner will test.
 - Rust: a cargo workspace (`Cargo.toml`, `Cargo.lock`) with the ten crates from the planned
   layout. Nine are empty library crates. `shapekit-cli` builds the `shapekit` binary, whose one

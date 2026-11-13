@@ -205,3 +205,27 @@ func TestAssetOrderAndPoolID(t *testing.T) {
 		t.Errorf("reversed pair: %v", got[4])
 	}
 }
+
+// a directory replace of the sdk reports the link-time override and the directory, and is
+// refused without an override; a module replace reports the replacement's version
+func TestDepVersionReplace(t *testing.T) {
+	dir := &debug.BuildInfo{Deps: []*debug.Module{{
+		Path: sdkModule, Version: "v0.9.0",
+		Replace: &debug.Module{Path: "../../../sdk", Version: "(devel)"},
+	}}}
+	if _, _, err := depVersion(dir, sdkModule, ""); err == nil {
+		t.Fatal("a directory replace without an override was accepted")
+	}
+	v, d, err := depVersion(dir, sdkModule, "dev")
+	if err != nil || v != "dev" || d != "../../../sdk" {
+		t.Fatalf("got %q %q %v", v, d, err)
+	}
+	mod := &debug.BuildInfo{Deps: []*debug.Module{{
+		Path: sdkModule, Version: "v0.8.0",
+		Replace: &debug.Module{Path: "example.com/fork", Version: "v0.8.1"},
+	}}}
+	v, d, err = depVersion(mod, sdkModule, "ignored")
+	if err != nil || v != "v0.8.1" || d != "" {
+		t.Fatalf("got %q %q %v", v, d, err)
+	}
+}
