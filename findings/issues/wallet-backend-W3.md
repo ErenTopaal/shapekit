@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/token_transfer.go` line 363](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/token_transfer.go#L363): `handleClawback` writes `BALANCE`/`BURN` (and a `DEBIT`) for a clawback, the same rows a payment to the issuer produces. The state change reasons have no CLAWBACK, so the ledger's `clawback` event is stored as a `burn`, and a reader cannot tell an issuer seizing funds from a holder returning them.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` line 363](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L363): `handleClawback` writes `BALANCE`/`BURN` (and a `DEBIT`) for a clawback, the same rows a payment to the issuer produces. The state change reasons have no CLAWBACK, so the ledger's `clawback` event is stored as a `burn`, and a reader cannot tell an issuer seizing funds from a holder returning them.
 
 Severity: wrong-data. CAPs: CAP-0027, CAP-0035, CAP-0067.
 
@@ -15,7 +15,7 @@ Corpus entry `cap35.clawback.p30-clawback-claimable-balance-envelope` of the sha
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

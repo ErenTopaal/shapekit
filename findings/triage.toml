@@ -12,7 +12,7 @@ schema = 1
 manifest = "corpus/manifest.json"
 # every input below is a committed, reduced copy of a run output; [[inputs.import]] says where
 # each came from. after new runs: `shapekit findings import-inputs`, then `shapekit findings collect`.
-harness = ["findings/inputs/harness-wallet-backend-e967ce8b.json"]
+harness = ["findings/inputs/harness-wallet-backend-3e22515a.json"]
 matrices = [
   "findings/inputs/conformance-rust.json",
   "findings/inputs/conformance-go.json",
@@ -21,15 +21,15 @@ matrices = [
 
 [[inputs.lint]]
 target = "wallet-backend"
-version = "e967ce8b7362b79c277e700e789181d76fbb5967"
-result = "findings/inputs/lint-wallet-backend-e967ce8b.json"
+version = "3e22515a44979fdc3a558fda3991ca2b48e38cef"
+result = "findings/inputs/lint-wallet-backend-3e22515a.json"
 command = "indexerlint -format json ./..."
 
 [[inputs.import]]
 kind = "harness"
-from = "target/findings/wallet-backend-e967ce8b/harness-report.json"
-to = "findings/inputs/harness-wallet-backend-e967ce8b.json"
-command = "shapekit harness run --network both --adapter \"adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967\" --out target/findings/wallet-backend-e967ce8b"
+from = "target/findings/wallet-backend-3e22515a/harness-report.json"
+to = "findings/inputs/harness-wallet-backend-3e22515a.json"
+command = "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a"
 
 [[inputs.import]]
 kind = "conformance"
@@ -51,9 +51,9 @@ command = "shapekit conformance run --sdk js --all-versions --out target/conform
 
 [[inputs.import]]
 kind = "lint"
-from = "target/findings/indexerlint-wallet-backend-e967ce8b.json"
-to = "findings/inputs/lint-wallet-backend-e967ce8b.json"
-command = "indexerlint -format json ./... (in a checkout of stellar/wallet-backend at e967ce8b7362b79c277e700e789181d76fbb5967)"
+from = "target/findings/indexerlint-wallet-backend-3e22515a.json"
+to = "findings/inputs/lint-wallet-backend-3e22515a.json"
+command = "indexerlint -format json ./... (in a checkout of stellar/wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)"
 
 [targets.wallet-backend]
 repo = "stellar/wallet-backend"

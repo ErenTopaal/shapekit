@@ -122,14 +122,15 @@ Checked at the commits below with `indexerlint ./...` (and `go vet -vettool` at 
 | `9538b3ca` | before `80121f3a` (issue #746) | 1 | 1 | 1 |
 | `80121f3a` | after the #746 fix | 0 | 1 | 0 |
 | `fbdb593e` | before PR #757 | 0 | 1 | 0 |
-| `e967ce8b` | current pin | 0 | 1 | 0 |
+| `e967ce8b` | previous pin | 0 | 1 | 0 |
+| `3e22515a` | current pin (`main` on 2026-11-13) | 0 | 1 | 0 |
 
 - #716 and #753: IDX001 reports the four sites in `contract_operations.go` that seed Soroban participants with `SourceAccount().Address()`, the producer #716 names first and #753 fixed; the findings disappear at `666a64d4`. The other two producers in #716 (a SEP-41 `ScAddress.String()` and a signed-payload signer) are not reported; see the IDX001 limits.
 - #729: not reported. The P strkey travels from the effects code to the state change builder through a `map[string]interface{}`, which IDX001 does not follow.
 - Auth-tree participants (fixed in `9538b3ca`): IDX003 reports all seven functions, IDX001 the credential address and the declared contract IDs used as set keys, IDX002 the unbounded tree walk.
 - #746 (fixed in `80121f3a`, the issue is still open): IDX003 and IDX001 report `ContractDeployProcessor.ProcessOperation` at `9538b3ca`; both clear once declared deployments are checked against created contract instances in meta.
 - #757 is a SQL query without a per-transaction limit on the serving side. It is not a pattern in Go source, and none of the rules is meant to catch it.
-- Current pin: one finding, IDX002 on the `walkInvocation` closure in `ContractDeployProcessor.ProcessOperation`, which walks the declared auth invocation tree with no depth limit. It is a true positive under the rule. Its practical reach is bounded by the decoder (depth 1500 by default) and by core, which rejects transactions nested deeper than 1000 from protocol 28, so it is a hardening finding, not a halt.
+- Current pin (`3e22515a`, unchanged from `e967ce8b`: the two commits between them only touch Blend decoding and serving): one finding, IDX002 on the `walkInvocation` closure in `ContractDeployProcessor.ProcessOperation`, which walks the declared auth invocation tree with no depth limit. It is a true positive under the rule. Its practical reach is bounded by the decoder (depth 1500 by default) and by core, which rejects transactions nested deeper than 1000 from protocol 28, so it is a hardening finding, not a halt.
 
 ## Seeded tests
 

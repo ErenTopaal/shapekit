@@ -4,7 +4,7 @@
 ## What happens
 
 `(*ContractDeployProcessor).ProcessOperation` (`internal/indexer/processors/contract_deploy.go`,
-at e967ce8b7362b79c277e700e789181d76fbb5967, line 115) defines a closure `walkInvocation` that
+at 3e22515a44979fdc3a558fda3991ca2b48e38cef, line 115) defines a closure `walkInvocation` that
 recurses into `SubInvocations` of every `SorobanAuthorizedInvocation` of every auth entry of an
 `InvokeHostFunction` operation. Nothing counts the depth, so the recursion goes as deep as the
 decoded tree.
@@ -24,7 +24,7 @@ Severity: robustness (hardening). It does not halt ingestion at the current limi
 
 ```sh
 git clone https://github.com/stellar/wallet-backend && cd wallet-backend
-git checkout e967ce8b7362b79c277e700e789181d76fbb5967
+git checkout 3e22515a44979fdc3a558fda3991ca2b48e38cef
 indexerlint -format json ./...
 ```
 

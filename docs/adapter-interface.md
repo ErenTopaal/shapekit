@@ -131,7 +131,7 @@ Request members (besides `id` and `cmd`):
 | `network_passphrase` | string | the passphrase to configure the target with |
 | `protocol` | integer | ledger protocol of the chain |
 | `delivery.mode` | string | the mode the harness picked |
-| `delivery.rpc_url` | string | JSON-RPC endpoint of the replay server; present in every mode |
+| `delivery.rpc_url` | string | JSON-RPC endpoint of the replay server ([replay-server.md](replay-server.md): methods, batch and response limits, paging, error codes); present in every mode |
 | `delivery.archive_url` | string | history archive root; the archive as it stood at the newest checkpoint at or below the head |
 | `delivery.lake.url` | string | SEP-54 lake root over HTTP: `.config.json` and the batches whose ledgers are all visible |
 | `delivery.lake.path` | string | the same lake as a directory on the harness host (every batch, including unreleased ones) |

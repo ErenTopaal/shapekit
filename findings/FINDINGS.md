@@ -49,47 +49,47 @@ The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimab
 - CAPs: CAP-0027, CAP-0035, CAP-0067
 - status: draft (not filed, draft [findings/issues/wallet-backend-W3.md](../findings/issues/wallet-backend-W3.md))
 - minimal entry: `cap35.clawback.p30-clawback-claimable-balance-envelope`
-- reproduce: `shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 36 failure(s) on 9 entries
 
 <details><summary>occurrences</summary>
 
-- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-clawback` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap27.muxed-accounts.p28-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap27.muxed-accounts.p30-clawback-from-id-2p64-1` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-clawback` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
 
 </details>
 
@@ -104,87 +104,87 @@ participantsForMeta switches on `meta.Operations`, the V0 arm of the Transaction
 - CAPs: CAP-0015, CAP-0023, CAP-0035, CAP-0067
 - status: duplicate-of ([stellar/wallet-backend#677](https://github.com/stellar/wallet-backend/issues/677))
 - minimal entry: `cap23.claimable-balances.p30-claim-through-depth-4-envelope`
-- reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 76 failure(s) on 20 entries
 
 <details><summary>occurrences</summary>
 
-- `cap15.fee-bump.p30-inner-bad-seq` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBZXQMBE7YK3QGE7SFLEP5LSOQ5FOCSRWCVJIE5TCTU4MHB7WPAFH4CS is stored but the meta does not show it, the envelope names it as tx-source
-- `cap15.fee-bump.p30-inner-bad-seq` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBZXQMBE7YK3QGE7SFLEP5LSOQ5FOCSRWCVJIE5TCTU4MHB7WPAFH4CS is stored but the meta does not show it, the envelope names it as tx-source
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
-- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
-- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GC64CNX645Q54RHV6VSJCUSEEI5G7S52V6ZTTGBG77WT2SYKBMEEVH7J is stored but the meta does not show it, the envelope names it as claimant
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GC64CNX645Q54RHV6VSJCUSEEI5G7S52V6ZTTGBG77WT2SYKBMEEVH7J is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
-- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GAIIB7AYHM3XWTH6ANXSHC6AEQGOAFYM53ODHBGOWICKDZFR3D2V6VBY is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GAIIB7AYHM3XWTH6ANXSHC6AEQGOAFYM53ODHBGOWICKDZFR3D2V6VBY is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p22-backfill-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GA3NTUR47QIAKOXDZFNJHYZE3HDB46YSFHME3DY7AGUZJRX2FSIVOWPJ is stored but the meta does not show it, the envelope names it as destination
-- `cap67.unified-events.p22-backfill-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GA3NTUR47QIAKOXDZFNJHYZE3HDB46YSFHME3DY7AGUZJRX2FSIVOWPJ is stored but the meta does not show it, the envelope names it as destination
-- `cap67.unified-events.p22-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p22-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p22-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p22-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p22-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p22-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p22-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
-- `cap67.unified-events.p22-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
-- `cap67.unified-events.p30-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
-- `cap67.unified-events.p30-payment-burn` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
+- `cap15.fee-bump.p30-inner-bad-seq` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBZXQMBE7YK3QGE7SFLEP5LSOQ5FOCSRWCVJIE5TCTU4MHB7WPAFH4CS is stored but the meta does not show it, the envelope names it as tx-source
+- `cap15.fee-bump.p30-inner-bad-seq` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBZXQMBE7YK3QGE7SFLEP5LSOQ5FOCSRWCVJIE5TCTU4MHB7WPAFH4CS is stored but the meta does not show it, the envelope names it as tx-source
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GCNPGADCOMTNPTM2XR6V7IOCWQ2MLJNGTCGD3U7SVPHHS7PKN6HMDEAG is missing
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GACTZCI6LARHTETF4CAK24GXPJ242RUY4KR6QAHM5DFM6O5HHYT3JJ4L is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GAPTSOXOPLGTIL32WZTIP6O4RULS23ILXXG5Y3IPEULYMPVCFPO4OMPU is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GB4KRLHBFV7KBOCEVMKVY7LCQBX33JADISJ6RIMQJZFZCI365M4N2BN6 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GB5MCLOXHIN7GFEMS7Q7STRAUNU7WTL3AI24EB5MILKZXWQDP4NCOGXG is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBACEBDTP37KGTAM4Z75ZTRZ7NQK352C6GTCZY5ZDT36CSXQZGOSJ7Z7 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBCIUIHMEIPWJU2RPDTTI23OIF5GFDJKAYM7LOW6ZGRDA2UWQXHSQHDY is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GBXY3M4ES6UNMNXK7RBVLIIYZSRE7DWPQMOB6OHTPEP7TUWTJ7ZCRPS4 is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GCU6NRM3S4UELHSFHYDBQHZKHYY5SXRIZEHX35BQL4MQOHX7ZVARLJRQ is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GDMLEHU4HHANJG446PNN2PVNTWLEQTKZVMJFPRSWEVVSVFP2FCCVRZOC is stored but the meta does not show it, the envelope names it as claimant
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GDXETM6Y6CLLEAF7E57Y2F6NIAVQGF5Y3E6T2TIX3NELC73R4VBB3VLK is stored but the meta does not show it, the envelope names it as claimant
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
+- `cap35.clawback.p30-clawback-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
+- `cap35.clawback.p30-clawback-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GC64CNX645Q54RHV6VSJCUSEEI5G7S52V6ZTTGBG77WT2SYKBMEEVH7J is stored but the meta does not show it, the envelope names it as claimant
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GC64CNX645Q54RHV6VSJCUSEEI5G7S52V6ZTTGBG77WT2SYKBMEEVH7J is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
+- `cap67.unified-events.p22-backfill-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBU6V5HKQFEDBJYW5E44OUF4U2VETRZPZ7L3HNNP3A4E7ROMMN7K656E is missing
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GAIIB7AYHM3XWTH6ANXSHC6AEQGOAFYM53ODHBGOWICKDZFR3D2V6VBY is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GAIIB7AYHM3XWTH6ANXSHC6AEQGOAFYM53ODHBGOWICKDZFR3D2V6VBY is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p22-backfill-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GA3NTUR47QIAKOXDZFNJHYZE3HDB46YSFHME3DY7AGUZJRX2FSIVOWPJ is stored but the meta does not show it, the envelope names it as destination
+- `cap67.unified-events.p22-backfill-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GA3NTUR47QIAKOXDZFNJHYZE3HDB46YSFHME3DY7AGUZJRX2FSIVOWPJ is stored but the meta does not show it, the envelope names it as destination
+- `cap67.unified-events.p22-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p22-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p22-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p22-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p22-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p22-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p22-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
+- `cap67.unified-events.p22-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p30-clawback-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped participant: participant GBJL4ZBUVYPA2UGZXRN62YIL4QGTM4YUWBAOXDPKDVOHBE6ZGI35KVB3 is missing
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GCOCPZVHUDKGHQSQUY2T6LEAGDDQUL5J6GG2HISAWEUVJNKKYGYK7E5P is stored but the meta does not show it, the envelope names it as claimant
+- `cap67.unified-events.p30-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
+- `cap67.unified-events.p30-payment-burn` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra participant: participant GC75L4OJYE25NGFKBO7L35X76K3OJCVTONXBC2L4XGBQNF7IGQV6GOZW is stored but the meta does not show it, the envelope names it as destination
 
 </details>
 
@@ -199,115 +199,115 @@ BALANCE rows are written per account; the claimable balance (B) or liquidity poo
 - CAPs: CAP-0023, CAP-0033, CAP-0035, CAP-0038, CAP-0067
 - status: draft (not filed, draft [findings/issues/wallet-backend-W2.md](../findings/issues/wallet-backend-W2.md))
 - minimal entry: `cap23.claimable-balances.p30-claim-through-depth-4-envelope`
-- reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 104 failure(s) on 19 entries
 
 <details><summary>occurrences</summary>
 
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped token-event: token-event is missing
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
-- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-claim-through-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap33.sponsorship.p30-sponsored-claimable-balance-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap33.sponsorship.p30-sponsored-claimable-balance-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap35.clawback.p30-create-clawback-enabled-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-deposit-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-path-payment-through-pool` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap38.liquidity-pools.p30-withdraw-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p22-backfill-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-claim-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-create-claimable-balance` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped token-event: token-event is missing
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
+- `cap67.unified-events.p30-liquidity-pool-deposit` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra token-event: token-event is stored but the meta does not show it
 
 </details>
 
@@ -322,46 +322,46 @@ CAP-67 puts the destination's mux id or, failing that, the transaction memo into
 - CAPs: CAP-0019, CAP-0024, CAP-0067
 - status: draft (not filed, draft [findings/issues/wallet-backend-W4.md](../findings/issues/wallet-backend-W4.md))
 - minimal entry: `classic.memo-bytes.p30-memo-ff`
-- reproduce: `shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - related upstream: [stellar/wallet-backend#800](https://github.com/stellar/wallet-backend/issues/800)
 - observed: 34 failure(s) on 17 entries
 
 <details><summary>occurrences</summary>
 
-- `cap67.unified-events.p22-backfill-payment-memo-hash` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p22-backfill-payment-memo-hash` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p22-backfill-payment-memo-text` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p22-backfill-payment-memo-text` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p30-payment-memo-hash` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p30-payment-memo-hash` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p30-payment-memo-text` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `cap67.unified-events.p30-payment-memo-text` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.max-length.p30-memo-text-28` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.max-length.p30-memo-text-28` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-sha256` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-sha256` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-zero` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-hash-zero` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-sha256` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-sha256` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-zero` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-arms.p30-memo-return-zero` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-above-max-code-point` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-above-max-code-point` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-ff` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-lone-continuation` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-lone-continuation` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-overlong-nul` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-overlong-nul` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-surrogate` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-surrogate` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-truncated-sequence-28` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): wrong-value token-event: token-event differs in to_muxed_id
-- `classic.memo-bytes.p30-memo-truncated-sequence-28` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p22-backfill-payment-memo-hash` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p22-backfill-payment-memo-hash` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p22-backfill-payment-memo-text` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p22-backfill-payment-memo-text` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p30-payment-memo-hash` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p30-payment-memo-hash` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p30-payment-memo-text` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `cap67.unified-events.p30-payment-memo-text` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.max-length.p30-memo-text-28` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.max-length.p30-memo-text-28` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-sha256` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-sha256` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-zero` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-hash-zero` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-sha256` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-sha256` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-zero` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-arms.p30-memo-return-zero` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-above-max-code-point` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-above-max-code-point` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-ff` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-lone-continuation` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-lone-continuation` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-overlong-nul` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-overlong-nul` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-surrogate` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-surrogate` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-truncated-sequence-28` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): wrong-value token-event: token-event differs in to_muxed_id
+- `classic.memo-bytes.p30-memo-truncated-sequence-28` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): wrong-value token-event: token-event differs in to_muxed_id
 
 </details>
 
@@ -376,36 +376,36 @@ Contract creation state changes come from the declared auth invocation tree. A S
 - CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0073, CAP-0085
 - status: draft (not filed, draft [findings/issues/wallet-backend-W5.md](../findings/issues/wallet-backend-W5.md))
 - minimal entry: `cap73.sac-trust.p28-deploy-xlm-sac-envelope`
-- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - related upstream: [stellar/wallet-backend#746](https://github.com/stellar/wallet-backend/issues/746)
 - observed: 24 failure(s) on 12 entries
 
 <details><summary>occurrences</summary>
 
-- `cap73.sac-trust.p28-deploy-credit-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-credit-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-credit-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-credit-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-xlm-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-xlm-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-xlm-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p28-deploy-xlm-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-credit-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-credit-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-credit-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-credit-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-xlm-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-xlm-sac-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-xlm-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap73.sac-trust.p30-deploy-xlm-sac-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap85.executable-tag.p30-contract-deploys-external-ref-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap85.executable-tag.p30-contract-deploys-external-ref-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `cap85.executable-tag.p30-contract-deploys-external-ref-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `cap85.executable-tag.p30-contract-deploys-external-ref-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped contract-deployed: contract-deployed is missing
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-credit-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-credit-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-credit-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-credit-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-xlm-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-xlm-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-xlm-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p28-deploy-xlm-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-credit-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-credit-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-credit-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-credit-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-xlm-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-xlm-sac-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-xlm-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap73.sac-trust.p30-deploy-xlm-sac-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap85.executable-tag.p30-contract-deploys-external-ref-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap85.executable-tag.p30-contract-deploys-external-ref-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `cap85.executable-tag.p30-contract-deploys-external-ref-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `cap85.executable-tag.p30-contract-deploys-external-ref-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
+- `soroban.invoke-basics.p30-contract-deploys-with-constructor-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped contract-deployed: contract-deployed is missing
+- `soroban.invoke-basics.p30-contract-deploys-with-constructor-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped contract-deployed: contract-deployed is missing
 
 </details>
 
@@ -420,19 +420,19 @@ A native SAC transfer to a G address that does not exist creates the account (CA
 - CAPs: CAP-0046-06, CAP-0073
 - status: draft (not filed, draft [findings/issues/wallet-backend-W6.md](../findings/issues/wallet-backend-W6.md))
 - minimal entry: `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope`
-- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 8 failure(s) on 4 entries
 
 <details><summary>occurrences</summary>
 
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped account-created: account-created is missing
-- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p28-xlm-transfer-creates-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped account-created: account-created is missing
+- `cap73.sac-trust.p30-xlm-transfer-creates-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped account-created: account-created is missing
 
 </details>
 
@@ -447,13 +447,13 @@ Revoking authorization with SetTrustLineFlags or AllowTrust redeems the holder's
 - CAPs: CAP-0038
 - status: draft (not filed, draft [findings/issues/wallet-backend-W7.md](../findings/issues/wallet-backend-W7.md))
 - minimal entry: `cap38.liquidity-pools.p30-revoke-redeems-pool-shares`
-- reproduce: `shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 2 failure(s) on 1 entry
 
 <details><summary>occurrences</summary>
 
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped trustline-removed: trustline-removed is missing
-- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped trustline-removed: trustline-removed is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped trustline-removed: trustline-removed is missing
+- `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped trustline-removed: trustline-removed is missing
 
 </details>
 
@@ -468,13 +468,13 @@ Core removes a pre-authorized transaction signer when the transaction is applied
 - CAPs: CAP-0002, CAP-0028
 - status: draft (not filed, draft [findings/issues/wallet-backend-W8.md](../findings/issues/wallet-backend-W8.md))
 - minimal entry: `classic.failed-tx.p30-pre-auth-failed-removes-signer`
-- reproduce: `shapekit harness run --chain classic.failed-tx.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain classic.failed-tx.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 2 failure(s) on 1 entry
 
 <details><summary>occurrences</summary>
 
-- `classic.failed-tx.p30-pre-auth-failed-removes-signer` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): dropped signer-removed: signer-removed is missing
-- `classic.failed-tx.p30-pre-auth-failed-removes-signer` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): dropped signer-removed: signer-removed is missing
+- `classic.failed-tx.p30-pre-auth-failed-removes-signer` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): dropped signer-removed: signer-removed is missing
+- `classic.failed-tx.p30-pre-auth-failed-removes-signer` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): dropped signer-removed: signer-removed is missing
 
 </details>
 
@@ -489,15 +489,15 @@ Following Horizon's effects, account creation emits a signer-created state chang
 - CAPs: CAP-0033
 - status: draft (not filed, draft [findings/issues/wallet-backend-W9.md](../findings/issues/wallet-backend-W9.md))
 - minimal entry: `cap33.sponsorship.p30-sponsored-account-envelope`
-- reproduce: `shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"`
+- reproduce: `shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
 - observed: 4 failure(s) on 2 entries
 
 <details><summary>occurrences</summary>
 
-- `cap33.sponsorship.p30-sponsored-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra signer-added: signer-added is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-account-envelope` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra signer-added: signer-added is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (mainnet): extra signer-added: signer-added is stored but the meta does not show it
-- `cap33.sponsorship.p30-sponsored-account-meta` wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (testnet): extra signer-added: signer-added is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra signer-added: signer-added is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-account-envelope` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra signer-added: signer-added is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (mainnet): extra signer-added: signer-added is stored but the meta does not show it
+- `cap33.sponsorship.p30-sponsored-account-meta` wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (testnet): extra signer-added: signer-added is stored but the meta does not show it
 
 </details>
 
@@ -511,13 +511,13 @@ The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurs
 - severity: robustness
 - CAPs: CAP-0046
 - status: draft (not filed, draft [findings/issues/wallet-backend-L1.md](../findings/issues/wallet-backend-L1.md))
-- reproduce: `indexerlint -format json ./... (in a checkout of wallet-backend at e967ce8b7362b79c277e700e789181d76fbb5967)`
+- reproduce: `indexerlint -format json ./... (in a checkout of wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)`
 - related upstream: [stellar/wallet-backend#746](https://github.com/stellar/wallet-backend/issues/746)
 - observed: 1 failure(s) on 0 entries
 
 <details><summary>occurrences</summary>
 
-- wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967 (internal/indexer/processors/contract_deploy.go:116:2): IDX002: walkInvocation (closure in (*ContractDeployProcessor).ProcessOperation) recurses over xdr.SorobanAuthorizedInvocation with no depth bound; carry a depth counter and stop at a fixed limit [(*ContractDeployProcessor).ProcessOperation]
+- wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef (internal/indexer/processors/contract_deploy.go:116:2): IDX002: walkInvocation (closure in (*ContractDeployProcessor).ProcessOperation) recurses over xdr.SorobanAuthorizedInvocation with no depth bound; carry a depth counter and stop at a fixed limit [(*ContractDeployProcessor).ProcessOperation]
 
 </details>
 
@@ -964,17 +964,13 @@ to_xdr_json renders nested values of any depth the decoder accepts, but the read
 
 </details>
 
-## Input problems
-
-- findings/inputs/harness-wallet-backend-e967ce8b.json: the harness ran against manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760, but corpus/manifest.json is 56f2976318aeb56531073fa336f2c3c442ee825efdbfc63388e7327d3dbd2a84; rerun the harness and import its report
-
 ## Inputs
 
 | kind | path | sha256 | detail |
 |---|---|---|---|
-| manifest | `corpus/manifest.json` | `56f2976318aeb565` | corpus 0.1.0 |
-| harness | `findings/inputs/harness-wallet-backend-e967ce8b.json` | `e4de2a361db1774c` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 890 entries, manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760 |
+| manifest | `corpus/manifest.json` | `c3876b18f4d8682e` | corpus 0.1.0 |
+| harness | `findings/inputs/harness-wallet-backend-3e22515a.json` | `1b4f9ae566d5ef28` | wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 894 entries, manifest c3876b18f4d8682e5626d9995acbde1f78278c0b045f69e1f68fa33409afe3a9 |
 | conformance | `findings/inputs/conformance-rust.json` | `e2bbfbdea883fedb` | corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0 |
 | conformance | `findings/inputs/conformance-go.json` | `5b18d48e65f61941` | corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
 | conformance | `findings/inputs/conformance-js.json` | `b2e054f4d50d3dbd` | corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 |
-| lint | `findings/inputs/lint-wallet-backend-e967ce8b.json` | `86903a4dd71e36e3` | wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 1 finding(s), 0 baselined, 0 suppressed |
+| lint | `findings/inputs/lint-wallet-backend-3e22515a.json` | `86903a4dd71e36e3` | wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 1 finding(s), 0 baselined, 0 suppressed |

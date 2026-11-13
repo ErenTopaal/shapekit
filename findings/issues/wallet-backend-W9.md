@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/effects_horizon.go` line 122](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/effects_horizon.go#L122): `addAccountCreatedEffects` emits Horizon's `signer_created` effect for the new account's master key, which becomes a `SIGNER`/`ADD` row. The ledger shows no signer: the master key's weight is threshold 0 of the new account entry, and no signer entry is added.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/effects_horizon.go` line 122](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/effects_horizon.go#L122): `addAccountCreatedEffects` emits Horizon's `signer_created` effect for the new account's master key, which becomes a `SIGNER`/`ADD` row. The ledger shows no signer: the master key's weight is threshold 0 of the new account entry, and no signer entry is added.
 
 Severity: wrong-data. CAPs: CAP-0033.
 
@@ -15,7 +15,7 @@ Corpus entry `cap33.sponsorship.p30-sponsored-account-envelope` of the shapekit 
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

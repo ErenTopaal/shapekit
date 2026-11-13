@@ -2,6 +2,30 @@
 
 A dated public log of what has landed. Newest entry first.
 
+## 2026-11-13: wallet-backend and stellar-rpc pins moved to current upstream
+
+- wallet-backend's current pin moves from `e967ce8b` to `3e22515a` (`main` on 2026-11-13). The
+  two commits between them, #803 (Blend pool names: byte and length checks on decode) and #802
+  (Blend decimals capped at 70 on ingest and when serving), change only Blend contract data
+  decoding and the Blend GraphQL resolvers; no indexer processor or data package changed.
+  `e967ce8b` stays pinned as the fixed side of #716 (`wallet-backend-issue716-fixed`).
+- Harness at the new pin, every chain on both networks, two rounds in one process: 894
+  entries, 674 pass, 102 mishandled, 40 dropped, 78 out-of-scope; both rounds gave the same
+  verdicts, harness peak 27.2 MB then 30.1 MB (within the 16 MiB allowance), target peak 91 MB
+  of the 4 GiB limit. Against the `e967ce8b` run every shared entry has the same verdict and the
+  same problems; the four new entries are the protocol 9 native trustline chain, out of scope.
+  The wallet-backend reproductions all hold. `indexerlint` still reports the one IDX002
+  finding (`walkInvocation`), unchanged.
+- The findings inputs, the per pull request expectations and the wallet-backend drafts now
+  name `3e22515a`. No new failure class: 22 findings, 494 failures, 0 unmapped.
+- stellar-rpc pin moves to `v30.0.1` (commit `6b6ec60c`, image digest recorded in `pins.toml`),
+  the release the replay server already followed. Its JSON-RPC behaviour is documented in
+  `docs/replay-server.md`.
+- Every other Stellar pin was already the newest stable release (stellar-core 30.0.0,
+  stellar-xdr 30.0.0, `@stellar/stellar-sdk` 17.4.0, go-stellar-sdk v0.9.0, soroban-sdk 29.0.1,
+  stellar-etl v2.8.34). wallet-backend at `3e22515a` still builds on go-stellar-sdk v0.8.0, so
+  the adapters stay on it.
+
 ## 2026-11-13: corpus data audit fixes
 
 Fixes from an audit of the corpus data against the RFP.

@@ -6,7 +6,7 @@
       "path": "findings/inputs/conformance-go.json",
       "sha256": "5b18d48e65f61941c072677c13a39db15c23bd7635b96fd95d8f53a5b570ddad",
       "from": "target/conformance/go/divergence-matrix.json",
-      "from_sha256": "05ec9f52fcbf0e07485c640eda1fec3d80d8a549b182d2722318f68885286f5b",
+      "from_sha256": "e481571bf8131b306716a3d63eb1b7f78dcb40bfd850845820bee5f7aaa97ea7",
       "command": "shapekit conformance run --sdk go --all-versions --out target/conformance/go",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
@@ -16,7 +16,7 @@
       "path": "findings/inputs/conformance-js.json",
       "sha256": "b2e054f4d50d3dbdb134f14c41825a24ff54fd33713437e22426d5df6d3d5fb2",
       "from": "target/conformance/js/divergence-matrix.json",
-      "from_sha256": "a17075d463828685ad3cd1a23749dc15a3b1dbc4edd6b1849915e367b70c6ac2",
+      "from_sha256": "e533d2f9990d1ceeea644d9e8d2df8bb3c47af6a007fd41ab36bb8380c0e4f5b",
       "command": "shapekit conformance run --sdk js --all-versions --out target/conformance/js",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0"
@@ -26,28 +26,28 @@
       "path": "findings/inputs/conformance-rust.json",
       "sha256": "e2bbfbdea883fedb31f73355d4fdb371adac624c88cd11bfda04690118d70f51",
       "from": "target/conformance/rust/divergence-matrix.json",
-      "from_sha256": "c497cc56ec0bbc0aad70a32ef84a63a7c9d609ebedf1379c86d80d2bb93f8b9b",
+      "from_sha256": "f5ca43a81c2dbcc60018fbf5f92ba3694e040aa5983a437b4f46010666b7bbb9",
       "command": "shapekit conformance run --sdk rust --all-versions --out target/conformance/rust",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
       "kind": "harness",
-      "path": "findings/inputs/harness-wallet-backend-e967ce8b.json",
-      "sha256": "e4de2a361db1774c0153c53c655c753ecd5b1bc0a1bc3d3ebdb3f929afea6b62",
-      "from": "target/findings/wallet-backend-e967ce8b/harness-report.json",
-      "from_sha256": "e4de2a361db1774c0153c53c655c753ecd5b1bc0a1bc3d3ebdb3f929afea6b62",
-      "command": "shapekit harness run --network both --adapter \"adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967\" --out target/findings/wallet-backend-e967ce8b",
+      "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
+      "sha256": "1b4f9ae566d5ef28364159f361a903818554195fbc85db5d98c7187e36b9006f",
+      "from": "target/findings/wallet-backend-3e22515a/harness-report.json",
+      "from_sha256": "1b4f9ae566d5ef28364159f361a903818554195fbc85db5d98c7187e36b9006f",
+      "command": "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a",
       "reduction": "none",
-      "describes": "wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 890 entries, manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760"
+      "describes": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 894 entries, manifest c3876b18f4d8682e5626d9995acbde1f78278c0b045f69e1f68fa33409afe3a9"
     },
     {
       "kind": "lint",
-      "path": "findings/inputs/lint-wallet-backend-e967ce8b.json",
+      "path": "findings/inputs/lint-wallet-backend-3e22515a.json",
       "sha256": "86903a4dd71e36e373196a79b9f8d1badba8c96e67074d0bd6e458d28e27f068",
-      "from": "target/findings/indexerlint-wallet-backend-e967ce8b.json",
+      "from": "target/findings/indexerlint-wallet-backend-3e22515a.json",
       "from_sha256": "86903a4dd71e36e373196a79b9f8d1badba8c96e67074d0bd6e458d28e27f068",
-      "command": "indexerlint -format json ./... (in a checkout of stellar/wallet-backend at e967ce8b7362b79c277e700e789181d76fbb5967)",
+      "command": "indexerlint -format json ./... (in a checkout of stellar/wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)",
       "reduction": "none",
       "describes": "1 finding(s), 0 baselined, 0 suppressed"
     }

@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/token_transfer.go` line 293](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/token_transfer.go#L293): `handleTransfer` adds the `ACCOUNT`/`CREATE` row only for `OperationTypeCreateAccount`. Since protocol 23 a native SAC transfer to a G address that does not exist creates the account (CAP-73); the meta shows the new account entry, but the operation is `InvokeHostFunction`, so only the balance credit is stored.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` line 293](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L293): `handleTransfer` adds the `ACCOUNT`/`CREATE` row only for `OperationTypeCreateAccount`. Since protocol 23 a native SAC transfer to a G address that does not exist creates the account (CAP-73); the meta shows the new account entry, but the operation is `InvokeHostFunction`, so only the balance credit is stored.
 
 Severity: data-loss. CAPs: CAP-0046-06, CAP-0073.
 
@@ -15,7 +15,7 @@ Corpus entry `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope` of the 
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

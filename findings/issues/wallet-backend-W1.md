@@ -5,7 +5,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/participants.go` line 66](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/participants.go#L66): `participantsForMeta` returns at once when `meta.Operations` (the V0 arm of the `TransactionMeta` union) is nil, which it is for every v1 to v4 meta, so the meta-derived participant loop never runs. Participants then come only from the envelope, operation participants and fee changes.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/participants.go` line 66](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/participants.go#L66): `participantsForMeta` returns at once when `meta.Operations` (the V0 arm of the `TransactionMeta` union) is nil, which it is for every v1 to v4 meta, so the meta-derived participant loop never runs. Participants then come only from the envelope, operation participants and fee changes.
 
 Severity: data-loss. CAPs: CAP-0015, CAP-0023, CAP-0035, CAP-0067.
 
@@ -17,7 +17,7 @@ Corpus entry `cap23.claimable-balances.p30-claim-through-depth-4-envelope` of th
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

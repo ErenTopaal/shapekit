@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/token_transfer.go` line 123](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/token_transfer.go#L123): `setToMuxedID` keeps the CAP-67 `to_muxed_id` only when it is an id (`ttp.MuxedInfo_Id`). Core writes the transaction memo there when the destination is not muxed: text as `string`, hash and return as `bytes`. Those values are dropped, so the stored credit has no `to_muxed_id` although the event carries one.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` line 123](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L123): `setToMuxedID` keeps the CAP-67 `to_muxed_id` only when it is an id (`ttp.MuxedInfo_Id`). Core writes the transaction memo there when the destination is not muxed: text as `string`, hash and return as `bytes`. Those values are dropped, so the stored credit has no `to_muxed_id` although the event carries one.
 
 Severity: data-loss. CAPs: CAP-0019, CAP-0024, CAP-0067.
 
@@ -15,7 +15,7 @@ Corpus entry `classic.memo-bytes.p30-memo-ff` of the shapekit corpus: chain `cla
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

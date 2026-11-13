@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/token_transfer.go` line 263](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/token_transfer.go#L263): `handleTransfer` writes a single DEBIT for `CreateClaimableBalance` and `LiquidityPoolDeposit` and a single CREDIT for `ClaimClaimableBalance` and `LiquidityPoolWithdraw`, skips any other transfer touching a claimable balance, and reduces a transfer with a liquidity pool to the account side (`handleTransfersWithLiquidityPool`). The B or L end of the transfer, which the ledger's CAP-67 event names, is never stored, so the stored movement has no counterparty.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` line 263](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L263): `handleTransfer` writes a single DEBIT for `CreateClaimableBalance` and `LiquidityPoolDeposit` and a single CREDIT for `ClaimClaimableBalance` and `LiquidityPoolWithdraw`, skips any other transfer touching a claimable balance, and reduces a transfer with a liquidity pool to the account side (`handleTransfersWithLiquidityPool`). The B or L end of the transfer, which the ledger's CAP-67 event names, is never stored, so the stored movement has no counterparty.
 
 Severity: data-loss. CAPs: CAP-0023, CAP-0033, CAP-0035, CAP-0038, CAP-0067.
 
@@ -15,7 +15,7 @@ Corpus entry `cap23.claimable-balances.p30-claim-through-depth-4-envelope` of th
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.

@@ -3,7 +3,7 @@
 
 ## What happens
 
-At e967ce8b7362b79c277e700e789181d76fbb5967, [`internal/indexer/processors/contract_deploy.go` line 36](https://github.com/stellar/wallet-backend/blob/e967ce8b7362b79c277e700e789181d76fbb5967/internal/indexer/processors/contract_deploy.go#L36): `ContractDeployProcessor.ProcessOperation` records a contract creation for the operation's own `CreateContract` only when its preimage is `FromAddress` (`emitTopLevel` skips `FromAsset`, the Stellar Asset Contract), and for nested deploys only when the deploy is declared in an auth entry (`walkInvocation`). A SAC deployment, or a contract deployed by another contract without an auth entry for it, creates a contract instance in the meta and gets no `ACCOUNT`/`CREATE` row.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/contract_deploy.go` line 36](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/contract_deploy.go#L36): `ContractDeployProcessor.ProcessOperation` records a contract creation for the operation's own `CreateContract` only when its preimage is `FromAddress` (`emitTopLevel` skips `FromAsset`, the Stellar Asset Contract), and for nested deploys only when the deploy is declared in an auth entry (`walkInvocation`). A SAC deployment, or a contract deployed by another contract without an auth entry for it, creates a contract instance in the meta and gets no `ACCOUNT`/`CREATE` row.
 
 Severity: data-loss. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0073, CAP-0085.
 
@@ -15,7 +15,7 @@ Corpus entry `cap73.sac-trust.p28-deploy-xlm-sac-envelope` of the shapekit corpu
 
 ```sh
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967"
+shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
 ```
 
 The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.
