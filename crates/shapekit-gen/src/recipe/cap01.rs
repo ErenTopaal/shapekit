@@ -27,8 +27,8 @@ use ed25519_dalek::SigningKey;
 use shapekit_core_driver::chain::Applied;
 use shapekit_core_driver::keys::{account_id, muxed_account};
 use stellar_xdr::{
-    AccountMergeResult, BumpSequenceOp, BumpSequenceResult, OperationBody, OperationResult,
-    OperationResultTr, SequenceNumber, TransactionResultResult,
+    AccountMergeResult, BumpSequenceOp, BumpSequenceResult, LedgerEntryChange, OperationBody,
+    OperationResult, OperationResultTr, SequenceNumber, TransactionMeta, TransactionResultResult,
 };
 
 use super::{ChainCtx, Recipe, Selector, Spec};
@@ -129,11 +129,24 @@ impl Recipe for BumpSequence {
             seq(ctx, &alice)? == before + 1,
             "a bump behind the sequence number should only consume the transaction's own"
         );
+        // core still loads and writes back the source account, so the operation meta holds a
+        // STATE and an UPDATED change with the same entry, which an indexer sees as a change
+        let TransactionMeta::V4(meta) = &applied.meta else {
+            bail!("expected TransactionMeta v4 at protocol {}", self.protocol);
+        };
+        let changes = meta.operations.first().map(|o| o.changes.as_slice());
+        ensure!(
+            matches!(
+                changes,
+                Some([LedgerEntryChange::State(a), LedgerEntryChange::Updated(b)]) if a == b
+            ),
+            "the bump behind should leave an identical STATE and UPDATED pair, core wrote {changes:?}"
+        );
         ctx.capture(
             "bump-behind",
             Selector::ledger_of(&applied),
             Spec::new(
-                "bump sequence to 1, behind the source's sequence number: it succeeds and changes nothing beyond the transaction's own sequence number",
+                "bump sequence to 1, behind the source's sequence number: it succeeds and changes nothing beyond the transaction's own sequence number, yet the operation meta holds a STATE and an UPDATED change of the source account with identical entries",
             )
             .fields(&["op.bump_sequence.bump_to"]),
         )?;

@@ -1,0 +1,62 @@
+{
+  "caps": [
+    "CAP-0002",
+    "CAP-0028"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "classic.failed-tx",
+  "fields_exercised": [
+    "op.change_trust.line",
+    "op.change_trust.limit",
+    "tx.v0.source_account_ed25519"
+  ],
+  "flags": [
+    "below-protocol-valid"
+  ],
+  "id": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ChangeTrust with a native line in a v0 envelope at protocol 9: doCheckValid accepts it before protocol 10, doApply throws, and core records tx_internal_error in the ledger, charging the fee and consuming the sequence number",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 9,
+    "introduced": 13,
+    "valid_max": 12,
+    "valid_min": 9
+  },
+  "source": {
+    "chain": "classic.failed-tx.change-trust-native.p9",
+    "class": "local-core",
+    "ledger_seq": 65,
+    "normalization": "key-stable",
+    "recipe": "classic.failed-tx.change-trust-native",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "tx_meta_version": 2,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.expected.json",
+      "expected_json_sha256": "09db251913755e4223f144946bac1827d84a62393f83a583005a1a62681a676f",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.oracle.json",
+      "oracle_sha256": "1bb2c7710d349376166840747a3cd42d69904a887c7a904104b169d8cee81169",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.xdr",
+      "xdr_sha256": "12335f787c34765b4aa880a5a0d3015116f39f19900bb2135d5f17fc6832be41"
+    },
+    "testnet": {
+      "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.expected.json",
+      "expected_json_sha256": "fa3100fc876e66bec2482dcfb479fff18019c78c45e30ed97dbe26121865679d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.oracle.json",
+      "oracle_sha256": "f6367df475bdc10520c701d6bb71678c0456b180c8fa0121da0efde6801ac478",
+      "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.xdr",
+      "xdr_sha256": "d581c59faf3d7691fbb89a6858efeae974d3330a36e2cd953114c316e541934f"
+    }
+  },
+  "xdr_type": "TransactionResultMeta"
+}

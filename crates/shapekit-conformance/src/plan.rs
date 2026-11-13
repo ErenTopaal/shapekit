@@ -3,11 +3,13 @@
 
 use std::path::Path;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use base64::Engine as _;
 use base64::engine::general_purpose::STANDARD as B64;
 use serde_json::{Map, Value, json};
-use shapekit_manifest::{DecodeExpectation, Entry, EntryKind, VectorFile, decode_depth};
+use shapekit_manifest::{
+    DecodeExpectation, Entry, EntryKind, VectorFile, decode_depth, read_verified,
+};
 use stellar_xdr::{Limits, ReadXdr, ScVal};
 
 use crate::testee::parse_deep;
@@ -80,8 +82,9 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
     };
     let mut out = Vec::new();
     for (variant, v) in entry.variants.iter() {
-        let bytes = std::fs::read(corpus.join(&v.xdr_file))
-            .with_context(|| format!("{}: reading {}", entry.id, v.xdr_file))?;
+        // an edited manifest must not point outside the corpus or at stale bytes
+        let bytes = read_verified(corpus, &v.xdr_file, Some(&v.xdr_sha256))
+            .map_err(|e| anyhow!("{}: {e}", entry.id))?;
         let b64 = B64.encode(&bytes);
         let decode_request = |op: &str| {
             obj(json!({
@@ -111,8 +114,12 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                     source: source.clone(),
                 });
                 if let Some(json_file) = &v.expected_json_file {
-                    let text = std::fs::read_to_string(corpus.join(json_file))
-                        .with_context(|| format!("{}: reading {json_file}", entry.id))?;
+                    let sha = v
+                        .expected_json_sha256
+                        .as_deref()
+                        .with_context(|| format!("{}: {json_file} has no sha256", entry.id))?;
+                    let text = read_verified_text(corpus, json_file, sha)
+                        .map_err(|e| anyhow!("{}: {e}", entry.id))?;
                     let expected = parse_deep(&text)
                         .with_context(|| format!("{}: parsing {json_file}", entry.id))?;
                     let json_source = format!(
@@ -181,6 +188,11 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
     Ok(out)
 }
 
+fn read_verified_text(corpus: &Path, rel: &str, sha256: &str) -> Result<String, String> {
+    let bytes = read_verified(corpus, rel, Some(sha256))?;
+    String::from_utf8(bytes).map_err(|e| format!("{rel} is not utf-8: {e}"))
+}
+
 fn vector_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
     let Some(file) = &entry.vector else {
         bail!(
@@ -189,8 +201,8 @@ fn vector_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
             entry.kind
         );
     };
-    let text = std::fs::read_to_string(corpus.join(&file.path))
-        .with_context(|| format!("{}: reading {}", entry.id, file.path))?;
+    let text = read_verified_text(corpus, &file.path, &file.sha256)
+        .map_err(|e| anyhow!("{}: {e}", entry.id))?;
     let vf: VectorFile = serde_json::from_str(&text)
         .with_context(|| format!("{}: parsing {}", entry.id, file.path))?;
     let mut out = Vec::new();

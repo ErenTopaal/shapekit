@@ -348,9 +348,11 @@ pub struct NotImported {
 }
 
 /// For every family fragment, the smallest golden ledger whose signature matches it (ties
-/// broken by file path and record), among ledgers of at most [`MAX_IMPORT_BYTES`]. A ledger
-/// chosen for several fragments of one family is one selection. Families no golden matches get
-/// no selection; fragments matched only by larger ledgers are returned as not imported.
+/// broken by file path and record), among ledgers of at most [`MAX_IMPORT_BYTES`] whose
+/// protocol lies in the family's `protocol_valid` range. A ledger chosen for several fragments
+/// of one family is one selection. Families no golden matches get no selection; fragments
+/// matched only by larger ledgers, or only by ledgers below the family's range, are returned as
+/// not imported.
 pub fn select(set: &GoldenSet, registry: &Registry) -> Result<(Vec<Selection>, Vec<NotImported>)> {
     let families = registry
         .families
@@ -361,18 +363,41 @@ pub fn select(set: &GoldenSet, registry: &Registry) -> Result<(Vec<Selection>, V
     for family in &families.families {
         let mut chosen: BTreeMap<usize, Vec<String>> = BTreeMap::new();
         for fragment in &family.signature {
-            let best = set
-                .lcms
-                .iter()
-                .enumerate()
-                .filter(|(_, l)| fragment_matches(&l.signature, fragment))
-                .min_by(|(_, a), (_, b)| {
-                    a.bytes
-                        .len()
-                        .cmp(&b.bytes.len())
-                        .then_with(|| set.files[a.file].path.cmp(&set.files[b.file].path))
-                        .then_with(|| a.record.cmp(&b.record))
+            let smallest = |in_range_only: bool| {
+                set.lcms
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, l)| {
+                        !in_range_only || in_family_range(family, ledger_version_of(set, l))
+                    })
+                    .filter(|(_, l)| fragment_matches(&l.signature, fragment))
+                    .min_by(|(_, a), (_, b)| {
+                        a.bytes
+                            .len()
+                            .cmp(&b.bytes.len())
+                            .then_with(|| set.files[a.file].path.cmp(&set.files[b.file].path))
+                            .then_with(|| a.record.cmp(&b.record))
+                    })
+            };
+            // a ledger below the family's range would carry the family's cap tags at a protocol
+            // where those caps did not exist yet, so such ledgers are only reported
+            let best = smallest(true);
+            if best.is_none()
+                && let Some((_, l)) = smallest(false)
+            {
+                skipped.push(NotImported {
+                    family: family.id.clone(),
+                    fragment: fragment.clone(),
+                    path: set.files[l.file].path.clone(),
+                    record: l.record,
+                    bytes: l.bytes.len(),
+                    reason: format!(
+                        "only golden ledgers outside the family's protocol range carry it (smallest at protocol {})",
+                        ledger_version_of(set, l)
+                    ),
                 });
+                continue;
+            }
             match best {
                 Some((i, l)) if l.bytes.len() <= MAX_IMPORT_BYTES => {
                     chosen.entry(i).or_default().push(fragment.clone());
@@ -399,6 +424,36 @@ pub fn select(set: &GoldenSet, registry: &Registry) -> Result<(Vec<Selection>, V
         }
     }
     Ok((out, skipped))
+}
+
+fn ledger_version_of(set: &GoldenSet, lcm: &GoldenLcm) -> u32 {
+    set.files[lcm.file].records[lcm.record].ledger_version
+}
+
+fn in_family_range(family: &Family, protocol: u32) -> bool {
+    protocol >= family.protocol_valid.min && family.protocol_valid.max.is_none_or(|m| protocol <= m)
+}
+
+/// The family's caps that exist at `protocol`: a cap whose registry protocol is above it
+/// describes nothing the ledger can hold. Caps without a protocol in the registry are kept.
+pub fn caps_at(family: &Family, registry: &Registry, protocol: u32) -> Result<Vec<String>> {
+    let caps: Vec<String> = family
+        .caps
+        .iter()
+        .filter(|id| {
+            registry
+                .cap(id)
+                .and_then(|c| c.protocol)
+                .is_none_or(|p| p <= protocol)
+        })
+        .cloned()
+        .collect();
+    ensure!(
+        !caps.is_empty(),
+        "family {} has no cap that exists at protocol {protocol}",
+        family.id
+    );
+    Ok(caps)
 }
 
 pub fn entry_id(family: &str, file: &GoldenFile, record: usize) -> String {
@@ -436,7 +491,8 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
         let lcm = &set.lcms[sel.lcm];
         let file = &set.files[lcm.file];
         let id = entry_id(&family.id, file, lcm.record);
-        let entry = golden_entry(set, family, sel, &id)?;
+        let caps = caps_at(family, registry, file.records[lcm.record].ledger_version)?;
+        let entry = golden_entry(set, family, sel, &id, caps)?;
         entry_io::write_xdr_entry(corpus, entry, "any", &lcm.bytes)?;
         report
             .written
@@ -459,7 +515,13 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
     Ok(report)
 }
 
-fn golden_entry(set: &GoldenSet, family: &Family, sel: &Selection, id: &str) -> Result<Entry> {
+fn golden_entry(
+    set: &GoldenSet,
+    family: &Family,
+    sel: &Selection,
+    id: &str,
+    caps: Vec<String>,
+) -> Result<Entry> {
     let lcm = &set.lcms[sel.lcm];
     let file = &set.files[lcm.file];
     let rec = &file.records[lcm.record];
@@ -472,7 +534,7 @@ fn golden_entry(set: &GoldenSet, family: &Family, sel: &Selection, id: &str) -> 
         id: id.to_string(),
         kind: EntryKind::Xdr,
         family: family.id.clone(),
-        caps: family.caps.clone(),
+        caps,
         protocol: EntryProtocol {
             introduced: family.protocol_introduced,
             generated_at: Some(rec.ledger_version),

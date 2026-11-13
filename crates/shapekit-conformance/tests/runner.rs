@@ -17,6 +17,7 @@ use shapekit_conformance::testee::{ErrorClass, Failure, Reply, Testee};
 use shapekit_conformance::versions::{
     MAX_RESPONSE_LINE, MemoryLimit, MemoryResource, Target, VersionsFile,
 };
+use shapekit_manifest::sha256_hex;
 use stellar_xdr::{Limits, ScMap, ScMapEntry, ScVal, WriteXdr};
 
 fn root() -> PathBuf {
@@ -230,16 +231,15 @@ fn corpus() -> Corpus {
     let mut entries = Vec::new();
 
     let u32_7 = enc(&ScVal::U32(7));
+    let accept_json = b"{\"u32\": 7}\n";
     write(&c.join("entries/t/t.accept/any.xdr"), &u32_7);
-    write(
-        &c.join("entries/t/t.accept/any.expected.json"),
-        b"{\"u32\": 7}\n",
-    );
+    write(&c.join("entries/t/t.accept/any.expected.json"), accept_json);
     let mut accept = entry("t.accept", "xdr", "must-accept");
     accept["xdr_type"] = json!("ScVal");
     accept["variants"] = json!({"any": {
-        "xdr_file": "entries/t/t.accept/any.xdr", "xdr_sha256": "unchecked",
-        "expected_json_file": "entries/t/t.accept/any.expected.json"}});
+        "xdr_file": "entries/t/t.accept/any.xdr", "xdr_sha256": sha256_hex(&u32_7),
+        "expected_json_file": "entries/t/t.accept/any.expected.json",
+        "expected_json_sha256": sha256_hex(accept_json)}});
     entries.push(accept);
 
     let mut trailing = u32_7.clone();
@@ -248,7 +248,7 @@ fn corpus() -> Corpus {
     let mut reject = entry("t.reject", "xdr", "must-reject");
     reject["xdr_type"] = json!("ScVal");
     reject["variants"] = json!({"any": {
-        "xdr_file": "entries/t/t.reject/any.xdr", "xdr_sha256": "unchecked"}});
+        "xdr_file": "entries/t/t.reject/any.xdr", "xdr_sha256": sha256_hex(&trailing)}});
     entries.push(reject);
 
     // the expectation is the strkey-text order, so a correct sdk diverges from it: a stand-in
@@ -260,14 +260,14 @@ fn corpus() -> Corpus {
         json!({"op": "asset_order", "a": {"xdr": usd(0x3a)}, "b": {"xdr": usd(0)},
                             "expected": "less"}),
     ];
+    let text = serde_json::to_string(&json!({"entry": wrong, "cases": cases})).unwrap();
     write(
         &c.join("vectors/ordering/t.order-wrong.json"),
-        serde_json::to_string(&json!({"entry": wrong, "cases": cases}))
-            .unwrap()
-            .as_bytes(),
+        text.as_bytes(),
     );
     let mut wrong = wrong;
-    wrong["vector"] = json!({"path": "vectors/ordering/t.order-wrong.json", "sha256": "unchecked"});
+    wrong["vector"] = json!({"path": "vectors/ordering/t.order-wrong.json",
+        "sha256": sha256_hex(text.as_bytes())});
     entries.push(wrong);
 
     let map = ScVal::Map(Some(ScMap(
@@ -283,15 +283,14 @@ fn corpus() -> Corpus {
         json!({"op": "to_native", "value": {"xdr": B64.encode(enc(&map))},
                             "expected": {"rule": "no-entry-lost", "entry_count": 1}}),
     ];
+    let text = serde_json::to_string(&json!({"entry": native, "cases": cases})).unwrap();
     write(
         &c.join("vectors/native-projection/t.native.json"),
-        serde_json::to_string(&json!({"entry": native, "cases": cases}))
-            .unwrap()
-            .as_bytes(),
+        text.as_bytes(),
     );
     let mut native = native;
-    native["vector"] =
-        json!({"path": "vectors/native-projection/t.native.json", "sha256": "unchecked"});
+    native["vector"] = json!({"path": "vectors/native-projection/t.native.json",
+        "sha256": sha256_hex(text.as_bytes())});
     entries.push(native);
 
     let manifest = json!({

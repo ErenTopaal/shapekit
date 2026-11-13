@@ -193,6 +193,7 @@
           "type": "integer"
         },
         "valid_max": {
+          "description": "The highest protocol at which these bytes are a valid ledger value, absent when the\nshape is still valid at the current protocol. A `below-protocol-valid` entry always has\none, the last protocol before its family's shape existed.",
           "format": "uint32",
           "minimum": 0,
           "type": [
@@ -201,6 +202,7 @@
           ]
         },
         "valid_min": {
+          "description": "The lowest protocol at which these bytes are a valid ledger value: the family's\n`protocol_valid.min`, or for a `below-protocol-valid` entry the protocol it was\nrecorded at.",
           "format": "uint32",
           "minimum": 0,
           "type": "integer"

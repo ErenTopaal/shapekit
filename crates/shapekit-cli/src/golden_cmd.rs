@@ -39,8 +39,8 @@ pub fn import(
     }
     for n in &report.not_imported {
         println!(
-            "not imported: {} fragment {} (smallest carrier {} record {}, {} bytes)",
-            n.family, n.fragment, n.path, n.record, n.bytes
+            "not imported: {} fragment {} (smallest carrier {} record {}, {} bytes): {}",
+            n.family, n.fragment, n.path, n.record, n.bytes, n.reason
         );
     }
     let families = registry.families.as_ref().map_or(0, |f| f.families.len());
@@ -48,6 +48,19 @@ pub fn import(
         "imported {total} entries for {} of {families} families; wrote {}",
         report.written.len(),
         report.index_path.display()
+    );
+    // the import rewrites every golden entry.json without its oracle reference, so the oracle
+    // runs here; otherwise a re-import of an unchanged set would not be a no-op
+    let oracle = shapekit_oracle::corpus::run(corpus)
+        .with_context(|| format!("running the oracle over {}", corpus.display()))?;
+    let golden_oracles = oracle
+        .written
+        .iter()
+        .filter(|(id, _, _)| report.written.values().flatten().any(|w| w == id))
+        .count();
+    println!(
+        "oracle: {golden_oracles} golden oracle files written ({} in the corpus)",
+        oracle.written.len()
     );
     Ok(true)
 }

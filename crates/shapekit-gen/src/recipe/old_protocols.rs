@@ -17,6 +17,9 @@
 //!   which `ManageDataOpFrame::doCheckValid` refuses before protocol 2. As a
 //!   validity check it stops the transaction at submission, so no ledger can
 //!   hold the result; the refused envelope is the only record.
+//! - [`ChangeTrustNative`], `classic.failed-tx` at protocol 9: a native
+//!   ChangeTrust line, which `ChangeTrustOpFrame::doCheckValid` accepts before
+//!   protocol 10 and `doApply` throws on, so the ledger holds tx_internal_error.
 //! - [`Inflation`], `cap26.inflation` at 11 and 12: the inflation operation
 //!   paying a voted destination and answering NOT_TIME once the weekly rounds
 //!   have caught up with the close time, and at 12 the same operation refused
@@ -347,6 +350,74 @@ impl Recipe for ManageDataProtocol1 {
             "core answered {:?}, expected manage_data not_supported_yet",
             r.result
         );
+        Ok(())
+    }
+}
+
+/// `classic.failed-tx` at protocol 9: ChangeTrust with a native line. Before
+/// protocol 10 `ChangeTrustOpFrame::doCheckValid` lets a native line through,
+/// `doApply` throws, and `TransactionFrame::applyOperations` turns the
+/// exception into txINTERNAL_ERROR because `HALT_ON_INTERNAL_TRANSACTION_ERROR`
+/// is off by default (`Config.cpp`). The release build closes the ledger with
+/// that result, so the native line reaches a tx set.
+pub struct ChangeTrustNative {
+    pub protocol: u32,
+}
+
+impl Recipe for ChangeTrustNative {
+    fn id(&self) -> &str {
+        "classic.failed-tx.change-trust-native"
+    }
+
+    fn family(&self) -> &str {
+        super::failed_tx::FAMILY
+    }
+
+    fn protocol(&self) -> u32 {
+        self.protocol
+    }
+
+    fn emit_classic_events(&self) -> bool {
+        false
+    }
+
+    fn backfill_stellar_asset_events(&self) -> bool {
+        false
+    }
+
+    fn below_protocol_valid(&self) -> bool {
+        true
+    }
+
+    fn run(&self, ctx: &mut ChainCtx) -> Result<()> {
+        ensure!(
+            self.protocol < 10,
+            "doCheckValid refuses a native change trust line from protocol 10"
+        );
+        ctx.fund(&["holder"], BALANCE)?;
+        let holder = ctx.account("holder");
+        let env = ctx.classic(
+            &holder,
+            vec![OperationBody::ChangeTrust(ChangeTrustOp {
+                line: ChangeTrustAsset::Native,
+                limit: i64::MAX,
+            })],
+        )?;
+        let applied = ctx.submit_and_close_failing(&env)?;
+        ensure!(
+            matches!(
+                applied.result.result,
+                TransactionResultResult::TxInternalError
+            ),
+            "core answered {:?}, expected tx_internal_error",
+            applied.result.result
+        );
+        ctx.capture(
+            "change-trust-native-internal-error",
+            Selector::transaction(&applied),
+            Spec::new("ChangeTrust with a native line in a v0 envelope at protocol 9: doCheckValid accepts it before protocol 10, doApply throws, and core records tx_internal_error in the ledger, charging the fee and consuming the sequence number")
+                .fields(&["op.change_trust.line", "op.change_trust.limit", "tx.v0.source_account_ed25519"]),
+        )?;
         Ok(())
     }
 }

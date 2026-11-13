@@ -62,7 +62,7 @@ pub struct GenReport {
 }
 
 /// Flag on every entry of a chain recorded below its family's valid range.
-pub const BELOW_PROTOCOL_VALID: &str = "below-protocol-valid";
+pub use shapekit_manifest::BELOW_PROTOCOL_VALID;
 
 /// The node every recipe chain runs on. Diagnostic events stay off: core
 /// would add wall-clock timings to them (see the smoke chain).

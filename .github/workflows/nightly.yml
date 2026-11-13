@@ -70,6 +70,20 @@ jobs:
           tag=$(scripts/pin.sh tag stellar-core)
           "$RUNNER_TEMP/bin/shapekit" goldens verify --core-src "$RUNNER_TEMP/core" --tag "$tag" \
             --index "corpus/goldens/core-$tag/index.json"
+      - name: a re-import of the goldens changes nothing
+        # the importer at the pinned tag, run on a copy, must give back the committed golden
+        # entries, their oracle files, the golden index and the manifest byte for byte. a family
+        # fragment added to the registry without a re-import fails here
+        run: |
+          set -euo pipefail
+          tag=$(scripts/pin.sh tag stellar-core)
+          work="$RUNNER_TEMP/reimport"
+          mkdir -p "$work"
+          cp -r corpus registry pins.toml "$work/"
+          (cd "$work" &&
+            "$RUNNER_TEMP/bin/shapekit" import goldens --core-src "$RUNNER_TEMP/core" --tag "$tag" &&
+            "$RUNNER_TEMP/bin/shapekit" manifest build)
+          diff -r corpus "$work/corpus"
       - name: pull the pinned core test build by digest
         run: docker pull --quiet "$(scripts/pin.sh image stellar-core-buildtests)"
       - name: core's own check-lcm run

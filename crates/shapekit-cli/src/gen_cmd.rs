@@ -231,3 +231,111 @@ pub fn checkpoints(
     );
     Ok(true)
 }
+
+/// `shapekit gen verify-raw-order`: compares core's raw stream of every chain present in both
+/// corpora, ledger by ledger, and fails on any per-key order difference or any difference that
+/// is not a reordering.
+pub fn verify_raw_order(corpus: &Path, other: &Path) -> Result<bool> {
+    use shapekit_core_driver::canonical::{RawOrderStats, compare_raw_order};
+    use shapekit_core_driver::meta::read_all;
+
+    let chains = corpus.join("chains");
+    let mut names: Vec<String> = std::fs::read_dir(&chains)
+        .with_context(|| format!("reading {}", chains.display()))?
+        .map(|e| Ok(e?.file_name().to_string_lossy().into_owned()))
+        .collect::<std::io::Result<_>>()?;
+    names.sort();
+    let mut total = RawOrderStats::default();
+    let (mut compared, mut missing, mut ledgers, mut ok) = (0usize, Vec::new(), 0usize, true);
+    let mut identical = Vec::new();
+    for name in &names {
+        for network in ["testnet", "mainnet"] {
+            let rel = Path::new("chains")
+                .join(name)
+                .join(network)
+                .join("ledgers.xdr");
+            let (a, b) = (corpus.join(&rel), other.join(&rel));
+            if !a.exists() {
+                continue;
+            }
+            if !b.exists() {
+                missing.push(rel.display().to_string());
+                continue;
+            }
+            // byte-identical streams are counted apart: a copied corpus gives them too, and
+            // they say nothing about two runs
+            let same = std::fs::read(&a)? == std::fs::read(&b)?;
+            if same {
+                identical.push(format!("{name} {network}"));
+            }
+            let fa = read_all(&a).with_context(|| format!("reading {}", a.display()))?;
+            let fb = read_all(&b).with_context(|| format!("reading {}", b.display()))?;
+            let mut chain = RawOrderStats::default();
+            if fa.len() != fb.len() {
+                println!(
+                    "{name} {network}: {} ledgers against {}",
+                    fa.len(),
+                    fb.len()
+                );
+                ok = false;
+                continue;
+            }
+            for (x, y) in fa.iter().zip(fb.iter()) {
+                if x.ledger_seq != y.ledger_seq {
+                    bail!(
+                        "{name} {network}: ledger {} paired with {}",
+                        x.ledger_seq,
+                        y.ledger_seq
+                    );
+                }
+                let s = compare_raw_order(&x.meta, &y.meta)?;
+                if s.per_key_mismatches > 0 || s.content_mismatches > 0 {
+                    println!(
+                        "{name} {network} ledger {}: {} per-key order differences, {} content differences",
+                        x.ledger_seq, s.per_key_mismatches, s.content_mismatches
+                    );
+                }
+                chain.add(s);
+            }
+            ledgers += fa.len();
+            compared += 1;
+            println!(
+                "{name} {network}: {} ledgers, {} lists, {} reordered between keys, {} keys with 2+ changes, {} per-key differences, {} content differences",
+                fa.len(),
+                chain.lists,
+                chain.lists_reordered,
+                chain.multi_change_keys,
+                chain.per_key_mismatches,
+                chain.content_mismatches
+            );
+            ok &= chain.per_key_mismatches == 0 && chain.content_mismatches == 0;
+            total.add(chain);
+        }
+    }
+    for m in &missing {
+        println!("not in {}: {m}", other.display());
+    }
+    if !identical.is_empty() {
+        println!(
+            "{} of the {compared} recordings are byte-identical in both corpora: {}",
+            identical.len(),
+            identical.join(", ")
+        );
+    }
+    println!(
+        "{compared} chain recordings, {ledgers} ledgers, {} change lists: {} reordered between keys, {} keys with 2+ changes, {} per-key order differences, {} content differences",
+        total.lists,
+        total.lists_reordered,
+        total.multi_change_keys,
+        total.per_key_mismatches,
+        total.content_mismatches
+    );
+    if compared == 0 {
+        bail!(
+            "no chain is recorded in both {} and {}",
+            corpus.display(),
+            other.display()
+        );
+    }
+    Ok(ok)
+}

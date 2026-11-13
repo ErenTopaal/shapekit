@@ -147,7 +147,27 @@ impl ChainFile {
                 path.display()
             )));
         }
-        serde_json::from_value(v).map_err(|e| PackError::Format(format!("{}: {e}", path.display())))
+        let chain: ChainFile = serde_json::from_value(v)
+            .map_err(|e| PackError::Format(format!("{}: {e}", path.display())))?;
+        // every reader joins these to the chain directory, so an edited chain.json must not
+        // reach outside it
+        let lake_keys = chain.lake.batches.iter().map(|b| b.key.as_str());
+        for rel in [
+            chain.lake.dir.as_str(),
+            chain.stream_file.as_str(),
+            chain.archive.file.as_str(),
+        ]
+        .into_iter()
+        .chain(lake_keys)
+        {
+            if !shapekit_manifest::is_safe_relative(rel) {
+                return Err(PackError::Format(format!(
+                    "{}: {rel:?} is not a relative path inside the chain directory",
+                    path.display()
+                )));
+            }
+        }
+        Ok(chain)
     }
 
     fn write(&self, dir: &Path) -> Result<(), PackError> {

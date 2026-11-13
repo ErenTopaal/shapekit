@@ -325,3 +325,30 @@ fn archive_at_a_checkpoint() {
         "{err}"
     );
 }
+
+// readers join chain.json's file names to the chain directory, so one that leaves it is
+// refused when the file is read
+#[test]
+fn chain_json_paths_stay_inside_the_chain() {
+    let committed = corpus_chains().remove(0);
+    let text = std::fs::read_to_string(committed.join(CHAIN_FILE)).unwrap();
+    let v: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert!(ChainFile::read(&committed).is_ok());
+    for (pointer, bad) in [
+        ("/stream_file", "../ledgers.xdr"),
+        ("/archive/file", "/tmp/archive.tar"),
+        ("/lake/dir", "a/../../b"),
+        ("/lake/batches/0/key", "../x.xdr.zst"),
+    ] {
+        let tmp = tempfile::tempdir().unwrap();
+        let mut edited = v.clone();
+        *edited.pointer_mut(pointer).unwrap() = serde_json::Value::from(bad);
+        std::fs::write(
+            tmp.path().join(CHAIN_FILE),
+            serde_json::to_string(&edited).unwrap(),
+        )
+        .unwrap();
+        let err = ChainFile::read(tmp.path()).unwrap_err().to_string();
+        assert!(err.contains("not a relative path"), "{pointer}: {err}");
+    }
+}

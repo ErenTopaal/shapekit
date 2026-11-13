@@ -14,7 +14,7 @@
   "kind": "xdr",
   "lcm_version": 2,
   "linked_issues": [],
-  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of [2, 1, 2] transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+  "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with three clusters of 2, 2 and 1 transactions, in an order that differs between the testnet and mainnet variants: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,

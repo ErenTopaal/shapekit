@@ -249,6 +249,79 @@ pub fn permutation_equal(
     Ok(ca == cb)
 }
 
+/// What [`compare_raw_order`] found between two raw recordings of one ledger.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct RawOrderStats {
+    /// Change lists compared.
+    pub lists: usize,
+    /// Lists holding the same changes in a different order.
+    pub lists_reordered: usize,
+    /// Keys with two or more changes in one list.
+    pub multi_change_keys: usize,
+    /// Such keys whose changes came in a different order in the two recordings.
+    pub per_key_mismatches: usize,
+    /// Lists whose changes differ as a multiset, or ledgers that differ outside the lists:
+    /// the recordings are not reorderings of each other there.
+    pub content_mismatches: usize,
+}
+
+impl RawOrderStats {
+    pub fn add(&mut self, o: RawOrderStats) {
+        self.lists += o.lists;
+        self.lists_reordered += o.lists_reordered;
+        self.multi_change_keys += o.multi_change_keys;
+        self.per_key_mismatches += o.per_key_mismatches;
+        self.content_mismatches += o.content_mismatches;
+    }
+}
+
+/// Compares two raw recordings of the same ledger. The canonical form rests on core keeping
+/// each key's changes in one order across processes and varying only the order between keys;
+/// this measures exactly that on real output.
+pub fn compare_raw_order(
+    a: &LedgerCloseMeta,
+    b: &LedgerCloseMeta,
+) -> Result<RawOrderStats, stellar_xdr::Error> {
+    let mut stats = RawOrderStats::default();
+    let (la, lb) = (change_lists(a), change_lists(b));
+    if la.len() != lb.len() {
+        stats.lists = la.len().max(lb.len());
+        stats.content_mismatches = stats.lists;
+        return Ok(stats);
+    }
+    let (ma, mb) = (change_multisets(a)?, change_multisets(b)?);
+    let (ka, kb) = (per_key_sequences(a), per_key_sequences(b));
+    for i in 0..la.len() {
+        stats.lists += 1;
+        if ma[i] != mb[i] {
+            stats.content_mismatches += 1;
+            continue;
+        }
+        if la[i] != lb[i] {
+            stats.lists_reordered += 1;
+        }
+        // equal multisets give the same keys with the same counts in the same key order
+        for ((_, seq_a), (_, seq_b)) in ka[i].iter().zip(kb[i].iter()) {
+            if seq_a.len() < 2 {
+                continue;
+            }
+            stats.multi_change_keys += 1;
+            if seq_a != seq_b {
+                stats.per_key_mismatches += 1;
+            }
+        }
+    }
+    if stats.content_mismatches == 0 && stats.per_key_mismatches == 0 {
+        let (mut ca, mut cb) = (a.clone(), b.clone());
+        canonicalize_lcm(&mut ca)?;
+        canonicalize_lcm(&mut cb)?;
+        if ca != cb {
+            stats.content_mismatches += 1;
+        }
+    }
+    Ok(stats)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

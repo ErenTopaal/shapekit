@@ -277,12 +277,17 @@ impl Recipe for ParallelTxSet {
             "ledger {ledger}: the parallel phase holds {shape:?}, not the {} calls",
             envs.len()
         );
+        // the note is shared by both variants, and the cluster order is not: the recorded
+        // testnet and mainnet sets list the same sizes in a different order, so only the sizes
+        // go into it
+        let mut sizes = shape[0].clone();
+        sizes.sort_unstable_by(|a, b| b.cmp(a));
         ctx.capture(
             "five-calls-parallel-phase",
             Selector::Ledger(ledger),
             Spec::new(format!(
-                "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of {:?} transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
-                shape[0]
+                "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with three clusters of {}, {} and {} transactions, in an order that differs between the testnet and mainnet variants: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+                sizes[0], sizes[1], sizes[2]
             )),
         )
     }

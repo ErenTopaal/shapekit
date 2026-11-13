@@ -435,6 +435,8 @@ pub fn targets(file: &VersionsFile, opts: &RunOptions) -> Result<Vec<Target>> {
         .collect()
 }
 
+/// Loads the manifest and refuses any file reference that leaves the corpus, before a testee
+/// starts. The bytes are checked against their sha256 when each entry's checks are built.
 pub fn load_manifest(path: &Path) -> Result<(Manifest, PathBuf)> {
     let manifest =
         manifest_build::load(path).with_context(|| format!("loading {}", path.display()))?;
@@ -442,6 +444,21 @@ pub fn load_manifest(path: &Path) -> Result<(Manifest, PathBuf)> {
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
+    for e in &manifest.entries {
+        let files = e
+            .variants
+            .iter()
+            .flat_map(|(_, v)| std::iter::once(&v.xdr_file).chain(&v.expected_json_file))
+            .chain(e.vector.iter().map(|f| &f.path));
+        for f in files {
+            ensure!(
+                shapekit_manifest::is_safe_relative(f),
+                "{}: {f:?} in {} is not a path inside the corpus",
+                e.id,
+                path.display()
+            );
+        }
+    }
     Ok((manifest, corpus))
 }
 

@@ -10,6 +10,9 @@ pub const MANIFEST_SCHEMA_VERSION: u32 = 1;
 
 pub const TESTNET_PASSPHRASE: &str = "Test SDF Network ; September 2015";
 pub const MAINNET_PASSPHRASE: &str = "Public Global Stellar Network ; September 2015";
+/// The flag of a contrast entry: bytes from a protocol before its family's shape existed.
+/// Such an entry's `protocol.valid_max` ends before `protocol.introduced`.
+pub const BELOW_PROTOCOL_VALID: &str = "below-protocol-valid";
 
 /// The corpus manifest: a header and every entry, sorted by id. All file paths are relative
 /// to the directory holding `manifest.json` and use forward slashes.
@@ -107,7 +110,13 @@ pub struct EntryProtocol {
     /// The protocol the bytes were produced at; absent for vectors that have no protocol.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub generated_at: Option<u32>,
+    /// The lowest protocol at which these bytes are a valid ledger value: the family's
+    /// `protocol_valid.min`, or for a `below-protocol-valid` entry the protocol it was
+    /// recorded at.
     pub valid_min: u32,
+    /// The highest protocol at which these bytes are a valid ledger value, absent when the
+    /// shape is still valid at the current protocol. A `below-protocol-valid` entry always has
+    /// one, the last protocol before its family's shape existed.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub valid_max: Option<u32>,
 }

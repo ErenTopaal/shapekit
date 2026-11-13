@@ -328,13 +328,17 @@ fn colliding_entries() -> Result<Vec<ScMapEntry>> {
 
 fn integer_extremes() -> Result<ScVal> {
     vec_of(vec![
+        ScVal::U32(0),
         ScVal::U32(u32::MAX),
         ScVal::I32(i32::MIN),
         ScVal::I32(i32::MAX),
+        ScVal::U64(0),
         ScVal::U64(u64::MAX),
         ScVal::I64(i64::MIN),
         ScVal::I64(i64::MAX),
+        ScVal::Timepoint(TimePoint(0)),
         ScVal::Timepoint(TimePoint(u64::MAX)),
+        ScVal::Duration(Duration(0)),
         ScVal::Duration(Duration(u64::MAX)),
         ScVal::U128(UInt128Parts { hi: 0, lo: 0 }),
         ScVal::U128(UInt128Parts {

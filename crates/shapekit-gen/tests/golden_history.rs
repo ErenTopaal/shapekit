@@ -115,6 +115,38 @@ fn imported_goldens_match_the_committed_index() {
     }
 }
 
+// a golden carries the family's cap tags, so its ledger must lie in the family's range and
+// every tag must name a cap that existed at the ledger's protocol
+#[test]
+fn goldens_lie_in_their_family_range_and_carry_only_existing_caps() {
+    let registry = registry();
+    for e in entries_of(SourceClass::CoreGolden) {
+        let family = registry.family(&e.family).unwrap();
+        let at = e.protocol.generated_at.unwrap();
+        assert!(at >= family.protocol_valid.min, "{} at {at}", e.id);
+        assert!(
+            family.protocol_valid.max.is_none_or(|m| at <= m),
+            "{}",
+            e.id
+        );
+        assert!(
+            !e.flags.iter().any(|f| f == "below-protocol-valid"),
+            "{}",
+            e.id
+        );
+        assert_eq!(
+            e.caps,
+            golden::caps_at(family, &registry, at).unwrap(),
+            "{}",
+            e.id
+        );
+        for cap in &e.caps {
+            let p = registry.cap(cap).unwrap().protocol;
+            assert!(p.is_none_or(|p| p <= at), "{} tags {cap} at {at}", e.id);
+        }
+    }
+}
+
 // core writes a STATE change before every UPDATED and REMOVED change of an operation, and
 // every successful operation result has an operation meta; both hold in every golden
 #[test]
@@ -231,6 +263,27 @@ fn scan_import_and_verify_a_golden_tree() {
     // a second import replaces the first one's entries instead of piling up
     let again = golden::import(&mut set, &registry, &out).unwrap();
     assert_eq!(again.removed.len(), selections.len());
+
+    // with the family's range above the ledgers' protocol 30 nothing of it is imported; each
+    // fragment is reported with the reason instead
+    let mut raised = registry.clone();
+    for f in &mut raised.families.as_mut().unwrap().families {
+        if f.id == "cap35.clawback" {
+            f.protocol_valid.min = 31;
+        }
+    }
+    let (selections, skipped) = golden::select(&set, &raised).unwrap();
+    assert!(!selections.iter().any(|s| s.family == "cap35.clawback"));
+    let reported: Vec<_> = skipped
+        .iter()
+        .filter(|n| n.family == "cap35.clawback")
+        .collect();
+    assert!(!reported.is_empty());
+    assert!(
+        reported
+            .iter()
+            .all(|n| n.reason.contains("outside the family's protocol range"))
+    );
 }
 
 // the next-protocol tier goes through the same scan and import, records its tier in the

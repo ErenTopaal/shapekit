@@ -235,8 +235,30 @@ impl Checker<'_> {
                 p.valid_max, p.valid_min
             ));
         }
-        if p.valid_max.is_some_and(|max| max < p.introduced) {
+        let contrast = self.entry.flags.iter().any(|f| f == BELOW_PROTOCOL_VALID);
+        if contrast {
+            // a contrast entry shows a ledger from before the shape existed, so its range ends
+            // before the protocol that introduced the shape
+            match p.valid_max {
+                None => self.problem(format!(
+                    "a {BELOW_PROTOCOL_VALID} entry needs protocol.valid_max"
+                )),
+                Some(max) if max >= p.introduced => self.problem(format!(
+                    "a {BELOW_PROTOCOL_VALID} entry has protocol.valid_max {max}, not below protocol.introduced {}",
+                    p.introduced
+                )),
+                Some(_) => {}
+            }
+        } else if p.valid_max.is_some_and(|max| max < p.introduced) {
             self.problem("protocol.valid_max is before protocol.introduced");
+        }
+        if let Some(at) = p.generated_at
+            && (at < p.valid_min || p.valid_max.is_some_and(|max| at > max))
+        {
+            self.problem(format!(
+                "protocol.generated_at {at} is outside valid_min {} to valid_max {:?}; bytes core emitted at a protocol are valid there",
+                p.valid_min, p.valid_max
+            ));
         }
     }
 

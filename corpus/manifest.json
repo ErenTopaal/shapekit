@@ -68,7 +68,7 @@
       "kind": "xdr",
       "lcm_version": 2,
       "linked_issues": [],
-      "notes": "bump sequence to 1, behind the source's sequence number: it succeeds and changes nothing beyond the transaction's own sequence number",
+      "notes": "bump sequence to 1, behind the source's sequence number: it succeeds and changes nothing beyond the transaction's own sequence number, yet the operation meta holds a STATE and an UPDATED change of the source account with identical entries",
       "passphrase_dependent": true,
       "protocol": {
         "generated_at": 30,
@@ -791,6 +791,50 @@
           "oracle_sha256": "65b1f55c80a7e9090c9b3be474b82eba45c5e69f1618fdcab842ccff27783d43",
           "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.golden-847b038d8a2ce1c2-7/any.xdr",
           "xdr_sha256": "1d62844981e37eb4373365bfae30f223454cf1097b4f6204dd931c9aeeb61a57"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [],
+      "flags": [],
+      "id": "cap03.offer-liabilities.mainnet-25000000",
+      "kind": "xdr",
+      "lcm_version": 0,
+      "linked_issues": [],
+      "notes": "captured 2026-11-13 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FE8323FF--24960000-25023999/FE8287BF--25000000.xdr.zst. ledger 25000000 hash 98c64c37e20ba4bb3c7c225b99f17080c06f625d23f570008efc81cb5107c727, protocol 11, LedgerCloseMeta v0. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). the header's scp value is STELLAR_VALUE_BASIC, unsigned: current core's HerderImpl::makeStellarValue writes only signed values, and mainnet headers carry basic values through protocol 11 (sampled at ledgers 19500000 to 25500000)",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 11,
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "mainnet-history",
+        "ledger_seq": 25000000,
+        "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FE8323FF--24960000-25023999/FE8287BF--25000000.xdr.zst"
+      },
+      "synthetic": false,
+      "tx_meta_version": 4,
+      "variants": {
+        "mainnet": {
+          "expected_json_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.expected.json",
+          "expected_json_sha256": "b932c714af1c7a05c41f5afb4b9f6c79e3c7643c1dea1e947b4bf21af512fce7",
+          "network_passphrase": "Public Global Stellar Network ; September 2015",
+          "oracle_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.oracle.json",
+          "oracle_sha256": "d7964c366cff95d1d5c9165a9201807a7fb7fbaee5afc2226b095b26a53a0ea4",
+          "xdr_file": "entries/cap03.offer-liabilities/cap03.offer-liabilities.mainnet-25000000/mainnet.xdr",
+          "xdr_sha256": "9ae0aecdde4f6cd5459284e7b2aca5aff5b9193a7c747693227345ebda7e1a35"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -4954,7 +4998,8 @@
       "protocol": {
         "generated_at": 11,
         "introduced": 12,
-        "valid_min": 12
+        "valid_max": 11,
+        "valid_min": 11
       },
       "source": {
         "chain": "cap26.inflation.p11",
@@ -5013,7 +5058,8 @@
       "protocol": {
         "generated_at": 11,
         "introduced": 12,
-        "valid_min": 12
+        "valid_max": 11,
+        "valid_min": 11
       },
       "source": {
         "chain": "cap26.inflation.p11",
@@ -13158,7 +13204,7 @@
       "kind": "xdr",
       "lcm_version": 2,
       "linked_issues": [],
-      "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with clusters of [2, 1, 2] transactions: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
+      "notes": "a LedgerCloseMetaV2 whose transaction set has a parallel Soroban phase of one stage with three clusters of 2, 2 and 1 transactions, in an order that differs between the testnet and mainnet variants: two calls writing the same entry share a cluster, two independent calls get their own, and a read-only call that changes nothing is packed in with them; each result meta carries the post-apply fee refund changes",
       "passphrase_dependent": true,
       "protocol": {
         "generated_at": 30,
@@ -13783,55 +13829,6 @@
       "family": "cap67.unified-events",
       "fields_exercised": [],
       "flags": [],
-      "id": "cap67.unified-events.golden-27003f6cc5cdecc2-1",
-      "kind": "xdr",
-      "lcm_version": 1,
-      "linked_issues": [],
-      "notes": "core test \"Module cache\", ledger 3 (record 2 of 17 in the upstream file). smallest golden ledger matching TransactionMeta:v3",
-      "passphrase_dependent": true,
-      "protocol": {
-        "generated_at": 20,
-        "introduced": 23,
-        "valid_min": 23
-      },
-      "source": {
-        "class": "core-golden",
-        "ledger_seq": 3,
-        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
-        "upstream": {
-          "path": "test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
-          "ref": "v30.0.0",
-          "repo": "https://github.com/stellar/stellar-core",
-          "sha256": "4ac9d66d7b3900283970930413015229f3cb245c46dc31ab63c062c19c2e9fcb"
-        }
-      },
-      "synthetic": false,
-      "tx_meta_version": 3,
-      "variants": {
-        "any": {
-          "expected_json_file": "entries/cap67.unified-events/cap67.unified-events.golden-27003f6cc5cdecc2-1/any.expected.json",
-          "expected_json_sha256": "e0e35003e0d3413761a9c2e2dc96da4a532deaf462350ba66426c61a02c2c805",
-          "network_passphrase": "(V) (;,,;) (V)",
-          "oracle_file": "entries/cap67.unified-events/cap67.unified-events.golden-27003f6cc5cdecc2-1/any.oracle.json",
-          "oracle_sha256": "8ba94fd5ab7a45e0cf0fba15370cf04e124e6b14b47ae2ab91fbdd5104d0bab0",
-          "xdr_file": "entries/cap67.unified-events/cap67.unified-events.golden-27003f6cc5cdecc2-1/any.xdr",
-          "xdr_sha256": "f8c79698514a9e6dfc62c101008556090fb9d34cf74867beee3aecf6feb283a9"
-        }
-      },
-      "xdr_type": "LedgerCloseMeta"
-    },
-    {
-      "caps": [
-        "CAP-0067"
-      ],
-      "expected": {
-        "decode": "must-accept",
-        "roundtrip": true,
-        "validity": "valid"
-      },
-      "family": "cap67.unified-events",
-      "fields_exercised": [],
-      "flags": [],
       "id": "cap67.unified-events.golden-27d2533d64835282-0",
       "kind": "xdr",
       "lcm_version": 2,
@@ -14188,7 +14185,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -14246,7 +14244,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14304,7 +14303,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14363,7 +14363,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14421,7 +14422,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14479,7 +14481,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14537,7 +14540,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14596,7 +14600,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14655,7 +14660,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14715,7 +14721,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14775,7 +14782,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14835,7 +14843,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14894,7 +14903,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -14953,7 +14963,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -15011,7 +15022,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -15070,7 +15082,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -15128,7 +15141,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -15186,7 +15200,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events-backfill.p22",
@@ -15244,7 +15259,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15303,7 +15319,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15361,7 +15378,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15419,7 +15437,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15477,7 +15496,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15536,7 +15556,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15595,7 +15616,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15655,7 +15677,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15715,7 +15738,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15775,7 +15799,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15834,7 +15859,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15893,7 +15919,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -15951,7 +15978,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -16010,7 +16038,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -16068,7 +16097,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -16126,7 +16156,8 @@
       "protocol": {
         "generated_at": 22,
         "introduced": 23,
-        "valid_min": 23
+        "valid_max": 22,
+        "valid_min": 22
       },
       "source": {
         "chain": "cap67.unified-events.p22",
@@ -17674,39 +17705,89 @@
       "family": "cap73.sac-trust",
       "fields_exercised": [],
       "flags": [],
-      "id": "cap73.sac-trust.golden-0207491749e6d15a-23",
+      "id": "cap73.sac-trust.golden-012504b1914e5df1-3",
       "kind": "xdr",
       "lcm_version": 2,
       "linked_issues": [],
-      "notes": "core test \"parallel txs\", section \"multi RO extensions with a single RW extension in a single stage and cluster. Run 8\", ledger 25 (record 24 of 40 in the upstream file). smallest golden ledger matching .changes[]:created.data:trustline",
+      "notes": "core test \"source trustline frozen\", section \"ManageSellOffer selling trustline frozen\", ledger 5 (record 4 of 15 in the upstream file). smallest golden ledger matching .changes[]:created.data:trustline",
       "passphrase_dependent": true,
       "protocol": {
-        "generated_at": 23,
+        "generated_at": 30,
         "introduced": 26,
         "valid_min": 26
       },
       "source": {
         "class": "core-golden",
-        "ledger_seq": 25,
-        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/0207491749e6d15a.xdr",
+        "ledger_seq": 5,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/FrozenLedgerKeysTests/012504b1914e5df1.xdr",
         "upstream": {
-          "path": "test-lcm-current/InvokeHostFunctionTests/0207491749e6d15a.xdr",
+          "path": "test-lcm-current/FrozenLedgerKeysTests/012504b1914e5df1.xdr",
           "ref": "v30.0.0",
           "repo": "https://github.com/stellar/stellar-core",
-          "sha256": "785028baf37aca17a7e051f7b4b492cf95ee16496015c1eacfa08c4c4b8bcad1"
+          "sha256": "79951021701ef4104f7ffc847a01f5a94cb223da13e102f2186044ac0ecb7d98"
         }
       },
       "synthetic": false,
       "tx_meta_version": 4,
       "variants": {
         "any": {
-          "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-0207491749e6d15a-23/any.expected.json",
-          "expected_json_sha256": "84596092d745c916d8edce86fb8daef4e5f1e834de992e093adc038df24b436a",
+          "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-012504b1914e5df1-3/any.expected.json",
+          "expected_json_sha256": "de424fafd0a5f8a550683c6c804f1180d15211605d11a8f5fd40f1aa918b2014",
           "network_passphrase": "(V) (;,,;) (V)",
-          "oracle_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-0207491749e6d15a-23/any.oracle.json",
-          "oracle_sha256": "9b08172bd80e8777a04ef63d7e916ef6343a02608730f6d01327de584fe29be8",
-          "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-0207491749e6d15a-23/any.xdr",
-          "xdr_sha256": "399b443fd3f55960839f88d9dd6047050ff09850e864425412efccbf8bb251fd"
+          "oracle_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-012504b1914e5df1-3/any.oracle.json",
+          "oracle_sha256": "e381067b7a2d1ee1ae02ba41c171c7c3406f21b4118378a19ab0af38535509cc",
+          "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-012504b1914e5df1-3/any.xdr",
+          "xdr_sha256": "9e848e535b2b9de7c9b6a9ee53e58d1263755c380c9a486a89dd2107748cf452"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [
+        "CAP-0073",
+        "CAP-0046-06"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "cap73.sac-trust",
+      "fields_exercised": [],
+      "flags": [],
+      "id": "cap73.sac-trust.golden-1467a37ff2a1e960-0",
+      "kind": "xdr",
+      "lcm_version": 2,
+      "linked_issues": [],
+      "notes": "core test \"sponsor future reserves\", section \"protocol version 30|add sponsored entry before adding first sponsored signer\", ledger 2 (record 1 of 3 in the upstream file). smallest golden ledger matching .changes[]:created.data:account",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 30,
+        "introduced": 26,
+        "valid_min": 26
+      },
+      "source": {
+        "class": "core-golden",
+        "ledger_seq": 2,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr",
+        "upstream": {
+          "path": "test-lcm-current/BeginSponsoringFutureReservesTests/1467a37ff2a1e960.xdr",
+          "ref": "v30.0.0",
+          "repo": "https://github.com/stellar/stellar-core",
+          "sha256": "0103e517acd8229d0e20979bf08a199047c3a69b9023f84007d42155970139ce"
+        }
+      },
+      "synthetic": false,
+      "tx_meta_version": 4,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-1467a37ff2a1e960-0/any.expected.json",
+          "expected_json_sha256": "90a5eac6bfa0563b05ccbdeea73c707df4fca8f0e5fe66f5fad3086418bff9e7",
+          "network_passphrase": "(V) (;,,;) (V)",
+          "oracle_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-1467a37ff2a1e960-0/any.oracle.json",
+          "oracle_sha256": "8ac42f3248689a611f6ab9fa500ad74a5d2172b22b86e89e29d0eefb5486e1c0",
+          "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-1467a37ff2a1e960-0/any.xdr",
+          "xdr_sha256": "98bbdbcf1a033408d204f2106d5eda1aa660536a7742dd99c8b5db418f1f75de"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -17807,56 +17888,6 @@
           "oracle_sha256": "10d4c8a126bfa3e1812adaafb6d41e66101600c40aa469eec11b7a08b6708ea6",
           "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-a8df5d4dbdc85ac8-2/any.xdr",
           "xdr_sha256": "06e497e3486e4b323cc553410e0eaa1ed60b9fff11eb3e75d4a684a5da8bae9a"
-        }
-      },
-      "xdr_type": "LedgerCloseMeta"
-    },
-    {
-      "caps": [
-        "CAP-0073",
-        "CAP-0046-06"
-      ],
-      "expected": {
-        "decode": "must-accept",
-        "roundtrip": true,
-        "validity": "valid"
-      },
-      "family": "cap73.sac-trust",
-      "fields_exercised": [],
-      "flags": [],
-      "id": "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0",
-      "kind": "xdr",
-      "lcm_version": 0,
-      "linked_issues": [],
-      "notes": "core test \"version test\", ledger 2 (record 1 of 11 in the upstream file). smallest golden ledger matching .changes[]:created.data:account",
-      "passphrase_dependent": true,
-      "protocol": {
-        "generated_at": 0,
-        "introduced": 26,
-        "valid_min": 26
-      },
-      "source": {
-        "class": "core-golden",
-        "ledger_seq": 2,
-        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/e6b26f2ad89e0e1b.xdr",
-        "upstream": {
-          "path": "test-lcm-current/InvokeHostFunctionTests/e6b26f2ad89e0e1b.xdr",
-          "ref": "v30.0.0",
-          "repo": "https://github.com/stellar/stellar-core",
-          "sha256": "1657be4581e2f75cfcf0d654a91c33cc3592c04930fde3ec290c9a9a440980d0"
-        }
-      },
-      "synthetic": false,
-      "tx_meta_version": 2,
-      "variants": {
-        "any": {
-          "expected_json_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-e6b26f2ad89e0e1b-0/any.expected.json",
-          "expected_json_sha256": "2ec64b17c99688829293be52464d01e5dc6157c0bf1f2527d320408271ca0a60",
-          "network_passphrase": "(V) (;,,;) (V)",
-          "oracle_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-e6b26f2ad89e0e1b-0/any.oracle.json",
-          "oracle_sha256": "4dcd1ea44c210b35140acb4687c11bf9897360bf961ba580cceccb803b6e2f3c",
-          "xdr_file": "entries/cap73.sac-trust/cap73.sac-trust.golden-e6b26f2ad89e0e1b-0/any.xdr",
-          "xdr_sha256": "b6bdc421d7ea796b7eb20cb8203bc68d3727f1ee40cca3f3046fa42b2f42c92f"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -19006,38 +19037,38 @@
       "family": "cap76.archival-remediation",
       "fields_exercised": [],
       "flags": [],
-      "id": "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
+      "id": "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
       "kind": "xdr",
-      "lcm_version": 1,
+      "lcm_version": 0,
       "linked_issues": [],
-      "notes": "core test \"Module cache across protocol versions\", ledger 14 (record 13 of 15 in the upstream file). smallest golden ledger matching LedgerUpgrade:version",
+      "notes": "core test \"version test\", ledger 3 (record 2 of 11 in the upstream file). smallest golden ledger matching LedgerUpgrade:version",
       "passphrase_dependent": true,
       "protocol": {
-        "generated_at": 23,
+        "generated_at": 29,
         "introduced": 24,
         "valid_min": 24
       },
       "source": {
         "class": "core-golden",
-        "ledger_seq": 14,
-        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/308caf2d0fc09c95.xdr",
+        "ledger_seq": 3,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/e6b26f2ad89e0e1b.xdr",
         "upstream": {
-          "path": "test-lcm-current/InvokeHostFunctionTests/308caf2d0fc09c95.xdr",
+          "path": "test-lcm-current/InvokeHostFunctionTests/e6b26f2ad89e0e1b.xdr",
           "ref": "v30.0.0",
           "repo": "https://github.com/stellar/stellar-core",
-          "sha256": "2c97faf2b4fd7cd46d060fc7ace8941a427a761af452279b2641f046a4e2eb17"
+          "sha256": "1657be4581e2f75cfcf0d654a91c33cc3592c04930fde3ec290c9a9a440980d0"
         }
       },
       "synthetic": false,
       "variants": {
         "any": {
-          "expected_json_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-308caf2d0fc09c95-12/any.expected.json",
-          "expected_json_sha256": "6b8c918b7e9b7238b3679a55156451e1cee1c87a0268dab06def8c9ec185eef4",
+          "expected_json_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1/any.expected.json",
+          "expected_json_sha256": "25e50eac75b150102cc21ec9b95b7fa5a3590399b63856427909d6d1dd06bb68",
           "network_passphrase": "(V) (;,,;) (V)",
-          "oracle_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-308caf2d0fc09c95-12/any.oracle.json",
-          "oracle_sha256": "369dd23d4d1e34a8a304e96729c3b9cce8314c7c2fda17af114f7f8b1367c6ac",
-          "xdr_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-308caf2d0fc09c95-12/any.xdr",
-          "xdr_sha256": "7e4aa778f408972d9b4c5e6e655e8ad5761e9e826c8a7c9e5315d56c3d3223b9"
+          "oracle_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1/any.oracle.json",
+          "oracle_sha256": "85c7be7598f02ec9838d240e99659c36927a4ae9444bd7adb606e0d6e0d29c80",
+          "xdr_file": "entries/cap76.archival-remediation/cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1/any.xdr",
+          "xdr_sha256": "d01e7d5e07a3633c7c371e1b109b48d2f21f14ddc6ecd7b2abe2a00b034ec472"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -20842,6 +20873,56 @@
       "family": "classic.failed-tx",
       "fields_exercised": [],
       "flags": [],
+      "id": "classic.failed-tx.golden-e0e11e1fb450f676-32",
+      "kind": "xdr",
+      "lcm_version": 2,
+      "linked_issues": [],
+      "notes": "core test \"parallel txs\", section \"internal error\", ledger 34 (record 33 of 33 in the upstream file). smallest golden ledger matching TransactionResultResult:tx_internal_error",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 23,
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "core-golden",
+        "ledger_seq": 34,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/e0e11e1fb450f676.xdr",
+        "upstream": {
+          "path": "test-lcm-current/InvokeHostFunctionTests/e0e11e1fb450f676.xdr",
+          "ref": "v30.0.0",
+          "repo": "https://github.com/stellar/stellar-core",
+          "sha256": "52cacfdb950caabe794663ac631058512b83152bad1cbed47d4a903ac8a32a73"
+        }
+      },
+      "synthetic": false,
+      "tx_meta_version": 4,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.golden-e0e11e1fb450f676-32/any.expected.json",
+          "expected_json_sha256": "33251691287f4dbff5fc89e102a26730ebd9d6fe55f57e3baafcac496df47b9a",
+          "network_passphrase": "(V) (;,,;) (V)",
+          "oracle_file": "entries/classic.failed-tx/classic.failed-tx.golden-e0e11e1fb450f676-32/any.oracle.json",
+          "oracle_sha256": "06b6f2e8da9337a358e9198b848a94c4f189a02dd4f4cbbbd7324f3065cffd3b",
+          "xdr_file": "entries/classic.failed-tx/classic.failed-tx.golden-e0e11e1fb450f676-32/any.xdr",
+          "xdr_sha256": "11f6fc783a2082c27cf48254d1e7283f451748dda02f302f5bbbaf72210b7442"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [
+        "CAP-0002",
+        "CAP-0028"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "classic.failed-tx",
+      "fields_exercised": [],
+      "flags": [],
       "id": "classic.failed-tx.golden-fad872f357f20fe9-12",
       "kind": "xdr",
       "lcm_version": 2,
@@ -20991,7 +21072,8 @@
       "protocol": {
         "generated_at": 1,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 1
       },
       "source": {
         "chain": "classic.failed-tx.manage-data.p1",
@@ -21048,7 +21130,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21107,7 +21190,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21167,7 +21251,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21227,7 +21312,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21287,7 +21373,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21347,7 +21434,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21407,7 +21495,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21468,7 +21557,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21529,7 +21619,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -21590,7 +21681,8 @@
       "protocol": {
         "generated_at": 12,
         "introduced": 13,
-        "valid_min": 13
+        "valid_max": 12,
+        "valid_min": 12
       },
       "source": {
         "chain": "classic.failed-tx.issuer-checks.p12",
@@ -27625,6 +27717,128 @@
     },
     {
       "caps": [
+        "CAP-0002",
+        "CAP-0028"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "classic.failed-tx",
+      "fields_exercised": [
+        "op.change_trust.line",
+        "op.change_trust.limit",
+        "tx.v0.source_account_ed25519"
+      ],
+      "flags": [
+        "below-protocol-valid"
+      ],
+      "id": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ChangeTrust with a native line in a v0 envelope at protocol 9: doCheckValid accepts it before protocol 10, doApply throws, and core records tx_internal_error in the ledger, charging the fee and consuming the sequence number",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 9,
+        "introduced": 13,
+        "valid_max": 12,
+        "valid_min": 9
+      },
+      "source": {
+        "chain": "classic.failed-tx.change-trust-native.p9",
+        "class": "local-core",
+        "ledger_seq": 65,
+        "recipe": "classic.failed-tx.change-trust-native",
+        "tx_index": 0
+      },
+      "synthetic": false,
+      "variants": {
+        "mainnet": {
+          "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/mainnet.expected.json",
+          "expected_json_sha256": "ec0f8d9bf28b90a179f2c1cfbc7dafdb32b35a9d54d82713ce77777963e05573",
+          "network_passphrase": "Public Global Stellar Network ; September 2015",
+          "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/mainnet.oracle.json",
+          "oracle_sha256": "1bb2c7710d349376166840747a3cd42d69904a887c7a904104b169d8cee81169",
+          "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/mainnet.xdr",
+          "xdr_sha256": "7a4276bdfd27cf88c6bcb0f4e8147640662d9f17c97e99bb0394e612226f1bd3"
+        },
+        "testnet": {
+          "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/testnet.expected.json",
+          "expected_json_sha256": "b81ae1df6110762b5b80c7c9bb1a77a07cc6d3c2fc3e05d740fdad4d824371b3",
+          "network_passphrase": "Test SDF Network ; September 2015",
+          "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/testnet.oracle.json",
+          "oracle_sha256": "f6367df475bdc10520c701d6bb71678c0456b180c8fa0121da0efde6801ac478",
+          "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-envelope/testnet.xdr",
+          "xdr_sha256": "058a76e2f5c7fcefc101535460891133f3688329338e9e237956d30433e89986"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [
+        "CAP-0002",
+        "CAP-0028"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "classic.failed-tx",
+      "fields_exercised": [
+        "op.change_trust.line",
+        "op.change_trust.limit",
+        "tx.v0.source_account_ed25519"
+      ],
+      "flags": [
+        "below-protocol-valid"
+      ],
+      "id": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ChangeTrust with a native line in a v0 envelope at protocol 9: doCheckValid accepts it before protocol 10, doApply throws, and core records tx_internal_error in the ledger, charging the fee and consuming the sequence number",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 9,
+        "introduced": 13,
+        "valid_max": 12,
+        "valid_min": 9
+      },
+      "source": {
+        "chain": "classic.failed-tx.change-trust-native.p9",
+        "class": "local-core",
+        "ledger_seq": 65,
+        "normalization": "key-stable",
+        "recipe": "classic.failed-tx.change-trust-native",
+        "tx_index": 0
+      },
+      "synthetic": false,
+      "tx_meta_version": 2,
+      "variants": {
+        "mainnet": {
+          "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.expected.json",
+          "expected_json_sha256": "09db251913755e4223f144946bac1827d84a62393f83a583005a1a62681a676f",
+          "network_passphrase": "Public Global Stellar Network ; September 2015",
+          "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.oracle.json",
+          "oracle_sha256": "1bb2c7710d349376166840747a3cd42d69904a887c7a904104b169d8cee81169",
+          "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/mainnet.xdr",
+          "xdr_sha256": "12335f787c34765b4aa880a5a0d3015116f39f19900bb2135d5f17fc6832be41"
+        },
+        "testnet": {
+          "expected_json_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.expected.json",
+          "expected_json_sha256": "fa3100fc876e66bec2482dcfb479fff18019c78c45e30ed97dbe26121865679d",
+          "network_passphrase": "Test SDF Network ; September 2015",
+          "oracle_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.oracle.json",
+          "oracle_sha256": "f6367df475bdc10520c701d6bb71678c0456b180c8fa0121da0efde6801ac478",
+          "xdr_file": "entries/classic.failed-tx/classic.failed-tx.p9-change-trust-native-internal-error-meta/testnet.xdr",
+          "xdr_sha256": "d581c59faf3d7691fbb89a6858efeae974d3330a36e2cd953114c316e541934f"
+        }
+      },
+      "xdr_type": "TransactionResultMeta"
+    },
+    {
+      "caps": [
         "CAP-0019",
         "CAP-0024"
       ],
@@ -32175,62 +32389,6 @@
       "family": "soroban.invoke-basics",
       "fields_exercised": [],
       "flags": [],
-      "id": "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
-      "kind": "xdr",
-      "lcm_version": 1,
-      "linked_issues": [],
-      "notes": "core test \"Module cache\", ledger 4 (record 3 of 17 in the upstream file). smallest golden ledger matching ContractCodeEntryExt:v0",
-      "passphrase_dependent": true,
-      "protocol": {
-        "generated_at": 20,
-        "introduced": 22,
-        "valid_min": 22
-      },
-      "source": {
-        "class": "core-golden",
-        "ledger_seq": 4,
-        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
-        "upstream": {
-          "path": "test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
-          "ref": "v30.0.0",
-          "repo": "https://github.com/stellar/stellar-core",
-          "sha256": "4ac9d66d7b3900283970930413015229f3cb245c46dc31ab63c062c19c2e9fcb"
-        }
-      },
-      "synthetic": false,
-      "tx_meta_version": 3,
-      "variants": {
-        "any": {
-          "expected_json_file": "entries/soroban.invoke-basics/soroban.invoke-basics.golden-27003f6cc5cdecc2-2/any.expected.json",
-          "expected_json_sha256": "3fcea731b809038e0af38aa7ee735ed832366e8491091aaf656ba1b96e76f670",
-          "network_passphrase": "(V) (;,,;) (V)",
-          "oracle_file": "entries/soroban.invoke-basics/soroban.invoke-basics.golden-27003f6cc5cdecc2-2/any.oracle.json",
-          "oracle_sha256": "423e5d450571d561ab01a0be6f31359c65d6d46590149909be9928bb95202daa",
-          "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.golden-27003f6cc5cdecc2-2/any.xdr",
-          "xdr_sha256": "33ff18981c12d6fa611b572014771d913d12020bd6164120360db986af29234a"
-        }
-      },
-      "xdr_type": "LedgerCloseMeta"
-    },
-    {
-      "caps": [
-        "CAP-0046",
-        "CAP-0046-02",
-        "CAP-0046-05",
-        "CAP-0046-07",
-        "CAP-0046-08",
-        "CAP-0046-12",
-        "CAP-0054",
-        "CAP-0058"
-      ],
-      "expected": {
-        "decode": "must-accept",
-        "roundtrip": true,
-        "validity": "valid"
-      },
-      "family": "soroban.invoke-basics",
-      "fields_exercised": [],
-      "flags": [],
       "id": "soroban.invoke-basics.golden-4c437318f87437c5-9",
       "kind": "xdr",
       "lcm_version": 2,
@@ -35287,6 +35445,55 @@
       "family": "soroban.scval-shapes",
       "fields_exercised": [],
       "flags": [],
+      "id": "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+      "kind": "xdr",
+      "lcm_version": 2,
+      "linked_issues": [],
+      "notes": "core test \"Soroban authorization\", section \"custom account|single call|no auth\", ledger 19 (record 18 of 18 in the upstream file). smallest golden ledger matching ScError:auth",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 30,
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "core-golden",
+        "ledger_seq": 19,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/7e8aadf36d7d907d.xdr",
+        "upstream": {
+          "path": "test-lcm-current/InvokeHostFunctionTests/7e8aadf36d7d907d.xdr",
+          "ref": "v30.0.0",
+          "repo": "https://github.com/stellar/stellar-core",
+          "sha256": "f8a4d04aa4942ec55b84e48f63e4b1e96c411cb1cc9cf15ba5b2fcc8a882105a"
+        }
+      },
+      "synthetic": false,
+      "tx_meta_version": 4,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-7e8aadf36d7d907d-17/any.expected.json",
+          "expected_json_sha256": "b41d98a25d7204d5dbac7a9344a91a4d93e869f28731d758bcffb82329d1df68",
+          "network_passphrase": "(V) (;,,;) (V)",
+          "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-7e8aadf36d7d907d-17/any.oracle.json",
+          "oracle_sha256": "a5aeabd9c318e42d2b081e7be52985f6e4ec3588f8678558a89cec7c7af02f22",
+          "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-7e8aadf36d7d907d-17/any.xdr",
+          "xdr_sha256": "92ebafb2de63e3a7dffb43858ad01faf3c2d9ea658a2b5c6e847fd7c9ad8cb55"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [],
+      "flags": [],
       "id": "soroban.scval-shapes.golden-8299635e181e651c-27",
       "kind": "xdr",
       "lcm_version": 2,
@@ -35320,6 +35527,55 @@
           "oracle_sha256": "caa62cb94a87e1fdaadf8363115894306056546dd92c356eb1ccd49ffe84ddc1",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-8299635e181e651c-27/any.xdr",
           "xdr_sha256": "aa23f9fdce0a4d5974671129aca644df1cf63fad298ecd64a1048f2ba8cbd4c6"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [],
+      "flags": [],
+      "id": "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
+      "kind": "xdr",
+      "lcm_version": 2,
+      "linked_issues": [],
+      "notes": "core test \"Soroban authorization\", section \"default classic account|single call|incorrect signature payload\", ledger 19 (record 18 of 18 in the upstream file). smallest golden ledger matching ScError:crypto",
+      "passphrase_dependent": true,
+      "protocol": {
+        "generated_at": 30,
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "core-golden",
+        "ledger_seq": 19,
+        "provenance_url": "https://github.com/stellar/stellar-core/blob/0e49751aa9ddf892302cca02cea7f3f5d97df9f1/test-lcm-current/InvokeHostFunctionTests/897493fc26f0ff7b.xdr",
+        "upstream": {
+          "path": "test-lcm-current/InvokeHostFunctionTests/897493fc26f0ff7b.xdr",
+          "ref": "v30.0.0",
+          "repo": "https://github.com/stellar/stellar-core",
+          "sha256": "caf5a9077470db34385d58c79db9f3217f4dfb37749a0c69d9685cf5f7bae92d"
+        }
+      },
+      "synthetic": false,
+      "tx_meta_version": 4,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-897493fc26f0ff7b-17/any.expected.json",
+          "expected_json_sha256": "99f4fa457d3a8a4754ba4787da62b6a61d9a3ec852c69c5558cd6fe1bf1a2081",
+          "network_passphrase": "(V) (;,,;) (V)",
+          "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-897493fc26f0ff7b-17/any.oracle.json",
+          "oracle_sha256": "847da3993db60c35ee495d7ec580755877e73fdabea573a2b693105bfb7ca180",
+          "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.golden-897493fc26f0ff7b-17/any.xdr",
+          "xdr_sha256": "80adbfc34a4b19ce05572eab48bdf972b05c0fee78e1f2ebeebbda4d1896cecd"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -35580,7 +35836,7 @@
           "expected_json_sha256": "ed4fd932147c673898e77a995027f98d5eb9b3cb69461dbff798a605ed57bfa3",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-envelope/mainnet.oracle.json",
-          "oracle_sha256": "a591438e792c684236f1f6017eb7e0d8023411850adc75ed88b880af787dc920",
+          "oracle_sha256": "a61f01d014eb7efbe2144cb92465f87d74f7496e44665ae34fe277d673ebf125",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-envelope/mainnet.xdr",
           "xdr_sha256": "7d642705092c4b8d3bd5d0a13153b9c6b12fc8747a37496f5f0335761bcf8bde"
         },
@@ -35589,7 +35845,7 @@
           "expected_json_sha256": "bb574d9b5aafa3fe43bc73b640b71a4a6193921d8e6720cfdadac57925dd8d68",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-envelope/testnet.oracle.json",
-          "oracle_sha256": "91c757c34c5ca87a262059b874c29560cbf908345b88d08a6274186ca3dfef0b",
+          "oracle_sha256": "571a6b947f12c5aee0a388c8403904c5d1a9f06ea65775f639f04a914927b0e9",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-envelope/testnet.xdr",
           "xdr_sha256": "271aa94cc372c447e8b3f288ea58892f3b23a029bedcd53a05fc2b776264bd62"
         }
@@ -35636,21 +35892,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/mainnet.expected.json",
-          "expected_json_sha256": "96bfaec8e2bdaf3e04ee8a307355b7eefdfc518d88e51a7880644a721e694005",
+          "expected_json_sha256": "6af552c7e16d57672c03623bbf6cb6aba531e3a7fd1970c516476d75c36c1498",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/mainnet.oracle.json",
-          "oracle_sha256": "a591438e792c684236f1f6017eb7e0d8023411850adc75ed88b880af787dc920",
+          "oracle_sha256": "a61f01d014eb7efbe2144cb92465f87d74f7496e44665ae34fe277d673ebf125",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/mainnet.xdr",
-          "xdr_sha256": "5ff824347842cf10ca5f8c6736a4c0db0602cfb8eeceaaa10ac0ef717fd083d4"
+          "xdr_sha256": "84cb5fbe7c3b47cd6e3c1c4dd67e05010af23493c50b62245ea5da1c3f0a39ea"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/testnet.expected.json",
-          "expected_json_sha256": "948cc2cac7e2b87b3085cb20178b63305593ced524976f4c679bfa2fdfcdc432",
+          "expected_json_sha256": "b582ea476f81a276e1aee135662cbc08ae51c24d6b3c3c08ea5b856d76df0ce7",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/testnet.oracle.json",
-          "oracle_sha256": "91c757c34c5ca87a262059b874c29560cbf908345b88d08a6274186ca3dfef0b",
+          "oracle_sha256": "571a6b947f12c5aee0a388c8403904c5d1a9f06ea65775f639f04a914927b0e9",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-errors-auth-crypto-events-meta/testnet.xdr",
-          "xdr_sha256": "379e7314ccbd48665cdbebb8f7c9507b77d22fbc3f6231c94c27988986f7b71f"
+          "xdr_sha256": "0332a84447ba60e3508d6ead925af4b20937b6a958fb72baa2f04650f011274c"
         }
       },
       "xdr_type": "TransactionResultMetaV1"
@@ -35693,21 +35949,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/mainnet.expected.json",
-          "expected_json_sha256": "3850add9f548454c7c27059864d2029e8dae0722fb5a9c0f908890855f391cb6",
+          "expected_json_sha256": "beb1109073b330a8dea6bacb023a6c4f45e147bb653d8d3a7286374ee24e336b",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/mainnet.oracle.json",
-          "oracle_sha256": "f3f9dd11567e14a40a0a4dc4e974fcbd11b972169f0111d7793c214c133750fd",
+          "oracle_sha256": "09dbd946b694d8b01295243e3e307e74787054196303eee1c101eb07028760d8",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/mainnet.xdr",
-          "xdr_sha256": "1f3ab969259257e83a76cef8a5f90e7200bbddfa558c61c7dc93f6baf000151e"
+          "xdr_sha256": "054f3d234364400df2186a354887bfd23a77e678a599e7f574ed17b61bab4f85"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/testnet.expected.json",
-          "expected_json_sha256": "9561aac2b7e99f7f1ddf0fc98e2bd2a31533297bc8366565da0974e15bc6f270",
+          "expected_json_sha256": "1b840ef841d2fe5dfea06ded755f7ebb3ba6b47ef3b10f57f11b14fc782e9524",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/testnet.oracle.json",
-          "oracle_sha256": "df6b27ca41348860238f19e1bb94cfa5eacd39371ff8ea551a1576c21bc34330",
+          "oracle_sha256": "2d2ec14e152bbe314faee797abeb7dffef399f870f470067763027e6e87ddad2",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-envelope/testnet.xdr",
-          "xdr_sha256": "f8f39f8dc2f69eb3a43e2ab1cabd8a43b2403bbe5d02e8745c0e4cd9289f6053"
+          "xdr_sha256": "a4c06078bacf48e1463c9e99c87996ab329dc05fa4a5c4db19af94413821d9c6"
         }
       },
       "xdr_type": "TransactionEnvelope"
@@ -35752,21 +36008,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/mainnet.expected.json",
-          "expected_json_sha256": "746bee5303f5a0d92fb9f5319789cdd61581598ee52c3d6d596db1ad05a1b649",
+          "expected_json_sha256": "c2c6deab0f217b496ceb6e8bd2596e857852132dcdbb100b227aee46be0d36f4",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/mainnet.oracle.json",
-          "oracle_sha256": "f3f9dd11567e14a40a0a4dc4e974fcbd11b972169f0111d7793c214c133750fd",
+          "oracle_sha256": "09dbd946b694d8b01295243e3e307e74787054196303eee1c101eb07028760d8",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/mainnet.xdr",
-          "xdr_sha256": "00a03e6dc37e635767b0cb4863b4135c298a23371cb9bb2d9bb288f801e52a66"
+          "xdr_sha256": "ca8c4f7b3b3cef123e3f8c1b75a621b8293a6fa4723fd20e07790fd0d99212db"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/testnet.expected.json",
-          "expected_json_sha256": "47f63bc0a15e1853bae9c54796cbf157e53ee43ef6e67b4e7224274af7966065",
+          "expected_json_sha256": "c865d0ecc9a217a97be958fed37a4bc2f0aefdf6b56d9b3ef673137ec03a4bf5",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/testnet.oracle.json",
-          "oracle_sha256": "df6b27ca41348860238f19e1bb94cfa5eacd39371ff8ea551a1576c21bc34330",
+          "oracle_sha256": "2d2ec14e152bbe314faee797abeb7dffef399f870f470067763027e6e87ddad2",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-integer-extremes-meta/testnet.xdr",
-          "xdr_sha256": "6ad769c213f6dd87a3d6badc3d88987b6d8fe1d2e84206b04ac56af6e38128e6"
+          "xdr_sha256": "cb7a1a8422e87e24478ec163fcc5a14768b625ffa1e794ec5e830104a4b710ce"
         }
       },
       "xdr_type": "TransactionResultMetaV1"
@@ -36285,21 +36541,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/mainnet.expected.json",
-          "expected_json_sha256": "7644ea7186192cdcfbb9649df213d22b1c1d231e2a50452d2ba4515b26e4fa8a",
+          "expected_json_sha256": "fd59f6f84cc1ac1a84185cdaf442e4526643b3575de429d3089a2869a4b4beef",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/mainnet.oracle.json",
-          "oracle_sha256": "51266a34e4886c6723a57fa5b7b76365d0c0e29779418f713aceedfd5c02fbc2",
+          "oracle_sha256": "cbbcd68df24fd29a66a4620e113fc66888a117945a309fac1478acf4cc388b3e",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/mainnet.xdr",
-          "xdr_sha256": "8aca71a22062d13f596c007f80c67cb5112a848321e5223b588dfa8e9dc69eec"
+          "xdr_sha256": "ec455f8a1a05bd67fde839f446364dbd440659a6d0b17b9446ab2241571e683d"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/testnet.expected.json",
-          "expected_json_sha256": "28dc9c630df291e79d11ac387780b702b5d52f014a128408fab434b517f1acee",
+          "expected_json_sha256": "6efd446684ffb950c9bb847deffce5b173542e6fb6c672229929f8a5d28853fd",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/testnet.oracle.json",
-          "oracle_sha256": "2f4097dbcf3357053bdd6affe70809b44cd02f6c9ecc366dc86d9b8a5390f958",
+          "oracle_sha256": "2651762827505b41d5878237fe29d7305597a4c5c489ed228325aaf3e155c244",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-envelope/testnet.xdr",
-          "xdr_sha256": "3602a6bd0fd9988ae275cb70f0d6f009e5c177ea09ff35a744315c52635a9e13"
+          "xdr_sha256": "e7ef104b734c13d7c812e01cebba003193f0a9976eee05be599934f2b2831b8f"
         }
       },
       "xdr_type": "TransactionEnvelope"
@@ -36346,21 +36602,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/mainnet.expected.json",
-          "expected_json_sha256": "d94247c8b7eab3ca93a1ec2002f142aa3148e629200007a8c917888589aa8cc4",
+          "expected_json_sha256": "592b3bd714215c16909ae26dd65dc865df17f1b5da4e4709855096c6a52fbfac",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/mainnet.oracle.json",
-          "oracle_sha256": "51266a34e4886c6723a57fa5b7b76365d0c0e29779418f713aceedfd5c02fbc2",
+          "oracle_sha256": "cbbcd68df24fd29a66a4620e113fc66888a117945a309fac1478acf4cc388b3e",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/mainnet.xdr",
-          "xdr_sha256": "ff1df231371ea03d302a5054f7a49bc29cc5cd389d76d5c2b07682c40babcadf"
+          "xdr_sha256": "ffd041bfa69a012814ba1924bf14375a839a73d3a18770207977fbcacb5a8fcd"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/testnet.expected.json",
-          "expected_json_sha256": "54a5ddd2211b9cfd056f2296fadf86c7ee9ec00cd3fd8d363d51d55ba3ab74cb",
+          "expected_json_sha256": "0d87b879c20f00653ba272f864b7c3dad3f4e1acaa4940b0393b5ebc6be2802f",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/testnet.oracle.json",
-          "oracle_sha256": "2f4097dbcf3357053bdd6affe70809b44cd02f6c9ecc366dc86d9b8a5390f958",
+          "oracle_sha256": "2651762827505b41d5878237fe29d7305597a4c5c489ed228325aaf3e155c244",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-string-not-utf8-meta/testnet.xdr",
-          "xdr_sha256": "780998522532a3a77fd5a674ec37ac18c45ad0eca2290b44af0ffcbd857dd419"
+          "xdr_sha256": "fe4293ea5e5b876be3302e3013f6acb103df5d3bf6d583a42ee7d938706a4c06"
         }
       },
       "xdr_type": "TransactionResultMetaV1"
@@ -36407,21 +36663,21 @@
       "variants": {
         "mainnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/mainnet.expected.json",
-          "expected_json_sha256": "473ebcd8be903a5f3ea8da319c7f1c44ddf2bab3c1a56e87700672ca54e78cec",
+          "expected_json_sha256": "103bbab711ea55cdea8f0bcf8a4f0aa0a58f769f23ba94cd08918774edcdfc4d",
           "network_passphrase": "Public Global Stellar Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/mainnet.oracle.json",
-          "oracle_sha256": "38c370e2c05e79f14d4cc02c6f52f2d3e41d11ab291cddde3644c3b5e6c39e71",
+          "oracle_sha256": "62f3f623d3f0468ec83b54c704266f4ee2625638f38836680ea32a2a73b2435c",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/mainnet.xdr",
-          "xdr_sha256": "5bbe0391ca15f62e65b5d4c8950150a402398caf5f73de2baf5f60985b9fdd67"
+          "xdr_sha256": "eda3c784aecb700d22699d25fbad7cdb1bf7d789df6c624ea798bc40f3408c9d"
         },
         "testnet": {
           "expected_json_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/testnet.expected.json",
-          "expected_json_sha256": "e9f9cb9e62d6f84b083fe39970af2ea49bb6bf3e6662340ca15ddbda9183ace5",
+          "expected_json_sha256": "bdd918040700cef307c80a093a0607273716ad7afee164d840fbdf8b05f4416a",
           "network_passphrase": "Test SDF Network ; September 2015",
           "oracle_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/testnet.oracle.json",
-          "oracle_sha256": "869fae5e579e65e263d090decbf0a8d878dc71d04a985995f82ff0ff31104ef3",
+          "oracle_sha256": "2facc968de5be447893c4ee0a2cb13fd6ea6cfc6279c8c05886100ae7efec8a8",
           "xdr_file": "entries/soroban.scval-shapes/soroban.scval-shapes.p30-symbol-not-utf8/testnet.xdr",
-          "xdr_sha256": "7d1044e22ca6220f7d892ff2534646ae686a93dd40e8cb590b6fb0c7db117230"
+          "xdr_sha256": "4cbbcde57552e158d6f77627959a65631edb4a38b628f5d9fc2c68a43a567357"
         }
       },
       "xdr_type": "LedgerCloseMeta"
@@ -37797,8 +38053,8 @@
     }
   },
   "protocol_tiers": [
-    0,
     1,
+    9,
     11,
     12,
     17,

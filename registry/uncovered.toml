@@ -114,9 +114,9 @@ blocker = "refused-before-ledger"
 reason = "tx set validation requires each fee source's available balance to cover all its fees in the set (TxSetUtils.cpp getInvalidTxListWithErrors) and at apply the fee is already charged, so commonValid only fails on a negative available balance, which no operation leaves (stellar-core v30.0.0)"
 
 [[arm]]
-arms = ["ChangeTrustAsset:native"]
-blocker = "refused-before-ledger"
-reason = "ChangeTrustOpFrame::doCheckValid answers CHANGE_TRUST_MALFORMED for a native line from protocol 10 and doApply throws on one below it (stellar-core v30.0.0)"
+arms = ["ContractCodeEntryExt:v0"]
+blocker = "old-protocol-only"
+reason = "soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload"
 
 [[arm]]
 arms = ["TrustLineAsset:native"]
@@ -166,11 +166,6 @@ blocker = "refused-before-ledger"
 reason = "ManageDataOpFrame::doCheckValid sets it only before protocol 2 (stellar-core v30.0.0). core 30.0.0 still runs a fresh network at protocol 1 and refuses ManageData there at submission with this code (classic.failed-tx.manage-data.p1); a validity check keeps it out of the tx queue and of tx set validation, so no ledger at any protocol holds it"
 
 [[arm]]
-arms = ["StellarValueExt:basic"]
-blocker = "history-only"
-reason = "HerderImpl::makeStellarValue writes only SIGNED or SIGNED_MS values (stellar-core v30.0.0), so only early mainnet headers carry a basic value; the one entry holding it is synthetic"
-
-[[arm]]
 arms = [
     "StellarValueExt:empty_tx_set",
     "StellarValueExt:empty_tx_set_ms",
@@ -186,12 +181,18 @@ reason = "needs numSponsoring plus numSubEntries near UINT32_MAX (SponsorshipUti
 [[arm]]
 arms = ["InnerTransactionResultResult:tx_internal_error"]
 blocker = "not-producible-locally"
-reason = "only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp)"
+reason = "only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp). the one release-build exception found, ChangeTrustOpFrame::doApply on a native line, is reachable only below protocol 10 (classic.failed-tx records it at protocol 9), and fee bumps exist only from protocol 13"
 
 [[arm]]
 arms = ["OperationResultTr:create_passive_sell_offer"]
 blocker = "never-emitted"
 reason = "CreatePassiveSellOfferOpFrame applies a MANAGE_SELL_OFFER operation it builds from the passive one (ManageSellOfferOpHolder), and MutableTransactionResult sets the result arm from that operation's type, so core reports every passive offer under manage_sell_offer (stellar-core v30.0.0 CreatePassiveSellOfferOpFrame.cpp, MutableTransactionResult.cpp); classic.failed-tx records an applied passive offer whose result is manage_sell_offer success, and none of the 18 golden ledgers holding the operation carries the arm"
+
+[[fragment]]
+family = "soroban.invoke-basics"
+fragment = "ContractCodeEntryExt:v0"
+blocker = "old-protocol-only"
+reason = "the arm itself: soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload"
 
 [[fragment]]
 family = "soroban.muxed-source"

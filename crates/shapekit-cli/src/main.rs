@@ -192,6 +192,17 @@ enum GenCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Compare core's raw ledgers.xdr of every chain in two independent recordings: each
+    /// ledger key's changes must come in the same order in both, and the recordings may
+    /// differ only in the order between keys. This is the evidence the key-stable canonical
+    /// form rests on. Record the second set with `gen chains --corpus <copy>`.
+    VerifyRawOrder {
+        /// The corpus holding the second recording.
+        #[arg(long)]
+        other: PathBuf,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+    },
     /// Regenerate the recipe chains under both passphrases into a temporary
     /// directory and compare canonical hashes and entry files with the corpus.
     VerifyRepro {
@@ -445,6 +456,9 @@ fn main() -> ExitCode {
                 pins: &pins,
             },
         ),
+        Command::Gen {
+            command: GenCommand::VerifyRawOrder { other, corpus },
+        } => gen_cmd::verify_raw_order(&corpus, &other),
         Command::Gen {
             command:
                 GenCommand::VerifyRepro {

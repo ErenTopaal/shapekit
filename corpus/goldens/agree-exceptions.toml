@@ -18,6 +18,12 @@ kinds = []
 reason = "same self-payment as golden-27d2533d64835282-0, in the following ledger"
 
 [[exception]]
+golden = "cap03.offer-liabilities.golden-27d2533d64835282-0"
+op = "payment"
+kinds = []
+reason = "the self-payment of cap21.preconditions.golden-27d2533d64835282-0, in this family through another fragment. the only cap03 entry with payments is mainnet ledger 25000000, whose four payments go to other accounts"
+
+[[exception]]
 golden = "cap33.sponsorship.golden-3635a80135f66ca8-0"
 op = "create_claimable_balance"
 kinds = ["created:claimable_balance", "state:account", "updated:account"]

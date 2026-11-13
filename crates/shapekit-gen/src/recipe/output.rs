@@ -17,6 +17,7 @@ use shapekit_registry::{Family, SourceClass};
 
 use super::Network;
 use super::ctx::Captured;
+use super::run::BELOW_PROTOCOL_VALID;
 
 pub const CHAINS_DIR: &str = "chains";
 
@@ -63,6 +64,31 @@ fn variant_of(v: &Variants, n: Network) -> Option<&Variant> {
     match n {
         Network::Testnet => v.testnet.as_ref(),
         Network::Mainnet => v.mainnet.as_ref(),
+    }
+}
+
+/// The protocol range of a local-core entry. A contrast entry (`below-protocol-valid`) holds
+/// bytes of the protocols before its family's shape existed, so its range runs from the
+/// protocol it was recorded at to the last one before the family's `protocol_valid.min`;
+/// every other entry takes the family's range.
+pub(crate) fn entry_protocol(
+    family: &Family,
+    generated_at: u32,
+    below_protocol_valid: bool,
+) -> EntryProtocol {
+    if below_protocol_valid {
+        return EntryProtocol {
+            introduced: family.protocol_introduced,
+            generated_at: Some(generated_at),
+            valid_min: generated_at,
+            valid_max: Some(family.protocol_valid.min.saturating_sub(1)),
+        };
+    }
+    EntryProtocol {
+        introduced: family.protocol_introduced,
+        generated_at: Some(generated_at),
+        valid_min: family.protocol_valid.min,
+        valid_max: family.protocol_valid.max,
     }
 }
 
@@ -181,12 +207,11 @@ pub(crate) fn merge(
             kind: EntryKind::Xdr,
             family: family.id.clone(),
             caps: family.caps.clone(),
-            protocol: EntryProtocol {
-                introduced: family.protocol_introduced,
-                generated_at: Some(protocol),
-                valid_min: family.protocol_valid.min,
-                valid_max: family.protocol_valid.max,
-            },
+            protocol: entry_protocol(
+                family,
+                protocol,
+                s.flags.iter().any(|f| f == BELOW_PROTOCOL_VALID),
+            ),
             xdr_type: Some(first.selected.xdr_type.to_string()),
             lcm_version: first.selected.lcm_version,
             tx_meta_version: first.selected.tx_meta_version,

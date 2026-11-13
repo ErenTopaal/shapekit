@@ -165,6 +165,7 @@ pub fn all() -> Vec<Box<dyn Recipe>> {
         Box::new(cap85::ExecutableTag { protocol: 30 }),
         Box::new(old_protocols::IssuerChecks { protocol: 12 }),
         Box::new(old_protocols::ManageDataProtocol1 { protocol: 1 }),
+        Box::new(old_protocols::ChangeTrustNative { protocol: 9 }),
         Box::new(old_protocols::Inflation { protocol: 11 }),
         Box::new(old_protocols::Inflation { protocol: 12 }),
         Box::new(old_protocols::ClaimAtomV0 { protocol: 17 }),

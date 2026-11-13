@@ -104,7 +104,7 @@ linked_issues = [
     "https://github.com/stellar/wallet-backend/issues/716",
 ]
 priority = 2
-notes = "at protocol 30 extend-ttl and restore with a muxed source apply and the invoke twin is rejected with txSOROBAN_INVALID (consensus from protocol 25). at protocol 24 the muxed invoke is accepted if phase 3 shows that chain is possible. at protocol 28 a muxed soroban source and its base account appear in one ledger. the grammar cannot tie the muxed source to the soroban body of the same operation, so the recipe asserts that pairing"
+notes = "at protocol 30 extend-ttl and restore with a muxed source apply and the invoke twin is rejected with txSOROBAN_INVALID (consensus from protocol 25). at protocol 28 a muxed soroban source and its base account appear in one ledger. the grammar cannot tie the muxed source to the soroban body of the same operation, so the recipe asserts that pairing"
 
 [[family]]
 id = "sep41.muxed-addresses"
@@ -166,7 +166,7 @@ linked_issues = [
     "https://github.com/stellar/stellar-etl/issues/460",
 ]
 priority = 4
-notes = "recorded at protocol 30 and 28. the defining combination, an invoke_host_function operation whose meta creates a trustline with limit i64::MAX and carries no contract event, cannot be written as one fragment; phase 5 asserts it in a test. the created-trustline and created-account fragments alone also match classic operations"
+notes = "recorded at protocol 30 and 28. the defining combination, an invoke_host_function operation whose meta creates a trustline with limit i64::MAX and carries no contract event, cannot be written as one fragment; the cap73 recipe asserts it on core's answer (one i64::MAX trustline created, no contract event). the created-trustline and created-account fragments alone also match classic operations"
 
 [[family]]
 id = "soroban.auth-trees"
@@ -225,7 +225,7 @@ linked_issues = [
     "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257",
 ]
 priority = 6
-notes = "the issuer pair is chosen so strkey order and raw key order disagree; the strkey-ordered twin is rejected with CHANGE_TRUST_MALFORMED. testnet-history is pool c2a730127d006897b021d6fcb279da68b4f65f9b6a408c74eb2cdd85ea862d5e, transaction 0126748091930959a3aefac9296e1773b947f964a9b73f37ce856c4df32d346f, ledger 5521432. the issuer order itself is a leaf value and has no fragment; the ordering vectors of phase 6 check it. revocation that redeems pool shares into claimable balances is recorded but has no single fragment"
+notes = "the issuer pair is chosen so strkey order and raw key order disagree; the strkey-ordered twin is rejected with CHANGE_TRUST_MALFORMED. testnet-history is pool c2a730127d006897b021d6fcb279da68b4f65f9b6a408c74eb2cdd85ea862d5e, transaction 0126748091930959a3aefac9296e1773b947f964a9b73f37ce856c4df32d346f, ledger 5521432. the issuer order itself is a leaf value and has no fragment; the synthetic ordering vectors (corpus/vectors/ordering) check it. revocation that redeems pool shares into claimable balances is recorded but has no single fragment"
 
 [[family]]
 id = "soroban.scval-shapes"
@@ -375,7 +375,7 @@ fields = [
 ]
 linked_issues = ["https://github.com/stellar/stellar-etl/issues/477"]
 priority = 11
-notes = "mainnet-history is ledger 36196205, named by stellar-etl#477; phase 6 research confirms what it holds"
+notes = "mainnet-history is ledger 36196205, named by stellar-etl#477 as a fee bump with a muxed fee source; the ledger holds that transaction as a plain v1 envelope whose own source account is muxed, so it is captured here as a muxed transaction source"
 
 [[family]]
 id = "cap63.parallel-txset"
@@ -412,7 +412,7 @@ source_classes = ["local-core", "mainnet-history", "synthetic"]
 fields = []
 linked_issues = []
 priority = 12
-notes = "a protocol 30 local core emits the generalized set with a v0 classic phase inside LedgerCloseMetaV2. LedgerCloseMeta v1 exists only for protocol 20 to 22 ledgers, so it comes from mainnet history captured in phase 6"
+notes = "a protocol 30 local core emits the generalized set with a v0 classic phase inside LedgerCloseMetaV2. LedgerCloseMeta v1 exists only for protocol 20 to 22 ledgers, which a protocol 30 local core does not close; the core golden of protocol 20 supplies it"
 
 [[family]]
 id = "cap88.ms-close-time"
@@ -428,7 +428,7 @@ source_classes = ["local-core", "testnet-history"]
 fields = []
 linked_issues = []
 priority = 12
-notes = "manual close uses whole seconds, so local core gives signed_ms with a zero millisecond part. a non-zero millisecond close time and an empty_tx_set_ms value come from testnet history in phase 6. the millisecond value is a leaf, so zero and non-zero share a signature"
+notes = "manual close uses whole seconds, so local core gives signed_ms with a zero millisecond part. a non-zero millisecond close time comes from testnet history (ledger 5695387); no ledger holding empty_tx_set_ms was found (registry/uncovered.toml). the millisecond value is a leaf, so zero and non-zero share a signature"
 
 [[family]]
 id = "cap83.empty-txset"
@@ -441,7 +441,7 @@ source_classes = ["testnet-history", "mainnet-history"]
 fields = []
 linked_issues = []
 priority = 12
-notes = "from protocol 30 the whole-second value is invalid except in the ledger that performs the upgrade to 30, which is why max is 30; the millisecond form belongs to cap88.ms-close-time. a standalone core cannot vote to drop its own tx set, so no local-core entry is possible; phase 6 searches testnet and mainnet history for one"
+notes = "from protocol 30 the whole-second value is invalid except in the ledger that performs the upgrade to 30, which is why max is 30; the millisecond form belongs to cap88.ms-close-time. a standalone core cannot vote to drop its own tx set, so no local-core entry is possible; the testnet and mainnet history searched holds none (registry/uncovered.toml)"
 
 [[family]]
 id = "classic.failed-tx"
@@ -453,6 +453,8 @@ signature = [
     "TransactionResultResult:tx_failed",
     "PaymentResult:no_destination",
     "SignerKey:pre_auth_tx",
+    "ChangeTrustAsset:native",
+    "TransactionResultResult:tx_internal_error",
     "TransactionResultResult:tx_bad_auth",
     "TransactionResultResult:tx_no_account",
     "AccountMergeResult:has_sub_entries",
@@ -576,7 +578,7 @@ fields = [
 ]
 linked_issues = []
 priority = 13
-notes = "the participants-from-meta case: accounts named only in the envelope of a failed transaction. cap-0028 removes a pre-auth signer even when the transaction fails, and cap-0002 puts signature and one-time signer changes in tx-level meta, so failed transactions still change state. the no_issuer, trust_not_required and self_not_allowed codes come from a contrast chain at protocol 12 in v0 envelopes, since core stopped giving them at protocol 13 or 16; a protocol 1 chain records the refused ManageData envelope"
+notes = "the participants-from-meta case: accounts named only in the envelope of a failed transaction. cap-0028 removes a pre-auth signer even when the transaction fails, and cap-0002 puts signature and one-time signer changes in tx-level meta, so failed transactions still change state. the no_issuer, trust_not_required and self_not_allowed codes come from a contrast chain at protocol 12 in v0 envelopes, since core stopped giving them at protocol 13 or 16; a protocol 1 chain records the refused ManageData envelope, and a protocol 9 chain the native ChangeTrust line that doApply throws on, which core closes as tx_internal_error"
 
 [[family]]
 id = "cap23.claimable-balances"
@@ -832,7 +834,7 @@ source_classes = ["local-core", "core-golden"]
 fields = []
 linked_issues = []
 priority = 13
-notes = "local-core if freezing is producible through config upgrades on a private network (phase 5); otherwise only the FrozenLedgerKeysTests goldens imported in phase 6 supply entries, and local-core is removed here"
+notes = "freezing is producible through config upgrades on a private network, so the cap77 recipe records the frozen key settings and the trustline_frozen failures; the FrozenLedgerKeysTests goldens add core's own ledgers"
 
 [[family]]
 id = "cap46.config-upgrades"
@@ -882,7 +884,7 @@ source_classes = ["mainnet-history"]
 fields = []
 linked_issues = []
 priority = 14
-notes = "no new xdr. the mainnet upgrade ledger adds 31879035 stroops to the header fee pool with no matching meta, and amended entries show only when later restored. both exist only on mainnet, so phase 6 captures the upgrade ledger and one later restore. the fragments are coarse; the fee pool delta is a leaf value"
+notes = "no new xdr. the mainnet upgrade ledger adds 31879035 stroops to the header fee pool with no matching meta, and amended entries show only when later restored. both exist only on mainnet, and no capture of either exists yet; the entries are core goldens holding the coarse fragments. the fragments are coarse; the fee pool delta is a leaf value"
 
 [[family]]
 id = "cap01.bump-sequence"
@@ -916,11 +918,11 @@ signature = [
     "OperationBody:create_passive_sell_offer",
     "ClaimAtom:v0",
 ]
-source_classes = ["local-core", "synthetic"]
+source_classes = ["local-core", "mainnet-history", "synthetic"]
 fields = ["op.manage_offer.offer_id", "op.manage_offer.assets_amount_price"]
 linked_issues = ["https://github.com/stellar/js-stellar-sdk/issues/1785"]
 priority = 14
-notes = "offer ids come from the header id pool, so ids above 2^53 cannot be produced on a fresh network; those stay textual-id vectors in phase 6. claim atom v0 (seller as a raw ed25519 key) comes from a protocol 17 chain, the last protocol before cap-0038 replaced it"
+notes = "offer ids come from the header id pool, so ids above 2^53 cannot be produced on a fresh network; those are covered by the synthetic textual-id vectors. claim atom v0 (seller as a raw ed25519 key) comes from a protocol 17 chain, the last protocol before cap-0038 replaced it. mainnet-history is ledger 25000000 at protocol 11, offers with liabilities in a header whose scp value is the unsigned STELLAR_VALUE_BASIC that current core never writes"
 
 [[family]]
 id = "cap18.maintain-liabilities"

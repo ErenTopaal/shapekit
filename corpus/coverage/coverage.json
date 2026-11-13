@@ -5,11 +5,11 @@
         "arm": "AccountEntryExt:v0",
         "by_source_class": {
           "core-golden": 27,
-          "local-core": 107,
-          "mainnet-history": 1,
+          "local-core": 108,
+          "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 138,
+        "core_emitted_entries": 140,
         "examples": [
           "cap01.bump-sequence.p30-bump-forward",
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
@@ -19,12 +19,12 @@
       {
         "arm": "AccountEntryExt:v1",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 92,
           "local-core": 358,
-          "mainnet-history": 5,
+          "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 456,
+        "core_emitted_entries": 459,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -34,24 +34,25 @@
       {
         "arm": "AccountEntryExtensionV1Ext:v0",
         "by_source_class": {
-          "local-core": 5
+          "local-core": 5,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 6,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
-          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
-          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0"
         ]
       },
       {
         "arm": "AccountEntryExtensionV1Ext:v2",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 92,
           "local-core": 354,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 452,
+        "core_emitted_entries": 454,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -74,12 +75,12 @@
       {
         "arm": "AccountEntryExtensionV2Ext:v3",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 92,
           "local-core": 353,
           "mainnet-history": 5,
           "testnet-history": 3
         },
-        "core_emitted_entries": 451,
+        "core_emitted_entries": 453,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -243,10 +244,10 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 131,
-          "mainnet-history": 3,
+          "mainnet-history": 4,
           "testnet-history": 2
         },
-        "core_emitted_entries": 143,
+        "core_emitted_entries": 144,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -258,10 +259,10 @@
         "by_source_class": {
           "core-golden": 14,
           "local-core": 137,
-          "mainnet-history": 1,
+          "mainnet-history": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 154,
+        "core_emitted_entries": 155,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -360,6 +361,16 @@
           "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
           "cap33.sponsorship.p30-sponsored-trustline-envelope",
           "cap38.liquidity-pools.testnet-5521432"
+        ]
+      },
+      {
+        "arm": "ChangeTrustAsset:native",
+        "by_source_class": {
+          "local-core": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "classic.failed-tx.p9-change-trust-native-internal-error-envelope"
         ]
       },
       {
@@ -796,10 +807,10 @@
       {
         "arm": "ConfigSettingEntry:contract_bandwidth_v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -809,10 +820,10 @@
       {
         "arm": "ConfigSettingEntry:contract_compute_v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -822,10 +833,10 @@
       {
         "arm": "ConfigSettingEntry:contract_cost_params_cpu_instructions",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 2
         },
-        "core_emitted_entries": 3,
+        "core_emitted_entries": 4,
         "examples": [
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
           "cap46.config-upgrades.p30-cost-params-cpu",
@@ -835,10 +846,10 @@
       {
         "arm": "ConfigSettingEntry:contract_cost_params_memory_bytes",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 2
         },
-        "core_emitted_entries": 3,
+        "core_emitted_entries": 4,
         "examples": [
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
           "cap46.config-upgrades.p30-cost-params-memory",
@@ -848,10 +859,10 @@
       {
         "arm": "ConfigSettingEntry:contract_data_entry_size_bytes",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -861,10 +872,10 @@
       {
         "arm": "ConfigSettingEntry:contract_data_key_size_bytes",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -874,10 +885,10 @@
       {
         "arm": "ConfigSettingEntry:contract_events_v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -887,10 +898,10 @@
       {
         "arm": "ConfigSettingEntry:contract_execution_lanes",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 7,
           "local-core": 2
         },
-        "core_emitted_entries": 8,
+        "core_emitted_entries": 9,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-182fa2818edaf743-1",
@@ -900,10 +911,10 @@
       {
         "arm": "ConfigSettingEntry:contract_historical_data_v0",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -939,10 +950,10 @@
       {
         "arm": "ConfigSettingEntry:contract_max_size_bytes",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 1
         },
-        "core_emitted_entries": 6,
+        "core_emitted_entries": 7,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
@@ -965,37 +976,38 @@
       {
         "arm": "ConfigSettingEntry:eviction_iterator",
         "by_source_class": {
-          "core-golden": 1
+          "core-golden": 2
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 2,
         "examples": [
-          "cap46.config-upgrades.golden-27003f6cc5cdecc2-0"
+          "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
+          "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1"
         ]
       },
       {
         "arm": "ConfigSettingEntry:freeze_bypass_txs",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 2
         },
-        "core_emitted_entries": 3,
+        "core_emitted_entries": 4,
         "examples": [
+          "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
           "cap77.frozen-keys.golden-750ccb6ad63c37bb-9",
-          "cap77.frozen-keys.p30-bypass-entry",
-          "cap77.frozen-keys.p30-bypass-upgrade"
+          "cap77.frozen-keys.p30-bypass-entry"
         ]
       },
       {
         "arm": "ConfigSettingEntry:frozen_ledger_keys",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 2
         },
-        "core_emitted_entries": 3,
+        "core_emitted_entries": 4,
         "examples": [
+          "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
           "cap77.frozen-keys.golden-34d6c37c6481e487-7",
-          "cap77.frozen-keys.p30-freeze-upgrade",
-          "cap77.frozen-keys.p30-frozen-keys-entry"
+          "cap77.frozen-keys.p30-freeze-upgrade"
         ]
       },
       {
@@ -1038,16 +1050,6 @@
         ]
       },
       {
-        "arm": "ContractCodeEntryExt:v0",
-        "by_source_class": {
-          "core-golden": 1
-        },
-        "core_emitted_entries": 1,
-        "examples": [
-          "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
-        ]
-      },
-      {
         "arm": "ContractCodeEntryExt:v1",
         "by_source_class": {
           "core-golden": 3,
@@ -1063,12 +1065,12 @@
       {
         "arm": "ContractEventBody:v0",
         "by_source_class": {
-          "core-golden": 38,
+          "core-golden": 40,
           "local-core": 332,
-          "mainnet-history": 6,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 379,
+        "core_emitted_entries": 382,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -1164,11 +1166,11 @@
       {
         "arm": "CreateAccountResult:success",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 2,
           "local-core": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 6,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-meta",
           "cap38.liquidity-pools.testnet-5521432",
@@ -1309,12 +1311,12 @@
       {
         "arm": "ExtensionPoint:v0",
         "by_source_class": {
-          "core-golden": 91,
+          "core-golden": 94,
           "local-core": 359,
-          "mainnet-history": 6,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 459,
+        "core_emitted_entries": 463,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1352,11 +1354,11 @@
       {
         "arm": "GeneralizedTransactionSet:v1",
         "by_source_class": {
-          "core-golden": 104,
+          "core-golden": 105,
           "local-core": 285,
           "testnet-history": 3
         },
-        "core_emitted_entries": 392,
+        "core_emitted_entries": 393,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1392,12 +1394,12 @@
       {
         "arm": "HostFunction:invoke_contract",
         "by_source_class": {
-          "core-golden": 24,
+          "core-golden": 27,
           "local-core": 59,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 88,
+        "core_emitted_entries": 91,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1407,10 +1409,10 @@
       {
         "arm": "HostFunction:upload_contract_wasm",
         "by_source_class": {
-          "core-golden": 6,
+          "core-golden": 5,
           "local-core": 1
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 6,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap67.unified-events.golden-60000be2e73a4207-10",
@@ -1589,11 +1591,11 @@
       {
         "arm": "InvokeHostFunctionResult:trapped",
         "by_source_class": {
-          "core-golden": 12,
+          "core-golden": 14,
           "local-core": 14,
           "testnet-history": 1
         },
-        "core_emitted_entries": 27,
+        "core_emitted_entries": 29,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap67.unified-events.golden-938fb779c48ac3af-16",
@@ -1604,22 +1606,23 @@
         "arm": "LedgerCloseMeta:v0",
         "by_source_class": {
           "core-golden": 2,
-          "local-core": 16
+          "local-core": 16,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 18,
+        "core_emitted_entries": 19,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
-          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
-          "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0"
+          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0"
         ]
       },
       {
         "arm": "LedgerCloseMeta:v1",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 5,
           "local-core": 34
         },
-        "core_emitted_entries": 42,
+        "core_emitted_entries": 39,
         "examples": [
           "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
           "cap46.config-upgrades.golden-27003f6cc5cdecc2-5",
@@ -1629,11 +1632,11 @@
       {
         "arm": "LedgerCloseMeta:v2",
         "by_source_class": {
-          "core-golden": 96,
+          "core-golden": 100,
           "local-core": 251,
           "testnet-history": 3
         },
-        "core_emitted_entries": 350,
+        "core_emitted_entries": 354,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1643,10 +1646,10 @@
       {
         "arm": "LedgerCloseMetaExt:v0",
         "by_source_class": {
-          "core-golden": 104,
+          "core-golden": 105,
           "local-core": 285
         },
-        "core_emitted_entries": 389,
+        "core_emitted_entries": 390,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1668,16 +1671,16 @@
       {
         "arm": "LedgerEntryChange:created",
         "by_source_class": {
-          "core-golden": 27,
+          "core-golden": 25,
           "local-core": 48,
-          "mainnet-history": 1,
+          "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 79,
+        "core_emitted_entries": 78,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta"
+          "cap03.offer-liabilities.mainnet-25000000",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -1711,11 +1714,11 @@
         "arm": "LedgerEntryChange:state",
         "by_source_class": {
           "core-golden": 99,
-          "local-core": 370,
-          "mainnet-history": 6,
+          "local-core": 371,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 478,
+        "core_emitted_entries": 480,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1726,11 +1729,11 @@
         "arm": "LedgerEntryChange:updated",
         "by_source_class": {
           "core-golden": 99,
-          "local-core": 370,
-          "mainnet-history": 6,
+          "local-core": 371,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 478,
+        "core_emitted_entries": 480,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1740,12 +1743,12 @@
       {
         "arm": "LedgerEntryData:account",
         "by_source_class": {
-          "core-golden": 91,
-          "local-core": 370,
-          "mainnet-history": 6,
+          "core-golden": 92,
+          "local-core": 371,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 470,
+        "core_emitted_entries": 473,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1781,25 +1784,25 @@
       {
         "arm": "LedgerEntryData:contract_code",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 3,
           "local-core": 4
         },
-        "core_emitted_entries": 8,
+        "core_emitted_entries": 7,
         "examples": [
           "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
-          "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
-          "soroban.invoke-basics.golden-7b59aa36c1776fe1-32"
+          "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
+          "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1"
         ]
       },
       {
         "arm": "LedgerEntryData:contract_data",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 20,
           "local-core": 39,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 63,
+        "core_emitted_entries": 64,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -1835,9 +1838,10 @@
         "arm": "LedgerEntryData:offer",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 16
+          "local-core": 16,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 22,
+        "core_emitted_entries": 23,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -1849,10 +1853,10 @@
         "by_source_class": {
           "core-golden": 9,
           "local-core": 72,
-          "mainnet-history": 3,
+          "mainnet-history": 4,
           "testnet-history": 1
         },
-        "core_emitted_entries": 85,
+        "core_emitted_entries": 86,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -1877,12 +1881,12 @@
       {
         "arm": "LedgerEntryExt:v0",
         "by_source_class": {
-          "core-golden": 100,
-          "local-core": 383,
-          "mainnet-history": 6,
+          "core-golden": 101,
+          "local-core": 384,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 492,
+        "core_emitted_entries": 495,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1920,11 +1924,12 @@
       {
         "arm": "LedgerHeaderExt:v0",
         "by_source_class": {
-          "core-golden": 106,
+          "core-golden": 107,
           "local-core": 300,
+          "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 409,
+        "core_emitted_entries": 411,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1954,11 +1959,12 @@
       {
         "arm": "LedgerHeaderHistoryEntryExt:v0",
         "by_source_class": {
-          "core-golden": 106,
+          "core-golden": 107,
           "local-core": 301,
+          "mainnet-history": 1,
           "testnet-history": 3
         },
-        "core_emitted_entries": 410,
+        "core_emitted_entries": 412,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -1968,12 +1974,12 @@
       {
         "arm": "LedgerKey:account",
         "by_source_class": {
-          "core-golden": 11,
+          "core-golden": 12,
           "local-core": 26,
           "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 39,
+        "core_emitted_entries": 40,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
@@ -1995,12 +2001,12 @@
       {
         "arm": "LedgerKey:contract_code",
         "by_source_class": {
-          "core-golden": 34,
+          "core-golden": 36,
           "local-core": 55,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 94,
+        "core_emitted_entries": 96,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -2010,12 +2016,12 @@
       {
         "arm": "LedgerKey:contract_data",
         "by_source_class": {
-          "core-golden": 45,
+          "core-golden": 48,
           "local-core": 77,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 127,
+        "core_emitted_entries": 130,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -2495,13 +2501,14 @@
         "arm": "ManageOfferSuccessResultOffer:created",
         "by_source_class": {
           "core-golden": 1,
-          "local-core": 6
+          "local-core": 6,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 7,
+        "core_emitted_entries": 8,
         "examples": [
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta"
+          "cap03.offer-liabilities.mainnet-25000000",
+          "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta"
         ]
       },
       {
@@ -2520,10 +2527,12 @@
       {
         "arm": "ManageOfferSuccessResultOffer:updated",
         "by_source_class": {
-          "local-core": 1
+          "local-core": 1,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 2,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap03.offer-liabilities.p30-update-offer-by-id"
         ]
       },
@@ -2580,10 +2589,12 @@
       {
         "arm": "ManageSellOfferResult:low_reserve",
         "by_source_class": {
-          "local-core": 1
+          "local-core": 1,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 2,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "classic.failed-tx.p30-manage-sell-low-reserve"
         ]
       },
@@ -2631,9 +2642,10 @@
         "arm": "ManageSellOfferResult:success",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 7
+          "local-core": 7,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 11,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -2679,12 +2691,12 @@
       {
         "arm": "Memo:none",
         "by_source_class": {
-          "core-golden": 91,
-          "local-core": 339,
-          "mainnet-history": 6,
+          "core-golden": 92,
+          "local-core": 340,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 439,
+        "core_emitted_entries": 442,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2707,26 +2719,27 @@
       {
         "arm": "Memo:text",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 10,
+          "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 12,
+        "core_emitted_entries": 14,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap38.liquidity-pools.testnet-5521432",
-          "cap67.unified-events.p22-backfill-payment-memo-text",
-          "cap67.unified-events.p22-payment-memo-text"
+          "cap67.unified-events.p22-backfill-payment-memo-text"
         ]
       },
       {
         "arm": "MuxedAccount:ed25519",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 92,
           "local-core": 343,
-          "mainnet-history": 5,
+          "mainnet-history": 6,
           "testnet-history": 3
         },
-        "core_emitted_entries": 441,
+        "core_emitted_entries": 444,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -2750,9 +2763,10 @@
         "arm": "OfferEntryExt:v0",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 16
+          "local-core": 16,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 22,
+        "core_emitted_entries": 23,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -2816,11 +2830,11 @@
         "arm": "OperationBody:change_trust",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 10,
+          "local-core": 11,
           "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 15,
+        "core_emitted_entries": 16,
         "examples": [
           "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
           "cap27.muxed-accounts.mainnet-36196205-17fee99b-envelope",
@@ -2867,11 +2881,11 @@
       {
         "arm": "OperationBody:create_account",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 2,
           "local-core": 5,
           "testnet-history": 2
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 9,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-envelope",
           "cap38.liquidity-pools.testnet-5521432",
@@ -2944,12 +2958,12 @@
       {
         "arm": "OperationBody:invoke_host_function",
         "by_source_class": {
-          "core-golden": 36,
+          "core-golden": 38,
           "local-core": 68,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 109,
+        "core_emitted_entries": 111,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -3012,13 +3026,14 @@
         "arm": "OperationBody:manage_sell_offer",
         "by_source_class": {
           "core-golden": 2,
-          "local-core": 17
+          "local-core": 17,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 19,
+        "core_emitted_entries": 20,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
-          "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0"
+          "cap03.offer-liabilities.mainnet-25000000"
         ]
       },
       {
@@ -3052,14 +3067,14 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 86,
-          "mainnet-history": 2,
+          "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 97,
+        "core_emitted_entries": 98,
         "examples": [
           "cap03.offer-liabilities.golden-27d2533d64835282-0",
-          "cap15.fee-bump.p30-fee-source-is-inner-source-envelope",
-          "cap15.fee-bump.p30-inner-bad-auth"
+          "cap03.offer-liabilities.mainnet-25000000",
+          "cap15.fee-bump.p30-fee-source-is-inner-source-envelope"
         ]
       },
       {
@@ -3092,13 +3107,14 @@
         "by_source_class": {
           "core-golden": 8,
           "local-core": 22,
+          "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 31,
+        "core_emitted_entries": 32,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap15.fee-bump.p30-inner-bad-auth",
-          "cap15.fee-bump.p30-inner-bad-auth-extra",
-          "cap33.sponsorship.golden-6f067a349543093a-48"
+          "cap15.fee-bump.p30-inner-bad-auth-extra"
         ]
       },
       {
@@ -3137,12 +3153,12 @@
       {
         "arm": "OperationResult:op_inner",
         "by_source_class": {
-          "core-golden": 90,
+          "core-golden": 91,
           "local-core": 363,
-          "mainnet-history": 6,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 462,
+        "core_emitted_entries": 464,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3277,11 +3293,11 @@
       {
         "arm": "OperationResultTr:create_account",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 2,
           "local-core": 5,
           "testnet-history": 2
         },
-        "core_emitted_entries": 10,
+        "core_emitted_entries": 9,
         "examples": [
           "cap33.sponsorship.p30-sponsored-account-meta",
           "cap38.liquidity-pools.testnet-5521432",
@@ -3342,12 +3358,12 @@
       {
         "arm": "OperationResultTr:invoke_host_function",
         "by_source_class": {
-          "core-golden": 32,
+          "core-golden": 34,
           "local-core": 68,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 105,
+        "core_emitted_entries": 107,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -3409,9 +3425,10 @@
         "arm": "OperationResultTr:manage_sell_offer",
         "by_source_class": {
           "core-golden": 3,
-          "local-core": 18
+          "local-core": 18,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 21,
+        "core_emitted_entries": 22,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
@@ -3449,14 +3466,14 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 79,
-          "mainnet-history": 2,
+          "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 90,
+        "core_emitted_entries": 91,
         "examples": [
           "cap03.offer-liabilities.golden-27d2533d64835282-0",
-          "cap15.fee-bump.p30-fee-source-is-inner-source-meta",
-          "cap15.fee-bump.p30-inner-failed-meta"
+          "cap03.offer-liabilities.mainnet-25000000",
+          "cap15.fee-bump.p30-fee-source-is-inner-source-meta"
         ]
       },
       {
@@ -3489,13 +3506,14 @@
         "by_source_class": {
           "core-golden": 8,
           "local-core": 22,
+          "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 31,
+        "core_emitted_entries": 32,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap15.fee-bump.p30-inner-bad-auth",
-          "cap15.fee-bump.p30-inner-bad-auth-extra",
-          "cap33.sponsorship.golden-6f067a349543093a-48"
+          "cap15.fee-bump.p30-inner-bad-auth-extra"
         ]
       },
       {
@@ -3793,10 +3811,12 @@
       {
         "arm": "PaymentResult:no_trust",
         "by_source_class": {
-          "local-core": 1
+          "local-core": 1,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 2,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "classic.failed-tx.p30-payment-no-trust"
         ]
       },
@@ -3835,14 +3855,14 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 69,
-          "mainnet-history": 1,
+          "mainnet-history": 2,
           "testnet-history": 2
         },
-        "core_emitted_entries": 79,
+        "core_emitted_entries": 80,
         "examples": [
           "cap03.offer-liabilities.golden-27d2533d64835282-0",
-          "cap15.fee-bump.p30-fee-source-is-inner-source-meta",
-          "cap15.fee-bump.p30-inner-success-meta"
+          "cap03.offer-liabilities.mainnet-25000000",
+          "cap15.fee-bump.p30-fee-source-is-inner-source-meta"
         ]
       },
       {
@@ -3858,11 +3878,11 @@
       {
         "arm": "Preconditions:none",
         "by_source_class": {
-          "core-golden": 89,
+          "core-golden": 91,
           "local-core": 345,
           "testnet-history": 1
         },
-        "core_emitted_entries": 435,
+        "core_emitted_entries": 437,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -3899,12 +3919,12 @@
       {
         "arm": "PublicKey:public_key_type_ed25519",
         "by_source_class": {
-          "core-golden": 106,
-          "local-core": 405,
-          "mainnet-history": 12,
+          "core-golden": 107,
+          "local-core": 406,
+          "mainnet-history": 13,
           "testnet-history": 3
         },
-        "core_emitted_entries": 526,
+        "core_emitted_entries": 529,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4023,12 +4043,12 @@
       {
         "arm": "ScAddress:account",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 20,
           "local-core": 341,
-          "mainnet-history": 8,
+          "mainnet-history": 9,
           "testnet-history": 3
         },
-        "core_emitted_entries": 371,
+        "core_emitted_entries": 373,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -4051,12 +4071,12 @@
       {
         "arm": "ScAddress:contract",
         "by_source_class": {
-          "core-golden": 45,
+          "core-golden": 48,
           "local-core": 100,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 152,
+        "core_emitted_entries": 155,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4105,14 +4125,14 @@
       {
         "arm": "ScError:auth",
         "by_source_class": {
-          "core-golden": 2,
+          "core-golden": 4,
           "local-core": 2
         },
-        "core_emitted_entries": 4,
+        "core_emitted_entries": 6,
         "examples": [
           "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
           "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
-          "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope"
+          "soroban.scval-shapes.golden-7e8aadf36d7d907d-17"
         ]
       },
       {
@@ -4152,14 +4172,14 @@
       {
         "arm": "ScError:crypto",
         "by_source_class": {
-          "core-golden": 1,
+          "core-golden": 2,
           "local-core": 2
         },
-        "core_emitted_entries": 3,
+        "core_emitted_entries": 4,
         "examples": [
           "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
-          "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
-          "soroban.scval-shapes.p30-errors-auth-crypto-events-meta"
+          "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
+          "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope"
         ]
       },
       {
@@ -4220,12 +4240,12 @@
       {
         "arm": "ScVal:address",
         "by_source_class": {
-          "core-golden": 28,
+          "core-golden": 30,
           "local-core": 341,
-          "mainnet-history": 8,
+          "mainnet-history": 9,
           "testnet-history": 3
         },
-        "core_emitted_entries": 380,
+        "core_emitted_entries": 383,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -4235,12 +4255,12 @@
       {
         "arm": "ScVal:bool",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 10,
           "local-core": 24,
           "mainnet-history": 3,
           "testnet-history": 2
         },
-        "core_emitted_entries": 37,
+        "core_emitted_entries": 39,
         "examples": [
           "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
           "cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4",
@@ -4250,12 +4270,12 @@
       {
         "arm": "ScVal:bytes",
         "by_source_class": {
-          "core-golden": 22,
+          "core-golden": 24,
           "local-core": 40,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 68,
+        "core_emitted_entries": 70,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4292,11 +4312,11 @@
       {
         "arm": "ScVal:error",
         "by_source_class": {
-          "core-golden": 19,
+          "core-golden": 21,
           "local-core": 6,
           "testnet-history": 1
         },
-        "core_emitted_entries": 26,
+        "core_emitted_entries": 28,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap66.archival.golden-04667ce620bffee7-23",
@@ -4320,10 +4340,10 @@
         "by_source_class": {
           "core-golden": 13,
           "local-core": 337,
-          "mainnet-history": 8,
+          "mainnet-history": 9,
           "testnet-history": 3
         },
-        "core_emitted_entries": 361,
+        "core_emitted_entries": 362,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -4373,12 +4393,12 @@
       {
         "arm": "ScVal:ledger_key_contract_instance",
         "by_source_class": {
-          "core-golden": 33,
+          "core-golden": 36,
           "local-core": 85,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 125,
+        "core_emitted_entries": 128,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4388,10 +4408,10 @@
       {
         "arm": "ScVal:ledger_key_nonce",
         "by_source_class": {
-          "core-golden": 5,
+          "core-golden": 6,
           "local-core": 12
         },
-        "core_emitted_entries": 17,
+        "core_emitted_entries": 18,
         "examples": [
           "cap71.credentials.golden-e25799a2e2e9eea2-17",
           "cap71.credentials.p30-address-v2",
@@ -4401,42 +4421,42 @@
       {
         "arm": "ScVal:map",
         "by_source_class": {
-          "core-golden": 12,
+          "core-golden": 14,
           "local-core": 85,
-          "mainnet-history": 3,
+          "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 103,
+        "core_emitted_entries": 106,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
-          "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
-          "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1"
+          "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53"
         ]
       },
       {
         "arm": "ScVal:string",
         "by_source_class": {
-          "core-golden": 15,
+          "core-golden": 17,
           "local-core": 138,
-          "mainnet-history": 2,
+          "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 158,
+        "core_emitted_entries": 161,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
-          "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
-          "cap03.offer-liabilities.p30-credit-pair-cross-partial"
+          "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta"
         ]
       },
       {
         "arm": "ScVal:symbol",
         "by_source_class": {
-          "core-golden": 48,
+          "core-golden": 50,
           "local-core": 346,
-          "mainnet-history": 8,
+          "mainnet-history": 9,
           "testnet-history": 3
         },
-        "core_emitted_entries": 405,
+        "core_emitted_entries": 408,
         "examples": [
           "cap01.bump-sequence.p30-bump-behind",
           "cap01.bump-sequence.p30-bump-forward",
@@ -4485,12 +4505,12 @@
       {
         "arm": "ScVal:u32",
         "by_source_class": {
-          "core-golden": 8,
+          "core-golden": 9,
           "local-core": 38,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 53,
+        "core_emitted_entries": 54,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4500,12 +4520,12 @@
       {
         "arm": "ScVal:u64",
         "by_source_class": {
-          "core-golden": 34,
+          "core-golden": 36,
           "local-core": 47,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 86,
+        "core_emitted_entries": 88,
         "examples": [
           "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
           "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
@@ -4515,12 +4535,12 @@
       {
         "arm": "ScVal:vec",
         "by_source_class": {
-          "core-golden": 24,
+          "core-golden": 27,
           "local-core": 41,
           "mainnet-history": 4,
           "testnet-history": 3
         },
-        "core_emitted_entries": 72,
+        "core_emitted_entries": 75,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4530,12 +4550,12 @@
       {
         "arm": "ScVal:void",
         "by_source_class": {
-          "core-golden": 21,
+          "core-golden": 24,
           "local-core": 31,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 57,
+        "core_emitted_entries": 60,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4587,13 +4607,14 @@
         "by_source_class": {
           "core-golden": 8,
           "local-core": 17,
+          "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 26,
+        "core_emitted_entries": 27,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap15.fee-bump.p30-inner-bad-auth",
-          "cap15.fee-bump.p30-inner-bad-auth-extra",
-          "cap33.sponsorship.golden-6f067a349543093a-48"
+          "cap15.fee-bump.p30-inner-bad-auth-extra"
         ]
       },
       {
@@ -4712,12 +4733,12 @@
       {
         "arm": "SorobanAuthorizedFunction:contract_fn",
         "by_source_class": {
-          "core-golden": 10,
+          "core-golden": 11,
           "local-core": 29,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 44,
+        "core_emitted_entries": 45,
         "examples": [
           "cap38.liquidity-pools.testnet-5521432",
           "cap40.signed-payload-signer.testnet-4437357",
@@ -4766,10 +4787,10 @@
       {
         "arm": "SorobanCredentials:address_v2",
         "by_source_class": {
-          "core-golden": 4,
+          "core-golden": 5,
           "local-core": 1
         },
-        "core_emitted_entries": 5,
+        "core_emitted_entries": 6,
         "examples": [
           "cap71.credentials.golden-e25799a2e2e9eea2-17",
           "cap71.credentials.p30-address-v2",
@@ -4805,12 +4826,12 @@
       {
         "arm": "SorobanTransactionDataExt:v0",
         "by_source_class": {
-          "core-golden": 50,
+          "core-golden": 52,
           "local-core": 76,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 131,
+        "core_emitted_entries": 133,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -4856,13 +4877,23 @@
         ]
       },
       {
+        "arm": "StellarValueExt:basic",
+        "by_source_class": {
+          "mainnet-history": 1
+        },
+        "core_emitted_entries": 1,
+        "examples": [
+          "cap03.offer-liabilities.mainnet-25000000"
+        ]
+      },
+      {
         "arm": "StellarValueExt:signed",
         "by_source_class": {
-          "core-golden": 14,
+          "core-golden": 11,
           "local-core": 67,
           "testnet-history": 2
         },
-        "core_emitted_entries": 83,
+        "core_emitted_entries": 80,
         "examples": [
           "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
           "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
@@ -4872,11 +4903,11 @@
       {
         "arm": "StellarValueExt:signed_ms",
         "by_source_class": {
-          "core-golden": 92,
+          "core-golden": 96,
           "local-core": 234,
           "testnet-history": 1
         },
-        "core_emitted_entries": 327,
+        "core_emitted_entries": 331,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4886,12 +4917,12 @@
       {
         "arm": "TransactionEnvelope:tx",
         "by_source_class": {
-          "core-golden": 89,
+          "core-golden": 91,
           "local-core": 347,
           "mainnet-history": 3,
           "testnet-history": 3
         },
-        "core_emitted_entries": 442,
+        "core_emitted_entries": 444,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4915,14 +4946,14 @@
       {
         "arm": "TransactionEnvelope:tx_v0",
         "by_source_class": {
-          "core-golden": 1,
-          "local-core": 12
+          "local-core": 13,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 14,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap26.inflation.p11-inflation-not-time",
-          "cap26.inflation.p11-inflation-payout",
-          "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
+          "cap26.inflation.p11-inflation-payout"
         ]
       },
       {
@@ -4943,12 +4974,12 @@
       {
         "arm": "TransactionExt:v1",
         "by_source_class": {
-          "core-golden": 51,
+          "core-golden": 53,
           "local-core": 77,
           "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 133,
+        "core_emitted_entries": 135,
         "examples": [
           "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
           "cap38.liquidity-pools.testnet-5521432",
@@ -4958,8 +4989,7 @@
       {
         "arm": "TransactionMeta:v2",
         "by_source_class": {
-          "core-golden": 1,
-          "local-core": 16
+          "local-core": 17
         },
         "core_emitted_entries": 17,
         "examples": [
@@ -4971,25 +5001,25 @@
       {
         "arm": "TransactionMeta:v3",
         "by_source_class": {
-          "core-golden": 3,
+          "core-golden": 1,
           "local-core": 17
         },
-        "core_emitted_entries": 20,
+        "core_emitted_entries": 18,
         "examples": [
-          "cap67.unified-events.golden-27003f6cc5cdecc2-1",
           "cap67.unified-events.p22-account-merge-muxed-destination",
-          "cap67.unified-events.p22-claim-claimable-balance"
+          "cap67.unified-events.p22-claim-claimable-balance",
+          "cap67.unified-events.p22-clawback"
         ]
       },
       {
         "arm": "TransactionMeta:v4",
         "by_source_class": {
-          "core-golden": 87,
+          "core-golden": 91,
           "local-core": 332,
-          "mainnet-history": 6,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 428,
+        "core_emitted_entries": 433,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -4999,11 +5029,11 @@
       {
         "arm": "TransactionPhase:v0",
         "by_source_class": {
-          "core-golden": 104,
+          "core-golden": 105,
           "local-core": 285,
           "testnet-history": 3
         },
-        "core_emitted_entries": 392,
+        "core_emitted_entries": 393,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -5013,11 +5043,11 @@
       {
         "arm": "TransactionPhase:v1",
         "by_source_class": {
-          "core-golden": 96,
+          "core-golden": 100,
           "local-core": 251,
           "testnet-history": 3
         },
-        "core_emitted_entries": 350,
+        "core_emitted_entries": 354,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -5027,12 +5057,12 @@
       {
         "arm": "TransactionResultExt:v0",
         "by_source_class": {
-          "core-golden": 91,
-          "local-core": 365,
-          "mainnet-history": 6,
+          "core-golden": 92,
+          "local-core": 366,
+          "mainnet-history": 7,
           "testnet-history": 3
         },
-        "core_emitted_entries": 465,
+        "core_emitted_entries": 468,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -5092,16 +5122,16 @@
       {
         "arm": "TransactionResultResult:tx_failed",
         "by_source_class": {
-          "core-golden": 28,
+          "core-golden": 30,
           "local-core": 134,
-          "mainnet-history": 1,
+          "mainnet-history": 2,
           "testnet-history": 3
         },
-        "core_emitted_entries": 166,
+        "core_emitted_entries": 169,
         "examples": [
           "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
           "cap01.bump-sequence.p30-merge-seqnum-too-far",
-          "cap03.offer-liabilities.p30-merge-dest-full"
+          "cap03.offer-liabilities.mainnet-25000000"
         ]
       },
       {
@@ -5135,10 +5165,13 @@
       {
         "arm": "TransactionResultResult:tx_internal_error",
         "by_source_class": {
-          "core-golden": 1
+          "core-golden": 2,
+          "local-core": 1
         },
-        "core_emitted_entries": 1,
+        "core_emitted_entries": 3,
         "examples": [
+          "classic.failed-tx.golden-e0e11e1fb450f676-32",
+          "classic.failed-tx.p9-change-trust-native-internal-error-meta",
           "classic.memo-bytes.golden-e0e11e1fb450f676-32"
         ]
       },
@@ -5155,9 +5188,9 @@
       {
         "arm": "TransactionResultResult:tx_success",
         "by_source_class": {
-          "core-golden": 61,
+          "core-golden": 60,
           "local-core": 226,
-          "mainnet-history": 2,
+          "mainnet-history": 3,
           "testnet-history": 3
         },
         "core_emitted_entries": 292,
@@ -5170,14 +5203,14 @@
       {
         "arm": "TransactionV0Ext:v0",
         "by_source_class": {
-          "core-golden": 1,
-          "local-core": 12
+          "local-core": 13,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 13,
+        "core_emitted_entries": 14,
         "examples": [
+          "cap03.offer-liabilities.mainnet-25000000",
           "cap26.inflation.p11-inflation-not-time",
-          "cap26.inflation.p11-inflation-payout",
-          "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
+          "cap26.inflation.p11-inflation-payout"
         ]
       },
       {
@@ -5199,10 +5232,10 @@
         "by_source_class": {
           "core-golden": 9,
           "local-core": 78,
-          "mainnet-history": 4,
+          "mainnet-history": 5,
           "testnet-history": 1
         },
-        "core_emitted_entries": 92,
+        "core_emitted_entries": 93,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5228,10 +5261,10 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 67,
-          "mainnet-history": 3,
+          "mainnet-history": 4,
           "testnet-history": 1
         },
-        "core_emitted_entries": 78,
+        "core_emitted_entries": 79,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5243,9 +5276,10 @@
         "by_source_class": {
           "core-golden": 7,
           "local-core": 25,
+          "mainnet-history": 1,
           "testnet-history": 1
         },
-        "core_emitted_entries": 33,
+        "core_emitted_entries": 34,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5270,9 +5304,10 @@
         "arm": "TrustLineEntryV1Ext:v0",
         "by_source_class": {
           "core-golden": 6,
-          "local-core": 17
+          "local-core": 17,
+          "mainnet-history": 1
         },
-        "core_emitted_entries": 23,
+        "core_emitted_entries": 24,
         "examples": [
           "cap03.offer-liabilities.golden-00c0553ff45607f9-10",
           "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
@@ -5296,11 +5331,11 @@
       {
         "arm": "TxSetComponent:txset_comp_txs_maybe_discounted_fee",
         "by_source_class": {
-          "core-golden": 45,
+          "core-golden": 44,
           "local-core": 230,
           "testnet-history": 3
         },
-        "core_emitted_entries": 278,
+        "core_emitted_entries": 277,
         "examples": [
           "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
           "cap01.bump-sequence.p30-bump-behind",
@@ -5351,15 +5386,6 @@
         }
       },
       {
-        "arm": "ChangeTrustAsset:native",
-        "non_core_entries": [],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "refused-before-ledger",
-          "reason": "ChangeTrustOpFrame::doCheckValid answers CHANGE_TRUST_MALFORMED for a native line from protocol 10 and doApply throws on one below it (stellar-core v30.0.0)"
-        }
-      },
-      {
         "arm": "ChangeTrustResult:malformed",
         "non_core_entries": [],
         "refused_by_core": [
@@ -5395,6 +5421,15 @@
         "uncovered": {
           "blocker": "never-emitted",
           "reason": "a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm"
+        }
+      },
+      {
+        "arm": "ContractCodeEntryExt:v0",
+        "non_core_entries": [],
+        "refused_by_core": [],
+        "uncovered": {
+          "blocker": "old-protocol-only",
+          "reason": "soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload"
         }
       },
       {
@@ -5459,7 +5494,7 @@
         "refused_by_core": [],
         "uncovered": {
           "blocker": "not-producible-locally",
-          "reason": "only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp)"
+          "reason": "only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp). the one release-build exception found, ChangeTrustOpFrame::doApply on a native line, is reachable only below protocol 10 (classic.failed-tx records it at protocol 9), and fee bumps exist only from protocol 13"
         }
       },
       {
@@ -5772,17 +5807,6 @@
         }
       },
       {
-        "arm": "StellarValueExt:basic",
-        "non_core_entries": [
-          "cap42.generalized-txset.synth-lcm-count-mismatch"
-        ],
-        "refused_by_core": [],
-        "uncovered": {
-          "blocker": "history-only",
-          "reason": "HerderImpl::makeStellarValue writes only SIGNED or SIGNED_MS values (stellar-core v30.0.0), so only early mainnet headers carry a basic value; the one entry holding it is synthetic"
-        }
-      },
-      {
         "arm": "StellarValueExt:empty_tx_set",
         "non_core_entries": [],
         "refused_by_core": [],
@@ -5948,17 +5972,17 @@
       "title": "Bump Sequence"
     },
     {
-      "core_emitted_entries": 120,
-      "entries": 121,
+      "core_emitted_entries": 123,
+      "entries": 124,
       "entries_by_source_class": {
-        "core-golden": 4,
-        "local-core": 115,
+        "core-golden": 5,
+        "local-core": 117,
         "mainnet-history": 2
       },
       "entries_by_variant": {
-        "any": 4,
-        "mainnet": 117,
-        "testnet": 115
+        "any": 5,
+        "mainnet": 119,
+        "testnet": 117
       },
       "families": [
         "classic.failed-tx"
@@ -5968,12 +5992,16 @@
       "protocol": 10,
       "protocols_all": [
         1,
+        9,
         12,
+        23,
         26,
         30
       ],
       "protocols_core_emitted": [
+        9,
         12,
+        23,
         26,
         30
       ],
@@ -5981,16 +6009,17 @@
       "title": "Transaction level signature verification"
     },
     {
-      "core_emitted_entries": 22,
-      "entries": 26,
+      "core_emitted_entries": 23,
+      "entries": 27,
       "entries_by_source_class": {
         "core-golden": 6,
         "local-core": 16,
+        "mainnet-history": 1,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 16,
+        "mainnet": 17,
         "testnet": 16,
         "vector": 3
       },
@@ -6001,10 +6030,12 @@
       "indexer_visible": true,
       "protocol": 10,
       "protocols_all": [
+        11,
         17,
         30
       ],
       "protocols_core_emitted": [
+        11,
         17,
         30
       ],
@@ -6042,16 +6073,17 @@
       "title": "Throttling and transaction pricing improvements"
     },
     {
-      "core_emitted_entries": 22,
-      "entries": 26,
+      "core_emitted_entries": 23,
+      "entries": 27,
       "entries_by_source_class": {
         "core-golden": 6,
         "local-core": 16,
+        "mainnet-history": 1,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 16,
+        "mainnet": 17,
         "testnet": 16,
         "vector": 3
       },
@@ -6062,10 +6094,12 @@
       "indexer_visible": true,
       "protocol": 11,
       "protocols_all": [
+        11,
         17,
         30
       ],
       "protocols_core_emitted": [
+        11,
         17,
         30
       ],
@@ -6500,17 +6534,17 @@
       "title": "First-class multiplexed accounts"
     },
     {
-      "core_emitted_entries": 120,
-      "entries": 121,
+      "core_emitted_entries": 123,
+      "entries": 124,
       "entries_by_source_class": {
-        "core-golden": 4,
-        "local-core": 115,
+        "core-golden": 5,
+        "local-core": 117,
         "mainnet-history": 2
       },
       "entries_by_variant": {
-        "any": 4,
-        "mainnet": 117,
-        "testnet": 115
+        "any": 5,
+        "mainnet": 119,
+        "testnet": 117
       },
       "families": [
         "classic.failed-tx"
@@ -6520,12 +6554,16 @@
       "protocol": 13,
       "protocols_all": [
         1,
+        9,
         12,
+        23,
         26,
         30
       ],
       "protocols_core_emitted": [
+        9,
         12,
+        23,
         26,
         30
       ],
@@ -6850,15 +6888,15 @@
       "title": "SPEEDEX - Pricing"
     },
     {
-      "core_emitted_entries": 47,
-      "entries": 52,
+      "core_emitted_entries": 46,
+      "entries": 51,
       "entries_by_source_class": {
-        "core-golden": 22,
+        "core-golden": 21,
         "local-core": 27,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 23,
+        "any": 22,
         "mainnet": 27,
         "testnet": 27,
         "vector": 2
@@ -6871,12 +6909,10 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         28,
         30
       ],
       "protocols_core_emitted": [
-        20,
         28,
         30
       ],
@@ -6884,16 +6920,16 @@
       "title": "Soroban smart contract system overview"
     },
     {
-      "core_emitted_entries": 27,
-      "entries": 59,
+      "core_emitted_entries": 29,
+      "entries": 61,
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 7,
         "local-core": 18,
         "mainnet-history": 4,
         "synthetic": 32
       },
       "entries_by_variant": {
-        "any": 22,
+        "any": 24,
         "mainnet": 22,
         "testnet": 18,
         "vector": 15
@@ -6918,15 +6954,15 @@
       "title": "Soroban Runtime Environment"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6938,11 +6974,9 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -6964,15 +6998,15 @@
       "title": "Smart Contract Host Functions"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -6984,11 +7018,9 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -7013,14 +7045,10 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        0,
-        23,
         28,
         30
       ],
       "protocols_core_emitted": [
-        0,
-        23,
         28,
         30
       ],
@@ -7028,15 +7056,15 @@
       "title": "Smart Contract Standardized Asset (Stellar Asset Contract)"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7048,26 +7076,24 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
       "title": "Fee and resource model in smart contracts"
     },
     {
-      "core_emitted_entries": 47,
-      "entries": 50,
+      "core_emitted_entries": 46,
+      "entries": 49,
       "entries_by_source_class": {
-        "core-golden": 24,
+        "core-golden": 23,
         "local-core": 23,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 25,
+        "any": 24,
         "mainnet": 23,
         "testnet": 23,
         "vector": 2
@@ -7080,11 +7106,9 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -7179,15 +7203,15 @@
       "title": "Soroban Authorization Framework"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7199,11 +7223,9 @@
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -7296,15 +7318,15 @@
       "title": "Separate host functions to extend the TTL for contract instance and contract code"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7316,11 +7338,9 @@
       "indexer_visible": true,
       "protocol": 21,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -7372,15 +7392,15 @@
       "title": "State Archival Persistent Entry Eviction"
     },
     {
-      "core_emitted_entries": 39,
-      "entries": 42,
+      "core_emitted_entries": 38,
+      "entries": 41,
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
       "entries_by_variant": {
-        "any": 21,
+        "any": 20,
         "mainnet": 19,
         "testnet": 19,
         "vector": 2
@@ -7392,11 +7412,9 @@
       "indexer_visible": true,
       "protocol": 22,
       "protocols_all": [
-        20,
         30
       ],
       "protocols_core_emitted": [
-        20,
         30
       ],
       "status": "Final",
@@ -7559,15 +7577,15 @@
       "title": "Soroban In-memory Read Resource"
     },
     {
-      "core_emitted_entries": 69,
-      "entries": 70,
+      "core_emitted_entries": 68,
+      "entries": 69,
       "entries_by_source_class": {
-        "core-golden": 10,
+        "core-golden": 9,
         "local-core": 59,
         "synthetic": 1
       },
       "entries_by_variant": {
-        "any": 11,
+        "any": 10,
         "mainnet": 59,
         "testnet": 59
       },
@@ -7579,13 +7597,11 @@
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
-        20,
         22,
         28,
         30
       ],
       "protocols_core_emitted": [
-        20,
         22,
         28,
         30
@@ -7766,14 +7782,10 @@
       "indexer_visible": true,
       "protocol": 26,
       "protocols_all": [
-        0,
-        23,
         28,
         30
       ],
       "protocols_core_emitted": [
-        0,
-        23,
         28,
         30
       ],
@@ -7826,11 +7838,11 @@
       "indexer_visible": true,
       "protocol": 24,
       "protocols_all": [
-        23,
+        29,
         30
       ],
       "protocols_core_emitted": [
-        23,
+        29,
         30
       ],
       "status": "Final",
@@ -8767,6 +8779,7 @@
             "cap85.executable-tag.p30-update-to-external-ref-envelope",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
@@ -8801,7 +8814,6 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
@@ -8819,6 +8831,8 @@
             "soroban.invoke-basics.p30-invoke-temporary-entry-envelope",
             "soroban.invoke-basics.p30-upload-wasm",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-envelope",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope",
@@ -8852,7 +8866,7 @@
             "cap38.liquidity-pools.golden-0d70bfa2dc91b602-10",
             "cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta",
             "cap38.liquidity-pools.testnet-5521432",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
             "cap73.sac-trust.p28-trust-meta",
             "cap73.sac-trust.p30-trust-meta",
             "classic.failed-tx.p30-passive-offer-operation-source"
@@ -8867,8 +8881,7 @@
             "cap33.sponsorship.p30-sponsored-account-meta",
             "cap38.liquidity-pools.testnet-5521432",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
-            "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
             "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
             "cap88.ms-close-time.testnet-5695387"
@@ -9159,7 +9172,7 @@
         "CAP-0046-01"
       ],
       "entries_by_source_class": {
-        "core-golden": 5,
+        "core-golden": 7,
         "local-core": 18,
         "mainnet-history": 4,
         "synthetic": 32
@@ -9167,6 +9180,7 @@
       "fragments": [
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
             "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
             "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
@@ -9255,6 +9269,8 @@
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope",
@@ -9313,6 +9329,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
             "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
             "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
@@ -9401,6 +9418,8 @@
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope",
@@ -9463,6 +9482,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -9879,6 +9899,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -10025,7 +10046,9 @@
             "soroban.invoke-basics.golden-d8e7a355b968f3df-28",
             "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
@@ -10051,6 +10074,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -10226,6 +10250,7 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
@@ -10389,7 +10414,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
@@ -10426,7 +10450,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-envelope",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
@@ -10485,6 +10511,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.memo-arms.p30-memo-hash-ff",
             "classic.memo-arms.p30-memo-hash-sha256",
             "classic.memo-arms.p30-memo-hash-zero",
@@ -10512,7 +10539,6 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
@@ -10523,6 +10549,8 @@
             "soroban.invoke-basics.p30-failed-trapped-envelope",
             "soroban.invoke-basics.p30-upload-wasm",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-envelope",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
@@ -10543,6 +10571,8 @@
           "core_emitted": [
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta"
           ],
@@ -10554,6 +10584,7 @@
         {
           "core_emitted": [
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta"
           ],
@@ -10615,6 +10646,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "classic.max-length.p30-memo-text-28",
             "classic.memo-bytes.p30-memo-truncated-sequence-28"
           ],
@@ -10684,10 +10716,12 @@
       "fragments": [
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap38.liquidity-pools.testnet-5521432",
             "cap67.unified-events.p22-backfill-payment-memo-text",
             "cap67.unified-events.p22-payment-memo-text",
             "cap67.unified-events.p30-payment-memo-text",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.max-length.p30-memo-text-28",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "classic.memo-bytes.p30-memo-above-max-code-point",
@@ -10777,7 +10811,7 @@
         "CAP-0067"
       ],
       "entries_by_source_class": {
-        "core-golden": 9,
+        "core-golden": 8,
         "local-core": 53,
         "synthetic": 1
       },
@@ -10797,6 +10831,7 @@
             "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -10960,7 +10995,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-deploy-credit-sac-meta",
@@ -10994,6 +11030,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
@@ -11197,7 +11234,9 @@
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
@@ -11226,6 +11265,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -11667,6 +11707,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
             "cap03.offer-liabilities.p30-credit-pair-cross-partial",
@@ -11821,6 +11862,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap27.muxed-accounts.p28-account-merge-destination-id-2p53",
             "cap27.muxed-accounts.p28-issued-payment-destination-id-2p53",
             "cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1",
@@ -11944,7 +11986,6 @@
         },
         {
           "core_emitted": [
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.p22-account-merge-muxed-destination",
             "cap67.unified-events.p22-claim-claimable-balance",
             "cap67.unified-events.p22-clawback",
@@ -11962,8 +12003,7 @@
             "cap67.unified-events.p22-payment-transfer",
             "cap67.unified-events.p22-set-authorized-false",
             "cap67.unified-events.p22-set-authorized-true",
-            "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
+            "soroban.auth-trees.golden-27003f6cc5cdecc2-3"
           ],
           "covered": true,
           "fragment": "TransactionMeta:v3",
@@ -12259,7 +12299,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-trust-again",
@@ -12286,6 +12327,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
@@ -12478,7 +12520,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
@@ -12617,7 +12661,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-trust-again",
@@ -12644,6 +12689,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
@@ -12836,7 +12882,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
@@ -12907,6 +12955,7 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
             "sep41.muxed-addresses.p28-credit-mint-to-muxed",
@@ -12975,7 +13024,9 @@
             "soroban.muxed-source.p30-restore-muxed-source",
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
@@ -13001,7 +13052,7 @@
             "cap63.parallel-txset.golden-308caf2d0fc09c95-12",
             "cap63.parallel-txset.p30-parallel-compute-setting",
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9"
           ],
@@ -13124,7 +13175,6 @@
             "cap66.archival.p30-evicted-temporary",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -13191,13 +13241,13 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-trust-again",
             "cap73.sac-trust.p30-trust-again",
             "cap76.archival-remediation.golden-04667ce620bffee7-26",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
             "cap77.frozen-keys.golden-0d70bfa2dc91b602-16",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9",
@@ -13219,6 +13269,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
@@ -13383,7 +13434,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
@@ -13413,7 +13463,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
@@ -13526,7 +13578,6 @@
             "cap66.archival.p30-evicted-temporary",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -13593,13 +13644,13 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-trust-again",
             "cap73.sac-trust.p30-trust-again",
             "cap76.archival-remediation.golden-04667ce620bffee7-26",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
             "cap77.frozen-keys.golden-0d70bfa2dc91b602-16",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9",
@@ -13621,6 +13672,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
             "classic.failed-tx.p30-allow-trust-low-reserve",
@@ -13785,7 +13837,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
@@ -13815,7 +13866,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
@@ -13909,7 +13962,6 @@
             "cap40.signed-payload-signer.testnet-4437357",
             "cap42.generalized-txset.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-4c437318f87437c5-9",
             "cap67.unified-events.golden-60000be2e73a4207-10",
@@ -13964,7 +14016,8 @@
             "cap67.unified-events.p30-payment-transfer",
             "cap67.unified-events.p30-set-authorized-false",
             "cap67.unified-events.p30-set-authorized-true",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap77.frozen-keys.golden-0d70bfa2dc91b602-16",
             "cap77.frozen-keys.golden-a0fb94c314b8bb2f-15",
             "cap77.frozen-keys.golden-d637d6474c6d185d-16",
@@ -14105,7 +14158,6 @@
             "classic.memo-bytes.p30-memo-truncated-sequence-28",
             "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
             "soroban.events-max.golden-4c437318f87437c5-9",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
             "soroban.scval-shapes.golden-4c437318f87437c5-9"
@@ -14122,7 +14174,6 @@
             "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
             "cap46.config-upgrades.golden-27003f6cc5cdecc2-5",
             "cap63.parallel-txset.golden-308caf2d0fc09c95-12",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.p22-account-merge-muxed-destination",
             "cap67.unified-events.p22-backfill-account-merge-muxed-destination",
             "cap67.unified-events.p22-backfill-claim-claimable-balance",
@@ -14158,9 +14209,7 @@
             "cap67.unified-events.p22-set-authorized-false",
             "cap67.unified-events.p22-set-authorized-true",
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
-            "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
+            "soroban.auth-trees.golden-27003f6cc5cdecc2-3"
           ],
           "covered": true,
           "fragment": "LedgerCloseMeta:v1",
@@ -14299,6 +14348,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p30-trust-again",
@@ -14510,7 +14561,9 @@
             "soroban.scval-shapes.golden-04667ce620bffee7-21",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
@@ -14573,8 +14626,8 @@
         "CAP-0028"
       ],
       "entries_by_source_class": {
-        "core-golden": 4,
-        "local-core": 115,
+        "core-golden": 5,
+        "local-core": 117,
         "mainnet-history": 2
       },
       "fragments": [
@@ -14582,6 +14635,7 @@
           "core_emitted": [
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-merge-dest-full",
             "cap23.claimable-balances.golden-67b49513ed2f1609-1",
             "cap26.inflation.p11-inflation-not-time",
@@ -14741,7 +14795,9 @@
             "soroban.invoke-basics.golden-e14cf5fee65b0fed-7",
             "soroban.invoke-basics.p30-failed-events-discarded-meta",
             "soroban.invoke-basics.p30-failed-trapped-meta",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
             "soroban.scval-shapes.p30-symbol-not-utf8",
@@ -14789,6 +14845,26 @@
           ],
           "covered": true,
           "fragment": "SignerKey:pre_auth_tx",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.p9-change-trust-native-internal-error-envelope"
+          ],
+          "covered": true,
+          "fragment": "ChangeTrustAsset:native",
+          "non_core_entries": [],
+          "refused_by_core": []
+        },
+        {
+          "core_emitted": [
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
+            "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+            "classic.memo-bytes.golden-e0e11e1fb450f676-32"
+          ],
+          "covered": true,
+          "fragment": "TransactionResultResult:tx_internal_error",
           "non_core_entries": [],
           "refused_by_core": []
         },
@@ -15289,6 +15365,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "classic.failed-tx.p30-manage-sell-low-reserve"
           ],
           "covered": true,
@@ -15514,6 +15591,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "classic.failed-tx.p30-payment-no-trust"
           ],
           "covered": true,
@@ -15696,6 +15774,7 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
@@ -15719,9 +15798,9 @@
         },
         {
           "core_emitted": [
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap26.inflation.p11-inflation-not-time",
             "cap26.inflation.p11-inflation-payout",
-            "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0",
             "classic.failed-tx.p12-allow-trust-self-not-allowed",
             "classic.failed-tx.p12-allow-trust-trust-not-required",
             "classic.failed-tx.p12-change-trust-self-not-allowed",
@@ -15731,7 +15810,8 @@
             "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
             "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
             "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
-            "classic.failed-tx.p12-payment-no-issuer"
+            "classic.failed-tx.p12-payment-no-issuer",
+            "classic.failed-tx.p9-change-trust-native-internal-error-envelope"
           ],
           "covered": true,
           "fragment": "TransactionEnvelope:tx_v0",
@@ -16166,7 +16246,6 @@
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -16231,7 +16310,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-deploy-credit-sac-meta",
@@ -16265,6 +16345,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
@@ -16434,7 +16515,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
@@ -16471,7 +16551,9 @@
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
@@ -16761,7 +16843,6 @@
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -16826,7 +16907,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-deploy-credit-sac-meta",
@@ -16860,6 +16942,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
@@ -17029,7 +17112,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
@@ -17066,7 +17148,9 @@
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
@@ -17249,7 +17333,7 @@
         "CAP-0058"
       ],
       "entries_by_source_class": {
-        "core-golden": 20,
+        "core-golden": 19,
         "local-core": 19,
         "synthetic": 3
       },
@@ -17260,7 +17344,6 @@
             "cap67.unified-events.golden-60000be2e73a4207-10",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-upload-wasm"
           ],
@@ -17333,6 +17416,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-envelope",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.golden-938fb779c48ac3af-16",
@@ -17375,6 +17459,8 @@
             "soroban.invoke-basics.p30-invoke-restored-contract-envelope",
             "soroban.invoke-basics.p30-invoke-temporary-entry-envelope",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-envelope",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope",
@@ -17466,6 +17552,8 @@
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
             "soroban.invoke-basics.golden-a1774bbe0c32cf40-10",
             "soroban.invoke-basics.p30-failed-trapped-meta",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-map-depth-over",
             "soroban.scval-shapes.p30-map-mixed-keys-unsorted",
             "soroban.scval-shapes.p30-symbol-not-utf8",
@@ -17525,7 +17613,6 @@
         {
           "core_emitted": [
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-restore-archived-instance-and-code-meta",
@@ -17568,6 +17655,7 @@
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
             "soroban.auth-trees.golden-a8df5d4dbdc85ac8-2",
@@ -17639,6 +17727,7 @@
             "cap85.executable-tag.p30-echo-executable-tag-value-meta",
             "cap85.executable-tag.p30-publish-executable-tag",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
             "sep41.muxed-addresses.p28-xlm-transfer-to-muxed",
@@ -17652,7 +17741,6 @@
             "soroban.events-max.golden-a8df5d4dbdc85ac8-7",
             "soroban.events-max.p30-echo-bytes-at-limit",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
             "soroban.invoke-basics.golden-a8c5079e2141c975-31",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
@@ -17691,6 +17779,7 @@
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
             "cap88.ms-close-time.testnet-5695387",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.memo-bytes.golden-e0e11e1fb450f676-32",
             "soroban.auth-trees.golden-57a486abce28859d-17",
             "soroban.auth-trees.golden-5f615b0f98ae09f3-11",
@@ -17711,6 +17800,7 @@
             "soroban.invoke-basics.golden-bf1c69a28fed2564-6",
             "soroban.invoke-basics.p30-invoke-temporary-entry-envelope",
             "soroban.invoke-basics.p30-invoke-temporary-entry-meta",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-envelope"
           ],
@@ -17727,6 +17817,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -18087,13 +18178,15 @@
           "refused_by_core": []
         },
         {
-          "core_emitted": [
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
-          ],
-          "covered": true,
+          "core_emitted": [],
+          "covered": false,
           "fragment": "ContractCodeEntryExt:v0",
           "non_core_entries": [],
-          "refused_by_core": []
+          "refused_by_core": [],
+          "uncovered": {
+            "blocker": "old-protocol-only",
+            "reason": "the arm itself: soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload"
+          }
         },
         {
           "core_emitted": [
@@ -18135,6 +18228,8 @@
           "core_emitted": [
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta"
           ],
@@ -18146,6 +18241,7 @@
         {
           "core_emitted": [
             "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta"
           ],
@@ -18177,6 +18273,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -18567,6 +18664,7 @@
             "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
             "cap01.bump-sequence.p30-bump-to-i64-max",
             "cap01.bump-sequence.p30-merge-seqnum-too-far",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
@@ -18735,6 +18833,7 @@
             "cap85.executable-tag.p30-update-to-external-ref-meta",
             "cap88.ms-close-time.testnet-5695387",
             "classic.failed-tx.golden-8e3126c525875c96-10",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
             "classic.failed-tx.p30-allow-trust-cant-revoke",
@@ -18895,7 +18994,6 @@
             "soroban.events-max.p30-echo-bytes-at-limit-over",
             "soroban.events-max.p30-emit-topics-bytes-at-limit",
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
@@ -18923,7 +19021,9 @@
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
             "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
@@ -18962,7 +19062,6 @@
           "core_emitted": [
             "soroban.events-max.golden-a8df5d4dbdc85ac8-1",
             "soroban.events-max.p30-echo-bytes-at-limit",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1",
             "soroban.invoke-basics.p30-upload-wasm"
           ],
@@ -19001,7 +19100,8 @@
             "cap71.credentials.p30-address-v2",
             "soroban.auth-trees.golden-57a486abce28859d-17",
             "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
-            "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
+            "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17"
           ],
           "covered": true,
           "fragment": "SorobanCredentials:address_v2",
@@ -19165,6 +19265,7 @@
       "fragments": [
         {
           "core_emitted": [
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.p30-freeze-upgrade",
             "cap77.frozen-keys.p30-frozen-keys-entry"
@@ -19187,6 +19288,7 @@
         },
         {
           "core_emitted": [
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9",
             "cap77.frozen-keys.p30-bypass-entry",
             "cap77.frozen-keys.p30-bypass-upgrade"
@@ -19307,7 +19409,7 @@
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
             "cap70.scp-timing.p30-scp-timing-entry",
             "cap70.scp-timing.p30-scp-timing-upgrade",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9",
             "cap77.frozen-keys.p30-bypass-entry",
@@ -19324,7 +19426,8 @@
           "core_emitted": [
             "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
             "cap46.config-upgrades.p30-cost-params-cpu",
-            "cap46.config-upgrades.p30-testnet-settings-upgrade"
+            "cap46.config-upgrades.p30-testnet-settings-upgrade",
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1"
           ],
           "covered": true,
           "fragment": "ConfigSettingEntry:contract_cost_params_cpu_instructions",
@@ -19335,7 +19438,8 @@
           "core_emitted": [
             "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
             "cap46.config-upgrades.p30-cost-params-memory",
-            "cap46.config-upgrades.p30-testnet-settings-upgrade"
+            "cap46.config-upgrades.p30-testnet-settings-upgrade",
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1"
           ],
           "covered": true,
           "fragment": "ConfigSettingEntry:contract_cost_params_memory_bytes",
@@ -19418,7 +19522,7 @@
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
             "cap70.scp-timing.p30-scp-timing-entry",
             "cap70.scp-timing.p30-scp-timing-upgrade",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12",
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1",
             "cap77.frozen-keys.golden-34d6c37c6481e487-7",
             "cap77.frozen-keys.golden-750ccb6ad63c37bb-9"
           ],
@@ -19446,7 +19550,7 @@
             "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
             "cap63.parallel-txset.golden-308caf2d0fc09c95-12",
             "cap70.scp-timing.golden-308caf2d0fc09c95-12",
-            "cap76.archival-remediation.golden-308caf2d0fc09c95-12"
+            "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1"
           ],
           "covered": true,
           "fragment": "LedgerUpgrade:version",
@@ -19545,6 +19649,7 @@
       "entries_by_source_class": {
         "core-golden": 6,
         "local-core": 16,
+        "mainnet-history": 1,
         "synthetic": 4
       },
       "fragments": [
@@ -19587,6 +19692,7 @@
             "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-27d2533d64835282-0",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
@@ -19710,7 +19816,6 @@
             "cap66.archival.p30-auto-restore-invoke-meta",
             "cap66.archival.p30-restore-footprint",
             "cap67.unified-events.golden-09beaf24eb0cdcb0-0",
-            "cap67.unified-events.golden-27003f6cc5cdecc2-1",
             "cap67.unified-events.golden-27d2533d64835282-0",
             "cap67.unified-events.golden-426337b02a4e2a17-11",
             "cap67.unified-events.golden-4c437318f87437c5-9",
@@ -19775,7 +19880,8 @@
             "cap71.credentials.p30-address-v2",
             "cap71.credentials.p30-with-delegates-nested",
             "cap71.credentials.p30-with-delegates-unsorted",
-            "cap73.sac-trust.golden-0207491749e6d15a-23",
+            "cap73.sac-trust.golden-012504b1914e5df1-3",
+            "cap73.sac-trust.golden-1467a37ff2a1e960-0",
             "cap73.sac-trust.golden-504393015a71bc7a-8",
             "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
             "cap73.sac-trust.p28-deploy-credit-sac-meta",
@@ -19809,6 +19915,7 @@
             "classic.failed-tx.golden-6f067a349543093a-50",
             "classic.failed-tx.golden-8e3126c525875c96-10",
             "classic.failed-tx.golden-c6724c1a19ffc3c9-7",
+            "classic.failed-tx.golden-e0e11e1fb450f676-32",
             "classic.failed-tx.golden-fad872f357f20fe9-12",
             "classic.failed-tx.mainnet-63092990-6f36ffa2-meta",
             "classic.failed-tx.p30-add-pre-auth-signer-meta",
@@ -19978,7 +20085,6 @@
             "soroban.events-max.p30-emit-topics-bytes-at-limit-over",
             "soroban.invoke-basics.golden-04667ce620bffee7-24",
             "soroban.invoke-basics.golden-04667ce620bffee7-26",
-            "soroban.invoke-basics.golden-27003f6cc5cdecc2-2",
             "soroban.invoke-basics.golden-4c437318f87437c5-9",
             "soroban.invoke-basics.golden-568d51258ccf9080-9",
             "soroban.invoke-basics.golden-7b59aa36c1776fe1-32",
@@ -20015,7 +20121,9 @@
             "soroban.muxed-source.p30-restore-noop-muxed-source",
             "soroban.scval-shapes.golden-3c107a86e830c499-7",
             "soroban.scval-shapes.golden-4c437318f87437c5-9",
+            "soroban.scval-shapes.golden-7e8aadf36d7d907d-17",
             "soroban.scval-shapes.golden-8299635e181e651c-27",
+            "soroban.scval-shapes.golden-897493fc26f0ff7b-17",
             "soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7",
             "soroban.scval-shapes.mainnet-57500008-b3475921-meta",
             "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
@@ -20042,6 +20150,7 @@
             "cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
             "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
             "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
             "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
@@ -20080,6 +20189,7 @@
         {
           "core_emitted": [
             "cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
+            "cap03.offer-liabilities.mainnet-25000000",
             "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
             "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
             "cap03.offer-liabilities.p30-issuer-sells-own-asset",
@@ -21187,33 +21297,34 @@
   "schema_version": 1,
   "stellar_xdr": "30.0.0",
   "summary": {
-    "arms_covered": 435,
+    "arms_covered": 436,
     "arms_reachable": 499,
-    "arms_uncovered": 64,
+    "arms_uncovered": 63,
     "arms_uncovered_by_blocker": {
-      "history-only": 3,
+      "history-only": 2,
       "never-emitted": 11,
       "not-producible-locally": 2,
-      "refused-before-ledger": 48
+      "old-protocol-only": 1,
+      "refused-before-ledger": 47
     },
     "caps": 102,
     "caps_indexer_visible": 45,
     "caps_indexer_visible_core_emitted": 44,
     "caps_indexer_visible_with_reason": 1,
-    "core_emitted_entries": 584,
-    "entries": 704,
+    "core_emitted_entries": 588,
+    "entries": 708,
     "entries_by_source_class": {
-      "core-golden": 106,
-      "local-core": 481,
-      "mainnet-history": 12,
+      "core-golden": 107,
+      "local-core": 483,
+      "mainnet-history": 13,
       "synthetic": 102,
       "testnet-history": 3
     },
     "families": 36,
     "fields_not_fully_validated": 36,
     "fields_not_fully_validated_exercised": 36,
-    "fragments": 317,
-    "fragments_covered": 308,
-    "fragments_uncovered": 9
+    "fragments": 319,
+    "fragments_covered": 309,
+    "fragments_uncovered": 10
   }
 }

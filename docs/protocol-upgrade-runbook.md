@@ -183,6 +183,12 @@ scripts/check-lcm.sh "$TMP/core" 2 5
 shapekit goldens agree
 ```
 
+The import takes, per family fragment, the smallest golden ledger whose protocol lies in the
+family's `protocol_valid` range, tags it with the family's caps that exist at that protocol, and
+runs the oracle over the corpus; fragments carried only outside the range are listed in the
+index as not imported. Any change to a family's fragments or range needs a re-import: the
+nightly `goldens` job re-imports into a copy and fails on any difference.
+
 Both commands read `test-lcm-current` by default; that is the tier a release build of core
 checks, and at the release the former `test-lcm-next` becomes it (its `index.json` stamps
 change to the new protocol). `check-lcm.sh` takes the `-buildtests` image from `pins.toml` and

@@ -2,6 +2,39 @@
 
 A dated public log of what has landed. Newest entry first.
 
+## 2026-11-13: corpus data audit fixes
+
+Fixes from an audit of the corpus data against the RFP.
+
+- Golden import: only golden ledgers inside a family's protocol range are imported, tagged with
+  the family's caps that exist at the ledger's protocol. Five goldens had carried caps from
+  protocols above their ledger (a protocol 0 ledger tagged CAP-0073, for example); three were
+  replaced by in-range ledgers and the fragments only out-of-range ledgers carry are listed in
+  the golden index as not imported. A re-import had given 109 entries against 106 committed
+  because fragments were added to `soroban.scval-shapes` and `classic.failed-tx` after the last
+  import; the import now also runs the oracle, a re-import is a no-op, and the nightly
+  `goldens` job re-imports into a copy and fails on any difference.
+- `classic.failed-tx` records a native ChangeTrust line at protocol 9, which a release core
+  includes and closes as `tx_internal_error`, so `ChangeTrustAsset:native` is covered and
+  `tx_internal_error` has a release-build entry.
+- `protocol.valid_max` is documented and set on every `below-protocol-valid` entry; its range
+  now describes the bytes (recorded protocol to the last protocol before the family's shape).
+  The validator requires it and checks `generated_at` against the range on every entry.
+- Mainnet ledger 25000000 (protocol 11) is captured into `cap03.offer-liabilities`; its header
+  holds `StellarValueExt:basic`, which current core never writes.
+- `shapekit gen verify-raw-order` compares core's raw streams of two independent recordings.
+  Over every chain: 0 per-key order differences across 10968 keys with two or more changes,
+  580 lists differing only between keys (`docs/adding-a-shape.md`, Normalization).
+- Notes corrected: integer extremes now include the unsigned zeros, the parallel phase note
+  states cluster sizes without an order (the variants differ), the bump-behind note names the
+  STATE and UPDATED pair. Registry notes no longer refer to internal plan sections.
+- Readers of manifest and `chain.json` file references refuse paths outside the corpus or
+  chain and check recorded hashes (conformance plan and runner, pack, serve).
+
+Coverage: 436 of 499 arms, 309 of 319 fragments, 44 of 45 indexer-visible caps core-emitted.
+`ContractCodeEntryExt:v0` lost its only carrier (a protocol 20 golden below its family's range)
+and has an `old-protocol-only` reason.
+
 ## 2026-11-13: CI coverage, pinned wallet-backend builds, guide publication gate
 
 Fixes from an audit of the CI workflows, the Go adapter and the documentation.

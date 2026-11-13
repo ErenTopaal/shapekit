@@ -8,17 +8,17 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 704 |
-| Core-emitted entries | 584 |
-| Entries by source class | core-golden 106, local-core 481, mainnet-history 12, synthetic 102, testnet-history 3 |
+| Entries | 708 |
+| Core-emitted entries | 588 |
+| Entries by source class | core-golden 107, local-core 483, mainnet-history 13, synthetic 102, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
 | Union arms reachable from `LedgerCloseMeta` | 499 |
-| Arms covered by a core-emitted entry | 435 (87.2%) |
-| Arms uncovered | 64 |
-| Uncovered arms by blocker | refused-before-ledger 48, history-only 3, not-producible-locally 2, never-emitted 11 |
-| Family fragments covered | 308 of 317 in 36 families |
+| Arms covered by a core-emitted entry | 436 (87.4%) |
+| Arms uncovered | 63 |
+| Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
+| Family fragments covered | 309 of 319 in 36 families |
 | Fields core does not fully validate, exercised | 36 of 36 |
 
 ## Blockers
@@ -38,11 +38,11 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP | Protocol | Indexer-visible | Families | Entries | Core-emitted | By source class | By variant | Core-emitted protocols | Note |
 |---|---|---|---|---|---|---|---|---|---|
 | CAP-0001 Bump Sequence | 10 | yes | `cap01.bump-sequence` | 9 | 8 | core-golden 1, local-core 8 | any 1, mainnet 8, testnet 8 | 30 |  |
-| CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 121 | 120 | core-golden 4, local-core 115, mainnet-history 2 | any 4, mainnet 117, testnet 115 | 12, 26, 30 |  |
-| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 26 | 22 | core-golden 6, local-core 16, synthetic 4 | any 7, mainnet 16, testnet 16, vector 3 | 17, 30 |  |
+| CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 124 | 123 | core-golden 5, local-core 117, mainnet-history 2 | any 5, mainnet 119, testnet 117 | 9, 12, 23, 26, 30 |  |
+| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 27 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 4 | any 7, mainnet 17, testnet 16, vector 3 | 11, 17, 30 |  |
 | CAP-0004 Improved Rounding for Cross Offer | 10 | no |  | 0 | 0 |  |  |  | offer-crossing rounding arithmetic only; results and meta keep existing shapes |
 | CAP-0005 Throttling and transaction pricing improvements | 11 | no |  | 0 | 0 |  |  |  | fee and transaction set selection only; the CAP states no changes in XDR |
-| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 26 | 22 | core-golden 6, local-core 16, synthetic 4 | any 7, mainnet 16, testnet 16, vector 3 | 17, 30 |  |
+| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 27 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 4 | any 7, mainnet 17, testnet 16, vector 3 | 11, 17, 30 |  |
 | CAP-0007 Deterministic Account Creation |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDeterministicAccountOp is absent at v30.0 |
 | CAP-0008 Self Identified Pre-Auth Transaction |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_PRE_AUTH_SELF_TX is absent at v30.0 |
 | CAP-0009 Linear/Exterior Immutable Accounts |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
@@ -64,7 +64,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0025 Remove Bucket Shadowing | 12 | no |  | 0 | 0 |  |  |  | bucket merge semantics and history archive publishing only; no XDR change |
 | CAP-0026 Disable Inflation Mechanism | 12 | no | `cap26.inflation` | 3 | 2 | local-core 3 | mainnet 3, testnet 3 | 11 | INFLATION returns the existing opNOT_SUPPORTED code; no new XDR or meta shape |
 | CAP-0027 First-class multiplexed accounts | 13 | yes | `cap27.muxed-accounts`, `soroban.muxed-source` | 45 | 30 | core-golden 2, local-core 28, mainnet-history 2, synthetic 13 | any 4, mainnet 30, testnet 28, vector 11 | 17, 28, 30 |  |
-| CAP-0028 Clear pre-auth transaction signer on failed transactions | 13 | yes | `classic.failed-tx` | 121 | 120 | core-golden 4, local-core 115, mainnet-history 2 | any 4, mainnet 117, testnet 115 | 12, 26, 30 |  |
+| CAP-0028 Clear pre-auth transaction signer on failed transactions | 13 | yes | `classic.failed-tx` | 124 | 123 | core-golden 5, local-core 117, mainnet-history 2 | any 5, mainnet 119, testnet 117 | 9, 12, 23, 26, 30 |  |
 | CAP-0029 AllowTrust when not AUTH_REQUIRED | 16 | no |  | 0 | 0 |  |  |  | relaxes ALLOW_TRUST authorization rules; the specification defines no XDR change and results and meta keep existing shapes |
 | CAP-0030 Remove NO_ISSUER Operation Results | 13 | no |  | 0 | 0 |  |  |  | operations stop returning *_NO_ISSUER codes (except ChangeTrust); no new XDR or meta shape |
 | CAP-0031 Sponsored Reserve |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol (in favour of CAP-0033); proposed SponsorshipEntry is absent at v30.0 |
@@ -82,29 +82,29 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0043 ECDSA Signers with P-256 and secp256k1 Curves |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed KEY_TYPE_ECDSA_P256 is absent at v30.0 |
 | CAP-0044 SPEEDEX - Configuration |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SpeedexConfigurationEntry is absent at v30.0 |
 | CAP-0045 SPEEDEX - Pricing |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
-| CAP-0046 Soroban smart contract system overview | 20 | yes | `soroban.muxed-source`, `soroban.invoke-basics` | 52 | 47 | core-golden 22, local-core 27, synthetic 3 | any 23, mainnet 27, testnet 27, vector 2 | 20, 28, 30 |  |
-| CAP-0046-01 Soroban Runtime Environment | 20 | yes | `soroban.scval-shapes` | 59 | 27 | core-golden 5, local-core 18, mainnet-history 4, synthetic 32 | any 22, mainnet 22, testnet 18, vector 15 | 22, 26, 30 |  |
-| CAP-0046-02 Smart Contract Lifecycle | 20 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
+| CAP-0046 Soroban smart contract system overview | 20 | yes | `soroban.muxed-source`, `soroban.invoke-basics` | 51 | 46 | core-golden 21, local-core 27, synthetic 3 | any 22, mainnet 27, testnet 27, vector 2 | 28, 30 |  |
+| CAP-0046-01 Soroban Runtime Environment | 20 | yes | `soroban.scval-shapes` | 61 | 29 | core-golden 7, local-core 18, mainnet-history 4, synthetic 32 | any 24, mainnet 22, testnet 18, vector 15 | 22, 26, 30 |  |
+| CAP-0046-02 Smart Contract Lifecycle | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0046-03 Smart Contract Host Functions | 20 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; its XDR section defers to CAP-0046-01 |
-| CAP-0046-05 Smart Contract Data | 20 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
-| CAP-0046-06 Smart Contract Standardized Asset (Stellar Asset Contract) | 20 | yes | `cap73.sac-trust` | 22 | 22 | core-golden 4, local-core 18 | any 4, mainnet 18, testnet 18 | 0, 23, 28, 30 |  |
-| CAP-0046-07 Fee and resource model in smart contracts | 20 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
-| CAP-0046-08 Smart Contract Events | 20 | yes | `soroban.invoke-basics`, `soroban.events-max` | 50 | 47 | core-golden 24, local-core 23, synthetic 3 | any 25, mainnet 23, testnet 23, vector 2 | 20, 30 |  |
+| CAP-0046-05 Smart Contract Data | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-06 Smart Contract Standardized Asset (Stellar Asset Contract) | 20 | yes | `cap73.sac-trust` | 22 | 22 | core-golden 4, local-core 18 | any 4, mainnet 18, testnet 18 | 28, 30 |  |
+| CAP-0046-07 Fee and resource model in smart contracts | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-08 Smart Contract Events | 20 | yes | `soroban.invoke-basics`, `soroban.events-max` | 49 | 46 | core-golden 23, local-core 23, synthetic 3 | any 24, mainnet 23, testnet 23, vector 2 | 30 |  |
 | CAP-0046-09 Network Configuration Ledger Entries | 20 | yes | `cap46.config-upgrades` | 8 | 8 | core-golden 3, local-core 5 | any 3, mainnet 5, testnet 5 | 20, 30 |  |
 | CAP-0046-10 Smart Contract Budget Metering | 20 | yes | `cap46.config-upgrades` | 8 | 8 | core-golden 3, local-core 5 | any 3, mainnet 5, testnet 5 | 20, 30 |  |
 | CAP-0046-11 Soroban Authorization Framework | 20 | yes | `soroban.auth-trees` | 22 | 18 | core-golden 5, local-core 14, synthetic 3 | any 8, mainnet 14, testnet 14 | 20, 30 |  |
-| CAP-0046-12 Soroban State Archival Interface | 20 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
+| CAP-0046-12 Soroban State Archival Interface | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0048 Smart Contract Asset Interoperability |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed AllowanceEntry is absent at v30.0 |
 | CAP-0049 Smart Contract Asset Interoperability with Wrapper |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed WrappedBalanceEntry is absent at v30.0 |
 | CAP-0050 Smart Contract Interactions |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed InvokeContractTransactionEnvelope is absent at v30.0 |
 | CAP-0051 Smart Contract Host Functionality: Secp256r1 Verification | 21 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; plus ContractCostType values, which are never serialized |
 | CAP-0052 Smart Contract Host Functionality: Base64 Encoding/Decoding |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol |
 | CAP-0053 Separate host functions to extend the TTL for contract instance and contract code | 21 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; no XDR section |
-| CAP-0054 Soroban refined VM instantiation cost model | 21 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
+| CAP-0054 Soroban refined VM instantiation cost model | 21 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0055 Soroban streamlined linking | 21 | no |  | 0 | 0 |  |  |  | the CAP states no XDR changes beyond CAP-0054; linking cost behaviour only |
 | CAP-0056 Soroban intra-transaction module caching | 21 | no |  | 0 | 0 |  |  |  | the CAP states no XDR changes beyond CAP-0054; intra-transaction module caching only |
 | CAP-0057 State Archival Persistent Entry Eviction | 23 | no |  | 0 | 0 |  |  |  | Draft; its proposed archival proof and cold archive XDR was added in v21.1..v22.0 and removed in v22.0..v23.0, absent at v30.0 |
-| CAP-0058 Constructors for Soroban contracts | 22 | yes | `soroban.invoke-basics` | 42 | 39 | core-golden 20, local-core 19, synthetic 3 | any 21, mainnet 19, testnet 19, vector 2 | 20, 30 |  |
+| CAP-0058 Constructors for Soroban contracts | 22 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0059 Host functions for BLS12-381 | 22 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes |
 | CAP-0060 Update to Wasmi register machine | 22 | no |  | 0 | 0 |  |  |  | Wasmi interpreter update; the CAP states no XDR changes |
 | CAP-0061 Smart Contract Standardized Asset (Stellar Asset Contract) Extension: Memo |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol |
@@ -113,7 +113,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0064 Memo Authorization for Soroban |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed SorobanAddressCredentialsV2 is absent at v30.0 |
 | CAP-0065 Reusable module cache | 23 | no |  | 0 | 0 |  |  |  | the CAP states no XDR changes; cross-ledger module cache only |
 | CAP-0066 Soroban In-memory Read Resource | 23 | yes | `cap66.archival` | 9 | 9 | core-golden 4, local-core 5 | any 4, mainnet 5, testnet 5 | 30 |  |
-| CAP-0067 Unified Asset Events | 23 | yes | `sep41.muxed-addresses`, `cap67.unified-events` | 70 | 69 | core-golden 10, local-core 59, synthetic 1 | any 11, mainnet 59, testnet 59 | 20, 22, 28, 30 |  |
+| CAP-0067 Unified Asset Events | 23 | yes | `sep41.muxed-addresses`, `cap67.unified-events` | 69 | 68 | core-golden 9, local-core 59, synthetic 1 | any 10, mainnet 59, testnet 59 | 22, 28, 30 |  |
 | CAP-0068 Host function for getting  executable for `Address` | 23 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states no new cost types |
 | CAP-0069 String/Bytes conversion host functions | 23 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states no new cost types |
 | CAP-0070 Configurable SCP Timing Parameters | 23 | yes | `cap70.scp-timing` | 3 | 3 | core-golden 1, local-core 2 | any 1, mainnet 2, testnet 2 | 23, 30 |  |
@@ -121,10 +121,10 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0071-01 Authentication delegation for custom accounts | 27 | yes | `cap71.credentials` | 4 | 4 | core-golden 1, local-core 3 | any 1, mainnet 3, testnet 3 | 30 |  |
 | CAP-0071-02 Address-bound Soroban address credentials | 27 | yes | `cap71.credentials` | 4 | 4 | core-golden 1, local-core 3 | any 1, mainnet 3, testnet 3 | 30 |  |
 | CAP-0072 Contract signers for Stellar accounts |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_SC_DELEGATED is absent at v30.0 |
-| CAP-0073 Allow SAC to create G-account balances | 26 | yes | `cap73.sac-trust` | 22 | 22 | core-golden 4, local-core 18 | any 4, mainnet 18, testnet 18 | 0, 23, 28, 30 |  |
+| CAP-0073 Allow SAC to create G-account balances | 26 | yes | `cap73.sac-trust` | 22 | 22 | core-golden 4, local-core 18 | any 4, mainnet 18, testnet 18 | 28, 30 |  |
 | CAP-0074 Host functions for BN254 | 25 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes |
 | CAP-0075 Cryptographic Primitives for Poseidon/Poseidon2 Hash Functions | 25 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes |
-| CAP-0076 P23 State Archival bug remediation | 24 | yes | `cap76.archival-remediation` | 2 | 2 | core-golden 2 | any 2 | 23, 30 |  |
+| CAP-0076 P23 State Archival bug remediation | 24 | yes | `cap76.archival-remediation` | 2 | 2 | core-golden 2 | any 2 | 29, 30 |  |
 | CAP-0077 Freeze Ledger Entries via Network Configuration | 26 | yes | `cap77.frozen-keys` | 12 | 12 | core-golden 5, local-core 7 | any 5, mainnet 7, testnet 7 | 30 |  |
 | CAP-0078 Host functions for performing limited TTL extensions | 26 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; no XDR section and the v25.0..v26.0 diff has nothing attributable to it |
 | CAP-0079 Host functions for muxed address strkey conversions | 26 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; the CAP states metering uses existing cost types |
@@ -142,7 +142,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 ## Union arms reachable from `LedgerCloseMeta`
 
-435 of 499 arms are held by at least one core-emitted entry. The full per-arm counts are in `coverage.json`.
+436 of 499 arms are held by at least one core-emitted entry. The full per-arm counts are in `coverage.json`.
 
 ### Uncovered arms
 
@@ -152,18 +152,18 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | `AllowTrustResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap18.maintain-liabilities.p30-allow-trust-both-flags` |
 | `BeginSponsoringFutureReservesResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `BumpSequenceResult:bad_seq` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap01.bump-sequence.p30-bump-negative` |
-| `ChangeTrustAsset:native` | `refused-before-ledger` | ChangeTrustOpFrame::doCheckValid answers CHANGE_TRUST_MALFORMED for a native line from protocol 10 and doApply throws on one below it (stellar-core v30.0.0) |  |
 | `ChangeTrustResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap38.liquidity-pools.p30-change-trust-pool-strkey-order` |
 | `ClawbackResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `ConfigSettingEntry:freeze_bypass_txs_delta` | `never-emitted` | a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |  |
 | `ConfigSettingEntry:frozen_ledger_keys_delta` | `never-emitted` | a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |  |
+| `ContractCodeEntryExt:v0` | `old-protocol-only` | soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload |  |
 | `CreateAccountResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `CreateClaimableBalanceResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap23.claimable-balances.p30-create-predicate-depth-5` |
 | `ExtendFootprintTtlResult:malformed` | `refused-before-ledger` | set only in doCheckValidForSoroban (stellar-core v30.0.0 ExtendFootprintTTLOpFrame.cpp, RestoreFootprintOpFrame.cpp), a check of the operation against network settings that only change through upgrades applied after a ledger's transactions |  |
 | `InnerTransactionResultResult:tx_frozen_key_accessed` | `refused-before-ledger` | TransactionFrame::commonValidPreSeqNum checks frozen keys against the network config (stellar-core v30.0.0), which only changes through config upgrades applied after a ledger's transactions, so validation already refused any transaction that fails at apply; none of the 1732 core golden files (test-lcm-current and test-lcm-next) holds it |  |
 | `InnerTransactionResultResult:tx_insufficient_balance` | `refused-before-ledger` | tx set validation requires each fee source's available balance to cover all its fees in the set (TxSetUtils.cpp getInvalidTxListWithErrors) and at apply the fee is already charged, so commonValid only fails on a negative available balance, which no operation leaves (stellar-core v30.0.0) |  |
 | `InnerTransactionResultResult:tx_insufficient_fee` | `refused-before-ledger` | set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set |  |
-| `InnerTransactionResultResult:tx_internal_error` | `not-producible-locally` | only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp) |  |
+| `InnerTransactionResultResult:tx_internal_error` | `not-producible-locally` | only an exception during apply sets it; the memo hook the goldens use (maybeTriggerTestInternalError) exists only in BUILD_TESTS builds, not the release image the recipes run (stellar-core v30.0.0 TransactionFrame.cpp). the one release-build exception found, ChangeTrustOpFrame::doApply on a native line, is reachable only below protocol 10 (classic.failed-tx records it at protocol 9), and fee bumps exist only from protocol 13 |  |
 | `InnerTransactionResultResult:tx_malformed` | `refused-before-ledger` | set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set |  |
 | `InnerTransactionResultResult:tx_missing_operation` | `refused-before-ledger` | set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set |  |
 | `InnerTransactionResultResult:tx_not_supported` | `refused-before-ledger` | set in TransactionFrame::commonValidPreSeqNum from the envelope, the header's base fee and the protocol alone (stellar-core v30.0.0); the same inputs hold at apply, so a transaction failing it is trimmed from every tx set |  |
@@ -197,7 +197,6 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | `SetOptionsResult:threshold_out_of_range` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `SetOptionsResult:unknown_flag` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails |  |
 | `SetTrustLineFlagsResult:malformed` | `refused-before-ledger` | set only in the operation's doCheckValid (stellar-core v30.0.0 src/transactions/*OpFrame.cpp), which reads nothing but the operation and the protocol, so the tx queue and tx set validation refuse the transaction and the identical check at apply never fails | refused by core 1: `cap35.clawback.p30-set-flags-clawback-enabled` |
-| `StellarValueExt:basic` | `history-only` | HerderImpl::makeStellarValue writes only SIGNED or SIGNED_MS values (stellar-core v30.0.0), so only early mainnet headers carry a basic value; the one entry holding it is synthetic | non-core 1: `cap42.generalized-txset.synth-lcm-count-mismatch` |
 | `StellarValueExt:empty_tx_set` | `history-only` | written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, mainnet ledger headers 64458432 to 65444991 (protocol 28 from 64458446, 29 from 64717645, history archive core_live_001 scanned 2026-11-12) hold none, all 986560 are signed, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm |  |
 | `StellarValueExt:empty_tx_set_ms` | `history-only` | written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, mainnet ledger headers 64458432 to 65444991 (protocol 28 from 64458446, 29 from 64717645, history archive core_live_001 scanned 2026-11-12) hold none, all 986560 are signed, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm |  |
 | `TransactionMeta:v0` | `never-emitted` | TransactionMetaBuilder writes v2, v3 or v4 only (src/transactions/TransactionMeta.cpp: "core does not produce it anymore"), and both data lakes hold history replayed by a current core |  |
@@ -287,9 +286,9 @@ SAC trust(address) creating an unlimited trustline with no event, XLM SAC transf
 |---|---|---|
 | `ContractIdPreimage:asset` | 5: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-xlm-sac-envelope` and 2 more |  |
 | `ContractExecutable:stellar_asset` | 9: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.p28-deploy-credit-sac-envelope`, `cap73.sac-trust.p28-deploy-credit-sac-meta` and 6 more |  |
-| `OperationBody:invoke_host_function` | 109: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 106 more |  |
+| `OperationBody:invoke_host_function` | 111: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 108 more |  |
 | `.changes[]:created.data:trustline` | 9: `cap27.muxed-accounts.mainnet-36196205-17fee99b-meta`, `cap33.sponsorship.p30-sponsored-trustline-meta`, `cap38.liquidity-pools.golden-0d70bfa2dc91b602-10` and 6 more |  |
-| `.changes[]:created.data:account` | 8: `cap33.sponsorship.p30-sponsored-account-meta`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-09beaf24eb0cdcb0-0` and 5 more |  |
+| `.changes[]:created.data:account` | 7: `cap33.sponsorship.p30-sponsored-account-meta`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-09beaf24eb0cdcb0-0` and 4 more |  |
 
 ### `soroban.auth-trees`
 
@@ -320,25 +319,25 @@ Pool-share trustlines with issuers ordered by key bytes, deposits, withdrawals a
 
 ### `soroban.scval-shapes`
 
-ScVal shapes: deep nesting, mixed-type map keys in host order, colliding keys, integer extremes. CAPs: CAP-0046-01. Entries: core-golden 5, local-core 18, mainnet-history 4, synthetic 32.
+ScVal shapes: deep nesting, mixed-type map keys in host order, colliding keys, integer extremes. CAPs: CAP-0046-01. Entries: core-golden 7, local-core 18, mainnet-history 4, synthetic 32.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ScVal:map` | 103: `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53`, `cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1` and 100 more |  |
+| `ScVal:map` | 106: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 103 more |  |
 | `:map[].key:u32` | 7: `soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta`, `soroban.scval-shapes.p30-integer-extremes-meta`, `soroban.scval-shapes.p30-map-keys-collide-native-envelope` and 4 more |  |
 | `:map[].key:string` | 6: `soroban.scval-shapes.p30-integer-extremes-meta`, `soroban.scval-shapes.p30-map-keys-collide-native-envelope`, `soroban.scval-shapes.p30-map-keys-collide-native-meta` and 3 more |  |
-| `:map[].key:symbol` | 103: `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53`, `cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1` and 100 more |  |
+| `:map[].key:symbol` | 106: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 103 more |  |
 | `:map[].val:map[].val:map` | 4: `soroban.scval-shapes.p30-map-depth-max-envelope`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-map-depth-over` and 1 more |  |
 | `:vec[]:vec[]:vec[]:vec` | 5: `soroban.scval-shapes.mainnet-57500008-b3475921-meta`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-vec-depth-max-envelope` and 2 more |  |
-| `ScVal:i128` | 361: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 358 more |  |
+| `ScVal:i128` | 362: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 359 more |  |
 | `ScVal:u128` | 11: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.mainnet-57500008-b3475921-envelope`, `soroban.scval-shapes.mainnet-57500008-b3475921-meta` and 8 more |  |
 | `ScVal:i256` | 9: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
 | `ScVal:u256` | 9: `soroban.scval-shapes.golden-3c107a86e830c499-7`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
-| `ScVal:string` | 158: `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta`, `cap03.offer-liabilities.p30-credit-pair-cross-partial` and 155 more |  |
-| `ScVal:symbol` | 405: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 402 more |  |
-| `ScVal:bytes` | 68: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 65 more |  |
-| `ScError:auth` | 4: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
-| `ScError:crypto` | 3: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta` |  |
+| `ScVal:string` | 161: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 158 more |  |
+| `ScVal:symbol` | 408: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 405 more |  |
+| `ScVal:bytes` | 70: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 67 more |  |
+| `ScError:auth` | 6: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-7e8aadf36d7d907d-17` and 3 more |  |
+| `ScError:crypto` | 4: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
 | `ScError:events` | 2: `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta` |  |
 
 ### `classic.max-length`
@@ -349,7 +348,7 @@ Every bounded classic vector at its maximum length. CAPs: CAP-0019, CAP-0024. En
 |---|---|---|
 | `.operations#max` | 2: `classic.max-length.mainnet-63092988-bf644414-envelope`, `classic.max-length.p30-operations-100` |  |
 | `.signatures#max` | 2: `classic.max-length.p30-home-domain-32`, `classic.max-length.p30-signatures-20` |  |
-| `.memo:text#max` | 2: `classic.max-length.p30-memo-text-28`, `classic.memo-bytes.p30-memo-truncated-sequence-28` |  |
+| `.memo:text#max` | 3: `cap03.offer-liabilities.mainnet-25000000`, `classic.max-length.p30-memo-text-28`, `classic.memo-bytes.p30-memo-truncated-sequence-28` |  |
 | `.data_value#max` | 2: `classic.max-length.p30-data-name-value-64-envelope`, `classic.max-length.p30-data-name-value-64-meta` |  |
 | `.path#max` | 3: `classic.max-length.golden-34519f44ec59503a-22`, `classic.max-length.p30-path-strict-receive-5`, `classic.max-length.p30-path-strict-send-5` |  |
 | `.signers#max` | 5: `classic.max-length.golden-6f067a349543093a-46`, `classic.max-length.p30-account-20-signers`, `classic.max-length.p30-home-domain-32` and 2 more |  |
@@ -361,7 +360,7 @@ Memo text holding bytes that are not valid UTF-8. CAPs: CAP-0019. Entries: core-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `Memo:text` | 12: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.p22-backfill-payment-memo-text`, `cap67.unified-events.p22-payment-memo-text` and 9 more |  |
+| `Memo:text` | 14: `cap03.offer-liabilities.mainnet-25000000`, `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.p22-backfill-payment-memo-text` and 11 more |  |
 
 ### `classic.memo-arms`
 
@@ -375,19 +374,19 @@ Memo id, hash and return values core never checks. CAPs: CAP-0019. Entries: loca
 
 ### `cap67.unified-events`
 
-Unified asset events from classic operations, fee events and to_muxed_id map data. CAPs: CAP-0067. Entries: core-golden 9, local-core 53, synthetic 1.
+Unified asset events from classic operations, fee events and to_muxed_id map data. CAPs: CAP-0067. Entries: core-golden 8, local-core 53, synthetic 1.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionMeta:v4` | 428: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 425 more |  |
-| `TransactionEventStage=before_all_txs` | 348: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 345 more |  |
+| `TransactionMeta:v4` | 433: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 430 more |  |
+| `TransactionEventStage=before_all_txs` | 349: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 346 more |  |
 | `TransactionEventStage=after_all_txs` | 83: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.p30-five-calls-parallel-phase` and 80 more |  |
-| `.operations[].events[].type=contract` | 146: `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta`, `cap03.offer-liabilities.p30-credit-pair-cross-partial` and 143 more |  |
-| `.operations[].events[].body:v0.data:map` | 62: `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53`, `cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1` and 59 more |  |
+| `.operations[].events[].type=contract` | 147: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 144 more |  |
+| `.operations[].events[].body:v0.data:map` | 63: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 60 more |  |
 | `ScAddress:muxed_account` | 8: `cap67.unified-events.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.p28-credit-mint-to-muxed` and 5 more |  |
 | `ScAddress:claimable_balance` | 14: `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta`, `cap33.sponsorship.p30-sponsored-claimable-balance-meta` and 11 more |  |
 | `ScAddress:liquidity_pool` | 7: `cap38.liquidity-pools.p30-deposit-meta`, `cap38.liquidity-pools.p30-path-payment-through-pool`, `cap38.liquidity-pools.p30-revoke-redeems-pool-shares` and 4 more |  |
-| `TransactionMeta:v3` | 20: `cap67.unified-events.golden-27003f6cc5cdecc2-1`, `cap67.unified-events.p22-account-merge-muxed-destination`, `cap67.unified-events.p22-claim-claimable-balance` and 17 more |  |
+| `TransactionMeta:v3` | 18: `cap67.unified-events.p22-account-merge-muxed-destination`, `cap67.unified-events.p22-claim-claimable-balance`, `cap67.unified-events.p22-clawback` and 15 more |  |
 
 ### `cap15.fee-bump`
 
@@ -412,10 +411,10 @@ Parallel Soroban transaction sets and LedgerCloseMetaV2. CAPs: CAP-0063. Entries
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta:v2` | 350: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 347 more |  |
-| `TransactionPhase:v1` | 350: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 347 more |  |
+| `LedgerCloseMeta:v2` | 354: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 351 more |  |
+| `TransactionPhase:v1` | 354: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 351 more |  |
 | `.execution_stages[]#many` | 2: `cap63.parallel-txset.golden-81af9cfb66a06a01-18`, `cap63.parallel-txset.p30-five-calls-parallel-phase` |  |
-| `.post_tx_apply_fee_processing#many` | 129: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 126 more |  |
+| `.post_tx_apply_fee_processing#many` | 132: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357` and 129 more |  |
 | `ConfigSettingEntry:contract_parallel_compute_v0` | 7: `cap46.config-upgrades.p30-testnet-settings-upgrade`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12`, `cap63.parallel-txset.p30-parallel-compute-setting` and 4 more |  |
 
 ### `cap42.generalized-txset`
@@ -425,10 +424,10 @@ Expected source classes with no entry: local-core, mainnet-history.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `GeneralizedTransactionSet:v1` | 392: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 389 more |  |
-| `TransactionPhase:v0` | 392: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 389 more |  |
-| `TxSetComponent:txset_comp_txs_maybe_discounted_fee` | 278: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 275 more |  |
-| `LedgerCloseMeta:v1` | 42: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 39 more |  |
+| `GeneralizedTransactionSet:v1` | 393: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 390 more |  |
+| `TransactionPhase:v0` | 393: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 390 more |  |
+| `TxSetComponent:txset_comp_txs_maybe_discounted_fee` | 277: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 274 more |  |
+| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
 
 ### `cap88.ms-close-time`
 
@@ -437,7 +436,7 @@ Expected source classes with no entry: local-core.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `StellarValueExt:signed_ms` | 327: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 324 more |  |
+| `StellarValueExt:signed_ms` | 331: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 328 more |  |
 | `StellarValueExt:empty_tx_set_ms` | none | `history-only` the arm itself: written only when the ballot protocol votes to drop a tx set the node cannot download or validate (BallotProtocol.cpp, HerderSCPDriver::makeEmptyTxSetValueFromValue, stellar-core v30.0.0); a standalone node always builds its own valid set, testnet 4.0M to 5.695M holds none, mainnet ledger headers 64458432 to 65444991 (protocol 28 from 64458446, 29 from 64717645, history archive core_live_001 scanned 2026-11-12) hold none, all 986560 are signed, and no ledger in the 1732 core golden files (test-lcm-current and test-lcm-next) takes either arm |
 
 ### `cap83.empty-txset`
@@ -451,13 +450,15 @@ Expected source classes with no entry: testnet-history, mainnet-history.
 
 ### `classic.failed-tx`
 
-Failed transactions whose envelope names accounts the ledger never touched. CAPs: CAP-0002, CAP-0028. Entries: core-golden 4, local-core 115, mainnet-history 2.
+Failed transactions whose envelope names accounts the ledger never touched. CAPs: CAP-0002, CAP-0028. Entries: core-golden 5, local-core 117, mainnet-history 2.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionResultResult:tx_failed` | 166: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.p30-merge-dest-full` and 163 more |  |
+| `TransactionResultResult:tx_failed` | 169: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.mainnet-25000000` and 166 more |  |
 | `PaymentResult:no_destination` | 6: `cap15.fee-bump.p30-inner-failed-meta`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta`, `cap40.signed-payload-signer.testnet-4437357` and 3 more |  |
 | `SignerKey:pre_auth_tx` | 6: `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50`, `classic.failed-tx.p30-add-pre-auth-signer-envelope` and 3 more |  |
+| `ChangeTrustAsset:native` | 1: `classic.failed-tx.p9-change-trust-native-internal-error-envelope` |  |
+| `TransactionResultResult:tx_internal_error` | 3: `classic.failed-tx.golden-e0e11e1fb450f676-32`, `classic.failed-tx.p9-change-trust-native-internal-error-meta`, `classic.memo-bytes.golden-e0e11e1fb450f676-32` |  |
 | `TransactionResultResult:tx_bad_auth` | 1: `classic.failed-tx.golden-8e3126c525875c96-10` |  |
 | `TransactionResultResult:tx_no_account` | 1: `classic.failed-tx.golden-fad872f357f20fe9-12` |  |
 | `AccountMergeResult:has_sub_entries` | 1: `classic.failed-tx.p30-merge-has-sub-entries` |  |
@@ -513,7 +514,7 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 | `ManageSellOfferResult:buy_not_authorized` | 1: `classic.failed-tx.p30-manage-sell-buy-not-authorized` |  |
 | `ManageSellOfferResult:cross_self` | 1: `classic.failed-tx.p30-manage-sell-cross-self` |  |
 | `ManageSellOfferResult:line_full` | 1: `classic.failed-tx.p30-manage-sell-line-full` |  |
-| `ManageSellOfferResult:low_reserve` | 1: `classic.failed-tx.p30-manage-sell-low-reserve` |  |
+| `ManageSellOfferResult:low_reserve` | 2: `cap03.offer-liabilities.mainnet-25000000`, `classic.failed-tx.p30-manage-sell-low-reserve` |  |
 | `ManageSellOfferResult:not_found` | 1: `classic.failed-tx.p30-manage-sell-not-found` |  |
 | `ManageSellOfferResult:sell_no_trust` | 1: `classic.failed-tx.p30-manage-sell-sell-no-trust` |  |
 | `ManageSellOfferResult:sell_not_authorized` | 1: `classic.failed-tx.p30-manage-sell-sell-not-authorized` |  |
@@ -538,7 +539,7 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 | `PathPaymentStrictSendResult:under_destmin` | 1: `classic.failed-tx.p30-path-send-under-destmin` |  |
 | `PathPaymentStrictSendResult:underfunded` | 1: `classic.failed-tx.p30-path-send-underfunded` |  |
 | `PaymentResult:line_full` | 1: `classic.failed-tx.p30-payment-line-full` |  |
-| `PaymentResult:no_trust` | 1: `classic.failed-tx.p30-payment-no-trust` |  |
+| `PaymentResult:no_trust` | 2: `cap03.offer-liabilities.mainnet-25000000`, `classic.failed-tx.p30-payment-no-trust` |  |
 | `PaymentResult:not_authorized` | 1: `classic.failed-tx.p30-payment-not-authorized` |  |
 | `PaymentResult:src_no_trust` | 1: `classic.failed-tx.p30-payment-src-no-trust` |  |
 | `PaymentResult:src_not_authorized` | 1: `classic.failed-tx.p30-payment-src-not-authorized` |  |
@@ -558,9 +559,9 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 | `OperationResult:op_exceeded_work_limit` | 1: `classic.failed-tx.p30-path-receive-exceeded-work-limit` |  |
 | `TransactionResultResult:tx_bad_auth_extra` | 1: `classic.failed-tx.p30-tx-bad-auth-extra` |  |
 | `TransactionResultResult:tx_bad_min_seq_age_or_gap` | 1: `classic.failed-tx.p30-tx-bad-min-seq-gap` |  |
-| `AccountEntryExtensionV1Ext:v0` | 5: `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0` and 2 more |  |
+| `AccountEntryExtensionV1Ext:v0` | 6: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 3 more |  |
 | `LedgerKey:data` | 2: `classic.failed-tx.p30-manage-data-removed`, `classic.failed-tx.p30-revoke-does-not-exist` |  |
-| `TransactionEnvelope:tx_v0` | 13: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout`, `cap73.sac-trust.golden-e6b26f2ad89e0e1b-0` and 10 more |  |
+| `TransactionEnvelope:tx_v0` | 14: `cap03.offer-liabilities.mainnet-25000000`, `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` and 11 more |  |
 | `ManageBuyOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-buy-no-issuer` |  |
 | `ManageBuyOfferResult:sell_no_issuer` | 1: `classic.failed-tx.p12-manage-buy-offer-sell-no-issuer` |  |
 | `ManageSellOfferResult:buy_no_issuer` | 1: `classic.failed-tx.p12-manage-sell-offer-buy-no-issuer` |  |
@@ -595,7 +596,7 @@ Version 2 preconditions: ledger bounds, minimum sequence, age, ledger gap, two e
 | `Preconditions:v2` | 12: `cap15.fee-bump.p30-inner-bad-min-seq-gap`, `cap21.preconditions.golden-27d2533d64835282-1`, `cap21.preconditions.p30-all-preconditions-envelope` and 9 more |  |
 | `.ledger_bounds.max_ledger` | 4: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-ledger-and-time-bounds-envelope`, `cap21.preconditions.p30-ledger-bounds-no-maximum-envelope` and 1 more |  |
 | `.extra_signers#max` | 2: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-two-extra-signers-envelope` |  |
-| `AccountEntryExtensionV2Ext:v3` | 451: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 448 more |  |
+| `AccountEntryExtensionV2Ext:v3` | 453: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 450 more |  |
 
 ### `cap33.sponsorship`
 
@@ -609,7 +610,7 @@ Sponsored accounts, trustlines, signers and claimable balances, and sponsorship 
 | `RevokeSponsorshipOp:ledger_entry` | 5: `cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope`, `classic.failed-tx.p30-revoke-does-not-exist`, `classic.failed-tx.p30-revoke-low-reserve` and 2 more |  |
 | `RevokeSponsorshipOp:signer` | 3: `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope`, `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope`, `cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope` |  |
 | `LedgerEntryExt:v1` | 29: `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-claim-through-depth-4-meta` and 26 more |  |
-| `AccountEntryExtensionV1Ext:v2` | 452: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 449 more |  |
+| `AccountEntryExtensionV1Ext:v2` | 454: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 451 more |  |
 | `.signer_sponsoring_i_ds[]:public_key_type_ed25519` | 17: `cap33.sponsorship.golden-6f067a349543093a-48`, `cap33.sponsorship.p30-revoke-signer-sponsorship-meta`, `cap33.sponsorship.p30-sponsored-account-entry` and 14 more |  |
 | `BeginSponsoringFutureReservesResult:already_sponsored` | 1: `cap33.sponsorship.golden-16ca002da0d1fd67-1` |  |
 | `BeginSponsoringFutureReservesResult:recursive` | 1: `cap33.sponsorship.golden-5a03a46b7b48bb06-2` |  |
@@ -628,31 +629,31 @@ Clawback, claimable balance clawback and trustline flag changes. CAPs: CAP-0035.
 
 ### `soroban.invoke-basics`
 
-Wasm upload, contract creation with and without constructor, invocation, TTL extension, restore. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058. Entries: core-golden 20, local-core 19, synthetic 3.
+Wasm upload, contract creation with and without constructor, invocation, TTL extension, restore. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058. Entries: core-golden 19, local-core 19, synthetic 3.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `HostFunction:upload_contract_wasm` | 7: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap67.unified-events.golden-60000be2e73a4207-10`, `classic.failed-tx.golden-8e3126c525875c96-10` and 4 more |  |
+| `HostFunction:upload_contract_wasm` | 6: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap67.unified-events.golden-60000be2e73a4207-10`, `classic.failed-tx.golden-8e3126c525875c96-10` and 3 more |  |
 | `HostFunction:create_contract` | 10: `cap73.sac-trust.golden-504393015a71bc7a-8`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap73.sac-trust.p28-deploy-credit-sac-envelope` and 7 more |  |
 | `HostFunction:create_contract_v2` | 4: `cap85.executable-tag.p30-create-external-ref-envelope`, `cap85.executable-tag.p30-create-external-ref-missing-tag`, `soroban.invoke-basics.golden-bf1c69a28fed2564-6` and 1 more |  |
-| `HostFunction:invoke_contract` | 88: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 85 more |  |
+| `HostFunction:invoke_contract` | 91: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 88 more |  |
 | `OperationBody:extend_footprint_ttl` | 10: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-568d51258ccf9080-9` and 7 more |  |
 | `OperationBody:restore_footprint` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 11 more |  |
-| `InvokeHostFunctionResult:trapped` | 27: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16`, `cap67.unified-events.golden-938fb779c48ac3af-19` and 24 more |  |
+| `InvokeHostFunctionResult:trapped` | 29: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16`, `cap67.unified-events.golden-938fb779c48ac3af-19` and 26 more |  |
 | `ContractCodeEntryExt:v1` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |
 | `ContractExecutable:wasm` | 23: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap85.executable-tag.p30-update-to-external-ref-meta` and 20 more |  |
-| `LedgerEntryData:contract_code` | 8: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-27003f6cc5cdecc2-2`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32` and 5 more |  |
-| `LedgerEntryData:contract_data` | 63: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 60 more |  |
+| `LedgerEntryData:contract_code` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |
+| `LedgerEntryData:contract_data` | 64: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 61 more |  |
 | `LedgerEntryData:ttl` | 65: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 62 more |  |
-| `ContractDataDurability=temporary` | 29: `cap38.liquidity-pools.testnet-5521432`, `cap66.archival.p30-evicted-temporary`, `cap71.credentials.golden-e25799a2e2e9eea2-17` and 26 more |  |
-| `ContractEventType=contract` | 354: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 351 more |  |
-| `ContractCodeEntryExt:v0` | 1: `soroban.invoke-basics.golden-27003f6cc5cdecc2-2` |  |
+| `ContractDataDurability=temporary` | 31: `cap38.liquidity-pools.testnet-5521432`, `cap66.archival.p30-evicted-temporary`, `cap71.credentials.golden-e25799a2e2e9eea2-17` and 28 more |  |
+| `ContractEventType=contract` | 355: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 352 more |  |
+| `ContractCodeEntryExt:v0` | none | `old-protocol-only` the arm itself: soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload |
 | `ExtendFootprintTtlResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-568d51258ccf9080-9` |  |
 | `ExtendFootprintTtlResult:resource_limit_exceeded` | 1: `soroban.invoke-basics.golden-8299635e181e651c-11` |  |
 | `InvokeHostFunctionResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-e14cf5fee65b0fed-7` |  |
 | `RestoreFootprintResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-d8e7a355b968f3df-28` |  |
-| `ScError:auth` | 4: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
-| `ScError:crypto` | 3: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope`, `soroban.scval-shapes.p30-errors-auth-crypto-events-meta` |  |
+| `ScError:auth` | 6: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-7e8aadf36d7d907d-17` and 3 more |  |
+| `ScError:crypto` | 4: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
 
 ### `soroban.events-max`
 
@@ -660,11 +661,11 @@ Contract events and return values at the configured size limits. CAPs: CAP-0046-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ContractEventType=contract` | 354: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 351 more |  |
+| `ContractEventType=contract` | 355: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 352 more |  |
 | `.operations[].events#many` | 15: `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta`, `cap03.offer-liabilities.p30-credit-pair-cross-partial` and 12 more |  |
-| `.body:v0.topics#many` | 376: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 373 more |  |
+| `.body:v0.topics#many` | 379: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 376 more |  |
 | `.body:v0.data:bytes` | 7: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-504393015a71bc7a-8`, `soroban.events-max.golden-a8df5d4dbdc85ac8-7` and 4 more |  |
-| `.return_value:bytes` | 5: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.events-max.p30-echo-bytes-at-limit`, `soroban.invoke-basics.golden-27003f6cc5cdecc2-2` and 2 more |  |
+| `.return_value:bytes` | 4: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.events-max.p30-echo-bytes-at-limit`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 1 more |  |
 
 Planned shapes no fragment can express, not in the corpus:
 
@@ -676,7 +677,7 @@ Address-v2 and with-delegates Soroban credentials. CAPs: CAP-0071, CAP-0071-01, 
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `SorobanCredentials:address_v2` | 5: `cap71.credentials.golden-e25799a2e2e9eea2-17`, `cap71.credentials.p30-address-v2`, `soroban.auth-trees.golden-57a486abce28859d-17` and 2 more |  |
+| `SorobanCredentials:address_v2` | 6: `cap71.credentials.golden-e25799a2e2e9eea2-17`, `cap71.credentials.p30-address-v2`, `soroban.auth-trees.golden-57a486abce28859d-17` and 3 more |  |
 | `SorobanCredentials:address_with_delegates` | 2: `cap71.credentials.p30-with-delegates-nested`, `cap71.credentials.p30-with-delegates-unsorted` |  |
 | `.delegates[].nested_delegates[]` | 2: `cap71.credentials.p30-with-delegates-nested`, `cap71.credentials.p30-with-delegates-unsorted` |  |
 
@@ -707,9 +708,9 @@ Frozen ledger keys: config settings and operations failing on a frozen trustline
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ConfigSettingEntry:frozen_ledger_keys` | 3: `cap77.frozen-keys.golden-34d6c37c6481e487-7`, `cap77.frozen-keys.p30-freeze-upgrade`, `cap77.frozen-keys.p30-frozen-keys-entry` |  |
+| `ConfigSettingEntry:frozen_ledger_keys` | 4: `cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1`, `cap77.frozen-keys.golden-34d6c37c6481e487-7`, `cap77.frozen-keys.p30-freeze-upgrade` and 1 more |  |
 | `ConfigSettingEntry:frozen_ledger_keys_delta` | none | `never-emitted` the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |
-| `ConfigSettingEntry:freeze_bypass_txs` | 3: `cap77.frozen-keys.golden-750ccb6ad63c37bb-9`, `cap77.frozen-keys.p30-bypass-entry`, `cap77.frozen-keys.p30-bypass-upgrade` |  |
+| `ConfigSettingEntry:freeze_bypass_txs` | 4: `cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1`, `cap77.frozen-keys.golden-750ccb6ad63c37bb-9`, `cap77.frozen-keys.p30-bypass-entry` and 1 more |  |
 | `ConfigSettingEntry:freeze_bypass_txs_delta` | none | `never-emitted` the arm itself: a delta exists only inside a ConfigUpgradeSet, which reaches the ledger as opaque bytes in contract data; ConfigUpgradeSetFrame::applyTo merges it into the stored FROZEN_LEDGER_KEYS or FREEZE_BYPASS_TXS entry (stellar-core v30.0.0 herder/Upgrades.cpp), so meta never holds the arm |
 | `ClaimClaimableBalanceResult:trustline_frozen` | 2: `cap77.frozen-keys.golden-a0fb94c314b8bb2f-15`, `cap77.frozen-keys.p30-claim-into-frozen-trustline` |  |
 | `LiquidityPoolDepositResult:trustline_frozen` | 3: `cap38.liquidity-pools.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.golden-d637d6474c6d185d-16`, `cap77.frozen-keys.p30-deposit-frozen-trustline` |  |
@@ -725,8 +726,8 @@ Soroban network config upgrades and cost parameter entries in upgrade meta. CAPs
 | `LedgerUpgrade:config` | 8: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 5 more |  |
 | `LedgerUpgrade:max_soroban_tx_set_size` | 2: `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.p30-max-soroban-tx-set-size-upgrade` |  |
 | `LedgerEntryData:config_setting` | 20: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-182fa2818edaf743-1`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-0` and 17 more |  |
-| `ConfigSettingEntry:contract_cost_params_cpu_instructions` | 3: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-cpu`, `cap46.config-upgrades.p30-testnet-settings-upgrade` |  |
-| `ConfigSettingEntry:contract_cost_params_memory_bytes` | 3: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-memory`, `cap46.config-upgrades.p30-testnet-settings-upgrade` |  |
+| `ConfigSettingEntry:contract_cost_params_cpu_instructions` | 4: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-cpu`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 1 more |  |
+| `ConfigSettingEntry:contract_cost_params_memory_bytes` | 4: `cap46.config-upgrades.golden-27003f6cc5cdecc2-0`, `cap46.config-upgrades.p30-cost-params-memory`, `cap46.config-upgrades.p30-testnet-settings-upgrade` and 1 more |  |
 | `LedgerUpgrade:base_fee` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
 | `LedgerUpgrade:base_reserve` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
 | `LedgerUpgrade:max_tx_set_size` | 1: `cap46.config-upgrades.p30-header-upgrades` |  |
@@ -764,14 +765,14 @@ Bump sequence and merges refused for a sequence number too far ahead. CAPs: CAP-
 
 ### `cap03.offer-liabilities`
 
-Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, synthetic 4.
+Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, mainnet-history 1, synthetic 4.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
 | `OperationBody:manage_buy_offer` | 16: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope` and 13 more |  |
-| `AccountEntryExt:v1` | 456: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 453 more |  |
-| `TrustLineEntryExt:v1` | 33: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 30 more |  |
-| `ManageOfferSuccessResultOffer:created` | 7: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta` and 4 more |  |
+| `AccountEntryExt:v1` | 459: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 456 more |  |
+| `TrustLineEntryExt:v1` | 34: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 31 more |  |
+| `ManageOfferSuccessResultOffer:created` | 8: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta` and 5 more |  |
 | `ClaimAtom:order_book` | 9: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 6 more |  |
 | `AccountMergeResult:dest_full` | 1: `cap03.offer-liabilities.p30-merge-dest-full` |  |
 | `OperationBody:create_passive_sell_offer` | 2: `cap03.offer-liabilities.golden-12c04cf739c52eac-20`, `classic.failed-tx.p30-passive-offer-operation-source` |  |

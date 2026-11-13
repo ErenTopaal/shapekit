@@ -167,13 +167,19 @@ family apart.
   `crates/shapekit-core-driver/tests/tx_mainnet_v0_kat.rs`). There are no muxed accounts and
   no preconditions beyond time bounds. Ledgers below protocol 20 are LedgerCloseMeta v0; with
   both event hooks off the meta is TransactionMeta v2, which is what such a ledger held when
-  core closed it. `old_protocols.rs` records chains at protocols 1, 11, 12 and 17.
+  core closed it. `old_protocols.rs` records chains at protocols 1, 9, 11, 12 and 17.
 - **Contrast chains.** A chain that shows what a ledger looked like before its family's shape
   existed runs below `protocol_valid.min`. Return `below_protocol_valid() -> true`: the
   generator then requires the protocol to be below the range (and no longer refuses it), and
-  flags every entry of the chain `below-protocol-valid`. Two chains of one family at the same
-  protocol need different recipe ids (the chain id is `<id>.p<protocol>`) and different slugs
-  (entry ids are `<family>.p<protocol>-<slug>`).
+  flags every entry of the chain `below-protocol-valid`. Such an entry's protocol range
+  describes its bytes, not the family's shape: `protocol.valid_min` is the protocol the chain
+  ran at and `protocol.valid_max` the last protocol before the family's `protocol_valid.min`
+  (an inflation payout recorded at 11 has `valid_min = 11`, `valid_max = 11`, `introduced =
+  12`). `introduced` stays the family's, the protocol whose change the entry contrasts with.
+  The manifest validator requires `valid_max` on every `below-protocol-valid` entry, below
+  `introduced`, and `generated_at` inside `valid_min` to `valid_max` on every entry. Two
+  chains of one family at the same protocol need different recipe ids (the chain id is
+  `<id>.p<protocol>`) and different slugs (entry ids are `<family>.p<protocol>-<slug>`).
 
 ## 3. Generating
 
@@ -244,8 +250,9 @@ ledgers one at a time.
 Entry fields filled by the generator: `source.class = local-core`, `source.recipe`,
 `source.chain`, `source.ledger_seq` (absent for refused envelopes), `source.tx_index`,
 `protocol.generated_at`, `lcm_version` and `tx_meta_version` where they apply, `caps` and the
-protocol range from the family. `source.tx_hash` is left out because a transaction hash covers
-the network id and so differs between the variants; it is derivable from each variant's envelope.
+protocol range from the family (for contrast entries, the range above). `source.tx_hash` is
+left out because a transaction hash covers the network id and so differs between the
+variants; it is derivable from each variant's envelope.
 
 ### Normalization
 
@@ -261,6 +268,18 @@ core never emits and one that makes ingest code reading changes pairwise fail. E
 carry change lists (`LedgerCloseMeta`, `TransactionResultMeta`, `TransactionResultMetaV1`,
 `TransactionMeta`) record `source.normalization = "key-stable"`; the validator requires it on
 such local-core entries.
+
+The claim that only the order between keys varies is checked on real output, not only argued
+from core's source. `shapekit gen verify-raw-order --other <corpus>` compares core's raw
+`ledgers.xdr` of every chain in two independent recordings, ledger by ledger: each change list
+must hold the same changes in both, each key's changes must come in the same order, and the
+ledgers must be equal once both are canonical. To run it, copy `corpus/` and record the copy
+again with `shapekit gen chains --corpus <copy>`. On 2026-11-13, two independent core runs of
+every chain (88 recordings, both passphrases, 6940 ledgers, 9346 change lists) gave 0 per-key
+order differences over 10968 keys with two or more changes in one list and 0 content
+differences; 580 lists differed, all only in the order between keys. 10 of the 88 raw streams
+were byte-identical in both runs, all of them chains at protocols 1, 9, 11 and 12. The
+same second recording reproduced every local-core entry and every lake byte for byte.
 
 ## 5. Timing
 

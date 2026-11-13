@@ -136,7 +136,9 @@
     {
       "bytes": 6652,
       "dir": "BeginSponsoringFutureReservesTests",
-      "imported_entries": [],
+      "imported_entries": [
+        "cap73.sac-trust.golden-1467a37ff2a1e960-0"
+      ],
       "ledger_seqs": [
         2,
         4
@@ -412,7 +414,9 @@
     {
       "bytes": 35452,
       "dir": "FrozenLedgerKeysTests",
-      "imported_entries": [],
+      "imported_entries": [
+        "cap73.sac-trust.golden-012504b1914e5df1-3"
+      ],
       "ledger_seqs": [
         2,
         16
@@ -3284,9 +3288,7 @@
     {
       "bytes": 138736,
       "dir": "InvokeHostFunctionTests",
-      "imported_entries": [
-        "cap73.sac-trust.golden-0207491749e6d15a-23"
-      ],
+      "imported_entries": [],
       "ledger_seqs": [
         2,
         41
@@ -5235,9 +5237,7 @@
         "cap42.generalized-txset.golden-27003f6cc5cdecc2-5",
         "cap46.config-upgrades.golden-27003f6cc5cdecc2-0",
         "cap46.config-upgrades.golden-27003f6cc5cdecc2-5",
-        "cap67.unified-events.golden-27003f6cc5cdecc2-1",
-        "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
-        "soroban.invoke-basics.golden-27003f6cc5cdecc2-2"
+        "soroban.auth-trees.golden-27003f6cc5cdecc2-3"
       ],
       "ledger_seqs": [
         2,
@@ -5700,8 +5700,7 @@
       "dir": "InvokeHostFunctionTests",
       "imported_entries": [
         "cap63.parallel-txset.golden-308caf2d0fc09c95-12",
-        "cap70.scp-timing.golden-308caf2d0fc09c95-12",
-        "cap76.archival-remediation.golden-308caf2d0fc09c95-12"
+        "cap70.scp-timing.golden-308caf2d0fc09c95-12"
       ],
       "ledger_seqs": [
         2,
@@ -10771,7 +10770,8 @@
       "bytes": 142864,
       "dir": "InvokeHostFunctionTests",
       "imported_entries": [
-        "soroban.invoke-basics.golden-7e8aadf36d7d907d-17"
+        "soroban.invoke-basics.golden-7e8aadf36d7d907d-17",
+        "soroban.scval-shapes.golden-7e8aadf36d7d907d-17"
       ],
       "ledger_seqs": [
         2,
@@ -11447,7 +11447,8 @@
       "bytes": 143400,
       "dir": "InvokeHostFunctionTests",
       "imported_entries": [
-        "soroban.invoke-basics.golden-897493fc26f0ff7b-17"
+        "soroban.invoke-basics.golden-897493fc26f0ff7b-17",
+        "soroban.scval-shapes.golden-897493fc26f0ff7b-17"
       ],
       "ledger_seqs": [
         2,
@@ -16884,6 +16885,7 @@
       "bytes": 98504,
       "dir": "InvokeHostFunctionTests",
       "imported_entries": [
+        "classic.failed-tx.golden-e0e11e1fb450f676-32",
         "classic.memo-bytes.golden-e0e11e1fb450f676-32"
       ],
       "ledger_seqs": [
@@ -17537,7 +17539,7 @@
       "bytes": 49460,
       "dir": "InvokeHostFunctionTests",
       "imported_entries": [
-        "cap73.sac-trust.golden-e6b26f2ad89e0e1b-0"
+        "cap76.archival-remediation.golden-e6b26f2ad89e0e1b-1"
       ],
       "ledger_seqs": [
         2,
@@ -20230,13 +20232,37 @@
       "path": "test-lcm-current/InvokeHostFunctionTests/dd6bb3f5fdd36b7a.xdr",
       "reason": "the smallest golden ledger carrying it is above the 1048576 byte import limit",
       "record": 10
+    },
+    {
+      "bytes": 1696,
+      "family": "cap67.unified-events",
+      "fragment": "TransactionMeta:v3",
+      "path": "test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
+      "reason": "only golden ledgers outside the family's protocol range carry it (smallest at protocol 20)",
+      "record": 1
+    },
+    {
+      "bytes": 1276,
+      "family": "classic.failed-tx",
+      "fragment": "TransactionEnvelope:tx_v0",
+      "path": "test-lcm-current/InvokeHostFunctionTests/e6b26f2ad89e0e1b.xdr",
+      "reason": "only golden ledgers outside the family's protocol range carry it (smallest at protocol 0)",
+      "record": 0
+    },
+    {
+      "bytes": 4408,
+      "family": "soroban.invoke-basics",
+      "fragment": "ContractCodeEntryExt:v0",
+      "path": "test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr",
+      "reason": "only golden ledgers outside the family's protocol range carry it (smallest at protocol 20)",
+      "record": 2
     }
   ],
   "totals": {
     "bytes": 77959908,
     "directories": 10,
     "files": 866,
-    "imported_entries": 106,
+    "imported_entries": 107,
     "ledgers": 15306
   },
   "upstream": {
