@@ -47,7 +47,9 @@ pub fn archive_name(corpus_version: &str) -> String {
 /// top-level `corpus-<version>/` directory, and writes `<out>/SHA256SUMS`.
 ///
 /// Before packing it checks that every file the manifest names exists with its recorded hash,
-/// so a release can never ship bytes the manifest does not vouch for.
+/// and that every chain directory matches its `chain.json` as `shapekit pack verify` checks
+/// it byte for byte, so a release can never ship bytes the manifest or a chain record does
+/// not vouch for.
 pub fn pack(corpus: &Path, manifest: &Manifest, out: &Path) -> Result<PackReport, CoverageError> {
     let version = manifest.corpus_version.trim();
     if version.is_empty() || version.contains(['/', '\\']) || version.starts_with('.') {
@@ -59,6 +61,7 @@ pub fn pack(corpus: &Path, manifest: &Manifest, out: &Path) -> Result<PackReport
     verify_manifest_files(corpus, manifest)?;
     let files = collect(corpus)?;
     no_strays(&files, manifest)?;
+    verify_chains(corpus, &files)?;
     for required in REQUIRED {
         if !files.iter().any(|f| f == required) {
             return Err(CoverageError::Pack(format!(
@@ -247,6 +250,44 @@ fn no_strays(files: &[String], manifest: &Manifest) -> Result<(), CoverageError>
         }
     }
     Ok(())
+}
+
+// chain files are vouched for by their chain.json, not by the manifest, so each directory is
+// checked against it; a file under chains/ outside a network directory has no record at all
+fn verify_chains(corpus: &Path, files: &[String]) -> Result<(), CoverageError> {
+    let mut dirs = std::collections::BTreeSet::new();
+    for f in files.iter().filter(|f| f.starts_with("chains/")) {
+        match f.splitn(4, '/').collect::<Vec<_>>().as_slice() {
+            ["chains", chain, network @ ("testnet" | "mainnet"), _] => {
+                dirs.insert(format!("chains/{chain}/{network}"));
+            }
+            _ => {
+                return Err(CoverageError::Pack(format!(
+                    "{f} is not inside a chains/<chain>/<testnet|mainnet>/ directory"
+                )));
+            }
+        }
+    }
+    let mut problems = Vec::new();
+    for d in &dirs {
+        let dir = corpus.join(d);
+        if !dir.join(shapekit_pack::chain::CHAIN_FILE).is_file() {
+            problems.push(format!("{d}: no chain.json"));
+            continue;
+        }
+        match shapekit_pack::verify_chain(&dir) {
+            Ok(found) => problems.extend(found.into_iter().map(|p| format!("{d}: {p}"))),
+            Err(e) => problems.push(format!("{d}: {e}")),
+        }
+    }
+    if problems.is_empty() {
+        Ok(())
+    } else {
+        Err(CoverageError::Pack(format!(
+            "chains do not match their chain.json (shapekit pack verify gives the detail):\n{}",
+            problems.join("\n")
+        )))
+    }
 }
 
 /// The members allowed outside `entries/`, `vectors/` and `chains/`: the required files, the

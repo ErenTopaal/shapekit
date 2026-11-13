@@ -84,6 +84,19 @@ jobs:
             "$RUNNER_TEMP/bin/shapekit" import goldens --core-src "$RUNNER_TEMP/core" --tag "$tag" &&
             "$RUNNER_TEMP/bin/shapekit" manifest build)
           diff -r corpus "$work/corpus"
+      - name: committed oracle files are what the oracle writes
+        # every entry, not only the goldens the re-import covers: the recipe chains' oracle
+        # files are compared by the repro job, synthetic and history entries only here
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/bin/shapekit" oracle run >/dev/null
+          changed=$(git status --porcelain -- corpus)
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff --stat -- corpus
+            echo "::error::committed oracle files differ from shapekit oracle run"
+            exit 1
+          fi
       - name: pull the pinned core test build by digest
         run: docker pull --quiet "$(scripts/pin.sh image stellar-core-buildtests)"
       - name: core's own check-lcm run

@@ -587,6 +587,15 @@ pub(crate) fn generator_files(path: &Path) -> Result<Vec<String>> {
     Ok(out)
 }
 
+/// The oracle files an entry records, relative to the corpus.
+pub(crate) fn oracle_files(path: &Path) -> Result<BTreeSet<String>> {
+    let e = read_entry(path)?;
+    Ok(e.variants
+        .iter()
+        .filter_map(|(_, v)| v.oracle_file.clone())
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

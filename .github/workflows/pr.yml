@@ -114,7 +114,7 @@ jobs:
 
   corpus:
     # registry, manifest (which round-trips every entry through stellar-xdr), generated files,
-    # coverage, guide, goldens, committed chains, the release archive, text rules
+    # oracle files, coverage, guide, goldens, committed chains, the release archive, text rules
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -141,6 +141,20 @@ jobs:
             echo "$changed"
             git diff --stat -- corpus
             echo "::error::committed corpus differs from synth build plus manifest build"
+            exit 1
+          fi
+      - name: committed oracle files are what the oracle writes
+        # harness verdicts are judged against these files, and manifest validate only checks
+        # them against their recorded hashes, so an oracle change that alters facts must come
+        # with the regenerated files
+        run: |
+          set -euo pipefail
+          shapekit oracle run >/dev/null
+          changed=$(git status --porcelain -- corpus)
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff --stat -- corpus
+            echo "::error::committed oracle files differ from shapekit oracle run"
             exit 1
           fi
       - run: shapekit coverage --check

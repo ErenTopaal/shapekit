@@ -933,3 +933,77 @@ fn kat_offer_cross_reports_the_trade() {
     want.sort();
     assert_eq!(moves, want);
 }
+
+#[test]
+fn self_fee_bump_reports_its_one_time_signer_removal_and_the_sequence_bump() {
+    // corpus entry cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta: the
+    // fee source is the inner source and holds a pre-auth signer for the fee-bump hash.
+    // stellar-core v30.0.0 FeeBumpTransactionFrame::apply removes that signer in its own
+    // LedgerTxn (removeOneTimeSignerKeyFromFeeSource), then the inner transaction bumps the
+    // sequence, so txChangesBefore has two groups for the account and both must be reported.
+    // The signer key is the fee-bump hash from the result, not from the oracle.
+    let corpus = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus");
+    let entry: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(corpus.join(
+            "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta/entry.json",
+        ))
+        .unwrap(),
+    )
+    .unwrap();
+    let chain = entry["source"]["chain"].as_str().unwrap();
+    let seq = u32::try_from(entry["source"]["ledger_seq"].as_u64().unwrap()).unwrap();
+    for (variant, passphrase) in [
+        ("testnet", TESTNET),
+        ("mainnet", "Public Global Stellar Network ; September 2015"),
+    ] {
+        let net = Network::new(passphrase);
+        let lake = shapekit_pack::Lake::open(
+            &corpus
+                .join("chains")
+                .join(chain)
+                .join(variant)
+                .join("ledgers"),
+        )
+        .unwrap();
+        let batch = lake.read_batch(lake.batch_for(seq).unwrap()).unwrap();
+        let lcm = decode_lcm(batch.ledger(seq).unwrap()).unwrap();
+        let view = shapekit_oracle::view::LedgerView::new(&lcm, &net).unwrap();
+        let (hash, account) = view
+            .txs
+            .iter()
+            .find_map(|tx| match tx.envelope {
+                TransactionEnvelope::TxFeeBump(e) => {
+                    let MuxedAccount::Ed25519(k) = &e.tx.fee_source else {
+                        return None;
+                    };
+                    Some((
+                        tx.result.transaction_hash.0,
+                        AccountId(PublicKey::PublicKeyTypeEd25519(k.clone())).to_string(),
+                    ))
+                }
+                _ => None,
+            })
+            .expect("a fee bump in the ledger");
+        let facts = interpret(&lcm, &net).unwrap();
+        let tx = facts.iter().find(|t| t.hash == hex::encode(hash)).unwrap();
+        assert!(tx.successful, "{variant}");
+        let signer = SignerKey::PreAuthTx(Uint256(hash)).to_string();
+        let before: Vec<&Change> = tx
+            .changes
+            .iter()
+            .filter(|c| c.scope == ChangeScope::TxBefore)
+            .map(|c| &c.change)
+            .collect();
+        assert!(
+            before.iter().any(|c| matches!(c,
+                Change::SignerRemoved { account: a, signer: s, weight: 1 } if *a == account && *s == signer)),
+            "{variant}: {before:?}"
+        );
+        assert!(
+            before.iter().any(|c| matches!(c,
+                Change::Sequence { account: a, before: b, after: n } if *a == account && n.0 == b.0 + 1)),
+            "{variant}: {before:?}"
+        );
+        check_ledger(&lcm, &net, None).unwrap();
+    }
+}

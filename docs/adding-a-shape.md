@@ -209,7 +209,10 @@ committed entry, so passphrase dependence is still decided on both.
 `gen verify-repro` regenerates under both passphrases into a temporary directory and compares
 with the corpus: per chain the canonical ledger hashes, ledger range and the SEP-54 lake files; per
 entry the set of ids, `entry.json` (oracle references excluded) and every `.xdr` and
-`.expected.json` file byte for byte. Exit status 1 when anything differs.
+`.expected.json` file byte for byte. It then runs `shapekit oracle run` over the regenerated
+chains and compares each entry's `.oracle.json` files with the committed ones, so an oracle
+change whose files were not regenerated is a difference too. Exit status 1 when anything
+differs.
 
 ## 4. What is written
 

@@ -8,9 +8,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 708 |
-| Core-emitted entries | 588 |
-| Entries by source class | core-golden 107, local-core 483, mainnet-history 13, synthetic 102, testnet-history 3 |
+| Entries | 710 |
+| Core-emitted entries | 590 |
+| Entries by source class | core-golden 107, local-core 485, mainnet-history 13, synthetic 102, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
@@ -51,7 +51,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0012 Deterministic accounts and creatorTxID |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDetAccountOp is absent at v30.0 |
 | CAP-0013 Change Trustlines to Balances |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed AddBalanceOp is absent at v30.0 |
 | CAP-0014 Adversarial Transaction Set Ordering |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
-| CAP-0015 Fee-Bump Transactions | 13 | yes | `cap15.fee-bump` | 20 | 18 | core-golden 1, local-core 15, mainnet-history 2, synthetic 2 | any 3, mainnet 17, testnet 15 | 20, 30 |  |
+| CAP-0015 Fee-Bump Transactions | 13 | yes | `cap15.fee-bump` | 22 | 20 | core-golden 1, local-core 17, mainnet-history 2, synthetic 2 | any 3, mainnet 19, testnet 17 | 20, 30 |  |
 | CAP-0016 Cosigned assets: NopOp and COAUTHORIZED_FLAG |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol (in favour of CAP-0018); proposed COAUTHORIZED_FLAG and NopOp are absent at v30.0 |
 | CAP-0017 Update LastModifiedLedgerSeq If and Only If LedgerEntry is Modified |  | no |  | 0 | 0 |  |  |  | Accepted but protocol TBD, not implemented; would only change lastModifiedLedgerSeq update rules, no XDR |
 | CAP-0018 Fine-Grained Control of Authorization | 13 | yes | `cap18.maintain-liabilities` | 7 | 6 | core-golden 1, local-core 6 | any 1, mainnet 6, testnet 6 | 30 |  |
@@ -329,12 +329,12 @@ ScVal shapes: deep nesting, mixed-type map keys in host order, colliding keys, i
 | `:map[].key:symbol` | 106: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 103 more |  |
 | `:map[].val:map[].val:map` | 4: `soroban.scval-shapes.p30-map-depth-max-envelope`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-map-depth-over` and 1 more |  |
 | `:vec[]:vec[]:vec[]:vec` | 5: `soroban.scval-shapes.mainnet-57500008-b3475921-meta`, `soroban.scval-shapes.p30-map-depth-max-meta`, `soroban.scval-shapes.p30-vec-depth-max-envelope` and 2 more |  |
-| `ScVal:i128` | 362: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 359 more |  |
+| `ScVal:i128` | 363: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 360 more |  |
 | `ScVal:u128` | 11: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.mainnet-57500008-b3475921-envelope`, `soroban.scval-shapes.mainnet-57500008-b3475921-meta` and 8 more |  |
 | `ScVal:i256` | 9: `cap38.liquidity-pools.testnet-5521432`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
 | `ScVal:u256` | 9: `soroban.scval-shapes.golden-3c107a86e830c499-7`, `soroban.scval-shapes.p30-integer-extremes-envelope`, `soroban.scval-shapes.p30-integer-extremes-meta` and 6 more |  |
-| `ScVal:string` | 161: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 158 more |  |
-| `ScVal:symbol` | 408: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 405 more |  |
+| `ScVal:string` | 162: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 159 more |  |
+| `ScVal:symbol` | 409: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 406 more |  |
 | `ScVal:bytes` | 70: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 67 more |  |
 | `ScError:auth` | 6: `soroban.invoke-basics.golden-7e8aadf36d7d907d-17`, `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-7e8aadf36d7d907d-17` and 3 more |  |
 | `ScError:crypto` | 4: `soroban.invoke-basics.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.golden-897493fc26f0ff7b-17`, `soroban.scval-shapes.p30-errors-auth-crypto-events-envelope` and 1 more |  |
@@ -378,10 +378,10 @@ Unified asset events from classic operations, fee events and to_muxed_id map dat
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionMeta:v4` | 433: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 430 more |  |
-| `TransactionEventStage=before_all_txs` | 349: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 346 more |  |
+| `TransactionMeta:v4` | 434: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 431 more |  |
+| `TransactionEventStage=before_all_txs` | 350: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 347 more |  |
 | `TransactionEventStage=after_all_txs` | 83: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.p30-five-calls-parallel-phase` and 80 more |  |
-| `.operations[].events[].type=contract` | 147: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 144 more |  |
+| `.operations[].events[].type=contract` | 148: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta` and 145 more |  |
 | `.operations[].events[].body:v0.data:map` | 63: `cap03.offer-liabilities.mainnet-25000000`, `cap27.muxed-accounts.p28-account-merge-destination-id-2p53`, `cap27.muxed-accounts.p28-issued-payment-destination-id-2p53` and 60 more |  |
 | `ScAddress:muxed_account` | 8: `cap67.unified-events.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.golden-938fb779c48ac3af-16`, `sep41.muxed-addresses.p28-credit-mint-to-muxed` and 5 more |  |
 | `ScAddress:claimable_balance` | 14: `cap23.claimable-balances.p30-claim-through-depth-4-meta`, `cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta`, `cap33.sponsorship.p30-sponsored-claimable-balance-meta` and 11 more |  |
@@ -390,13 +390,13 @@ Unified asset events from classic operations, fee events and to_muxed_id map dat
 
 ### `cap15.fee-bump`
 
-Fee-bump envelopes over successful and failed inner transactions, with a muxed fee source. CAPs: CAP-0015. Entries: core-golden 1, local-core 15, mainnet-history 2, synthetic 2.
+Fee-bump envelopes over successful and failed inner transactions, with a muxed fee source. CAPs: CAP-0015. Entries: core-golden 1, local-core 17, mainnet-history 2, synthetic 2.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `TransactionEnvelope:tx_fee_bump` | 14: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 11 more |  |
-| `FeeBumpTransactionInnerTx:tx` | 14: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 11 more |  |
-| `TransactionResultResult:tx_fee_bump_inner_success` | 5: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.p30-fee-source-is-inner-source-meta`, `cap15.fee-bump.p30-inner-success-meta` and 2 more |  |
+| `TransactionEnvelope:tx_fee_bump` | 15: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 12 more |  |
+| `FeeBumpTransactionInnerTx:tx` | 15: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-envelope`, `cap15.fee-bump.p30-fee-source-is-inner-source-envelope` and 12 more |  |
+| `TransactionResultResult:tx_fee_bump_inner_success` | 6: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.p30-fee-source-is-inner-source-meta`, `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` and 3 more |  |
 | `TransactionResultResult:tx_fee_bump_inner_failed` | 10: `cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12`, `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap15.fee-bump.p30-inner-bad-auth` and 7 more |  |
 | `.fee_source:muxed_ed25519` | 2: `cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope`, `cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope` |  |
 | `InnerTransactionResultResult:tx_bad_auth` | 1: `cap15.fee-bump.p30-inner-bad-auth` |  |
@@ -456,7 +456,7 @@ Failed transactions whose envelope names accounts the ledger never touched. CAPs
 |---|---|---|
 | `TransactionResultResult:tx_failed` | 169: `cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta`, `cap01.bump-sequence.p30-merge-seqnum-too-far`, `cap03.offer-liabilities.mainnet-25000000` and 166 more |  |
 | `PaymentResult:no_destination` | 6: `cap15.fee-bump.p30-inner-failed-meta`, `cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta`, `cap40.signed-payload-signer.testnet-4437357` and 3 more |  |
-| `SignerKey:pre_auth_tx` | 6: `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50`, `classic.failed-tx.p30-add-pre-auth-signer-envelope` and 3 more |  |
+| `SignerKey:pre_auth_tx` | 7: `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta`, `cap33.sponsorship.golden-6f067a349543093a-48`, `classic.failed-tx.golden-6f067a349543093a-50` and 4 more |  |
 | `ChangeTrustAsset:native` | 1: `classic.failed-tx.p9-change-trust-native-internal-error-envelope` |  |
 | `TransactionResultResult:tx_internal_error` | 3: `classic.failed-tx.golden-e0e11e1fb450f676-32`, `classic.failed-tx.p9-change-trust-native-internal-error-meta`, `classic.memo-bytes.golden-e0e11e1fb450f676-32` |  |
 | `TransactionResultResult:tx_bad_auth` | 1: `classic.failed-tx.golden-8e3126c525875c96-10` |  |
@@ -596,7 +596,7 @@ Version 2 preconditions: ledger bounds, minimum sequence, age, ledger gap, two e
 | `Preconditions:v2` | 12: `cap15.fee-bump.p30-inner-bad-min-seq-gap`, `cap21.preconditions.golden-27d2533d64835282-1`, `cap21.preconditions.p30-all-preconditions-envelope` and 9 more |  |
 | `.ledger_bounds.max_ledger` | 4: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-ledger-and-time-bounds-envelope`, `cap21.preconditions.p30-ledger-bounds-no-maximum-envelope` and 1 more |  |
 | `.extra_signers#max` | 2: `cap21.preconditions.p30-all-preconditions-envelope`, `cap21.preconditions.p30-two-extra-signers-envelope` |  |
-| `AccountEntryExtensionV2Ext:v3` | 453: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 450 more |  |
+| `AccountEntryExtensionV2Ext:v3` | 454: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 451 more |  |
 
 ### `cap33.sponsorship`
 
@@ -610,7 +610,7 @@ Sponsored accounts, trustlines, signers and claimable balances, and sponsorship 
 | `RevokeSponsorshipOp:ledger_entry` | 5: `cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope`, `classic.failed-tx.p30-revoke-does-not-exist`, `classic.failed-tx.p30-revoke-low-reserve` and 2 more |  |
 | `RevokeSponsorshipOp:signer` | 3: `cap33.sponsorship.p30-revoke-signer-sponsorship-envelope`, `cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope`, `cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope` |  |
 | `LedgerEntryExt:v1` | 29: `cap15.fee-bump.mainnet-51000294-a25b8226-meta`, `cap23.claimable-balances.golden-3635a80135f66ca8-0`, `cap23.claimable-balances.p30-claim-through-depth-4-meta` and 26 more |  |
-| `AccountEntryExtensionV1Ext:v2` | 454: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 451 more |  |
+| `AccountEntryExtensionV1Ext:v2` | 455: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 452 more |  |
 | `.signer_sponsoring_i_ds[]:public_key_type_ed25519` | 17: `cap33.sponsorship.golden-6f067a349543093a-48`, `cap33.sponsorship.p30-revoke-signer-sponsorship-meta`, `cap33.sponsorship.p30-sponsored-account-entry` and 14 more |  |
 | `BeginSponsoringFutureReservesResult:already_sponsored` | 1: `cap33.sponsorship.golden-16ca002da0d1fd67-1` |  |
 | `BeginSponsoringFutureReservesResult:recursive` | 1: `cap33.sponsorship.golden-5a03a46b7b48bb06-2` |  |
@@ -646,7 +646,7 @@ Wasm upload, contract creation with and without constructor, invocation, TTL ext
 | `LedgerEntryData:contract_data` | 64: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 61 more |  |
 | `LedgerEntryData:ttl` | 65: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 62 more |  |
 | `ContractDataDurability=temporary` | 31: `cap38.liquidity-pools.testnet-5521432`, `cap66.archival.p30-evicted-temporary`, `cap71.credentials.golden-e25799a2e2e9eea2-17` and 28 more |  |
-| `ContractEventType=contract` | 355: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 352 more |  |
+| `ContractEventType=contract` | 356: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 353 more |  |
 | `ContractCodeEntryExt:v0` | none | `old-protocol-only` the arm itself: soroban-env-host writes ContractCodeEntryExt v1 with the module's cost inputs on every wasm upload (upload_contract_wasm in host/lifecycle.rs, 22.1.3 and 30.0.0; v0 stays only for the test build's empty wasm), so v0 entries are code uploaded at protocol 20 and show in later meta only when such an entry changes. the recipes' soroban hosts start at protocol 22. the one golden holding it (test-lcm-current/InvokeHostFunctionTests/27003f6cc5cdecc2.xdr record 2) is a protocol 20 ledger, below soroban.invoke-basics' range from 22, so the golden index lists it as not imported, and 29 protocol 20 mainnet ledgers sampled from 50460000 to 52140000 hold no upload |
 | `ExtendFootprintTtlResult:insufficient_refundable_fee` | 1: `soroban.invoke-basics.golden-568d51258ccf9080-9` |  |
 | `ExtendFootprintTtlResult:resource_limit_exceeded` | 1: `soroban.invoke-basics.golden-8299635e181e651c-11` |  |
@@ -661,9 +661,9 @@ Contract events and return values at the configured size limits. CAPs: CAP-0046-
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `ContractEventType=contract` | 355: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 352 more |  |
+| `ContractEventType=contract` | 356: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 353 more |  |
 | `.operations[].events#many` | 15: `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta`, `cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta`, `cap03.offer-liabilities.p30-credit-pair-cross-partial` and 12 more |  |
-| `.body:v0.topics#many` | 379: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 376 more |  |
+| `.body:v0.topics#many` | 380: `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward`, `cap01.bump-sequence.p30-bump-past-starting-sequence` and 377 more |  |
 | `.body:v0.data:bytes` | 7: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-504393015a71bc7a-8`, `soroban.events-max.golden-a8df5d4dbdc85ac8-7` and 4 more |  |
 | `.return_value:bytes` | 4: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.events-max.p30-echo-bytes-at-limit`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 1 more |  |
 
@@ -770,7 +770,7 @@ Offers with buying and selling liabilities, including manage-buy offers. CAPs: C
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
 | `OperationBody:manage_buy_offer` | 16: `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-envelope` and 13 more |  |
-| `AccountEntryExt:v1` | 459: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 456 more |  |
+| `AccountEntryExt:v1` | 460: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 457 more |  |
 | `TrustLineEntryExt:v1` | 34: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 31 more |  |
 | `ManageOfferSuccessResultOffer:created` | 8: `cap03.offer-liabilities.golden-0ebc576d9b25b85a-8`, `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta` and 5 more |  |
 | `ClaimAtom:order_book` | 9: `cap03.offer-liabilities.golden-00c0553ff45607f9-10`, `cap03.offer-liabilities.golden-1184dd64bb4ead8c-20`, `cap03.offer-liabilities.golden-12c04cf739c52eac-20` and 6 more |  |

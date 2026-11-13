@@ -14,6 +14,10 @@
 //! | 9 on   | inner tx_bad_auth, tx_bad_seq, tx_bad_auth_extra and             |
 //! |        | tx_bad_min_seq_age_or_gap, each after an earlier transaction in  |
 //! |        | the same ledger (`failed_tx::ordering`), and tx_bad_sponsorship  |
+//! | then   | payer adds to alice a pre-auth signer for the hash of a fee bump |
+//! |        | alice pays for her own payment                                   |
+//! | then   | that fee bump: core removes the one-time signer, then the inner  |
+//! |        | transaction bumps alice's sequence, two groups for one account   |
 //!
 //! The failed inner payments name a destination that was never funded, so
 //! they pass submission and fail at apply with `PAYMENT_NO_DESTINATION`;
@@ -22,11 +26,13 @@
 use anyhow::{Context, Result, bail, ensure};
 use ed25519_dalek::SigningKey;
 use shapekit_core_driver::chain::Applied;
-use shapekit_core_driver::keys::{muxed_account, muxed_account_with_id};
-use shapekit_core_driver::tx::{fee_bump, sign_fee_bump, sign_transaction};
+use shapekit_core_driver::keys::{account_id, muxed_account, muxed_account_with_id};
+use shapekit_core_driver::tx::{fee_bump, fee_bump_hash, sign_fee_bump, sign_transaction};
 use stellar_xdr::{
-    Asset, InnerTransactionResultResult, MuxedAccount, OperationBody, OperationResult,
-    OperationResultTr, PaymentOp, PaymentResult, TransactionEnvelope, TransactionResultResult,
+    AccountEntry, Asset, InnerTransactionResultResult, LedgerEntryChange, LedgerEntryData,
+    MuxedAccount, OperationBody, OperationResult, OperationResultTr, PaymentOp, PaymentResult,
+    SetOptionsOp, Signer, SignerKey, TransactionEnvelope, TransactionMeta, TransactionResultResult,
+    Uint256,
 };
 
 use super::failed_tx::ordering;
@@ -218,6 +224,92 @@ impl Recipe for FeeBump {
         ordering::bad_seq(ctx, "inner-bad-seq", &payer)?;
         ordering::bad_auth_extra(ctx, "inner-bad-auth-extra", Some(&payer))?;
         ordering::bad_min_seq_gap(ctx, "inner-bad-min-seq-gap", Some(&payer))?;
-        ordering::bad_sponsorship(ctx, "inner-bad-sponsorship", &payer)
+        ordering::bad_sponsorship(ctx, "inner-bad-sponsorship", &payer)?;
+
+        self_bump_with_pre_auth_signer(ctx, &alice, &payer)
     }
+}
+
+/// Alice's account as `change` shows it.
+fn account_of(change: &LedgerEntryChange) -> Option<&AccountEntry> {
+    match change {
+        LedgerEntryChange::State(e) | LedgerEntryChange::Updated(e) => match &e.data {
+            LedgerEntryData::Account(a) => Some(a),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+/// A fee bump over its own source, which holds a pre-auth signer for the fee-bump hash.
+/// Core's `FeeBumpTransactionFrame::apply` removes that one-time signer from the fee source
+/// in its own `LedgerTxn` and then the inner transaction bumps the sequence in another, so
+/// `txChangesBefore` holds two groups for alice that each change her account: the shape an
+/// interpreter reading only the last group gets wrong.
+fn self_bump_with_pre_auth_signer(
+    ctx: &mut ChainCtx,
+    alice: &SigningKey,
+    payer: &SigningKey,
+) -> Result<()> {
+    let alice_g = muxed_account(&alice.verifying_key());
+    let bob = muxed_account(&ctx.account("bob").verifying_key());
+    // built before the signer is added, which payer submits with alice as the operation
+    // source so alice's sequence is still the one the inner transaction was built on
+    let tx = ctx.tx(alice)?.operation(None, payment(bob)).build()?;
+    let inner = sign_transaction(tx, &ctx.network_id(), &[alice])?;
+    let outer = fee_bump(inner, alice_g.clone(), OUTER_FEE);
+    let signer = SignerKey::PreAuthTx(Uint256(fee_bump_hash(&outer, &ctx.network_id())?));
+    let set = ctx
+        .tx(payer)?
+        .operation(
+            Some(alice_g),
+            OperationBody::SetOptions(SetOptionsOp {
+                inflation_dest: None,
+                clear_flags: None,
+                set_flags: None,
+                master_weight: None,
+                low_threshold: None,
+                med_threshold: None,
+                high_threshold: None,
+                home_domain: None,
+                signer: Some(Signer {
+                    key: signer.clone(),
+                    weight: 1,
+                }),
+            }),
+        )
+        .build()?;
+    let env = ctx.sign(set, &[payer, alice])?;
+    ctx.submit_and_close(&env)?;
+
+    // the pre-auth signer alone authorises the fee bump; core refuses a master key signature
+    // on top of it as tx_bad_auth_extra
+    let env = TransactionEnvelope::TxFeeBump(sign_fee_bump(outer, &ctx.network_id(), &[])?);
+    let applied = ctx.submit_and_close(&env)?;
+    ensure_inner(&applied, Inner::Success)?;
+    let TransactionMeta::V4(meta) = &applied.meta else {
+        bail!("ledger {}: expected transaction meta v4", applied.ledger);
+    };
+    let id = account_id(&alice.verifying_key());
+    let seen: Vec<(bool, i64)> = meta
+        .tx_changes_before
+        .iter()
+        .filter_map(account_of)
+        .filter(|a| a.account_id == id)
+        .map(|a| (a.signers.iter().any(|s| s.key == signer), a.seq_num.0))
+        .collect();
+    let seq = seen.first().map(|s| s.1).unwrap_or_default();
+    ensure!(
+        seen == [(true, seq), (false, seq), (false, seq), (false, seq + 1)],
+        "ledger {}: alice's txChangesBefore is {seen:?}, expected the signer removal and then the sequence bump as two groups",
+        applied.ledger
+    );
+    ctx.capture(
+        "fee-source-is-inner-source-pre-auth-signer",
+        Selector::transaction(&applied),
+        Spec::new(
+            "a fee bump whose fee source is the inner source and holds a pre-auth signer for the fee-bump hash; core removes the signer in one LedgerTxn and the inner transaction bumps the sequence in another, so txChangesBefore holds two groups for the account",
+        )
+        .fields(&FIELDS),
+    )
 }

@@ -196,12 +196,12 @@ problems = ["dropped"]
 
 [[finding]]
 id = "WB-W8"
-title = "a failed transaction that consumes a pre-auth signer records no signer removal"
+title = "a pre-auth signer core removes in txChangesBefore is never recorded as removed (failed transactions, fee bumps)"
 component = "wallet-backend"
 severity = "data-loss"
 status = "draft"
 draft = "findings/issues/wallet-backend-W8.md"
-cause = "Core removes a pre-authorized transaction signer when the transaction is applied, even when it fails (txChangesBefore). wallet-backend derives signer changes from operation effects, which exist only for successful transactions, so the removal is not stored."
+cause = "Core removes a pre-authorized transaction signer in txChangesBefore: the transaction's own hash signer when the transaction is applied, even when it fails, and a fee bump's hash signer from the fee source before the inner transaction runs, even when it succeeds. wallet-backend derives signer changes only from operation effects (SetOptions changes of successful transactions), never from txChangesBefore, so neither removal is stored."
 
 [[finding.harness]]
 target = "wallet-backend"

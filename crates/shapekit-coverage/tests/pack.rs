@@ -10,7 +10,33 @@ use shapekit_manifest::{
 };
 use shapekit_registry::SourceClass;
 
-const VECTOR: &str = "vectors/strkey/demo.synth-one.json";
+// longer than ustar's 100-byte name field once under the archive's top directory, so the gnu
+// long-name records are exercised too
+const VECTOR: &str = "vectors/strkey/demo.synth-one.pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp.json";
+
+/// A small committed chain, copied in whole so the pack's chain verification has real bytes.
+const CHAIN_SRC: &str = "../../corpus/chains/classic.failed-tx.manage-data.p1/testnet";
+const CHAIN_DIR: &str = "chains/demo.p30/testnet";
+
+fn copy_dir(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for item in std::fs::read_dir(from).unwrap() {
+        let path = item.unwrap().path();
+        let dest = to.join(path.file_name().unwrap());
+        if path.is_dir() {
+            copy_dir(&path, &dest);
+        } else {
+            std::fs::copy(&path, &dest).unwrap();
+        }
+    }
+}
+
+fn file_count(dir: &Path) -> usize {
+    walkdir::WalkDir::new(dir)
+        .into_iter()
+        .filter(|e| e.as_ref().unwrap().file_type().is_file())
+        .count()
+}
 
 fn write(root: &Path, rel: &str, bytes: &[u8]) {
     let path = root.join(rel);
@@ -82,8 +108,7 @@ fn manifest(vector_sha: &str) -> Manifest {
     }
 }
 
-// a corpus small enough to pack in a debug build, with a nested path longer than ustar's
-// 100-byte name field so the gnu long-name records are exercised too
+// a corpus small enough to pack in a debug build
 fn fixture(root: &Path) -> Manifest {
     let vector = b"{\"cases\":[]}\n";
     write(root, "manifest.json", b"{}\n");
@@ -92,13 +117,16 @@ fn fixture(root: &Path) -> Manifest {
     write(root, "coverage/coverage.json", b"{}\n");
     write(root, "coverage/COVERAGE.md", b"# coverage\n");
     write(root, "goldens/core-v30.0.0/index.json", b"{}\n");
-    let deep = format!(
-        "chains/demo.p30/testnet/ledgers/{}/x.xdr.zst",
-        "p".repeat(120)
+    copy_dir(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join(CHAIN_SRC),
+        &root.join(CHAIN_DIR),
     );
-    write(root, &deep, &[7u8; 5000]);
-    write(root, "chains/demo.p30/testnet/chain.json", b"{}\n");
     manifest(&sha256_hex(vector))
+}
+
+/// The six files the fixture writes outside the chain, plus the chain's.
+fn fixture_files(root: &Path) -> usize {
+    6 + file_count(&root.join(CHAIN_DIR))
 }
 
 fn members(archive: &Path) -> Vec<(String, u64, u64, u32, Vec<u8>)> {
@@ -147,7 +175,7 @@ fn two_runs_give_identical_bytes() {
         std::fs::read(dir.path().join("a").join(SUMS_FILE)).unwrap(),
         std::fs::read(dir.path().join("b").join(SUMS_FILE)).unwrap()
     );
-    assert_eq!(a.files, 8);
+    assert_eq!(a.files, fixture_files(&corpus));
     let sums = std::fs::read_to_string(&a.sums).unwrap();
     assert_eq!(sums, format!("{}  {}\n", a.sha256, archive_name("9.9.9")));
     assert_eq!(a.sha256, sha256_hex(&std::fs::read(&a.archive).unwrap()));
@@ -162,7 +190,7 @@ fn archive_holds_every_file_with_fixed_metadata() {
     let members = members(&r.archive);
     let files: Vec<&(String, u64, u64, u32, Vec<u8>)> =
         members.iter().filter(|m| !m.0.ends_with('/')).collect();
-    assert_eq!(files.len(), 8);
+    assert_eq!(files.len(), fixture_files(&corpus));
     for (path, mtime, ids, mode, bytes) in &members {
         assert!(path.starts_with("corpus-9.9.9/"), "{path}");
         assert_eq!((*mtime, *ids), (0, 0), "{path}");
@@ -267,4 +295,44 @@ fn refuses_a_corpus_without_coverage() {
     std::fs::remove_file(corpus.join("coverage/COVERAGE.md")).unwrap();
     let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
     assert!(err.to_string().contains("coverage/COVERAGE.md"), "{err}");
+}
+
+#[test]
+fn refuses_chain_bytes_their_chain_json_does_not_vouch_for() {
+    let dir = tempfile::tempdir().unwrap();
+    let corpus = dir.path().join("corpus");
+    let m = fixture(&corpus);
+    let stream = corpus.join(CHAIN_DIR).join("ledgers.xdr");
+    let mut bytes = std::fs::read(&stream).unwrap();
+    bytes.push(0);
+    std::fs::write(&stream, bytes).unwrap();
+    let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+    assert!(
+        err.to_string().contains("do not match their chain.json")
+            && err.to_string().contains("ledgers.xdr"),
+        "{err}"
+    );
+}
+
+#[test]
+fn refuses_strays_under_chains() {
+    for stray in [
+        "chains/demo.p30/testnet/stray.bin",
+        "chains/demo.p30/testnet/ledgers/FFFFFFFF--0-63999/stray.bin",
+        "chains/demo.p30/stray.bin",
+        "chains/demo.p30/futurenet/chain.json",
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let corpus = dir.path().join("corpus");
+        let m = fixture(&corpus);
+        write(&corpus, stray, b"x");
+        let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+        let msg = err.to_string();
+        assert!(
+            msg.contains("not part of a committed chain")
+                || msg.contains("not a batch object")
+                || msg.contains("is not inside a chains/"),
+            "{stray}: {msg}"
+        );
+    }
 }

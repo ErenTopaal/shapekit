@@ -22,7 +22,8 @@ use shapekit_registry::{Family, Registry};
 use super::ctx::{Captured, ChainCtx};
 use super::output::{
     CHAINS_DIR, ChainCheck, Journal, chain_entries, check_entry, generator_entry_json,
-    generator_files, install_chain, install_entries, merge, reproducible_chain_json, write_entry,
+    generator_files, install_chain, install_entries, merge, oracle_files, reproducible_chain_json,
+    write_entry,
 };
 use super::state_check::{StateCheck, check_against_core};
 use super::{Network, Recipe, chain_id};
@@ -349,8 +350,9 @@ pub struct Repro {
 
 /// Regenerates `recipes` under both passphrases into a temporary corpus and
 /// compares it with `opts.corpus`: every chain's canonical ledger hashes and
-/// SEP-54 lake, the set of entries each chain owns, and every file the
-/// generator writes for them, byte for byte.
+/// SEP-54 lake, the set of entries each chain owns, every file the generator
+/// writes for them, and the oracle files `shapekit oracle run` derives from
+/// the regenerated chains, byte for byte.
 pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Repro> {
     let fresh = tempfile::Builder::new()
         .prefix("shapekit-repro-")
@@ -365,6 +367,10 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
         generated_with: opts.generated_with.clone(),
     };
     let report = generate(recipes, &fresh_opts)?;
+    // the oracle is rerun with the code under test, so a change to the interpreter that the
+    // committed oracle files were not regenerated for shows up here as a byte difference
+    shapekit_oracle::corpus::run(fresh.path())
+        .map_err(|e| anyhow!("oracle run over the regenerated chains: {e}"))?;
     let mut diffs = Vec::new();
     let mut chains_compared = 0;
     let mut entries_compared = 0;
@@ -423,6 +429,23 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
                     Ok(x) if x == y => {}
                     Ok(_) => diffs.push(format!("{f}: bytes differ")),
                     Err(e) => diffs.push(format!("{f}: committed file unreadable: {e}")),
+                }
+            }
+            let committed = oracle_files(&a.join(ENTRY_FILE))?;
+            let regenerated = oracle_files(&b.join(ENTRY_FILE))?;
+            for f in committed.union(&regenerated) {
+                match (committed.contains(f), regenerated.contains(f)) {
+                    (true, true) => {
+                        let x = std::fs::read(opts.corpus.join(f));
+                        let y = std::fs::read(fresh.path().join(f))?;
+                        match x {
+                            Ok(x) if x == y => {}
+                            Ok(_) => diffs.push(format!("{f}: oracle file differs")),
+                            Err(e) => diffs.push(format!("{f}: committed file unreadable: {e}")),
+                        }
+                    }
+                    (true, false) => diffs.push(format!("{f}: committed oracle file only")),
+                    _ => diffs.push(format!("{f}: regenerated oracle file only")),
                 }
             }
         }

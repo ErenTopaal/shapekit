@@ -6,8 +6,9 @@
 //! emits a list as one or more `LedgerTxn` commits concatenated, each giving a key at most
 //! one group: `STATE` then `UPDATED` or `REMOVED`, a lone `CREATED`, or `RESTORED`
 //! optionally followed by `UPDATED` or `REMOVED`. A key may have two groups in one list (a
-//! fee bump whose fee source is the inner source: `txChangesBefore` holds a no-op signer
-//! pass and then the sequence bump for the same account).
+//! fee bump whose fee source is the inner source: `txChangesBefore` holds the fee bump's
+//! one-time signer pass, which removes a pre-auth signer for the fee-bump hash or changes
+//! nothing, and then the sequence bump for the same account).
 //!
 //! [`raw_order`] keeps that order and refuses a key whose changes do not chain in it: every
 //! `STATE` must equal the value before it, every `CREATED` must follow an absent entry, and

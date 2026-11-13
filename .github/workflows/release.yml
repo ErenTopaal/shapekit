@@ -59,6 +59,10 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
       - run: cargo build --release --locked -p shapekit-cli
+      - name: committed chains match their chain.json
+        # corpus pack checks chain bytes against chain.json too; this adds the check that each
+        # lake is the canonical form of core's raw stream, which needs the core driver
+        run: target/release/shapekit pack verify
       - name: corpus archive
         run: target/release/shapekit corpus pack --out "$RUNNER_TEMP/assets"
       - name: fetch test-lcm-current at the pinned stellar-core tag

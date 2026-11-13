@@ -275,7 +275,8 @@ everything out of the release:
 
 - Everything it writes goes under `next/` at the repository root, never into `corpus/`,
   `registry/` or `pins.toml`. `shapekit corpus pack` packs `--corpus` (default `corpus`) and
-  refuses any file the manifest does not list, so `next/` never reaches the corpus archive.
+  refuses any file the manifest or a chain's `chain.json` does not vouch for, so `next/` never
+  reaches the corpus archive.
 - Pins: `next/pins.toml` (same format) names the vnext image as `stellar-core` and its
   `-vnext-buildtests` image, the core commit the image was built from, and what else the
   rehearsal relies on. Check it with `shapekit pins verify --file next/pins.toml`. Futurenet's

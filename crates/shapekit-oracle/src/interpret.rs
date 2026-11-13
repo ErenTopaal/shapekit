@@ -283,8 +283,8 @@ fn parse_sep11(s: &str) -> Option<Asset> {
     }
 }
 
-/// One key's movement within a change list: value before (from `STATE` or `RESTORED`)
-/// and after.
+/// One key's movement within a change list: value before (from the key's first change,
+/// absent when that is a `CREATED`) and after (from its last).
 pub(crate) struct Diff<'a> {
     pub key: LedgerKey,
     pub before: Option<&'a LedgerEntry>,
@@ -306,7 +306,9 @@ pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Result<Vec<Diff<'_>>, Stri
             | LedgerEntryChange::Restored(e) => e.to_key(),
             LedgerEntryChange::Removed(k) => k.clone(),
         };
+        let mut first = false;
         let i = *at.entry(key.clone()).or_insert_with(|| {
+            first = true;
             out.push(Diff {
                 key,
                 before: None,
@@ -317,13 +319,19 @@ pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Result<Vec<Diff<'_>>, Stri
             out.len() - 1
         });
         let d = &mut out[i];
+        // only the first sight of a key gives its value before the list: a second group's
+        // STATE is the value the first group left, and a leading CREATED means it was absent
         match c {
             LedgerEntryChange::State(e) => {
-                d.before = Some(e);
+                if first {
+                    d.before = Some(e);
+                }
                 d.after = Some(e);
             }
             LedgerEntryChange::Restored(e) => {
-                d.before = Some(e);
+                if first {
+                    d.before = Some(e);
+                }
                 d.after = Some(e);
                 d.restored = true;
             }
@@ -652,7 +660,10 @@ fn i128_of(p: &stellar_xdr::Int128Parts) -> i128 {
 // the change to report: removal, creation or update; a restore that changed nothing more
 // reports as a restore
 fn action(d: &Diff<'_>) -> Option<Action> {
-    if d.removed {
+    if d.before.is_none() && d.after.is_none() {
+        // created and removed again within one list: nothing moved
+        None
+    } else if d.removed {
         Some(Action::Removed)
     } else if d.before.is_none() && d.after.is_some() {
         Some(Action::Created)
@@ -1430,4 +1441,105 @@ fn token_event(
         _ => return None,
     }
     Some(te)
+}
+
+#[cfg(test)]
+mod tests {
+    use stellar_xdr::{
+        LedgerEntryExt, PublicKey, SequenceNumber, Signer, SignerKey, String32, Uint256,
+    };
+
+    use super::*;
+
+    fn acct(seq: i64, preauth: bool) -> LedgerEntry {
+        let signers: Vec<Signer> = if preauth {
+            vec![Signer {
+                key: SignerKey::PreAuthTx(Uint256([9; 32])),
+                weight: 1,
+            }]
+        } else {
+            vec![]
+        };
+        LedgerEntry {
+            last_modified_ledger_seq: 1,
+            data: LedgerEntryData::Account(AccountEntry {
+                account_id: AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([7; 32]))),
+                balance: 10,
+                seq_num: SequenceNumber(seq),
+                num_sub_entries: u32::from(preauth),
+                inflation_dest: None,
+                flags: 0,
+                home_domain: String32::default(),
+                thresholds: stellar_xdr::Thresholds([1, 0, 0, 0]),
+                signers: signers.try_into().unwrap(),
+                ext: AccountEntryExt::V0,
+            }),
+            ext: LedgerEntryExt::V0,
+        }
+    }
+
+    fn kinds(changes: &[LedgerEntryChange]) -> Vec<Change> {
+        let ctx = Context {
+            sac: BTreeMap::new(),
+            ttl_targets: BTreeMap::new(),
+        };
+        let mut out = Vec::new();
+        let mut parts = ParticipantSet::default();
+        for d in diffs(changes).unwrap() {
+            entry_changes(&ctx, &d, Scope::TxBefore, None, &mut out, &mut parts).unwrap();
+        }
+        out.into_iter().map(|c| c.change).collect()
+    }
+
+    /// A fee bump over its own source holding a pre-auth signer for the fee-bump hash: core
+    /// removes the signer in one group, then the inner transaction bumps the sequence.
+    #[test]
+    fn two_groups_keep_the_first_groups_change() {
+        let raw = vec![
+            LedgerEntryChange::State(acct(8, true)),
+            LedgerEntryChange::Updated(acct(8, false)),
+            LedgerEntryChange::State(acct(8, false)),
+            LedgerEntryChange::Updated(acct(9, false)),
+        ];
+        let ds = diffs(&raw).unwrap();
+        assert_eq!(ds.len(), 1);
+        assert_eq!(ds[0].before, Some(&acct(8, true)));
+        assert_eq!(ds[0].after, Some(&acct(9, false)));
+        let got = kinds(&raw);
+        assert!(
+            matches!(got.as_slice(), [Change::Sequence { before, after, .. }, Change::SignerRemoved { weight: 1, .. }]
+                if *before == Int::from(8i64) && *after == Int::from(9i64)),
+            "{got:?}"
+        );
+    }
+
+    #[test]
+    fn created_then_updated_in_a_second_group_is_a_creation() {
+        let raw = vec![
+            LedgerEntryChange::Created(acct(8, false)),
+            LedgerEntryChange::State(acct(8, false)),
+            LedgerEntryChange::Updated(acct(9, false)),
+        ];
+        let ds = diffs(&raw).unwrap();
+        assert_eq!(ds[0].before, None);
+        assert_eq!(ds[0].after, Some(&acct(9, false)));
+        let got = kinds(&raw);
+        assert!(
+            matches!(
+                got.as_slice(),
+                [Change::BalanceChange { .. }, Change::AccountCreated { .. }]
+            ),
+            "{got:?}"
+        );
+    }
+
+    #[test]
+    fn created_then_removed_reports_nothing() {
+        let raw = vec![
+            LedgerEntryChange::Created(acct(8, false)),
+            LedgerEntryChange::State(acct(8, false)),
+            LedgerEntryChange::Removed(acct(8, false).to_key()),
+        ];
+        assert!(kinds(&raw).is_empty());
+    }
 }

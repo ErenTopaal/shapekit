@@ -1,0 +1,60 @@
+{
+  "caps": [
+    "CAP-0015"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [
+    "tx.envelope.type",
+    "feebump.fee_source",
+    "feebump.fee",
+    "feebump.signatures",
+    "feebump.inner_tx"
+  ],
+  "flags": [],
+  "id": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/stellar-etl/issues/477"
+  ],
+  "notes": "a fee bump whose fee source is the inner source and holds a pre-auth signer for the fee-bump hash; core removes the signer in one LedgerTxn and the inner transaction bumps the sequence in another, so txChangesBefore holds two groups for the account",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "chain": "cap15.fee-bump.p30",
+    "class": "local-core",
+    "ledger_seq": 85,
+    "recipe": "cap15.fee-bump",
+    "tx_index": 0
+  },
+  "synthetic": false,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/mainnet.expected.json",
+      "expected_json_sha256": "7ca4d7de9713a24c2e7d0949412a042d645d3fecfb58cf32c71c31e0e054d9ec",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "oracle_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/mainnet.oracle.json",
+      "oracle_sha256": "7efd9c5d6819e2108fda4128b26c858a1e6b6e146929eeee4d324a4584630583",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/mainnet.xdr",
+      "xdr_sha256": "c04ccacbddca130cb51396354bd9f2be50791195c2047a7bb2a69ca15db240b3"
+    },
+    "testnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/testnet.expected.json",
+      "expected_json_sha256": "a2b2dc72e2e6fd80cd98c672dcc66bf396e0487183491ad62c6f710a9e738593",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "oracle_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/testnet.oracle.json",
+      "oracle_sha256": "eba8ae602c73d83fa6767872fd21d25004e3d78b996869191055ede21f178879",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope/testnet.xdr",
+      "xdr_sha256": "ec9d1240576fdb2507a07242d6772740c7aa0c5d958a1e61a0a38f9e316ef6e0"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

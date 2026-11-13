@@ -13,8 +13,11 @@
 #   [shards]         matrix width when every family is selected (default 4)
 #
 # the selection is the rotating window plus every family the change touches. a change to
-# code or data every recipe shares (the core driver, the generator framework, the registry,
-# the contracts, the pins) selects every family. the output is the matrix as json on one
+# code or data every recipe shares (the core driver, the generator framework, the oracle,
+# the registry, the contracts, the pins) selects every family. the oracle is in that set
+# because verify-repro reruns it over the regenerated chains and compares the oracle files
+# too; the corpus job in pr.yml also reruns it over the whole corpus, golden and synthetic
+# entries included, which the repro shards do not cover. the output is the matrix as json on one
 # line, {"include":[{"shard":"1","families":"a b"},...]}, plus a summary on stderr. the same
 # inputs always give the same output.
 #
