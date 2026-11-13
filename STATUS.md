@@ -32,9 +32,9 @@ Since the previous entry:
 - Docs and dashboard site at <https://shapekit.org>: Fumadocs on React Router, prerendered,
   data from `shapekit site data` (`docs/site.md`).
 - CI ran on GitHub for the first time. The pull request, site and upstream-drift workflows
-  pass, and so does a full nightly run (both harness deliveries, the five wallet-backend
-  reproductions on their pre-fix and fixed commits, fuzzing, goldens, docker tests and the
-  findings check). Three nightly problems the first run showed are fixed: the cap40 chain test
+  pass, and so does a full nightly run: both harness deliveries, the wallet-backend
+  reproductions of #729, #731, #716, #753 and #792 on their pre-fix and fixed commits (all 20
+  rows hold), fuzzing, goldens, docker tests and the findings check. Three nightly problems the first run showed are fixed: the cap40 chain test
   now runs the oracle on its corpus, the reproduce job frees runner disk before building ten
   wallet-backend images, and `findings check --fresh-runs` compares tonight's findings without
   the input hashes, which change with each run's timings.
