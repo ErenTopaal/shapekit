@@ -8,7 +8,7 @@
 
 use std::fs::File;
 use std::io::{BufReader, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -190,6 +190,39 @@ fn frame_header(len: usize) -> [u8; 4] {
     (0x8000_0000 | len as u32).to_be_bytes()
 }
 
+/// Outputs a conversion has created so far, removed again unless it finishes, so a failed
+/// `pack` leaves the recorded chain as it found it and running it again works.
+#[derive(Default)]
+struct Undo(Vec<PathBuf>);
+
+impl Undo {
+    fn add(&mut self, p: PathBuf) {
+        self.0.push(p);
+    }
+
+    fn replace(&mut self, old: &Path, new: PathBuf) {
+        self.0.retain(|p| p != old);
+        self.0.push(new);
+    }
+
+    fn keep(mut self) {
+        self.0.clear();
+    }
+}
+
+impl Drop for Undo {
+    fn drop(&mut self) {
+        for p in self.0.iter().rev() {
+            // best effort while an earlier error is already on its way to the caller
+            let _ = if p.is_dir() {
+                std::fs::remove_dir_all(p)
+            } else {
+                std::fs::remove_file(p)
+            };
+        }
+    }
+}
+
 /// Converts a recorded chain directory in place to the committed form. A chain already in
 /// the committed form is left alone. Every canonical ledger is checked against the hash the
 /// recorder wrote before anything is removed.
@@ -218,6 +251,20 @@ pub fn pack_chain(dir: &Path, layout: Layout) -> Result<Packed, PackError> {
             rec.stream_file
         )));
     }
+
+    // a schema 1 chain.json means no pack finished here, and a failed one cleans up, so
+    // these exist only if something else put them there; never overwrite that
+    let lake_dir = dir.join(LEDGERS_DIR);
+    let tar_path = dir.join(ARCHIVE_TAR);
+    for p in [&lake_dir, &tar_path] {
+        if p.exists() {
+            return Err(PackError::Format(format!(
+                "{} already exists in a chain that is not packed yet; remove it and run again",
+                p.display()
+            )));
+        }
+    }
+    let mut undo = Undo::default();
 
     let canonical_path = dir.join(CANONICAL_STREAM_FILE);
     let stream_sha = sha256_file(&canonical_path)?;
@@ -250,11 +297,11 @@ pub fn pack_chain(dir: &Path, layout: Layout) -> Result<Packed, PackError> {
         }
         Ok(xdr)
     });
-    let lake_dir = dir.join(LEDGERS_DIR);
     let staging = dir.join(".ledgers.partial");
     if staging.exists() {
         std::fs::remove_dir_all(&staging).map_err(io_err(&staging))?;
     }
+    undo.add(staging.clone());
     let summary = write_sep54(checked, &rec.passphrase, &staging, layout)?;
     if expected.next().is_some() {
         return Err(PackError::Format(format!(
@@ -272,8 +319,8 @@ pub fn pack_chain(dir: &Path, layout: Layout) -> Result<Packed, PackError> {
     }
 
     let archive_src = dir.join(ARCHIVE_DIR);
-    let tar_path = dir.join(ARCHIVE_TAR);
     let files = bundle_archive(&archive_src, &tar_path)?;
+    undo.add(tar_path.clone());
     let idx = ArchiveIndex::read(&tar_path)?;
     for c in &rec.checkpoints {
         if !idx.states.contains_key(c) {
@@ -283,13 +330,8 @@ pub fn pack_chain(dir: &Path, layout: Layout) -> Result<Packed, PackError> {
         }
     }
 
-    if lake_dir.exists() {
-        return Err(PackError::Format(format!(
-            "{} already exists",
-            lake_dir.display()
-        )));
-    }
     std::fs::rename(&staging, &lake_dir).map_err(io_err(&lake_dir))?;
+    undo.replace(&staging, lake_dir.clone());
     let batches = summary.batches.len();
     let chain = ChainFile {
         schema: SCHEMA,
@@ -321,6 +363,8 @@ pub fn pack_chain(dir: &Path, layout: Layout) -> Result<Packed, PackError> {
         ledgers: rec.ledgers,
     };
     chain.write(dir)?;
+    // packed from here on: chain.json says so, and the inputs below are no longer needed
+    undo.keep();
     std::fs::remove_file(&canonical_path).map_err(io_err(&canonical_path))?;
     std::fs::remove_dir_all(&archive_src).map_err(io_err(&archive_src))?;
     Ok(Packed::Converted {

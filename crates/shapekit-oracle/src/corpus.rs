@@ -10,8 +10,12 @@
 //!   from, and the transaction is the one whose XDR in that ledger is byte-equal to the
 //!   variant's bytes, which needs no per-variant hash.
 //!
-//! Every ledger read must also pass the conservation check before its facts are written.
-//! Both need `expected.validity = valid`: an entry core would reject or never emit has no
+//! Every ledger read, at either level, must pass the conservation check
+//! ([`check_ledger`]) before its facts are written: per transaction and per ledger always,
+//! and the fee pool and `totalCoins` step too when the previous header is at hand. A chain
+//! ledger has it (the lake holds the ledger before, except for the chain's first); a lone
+//! `LedgerCloseMeta` entry does not.
+//! Both levels need `expected.validity = valid`: an entry core would reject or never emit has no
 //! applied ledger to describe. Everything else is reported as not eligible, with the reason.
 
 use std::path::{Path, PathBuf};
@@ -21,7 +25,7 @@ use shapekit_manifest::xdr::render_json;
 use shapekit_manifest::{
     Entry, EntryKind, MAINNET_PASSPHRASE, TESTNET_PASSPHRASE, Variant, sha256_hex,
 };
-use stellar_xdr::{LedgerCloseMeta, Limits, WriteXdr};
+use stellar_xdr::{LedgerCloseMeta, LedgerHeader, Limits, WriteXdr};
 
 use crate::conservation::check_ledger;
 use crate::decode::decode_lcm;
@@ -98,6 +102,8 @@ pub fn run(corpus: &Path) -> Result<RunSummary, RunError> {
                     let lcm = decode_lcm(&xdr).map_err(|e| {
                         entry_err(&file, format!("{name}: decoding LedgerCloseMeta: {e}"))
                     })?;
+                    check_ledger(&lcm, &network, None)
+                        .map_err(|e| entry_err(&file, format!("{name}: {e}")))?;
                     interpret_ledger(&lcm, &network)
                         .map_err(|e| entry_err(&file, format!("{name}: {e}")))?
                 }
@@ -106,9 +112,9 @@ pub fn run(corpus: &Path) -> Result<RunSummary, RunError> {
                     ledger_seq,
                     xdr_type,
                 } => {
-                    let lcm = chain_ledger(corpus, chain, name, *ledger_seq)
+                    let (lcm, prev) = chain_ledger(corpus, chain, name, *ledger_seq)
                         .map_err(|m| entry_err(&file, format!("{name}: {m}")))?;
-                    check_ledger(&lcm, &network, None)
+                    check_ledger(&lcm, &network, prev.as_ref())
                         .map_err(|e| entry_err(&file, format!("{name}: {e}")))?;
                     let index = find_tx(&lcm, &network, xdr_type, &xdr)
                         .map_err(|m| entry_err(&file, format!("{name}: {m}")))?;
@@ -266,28 +272,47 @@ fn passphrase_for(
     }
 }
 
+/// Ledger `seq` of a chain, and the header of the ledger before it when the chain has it.
 fn chain_ledger(
     corpus: &Path,
     chain: &str,
     variant: &str,
     seq: u32,
-) -> Result<LedgerCloseMeta, String> {
+) -> Result<(LedgerCloseMeta, Option<LedgerHeader>), String> {
     let path = corpus
         .join(CHAINS_DIR)
         .join(chain)
         .join(variant)
         .join(CHAIN_LAKE);
     let lake = shapekit_pack::Lake::open(&path).map_err(|e| e.to_string())?;
-    let batch = lake
-        .batch_for(seq)
-        .ok_or_else(|| format!("{} has no ledger {seq}", path.display()))?;
-    let batch = lake
-        .read_batch(batch)
-        .map_err(|e| format!("{}: {e}", path.display()))?;
-    let xdr = batch
-        .ledger(seq)
-        .ok_or_else(|| format!("{} has no ledger {seq}", path.display()))?;
-    decode_lcm(xdr).map_err(|e| format!("{} ledger {seq}: {e}", path.display()))
+    let read = |seq: u32| -> Result<Option<LedgerCloseMeta>, String> {
+        let Some(batch) = lake.batch_for(seq) else {
+            return Ok(None);
+        };
+        let batch = lake
+            .read_batch(batch)
+            .map_err(|e| format!("{}: {e}", path.display()))?;
+        let Some(xdr) = batch.ledger(seq) else {
+            return Ok(None);
+        };
+        decode_lcm(xdr)
+            .map(Some)
+            .map_err(|e| format!("{} ledger {seq}: {e}", path.display()))
+    };
+    let lcm = read(seq)?.ok_or_else(|| format!("{} has no ledger {seq}", path.display()))?;
+    let prev = match seq.checked_sub(1) {
+        Some(p) => read(p)?.map(|l| ledger_header(&l).clone()),
+        None => None,
+    };
+    Ok((lcm, prev))
+}
+
+fn ledger_header(lcm: &LedgerCloseMeta) -> &LedgerHeader {
+    match lcm {
+        LedgerCloseMeta::V0(m) => &m.ledger_header.header,
+        LedgerCloseMeta::V1(m) => &m.ledger_header.header,
+        LedgerCloseMeta::V2(m) => &m.ledger_header.header,
+    }
 }
 
 fn find_tx(

@@ -1,9 +1,10 @@
 //! JSON-RPC 2.0 methods, shaped after stellar-rpc (`cmd/stellar-rpc/internal/methods`)
-//! and the request and response types of go-stellar-sdk v0.8.0 `protocols/rpc` (R10).
-//! Error codes and messages follow those sources, so clients that branch on them behave as
-//! they would against stellar-rpc. Where v30.0.0 and v30.0.1 differ (getLedgers with a
-//! cursor at or past the tip), v30.0.1 is followed: it is the current release and the one
-//! the conformance fixtures were captured from.
+//! and the request and response types of go-stellar-sdk `protocols/rpc` (R10). Error codes
+//! and messages follow those sources, so clients that branch on them behave as they would
+//! against stellar-rpc. Where v30.0.0 and v30.0.1 differ (getLedgers and getTransactions
+//! with a cursor at or past the tip), v30.0.1 is followed: it is the current release and
+//! the one the conformance fixtures were captured from. The envelope around the methods
+//! (batches, invalid requests, the response budget) is in [`crate::envelope`].
 
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -23,6 +24,9 @@ pub const INVALID_REQUEST: i64 = -32600;
 pub const METHOD_NOT_FOUND: i64 = -32601;
 pub const INVALID_PARAMS: i64 = -32602;
 pub const INTERNAL_ERROR: i64 = -32603;
+/// jrpc2's code for an error that carries none of its own (`jrpc2.ErrorCode`, code.go in
+/// jrpc2 v1.3.3), which is what stellar-rpc's bridge answers a response that does not fit.
+pub const SYSTEM_ERROR: i64 = -32098;
 
 /// stellar-rpc's defaults for getLedgers and getTransactions.
 pub const MAX_LIMIT: u64 = 200;
@@ -30,6 +34,10 @@ pub const DEFAULT_LIMIT: u64 = 50;
 
 /// `getLedgerEntriesMaxKeys` in stellar-rpc.
 pub const MAX_KEYS: usize = 200;
+
+/// Most ledgers one getTransactions call scans: stellar-rpc's `LedgerScanLimit`
+/// (methods/get_events.go, v30.0.1), which get_transactions.go also caps its walk at.
+pub const LEDGER_SCAN_LIMIT: u32 = 10_000;
 
 const FORMAT_BASE64: &str = "base64";
 const FORMAT_JSON: &str = "json";
@@ -45,6 +53,42 @@ pub struct RpcError {
     pub code: i64,
     pub message: String,
     pub data: Option<Value>,
+}
+
+/// What one call may still add to the answers of its HTTP request: the bytes written since
+/// `total_from` (the start of the request's answers) must stay within `limit`, unless the
+/// call's own answer, from `call_from`, is small (bridge.go exempts those).
+#[derive(Debug, Clone, Copy)]
+pub struct Room {
+    total_from: usize,
+    call_from: usize,
+    limit: usize,
+}
+
+impl Room {
+    pub fn new(total_from: usize, call_from: usize, limit: usize) -> Self {
+        Room {
+            total_from,
+            call_from,
+            limit,
+        }
+    }
+
+    /// Checked as an answer grows, so a call stops one item past the budget instead of
+    /// building its whole answer first.
+    fn check(&self, out: &[u8]) -> Result<(), RpcError> {
+        let call = out.len().saturating_sub(self.call_from);
+        let total = out.len().saturating_sub(self.total_from);
+        if call > crate::envelope::SMALL_RESPONSE_BYTES && total > self.limit {
+            // bridge.go `errResponseTooLarge`, which reaches the client through
+            // jrpc2.ErrorCode as a system error
+            return Err(RpcError::new(
+                SYSTEM_ERROR,
+                "the response is larger than the node may hold; request fewer items",
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl RpcError {
@@ -75,23 +119,30 @@ impl From<serde_json::Error> for RpcError {
     }
 }
 
-/// Handles one request object, appending its response object to `out`. Returns false, with
-/// nothing written, for a notification (a request without an id): every method is read
-/// only, so a notification has no effect to carry out.
-///
-/// The response is text from the start, ledger by ledger and transaction by transaction,
-/// and in the bytes a `serde_json::Value` of it would print: keys sorted, compact.
+/// Handles one request object, appending its answer to `out`, with no response budget.
+/// Returns false, with nothing written, for a notification (a valid request without an id
+/// or with a null id): every method is read only, so a notification has nothing to do.
+/// An invalid request is answered whether or not it has an id, as jrpc2 does.
 pub fn handle(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> bool {
-    let Some(id) = req.get("id") else {
-        return false;
-    };
+    crate::envelope::answer_member(req, out, usize::MAX, |id, req, out, room| {
+        answer(replay, id, req, out, room)
+    })
+}
+
+/// Answers one valid call with id `id`. The answer is text from the start, ledger by ledger
+/// and transaction by transaction, and in the bytes a `serde_json::Value` of it would
+/// print: keys sorted, compact.
+pub(crate) fn answer(replay: &Replay, id: &Value, req: &Value, out: &mut Vec<u8>, room: Room) {
     let mark = out.len();
     // "id" < "jsonrpc" < "result": the result, written last, streams in place
     out.extend_from_slice(b"{\"id\":");
-    let wrote = text::write(out, id).map_err(RpcError::from).and_then(|()| {
-        out.extend_from_slice(b",\"jsonrpc\":\"2.0\",\"result\":");
-        dispatch(replay, req, out)
-    });
+    let wrote = text::write(out, id)
+        .map_err(RpcError::from)
+        .and_then(|()| {
+            out.extend_from_slice(b",\"jsonrpc\":\"2.0\",\"result\":");
+            dispatch(replay, req, out, room)
+        })
+        .and_then(|()| room.check(out));
     match wrote {
         Ok(()) => out.push(b'}'),
         Err(e) => {
@@ -100,7 +151,6 @@ pub fn handle(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> bool {
             text::write(out, &v).expect("an error object of plain values serialises");
         }
     }
-    true
 }
 
 /// A response for a body that is not JSON at all.
@@ -114,13 +164,12 @@ pub fn parse_error(e: &serde_json::Error) -> Value {
 
 /// Writes the result of one request into `out`; on an error `out` holds a partial result
 /// that the caller discards.
-fn dispatch(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> Result<(), RpcError> {
-    if req.get("jsonrpc").and_then(Value::as_str) != Some("2.0") {
-        return Err(RpcError::new(INVALID_REQUEST, "invalid version marker"));
-    }
+fn dispatch(replay: &Replay, req: &Value, out: &mut Vec<u8>, room: Room) -> Result<(), RpcError> {
+    // the envelope already checked the version marker and that a method is a string
     let method = req
         .get("method")
         .and_then(Value::as_str)
+        .filter(|m| !m.is_empty())
         .ok_or_else(|| RpcError::new(INVALID_REQUEST, "empty method name"))?;
     let params = req.get("params").cloned().unwrap_or(Value::Null);
     let small = match method {
@@ -128,10 +177,10 @@ fn dispatch(replay: &Replay, req: &Value, out: &mut Vec<u8>) -> Result<(), RpcEr
         "getNetwork" => get_network(replay),
         "getVersionInfo" => get_version_info(replay),
         "getLatestLedger" => get_latest_ledger(replay),
-        "getLedgers" => return get_ledgers(replay, parse(params)?, out),
-        "getLedgerEntries" => return get_ledger_entries(replay, parse(params)?, out),
+        "getLedgers" => return get_ledgers(replay, parse(params)?, out, room),
+        "getLedgerEntries" => return get_ledger_entries(replay, parse(params)?, out, room),
         "getTransaction" => return get_transaction(replay, parse(params)?, out),
-        "getTransactions" => return get_transactions(replay, parse(params)?, out),
+        "getTransactions" => return get_transactions(replay, parse(params)?, out, room),
         "sendTransaction" => Err(RpcError::new(
             INVALID_REQUEST,
             "shapekit replay server is read-only: it serves recorded ledgers and accepts no transactions",
@@ -199,8 +248,9 @@ fn get_health(replay: &Replay) -> Result<Value, RpcError> {
         "latestLedgerCloseTime": head_time.to_string(),
         "oldestLedger": replay.first,
         "oldestLedgerCloseTime": replay.first_close_time.to_string(),
-        // everything recorded is retained
-        "ledgerRetentionWindow": replay.last - replay.first + 1,
+        // stellar-rpc reports its configured retention; a replay retains every ledger it
+        // has released, and ledgers past the head do not exist yet for a client
+        "ledgerRetentionWindow": head - replay.first + 1,
     }))
 }
 
@@ -308,7 +358,12 @@ fn join(errs: [Result<(), String>; 2]) -> Result<(), String> {
     }
 }
 
-fn get_ledgers(replay: &Replay, req: GetLedgersRequest, out: &mut Vec<u8>) -> Result<(), RpcError> {
+fn get_ledgers(
+    replay: &Replay,
+    req: GetLedgersRequest,
+    out: &mut Vec<u8>,
+    room: Room,
+) -> Result<(), RpcError> {
     let (first, head) = (replay.first, replay.head());
     let as_json = check_format(&req.format);
     join([
@@ -360,6 +415,7 @@ fn get_ledgers(replay: &Replay, req: GetLedgersRequest, out: &mut Vec<u8>) -> Re
             )
         })?;
         ledger_info(&xdr, &lcm, as_json, out)?;
+        room.check(out)?;
     }
     out.push(b']');
     let cursor = if start <= end {
@@ -495,6 +551,7 @@ fn get_ledger_entries(
     replay: &Replay,
     req: GetLedgerEntriesRequest,
     out: &mut Vec<u8>,
+    room: Room,
 ) -> Result<(), RpcError> {
     let as_json = check_format(&req.format).map_err(|m| RpcError::new(INVALID_PARAMS, m))?;
     if req.keys.len() > MAX_KEYS {
@@ -557,6 +614,7 @@ fn get_ledger_entries(
             r.member("liveUntilLedgerSeq", t)?;
         }
         r.end();
+        room.check(out)?;
     }
     out.extend_from_slice(b"],");
     members(out, &[("latestLedger", &head)])?;
@@ -760,17 +818,51 @@ struct GetTransactionsRequest {
     format: Option<String>,
 }
 
-/// Total order id of go-stellar-sdk `toid`: ledger, transaction order, operation order.
-fn toid(ledger: i64, tx: i64, op: i64) -> i64 {
-    (ledger << 32) | (tx << 12) | op
+/// go-stellar-sdk's `toid.ID`: ledger, transaction order and operation order, packed into
+/// one int64 as `ledger << 32 | tx << 12 | op` (toid/main.go).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Toid {
+    ledger: i32,
+    tx: i32,
+    op: i32,
 }
 
+impl Toid {
+    fn new(ledger: i32, tx: i32, op: i32) -> Self {
+        Toid { ledger, tx, op }
+    }
+
+    /// `toid.Parse`: the fields are masked out, so every int64 parses.
+    fn parse(id: i64) -> Self {
+        Toid {
+            ledger: (id >> 32) as i32,
+            tx: ((id >> 12) & 0xF_FFFF) as i32,
+            op: (id & 0xFFF) as i32,
+        }
+    }
+
+    fn to_i64(self) -> i64 {
+        (i64::from(self.ledger) << 32) | (i64::from(self.tx) << 12) | i64::from(self.op)
+    }
+}
+
+/// stellar-rpc v30.0.1 `getTransactionsByLedgerSequence` and `processTransactionsInLedger`
+/// (cmd/stellar-rpc/internal/methods/get_transactions.go), step for step:
+/// - the walk starts after the cursor, or at the first transaction of `startLedger`;
+/// - the cursor is that of the last transaction returned, or `toid(ledger, 0, 1)` of the
+///   last ledger the walk passed without returning anything from it;
+/// - a cursor that would come out lower than the request's own (a caught-up poller, whose
+///   cursor points at or past the tip) is replaced by the request's cursor, so the returned
+///   cursor always fetches what comes next and never re-delivers a transaction;
+/// - the walk stops after [`LEDGER_SCAN_LIMIT`] ledgers or at the head, read once.
 fn get_transactions(
     replay: &Replay,
     req: GetTransactionsRequest,
     out: &mut Vec<u8>,
+    room: Room,
 ) -> Result<(), RpcError> {
     let (first, head) = (replay.first, replay.head());
+    let head_time = replay.close_time(head).map_err(internal)?;
     let as_json = check_format(&req.format);
     join([
         validate_pagination(req.start_ledger, &req.pagination, first, head),
@@ -778,82 +870,94 @@ fn get_transactions(
     ])
     .map_err(|m| RpcError::new(INVALID_REQUEST, m))?;
     let as_json = as_json.expect("joined above");
-    if req.start_ledger > i32::MAX as u32 {
-        return Err(RpcError::new(
-            INVALID_PARAMS,
-            "startLedger exceeds supported range",
-        ));
-    }
-    let mut start_ledger = i64::from(req.start_ledger);
-    let mut start_tx = 1i64;
+
+    // initializePagination
+    let start_ledger = i32::try_from(req.start_ledger)
+        .map_err(|_| RpcError::new(INVALID_PARAMS, "startLedger exceeds supported range"))?;
+    let mut start = Toid::new(start_ledger, 1, 1);
     let mut limit = DEFAULT_LIMIT;
+    let mut request_cursor = None;
     if let Some(p) = &req.pagination {
         if !p.cursor.is_empty() {
             let c: i64 = p
                 .cursor
                 .parse()
                 .map_err(|_| RpcError::new(INVALID_PARAMS, go_parse_int_error(&p.cursor)))?;
-            start_ledger = c >> 32;
-            start_tx = ((c >> 12) & 0xFFFFF) + 1;
+            let parsed = Toid::parse(c);
+            request_cursor = Some(parsed);
+            // the page starts with the transaction right after the cursor
+            start = Toid {
+                tx: parsed.tx + 1,
+                ..parsed
+            };
         }
         if p.limit > 0 {
             limit = p.limit;
         }
     }
+    if start.ledger < 0 {
+        return Err(RpcError::new(
+            INVALID_PARAMS,
+            "cursor ledger sequence cannot be negative",
+        ));
+    }
+    let missing = |seq: u32| {
+        RpcError::new(
+            INVALID_PARAMS,
+            format!("database does not contain metadata for ledger: {seq}"),
+        )
+    };
+
     // "cursor" comes first and is known only once the page is written, so the page is
     // written first and the members before it are put in front after
     let at = out.len();
     out.extend_from_slice(b"\"transactions\":[");
     let mut count = 0u64;
-    let mut cursor = toid(0, 0, 0);
-    let mut seq = start_ledger;
-    while seq <= i64::from(head) {
-        if seq < 0 {
-            return Err(RpcError::new(
-                INVALID_PARAMS,
-                "cursor ledger sequence cannot be negative",
-            ));
+    let mut cursor = Toid::new(0, 0, 0);
+    let scan_from = start.ledger as u32;
+    let scan_to = head.min(scan_from.saturating_add(LEDGER_SCAN_LIMIT - 1));
+    'ledgers: for seq in scan_from..=scan_to {
+        // the store yields nothing below its oldest ledger, which the walk reports as the
+        // first ledger it did not get
+        if seq < first {
+            return Err(missing(scan_from));
         }
-        let s = seq as u32;
-        if s < first {
-            return Err(RpcError::new(
-                INVALID_PARAMS,
-                format!("database does not contain metadata for ledger: {s}"),
-            ));
-        }
-        let (_, lcm) = replay.ledger(s).map_err(internal)?;
+        let (_, lcm) = replay.ledger(seq).map_err(internal)?;
         let close_time = header_entry(&lcm).header.scp_value.close_time.0;
         let view = LedgerView::new(&lcm, &replay.network).map_err(internal)?;
-        let from = if seq == start_ledger { start_tx } else { 1 };
-        cursor = toid(seq, 0, 1);
-        let mut done = false;
-        for i in from..=(view.txs.len() as i64) {
-            cursor = toid(seq, i, 1);
+        // the cursor's transaction offset applies only within the cursor's own ledger
+        let ledger = seq as i32;
+        let from = if ledger == start.ledger { start.tx } else { 1 };
+        cursor = Toid::new(ledger, 0, 1);
+        // a start past the ledger's last transaction yields nothing: a spent cursor
+        let skip = usize::try_from(from - 1).unwrap_or(0);
+        for (i, tx) in view.txs.iter().enumerate().skip(skip) {
+            cursor.tx = i as i32 + 1;
             if count > 0 {
                 out.push(b',');
             }
             let mut d = Object::new(out);
-            tx_details(&view.txs[(i - 1) as usize], s, as_json, &mut d)?;
+            tx_details(tx, seq, as_json, &mut d)?;
             d.member("createdAt", &close_time)?;
             d.end();
+            room.check(out)?;
             count += 1;
             if count >= limit {
-                done = true;
-                break;
+                break 'ledgers;
             }
         }
-        if done {
-            break;
-        }
-        seq += 1;
+    }
+    if let Some(rc) = request_cursor
+        && cursor.to_i64() < rc.to_i64()
+    {
+        cursor = rc;
     }
     out.extend_from_slice(b"]}");
-    let (head, head_time) = latest(replay)?;
     let mut front = b"{".to_vec();
     members(
         &mut front,
         &[
-            ("cursor", &cursor.to_string()),
+            ("cursor", &cursor.to_i64().to_string()),
             ("latestLedger", &head),
             ("latestLedgerCloseTimestamp", &head_time),
             ("oldestLedger", &first),
@@ -863,4 +967,33 @@ fn get_transactions(
     front.push(b',');
     insert(out, at, &front);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn toid_round_trips_every_int64_as_go_does() {
+        for id in [
+            0,
+            1,
+            (64 << 32) | (1 << 12) | 1,
+            -1,
+            i64::MIN,
+            i64::MAX,
+            -(1 << 32),
+        ] {
+            assert_eq!(Toid::parse(id).to_i64(), id, "{id}");
+        }
+        assert_eq!(
+            Toid::parse(274877911041),
+            Toid {
+                ledger: 64,
+                tx: 1,
+                op: 1
+            }
+        );
+        assert!(Toid::parse(-(1 << 32)).ledger < 0);
+    }
 }

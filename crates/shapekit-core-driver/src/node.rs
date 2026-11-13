@@ -77,6 +77,8 @@ pub enum NodeError {
     Rejected { what: String, message: String },
     #[error("unexpected answer to {what}: {body}")]
     Unexpected { what: String, body: String },
+    #[error("core is still booting and answers no command yet")]
+    Booting,
     #[error("decoding {what}: {source}")]
     Xdr {
         what: String,
@@ -219,6 +221,40 @@ struct InfoEnvelope {
     info: CoreInfo,
 }
 
+/// What every http route answers until core has finished starting, with status 200:
+/// `CommandHandler::safeRouter`, src/main/CommandHandler.cpp in stellar-core v30.0.0.
+const BOOTING_ERROR: &str = "Core is booting, try again later";
+
+/// Core's answer to `info`: its state, or the error every route gives while booting, which
+/// is not a failure but a reason to ask again.
+fn parse_info(body: &str) -> Result<CoreInfo, NodeError> {
+    if let Ok(env) = serde_json::from_str::<InfoEnvelope>(body) {
+        return Ok(env.info);
+    }
+    let booting = serde_json::from_str::<serde_json::Value>(body)
+        .ok()
+        .is_some_and(|v| v.get("error").and_then(|e| e.as_str()) == Some(BOOTING_ERROR));
+    if booting {
+        return Err(NodeError::Booting);
+    }
+    Err(NodeError::Unexpected {
+        what: "info".into(),
+        body: body.to_owned(),
+    })
+}
+
+/// Whether `wait_synced` should keep polling after this error rather than give up.
+fn not_up_yet(e: &NodeError) -> bool {
+    // the http server is not listening for the first moments, then it answers but boots
+    matches!(e, NodeError::Http(_) | NodeError::Booting)
+}
+
+/// `docker image inspect` failed: is the image just not pulled, or is docker itself
+/// unreachable or refusing (no daemon, no permission)? Only the first is fixed by a pull.
+fn image_missing(stderr: &str) -> bool {
+    stderr.contains("No such image")
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClosedLedger {
     pub ledger_seq: u32,
@@ -319,11 +355,19 @@ impl CoreNode {
         let user = format!("{}:{}", meta.uid(), meta.gid());
 
         let image = cfg.image.reference();
-        if !docker(&["image", "inspect", "--format", "{{.Id}}", &image])?
-            .status
-            .success()
-        {
-            return Err(NodeError::ImageMissing(image));
+        let args = ["image", "inspect", "--format", "{{.Id}}", &image];
+        let inspected = docker(&args)?;
+        if !inspected.status.success() {
+            let stderr = String::from_utf8_lossy(&inspected.stderr).trim().to_owned();
+            if image_missing(&stderr) {
+                return Err(NodeError::ImageMissing(image));
+            }
+            return Err(NodeError::Docker {
+                args: args.join(" "),
+                code: inspected.status.code(),
+                stderr,
+                stdout: tail(&String::from_utf8_lossy(&inspected.stdout), 40),
+            });
         }
 
         let mut res = DockerResources::default();
@@ -458,8 +502,7 @@ impl CoreNode {
             match self.info() {
                 Ok(info) if info.state == "Synced!" => return Ok(()),
                 Ok(info) => state = info.state,
-                // the http server is not up for the first moments
-                Err(NodeError::Http(e)) => state = e.to_string(),
+                Err(e) if not_up_yet(&e) => state = e.to_string(),
                 Err(e) => return Err(e),
             }
             std::thread::sleep(Duration::from_millis(100));
@@ -472,12 +515,7 @@ impl CoreNode {
     }
 
     pub fn info(&self) -> Result<CoreInfo, NodeError> {
-        let body = self.http.command("info")?;
-        let env: InfoEnvelope = serde_json::from_str(&body).map_err(|_| NodeError::Unexpected {
-            what: "info".into(),
-            body: body.clone(),
-        })?;
-        Ok(env.info)
+        parse_info(&self.http.command("info")?)
     }
 
     /// Closes exactly `ledger_seq` at exactly `close_time`, which must be the
@@ -761,6 +799,15 @@ impl CoreNode {
         }
     }
 
+    /// Stops core, leaving its container and network for [`CoreNode::stop`]
+    /// to remove. Once it returns nothing in the workdir changes any more, so
+    /// files core writes on its own schedule, such as the history archive, can
+    /// be copied without racing a write. The node answers no commands after.
+    pub fn halt(&self) -> Result<(), NodeError> {
+        docker_ok(&["stop", "-t", "20", self.container()])?;
+        Ok(())
+    }
+
     /// Stops core and removes the container and its network. Dropping a
     /// node does the same but can only print failures.
     pub fn stop(mut self) -> Result<(), NodeError> {
@@ -906,6 +953,55 @@ mod tests {
         assert!(checkpoints_through(62).is_empty());
         assert_eq!(checkpoints_through(63), vec![63]);
         assert_eq!(checkpoints_through(200), vec![63, 127, 191]);
+    }
+
+    #[test]
+    fn info_answers_are_classified() {
+        // the exact body core v30.0.0 sends while booting
+        let booting = parse_info(r#"{"error": "Core is booting, try again later"}"#);
+        assert!(matches!(booting, Err(NodeError::Booting)));
+        assert!(not_up_yet(&booting.unwrap_err()));
+
+        let info = parse_info(
+            r#"{"info": {"build": "v30.0.0", "network": "n", "protocol_version": 30,
+            "state": "Joining SCP", "ledger": {"num": 1, "version": 0, "closeTime": 0,
+            "hash": "00", "baseFee": 100, "baseReserve": 100000000, "maxTxSetSize": 100}}}"#,
+        )
+        .unwrap();
+        assert_eq!(info.state, "Joining SCP");
+
+        for other in [
+            r#"{"error": "something else"}"#,
+            r#"{"exception": "Core is booting, try again later"}"#,
+            "Core is booting, try again later",
+            "",
+        ] {
+            let e = parse_info(other).unwrap_err();
+            assert!(matches!(e, NodeError::Unexpected { .. }), "{other}: {e}");
+            assert!(!not_up_yet(&e), "{other}");
+        }
+        let http = NodeError::Http(HttpError::Output {
+            what: "info".into(),
+            output: String::new(),
+        });
+        assert!(not_up_yet(&http));
+    }
+
+    #[test]
+    fn image_inspect_failures_are_told_apart() {
+        // docker 29 wording; older clients print "Error: No such image: ..."
+        assert!(image_missing(
+            "Error response from daemon: No such image: stellar/stellar-core:x"
+        ));
+        assert!(image_missing(
+            "Error: No such image: stellar/stellar-core:x"
+        ));
+        assert!(!image_missing(
+            "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?"
+        ));
+        assert!(!image_missing(
+            "permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock"
+        ));
     }
 
     #[test]

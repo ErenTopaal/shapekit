@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 
+use shapekit_oracle::state::GENESIS_LEDGER_SEQ;
 use shapekit_oracle::view::LedgerView;
 use shapekit_oracle::{LedgerState, Network, decode_lcm};
 use shapekit_pack::archive::{ArchiveIndex, Member, classify};
@@ -105,6 +106,14 @@ impl Replay {
         let lake = open_lake(dir, &chain)?;
         let network = Network::new(&chain.passphrase);
         let (first, last) = (chain.ledger_range.first, chain.ledger_range.last);
+        // the ledger state is rebuilt from genesis, so the chain has to start right after it;
+        // a chain cut from later history would need a seeded state, which no chain needs
+        if first != GENESIS_LEDGER_SEQ + 1 {
+            return Err(ServeError::Chain(format!(
+                "the chain starts at ledger {first}; replay rebuilds state from genesis and needs a chain that starts at ledger {}",
+                GENESIS_LEDGER_SEQ + 1
+            )));
+        }
         let lake_keys = chain
             .lake
             .batches
@@ -226,7 +235,11 @@ impl Replay {
         if state.head_seq().is_some_and(|h| h > head) {
             *state = LedgerState::genesis(&self.network);
         }
-        let from = state.head_seq().map_or(self.first, |h| h + 1);
+        // genesis has a head, and open checked that the chain starts right after it
+        let from = state
+            .head_seq()
+            .expect("a state built from genesis has a head")
+            + 1;
         for seq in from..=head {
             let (_, lcm) = self.ledger(seq)?;
             state

@@ -319,3 +319,42 @@ fn copy_tree(from: &Path, to: &Path) {
         }
     }
 }
+
+/// A ledger-level entry goes through the conservation check too: a ledger whose fee does
+/// not match its balance changes gets no oracle file.
+#[test]
+fn run_checks_conservation_for_ledger_entries() {
+    let mut lcm = decode_lcm(&testnet_lcm("4437357")).unwrap();
+    // the list is rebuilt with the first fee one higher, as a VecM has no mutable access
+    macro_rules! bump_first_fee {
+        ($m:expr) => {{
+            let mut txs = $m.tx_processing.to_vec();
+            txs[0].result.result.fee_charged += 1;
+            $m.tx_processing = txs.try_into().unwrap();
+        }};
+    }
+    match &mut lcm {
+        LedgerCloseMeta::V0(m) => bump_first_fee!(m),
+        LedgerCloseMeta::V1(m) => bump_first_fee!(m),
+        LedgerCloseMeta::V2(m) => bump_first_fee!(m),
+    }
+    let bytes = lcm.to_xdr(Limits::none()).unwrap();
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path();
+    let d = "entries/test.family/test.family.ledger";
+    put(root, &format!("{d}/testnet.xdr"), &bytes);
+    put_entry(
+        root,
+        d,
+        &entry(
+            "test.family.ledger",
+            "LedgerCloseMeta",
+            &format!("{d}/testnet.xdr"),
+            &bytes,
+            source(None, Some(4437357)),
+        ),
+    );
+    let e = run(root).unwrap_err().to_string();
+    assert!(e.contains("feeCharged"), "{e}");
+    assert!(!root.join(format!("{d}/testnet.oracle.json")).exists());
+}

@@ -139,19 +139,34 @@ pub fn bundle_archive(src: &Path, out: &Path) -> Result<Vec<ArchiveFile>, PackEr
     collect_files(src, src, &mut paths)?;
     paths.sort();
     let tmp = out.with_extension("tar.partial");
-    let file = File::create(&tmp).map_err(io_err(&tmp))?;
+    // a failed bundle leaves nothing behind, so a re-run starts clean
+    let written = write_tar(src, &paths, &tmp);
+    if written.is_err() {
+        // the error that matters is the one being returned
+        let _ = std::fs::remove_file(&tmp);
+    }
+    let files = written?;
+    std::fs::rename(&tmp, out).map_err(|e| {
+        let _ = std::fs::remove_file(&tmp);
+        io_err(out)(e)
+    })?;
+    Ok(files)
+}
+
+fn write_tar(src: &Path, paths: &[String], tmp: &Path) -> Result<Vec<ArchiveFile>, PackError> {
+    let file = File::create(tmp).map_err(io_err(tmp))?;
     let mut builder = tar::Builder::new(file);
     let mut files = Vec::with_capacity(paths.len());
     for rel in paths {
-        if classify(&rel).is_none() {
+        if classify(rel).is_none() {
             return Err(PackError::Format(format!(
                 "{rel} in {} is not part of a history archive",
                 src.display()
             )));
         }
-        let full = src.join(&rel);
+        let full = src.join(rel);
         let bytes = std::fs::read(&full).map_err(io_err(&full))?;
-        let (sha256, gzip) = sha_of(&rel, &bytes)?;
+        let (sha256, gzip) = sha_of(rel, &bytes)?;
         let mut header = tar::Header::new_ustar();
         header.set_entry_type(tar::EntryType::Regular);
         header.set_size(bytes.len() as u64);
@@ -160,18 +175,17 @@ pub fn bundle_archive(src: &Path, out: &Path) -> Result<Vec<ArchiveFile>, PackEr
         header.set_uid(0);
         header.set_gid(0);
         builder
-            .append_data(&mut header, &rel, bytes.as_slice())
-            .map_err(io_err(&tmp))?;
+            .append_data(&mut header, rel, bytes.as_slice())
+            .map_err(io_err(tmp))?;
         files.push(ArchiveFile {
-            path: rel,
+            path: rel.clone(),
             sha256,
             gzip,
         });
     }
-    let mut file = builder.into_inner().map_err(io_err(&tmp))?;
-    file.flush().map_err(io_err(&tmp))?;
-    file.sync_all().map_err(io_err(&tmp))?;
-    std::fs::rename(&tmp, out).map_err(io_err(out))?;
+    let mut file = builder.into_inner().map_err(io_err(tmp))?;
+    file.flush().map_err(io_err(tmp))?;
+    file.sync_all().map_err(io_err(tmp))?;
     Ok(files)
 }
 

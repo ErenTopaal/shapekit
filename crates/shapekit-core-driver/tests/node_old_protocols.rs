@@ -1,12 +1,12 @@
 //! What stellar-core 30.0.0 does on fresh standalone networks below protocol
 //! 13: the driver must submit v0 envelopes there and find them in the meta by
 //! hash, and protocol 1 is probed for ManageData, which core answers
-//! MANAGE_DATA_NOT_SUPPORTED_YET for only before protocol 2. Needs docker and
-//! `SHAPEKIT_DOCKER_TESTS=1`.
+//! MANAGE_DATA_NOT_SUPPORTED_YET for only before protocol 2. Needs docker, so
+//! the tests are ignored by default; run with `--include-ignored`.
 
 mod node_support;
 
-use node_support::{TESTNET, config, enabled};
+use node_support::{TESTNET, config};
 use shapekit_core_driver::chain::{ChainDriver, ChainError};
 use shapekit_core_driver::keys::{account_id, derive_key, muxed_account, root_key};
 use shapekit_core_driver::node::SubmitStatus;
@@ -27,10 +27,8 @@ fn old_config(protocol: u32) -> shapekit_core_driver::config::NodeConfig {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn v0_envelopes_apply_below_protocol_13() {
-    if !enabled("v0_envelopes_apply_below_protocol_13") {
-        return;
-    }
     for protocol in [11, 12] {
         let dir = tempfile::tempdir().unwrap();
         let mut chain = ChainDriver::start(old_config(protocol), dir.path()).expect("start");
@@ -90,10 +88,8 @@ fn v0_envelopes_apply_below_protocol_13() {
 /// Upgrading a fresh network to protocol 1 and submitting ManageData there.
 /// The answer is printed and asserted as core gives it.
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn protocol_1_manage_data() {
-    if !enabled("protocol_1_manage_data") {
-        return;
-    }
     let dir = tempfile::tempdir().unwrap();
     let mut chain = ChainDriver::start(old_config(1), dir.path()).expect("start at protocol 1");
     let root = root_key(TESTNET);

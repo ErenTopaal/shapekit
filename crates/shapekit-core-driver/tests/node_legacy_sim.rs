@@ -2,7 +2,7 @@
 //! protocols 22, 24 and 28 every Soroban transaction here is priced by the
 //! matching older soroban-simulation (`sim_legacy`) and must then be applied
 //! by core 30.0.0 with txSUCCESS, or be refused exactly where the protocol
-//! says so. Needs docker and `SHAPEKIT_DOCKER_TESTS=1`.
+//! says so. Needs docker, so it is ignored by default; run with `--include-ignored`.
 //!
 //! Per protocol: echo built with the older soroban-sdk (upload, deploy,
 //! invoke), the XLM SAC deployed from its asset and a SAC transfer. At 28
@@ -13,7 +13,7 @@
 mod node_support;
 
 use ed25519_dalek::SigningKey;
-use node_support::{TESTNET, config, enabled};
+use node_support::{TESTNET, config};
 use sha2::{Digest, Sha256};
 use shapekit_core_driver::chain::{Applied, ChainDriver, ChainError};
 use shapekit_core_driver::contracts::{echo_wasm_for, interface_protocol};
@@ -383,10 +383,8 @@ fn run(protocol: u32) -> Outcome {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn legacy_simulation_is_accepted_by_core() {
-    if !enabled("legacy_simulation_is_accepted_by_core") {
-        return;
-    }
     for (protocol, interface) in [(22, 22), (24, 23), (28, 28)] {
         let o = run(protocol);
         eprintln!("{o:#?}");

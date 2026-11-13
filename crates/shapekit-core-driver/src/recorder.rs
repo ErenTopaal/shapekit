@@ -19,7 +19,7 @@ use sha2::{Digest, Sha256};
 
 use stellar_xdr::{Limits, WriteXdr};
 
-use crate::canonical::{canonicalize_lcm, permutation_equal};
+use crate::canonical::{canonicalize_lcm, change_multisets, per_key_sequences, permutation_equal};
 use crate::config::{CHAIN_EPOCH, CLOSE_STEP, CoreImage, node_public_key};
 use crate::keys::network_id;
 use crate::meta::{FramedLcm, MetaError, MetaStream};
@@ -67,6 +67,16 @@ pub enum RecorderError {
     },
     #[error("ledger {0}: canonical meta is not a permutation of core's meta")]
     NotPermutation(u32),
+    #[error("ledger {0}: canonical meta reorders the changes of one ledger key")]
+    KeyOrder(u32),
+    #[error(
+        "the archive holds checkpoints {found:?}, but the ledgers through {last} need exactly {expected:?}"
+    )]
+    Checkpoints {
+        last: u32,
+        expected: Vec<u32>,
+        found: Vec<u32>,
+    },
 }
 
 fn io(path: &Path) -> impl FnOnce(std::io::Error) -> RecorderError + '_ {
@@ -97,7 +107,7 @@ pub struct CanonicalLcm {
     pub meta: stellar_xdr::LedgerCloseMeta,
 }
 
-/// Canonical form of a recorded frame, checked to be a permutation of it.
+/// Canonical form of a recorded frame, checked against it by [`check_canonical`].
 pub fn canonical_frame(f: &FramedLcm) -> Result<CanonicalLcm, RecorderError> {
     let err = |source| RecorderError::Canonical {
         ledger_seq: f.ledger_seq,
@@ -105,9 +115,7 @@ pub fn canonical_frame(f: &FramedLcm) -> Result<CanonicalLcm, RecorderError> {
     };
     let mut meta = f.meta.clone();
     canonicalize_lcm(&mut meta).map_err(err)?;
-    if !permutation_equal(&f.meta, &meta).map_err(err)? {
-        return Err(RecorderError::NotPermutation(f.ledger_seq));
-    }
+    check_canonical(f.ledger_seq, &f.meta, &meta)?;
     let xdr = meta.to_xdr(Limits::none()).map_err(err)?;
     if xdr.len() != f.xdr.len() {
         return Err(RecorderError::NotPermutation(f.ledger_seq));
@@ -117,6 +125,29 @@ pub fn canonical_frame(f: &FramedLcm) -> Result<CanonicalLcm, RecorderError> {
         xdr,
         meta,
     })
+}
+
+/// Checks a canonical LCM against core's raw one: the same changes in every list, and each
+/// key's changes in core's order. The second check does not go through
+/// [`canonicalize_lcm`], so it also catches that function reordering one key's changes,
+/// which [`permutation_equal`] (it canonicalizes both sides) cannot.
+pub fn check_canonical(
+    ledger_seq: u32,
+    raw: &stellar_xdr::LedgerCloseMeta,
+    canonical: &stellar_xdr::LedgerCloseMeta,
+) -> Result<(), RecorderError> {
+    let err = |source| RecorderError::Canonical { ledger_seq, source };
+    // the same changes first, so a key order failure below means order and nothing else
+    if change_multisets(raw).map_err(err)? != change_multisets(canonical).map_err(err)? {
+        return Err(RecorderError::NotPermutation(ledger_seq));
+    }
+    if per_key_sequences(raw) != per_key_sequences(canonical) {
+        return Err(RecorderError::KeyOrder(ledger_seq));
+    }
+    if !permutation_equal(raw, canonical).map_err(err)? {
+        return Err(RecorderError::NotPermutation(ledger_seq));
+    }
+    Ok(())
 }
 
 /// Frames `values` with single-fragment record marking, as core does. Every
@@ -221,7 +252,11 @@ impl ChainRecorder {
 
     /// Writes the chain into `target`, which must not exist yet: the framed
     /// stream, a copy of the history archive once every checkpoint up to the
-    /// last recorded ledger is published, and `chain.json`.
+    /// last recorded ledger is published, and `chain.json`. Halts core before
+    /// copying the archive, so nothing can write to it during the copy, and
+    /// checks that the copy holds exactly the checkpoints the ledgers need. The
+    /// node takes no more commands afterwards; the caller still stops it to
+    /// remove its container and network.
     pub fn finish(mut self, node: &CoreNode, target: &Path) -> Result<ChainSummary, RecorderError> {
         for f in self.stream.drain()? {
             self.push(f)?;
@@ -253,9 +288,17 @@ impl ChainRecorder {
         let canonical_path = target.join(CANONICAL_STREAM_FILE);
         std::fs::write(&canonical_path, &canonical_stream).map_err(io(&canonical_path))?;
 
+        node.halt()?;
         let archive = target.join(ARCHIVE_DIR);
         copy_dir(&node.history_dir(), &archive)?;
         let checkpoints = archive_checkpoints(&archive)?;
+        if checkpoints != expected_checkpoints {
+            return Err(RecorderError::Checkpoints {
+                last,
+                expected: expected_checkpoints,
+                found: checkpoints,
+            });
+        }
 
         let cfg = node.config();
         let summary = ChainSummary {

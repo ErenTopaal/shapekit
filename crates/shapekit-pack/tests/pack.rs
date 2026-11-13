@@ -122,6 +122,80 @@ fn repacking_reproduces_the_committed_bytes() {
     }
 }
 
+/// Every file under `dir`, relative, sorted: what a failed pack must leave unchanged.
+fn listing(dir: &Path) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(d) = stack.pop() {
+        for e in std::fs::read_dir(&d).unwrap() {
+            let p = e.unwrap().path();
+            if p.is_dir() {
+                stack.push(p.clone());
+            }
+            out.push(p.strip_prefix(dir).unwrap().display().to_string());
+        }
+    }
+    out.sort();
+    out
+}
+
+/// A pack that fails after writing its outputs (here: chain.json lists a checkpoint the
+/// archive lacks, found once the lake and the tar are written) removes them again, so the
+/// same command succeeds once the input is right.
+#[test]
+fn a_failed_pack_cleans_up_and_a_rerun_works() {
+    let committed = fixture();
+    let chain = ChainFile::read(&committed).unwrap();
+    let tmp = tempfile::tempdir().unwrap();
+    let work = tmp.path().join("chain");
+    unpack(&committed, &work);
+    let good = std::fs::read(work.join(CHAIN_FILE)).unwrap();
+    let mut v: serde_json::Value = serde_json::from_slice(&good).unwrap();
+    v["checkpoints"].as_array_mut().unwrap().push(9_999.into());
+    std::fs::write(
+        work.join(CHAIN_FILE),
+        serde_json::to_vec_pretty(&v).unwrap(),
+    )
+    .unwrap();
+    let before = listing(&work);
+
+    for _ in 0..2 {
+        let e = pack_chain(&work, chain.layout().unwrap()).unwrap_err();
+        assert!(e.to_string().contains("checkpoint 9999"), "{e}");
+        assert_eq!(listing(&work), before, "a failed pack left files behind");
+    }
+
+    std::fs::write(work.join(CHAIN_FILE), &good).unwrap();
+    assert!(matches!(
+        pack_chain(&work, chain.layout().unwrap()).unwrap(),
+        Packed::Converted { .. }
+    ));
+    assert!(verify_chain(&work).unwrap().is_empty());
+    assert_eq!(
+        std::fs::read(work.join("archive.tar")).unwrap(),
+        std::fs::read(committed.join("archive.tar")).unwrap()
+    );
+}
+
+/// Outputs nobody's pack left (a schema 1 chain is not packed yet) are never overwritten.
+#[test]
+fn pack_refuses_foreign_outputs() {
+    let committed = fixture();
+    let chain = ChainFile::read(&committed).unwrap();
+    let tmp = tempfile::tempdir().unwrap();
+    let work = tmp.path().join("chain");
+    unpack(&committed, &work);
+    std::fs::write(work.join("archive.tar"), b"not mine").unwrap();
+    let e = pack_chain(&work, chain.layout().unwrap()).unwrap_err();
+    assert!(e.to_string().contains("already exists"), "{e}");
+    assert_eq!(
+        std::fs::read(work.join("archive.tar")).unwrap(),
+        b"not mine"
+    );
+    assert!(!work.join(LEDGERS_DIR).exists());
+    assert!(!work.join(".ledgers.partial").exists());
+}
+
 #[test]
 fn config_is_what_galexie_writes() {
     let cfg = std::fs::read_to_string(fixture().join(LEDGERS_DIR).join(CONFIG_FILE)).unwrap();

@@ -10,17 +10,6 @@ use shapekit_core_driver::config::{CoreImage, NodeConfig};
 pub const TESTNET: &str = "Test SDF Network ; September 2015";
 pub const MAINNET: &str = "Public Global Stellar Network ; September 2015";
 
-/// The tests need docker and the pinned core image, so they only run when
-/// asked to. Returning early keeps `cargo test` usable on machines without
-/// docker; the skip is printed so it never passes unnoticed.
-pub fn enabled(test: &str) -> bool {
-    let on = std::env::var("SHAPEKIT_DOCKER_TESTS").as_deref() == Ok("1");
-    if !on {
-        eprintln!("{test}: skipped, set SHAPEKIT_DOCKER_TESTS=1 to run against docker");
-    }
-    on
-}
-
 pub fn pins_path() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml")
 }

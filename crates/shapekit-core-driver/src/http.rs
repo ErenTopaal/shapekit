@@ -32,7 +32,7 @@ pub enum HttpError {
         code: Option<i32>,
         stderr: String,
     },
-    #[error("unparseable curl output for {what}: {output:?}")]
+    #[error("unparseable output of the in-container http client for {what}: {output:?}")]
     Output { what: String, output: String },
     #[error("core answered {what} with http {status}: {body}")]
     Status {

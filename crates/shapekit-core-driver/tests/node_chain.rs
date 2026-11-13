@@ -1,11 +1,11 @@
-//! Chain recording against the pinned stellar-core image. Needs docker and
-//! `SHAPEKIT_DOCKER_TESTS=1`.
+//! Chain recording against the pinned stellar-core image. Needs docker, so
+//! the tests are ignored by default; run with `--include-ignored`.
 
 mod node_support;
 
 use std::path::{Path, PathBuf};
 
-use node_support::{MAINNET, TESTNET, config, docker_object_exists, enabled};
+use node_support::{MAINNET, TESTNET, config, docker_object_exists};
 use shapekit_core_driver::canonical::permutation_equal;
 use shapekit_core_driver::config::close_time;
 use shapekit_core_driver::meta::{FramedLcm, read_all};
@@ -85,10 +85,8 @@ fn header(f: &FramedLcm) -> &stellar_xdr::LedgerHeader {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn node_chain_is_byte_reproducible_per_passphrase() {
-    if !enabled("node_chain_is_byte_reproducible_per_passphrase") {
-        return;
-    }
     let tmp = tempfile::tempdir().unwrap();
     let mut runs = Vec::new();
     for (i, p) in [TESTNET, TESTNET, MAINNET, MAINNET].iter().enumerate() {
@@ -153,10 +151,8 @@ fn node_chain_is_byte_reproducible_per_passphrase() {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn node_chain_publishes_first_checkpoint() {
-    if !enabled("node_chain_publishes_first_checkpoint") {
-        return;
-    }
     let tmp = tempfile::tempdir().unwrap();
     let (summary, frames, _) = record(TESTNET, 30, 63, tmp.path());
     assert_eq!(summary.checkpoints, vec![63]);
@@ -170,10 +166,8 @@ fn node_chain_publishes_first_checkpoint() {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn node_runs_older_protocols() {
-    if !enabled("node_runs_older_protocols") {
-        return;
-    }
     for protocol in [22, 24, 26, 28] {
         let tmp = tempfile::tempdir().unwrap();
         let (summary, frames, _) = record(TESTNET, protocol, FIRST_LEDGER + 3, tmp.path());

@@ -27,6 +27,12 @@ pub const ZSTD_LEVEL: i32 = 19;
 /// Decompressed batches above this are treated as corrupt rather than read into memory.
 pub const MAX_BATCH_LEN: u64 = 1 << 30;
 
+/// A lower bound on the XDR size of one `LedgerCloseMeta`: its 4 byte arm, then the
+/// `LedgerHeaderHistoryEntry` every arm starts with, whose fixed fields alone are 360 bytes
+/// (hash 32, header 324, ext 4). A batch header claiming more ledgers than its bytes can
+/// hold at this size is corrupt.
+pub const MIN_LCM_LEN: usize = 364;
+
 /// The zstd library the batches are compressed with, as `major.minor.patch`.
 pub fn zstd_library() -> &'static str {
     zstd::zstd_safe::version_string()
@@ -245,6 +251,14 @@ impl Batch {
         if end < start || u64::from(count) != u64::from(end - start) + 1 {
             return Err(bad(format!(
                 "holds {count} ledgers for the range {start} to {end}"
+            )));
+        }
+        // the count is untrusted: bound it by what the bytes can hold before reserving
+        let room = (data.len() - 12) / MIN_LCM_LEN;
+        if count as usize > room {
+            return Err(bad(format!(
+                "claims {count} ledgers, but its {} bytes hold at most {room}",
+                data.len()
             )));
         }
         let mut spans = Vec::with_capacity(count as usize);
@@ -523,4 +537,56 @@ pub fn lake_digest(dir: &Path) -> Result<String, PackError> {
         h.update(Sha256::digest(std::fs::read(&p).map_err(io_err(&p))?));
     }
     Ok(hex::encode(h.finalize()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use stellar_xdr::{LedgerCloseMetaV0, LedgerCloseMetaV1, LedgerCloseMetaV2, WriteXdr};
+
+    #[test]
+    fn min_lcm_len_is_a_lower_bound() {
+        // the defaults hold every field at its smallest: empty vectors, first union arms
+        for lcm in [
+            LedgerCloseMeta::V0(LedgerCloseMetaV0::default()),
+            LedgerCloseMeta::V1(LedgerCloseMetaV1::default()),
+            LedgerCloseMeta::V2(LedgerCloseMetaV2::default()),
+        ] {
+            let len = lcm.to_xdr(Limits::none()).unwrap().len();
+            assert!(len >= MIN_LCM_LEN, "{len} < {MIN_LCM_LEN}");
+        }
+    }
+
+    #[test]
+    fn a_corrupt_count_is_an_error_not_an_allocation() {
+        // u32::MAX ledgers would reserve 64 GiB of spans if the count were trusted
+        let mut data = Vec::new();
+        data.extend(0u32.to_be_bytes());
+        data.extend((u32::MAX - 1).to_be_bytes());
+        data.extend(u32::MAX.to_be_bytes());
+        data.extend([0u8; 4096]);
+        let e = Batch::parse(data).unwrap_err().to_string();
+        assert!(e.contains("hold at most 11"), "{e}");
+    }
+
+    #[test]
+    fn a_count_the_bytes_can_hold_still_parses() {
+        let lcm = LedgerCloseMeta::V0(LedgerCloseMetaV0 {
+            ledger_header: stellar_xdr::LedgerHeaderHistoryEntry {
+                header: stellar_xdr::LedgerHeader {
+                    ledger_seq: 5,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        let mut data = Vec::new();
+        data.extend(5u32.to_be_bytes());
+        data.extend(5u32.to_be_bytes());
+        data.extend(1u32.to_be_bytes());
+        data.extend(lcm.to_xdr(Limits::none()).unwrap());
+        let b = Batch::parse(data).unwrap();
+        assert_eq!((b.start, b.end), (5, 5));
+    }
 }

@@ -1,7 +1,7 @@
 //! Whether stellar-core 30.0.0 applies Soroban upload, deploy and invoke on
-//! fresh standalone networks at protocols 22, 24, 26 and 28 (the plan's
-//! phase 3 blocker), and what happens to this repository's own contracts
-//! there. Needs docker and `SHAPEKIT_DOCKER_TESTS=1`.
+//! fresh standalone networks at protocols 22, 24, 26 and 28, and what
+//! happens to this repository's own contracts there. Needs docker, so the
+//! tests are ignored by default; run with `--include-ignored`.
 //!
 //! The repository's contracts are built with soroban-sdk 29, which writes
 //! interface protocol 29 into `contractenvmetav0`. soroban-env-host refuses
@@ -13,7 +13,7 @@
 
 mod node_support;
 
-use node_support::{TESTNET, config, enabled};
+use node_support::{TESTNET, config};
 use sha2::{Digest, Sha256};
 use shapekit_core_driver::chain::{ChainDriver, ChainError};
 use shapekit_core_driver::contracts::{
@@ -305,10 +305,8 @@ fn run(protocol: u32) -> Outcome {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn soroban_on_older_protocols() {
-    if !enabled("soroban_on_older_protocols") {
-        return;
-    }
     assert_eq!(
         interface_protocol(ECHO_WASM),
         Some(CONTRACTS_INTERFACE_PROTOCOL)

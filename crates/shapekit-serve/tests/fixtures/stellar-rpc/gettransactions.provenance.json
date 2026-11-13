@@ -1,0 +1,15 @@
+{
+  "fixture": "gettransactions.json",
+  "fixture_sha256": "5cf5350fb1b8a2f27832c940b52b8c6e52fad5809233aa18e722abbd656b5810",
+  "source": "https://soroban-testnet.stellar.org",
+  "network": "testnet",
+  "captured_at": "2026-11-13T03:29:51Z",
+  "server_version": "30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d",
+  "capture_tool": "capture_transactions.py in this directory, run once as `python3 -I capture_transactions.py https://soroban-testnet.stellar.org .`",
+  "notes": [
+    "walk follows the cursor each getTransactions page returned, 12 pages of 3 from latestLedger - 40, so it records where a real server puts its cursor (the last transaction returned, as toid(ledger, applicationOrder, 1)) and how a page that ends on a ledger's last transaction continues at the next ledger's first",
+    "testnet closes ledgers with many transactions, so the walk does not reach the tip; cursor-past-tip and cursor-past-tip-mid-ledger show what a caught-up poller gets instead: an empty page with its own cursor echoed (get_transactions.go in stellar-rpc v30.0.1, the requestCursor comparison)",
+    "transactions are summarised to ledger, applicationOrder and txHash plus each page's key sets; error answers are kept whole; response_sha256 is the hash of each raw response body",
+    "envelopes are raw bodies posted as written, to record how the server treats the json-rpc envelope itself (scalars, empty and oversized batches, invalid members, notifications); a getNetwork result is reduced to its keys"
+  ]
+}

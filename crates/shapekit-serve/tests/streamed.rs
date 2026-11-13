@@ -255,15 +255,30 @@ fn errors_and_notifications() {
         &mut out
     ));
     assert!(out.is_empty());
+    // a null id is a notification too, as jrpc2 treats it
+    assert!(!rpc::handle(
+        &replay,
+        &json!({"jsonrpc": "2.0", "id": null, "method": "getHealth"}),
+        &mut out
+    ));
+    assert!(out.is_empty());
     // an error answer carries the request id, its keys sorted like every other object
-    let req = json!({"jsonrpc": "2.0", "id": {"z": 1, "a": 2}, "method": "getLedgers",
+    let req = json!({"jsonrpc": "2.0", "id": "a<\"b", "method": "getLedgers",
         "params": {"pagination": {"cursor": "0"}}});
     assert!(rpc::handle(&replay, &req, &mut out));
-    let text = String::from_utf8(out).unwrap();
+    let text = String::from_utf8(std::mem::take(&mut out)).unwrap();
     assert_eq!(parse(&text).to_string(), text);
     assert!(text.starts_with(r#"{"error":{"code":-32602,"#), "{text}");
-    assert!(
-        text.ends_with(r#""id":{"a":2,"z":1},"jsonrpc":"2.0"}"#),
-        "{text}"
-    );
+    assert!(text.ends_with(r#""id":"a<\"b","jsonrpc":"2.0"}"#), "{text}");
+    // an id that is neither a string nor a number makes the request invalid (jrpc2), and an
+    // invalid request is answered even without an id, with a null one
+    for req in [
+        json!({"jsonrpc": "2.0", "id": {"z": 1, "a": 2}, "method": "getHealth"}),
+        json!({"jsonrpc": "1.0", "method": "getHealth"}),
+    ] {
+        assert!(rpc::handle(&replay, &req, &mut out));
+        let v = parse(&String::from_utf8(std::mem::take(&mut out)).unwrap());
+        assert_eq!(v["id"], Value::Null, "{req}");
+        assert_eq!(v["error"]["code"], -32600, "{req}");
+    }
 }

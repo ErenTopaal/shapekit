@@ -1,12 +1,12 @@
-//! The plan's phase 3 smoke chain against the pinned stellar-core image.
-//! Needs docker and `SHAPEKIT_DOCKER_TESTS=1`.
+//! The smoke chain against the pinned stellar-core image. Needs docker, so
+//! the tests are ignored by default; run with `--include-ignored`.
 
 mod node_support;
 
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use node_support::{MAINNET, TESTNET, enabled, pins_path};
+use node_support::{MAINNET, TESTNET, pins_path};
 use shapekit_core_driver::canonical::permutation_equal;
 use shapekit_core_driver::chain::upgrades;
 use shapekit_core_driver::config::{CoreImage, close_time};
@@ -216,10 +216,8 @@ fn assert_same_bytes(name: &str, a: &Run, b: &Run) -> Vec<u32> {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn smoke_chain_is_reproducible_and_network_independent_in_shape() {
-    if !enabled("smoke_chain_is_reproducible_and_network_independent_in_shape") {
-        return;
-    }
     let tmp = tempfile::tempdir().unwrap();
     let mut runs = Vec::new();
     for (i, p) in [TESTNET, TESTNET, MAINNET, MAINNET].iter().enumerate() {
@@ -303,10 +301,8 @@ fn has_timing_event(meta: &TransactionMeta) -> bool {
 /// Why chains run with diagnostic events off: core then reports the wall
 /// clock time of each host invocation in the meta.
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn diagnostic_events_carry_wall_clock_timing() {
-    if !enabled("diagnostic_events_carry_wall_clock_timing") {
-        return;
-    }
     let tmp = tempfile::tempdir().unwrap();
     let r = run(TESTNET, true, tmp.path());
     let last = r.canonical.last().unwrap();

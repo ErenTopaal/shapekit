@@ -22,7 +22,7 @@ use shapekit_manifest::{
     TESTNET_PASSPHRASE, Validity, Variant, Variants, decode_limits, fragment_matches,
     roundtrip_check, sha256_hex, shape_signature,
 };
-use shapekit_pack::lake::Batch;
+use shapekit_pack::lake::{Batch, MAX_BATCH_LEN};
 use shapekit_registry::{Registry, SourceClass};
 use stellar_xdr::{
     GeneralizedTransactionSet, LedgerCloseMeta, Limits, ReadXdr, StellarValueExt,
@@ -37,7 +37,8 @@ pub const PUBNET_LAKE_PREFIX: &str = "v1.1/stellar/ledgers/pubnet";
 pub const TESTNET_LAKE_ROOT: &str = "v1.1/stellar/ledgers/testnet";
 pub const TESTNET_RPC: &str = "https://soroban-testnet.stellar.org";
 pub const LAKE_PATH: &str = "sep-54 public data lake";
-// a lake object holds ledgersPerBatch ledgers; pubnet ledgers stay well below this
+// a lake object holds ledgersPerBatch ledgers; pubnet ledgers stay well below this. it
+// also bounds a getLedgers reply, which carries one ledger as base64
 const MAX_OBJECT: u64 = 512 << 20;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -221,8 +222,7 @@ pub fn fetch_lake(
     let url = format!("{LAKE_ENDPOINT}/{prefix}/{}", lake_object_key(&cfg, seq)?);
     let compressed = get(client, &url)?
         .with_context(|| format!("ledger {seq} is not in the lake ({url} does not exist)"))?;
-    let raw = zstd::stream::decode_all(compressed.as_slice())
-        .with_context(|| format!("decompressing {url}"))?;
+    let raw = decompress_capped(&compressed, MAX_BATCH_LEN, &url)?;
     // each ledger is decoded on its own at xdr.meta.depth: decoded whole, the batch's struct
     // and vector spend two more levels above every ledger
     let batch =
@@ -244,6 +244,22 @@ pub fn fetch_lake(
     })
 }
 
+/// Decompresses a downloaded zstd object, failing once it passes `limit` bytes: the frame
+/// header's content size is the server's claim, so it is neither trusted nor needed.
+fn decompress_capped(compressed: &[u8], limit: u64, what: &str) -> Result<Vec<u8>> {
+    let mut out = Vec::new();
+    zstd::stream::Decoder::new(compressed)
+        .with_context(|| format!("decompressing {what}"))?
+        .take(limit + 1)
+        .read_to_end(&mut out)
+        .with_context(|| format!("decompressing {what}"))?;
+    ensure!(
+        out.len() as u64 <= limit,
+        "{what} decompresses to more than {limit} bytes"
+    );
+    Ok(out)
+}
+
 /// Fetches ledger `seq` through stellar-rpc `getLedgers`.
 pub fn fetch_rpc(client: &reqwest::blocking::Client, rpc: &str, seq: u32) -> Result<Fetched> {
     let request = serde_json::json!({
@@ -252,16 +268,23 @@ pub fn fetch_rpc(client: &reqwest::blocking::Client, rpc: &str, seq: u32) -> Res
         "method": "getLedgers",
         "params": {"startLedger": seq, "pagination": {"limit": 1}, "xdrFormat": "base64"},
     });
-    let body = client
+    let resp = client
         .post(rpc)
         .header(reqwest::header::CONTENT_TYPE, "application/json")
         .body(serde_json::to_vec(&request)?)
         .send()
         .with_context(|| format!("getLedgers on {rpc}"))?
         .error_for_status()
-        .with_context(|| format!("getLedgers on {rpc}"))?
-        .bytes()
+        .with_context(|| format!("getLedgers on {rpc}"))?;
+    // the url is the caller's, so the reply is untrusted: read no more than one ledger needs
+    let mut body = Vec::new();
+    resp.take(MAX_OBJECT + 1)
+        .read_to_end(&mut body)
         .with_context(|| format!("reading the getLedgers reply from {rpc}"))?;
+    ensure!(
+        body.len() as u64 <= MAX_OBJECT,
+        "the getLedgers reply from {rpc} is larger than {MAX_OBJECT} bytes"
+    );
     let resp: serde_json::Value = serde_json::from_slice(&body)
         .with_context(|| format!("parsing the getLedgers reply from {rpc}"))?;
     if let Some(err) = resp.get("error") {
@@ -681,6 +704,18 @@ mod tests {
         let mut flat = cfg();
         flat.batches_per_partition = 1;
         assert_eq!(lake_object_key(&flat, 7).unwrap(), "FFFFFFF8--7.xdr.zst");
+    }
+
+    #[test]
+    fn decompression_stops_at_the_cap() {
+        let raw = vec![7u8; 1 << 20];
+        let small = zstd::bulk::compress(&raw, 3).unwrap();
+        // a megabyte of one byte compresses to a few hundred: the ratio a bomb exploits
+        assert!(small.len() < 4096);
+        assert_eq!(decompress_capped(&small, 1 << 20, "x").unwrap(), raw);
+        let e = decompress_capped(&small, (1 << 20) - 1, "x").unwrap_err();
+        assert!(e.to_string().contains("more than"), "{e}");
+        assert!(decompress_capped(b"not zstd", 1 << 20, "x").is_err());
     }
 
     #[test]

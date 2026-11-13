@@ -1,7 +1,9 @@
 //! `shapekit serve`: replays one recorded chain over HTTP.
 //!
 //! Routes:
-//! - `POST /` and `POST /rpc`: JSON-RPC 2.0, the read methods of stellar-rpc (see [`rpc`]).
+//! - `POST /` and `POST /rpc`: JSON-RPC 2.0, the read methods of stellar-rpc (see [`rpc`]),
+//!   in stellar-rpc's envelope: at most [`MAX_BATCH_LEN`] calls per batch and at most
+//!   [`MAX_RESPONSE_BYTES`] of answers per request (see [`envelope`]).
 //! - `GET /ledgers/<key>`: the chain's SEP-54 lake, `.config.json` and every batch whose
 //!   ledgers are all at or below the visible head.
 //! - `GET /archive/<path>`: the history archive as it stood at the newest checkpoint at or
@@ -12,6 +14,7 @@
 //! Every answer comes from the recorded chain. Ledgers are read from the lake on demand
 //! through a cache bounded in bytes.
 
+pub mod envelope;
 mod json;
 pub mod replay;
 pub mod rpc;
@@ -28,6 +31,7 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use serde_json::{Value, json};
 
+pub use crate::envelope::{MAX_BATCH_LEN, MAX_RESPONSE_BYTES};
 pub use crate::replay::DEFAULT_CACHE_BYTES;
 use crate::replay::Replay;
 
@@ -76,43 +80,10 @@ fn router(app: App) -> Router {
 async fn rpc_route(State(app): State<App>, body: Bytes) -> Response {
     let replay = app.replay.clone();
     let log = app.log_requests;
+    // the text is built here and not on an async worker, so only the capped blocking
+    // threads ever grow an arena to the size of a large response
     let out = tokio::task::spawn_blocking(move || {
-        let req: Value = match serde_json::from_slice(&body) {
-            Ok(v) => v,
-            Err(e) => return Some(rpc::parse_error(&e).to_string().into_bytes()),
-        };
-        // the text is built here and not on an async worker, so only the capped blocking
-        // threads ever grow an arena to the size of a large response
-        let mut out = Vec::new();
-        let one = |r: &Value, out: &mut Vec<u8>| {
-            if log {
-                eprintln!(
-                    "rpc {}",
-                    r.get("method").and_then(Value::as_str).unwrap_or("?")
-                );
-            }
-            rpc::handle(&replay, r, out)
-        };
-        match &req {
-            Value::Array(items) if !items.is_empty() => {
-                out.push(b'[');
-                let mut any = false;
-                for r in items {
-                    let mark = out.len();
-                    if any {
-                        out.push(b',');
-                    }
-                    if one(r, &mut out) {
-                        any = true;
-                    } else {
-                        out.truncate(mark);
-                    }
-                }
-                out.push(b']');
-                any.then_some(out)
-            }
-            other => one(other, &mut out).then_some(out),
-        }
+        envelope::answer_body(&replay, &body, MAX_RESPONSE_BYTES, log)
     })
     .await;
     match out {

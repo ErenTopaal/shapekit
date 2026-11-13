@@ -1,9 +1,9 @@
 //! Command and query server calls against the pinned stellar-core image.
-//! Needs docker and `SHAPEKIT_DOCKER_TESTS=1`.
+//! Needs docker, so it is ignored by default; run with `--include-ignored`.
 
 mod node_support;
 
-use node_support::{TESTNET, config, enabled};
+use node_support::{TESTNET, config};
 use shapekit_core_driver::config::close_time;
 use shapekit_core_driver::keys::{account_id, derive_key, muxed_account, network_id, root_key};
 use shapekit_core_driver::meta::MetaStream;
@@ -19,10 +19,8 @@ fn account_key(id: stellar_xdr::AccountId) -> LedgerKey {
 }
 
 #[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
 fn node_api_round_trip() {
-    if !enabled("node_api_round_trip") {
-        return;
-    }
     let tmp = tempfile::tempdir().unwrap();
     let node = CoreNode::start(config(TESTNET, 30), tmp.path()).expect("core starts");
 
