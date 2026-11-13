@@ -270,8 +270,7 @@ fn schema_source_classes_match_the_registry() {
 #[test]
 fn normalization_is_only_for_local_core() {
     let (dir, mut manifest) = sample();
-    manifest.entries[0].source.normalization =
-        Some(shapekit_manifest::Normalization::CoreNormalizeMeta);
+    manifest.entries[0].source.normalization = Some(shapekit_manifest::Normalization::KeyStable);
     let p = problems(&manifest, dir.path());
     assert_eq!(p.len(), 1, "{p:#?}");
     assert!(p[0].contains("only recorded for local-core"), "{p:#?}");

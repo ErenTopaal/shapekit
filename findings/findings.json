@@ -4,31 +4,31 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "ae72420ab177dd3cb4ea04545e3348f3020b0e30747afce0506641d7a09d5df5",
+      "sha256": "77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760",
       "detail": "corpus 0.1.0"
     },
     {
       "kind": "harness",
       "path": "target/findings/wallet-backend-e967ce8b/harness-report.json",
-      "sha256": "2e6d06b54da90b7e4a666d88ed702226b553f75553e97ee2f603d806d5b323dd",
-      "detail": "wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 858 entries, manifest ae72420ab177dd3cb4ea04545e3348f3020b0e30747afce0506641d7a09d5df5"
+      "sha256": "e4de2a361db1774c0153c53c655c753ecd5b1bc0a1bc3d3ebdb3f929afea6b62",
+      "detail": "wallet-backend e967ce8b7362b79c277e700e789181d76fbb5967, 890 entries, manifest 77f987d7af317f82c6374cd205c2b5fb7dd6e130543b8064b551ac82bd915760"
     },
     {
       "kind": "conformance",
       "path": "target/conformance/rust/divergence-matrix.json",
-      "sha256": "04fa4aeccd2cc61cdfaf2e5c3251bdee3f420dd10a8395131aa55aa6fe1584f8",
+      "sha256": "7703c67dd2a611fba8381570ab7f11cc10379573e8b08bf38ba41b4bf1ea1049",
       "detail": "corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
       "kind": "conformance",
       "path": "target/conformance/go/divergence-matrix.json",
-      "sha256": "511c420136cba6cfc4a8f1177f7243878b42f46720fc6cc40ef33099c23bbacc",
+      "sha256": "3eaea643613b4660f3d65717185c3fb4aea1329a812d5389bb0c20fe9bb7df70",
       "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0"
     },
     {
       "kind": "conformance",
       "path": "target/conformance/js/divergence-matrix.json",
-      "sha256": "c7550b17975ee7180e1f752879e9099edb9f3c644384b610f6e036e07565b92c",
+      "sha256": "8f245b26804a1df8ad7e862a3c7ceb3d52b8038ff1569c1a0c242bc7dd3041ff",
       "detail": "corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0"
     },
     {
@@ -39,8 +39,8 @@
     }
   ],
   "summary": {
-    "findings": 22,
-    "failures": 483,
+    "findings": 21,
+    "failures": 477,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -54,9 +54,6 @@
       "rs-stellar-xdr": {
         "divergence": 2
       },
-      "shapekit": {
-        "halt": 1
-      },
       "wallet-backend": {
         "data-loss": 7,
         "robustness": 1,
@@ -66,83 +63,15 @@
     "by_severity": {
       "data-loss": 7,
       "divergence": 9,
-      "halt": 1,
       "robustness": 3,
       "wrong-data": 2
     },
     "by_status": {
       "draft": 15,
-      "duplicate-of": 6,
-      "wont-fix": 1
+      "duplicate-of": 6
     }
   },
   "findings": [
-    {
-      "id": "SK-W10",
-      "title": "the cap66 auto-restore ledger stores UPDATED before RESTORED, an order core never emits, and wallet-backend's ingest panics on it",
-      "component": "shapekit",
-      "severity": "halt",
-      "caps": [
-        "CAP-0062",
-        "CAP-0066"
-      ],
-      "minimal_entry": "cap66.archival.p30-auto-restore-invoke-envelope",
-      "reproduce": "shapekit harness run --chain cap66.archival.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit e967ce8b7362b79c277e700e789181d76fbb5967\"",
-      "status": "wont-fix",
-      "reason": "Not an upstream defect, nothing to file. Core 30.0.0's raw stream for ledger 87 of cap66.archival.p30 has operation 0 changes [restored ttl, restored contract data, updated contract data]; shapekit's canonical order (crates/shapekit-core-driver/src/canonical.rs, core's normalizeMeta rank state, created, updated, removed, restored) moves the update before its restore. go-stellar-sdk v0.8.0 ingest.GetChangesFromLedgerEntryChanges reads the change before an UPDATED as its state (CAP-62 pairs), finds none at index 0 and panics with index out of range [-1]. Fix in shapekit (keep a restore immediately before the update or removal of its key) and re-record the chain; until then this verdict is a corpus artifact.",
-      "cause": "Formerly triaged as wallet-backend W10 (ingestion panic, private-disclosure candidate). Checked against core's raw ledgers.xdr: the order the panic needs is produced by shapekit's canonicalisation, not by core, and it is the only restored-then-updated or restored-then-removed pair in every recorded chain.",
-      "siblings": [],
-      "related": [],
-      "entries": [
-        "cap66.archival.p30-auto-restore-invoke-envelope",
-        "cap66.archival.p30-auto-restore-invoke-meta",
-        "cap66.archival.p30-evicted-temporary"
-      ],
-      "occurrences": [
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-auto-restore-invoke-envelope",
-          "at": "mainnet",
-          "what": "mishandled (halted): ingestion stopped at ledger 87 (halted): no progress for 120s; last error: Error: running ingest: running 'ingest' from 0 to 0: live ingestion pipeline: processing ledger 87: processing ledger 87: processing transactions for ledger 87: waiting for transaction processing: task panicked: runtime error: index out of range [-1], goroutine 250 [running]:"
-        },
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-auto-restore-invoke-envelope",
-          "at": "testnet",
-          "what": "mishandled (halted): ingestion stopped at ledger 87 (halted): no progress for 120s; last error: Error: running ingest: running 'ingest' from 0 to 0: live ingestion pipeline: processing ledger 87: processing ledger 87: processing transactions for ledger 87: waiting for transaction processing: task panicked: runtime error: index out of range [-1], goroutine 223 [running]:"
-        },
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-auto-restore-invoke-meta",
-          "at": "mainnet",
-          "what": "mishandled (halted): ingestion stopped at ledger 87 (halted): no progress for 120s; last error: Error: running ingest: running 'ingest' from 0 to 0: live ingestion pipeline: processing ledger 87: processing ledger 87: processing transactions for ledger 87: waiting for transaction processing: task panicked: runtime error: index out of range [-1], goroutine 250 [running]:"
-        },
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-auto-restore-invoke-meta",
-          "at": "testnet",
-          "what": "mishandled (halted): ingestion stopped at ledger 87 (halted): no progress for 120s; last error: Error: running ingest: running 'ingest' from 0 to 0: live ingestion pipeline: processing ledger 87: processing ledger 87: processing transactions for ledger 87: waiting for transaction processing: task panicked: runtime error: index out of range [-1], goroutine 223 [running]:"
-        },
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-evicted-temporary",
-          "at": "mainnet",
-          "what": "not-evaluated: the target stopped at ledger 87 (halted, entry cap66.archival.p30-auto-restore-invoke-envelope) before reaching ledger 93"
-        },
-        {
-          "source": "harness",
-          "on": "wallet-backend@e967ce8b7362b79c277e700e789181d76fbb5967",
-          "entry": "cap66.archival.p30-evicted-temporary",
-          "at": "testnet",
-          "what": "not-evaluated: the target stopped at ledger 87 (halted, entry cap66.archival.p30-auto-restore-invoke-envelope) before reaching ledger 93"
-        }
-      ]
-    },
     {
       "id": "WB-W3",
       "title": "clawbacks are stored as BURN, so a clawback is indistinguishable from a payment to the issuer",

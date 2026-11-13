@@ -1,11 +1,14 @@
 //! `canonicalize_lcm` against stellar-core's own goldens (v30.0.0, see
 //! fixtures/core-golden/provenance.json). Core captured these in the order
 //! its LedgerTxn emitted the changes, not sorted, so they show that the
-//! canonical form reorders real meta, only reorders it, and is stable.
+//! canonical form reorders real meta, only reorders it, keeps every key's
+//! changes in core's order, and is stable.
 
 use std::path::Path;
 
-use shapekit_core_driver::canonical::{canonicalize_lcm, change_multisets, permutation_equal};
+use shapekit_core_driver::canonical::{
+    canonicalize_lcm, change_multisets, per_key_sequences, permutation_equal,
+};
 use shapekit_core_driver::meta::read_all;
 use stellar_xdr::{LedgerCloseMeta, Limits, WriteXdr};
 
@@ -38,6 +41,11 @@ fn check(name: &str) -> usize {
             change_multisets(&raw).unwrap(),
             change_multisets(&canon).unwrap(),
             "{name}: change multisets differ"
+        );
+        assert_eq!(
+            per_key_sequences(&raw),
+            per_key_sequences(&canon),
+            "{name}: a key's changes changed order"
         );
         assert!(permutation_equal(&raw, &canon).unwrap());
         if canon != raw {

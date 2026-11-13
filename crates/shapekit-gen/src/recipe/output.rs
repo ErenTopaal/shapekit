@@ -197,7 +197,7 @@ pub(crate) fn merge(
                 normalization: first
                     .selected
                     .normalized
-                    .then_some(Normalization::CoreNormalizeMeta),
+                    .then_some(Normalization::KeyStable),
                 core_rejection: first.rejection.clone(),
             },
             synthetic: false,

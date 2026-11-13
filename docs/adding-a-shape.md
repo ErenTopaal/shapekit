@@ -250,11 +250,17 @@ the network id and so differs between the variants; it is derivable from each va
 ### Normalization
 
 Release core emits each ledger-entry change list in a per-process order. The recorder writes a
-canonical stream with the order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp)
-applies before it compares goldens, and checks it is a permutation of core's output. Entries that
+canonical stream in which every change list is stably sorted by ledger key: the keys come in a
+fixed order and each key's changes keep the order core emitted them in, and it checks the result
+is a permutation of core's output. Within one key core's order is the logical sequence (a
+`RESTORED` before the `UPDATED` of the same entry, a `STATE` before its `UPDATED`) and does not
+change between runs; only the order between keys comes from core's hash map, so a canonical LCM
+is a byte string core itself can emit. Core's own `normalizeMeta` (src/util/MetaUtils.cpp) is
+not used: it also sorts by change type, which can put a `RESTORED` after its `UPDATED`, an order
+core never emits and one that makes ingest code reading changes pairwise fail. Entries that
 carry change lists (`LedgerCloseMeta`, `TransactionResultMeta`, `TransactionResultMetaV1`,
-`TransactionMeta`) record `source.normalization = "core-normalize-meta"`; the validator requires
-it on such local-core entries. A canonical LCM is a byte string core itself can emit.
+`TransactionMeta`) record `source.normalization = "key-stable"`; the validator requires it on
+such local-core entries.
 
 ## 5. Timing
 

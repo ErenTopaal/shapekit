@@ -70,6 +70,8 @@ fn registered_commands() {
             "pack",
             "serve",
             "harness",
+            "findings",
+            "fuzz",
             "coverage",
             "corpus",
             "help",

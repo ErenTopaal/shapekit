@@ -3,54 +3,44 @@
 //! Release builds of stellar-core 30.0.0 emit the changes of one `LedgerTxn`
 //! in the iteration order of an unordered map whose hash key is random per
 //! process (`LedgerTxn::Impl::getChanges`), so the raw meta of two identical
-//! runs differs in the order of those lists and nowhere else. Core itself
-//! compares meta only after `normalizeMeta` (src/util/MetaUtils.cpp, v30.0.0),
-//! and this module applies exactly that rule to exactly the lists it sorts:
+//! runs differs in the order of those lists and nowhere else. The lists this
+//! module reorders are the ones core's `normalizeMeta` (src/util/MetaUtils.cpp,
+//! v30.0.0) reorders before comparing goldens:
 //!
 //! - every upgrade's `changes`
 //! - every transaction's `feeProcessing`
 //! - the transaction meta: `txChanges` (v1), `txChangesBefore` and
 //!   `txChangesAfter` (v2 to v4), and every operation's `changes` (v0 to v4)
 //!
-//! Core leaves `postTxApplyFeeProcessing`, events, evicted keys and
-//! everything else in emission order, and so does this module. Core's golden
-//! comparison also zeroes the data of `core_metrics`/`invoke_time_nsecs`
-//! diagnostic events (`zeroNonDeterministicDiagnostics`); that is about test
-//! timing, changes values rather than order, and is not done here.
+//! `postTxApplyFeeProcessing`, events, evicted keys and everything else stay
+//! in emission order.
 //!
-//! The order is the one `CmpLedgerEntryChanges` defines: by the ledger key the
-//! change is about, then by change type ranked state, created, updated,
-//! removed, restored, then by SHA-256 of the change's XDR. The key comparison
-//! is xdrpp's generated `operator<=>`: structs field by field in declaration
-//! order, unions by discriminant value and then the arm, vectors and opaques
-//! lexicographically with length as the tie break, optionals with absent
-//! first. `stellar-xdr`'s derived `Ord` is the same relation as long as every
-//! union declares its arms in increasing discriminant order, which the tests
-//! check for every union a `LedgerKey` can contain.
+//! The rule is not core's, though. `normalizeMeta` sorts by key, then by
+//! change type, then by hash, which is only a comparison aid: it can put a
+//! `RESTORED` after the `UPDATED` of the same key, an order core never emits
+//! and one ingest code that pairs each change with the one before it cannot
+//! read. The canonical form here is a stable sort by the ledger key alone.
+//! The changes of one key keep core's raw relative order, which is the
+//! logical sequence of that key and does not depend on the process; only the
+//! order between keys comes from the hash map, so any key order is one core
+//! can emit, and the canonical LCM is a byte string core itself can write.
 //!
-//! The result only permutes lists, and since core's own order is unspecified
-//! per process, a canonical LCM is a byte string core itself can emit.
+//! The key comparison is xdrpp's generated `operator<=>`: structs field by
+//! field in declaration order, unions by discriminant value and then the arm,
+//! vectors and opaques lexicographically with length as the tie break,
+//! optionals with absent first. `stellar-xdr`'s derived `Ord` is the same
+//! relation as long as every union declares its arms in increasing
+//! discriminant order, which the tests check for every union a `LedgerKey`
+//! can contain. Matching core's key order is not required for correctness,
+//! it only keeps the canonical key order the one core's tools would show.
 
-use sha2::{Digest, Sha256};
 use stellar_xdr::{
     LedgerCloseMeta, LedgerEntryChange, LedgerEntryChanges, LedgerKey, Limits, TransactionMeta,
     WriteXdr,
 };
 
-/// Position of a change type in core's order (`remap` in MetaUtils.cpp):
-/// state, created, updated, removed, restored.
-fn type_rank(c: &LedgerEntryChange) -> u8 {
-    match c {
-        LedgerEntryChange::State(_) => 0,
-        LedgerEntryChange::Created(_) => 1,
-        LedgerEntryChange::Updated(_) => 2,
-        LedgerEntryChange::Removed(_) => 3,
-        LedgerEntryChange::Restored(_) => 4,
-    }
-}
-
 /// The key a change is about (`getKeyFromChange` in MetaUtils.cpp).
-fn change_key(c: &LedgerEntryChange) -> LedgerKey {
+pub fn change_key(c: &LedgerEntryChange) -> LedgerKey {
     match c {
         LedgerEntryChange::State(e)
         | LedgerEntryChange::Created(e)
@@ -60,19 +50,19 @@ fn change_key(c: &LedgerEntryChange) -> LedgerKey {
     }
 }
 
-/// Sorts one change list into core's normalized order.
+/// Sorts one change list by ledger key, keeping each key's changes in the
+/// order they were given.
 pub fn sort_changes(changes: &mut LedgerEntryChanges) -> Result<(), stellar_xdr::Error> {
     if changes.0.len() < 2 {
         return Ok(());
     }
-    let mut keyed = Vec::with_capacity(changes.0.len());
-    for c in std::mem::take(&mut changes.0).to_vec() {
-        let digest: [u8; 32] = Sha256::digest(c.to_xdr(Limits::none())?).into();
-        keyed.push(((change_key(&c), type_rank(&c), digest), c));
-    }
-    // the digest makes the key total up to byte-equal changes, so an
-    // unstable sort cannot produce two different byte strings
-    keyed.sort_unstable_by(|a, b| a.0.cmp(&b.0));
+    let mut keyed: Vec<(LedgerKey, LedgerEntryChange)> = std::mem::take(&mut changes.0)
+        .to_vec()
+        .into_iter()
+        .map(|c| (change_key(&c), c))
+        .collect();
+    // stable, so one key's changes stay in core's order
+    keyed.sort_by(|a, b| a.0.cmp(&b.0));
     changes.0 = keyed
         .into_iter()
         .map(|(_, c)| c)
@@ -81,7 +71,7 @@ pub fn sort_changes(changes: &mut LedgerEntryChanges) -> Result<(), stellar_xdr:
     Ok(())
 }
 
-/// `normalizeMeta(TransactionMeta&)`.
+/// Canonical form of every change list in a `TransactionMeta`.
 pub fn canonicalize_tx_meta(meta: &mut TransactionMeta) -> Result<(), stellar_xdr::Error> {
     match meta {
         TransactionMeta::V0(ops) => {
@@ -120,7 +110,7 @@ pub fn canonicalize_tx_meta(meta: &mut TransactionMeta) -> Result<(), stellar_xd
     Ok(())
 }
 
-/// `normalizeMeta(LedgerCloseMeta&)`.
+/// Canonical form of every change list in a `LedgerCloseMeta`.
 pub fn canonicalize_lcm(lcm: &mut LedgerCloseMeta) -> Result<(), stellar_xdr::Error> {
     match lcm {
         LedgerCloseMeta::V0(m) => {
@@ -154,11 +144,8 @@ pub fn canonicalize_lcm(lcm: &mut LedgerCloseMeta) -> Result<(), stellar_xdr::Er
     Ok(())
 }
 
-/// Every change of every list [`canonicalize_lcm`] may reorder, each list
-/// sorted by the change's XDR bytes. Two LCMs that differ only in the order
-/// within those lists give equal results, so comparing this is the multiset
-/// check between a raw and a canonical LCM.
-pub fn change_multisets(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<Vec<u8>>>, stellar_xdr::Error> {
+/// Every list [`canonicalize_lcm`] may reorder, in the order the LCM holds them.
+pub fn change_lists(lcm: &LedgerCloseMeta) -> Vec<&LedgerEntryChanges> {
     let mut lists: Vec<&LedgerEntryChanges> = Vec::new();
     fn tx_lists<'a>(meta: &'a TransactionMeta, out: &mut Vec<&'a LedgerEntryChanges>) {
         match meta {
@@ -207,6 +194,15 @@ pub fn change_multisets(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<Vec<u8>>>, stel
             }
         }
     }
+    lists
+}
+
+/// Every change of every list [`canonicalize_lcm`] may reorder, each list
+/// sorted by the change's XDR bytes. Two LCMs that differ only in the order
+/// within those lists give equal results, so comparing this is the multiset
+/// check between a raw and a canonical LCM.
+pub fn change_multisets(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<Vec<u8>>>, stellar_xdr::Error> {
+    let lists = change_lists(lcm);
     let mut out = Vec::with_capacity(lists.len());
     for l in lists {
         let mut items = Vec::with_capacity(l.0.len());
@@ -219,9 +215,27 @@ pub fn change_multisets(lcm: &LedgerCloseMeta) -> Result<Vec<Vec<Vec<u8>>>, stel
     Ok(out)
 }
 
-/// Whether `b` is `a` with only the lists [`canonicalize_lcm`] sorts
-/// permuted: equal once both are canonical, and holding the same multiset
-/// of changes in every list.
+/// Each list's changes grouped by key, keys in canonical order, each key's
+/// changes in the order the list holds them. Equal for two LCMs exactly when
+/// every key's changes came in the same order in both.
+pub fn per_key_sequences(lcm: &LedgerCloseMeta) -> Vec<Vec<(LedgerKey, Vec<&LedgerEntryChange>)>> {
+    change_lists(lcm)
+        .into_iter()
+        .map(|l| {
+            let mut groups: std::collections::BTreeMap<LedgerKey, Vec<&LedgerEntryChange>> =
+                std::collections::BTreeMap::new();
+            for c in l.0.iter() {
+                groups.entry(change_key(c)).or_default().push(c);
+            }
+            groups.into_iter().collect()
+        })
+        .collect()
+}
+
+/// Whether `a` and `b` differ only in the order between keys within the
+/// lists [`canonicalize_lcm`] sorts: the same multiset of changes in every
+/// list, and equal once both are canonical, which also needs every key's
+/// changes in the same relative order in both.
 pub fn permutation_equal(
     a: &LedgerCloseMeta,
     b: &LedgerCloseMeta,
@@ -308,33 +322,108 @@ mod tests {
         }
     }
 
+    fn removed(n: u8) -> LedgerEntryChange {
+        LedgerEntryChange::Removed(LedgerKey::Account(LedgerKeyAccount {
+            account_id: AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([n; 32]))),
+        }))
+    }
+
     #[test]
-    fn orders_by_key_then_type_then_hash() {
-        let removed = LedgerEntryChange::Removed(LedgerKey::Account(LedgerKeyAccount {
-            account_id: AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([1; 32]))),
-        }));
+    fn orders_by_key_and_keeps_each_keys_order() {
+        // the restore stays in front of the update and the removal after its
+        // update, where a sort by change type would move both
         let mut c = LedgerEntryChanges(
             vec![
-                LedgerEntryChange::Updated(account(2, 5)),
-                LedgerEntryChange::Created(account(1, 7)),
-                removed.clone(),
-                LedgerEntryChange::State(account(2, 9)),
+                LedgerEntryChange::Restored(account(2, 4)),
                 LedgerEntryChange::State(account(1, 3)),
+                LedgerEntryChange::Updated(account(2, 5)),
+                LedgerEntryChange::Updated(account(1, 7)),
+                removed(1),
             ]
             .try_into()
             .unwrap(),
         );
         sort_changes(&mut c).unwrap();
-        let got: Vec<_> = c.0.to_vec();
         assert_eq!(
-            got,
+            c.0.to_vec(),
             vec![
                 LedgerEntryChange::State(account(1, 3)),
-                LedgerEntryChange::Created(account(1, 7)),
-                removed,
-                LedgerEntryChange::State(account(2, 9)),
+                LedgerEntryChange::Updated(account(1, 7)),
+                removed(1),
+                LedgerEntryChange::Restored(account(2, 4)),
                 LedgerEntryChange::Updated(account(2, 5)),
             ]
         );
+    }
+
+    // splitmix64, so the lists are the same on every run
+    struct Rng(u64);
+    impl Rng {
+        fn next(&mut self) -> u64 {
+            self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
+            let mut z = self.0;
+            z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+            z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+            z ^ (z >> 31)
+        }
+        fn below(&mut self, n: u64) -> u64 {
+            self.next() % n
+        }
+    }
+
+    fn random_change(rng: &mut Rng) -> LedgerEntryChange {
+        let n = rng.below(4) as u8 + 1;
+        let v = rng.below(3) as i64;
+        match rng.below(5) {
+            0 => LedgerEntryChange::State(account(n, v)),
+            1 => LedgerEntryChange::Created(account(n, v)),
+            2 => LedgerEntryChange::Updated(account(n, v)),
+            3 => removed(n),
+            _ => LedgerEntryChange::Restored(account(n, v)),
+        }
+    }
+
+    fn per_key(list: &[LedgerEntryChange]) -> Vec<(LedgerKey, Vec<LedgerEntryChange>)> {
+        let mut out: Vec<(LedgerKey, Vec<LedgerEntryChange>)> = Vec::new();
+        for c in list {
+            let k = change_key(c);
+            match out.iter_mut().find(|(x, _)| *x == k) {
+                Some((_, v)) => v.push(c.clone()),
+                None => out.push((k, vec![c.clone()])),
+            }
+        }
+        out.sort_by(|a, b| a.0.cmp(&b.0));
+        out
+    }
+
+    #[test]
+    fn canonical_is_a_permutation_that_keeps_every_keys_order() {
+        let mut rng = Rng(0x5eed);
+        for _ in 0..2000 {
+            let len = rng.below(12) as usize;
+            let raw: Vec<_> = (0..len).map(|_| random_change(&mut rng)).collect();
+            let mut c = LedgerEntryChanges(raw.clone().try_into().unwrap());
+            sort_changes(&mut c).unwrap();
+            let got = c.0.to_vec();
+
+            // the same multiset of changes
+            let bytes = |l: &[LedgerEntryChange]| {
+                let mut v: Vec<_> = l
+                    .iter()
+                    .map(|c| c.to_xdr(Limits::none()).unwrap())
+                    .collect();
+                v.sort();
+                v
+            };
+            assert_eq!(bytes(&raw), bytes(&got));
+            // keys in order, and each key's changes exactly as raw had them
+            let keys: Vec<_> = got.iter().map(change_key).collect();
+            assert!(keys.windows(2).all(|w| w[0] <= w[1]), "keys out of order");
+            assert_eq!(per_key(&raw), per_key(&got));
+            // and sorting again changes nothing
+            let mut again = c.clone();
+            sort_changes(&mut again).unwrap();
+            assert_eq!(again, c);
+        }
     }
 }

@@ -399,3 +399,233 @@ func TestServedArchiveFollowsHead(t *testing.T) {
 		checkArchive(ctx, t, c, srv.URL+"/archive", cp)
 	}
 }
+
+// lakeLedgers reads every ledger of the chain from its lake through the sdk.
+func lakeLedgers(ctx context.Context, t *testing.T, c Chain) []xdr.LedgerCloseMeta {
+	t.Helper()
+
+	cfg := datastore.DataStoreConfig{
+		Type:              "Filesystem",
+		Params:            map[string]string{"destination_path": c.LakeDir()},
+		NetworkPassphrase: c.Passphrase,
+		Compression:       "zstd",
+	}
+
+	store, err := datastore.NewDataStore(ctx, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	schema, err := datastore.LoadSchema(ctx, store, cfg)
+	if err != nil {
+		t.Fatalf("%s: LoadSchema: %v", c.Dir, err)
+	}
+
+	backend, err := ledgerbackend.NewBufferedStorageBackend(ledgerbackend.BufferedStorageBackendConfig{
+		BufferSize: 10, NumWorkers: 2, RetryWait: time.Second,
+	}, store, schema)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() { _ = backend.Close() }()
+
+	if err := backend.PrepareRange(ctx, ledgerbackend.BoundedRange(c.LedgerRange.First, c.LedgerRange.Last)); err != nil {
+		t.Fatalf("%s: PrepareRange: %v", c.Dir, err)
+	}
+
+	out := make([]xdr.LedgerCloseMeta, 0, c.LedgerRange.Last-c.LedgerRange.First+1)
+
+	for seq := c.LedgerRange.First; seq <= c.LedgerRange.Last; seq++ {
+		lcm, err := backend.GetLedger(ctx, seq)
+		if err != nil {
+			t.Fatalf("%s: GetLedger(%d): %v", c.Dir, seq, err)
+		}
+
+		out = append(out, lcm)
+	}
+
+	return out
+}
+
+// guarded runs f and turns a panic into an error, so one bad list names its place instead
+// of ending the whole test binary.
+func guarded(f func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+
+	return f()
+}
+
+// rawLists are the change lists of one transaction's meta, as stored, by name.
+func rawLists(tx ingest.LedgerTransaction) (map[string]xdr.LedgerEntryChanges, error) {
+	lists := map[string]xdr.LedgerEntryChanges{
+		"fee":            tx.FeeChanges,
+		"post-apply-fee": tx.PostTxApplyFeeChanges,
+	}
+
+	var ops [][]xdr.LedgerEntryChange
+
+	switch tx.UnsafeMeta.V {
+	case 0:
+		for _, op := range *tx.UnsafeMeta.Operations {
+			ops = append(ops, op.Changes)
+		}
+	case 1:
+		m := tx.UnsafeMeta.MustV1()
+		lists["tx"] = m.TxChanges
+
+		for _, op := range m.Operations {
+			ops = append(ops, op.Changes)
+		}
+	case 2:
+		m := tx.UnsafeMeta.MustV2()
+		lists["tx-before"], lists["tx-after"] = m.TxChangesBefore, m.TxChangesAfter
+
+		for _, op := range m.Operations {
+			ops = append(ops, op.Changes)
+		}
+	case 3:
+		m := tx.UnsafeMeta.MustV3()
+		lists["tx-before"], lists["tx-after"] = m.TxChangesBefore, m.TxChangesAfter
+
+		for _, op := range m.Operations {
+			ops = append(ops, op.Changes)
+		}
+	case 4:
+		m := tx.UnsafeMeta.MustV4()
+		lists["tx-before"], lists["tx-after"] = m.TxChangesBefore, m.TxChangesAfter
+
+		for _, op := range m.Operations {
+			ops = append(ops, op.Changes)
+		}
+	default:
+		return nil, fmt.Errorf("transaction meta v%d", tx.UnsafeMeta.V)
+	}
+
+	for i, op := range ops {
+		lists[fmt.Sprintf("op %d", i)] = op
+	}
+
+	return lists, nil
+}
+
+// checkLedgerIngest runs the sdk's ingest readers over one ledger: the change reader to
+// the end, and per transaction the fee, transaction and operation changes plus
+// GetChangesFromLedgerEntryChanges over every stored list. Indexers built on the sdk do
+// exactly this, and a list in an order core never emits makes it panic.
+func checkLedgerIngest(c Chain, lcm xdr.LedgerCloseMeta) []error {
+	seq := lcm.LedgerSequence()
+	where := func(format string, args ...any) string {
+		return fmt.Sprintf("%s: ledger %d: ", c.Dir, seq) + fmt.Sprintf(format, args...)
+	}
+
+	var errs []error
+
+	if err := guarded(func() error {
+		r, err := ingest.NewLedgerChangeReaderFromLedgerCloseMeta(c.Passphrase, lcm)
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = r.Close() }()
+
+		for {
+			_, err := r.Read()
+			if errors.Is(err, io.EOF) {
+				return nil
+			}
+
+			if err != nil {
+				return err
+			}
+		}
+	}); err != nil {
+		errs = append(errs, fmt.Errorf("%s: %w", where("change reader"), err))
+	}
+
+	txs, err := ingest.NewLedgerTransactionReaderFromLedgerCloseMeta(c.Passphrase, lcm)
+	if err != nil {
+		return append(errs, fmt.Errorf("%s: %w", where("transaction reader"), err))
+	}
+
+	defer func() { _ = txs.Close() }()
+
+	for {
+		tx, err := txs.Read()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+
+		if err != nil {
+			return append(errs, fmt.Errorf("%s: %w", where("reading a transaction"), err))
+		}
+
+		at := func(what string) string { return where("tx %d %s", tx.Index, what) }
+
+		if err := guarded(func() error {
+			tx.GetFeeChanges()
+			tx.GetPostApplyFeeChanges()
+
+			if _, err := tx.GetChanges(); err != nil {
+				return err
+			}
+
+			for i := range tx.Envelope.Operations() {
+				if _, err := tx.GetOperationChanges(uint32(i)); err != nil {
+					return fmt.Errorf("op %d: %w", i, err)
+				}
+			}
+
+			return nil
+		}); err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", at("changes"), err))
+		}
+
+		lists, err := rawLists(tx)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", at("meta"), err))
+			continue
+		}
+
+		for name, l := range lists {
+			if err := guarded(func() error {
+				ingest.GetChangesFromLedgerEntryChanges(l)
+				return nil
+			}); err != nil {
+				errs = append(errs, fmt.Errorf("%s: %w", at(name), err))
+			}
+		}
+	}
+
+	return errs
+}
+
+// Check 3: go-stellar-sdk's ingest readers take every transaction of every chain without a
+// panic or an error.
+func TestIngestReadsEveryTransaction(t *testing.T) {
+	_, _, chains := setup(t)
+	ctx := context.Background()
+
+	for _, dir := range chains {
+		c, err := ReadChain(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		txs := 0
+
+		for _, lcm := range lakeLedgers(ctx, t, c) {
+			for _, err := range checkLedgerIngest(c, lcm) {
+				t.Error(err)
+			}
+
+			txs += lcm.CountTransactions()
+		}
+
+		t.Logf("%s: %d transactions read by ingest", c.Dir, txs)
+	}
+}

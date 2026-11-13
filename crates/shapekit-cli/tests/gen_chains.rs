@@ -102,7 +102,7 @@ fn cap40_chains_validate_and_reproduce() {
         );
         assert_eq!(
             get(&format!("{p}-authorised-by-payload-32"))["source"]["normalization"],
-            "core-normalize-meta"
+            "key-stable"
         );
     }
 

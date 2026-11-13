@@ -32,27 +32,6 @@ adapter = "adapters/bin/wb-adapter --commit {version}"
 # wallet-backend, current pin, harness
 
 [[finding]]
-id = "SK-W10"
-title = "the cap66 auto-restore ledger stores UPDATED before RESTORED, an order core never emits, and wallet-backend's ingest panics on it"
-component = "shapekit"
-severity = "halt"
-status = "wont-fix"
-reason = "Not an upstream defect, nothing to file. Core 30.0.0's raw stream for ledger 87 of cap66.archival.p30 has operation 0 changes [restored ttl, restored contract data, updated contract data]; shapekit's canonical order (crates/shapekit-core-driver/src/canonical.rs, core's normalizeMeta rank state, created, updated, removed, restored) moves the update before its restore. go-stellar-sdk v0.8.0 ingest.GetChangesFromLedgerEntryChanges reads the change before an UPDATED as its state (CAP-62 pairs), finds none at index 0 and panics with index out of range [-1]. Fix in shapekit (keep a restore immediately before the update or removal of its key) and re-record the chain; until then this verdict is a corpus artifact."
-cause = "Formerly triaged as wallet-backend W10 (ingestion panic, private-disclosure candidate). Checked against core's raw ledgers.xdr: the order the panic needs is produced by shapekit's canonicalisation, not by core, and it is the only restored-then-updated or restored-then-removed pair in every recorded chain."
-
-[[finding.harness]]
-target = "wallet-backend"
-entries = ["cap66.archival.*"]
-verdicts = ["mishandled"]
-reasons = ["halted"]
-
-[[finding.harness]]
-target = "wallet-backend"
-entries = ["cap66.archival.*"]
-verdicts = ["not-evaluated"]
-detail_contains = "the target stopped at ledger"
-
-[[finding]]
 id = "WB-W3"
 title = "clawbacks are stored as BURN, so a clawback is indistinguishable from a payment to the issuer"
 component = "wallet-backend"

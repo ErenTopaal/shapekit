@@ -307,12 +307,9 @@ impl LedgerState {
         parallel: bool,
         report: &mut ApplyReport,
     ) -> Result<(), StateError> {
-        // canonical lists are sorted, so a key with two groups in one list is first put
-        // back into an order that chains; a tracked key's stored value settles ambiguity
-        let ordered = crate::order::raw_order(changes, |k| {
-            (self.live.contains_key(k) || self.strict(k)).then(|| self.live.get(k))
-        })
-        .map_err(|problem| StateError::Order {
+        // one key's changes are read in the order core emitted them, which the canonical
+        // form keeps; a key whose changes do not chain is refused before anything is applied
+        let ordered = crate::order::raw_order(changes).map_err(|problem| StateError::Order {
             seq,
             at: at.to_string(),
             problem,

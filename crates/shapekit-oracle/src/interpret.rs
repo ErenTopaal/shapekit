@@ -293,12 +293,12 @@ pub(crate) struct Diff<'a> {
     pub removed: bool,
 }
 
-/// Reads `changes` in an order that chains (see [`crate::order`]), so a canonical list
-/// whose key has two groups gives the right before and after.
+/// Reads `changes` key by key in the order given, which must chain (see [`crate::order`]),
+/// so a key with two groups gives the right before and after.
 pub(crate) fn diffs(changes: &[LedgerEntryChange]) -> Result<Vec<Diff<'_>>, String> {
     let mut out: Vec<Diff<'_>> = Vec::new();
     let mut at: BTreeMap<LedgerKey, usize> = BTreeMap::new();
-    for c in crate::order::raw_order(changes, |_| None)? {
+    for c in crate::order::raw_order(changes)? {
         let key = match c {
             LedgerEntryChange::Created(e)
             | LedgerEntryChange::Updated(e)

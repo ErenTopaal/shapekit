@@ -144,10 +144,11 @@ pub struct Source {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 pub enum Normalization {
-    /// The order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp) gives change
-    /// lists before it compares goldens. Only order changes; the bytes core wrote are a
-    /// permutation of the stored ones.
-    CoreNormalizeMeta,
+    /// Every change list stably sorted by ledger key: the order between keys is fixed, and
+    /// each key's changes keep the order core emitted them in. Only the order between keys
+    /// changes, which core leaves to a per-process hash map, so the stored bytes are an
+    /// order core itself can emit and the bytes core wrote are a permutation of them.
+    KeyStable,
 }
 
 /// Core's refusal of an envelope: where it happened and the `TransactionResult` it returned.

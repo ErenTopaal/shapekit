@@ -1,27 +1,23 @@
-//! Recovering an apply order for one change list in canonical form.
+//! Reading one change list key by key, checking that each key's changes chain.
 //!
-//! The canonical meta the chains are committed in sorts every change list by key, then by
-//! change type (state, created, updated, removed, restored), then by hash (core's
-//! `normalizeMeta`). Core emits a list as one or more `LedgerTxn` commits concatenated, each
-//! giving a key at most one group: `STATE` then `UPDATED` or `REMOVED`, a lone `CREATED`,
-//! or `RESTORED` optionally followed by `UPDATED` or `REMOVED`. When a key has two groups in
-//! one list (a fee bump whose fee source is the inner source: `txChangesBefore` holds a
-//! no-op signer pass and the sequence bump for the same account), or `RESTORED` sorts
-//! after its `UPDATED`, reading the sorted list front to back pairs the wrong values.
+//! The canonical meta the chains are committed in sorts every change list by ledger key and
+//! keeps each key's changes in the order core emitted them (see shapekit-core-driver's
+//! `canonical` module), so within one key the list is already the logical sequence. Core
+//! emits a list as one or more `LedgerTxn` commits concatenated, each giving a key at most
+//! one group: `STATE` then `UPDATED` or `REMOVED`, a lone `CREATED`, or `RESTORED`
+//! optionally followed by `UPDATED` or `REMOVED`. A key may have two groups in one list (a
+//! fee bump whose fee source is the inner source: `txChangesBefore` holds a no-op signer
+//! pass and then the sequence bump for the same account).
 //!
-//! [`raw_order`] puts each such key's changes back into an order that chains: every
-//! `STATE` equals the value before it, every `CREATED` follows an absent entry. All orders
-//! that chain are searched; they must agree on the value before and after the list, or the
-//! list is reported as ambiguous. A caller that knows the value before the list (the ledger
-//! state) passes it to settle an ambiguity, never to replace a contradiction.
+//! [`raw_order`] keeps that order and refuses a key whose changes do not chain in it: every
+//! `STATE` must equal the value before it, every `CREATED` must follow an absent entry, and
+//! every `UPDATED` or `REMOVED` must follow a `STATE` or `RESTORED`. Meta sorted by change
+//! type (core's `normalizeMeta`, which can put a `RESTORED` after its `UPDATED`) is refused
+//! rather than repaired, since no reader of real meta sees that order.
 
 use std::collections::BTreeMap;
 
 use stellar_xdr::{LedgerEntry, LedgerEntryChange, LedgerKey};
-
-/// Larger groups would make the search slow; core never writes one key this often in one
-/// list (each group is one `LedgerTxn` commit of a transaction step).
-const MAX_GROUP: usize = 8;
 
 fn key_of(c: &LedgerEntryChange) -> LedgerKey {
     match c {
@@ -33,21 +29,6 @@ fn key_of(c: &LedgerEntryChange) -> LedgerKey {
     }
 }
 
-// a group that reads correctly front to back
-fn plain(group: &[&LedgerEntryChange]) -> bool {
-    use LedgerEntryChange as C;
-    matches!(
-        group,
-        [_] | [C::State(_) | C::Restored(_), C::Updated(_) | C::Removed(_)]
-    )
-}
-
-#[derive(Clone, Copy, PartialEq)]
-enum Cur<'a> {
-    Any,
-    Val(Option<&'a LedgerEntry>),
-}
-
 #[derive(Clone, Copy, PartialEq)]
 enum Phase {
     Free,
@@ -55,127 +36,53 @@ enum Phase {
     AfterRestore,
 }
 
-struct Search<'a> {
-    group: Vec<&'a LedgerEntryChange>,
-    used: Vec<bool>,
-    path: Vec<usize>,
-    // (value before, value after, order)
-    found: Vec<(Option<&'a LedgerEntry>, Option<&'a LedgerEntry>, Vec<usize>)>,
-}
-
-impl<'a> Search<'a> {
-    fn run(&mut self, cur: Cur<'a>, phase: Phase, before: Option<Option<&'a LedgerEntry>>) {
-        if self.path.len() == self.group.len() {
-            if phase != Phase::AfterState
-                && let (Some(b), Cur::Val(a)) = (before, cur)
+// `None` while nothing about the value is known yet, then the value itself
+fn check_group(key: &LedgerKey, group: &[&LedgerEntryChange]) -> Result<(), String> {
+    let mut cur: Option<Option<&LedgerEntry>> = None;
+    let mut phase = Phase::Free;
+    for (i, c) in group.iter().enumerate() {
+        let next = match (phase, c) {
+            (Phase::Free | Phase::AfterRestore, LedgerEntryChange::State(e))
+                if cur.is_none() || cur == Some(Some(e)) =>
             {
-                self.found.push((b, a, self.path.clone()));
+                Some((Some(e), Phase::AfterState))
             }
-            return;
-        }
-        for i in 0..self.group.len() {
-            if self.used[i] {
-                continue;
+            (Phase::Free | Phase::AfterRestore, LedgerEntryChange::Created(e))
+                if matches!(cur, None | Some(None)) =>
+            {
+                Some((Some(e), Phase::Free))
             }
-            // equal changes are interchangeable, so only the first unused one is tried
-            if (0..i).any(|j| !self.used[j] && self.group[j] == self.group[i]) {
-                continue;
+            (Phase::Free | Phase::AfterRestore, LedgerEntryChange::Restored(e)) => {
+                Some((Some(e), Phase::AfterRestore))
             }
-            let c = self.group[i];
-            let next = match (phase, c) {
-                (Phase::Free | Phase::AfterRestore, LedgerEntryChange::State(e))
-                    if matches!(cur, Cur::Any) || cur == Cur::Val(Some(e)) =>
-                {
-                    Some((Cur::Val(Some(e)), Phase::AfterState, Some(e)))
-                }
-                (Phase::Free | Phase::AfterRestore, LedgerEntryChange::Created(e))
-                    if matches!(cur, Cur::Any | Cur::Val(None)) =>
-                {
-                    Some((Cur::Val(Some(e)), Phase::Free, None))
-                }
-                (Phase::Free | Phase::AfterRestore, LedgerEntryChange::Restored(e)) => {
-                    Some((Cur::Val(Some(e)), Phase::AfterRestore, Some(e)))
-                }
-                (Phase::AfterState | Phase::AfterRestore, LedgerEntryChange::Updated(e)) => {
-                    Some((Cur::Val(Some(e)), Phase::Free, None))
-                }
-                (Phase::AfterState | Phase::AfterRestore, LedgerEntryChange::Removed(_)) => {
-                    Some((Cur::Val(None), Phase::Free, None))
-                }
-                _ => None,
-            };
-            let Some((cur2, phase2, start)) = next else {
-                continue;
-            };
-            // the value before the list is fixed by the first change
-            let before2 = before.or(match c {
-                LedgerEntryChange::Created(_) => Some(None),
-                _ => start.map(Some),
-            });
-            self.used[i] = true;
-            self.path.push(i);
-            self.run(cur2, phase2, before2);
-            self.path.pop();
-            self.used[i] = false;
-        }
-    }
-}
-
-fn order_group<'a>(
-    key: &LedgerKey,
-    group: Vec<&'a LedgerEntryChange>,
-    known: Option<Option<&LedgerEntry>>,
-) -> Result<Vec<&'a LedgerEntryChange>, String> {
-    if plain(&group) {
-        return Ok(group);
-    }
-    if group.len() > MAX_GROUP {
-        return Err(format!(
-            "{} changes to one key in one list, more than {MAX_GROUP}: {key:?}",
-            group.len()
-        ));
-    }
-    let n = group.len();
-    let mut s = Search {
-        group,
-        used: vec![false; n],
-        path: Vec::new(),
-        found: Vec::new(),
-    };
-    s.run(Cur::Any, Phase::Free, None);
-    let agree = |f: &[(Option<&LedgerEntry>, Option<&LedgerEntry>, Vec<usize>)]| {
-        f.iter().all(|x| x.0 == f[0].0 && x.1 == f[0].1)
-    };
-    if s.found.is_empty() {
-        return Err(format!("the changes to {key:?} do not chain in any order"));
-    }
-    if !agree(&s.found) {
-        let Some(k) = known else {
+            (Phase::AfterState | Phase::AfterRestore, LedgerEntryChange::Updated(e)) => {
+                Some((Some(e), Phase::Free))
+            }
+            (Phase::AfterState | Phase::AfterRestore, LedgerEntryChange::Removed(_)) => {
+                Some((None, Phase::Free))
+            }
+            _ => None,
+        };
+        let Some((value, phase2)) = next else {
             return Err(format!(
-                "the changes to {key:?} chain in orders with different results"
+                "change {i} of {} to {key:?} does not follow the ones before it",
+                group.len()
             ));
         };
-        s.found.retain(|x| x.0 == k);
-        if s.found.is_empty() || !agree(&s.found) {
-            return Err(format!(
-                "the changes to {key:?} chain in orders with different results, \
-                 and the known value before the list does not settle it"
-            ));
-        }
+        cur = Some(value);
+        phase = phase2;
     }
-    let order = s.found.swap_remove(0).2;
-    Ok(order.into_iter().map(|i| s.group[i]).collect())
+    if phase == Phase::AfterState {
+        return Err(format!("the changes to {key:?} end in a STATE"));
+    }
+    Ok(())
 }
 
-/// `changes` in an order core could have emitted them in, one key's changes together, keys
-/// in order of first appearance. `known` gives, where the caller knows it, the value of a
-/// key before the list (`Some(None)` for an absent entry).
-pub fn raw_order<'a, 'k>(
-    changes: &'a [LedgerEntryChange],
-    known: impl Fn(&LedgerKey) -> Option<Option<&'k LedgerEntry>>,
-) -> Result<Vec<&'a LedgerEntryChange>, String> {
+/// `changes` one key's changes together, keys in order of first appearance, each key's
+/// changes in the order given. Fails when a key's changes do not chain in that order.
+pub fn raw_order(changes: &[LedgerEntryChange]) -> Result<Vec<&LedgerEntryChange>, String> {
     let mut keys: Vec<LedgerKey> = Vec::new();
-    let mut groups: BTreeMap<LedgerKey, Vec<&'a LedgerEntryChange>> = BTreeMap::new();
+    let mut groups: BTreeMap<LedgerKey, Vec<&LedgerEntryChange>> = BTreeMap::new();
     for c in changes {
         let k = key_of(c);
         let g = groups.entry(k.clone()).or_default();
@@ -187,7 +94,8 @@ pub fn raw_order<'a, 'k>(
     let mut out = Vec::with_capacity(changes.len());
     for k in keys {
         let g = groups.remove(&k).expect("every key has a group");
-        out.extend(order_group(&k, g, known(&k))?);
+        check_group(&k, &g)?;
+        out.extend(g);
     }
     Ok(out)
 }
@@ -239,53 +147,60 @@ mod tests {
         }
     }
 
-    /// The fee bump over its own source: a no-op pass then the sequence bump, sorted so
-    /// both STATEs come first and the no-op UPDATED last.
+    /// The fee bump over its own source: a no-op pass then the sequence bump.
     #[test]
-    fn two_groups_of_one_key_chain_back() {
-        let sorted = vec![
+    fn two_groups_of_one_key_are_read_as_given() {
+        let raw = vec![
             LedgerEntryChange::State(acct(8)),
+            LedgerEntryChange::Updated(acct(8)),
             LedgerEntryChange::State(acct(8)),
             LedgerEntryChange::Updated(acct(9)),
-            LedgerEntryChange::Updated(acct(8)),
         ];
-        let got = raw_order(&sorted, |_| None).unwrap();
+        let got = raw_order(&raw).unwrap();
         assert_eq!(seqs(&got), vec![('s', 8), ('u', 8), ('s', 8), ('u', 9)]);
     }
 
     #[test]
-    fn restored_then_updated_is_put_back_in_front() {
+    fn a_cycle_is_read_as_given() {
+        let raw = vec![
+            LedgerEntryChange::State(acct(2)),
+            LedgerEntryChange::Updated(acct(1)),
+            LedgerEntryChange::State(acct(1)),
+            LedgerEntryChange::Updated(acct(2)),
+        ];
+        let got = raw_order(&raw).unwrap();
+        assert_eq!(seqs(&got), vec![('s', 2), ('u', 1), ('s', 1), ('u', 2)]);
+    }
+
+    #[test]
+    fn restore_then_update_chains() {
+        let raw = vec![
+            LedgerEntryChange::Restored(acct(4)),
+            LedgerEntryChange::Updated(acct(5)),
+        ];
+        let got = raw_order(&raw).unwrap();
+        assert_eq!(seqs(&got), vec![('r', 4), ('u', 5)]);
+    }
+
+    /// The order core's `normalizeMeta` gives the pair above; no reader of real meta sees
+    /// it, so it is refused instead of being put back.
+    #[test]
+    fn update_before_its_restore_is_refused() {
         let sorted = vec![
             LedgerEntryChange::Updated(acct(5)),
             LedgerEntryChange::Restored(acct(4)),
         ];
-        let got = raw_order(&sorted, |_| None).unwrap();
-        assert_eq!(seqs(&got), vec![('r', 4), ('u', 5)]);
+        assert!(raw_order(&sorted).is_err());
     }
 
     #[test]
-    fn a_cycle_needs_the_known_value() {
-        // 1 -> 2 -> 1 and 2 -> 1 -> 2 chain the same multiset
-        let sorted = vec![
+    fn changes_that_do_not_chain_are_refused() {
+        let raw = vec![
             LedgerEntryChange::State(acct(1)),
-            LedgerEntryChange::State(acct(2)),
-            LedgerEntryChange::Updated(acct(1)),
             LedgerEntryChange::Updated(acct(2)),
-        ];
-        assert!(raw_order(&sorted, |_| None).is_err());
-        let one = acct(1);
-        let got = raw_order(&sorted, |_| Some(Some(&one))).unwrap();
-        assert_eq!(seqs(&got), vec![('s', 1), ('u', 2), ('s', 2), ('u', 1)]);
-    }
-
-    #[test]
-    fn changes_that_never_chain_are_refused() {
-        let sorted = vec![
-            LedgerEntryChange::State(acct(1)),
             LedgerEntryChange::State(acct(3)),
-            LedgerEntryChange::Updated(acct(2)),
             LedgerEntryChange::Updated(acct(4)),
         ];
-        assert!(raw_order(&sorted, |_| None).is_err());
+        assert!(raw_order(&raw).is_err());
     }
 }

@@ -251,11 +251,15 @@ enum ImportCommand {
     /// Index stellar-core's --check-lcm goldens and import the smallest golden ledger per
     /// family fragment as core-golden entries.
     Goldens {
-        /// A git checkout of stellar-core at the tag, holding test-lcm-current/.
+        /// A git checkout of stellar-core at the tag, holding the --tier directory.
         #[arg(long)]
         core_src: PathBuf,
         #[arg(long, default_value = "v30.0.0")]
         tag: String,
+        /// Golden tier to read. test-lcm-next is the next protocol's meta and belongs in the
+        /// next/ rehearsal tree (--corpus next), never in the release corpus.
+        #[arg(long, default_value = "test-lcm-current", value_parser = ["test-lcm-current", "test-lcm-next"])]
+        tier: String,
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
         #[arg(long, default_value = "registry")]
@@ -271,6 +275,8 @@ enum GoldensCommand {
         core_src: PathBuf,
         #[arg(long, default_value = "v30.0.0")]
         tag: String,
+        #[arg(long, default_value = "test-lcm-current", value_parser = ["test-lcm-current", "test-lcm-next"])]
+        tier: String,
         #[arg(long, default_value = "corpus/goldens/core-v30.0.0/index.json")]
         index: PathBuf,
     },
@@ -459,10 +465,11 @@ fn main() -> ExitCode {
                 ImportCommand::Goldens {
                     core_src,
                     tag,
+                    tier,
                     corpus,
                     registry,
                 },
-        } => golden_cmd::import(&core_src, &tag, &corpus, &registry),
+        } => golden_cmd::import(&core_src, &tag, &tier, &corpus, &registry),
         Command::Goldens {
             command: GoldensCommand::Agree { file, registry },
         } => golden_cmd::agree(&file, &registry),
@@ -471,9 +478,10 @@ fn main() -> ExitCode {
                 GoldensCommand::Verify {
                     core_src,
                     tag,
+                    tier,
                     index,
                 },
-        } => golden_cmd::verify(&core_src, &tag, &index),
+        } => golden_cmd::verify(&core_src, &tag, &tier, &index),
         Command::Capture {
             command:
                 CaptureCommand::History {

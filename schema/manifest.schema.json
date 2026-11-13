@@ -279,8 +279,8 @@
       "description": "Ordering rules applied to recorded meta before it is stored.",
       "oneOf": [
         {
-          "const": "core-normalize-meta",
-          "description": "The order stellar-core's own `normalizeMeta` (src/util/MetaUtils.cpp) gives change\nlists before it compares goldens. Only order changes; the bytes core wrote are a\npermutation of the stored ones.",
+          "const": "key-stable",
+          "description": "Every change list stably sorted by ledger key: the order between keys is fixed, and\neach key's changes keep the order core emitted them in. Only the order between keys\nchanges, which core leaves to a per-process hash map, so the stored bytes are an\norder core itself can emit and the bytes core wrote are a permutation of them.",
           "type": "string"
         }
       ]

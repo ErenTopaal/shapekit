@@ -119,7 +119,7 @@ pub struct ChainFile {
     pub close_schedule: CloseSchedule,
     pub ledger_range: LedgerRange,
     pub checkpoints: Vec<u32>,
-    /// How the lake's ledgers order change lists (`core-normalize-meta`).
+    /// How the lake's ledgers order change lists (`key-stable`).
     pub normalization: String,
     pub lake: LakeRecord,
     /// SHA-256 of the lake's ledgers as one record-marked stream, the canonical stream the

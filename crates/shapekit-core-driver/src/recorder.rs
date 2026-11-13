@@ -4,8 +4,9 @@
 //!
 //! The raw framed stream is kept as core wrote it (`ledgers.xdr`), as the
 //! provenance record. Beside it the recorder writes the canonical stream
-//! (`ledgers.canonical.xdr`): the same LCMs with their change lists in the
-//! order core's own `normalizeMeta` produces (see [`crate::canonical`]).
+//! (`ledgers.canonical.xdr`): the same LCMs with their change lists stably
+//! sorted by ledger key, each key's changes in core's order (see
+//! [`crate::canonical`]).
 //! Release core orders those lists differently in every process, so only
 //! the canonical stream is reproducible byte for byte, and the corpus is
 //! built from it. Writing SEP-54 batches is a separate step.
@@ -34,7 +35,7 @@ pub const CANONICAL_STREAM_FILE: &str = "ledgers.canonical.xdr";
 /// Names the ordering rule applied to the canonical stream, recorded in
 /// `chain.json` so a reader knows the canonical bytes are not core's raw
 /// output order.
-pub const NORMALIZATION: &str = "core-normalize-meta";
+pub const NORMALIZATION: &str = "key-stable";
 pub const ARCHIVE_DIR: &str = "archive";
 
 /// How long to wait for a closed ledger's meta or a checkpoint publish.
