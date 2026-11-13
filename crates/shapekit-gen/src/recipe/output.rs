@@ -216,7 +216,12 @@ pub(crate) fn merge(
             lcm_version: first.selected.lcm_version,
             tx_meta_version: first.selected.tx_meta_version,
             source: Source {
-                class: SourceClass::LocalCore,
+                // a refused envelope is the generator's bytes, never core output
+                class: if refused {
+                    SourceClass::LocalCoreRefused
+                } else {
+                    SourceClass::LocalCore
+                },
                 recipe: Some(recipe_id.to_string()),
                 chain: Some(chain_id.to_string()),
                 ledger_seq: (!refused).then_some(first.ledger_seq),
@@ -244,7 +249,7 @@ pub(crate) fn merge(
                 roundtrip: !s.must_reject,
             },
             flags: s.flags.clone(),
-            fields_exercised: s.fields_exercised.clone(),
+            fields_exercised: fields_carried(first, &s.fields_exercised)?,
             linked_issues: s
                 .linked_issues
                 .clone()
@@ -263,6 +268,46 @@ pub(crate) fn merge(
         out.push(PendingEntry { entry, bytes });
     }
     Ok(out)
+}
+
+/// The fields of `spec` that the captured bytes carry. A recipe states the fields of the
+/// transaction it built, and the envelope capture carries all of them. The meta capture
+/// of the same transaction holds the result and the ledger changes, not the envelope, so
+/// it keeps only a field whose value core also writes into a ledger entry: a signed
+/// payload signer key, which lands in the account's signer list. Every other row of
+/// fields.toml describes envelope data that meta never repeats.
+fn fields_carried(c: &Captured, fields: &[String]) -> Result<Vec<String>> {
+    if c.selected.suffix != "-meta" {
+        return Ok(fields.to_vec());
+    }
+    let mut out = Vec::new();
+    for f in fields {
+        if f == SIGNED_PAYLOAD_FIELD && carries_signed_payload(c)? {
+            out.push(f.clone());
+        }
+    }
+    Ok(out)
+}
+
+const SIGNED_PAYLOAD_FIELD: &str = "signer_key.signed_payload.payload";
+
+/// Whether the bytes hold a signed payload signer key anywhere. xdr-json renders a signer
+/// key as its strkey, so a P strkey string is the signed payload arm.
+fn carries_signed_payload(c: &Captured) -> Result<bool> {
+    let t = c.selected.xdr_type;
+    let bytes = &c.selected.bytes;
+    let value = xdr::decode(t, bytes, decode_limits(t, bytes.len()))
+        .and_then(|v| xdr::json_value(&v))
+        .with_context(|| format!("{}: decoding the {t} to find signer keys", c.slug))?;
+    fn walk(v: &Value) -> bool {
+        match v {
+            Value::String(s) => stellar_strkey::ed25519::SignedPayload::from_string(s).is_ok(),
+            Value::Array(a) => a.iter().any(walk),
+            Value::Object(o) => o.values().any(walk),
+            _ => false,
+        }
+    }
+    Ok(walk(&value))
 }
 
 /// Why a committed entry's variant cannot stand next to a fresh capture, if it cannot.
@@ -406,7 +451,7 @@ pub(crate) fn chain_entries(
             continue;
         }
         let e = read_entry(&file)?;
-        if e.source.class == SourceClass::LocalCore && e.source.chain.as_deref() == Some(chain_id) {
+        if e.source.class.is_local() && e.source.chain.as_deref() == Some(chain_id) {
             out.insert(e.id, path);
         }
     }
@@ -506,9 +551,7 @@ pub(crate) fn install_entries(
         let file = entry_dir(corpus, family, id).join(ENTRY_FILE);
         if file.exists() {
             let old = read_entry(&file)?;
-            if old.source.class != SourceClass::LocalCore
-                || old.source.chain.as_deref() != Some(chain_id)
-            {
+            if !old.source.class.is_local() || old.source.chain.as_deref() != Some(chain_id) {
                 bail!(
                     "{id} already exists as a {} entry of chain {:?}; refusing to replace it",
                     old.source.class.as_str(),
@@ -614,6 +657,63 @@ mod tests {
             }
         }
         panic!("the corpus has no local-core transaction entry");
+    }
+
+    fn committed_capture(family: &str, id: &str, suffix: &'static str) -> Captured {
+        use super::super::ctx::Spec;
+        use super::super::select::Selected;
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus");
+        let dir = root.join("entries").join(family).join(id);
+        let e = read_entry(&dir.join(ENTRY_FILE)).unwrap();
+        Captured {
+            slug: id.to_string(),
+            ledger_seq: 0,
+            selected: Selected {
+                suffix,
+                xdr_type: if suffix == "-meta" {
+                    "TransactionResultMetaV1"
+                } else {
+                    "TransactionEnvelope"
+                },
+                bytes: std::fs::read(dir.join("testnet.xdr")).unwrap(),
+                lcm_version: None,
+                tx_meta_version: e.tx_meta_version,
+                tx_index: None,
+                tx_hash: None,
+                normalized: false,
+            },
+            validity: e.expected.validity,
+            rejection: None,
+            spec: Spec::default(),
+        }
+    }
+
+    #[test]
+    fn meta_entries_keep_only_the_fields_their_bytes_carry() {
+        let fields: Vec<String> = ["op.set_options.signer", "signer_key.signed_payload.payload"]
+            .map(String::from)
+            .to_vec();
+        let family = "cap40.signed-payload-signer";
+        let base = "cap40.signed-payload-signer.p30-set-options-payload-1";
+        // the signer lands in the account's signer list, so the meta holds the payload
+        let meta = committed_capture(family, &format!("{base}-meta"), "-meta");
+        assert_eq!(
+            fields_carried(&meta, &fields).unwrap(),
+            vec!["signer_key.signed_payload.payload".to_string()]
+        );
+        let envelope = committed_capture(family, &format!("{base}-envelope"), "-envelope");
+        assert_eq!(fields_carried(&envelope, &fields).unwrap(), fields);
+        // preconditions live only in the envelope
+        let meta = committed_capture(
+            "cap21.preconditions",
+            "cap21.preconditions.p30-all-preconditions-meta",
+            "-meta",
+        );
+        let cond = vec![
+            "tx.cond.type".to_string(),
+            "tx.cond.extra_signers".to_string(),
+        ];
+        assert!(fields_carried(&meta, &cond).unwrap().is_empty());
     }
 
     #[test]

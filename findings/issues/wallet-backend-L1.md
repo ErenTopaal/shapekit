@@ -4,7 +4,7 @@
 ## What happens
 
 `(*ContractDeployProcessor).ProcessOperation` (`internal/indexer/processors/contract_deploy.go`,
-at 3e22515a44979fdc3a558fda3991ca2b48e38cef, line 115) defines a closure `walkInvocation` that
+at 3e22515a44979fdc3a558fda3991ca2b48e38cef, line 116) defines a closure `walkInvocation` that
 recurses into `SubInvocations` of every `SorobanAuthorizedInvocation` of every auth entry of an
 `InvokeHostFunction` operation. Nothing counts the depth, so the recursion goes as deep as the
 decoded tree.

@@ -263,6 +263,15 @@ func (f *flow) expr(e ast.Expr) label {
 		return f.vars[f.info.ObjectOf(x)]
 	case *ast.SelectorExpr:
 		if l := f.source(x); l.ok() {
+			// keep what the value was read from, so a check on the
+			// account, as in acct.MustMed25519().Id after a look at
+			// acct.Type, clears the field read from it
+			if inner := f.expr(x.X); inner.ok() {
+				l.chain = inner.chain
+			} else if r := sdk.Root(f.info, x.X); r != nil {
+				l.chain = []types.Object{r}
+			}
+
 			return l
 		}
 
@@ -389,6 +398,7 @@ func (f *flow) findChecks() {
 
 	all := func(label) bool { return true }
 	declared := func(l label) bool { return !l.mux() }
+	guards := f.muxGuards()
 
 	ast.Inspect(f.fd.Body, func(x ast.Node) bool {
 		switch x := x.(type) {
@@ -415,6 +425,8 @@ func (f *flow) findChecks() {
 			if x.Tag != nil {
 				f.muxTypeCheck(x.Tag)
 			}
+		case *ast.IfStmt:
+			f.guardCheck(x.Cond, guards)
 		case *ast.IndexExpr:
 			// a lookup in a map built from meta, such as created[contractID]
 			if _, isMap := f.info.TypeOf(x.X).Underlying().(*types.Map); isMap && readsMeta {
@@ -437,6 +449,81 @@ func (f *flow) muxTypeCheck(e ast.Expr) {
 	if r := sdk.Root(f.info, sel.X); r != nil {
 		f.checked[r] = true
 	}
+}
+
+// muxGuards maps the ok of GetMed25519 and the error of GetId to what they
+// guard: the id and the account it came from. GetId returns 0 with an error
+// for an account that is not muxed, so storing it without looking at the
+// error invents a mux id of 0.
+func (f *flow) muxGuards() map[types.Object][]types.Object {
+	out := map[types.Object][]types.Object{}
+
+	ast.Inspect(f.fd.Body, func(x ast.Node) bool {
+		as, ok := x.(*ast.AssignStmt)
+		if !ok || len(as.Lhs) != 2 || len(as.Rhs) != 1 {
+			return true
+		}
+
+		call, ok := ast.Unparen(as.Rhs[0]).(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+
+		if a, ok := f.accessor(sel); !ok || a.Type != "MuxedAccount" || (a.Member != "GetMed25519" && a.Member != "GetId") {
+			return true
+		}
+
+		g, ok := as.Lhs[1].(*ast.Ident)
+		if !ok {
+			return true
+		}
+
+		guard := f.info.ObjectOf(g)
+		if guard == nil || guard.Name() == "_" {
+			return true
+		}
+
+		var guarded []types.Object
+
+		if id, ok := as.Lhs[0].(*ast.Ident); ok {
+			if o := f.info.ObjectOf(id); o != nil {
+				guarded = append(guarded, o)
+			}
+		}
+
+		if r := sdk.Root(f.info, sel.X); r != nil {
+			guarded = append(guarded, r)
+		}
+
+		out[guard] = guarded
+
+		return true
+	})
+
+	return out
+}
+
+// guardCheck marks the values a guard protects when an if condition looks
+// at the guard, as in `if ok` or `if err != nil`.
+func (f *flow) guardCheck(cond ast.Expr, guards map[types.Object][]types.Object) {
+	if len(guards) == 0 {
+		return
+	}
+
+	ast.Inspect(cond, func(x ast.Node) bool {
+		if id, ok := x.(*ast.Ident); ok {
+			for _, o := range guards[f.info.ObjectOf(id)] {
+				f.checked[o] = true
+			}
+		}
+
+		return true
+	})
 }
 
 func (f *flow) isChecked(l label, e ast.Expr) bool {
@@ -480,7 +567,7 @@ func (f *flow) sinks() []sinkHit {
 			return
 		}
 
-		if kind != sinkConvert && !storable(f.info.TypeOf(e)) {
+		if kind != sinkConvert && !keyable(l, f.info.TypeOf(e)) {
 			return
 		}
 
@@ -500,6 +587,13 @@ func (f *flow) sinks() []sinkHit {
 					if i < len(x.Rhs) && f.dbField(l) {
 						hit(x.Rhs[i], sinkStore, "is stored in db field "+l.Sel.Name)
 					}
+				}
+			}
+		case *ast.IncDecStmt:
+			// m[k]++ stores under k just like m[k] = v
+			if ix, ok := ast.Unparen(x.X).(*ast.IndexExpr); ok {
+				if _, isMap := f.info.TypeOf(ix.X).Underlying().(*types.Map); isMap {
+					hit(ix.Index, sinkKey, "is used as a map key")
 				}
 			}
 		case *ast.CompositeLit:

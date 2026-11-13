@@ -98,9 +98,12 @@ The RFP gates publication of the guide on review by a stellar-core or platform e
 - Required reviewer: a stellar-core engineer or a platform engineer at SDF.
 - State: **not yet reviewed**. The guide is a draft and is not published.
 - stellar-docs pull request: drafted, not opened. It adds the page as
-  `docs/data/indexers/build-your-own/indexer-hardening.mdx` with an entry in `docs.json`, on a
-  local branch `indexer-hardening-guide` of stellar/stellar-docs that has not been pushed. The
-  tables in it are regenerated with `shapekit guide table` from the commit that is submitted.
+  `docs/data/indexers/build-your-own/indexer-hardening.mdx` with an entry in `docs.json`. On
+  2026-11-13 the page was regenerated from the current guide, committed on a local branch
+  `indexer-hardening-guide` on top of stellar-docs `main` (`734347c0`), and checked there with
+  `pnpm format:mdx` (no changes), `pnpm check` and `pnpm check:links` (both pass). The commit is
+  kept in this repository as `docs/guide/stellar-docs.patch` (see the README for applying it); it
+  has not been pushed. Regenerate the patch from the commit that is submitted.
 - When the review is done, this section records the reviewer, the date and the reviewed commit,
   and the comment lines in the guide's front matter are removed.
 

@@ -1,11 +1,18 @@
 <!-- repo: stellar/wallet-backend -->
-# CreateAccount writes a SIGNER ADD for the new account's master key, which the ledger does not show
+# Question: CreateAccount writes a SIGNER ADD row for the new account's master key (Horizon parity). Intended for state changes?
 
 ## What happens
 
-At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/effects_horizon.go` line 122](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/effects_horizon.go#L122): `addAccountCreatedEffects` emits Horizon's `signer_created` effect for the new account's master key, which becomes a `SIGNER`/`ADD` row. The ledger shows no signer: the master key's weight is threshold 0 of the new account entry, and no signer entry is added.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/effects_horizon.go` lines 122-133](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/effects_horizon.go#L122-L133): `addAccountCreatedEffects` emits a `signer_created` effect for the new account's master key with weight `keypair.DefaultSignerWeight`, which becomes a `SIGNER`/`ADD` state change. The file says it was ported from Horizon's effects processing, and Horizon does the same ([stellar-horizon `effects_processor.go`, `addAccountCreatedEffects`](https://github.com/stellar/stellar-horizon/blob/01ba44a988b3ebc2d68d3cb6747fa2c2733773cd/internal/ingest/processors/effects_processor.go#L460-L490)). It is also consistent with how set options is handled here: `SignerSummary()` counts the master key as a signer while its weight is above 0, so a later master weight change becomes a signer update or removal.
 
-Severity: wrong-data. CAPs: CAP-0033.
+So this looks like intended Horizon parity, not a mistake. The reason to ask is what a consumer of state changes sees. In the ledger the new account entry has an empty signer list; the master key's weight is byte 0 of its thresholds. A `SIGNER`/`ADD` row for the master key has the same shape as one for a signer added by set options, so a consumer that rebuilds an account's signer entries from these rows, or counts signer additions, has to know the convention and compare the key with the account to tell them apart. Nothing in the row marks it as the master key.
+
+Questions:
+
+1. Is the master key meant to appear as a signer in state changes, as in Horizon's effects?
+2. If so, would a marker on these rows (or a note in the state change docs) be welcome, so consumers do not read them as signer entries?
+
+Severity as the harness classifies it against the ledger, which has no signer entry here: wrong-data (a stored fact the meta does not show). CAPs: CAP-0033 (the corpus entry is a sponsored account creation; the row appears for any CreateAccount).
 
 ## Minimal entry
 
@@ -29,9 +36,9 @@ From the harness report of the run above (`harness-report.json`, entry `cap33.sp
 
 Verdict for the entry: mishandled (wrong-value): 0 wrong value(s), 1 fact(s) stored that the meta does not show.
 
-## Suggested fix
+## Possible changes, if a change is wanted
 
-Do not emit a signer row for account creation, or mark it as derived; the master key is not a signer entry.
+Mark the row as the master key (for example a reason or a flag), or leave master key weight to the account's thresholds and emit no signer row for it. If the Horizon convention is meant to stay, documenting it is enough.
 
 ## Other entries with the same cause
 

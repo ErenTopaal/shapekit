@@ -188,7 +188,7 @@
       },
       "source": {
         "chain": "cap01.bump-sequence.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAL/////wAAAAA=",
@@ -336,10 +336,7 @@
         "validity": "valid"
       },
       "family": "cap01.bump-sequence",
-      "fields_exercised": [
-        "op.bump_sequence.bump_to",
-        "op.account_merge.destination"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
       "kind": "xdr",
@@ -1148,10 +1145,7 @@
         "validity": "valid"
       },
       "family": "cap03.offer-liabilities",
-      "fields_exercised": [
-        "op.manage_offer.offer_id",
-        "op.manage_offer.assets_amount_price"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta",
       "kind": "xdr",
@@ -1266,10 +1260,7 @@
         "validity": "valid"
       },
       "family": "cap03.offer-liabilities",
-      "fields_exercised": [
-        "op.manage_offer.offer_id",
-        "op.manage_offer.assets_amount_price"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta",
       "kind": "xdr",
@@ -1384,10 +1375,7 @@
         "validity": "valid"
       },
       "family": "cap03.offer-liabilities",
-      "fields_exercised": [
-        "op.manage_offer.offer_id",
-        "op.manage_offer.assets_amount_price"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta",
       "kind": "xdr",
@@ -2154,13 +2142,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-fee-source-is-inner-source-meta",
       "kind": "xdr",
@@ -2276,13 +2258,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
       "kind": "xdr",
@@ -2696,13 +2672,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-inner-failed-meta",
       "kind": "xdr",
@@ -2818,13 +2788,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-inner-success-meta",
       "kind": "xdr",
@@ -2941,14 +2905,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee_source.mux_id",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta",
       "kind": "xdr",
@@ -3065,14 +3022,7 @@
         "validity": "valid"
       },
       "family": "cap15.fee-bump",
-      "fields_exercised": [
-        "tx.envelope.type",
-        "feebump.fee_source",
-        "feebump.fee_source.mux_id",
-        "feebump.fee",
-        "feebump.signatures",
-        "feebump.inner_tx"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap15.fee-bump.p30-muxed-fee-source-inner-success-meta",
       "kind": "xdr",
@@ -3379,7 +3329,7 @@
       },
       "source": {
         "chain": "cap18.maintain-liabilities.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAH/////wAAAAA=",
@@ -3794,16 +3744,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.time_bounds",
-        "tx.cond.ledger_bounds",
-        "tx.cond.min_seq_num",
-        "tx.cond.min_seq_age",
-        "tx.cond.min_seq_ledger_gap",
-        "tx.cond.extra_signers",
-        "tx.seq_num"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-all-preconditions-meta",
       "kind": "xdr",
@@ -3913,11 +3854,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.time_bounds",
-        "tx.cond.ledger_bounds"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-ledger-and-time-bounds-meta",
       "kind": "xdr",
@@ -3988,7 +3925,7 @@
       },
       "source": {
         "chain": "cap21.preconditions.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_too_late",
           "result_xdr": "AAAAAAAAAGT////9AAAAAA==",
@@ -4080,10 +4017,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.ledger_bounds"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-ledger-bounds-no-maximum-meta",
       "kind": "xdr",
@@ -4193,11 +4127,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.min_seq_age",
-        "tx.cond.min_seq_ledger_gap"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-min-seq-age-and-gap-meta",
       "kind": "xdr",
@@ -4269,7 +4199,7 @@
       },
       "source": {
         "chain": "cap21.preconditions.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_bad_min_seq_age_or_gap",
           "result_xdr": "AAAAAAAAAGT////xAAAAAA==",
@@ -4362,11 +4292,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.min_seq_num",
-        "tx.seq_num"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-min-seq-num-jump-meta",
       "kind": "xdr",
@@ -4477,12 +4403,7 @@
         "validity": "valid"
       },
       "family": "cap21.preconditions",
-      "fields_exercised": [
-        "tx.cond.type",
-        "tx.cond.extra_signers",
-        "tx.signatures",
-        "tx.signatures.hint"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap21.preconditions.p30-two-extra-signers-meta",
       "kind": "xdr",
@@ -4726,9 +4647,7 @@
         "validity": "valid"
       },
       "family": "cap23.claimable-balances",
-      "fields_exercised": [
-        "op.claim_claimable_balance.balance_id"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap23.claimable-balances.p30-claim-through-depth-4-meta",
       "kind": "xdr",
@@ -4798,7 +4717,7 @@
       },
       "source": {
         "chain": "cap23.claimable-balances.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAO/////wAAAAA=",
@@ -4893,11 +4812,7 @@
         "validity": "valid"
       },
       "family": "cap23.claimable-balances",
-      "fields_exercised": [
-        "op.create_claimable_balance.claimants.destination",
-        "op.create_claimable_balance.claimants.predicate",
-        "op.create_claimable_balance.asset_amount"
-      ],
+      "fields_exercised": [],
       "flags": [
         "max-length-vec"
       ],
@@ -5240,7 +5155,7 @@
       },
       "source": {
         "chain": "cap26.inflation.p12",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAf////0AAAAA",
@@ -7407,9 +7322,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.revoke_sponsorship"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-revoke-signer-sponsorship-meta",
       "kind": "xdr",
@@ -7517,9 +7430,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.revoke_sponsorship"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-revoke-trustline-sponsorship-meta",
       "kind": "xdr",
@@ -7677,10 +7588,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.begin_sponsoring.sponsored_id",
-        "op.create_account.destination"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-sponsored-account-meta",
       "kind": "xdr",
@@ -7836,10 +7744,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.begin_sponsoring.sponsored_id",
-        "op.create_claimable_balance.asset_amount"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-sponsored-claimable-balance-meta",
       "kind": "xdr",
@@ -7948,10 +7853,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.begin_sponsoring.sponsored_id",
-        "op.set_options.signer"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-sponsored-signer-meta",
       "kind": "xdr",
@@ -8107,10 +8009,7 @@
         "validity": "valid"
       },
       "family": "cap33.sponsorship",
-      "fields_exercised": [
-        "op.begin_sponsoring.sponsored_id",
-        "op.change_trust.line"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap33.sponsorship.p30-sponsored-trustline-meta",
       "kind": "xdr",
@@ -8324,9 +8223,7 @@
         "validity": "valid"
       },
       "family": "cap35.clawback",
-      "fields_exercised": [
-        "op.clawback_claimable_balance.balance_id"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap35.clawback.p30-clawback-claimable-balance-meta",
       "kind": "xdr",
@@ -8612,7 +8509,7 @@
       },
       "source": {
         "chain": "cap35.clawback.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAV/////wAAAAA=",
@@ -8967,11 +8864,7 @@
         "validity": "valid"
       },
       "family": "cap38.liquidity-pools",
-      "fields_exercised": [
-        "op.change_trust.line",
-        "op.change_trust.line.liquidity_pool",
-        "op.change_trust.limit"
-      ],
+      "fields_exercised": [],
       "flags": [
         "issuer-order-differs"
       ],
@@ -9055,7 +8948,7 @@
       },
       "source": {
         "chain": "cap38.liquidity-pools.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////wAAAAA=",
@@ -9150,9 +9043,7 @@
         "validity": "valid"
       },
       "family": "cap38.liquidity-pools",
-      "fields_exercised": [
-        "op.liquidity_pool_deposit"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap38.liquidity-pools.p30-deposit-meta",
       "kind": "xdr",
@@ -9440,9 +9331,7 @@
         "validity": "valid"
       },
       "family": "cap38.liquidity-pools",
-      "fields_exercised": [
-        "op.liquidity_pool_withdraw"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap38.liquidity-pools.p30-withdraw-meta",
       "kind": "xdr",
@@ -10173,7 +10062,7 @@
       },
       "source": {
         "chain": "cap40.signed-payload-signer.p28",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_malformed",
           "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
@@ -10271,9 +10160,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "tx.cond.extra_signers",
-        "tx.signatures",
-        "tx.signatures.hint",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -10391,7 +10277,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -10509,7 +10394,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.revoke_sponsorship",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -10588,7 +10472,7 @@
       },
       "source": {
         "chain": "cap40.signed-payload-signer.p28",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////+AAAAAA=",
@@ -10684,7 +10568,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -10802,7 +10685,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -10920,7 +10802,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11038,7 +10919,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11230,7 +11110,7 @@
       },
       "source": {
         "chain": "cap40.signed-payload-signer.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_malformed",
           "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
@@ -11328,9 +11208,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "tx.cond.extra_signers",
-        "tx.signatures",
-        "tx.signatures.hint",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11448,7 +11325,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11566,7 +11442,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.revoke_sponsorship",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11645,7 +11520,7 @@
       },
       "source": {
         "chain": "cap40.signed-payload-signer.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////+AAAAAA=",
@@ -11741,7 +11616,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11859,7 +11733,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -11977,7 +11850,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -12095,7 +11967,6 @@
       },
       "family": "cap40.signed-payload-signer",
       "fields_exercised": [
-        "op.set_options.signer",
         "signer_key.signed_payload.payload"
       ],
       "flags": [],
@@ -13677,10 +13548,7 @@
         "validity": "valid"
       },
       "family": "cap66.archival",
-      "fields_exercised": [
-        "tx.soroban.ext.archived_soroban_entries",
-        "tx.soroban.footprint"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap66.archival.p30-auto-restore-invoke-meta",
       "kind": "xdr",
@@ -18083,9 +17951,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p28-deploy-credit-sac-meta",
       "kind": "xdr",
@@ -18201,9 +18067,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p28-deploy-xlm-sac-meta",
       "kind": "xdr",
@@ -18383,11 +18247,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p28-trust-meta",
       "kind": "xdr",
@@ -18505,11 +18365,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
       "kind": "xdr",
@@ -18625,9 +18481,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p30-deploy-credit-sac-meta",
       "kind": "xdr",
@@ -18743,9 +18597,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p30-deploy-xlm-sac-meta",
       "kind": "xdr",
@@ -18925,11 +18777,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p30-trust-meta",
       "kind": "xdr",
@@ -19047,11 +18895,7 @@
         "validity": "valid"
       },
       "family": "cap73.sac-trust",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
       "kind": "xdr",
@@ -20192,11 +20036,7 @@
         "validity": "valid"
       },
       "family": "cap85.executable-tag",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap85.executable-tag.p30-contract-deploys-external-ref-meta",
       "kind": "xdr",
@@ -20304,9 +20144,7 @@
         "validity": "valid"
       },
       "family": "cap85.executable-tag",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap85.executable-tag.p30-create-external-ref-meta",
       "kind": "xdr",
@@ -20474,11 +20312,7 @@
         "validity": "valid"
       },
       "family": "cap85.executable-tag",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap85.executable-tag.p30-echo-executable-tag-value-meta",
       "kind": "xdr",
@@ -20693,11 +20527,7 @@
         "validity": "valid"
       },
       "family": "cap85.executable-tag",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "cap85.executable-tag.p30-update-to-external-ref-meta",
       "kind": "xdr",
@@ -21199,7 +21029,7 @@
       },
       "source": {
         "chain": "classic.failed-tx.manage-data.p1",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAK/////wAAAAA=",
@@ -21903,9 +21733,7 @@
         "validity": "valid"
       },
       "family": "classic.failed-tx",
-      "fields_exercised": [
-        "op.set_options.signer"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "classic.failed-tx.p30-add-pre-auth-signer-meta",
       "kind": "xdr",
@@ -27908,11 +27736,7 @@
         "validity": "valid"
       },
       "family": "classic.failed-tx",
-      "fields_exercised": [
-        "op.change_trust.line",
-        "op.change_trust.limit",
-        "tx.v0.source_account_ed25519"
-      ],
+      "fields_exercised": [],
       "flags": [
         "below-protocol-valid"
       ],
@@ -28265,10 +28089,7 @@
         "validity": "valid"
       },
       "family": "classic.max-length",
-      "fields_exercised": [
-        "op.manage_data.data_name",
-        "op.manage_data.data_value"
-      ],
+      "fields_exercised": [],
       "flags": [
         "max-length-vec"
       ],
@@ -28404,7 +28225,7 @@
       },
       "source": {
         "chain": "classic.max-length.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////9wAAAAA=",
@@ -28461,7 +28282,7 @@
       },
       "source": {
         "chain": "classic.max-length.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////9wAAAAA=",
@@ -31241,7 +31062,7 @@
       },
       "source": {
         "chain": "soroban.auth-trees.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_malformed",
           "result_xdr": "AAAAAAAAAAD////wAAAAAA==",
@@ -33526,14 +33347,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "tx.ext",
-        "tx.soroban.resource_fee",
-        "tx.soroban.footprint",
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-contract-deploys-with-constructor-meta",
       "kind": "xdr",
@@ -33656,10 +33470,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage",
-        "tx.ext"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-create-contract-v1-meta",
       "kind": "xdr",
@@ -33783,11 +33594,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "op.invoke_host_function.create_contract.preimage",
-        "op.invoke_host_function.create_contract_v2.constructor_args",
-        "tx.ext"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-create-contract-v2-constructor-meta",
       "kind": "xdr",
@@ -33911,11 +33718,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "op.extend_footprint_ttl.extend_to",
-        "tx.soroban.footprint",
-        "tx.ext"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-extend-ttl-meta",
       "kind": "xdr",
@@ -34044,14 +33847,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "tx.ext",
-        "tx.soroban.resource_fee",
-        "tx.soroban.footprint",
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "failed-tx"
       ],
@@ -34182,14 +33978,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "tx.ext",
-        "tx.soroban.resource_fee",
-        "tx.soroban.footprint",
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "failed-tx"
       ],
@@ -34318,14 +34107,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "tx.ext",
-        "tx.soroban.resource_fee",
-        "tx.soroban.footprint",
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-invoke-restored-contract-meta",
       "kind": "xdr",
@@ -34452,14 +34234,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "tx.ext",
-        "tx.soroban.resource_fee",
-        "tx.soroban.footprint",
-        "op.invoke_host_function.invoke_contract.contract_address",
-        "op.invoke_host_function.invoke_contract.function_name",
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-invoke-temporary-entry-meta",
       "kind": "xdr",
@@ -34583,11 +34358,7 @@
         "validity": "valid"
       },
       "family": "soroban.invoke-basics",
-      "fields_exercised": [
-        "op.restore_footprint",
-        "tx.soroban.footprint",
-        "tx.ext"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.invoke-basics.p30-restore-archived-instance-and-code-meta",
       "kind": "xdr",
@@ -34947,7 +34718,7 @@
       },
       "source": {
         "chain": "soroban.muxed-source.p28",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_soroban_invalid",
           "result_xdr": "AAAAAAAALFL////vAAAAAA==",
@@ -35256,7 +35027,7 @@
       },
       "source": {
         "chain": "soroban.muxed-source.p30",
-        "class": "local-core",
+        "class": "local-core-refused",
         "core_rejection": {
           "result_code": "tx_soroban_invalid",
           "result_xdr": "AAAAAAAAGVH////vAAAAAA==",
@@ -35984,9 +35755,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
       "kind": "xdr",
@@ -36100,9 +35869,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.scval-shapes.p30-integer-extremes-meta",
       "kind": "xdr",
@@ -36218,9 +35985,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "max-depth"
       ],
@@ -36397,9 +36162,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "colliding-map-keys"
       ],
@@ -36515,9 +36278,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [],
       "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
       "kind": "xdr",
@@ -36692,9 +36453,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "non-utf8"
       ],
@@ -36873,9 +36632,7 @@
         "validity": "valid"
       },
       "family": "soroban.scval-shapes",
-      "fields_exercised": [
-        "op.invoke_host_function.invoke_contract.args"
-      ],
+      "fields_exercised": [],
       "flags": [
         "max-depth"
       ],

@@ -25,12 +25,13 @@ var trustedPartial = map[string]bool{
 
 // carriers are methods that are not listed as accessors in fields.toml but
 // hand out an unvalidated field inside their result: MuxedAccount.Address
-// renders the mux id into an M strkey, SignerKey.Address renders a signed
-// payload into a P strkey. Each inherits the rows of the listed accessor
-// named on the right.
+// and GetAddress render the mux id into an M strkey, SignerKey.Address
+// renders a signed payload into a P strkey. Each inherits the rows of the
+// listed accessor named on the right.
 var carriers = map[fieldtable.Accessor]fieldtable.Accessor{
-	{Type: "MuxedAccount", Member: "Address"}: {Type: "MuxedAccount", Member: "GetId"},
-	{Type: "SignerKey", Member: "Address"}:    {Type: "SignerKey", Member: "GetEd25519SignedPayload"},
+	{Type: "MuxedAccount", Member: "Address"}:    {Type: "MuxedAccount", Member: "GetId"},
+	{Type: "MuxedAccount", Member: "GetAddress"}: {Type: "MuxedAccount", Member: "GetId"},
+	{Type: "SignerKey", Member: "Address"}:       {Type: "SignerKey", Member: "GetEd25519SignedPayload"},
 }
 
 // unmuxers return the base account and drop the mux id.

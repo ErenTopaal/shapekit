@@ -137,13 +137,13 @@ null = ["from"]
 
 [[finding]]
 id = "WB-W4"
-title = "to_muxed_id is kept only when it is a u64; a text, hash or return memo carried by the event is lost"
+title = "question: to_muxed_id keeps only u64 values, so a text, hash or return memo of a payment to a G address is not stored; intended?"
 component = "wallet-backend"
 severity = "data-loss"
 status = "draft"
 draft = "findings/issues/wallet-backend-W4.md"
 related = ["https://github.com/stellar/wallet-backend/issues/800"]
-cause = "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it."
+cause = "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it. Its code comment says this is deliberate, and no other table seems to keep the memo; the draft asks whether that is intended."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -210,12 +210,12 @@ problems = ["dropped"]
 
 [[finding]]
 id = "WB-W9"
-title = "CreateAccount writes a SIGNER ADD for the new account's master key, which the ledger does not show"
+title = "question: CreateAccount writes a SIGNER ADD row for the new account's master key (Horizon parity); intended for state changes?"
 component = "wallet-backend"
 severity = "wrong-data"
 status = "draft"
 draft = "findings/issues/wallet-backend-W9.md"
-cause = "Following Horizon's effects, account creation emits a signer-created state change for the master key. The ledger has no signer entry: the master key's weight is threshold 0 of the account entry, and no signer was added."
+cause = "Following Horizon's effects (the code says it was ported from them), account creation emits a signer-created state change for the master key, and set options treats the master key as a signer while its weight is above 0. The ledger has no signer entry: the master key's weight is byte 0 of the account's thresholds. Likely intended; the draft asks, and what it would cost consumers is that the row looks like a signer entry."
 
 [[finding.harness]]
 target = "wallet-backend"

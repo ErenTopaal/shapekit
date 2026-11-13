@@ -279,6 +279,7 @@ fn normalization_is_only_for_local_core() {
 #[test]
 fn refused_local_core_entries_carry_cores_result() {
     use shapekit_manifest::{CoreRejection, RejectionStage, Validity};
+    use shapekit_registry::SourceClass;
     use stellar_xdr::{Limits, TransactionResult, TransactionResultExt, WriteXdr};
 
     let malformed = TransactionResult {
@@ -288,47 +289,72 @@ fn refused_local_core_entries_carry_cores_result() {
     }
     .to_xdr_base64(Limits::none())
     .unwrap();
-    let local = |manifest: &mut Manifest| {
+    let rejection = |stage, code: &str| {
+        Some(CoreRejection {
+            stage,
+            result_code: code.into(),
+            result_xdr: malformed.clone(),
+        })
+    };
+    let local = |manifest: &mut Manifest, class| {
         let e = &mut manifest.entries[0];
-        e.source.class = shapekit_registry::SourceClass::LocalCore;
+        e.source.class = class;
         e.source.recipe = Some("cap15.fee-bump".into());
         e.source.chain = Some("cap15.fee-bump.p30".into());
         e.expected.validity = Validity::InvalidByCore;
     };
 
-    let (dir, mut manifest) = sample();
-    local(&mut manifest);
-    let p = problems(&manifest, dir.path());
-    assert_eq!(p.len(), 1, "{p:#?}");
-    assert!(p[0].contains("needs source.core_rejection"), "{p:#?}");
+    for class in [SourceClass::LocalCore, SourceClass::LocalCoreRefused] {
+        let (dir, mut manifest) = sample();
+        local(&mut manifest, class);
+        let p = problems(&manifest, dir.path());
+        assert_eq!(p.len(), 1, "{class:?}: {p:#?}");
+        assert!(p[0].contains("core_rejection"), "{class:?}: {p:#?}");
+    }
 
     let (dir, mut manifest) = sample();
-    local(&mut manifest);
-    manifest.entries[0].source.core_rejection = Some(CoreRejection {
-        stage: RejectionStage::Submit,
-        result_code: "tx_bad_auth".into(),
-        result_xdr: malformed.clone(),
-    });
+    local(&mut manifest, SourceClass::LocalCoreRefused);
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Submit, "tx_bad_auth");
     let p = problems(&manifest, dir.path());
     assert_eq!(p.len(), 1, "{p:#?}");
     assert!(p[0].contains("result_xdr holds tx_malformed"), "{p:#?}");
 
     let (dir, mut manifest) = sample();
-    local(&mut manifest);
-    manifest.entries[0].source.core_rejection = Some(CoreRejection {
-        stage: RejectionStage::Submit,
-        result_code: "tx_malformed".into(),
-        result_xdr: malformed.clone(),
-    });
+    local(&mut manifest, SourceClass::LocalCoreRefused);
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Submit, "tx_malformed");
+    assert_eq!(problems(&manifest, dir.path()), Vec::<String>::new());
+
+    // bytes refused at submission never reached a ledger, so local-core would present them
+    // as core output
+    let (dir, mut manifest) = sample();
+    local(&mut manifest, SourceClass::LocalCore);
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Submit, "tx_malformed");
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(
+        p[0].contains("is local-core-refused, not local-core"),
+        "{p:#?}"
+    );
+
+    // a transaction core applied and failed did reach a ledger
+    let (dir, mut manifest) = sample();
+    local(&mut manifest, SourceClass::LocalCoreRefused);
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Apply, "tx_malformed");
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(
+        p[0].contains("needs source.core_rejection.stage submit"),
+        "{p:#?}"
+    );
+
+    let (dir, mut manifest) = sample();
+    local(&mut manifest, SourceClass::LocalCore);
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Apply, "tx_malformed");
     assert_eq!(problems(&manifest, dir.path()), Vec::<String>::new());
 
     // a rejection on an entry core accepted contradicts it
     let (dir, mut manifest) = sample();
-    manifest.entries[0].source.core_rejection = Some(CoreRejection {
-        stage: RejectionStage::Submit,
-        result_code: "tx_malformed".into(),
-        result_xdr: malformed,
-    });
+    manifest.entries[0].source.core_rejection = rejection(RejectionStage::Submit, "tx_malformed");
     let p = problems(&manifest, dir.path());
     assert!(
         p.iter().any(|m| m.contains("not invalid-by-core")),

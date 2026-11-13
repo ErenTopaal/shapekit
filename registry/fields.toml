@@ -118,7 +118,7 @@ checks = "never compared, never looked up, never stored in a ledger entry. toAcc
 protocol_min = 13
 risk = "any 64-bit value, chosen by the submitter, with no account behind it. trusting it as an account id, or storing a muxed address in a 32-byte column, truncates or fabricates identities (wallet-backend#716)"
 handling = "store the base account and the mux id separately, the id as an unsigned 64-bit value; never treat an M address as an account that exists; key balances by the base account"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "makeMuxIDSCVal, makeMuxedAccountAddress", lines = "2272-2300" },
@@ -455,7 +455,7 @@ checks = "discarded by toAccountID in getFeeSourceID; not checked"
 protocol_min = 13
 risk = "submitter-chosen 64-bit value with no account behind it (stellar-etl#477 historical fee_account_muxed rows)"
 handling = "store base account and mux id separately"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::getFeeSourceID", lines = "675-679" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
@@ -529,7 +529,7 @@ checks = "discarded by toAccountID; copied into events only. from protocol 25 a 
 protocol_min = 13
 risk = "same as the transaction source mux id; a muxed operation source plus its base account can collide as two keys for one account (wallet-backend#753)"
 handling = "store base account and mux id separately; de-duplicate participants by base account"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/OperationFrame.cpp", symbol = "OperationFrame::getSourceID", lines = "264-269" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::validateSorobanMemo", lines = "340-369" },
@@ -585,7 +585,7 @@ checks = "reduced away by toAccountID; copied into the transfer event as to_muxe
 protocol_min = 13
 risk = "an arbitrary id that does not correspond to anything on ledger; truncating M addresses to 32 bytes loses it (wallet-backend#716)"
 handling = "store base account plus unsigned 64-bit id; read the id from the event when present"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PaymentOpFrame.cpp", symbol = "PaymentOpFrame::doApply", lines = "50-64" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/EventManager.cpp", symbol = "getPossibleMuxedData", lines = "104-136" },
@@ -642,7 +642,7 @@ checks = "discarded by getDestID (toAccountID); copied into the transfer event"
 protocol_min = 13
 risk = "as for payment mux id"
 handling = "as for payment mux id"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/PathPaymentOpFrameBase.cpp", symbol = "PathPaymentOpFrameBase::getDestID", lines = "25-29" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "toAccountID", lines = "1184-1201" },
@@ -936,7 +936,7 @@ checks = "discarded by toAccountID at apply; copied into the clawback event"
 protocol_min = 17
 risk = "arbitrary 64-bit value"
 handling = "store separately from the base account"
-go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
+go_accessors = ["xdr.MuxedAccount.Med25519", "xdr.MuxedAccount.GetMed25519", "xdr.MuxedAccount.MustMed25519", "xdr.MuxedAccountMed25519.Id", "xdr.MuxedAccount.GetId"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/ClawbackOpFrame.cpp", symbol = "ClawbackOpFrame::doApply", lines = "28-61" },
 ]

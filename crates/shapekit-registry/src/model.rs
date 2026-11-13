@@ -180,6 +180,9 @@ pub struct FamiliesFile {
 pub enum SourceClass {
     CoreGolden,
     LocalCore,
+    /// An envelope the generator built and a local core refused at submission. The bytes
+    /// never reached a ledger, so they are not core-emitted output, but core's answer is.
+    LocalCoreRefused,
     TestnetHistory,
     MainnetHistory,
     Synthetic,
@@ -190,10 +193,16 @@ impl SourceClass {
         match self {
             SourceClass::CoreGolden => "core-golden",
             SourceClass::LocalCore => "local-core",
+            SourceClass::LocalCoreRefused => "local-core-refused",
             SourceClass::TestnetHistory => "testnet-history",
             SourceClass::MainnetHistory => "mainnet-history",
             SourceClass::Synthetic => "synthetic",
         }
+    }
+
+    /// Made by a recipe against a local core, whether core accepted it or not.
+    pub fn is_local(self) -> bool {
+        matches!(self, SourceClass::LocalCore | SourceClass::LocalCoreRefused)
     }
 }
 

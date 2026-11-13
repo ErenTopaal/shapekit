@@ -1,11 +1,18 @@
 <!-- repo: stellar/wallet-backend -->
-# To_muxed_id is kept only when it is a u64; a text, hash or return memo carried by the event is lost
+# Question: to_muxed_id keeps only u64 values, so a text, hash or return memo of a payment to a G address is not stored. Intended?
 
 ## What happens
 
-At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` line 123](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L123): `setToMuxedID` keeps the CAP-67 `to_muxed_id` only when it is an id (`ttp.MuxedInfo_Id`). Core writes the transaction memo there when the destination is not muxed: text as `string`, hash and return as `bytes`. Those values are dropped, so the stored credit has no `to_muxed_id` although the event carries one.
+At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` lines 119-124](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L119-L124): `setToMuxedID` copies the CAP-67 `to_muxed_id` of a transfer or mint event into the credit row only when its content is an id (`ttp.MuxedInfo_Id`). The comment above it says this is deliberate: "text and hash memos are not ids and are left out". The column is documented as the "CAP-67 destination memo (u64)" (`internal/indexer/types/types.go` line 917).
 
-Severity: data-loss. CAPs: CAP-0019, CAP-0024, CAP-0067.
+So this may well be intended. The reason to ask is what it costs a consumer. For a classic payment to a G address that carries a text, hash or return memo, core writes that memo into the event's `to_muxed_id` (typed as `string` or `bytes`). That is the common shape of a deposit to an exchange or custodian that identifies the customer by a text memo. At this commit no other table seems to keep it either: the `transactions` table (`internal/db/migrations/2025-06-10.2-transactions.sql`) has no memo column, and `operations.operation_xdr` holds the operation, not the transaction's memo. If that reading is right, an indexer consumer cannot recover which customer a text-memo deposit was for from wallet-backend's data, while it can for a MEMO_ID deposit or an M address.
+
+Questions:
+
+1. Is dropping text, hash and return memos from `to_muxed_id` the intended behaviour?
+2. If so, is the memo meant to be available somewhere else (another table or the API) that I missed?
+
+Severity as the harness classifies it against the ledger: data-loss (the event carries a value that no stored row has). CAPs: CAP-0019, CAP-0024, CAP-0067.
 
 ## Minimal entry
 
@@ -30,9 +37,9 @@ From the harness report of the run above (`harness-report.json`, entry `classic.
 
 Verdict for the entry: mishandled (wrong-value): 1 wrong value(s), 0 fact(s) stored that the meta does not show.
 
-## Suggested fix
+## Possible changes, if this is not intended
 
-Store `to_muxed_id` with its type (u64, string, bytes), as CAP-67 defines it, or keep the memo it carries in another column.
+Store `to_muxed_id` with its CAP-67 type (u64, string or bytes), or store the transaction memo in its own column. If it is intended, a line in the schema or API docs saying that only id memos are kept would let consumers know to read memos elsewhere.
 
 ## Other entries with the same cause
 

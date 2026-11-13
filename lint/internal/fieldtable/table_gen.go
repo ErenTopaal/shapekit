@@ -81,6 +81,7 @@ var Fields = []Field{
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
 			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},
@@ -356,6 +357,8 @@ var Fields = []Field{
 		Handling:        "store base account and mux id separately",
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
+			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},
@@ -412,6 +415,8 @@ var Fields = []Field{
 		Handling:        "store base account and mux id separately; de-duplicate participants by base account",
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
+			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},
@@ -455,6 +460,8 @@ var Fields = []Field{
 		Handling:        "store base account plus unsigned 64-bit id; read the id from the event when present",
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
+			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},
@@ -498,6 +505,8 @@ var Fields = []Field{
 		Handling:        "as for payment mux id",
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
+			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},
@@ -753,6 +762,8 @@ var Fields = []Field{
 		Handling:        "store separately from the base account",
 		Accessors: []Accessor{
 			{Type: "MuxedAccount", Member: "Med25519"},
+			{Type: "MuxedAccount", Member: "GetMed25519"},
+			{Type: "MuxedAccount", Member: "MustMed25519"},
 			{Type: "MuxedAccountMed25519", Member: "Id"},
 			{Type: "MuxedAccount", Member: "GetId"},
 		},

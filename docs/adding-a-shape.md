@@ -133,9 +133,14 @@ family apart.
   example the result code of a refused twin, or the signers on an account) and fail with a
   message. A recipe never passes by accident.
 - **Negative twins.** Where core refuses a malformed variant, submit it with `capture_rejected`
-  and check the returned result code. The entry gets `expected.validity = invalid-by-core` and
-  `source.core_rejection { stage: submit, result_code, result_xdr }`. A malformed transaction that
-  core includes and fails is a normal `submit_and_close_failing` plus `capture`.
+  and check the returned result code. The entry gets `source.class = local-core-refused`,
+  `expected.validity = invalid-by-core` and
+  `source.core_rejection { stage: submit, result_code, result_xdr }`. Its bytes are what the
+  generator built, not output core wrote into a ledger, which is what the separate class tells
+  a consumer; `synthetic` stays `false` because core's answer to them is real, and coverage never
+  counts them. List `local-core-refused` in the family's `source_classes`. A malformed
+  transaction that core includes and fails is a normal `submit_and_close_failing` plus `capture`
+  and stays `local-core`.
 - **Only core-emitted bytes.** Never hand-build an entry. Hand-crafted values belong to
   `shapekit synth` with `synthetic: true`.
 - **Soroban.** `soroban_settings() -> true` applies testnet's live CONFIG_SETTING values before
@@ -250,10 +255,14 @@ that the lake holds exactly the canonical form of `ledgers.xdr`. `shapekit pack 
 read-only JSON-RPC endpoint shaped like stellar-rpc, with `POST /control/head` to release
 ledgers one at a time.
 
-Entry fields filled by the generator: `source.class = local-core`, `source.recipe`,
+Entry fields filled by the generator: `source.class = local-core` (`local-core-refused` for an
+envelope core refused at submission), `source.recipe`,
 `source.chain`, `source.ledger_seq` (absent for refused envelopes), `source.tx_index`,
 `protocol.generated_at`, `lcm_version` and `tx_meta_version` where they apply, `caps` and the
-protocol range from the family (for contrast entries, the range above). `source.tx_hash` is
+protocol range from the family (for contrast entries, the range above). `fields_exercised`
+comes from the recipe's `Spec`: the `-envelope` entry of a transaction carries all of them, the
+`-meta` entry only those its bytes hold (today a signed payload signer key that lands in an
+account's signer list), since meta does not repeat the envelope. `source.tx_hash` is
 left out because a transaction hash covers the network id and so differs between the
 variants; it is derivable from each variant's envelope.
 

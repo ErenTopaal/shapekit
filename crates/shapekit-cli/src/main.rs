@@ -15,6 +15,7 @@ mod pack_cmd;
 mod pins;
 mod registry_cmd;
 mod serve_cmd;
+mod site_cmd;
 mod synth_cmd;
 
 use std::path::PathBuf;
@@ -117,6 +118,11 @@ enum Command {
     Fuzz(fuzz_cmd::FuzzArgs),
     /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
     Coverage(coverage_cmd::CoverageArgs),
+    /// The static site in site/: its JSON data, derived from committed files only.
+    Site {
+        #[command(subcommand)]
+        command: site_cmd::SiteCommand,
+    },
     /// The corpus as a release asset.
     Corpus {
         #[command(subcommand)]
@@ -543,6 +549,7 @@ fn main() -> ExitCode {
         Command::Fuzz(args) => fuzz_cmd::run(args),
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
+        Command::Site { command } => site_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

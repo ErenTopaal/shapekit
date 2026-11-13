@@ -155,6 +155,11 @@ impl Checker<'_> {
             SourceClass::LocalCore => {
                 vec![("recipe", s.recipe.is_some()), ("chain", s.chain.is_some())]
             }
+            SourceClass::LocalCoreRefused => vec![
+                ("recipe", s.recipe.is_some()),
+                ("chain", s.chain.is_some()),
+                ("core_rejection", s.core_rejection.is_some()),
+            ],
             SourceClass::TestnetHistory | SourceClass::MainnetHistory => vec![
                 ("ledger_seq", s.ledger_seq.is_some()),
                 ("provenance_url", s.provenance_url.is_some()),
@@ -183,7 +188,7 @@ impl Checker<'_> {
 
     fn normalization(&mut self) {
         let e = self.entry;
-        let local = e.source.class == SourceClass::LocalCore;
+        let local = e.source.class.is_local();
         if e.source.normalization.is_some() && !local {
             self.problem("source.normalization is only recorded for local-core entries");
         }
@@ -207,6 +212,18 @@ impl Checker<'_> {
             }
             return;
         };
+        // bytes refused at submission never reached a ledger, so they must not be labelled
+        // as core output; bytes core applied and failed did reach one
+        let refused = r.stage == RejectionStage::Submit;
+        match e.source.class {
+            SourceClass::LocalCore if refused => self.problem(
+                "an envelope core refused at submission is local-core-refused, not local-core",
+            ),
+            SourceClass::LocalCoreRefused if !refused => {
+                self.problem("a local-core-refused entry needs source.core_rejection.stage submit")
+            }
+            _ => {}
+        }
         if !invalid {
             self.problem(
                 "source.core_rejection is set but expected.validity is not invalid-by-core",

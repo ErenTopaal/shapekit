@@ -953,9 +953,10 @@ pub fn agree(
         let slot = by_family.entry(e.family.as_str()).or_default();
         match e.source.class {
             SourceClass::CoreGolden => slot.0.push(e),
-            SourceClass::LocalCore | SourceClass::TestnetHistory | SourceClass::MainnetHistory => {
-                slot.1.push(e)
-            }
+            SourceClass::LocalCore
+            | SourceClass::LocalCoreRefused
+            | SourceClass::TestnetHistory
+            | SourceClass::MainnetHistory => slot.1.push(e),
             SourceClass::Synthetic => {}
         }
     }

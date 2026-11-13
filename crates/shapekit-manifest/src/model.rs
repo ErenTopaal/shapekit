@@ -188,6 +188,7 @@ pub enum RejectionStage {
 enum SourceClassSchema {
     CoreGolden,
     LocalCore,
+    LocalCoreRefused,
     TestnetHistory,
     MainnetHistory,
     Synthetic,

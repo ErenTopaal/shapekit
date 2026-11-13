@@ -73,19 +73,19 @@ Entries match by rule, package and function (`Name`, `(T).Name` or `(*T).Name`),
 
 The fields come from `registry/fields.toml`, the same file that produces the guide's field table. `go generate ./internal/fieldtable` in `lint/` turns it into `lint/internal/fieldtable/table_gen.go`, and a test fails when the generated table and the registry differ, so the linter and the guide cannot drift.
 
-Fields checked: every row with `validated_by_core = "no"` (mux ids of every muxed account, memo text, id, hash and return hash, manage data values), plus the `partial` rows whose checked part is not the part an indexer relies on: the signed payload of a signer key, the declared Soroban footprint, and declared auth entries with their credentials, nonces, signatures, delegates and invocation trees. A read of any `go_accessors` entry of those rows starts a flow. Two methods are not listed as accessors but carry a field inside their result and are treated as accessors of the matching rows: `MuxedAccount.Address` (an M strkey carries the mux id) and `SignerKey.Address` (a P strkey carries the payload).
+Fields checked: every row with `validated_by_core = "no"` (mux ids of every muxed account, memo text, id, hash and return hash, manage data values), plus the `partial` rows whose checked part is not the part an indexer relies on: the signed payload of a signer key, the declared Soroban footprint, and declared auth entries with their credentials, nonces, signatures, delegates and invocation trees. A read of any `go_accessors` entry of those rows starts a flow. For mux ids the accessors are `MuxedAccount.Med25519`, `GetMed25519`, `MustMed25519`, `GetId` and `MuxedAccountMed25519.Id`; a test resolves every listed accessor against the go-stellar-sdk the testdata module pins (v0.8.0; it also passes against v0.9.0, which has the same names). Three methods are not listed as accessors but carry a field inside their result and are treated as accessors of the matching rows: `MuxedAccount.Address` and `MuxedAccount.GetAddress` (an M strkey carries the mux id) and `SignerKey.Address` (a P strkey carries the payload).
 
 A finding is reported when that value, inside the function, reaches:
 
-- a key: a map store, a set `Add`/`Store`/`Put`/`Insert`/`Union`, or a `New...Set(...)` constructor;
+- a key: a map store (`m[k] = v`, `m[k] += v` or `m[k]++`), a set `Add`/`Store`/`Put`/`Insert`/`Union`, or a `New...Set(...)` constructor;
 - storage: a struct field with a `db` tag, a SQL `Exec`/`Query`/`QueryRow`/`CopyFrom`/`Queue` call, or an argument of a function whose parameter reaches storage (worked out per function and passed across packages as an analysis fact);
 - a lossy conversion: bytes to `string`, or an unsigned 64-bit value to a signed integer.
 
-Numbers are only checked at conversions; storing a `uint64` as such is the handling the registry asks for.
+Keys and storage are checked for strings, byte slices and arrays, and named struct types. Integers are checked there only when they carry a mux id: a mux id is any 64-bit value the submitter picked, so a mux id used as a map key, or stored, without a look at the account type first treats a number with no account behind it as an identity (and `id, _ := acct.GetId()` stores 0 for every account that is not muxed). Once the code has looked at the type, storing the id as a `uint64` next to the base account is the handling the registry asks for and is not reported. Other numbers, such as a memo id, are only checked at conversions.
 
-Recognized checks: `utf8.Valid`, `utf8.ValidString` or `strings.ToValidUTF8` on the value; for mux ids, a comparison or switch on the muxed account's `Type`, or `ToAccountId()`, which drops the id; for declared auth and footprint data, an equality comparison or a map lookup in a function whose call tree reads transaction meta (the pattern `if _, ok := created[contractID]; ok`).
+Recognized checks: `utf8.Valid`, `utf8.ValidString` or `strings.ToValidUTF8` on the value; for mux ids, a comparison or switch on the muxed account's `Type`, an `if` on the `ok` of `GetMed25519` or the error of `GetId`, or `ToAccountId()`, which drops the id; for declared auth and footprint data, an equality comparison or a map lookup in a function whose call tree reads transaction meta (the pattern `if _, ok := created[contractID]; ok`).
 
-What it cannot see: flows through struct fields or interface maps between functions (a value put into `map[string]interface{}` in one function and read back in another is lost), flows through channels and goroutines, a check done in a caller, `ScAddress.String()` on a muxed account address (left out because nearly every call is on a contract address), and whether a check is the right one (any `utf8.ValidString` call on the value clears it, whatever the code does with the result).
+What it cannot see: flows through struct fields or interface maps between functions (a value put into `map[string]interface{}` in one function and read back in another is lost), flows through channels and goroutines, a check done in a caller, `ScAddress.String()` on a muxed account address (left out because nearly every call is on a contract address), and whether a check is the right one (any `utf8.ValidString` call on the value clears it, whatever the code does with the result; a look at the account type clears a mux id even when the code then keys a map by the id alone).
 
 ## IDX002: missing depth or size cap
 
@@ -111,7 +111,7 @@ What it cannot see: a meta read that does not actually confirm the envelope addr
 
 ## Results on stellar/wallet-backend
 
-Checked at the commits below with `indexerlint ./...` (and `go vet -vettool` at the current pin, same result). Findings are per function.
+Checked at the commits below with `indexerlint ./...` (and `go vet -vettool` at the current pin, same result). Findings are per function. The table was rerun on 2026-11-13 after IDX001 started reporting `m[k]++` keys and mux ids used as integer keys or stored as integers: every commit gave the same findings as before, line for line. Outside its integration test helpers wallet-backend does not read mux ids through the xdr accessors: it takes the id from the token transfer processor's `MuxedInfo` and reduces envelope accounts with `ToAccountId()` before using them, so the new sinks have nothing to report there.
 
 | Commit | Role | IDX001 | IDX002 | IDX003 |
 |---|---|---|---|---|
@@ -138,7 +138,7 @@ Each rule has a testdata module under `lint/<rule>/testdata` that imports the re
 
 | Rule | Seeded violations | Detected | Unexpected findings |
 |---|---|---|---|
-| IDX001 | 8 | 8 | 0 |
+| IDX001 | 15 | 15 | 0 |
 | IDX002 | 14 | 14 | 0 |
 | IDX003 | 11 | 11 | 0 |
 

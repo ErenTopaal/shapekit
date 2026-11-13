@@ -165,7 +165,7 @@ func (c *checker) solvePersists() {
 			}
 
 			for i, p := range params {
-				if cur[i] || p == nil || !storable(p.Type()) {
+				if cur[i] || p == nil || (!storable(p.Type()) && !isInteger(p.Type())) {
 					continue
 				}
 
@@ -225,7 +225,7 @@ func paramObjects(info *types.Info, ft *ast.FuncType) []types.Object {
 
 // storable reports whether a value of type t is worth following into
 // storage: strings, byte slices and arrays, and named struct types such as
-// nullable column wrappers. Plain numbers are left to the conversion check.
+// nullable column wrappers. Numbers go through keyable.
 func storable(t types.Type) bool {
 	if t == nil {
 		return false
@@ -245,6 +245,31 @@ func storable(t types.Type) bool {
 	default:
 		return false
 	}
+}
+
+// keyable reports whether a value labeled l of type t counts at a key or
+// storage sink. Integers count only for mux ids: a mux id is any 64-bit
+// value the submitter picked, so keying or storing it without first
+// looking at the account type treats a number with no account behind it as
+// an identity. Other integers, such as a memo id, are only checked at
+// conversions. Integer parameters are followed so a mux id stored through
+// a helper is seen.
+func keyable(l label, t types.Type) bool {
+	if storable(t) {
+		return true
+	}
+
+	return isInteger(t) && (l.mux() || l.row.ID == paramRow.ID)
+}
+
+func isInteger(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	b, ok := t.Underlying().(*types.Basic)
+
+	return ok && b.Info()&types.IsInteger != 0
 }
 
 func isByte(t types.Type) bool {

@@ -172,7 +172,10 @@ impl EntryShape<'_> {
 /// Bytes core wrote into a ledger: any non-synthetic xdr entry that core did not refuse.
 pub fn is_core_emitted(entry: &Entry) -> bool {
     entry.kind == EntryKind::Xdr
-        && entry.source.class != SourceClass::Synthetic
+        && !matches!(
+            entry.source.class,
+            SourceClass::Synthetic | SourceClass::LocalCoreRefused
+        )
         && entry.expected.validity == Validity::Valid
 }
 

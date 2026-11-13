@@ -31,7 +31,7 @@ signature = [
     ".body:revoke_sponsorship:signer.signer_key:ed25519_signed_payload",
     ".signers[].key:ed25519_signed_payload",
 ]
-source_classes = ["local-core", "testnet-history", "synthetic"]
+source_classes = ["local-core", "testnet-history", "synthetic", "local-core-refused"]
 fields = [
     "signer_key.signed_payload.payload",
     "op.set_options.signer",
@@ -92,7 +92,7 @@ signature = [
     "OperationBody:restore_footprint",
     ".source_account:muxed_ed25519",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = [
     "tx.source_account",
     "tx.source_account.mux_id",
@@ -181,7 +181,7 @@ signature = [
     ".root_invocation.sub_invocations[].sub_invocations[].sub_invocations[]",
     "SorobanAuthorizedFunction:create_contract_host_fn",
 ]
-source_classes = ["local-core", "synthetic"]
+source_classes = ["local-core", "synthetic", "local-core-refused"]
 fields = [
     "op.invoke_host_function.auth",
     "auth.credentials.source_account",
@@ -211,7 +211,7 @@ signature = [
     "TrustLineEntryV1Ext:v2",
     "ChangeTrustResult:malformed",
 ]
-source_classes = ["local-core", "testnet-history", "synthetic"]
+source_classes = ["local-core", "testnet-history", "synthetic", "local-core-refused"]
 fields = [
     "op.change_trust.line",
     "op.change_trust.line.liquidity_pool",
@@ -278,7 +278,7 @@ signature = [
     ".signers#max",
     "SetOptionsResult:too_many_signers",
 ]
-source_classes = ["local-core", "synthetic"]
+source_classes = ["local-core", "synthetic", "local-core-refused"]
 fields = [
     "tx.operations",
     "tx.signatures",
@@ -569,7 +569,7 @@ signature = [
     "AllowTrustResult:self_not_allowed",
     "ChangeTrustResult:self_not_allowed",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = [
     "tx.source_account",
     "op.source_account",
@@ -595,7 +595,7 @@ signature = [
     "ClaimPredicate:before_relative_time",
     "CreateClaimableBalanceResult:malformed",
 ]
-source_classes = ["local-core", "synthetic"]
+source_classes = ["local-core", "synthetic", "local-core-refused"]
 fields = [
     "op.create_claimable_balance.claimants.destination",
     "op.create_claimable_balance.claimants.predicate",
@@ -618,7 +618,7 @@ signature = [
     ".extra_signers#max",
     "AccountEntryExtensionV2Ext:v3",
 ]
-source_classes = ["local-core", "synthetic"]
+source_classes = ["local-core", "synthetic", "local-core-refused"]
 fields = [
     "tx.cond.type",
     "tx.cond.time_bounds",
@@ -669,7 +669,7 @@ signature = [
     "OperationBody:set_trust_line_flags",
     "ClaimableBalanceEntryExt:v1",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = [
     "op.clawback.from",
     "op.clawback.asset_amount",
@@ -897,7 +897,7 @@ signature = [
     "BumpSequenceResult:bad_seq",
     "AccountMergeResult:seqnum_too_far",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = ["op.bump_sequence.bump_to", "op.account_merge.destination"]
 linked_issues = []
 priority = 14
@@ -935,7 +935,7 @@ signature = [
     ".body:allow_trust.asset:credit_alphanum4",
     ".body:allow_trust.asset:credit_alphanum12",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = ["op.allow_trust", "op.set_trust_line_flags"]
 linked_issues = []
 priority = 14
@@ -953,7 +953,7 @@ signature = [
     "InflationResult:success",
     "InflationResult:not_time",
 ]
-source_classes = ["local-core"]
+source_classes = ["local-core", "local-core-refused"]
 fields = ["op.set_options.inflation_dest"]
 linked_issues = []
 priority = 14

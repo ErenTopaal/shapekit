@@ -4,14 +4,14 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "c3876b18f4d8682e5626d9995acbde1f78278c0b045f69e1f68fa33409afe3a9",
+      "sha256": "3a9bfac4befc1d438d1fdd17ae029ed671cffdfd49eacb40b373cb54f5d048b6",
       "detail": "corpus 0.1.0"
     },
     {
       "kind": "harness",
       "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
-      "sha256": "1b4f9ae566d5ef28364159f361a903818554195fbc85db5d98c7187e36b9006f",
-      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 894 entries, manifest c3876b18f4d8682e5626d9995acbde1f78278c0b045f69e1f68fa33409afe3a9"
+      "sha256": "060e1cdc896fb7d51ae11200d1525a6a320a92c2379845788cc51ea27f20a55f",
+      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest 3a9bfac4befc1d438d1fdd17ae029ed671cffdfd49eacb40b373cb54f5d048b6"
     },
     {
       "kind": "conformance",
@@ -40,7 +40,7 @@
   ],
   "summary": {
     "findings": 22,
-    "failures": 494,
+    "failures": 498,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -1704,7 +1704,7 @@
     },
     {
       "id": "WB-W4",
-      "title": "to_muxed_id is kept only when it is a u64; a text, hash or return memo carried by the event is lost",
+      "title": "question: to_muxed_id keeps only u64 values, so a text, hash or return memo of a payment to a G address is not stored; intended?",
       "component": "wallet-backend",
       "severity": "data-loss",
       "caps": [
@@ -1716,7 +1716,7 @@
       "reproduce": "shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-W4.md",
-      "cause": "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it.",
+      "cause": "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it. Its code comment says this is deliberate, and no other table seems to keep the memo; the draft asks whether that is intended.",
       "siblings": [],
       "related": [
         "https://github.com/stellar/wallet-backend/issues/800"
@@ -2311,24 +2311,55 @@
     },
     {
       "id": "WB-W8",
-      "title": "a failed transaction that consumes a pre-auth signer records no signer removal",
+      "title": "a pre-auth signer core removes in txChangesBefore is never recorded as removed (failed transactions, fee bumps)",
       "component": "wallet-backend",
       "severity": "data-loss",
       "caps": [
         "CAP-0002",
+        "CAP-0015",
         "CAP-0028"
       ],
-      "minimal_entry": "classic.failed-tx.p30-pre-auth-failed-removes-signer",
-      "reproduce": "shapekit harness run --chain classic.failed-tx.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
+      "minimal_entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+      "reproduce": "shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-W8.md",
-      "cause": "Core removes a pre-authorized transaction signer when the transaction is applied, even when it fails (txChangesBefore). wallet-backend derives signer changes from operation effects, which exist only for successful transactions, so the removal is not stored.",
+      "cause": "Core removes a pre-authorized transaction signer in txChangesBefore: the transaction's own hash signer when the transaction is applied, even when it fails, and a fee bump's hash signer from the fee source before the inner transaction runs, even when it succeeds. wallet-backend derives signer changes only from operation effects (SetOptions changes of successful transactions), never from txChangesBefore, so neither removal is stored.",
       "siblings": [],
       "related": [],
       "entries": [
+        "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+        "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
         "classic.failed-tx.p30-pre-auth-failed-removes-signer"
       ],
       "occurrences": [
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+          "at": "mainnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+          "at": "testnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
+          "at": "mainnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
+          "at": "testnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
         {
           "source": "harness",
           "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
@@ -2347,7 +2378,7 @@
     },
     {
       "id": "WB-W9",
-      "title": "CreateAccount writes a SIGNER ADD for the new account's master key, which the ledger does not show",
+      "title": "question: CreateAccount writes a SIGNER ADD row for the new account's master key (Horizon parity); intended for state changes?",
       "component": "wallet-backend",
       "severity": "wrong-data",
       "caps": [
@@ -2357,7 +2388,7 @@
       "reproduce": "shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-W9.md",
-      "cause": "Following Horizon's effects, account creation emits a signer-created state change for the master key. The ledger has no signer entry: the master key's weight is threshold 0 of the account entry, and no signer was added.",
+      "cause": "Following Horizon's effects (the code says it was ported from them), account creation emits a signer-created state change for the master key, and set options treats the master key as a signer while its weight is above 0. The ledger has no signer entry: the master key's weight is byte 0 of the account's thresholds. Likely intended; the draft asks, and what it would cost consumers is that the row looks like a signer entry.",
       "siblings": [],
       "related": [],
       "entries": [

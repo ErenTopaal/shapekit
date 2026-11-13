@@ -113,6 +113,20 @@ cd <your indexer> && indexerlint ./...
 Rules, suppressions and the baseline file are described in [docs/linter.md](docs/linter.md).
 The same checks are a checklist in the guide for indexers in other languages.
 
+### The guide as a stellar-docs change
+
+`docs/guide/stellar-docs.patch` adds the guide to stellar/stellar-docs as
+`docs/data/indexers/build-your-own/indexer-hardening.mdx`, with a link from the Build Your Own
+index and an entry in `docs.json`. It is made from the guide in this commit with the
+review-gate comments removed and corpus entries written as plain ids (`shapekit guide table
+--plain-entries`), on top of stellar-docs `main` at `734347c0`. To apply it:
+
+```sh
+cd stellar-docs && git switch -c indexer-hardening-guide origin/main
+git am /path/to/shapekit/docs/guide/stellar-docs.patch
+pnpm install && pnpm check
+```
+
 ### Regenerate the corpus
 
 Needs Docker and the pinned stellar-core image.
@@ -136,6 +150,7 @@ cargo test --workspace
 # in each module listed in go.work; adapters/ needs SHAPEKIT_BIN or target/debug/shapekit
 go vet ./... && go test ./... && golangci-lint run ./...
 
+# node 26; testees/js/.npmrc sets engine-strict, so npm ci fails on an older node
 cd testees/js && npm ci && npx tsc --noEmit && npx tsc && node --test "dist/**/*.test.js"
 
 scripts/check-no-em-dash.sh
