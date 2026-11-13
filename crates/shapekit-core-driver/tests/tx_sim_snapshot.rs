@@ -239,6 +239,44 @@ fn extend_ttl_and_restore() {
     );
 }
 
+// stellar-rpc v30.0.1 sorts and dedups the extend and restore keys before
+// simulating (lib/preflight/src/shared.rs `unique`), so a repeated key is
+// counted once in the footprint and the fee
+#[test]
+fn repeated_keys_count_once() {
+    let s = load();
+    let live_until = s
+        .entries
+        .iter()
+        .find(|(k, _)| *k == instance_key())
+        .and_then(|(_, e)| e.live_until_ledger_seq)
+        .expect("instance ttl");
+    let twice = [instance_key(), instance_key()];
+
+    let sim = Simulator::new(memory(&s), &s.ctx).expect("simulator");
+    let max_ttl = sim.ledger_info().max_entry_ttl - 1;
+    let once = sim
+        .simulate_extend_ttl(&[instance_key()], max_ttl)
+        .expect("extend once");
+    let both = sim
+        .simulate_extend_ttl(&twice, max_ttl)
+        .expect("extend twice");
+    assert_eq!(both.transaction_data, once.transaction_data);
+
+    let mut later = s.ctx.clone();
+    later.sequence_number = live_until + 1;
+    let sim = Simulator::new(memory(&s), &later).expect("simulator");
+    let once = sim
+        .simulate_restore(&[instance_key()])
+        .expect("restore once");
+    let both = sim.simulate_restore(&twice).expect("restore twice");
+    assert_eq!(both, once);
+    let ext = sim
+        .simulate_extend_ttl(&twice, 1000)
+        .expect("extend archived");
+    assert_eq!(ext.restore.expect("restore preamble"), once);
+}
+
 #[test]
 fn failed_invocation_is_an_error_with_diagnostics() {
     let s = load();

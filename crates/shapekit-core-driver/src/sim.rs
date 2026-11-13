@@ -1,9 +1,12 @@
 //! Soroban simulation over a ledger snapshot, wrapping `soroban-simulation`.
 //!
-//! The setup mirrors stellar-rpc v30.0.0 (`cmd/stellar-rpc/lib/preflight`):
+//! The setup mirrors stellar-rpc v30.0.1 (`cmd/stellar-rpc/lib/preflight`):
 //! the network config is loaded from the snapshot's CONFIG_SETTING entries,
 //! the ledger info takes the protocol, sequence and close time of the latest
-//! closed ledger, and the TTL limits come from the network config. Two things
+//! closed ledger, and the TTL limits come from the network config. As in
+//! v30.0.1, only the host's own protocol is simulated, a failed ledger read
+//! fails the simulation instead of reading as a missing entry, and the keys
+//! of an extend or restore are sorted and deduplicated first. Two things
 //! differ on purpose: the PRNG seed is fixed instead of random, so recorded
 //! footprints and fees repeat, and the base reserve is the ledger's real one
 //! instead of rpc's hardcoded 5000000.
@@ -35,7 +38,7 @@ pub const SIMULATION_PRNG_SEED: [u8; 32] = *b"shapekit simulation prng seed v1";
 
 // resource adjustment, stated once. the values equal
 // `SimulationAdjustmentConfig::default_adjustment()` in soroban-simulation
-// 30.0.0, which stellar-rpc uses with no extra instruction leeway, so our
+// 30.0.0, which stellar-rpc v30.0.1 uses with no extra instruction leeway, so our
 // fees match what an sdk user gets from rpc. each factor adjusts a value v to
 // max(v * multiplicative, v + additive).
 pub const INSTRUCTIONS_MULTIPLIER: f64 = 1.04;
@@ -275,6 +278,17 @@ pub struct ExtendTtlSimulation {
     pub restore: Option<SorobanTransactionData>,
 }
 
+// the keys sorted, each once, as stellar-rpc v30.0.1 hands them to an extend
+// or restore (`unique` in lib/preflight/src/shared.rs). soroban-simulation
+// sorts the footprint but keeps repeats, which would list a key twice and
+// charge its rent twice.
+fn unique(keys: &[LedgerKey]) -> Vec<LedgerKey> {
+    let mut keys = keys.to_vec();
+    keys.sort();
+    keys.dedup();
+    keys
+}
+
 pub struct Simulator {
     snapshot: Rc<FetchingSnapshot>,
     network_config: NetworkConfig,
@@ -390,6 +404,7 @@ impl Simulator {
         keys: &[LedgerKey],
         extend_to: u32,
     ) -> Result<ExtendTtlSimulation, SimError> {
+        let keys = unique(keys);
         let restoring = AutoRestoringSnapshotSource::new(self.snapshot.clone(), &self.ledger_info)
             .map_err(|e| SimError::Setup(format!("{e:#}")))?;
         let run = simulate_extend_ttl_op(
@@ -397,7 +412,7 @@ impl Simulator {
             &self.network_config,
             &adjustment_config(),
             &self.ledger_info,
-            keys,
+            &keys,
             extend_to,
         );
         if let Some(e) = self.snapshot.take_failure() {
@@ -423,12 +438,13 @@ impl Simulator {
     /// Restore simulation. Live keys are left out of the result; a missing or
     /// temporary key is an error.
     pub fn simulate_restore(&self, keys: &[LedgerKey]) -> Result<SorobanTransactionData, SimError> {
+        let keys = unique(keys);
         let run = simulate_restore_op(
             self.snapshot.as_ref(),
             &self.network_config,
             &adjustment_config(),
             &self.ledger_info,
-            keys,
+            &keys,
         );
         if let Some(e) = self.snapshot.take_failure() {
             return Err(e);
