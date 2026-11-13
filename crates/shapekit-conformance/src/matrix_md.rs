@@ -5,8 +5,9 @@ use std::fmt::Write as _;
 use crate::compare::ResultClass;
 use crate::runner::Matrix;
 
-const ORDER: [ResultClass; 5] = [
+const ORDER: [ResultClass; 6] = [
     ResultClass::Pass,
+    ResultClass::Reference,
     ResultClass::DivergesFromNetwork,
     ResultClass::DivergesFromPeers,
     ResultClass::Unsupported,
@@ -32,9 +33,9 @@ pub fn render(m: &Matrix) -> String {
     let _ = writeln!(out, "## Testees\n");
     let _ = writeln!(
         out,
-        "| testee | package | components | decode limits | ops |"
+        "| testee | package | components | decode limits | ops | role |"
     );
-    let _ = writeln!(out, "|---|---|---|---|---|");
+    let _ = writeln!(out, "|---|---|---|---|---|---|");
     for t in &m.testees {
         let components: Vec<String> = t
             .components
@@ -43,13 +44,24 @@ pub fn render(m: &Matrix) -> String {
             .collect();
         let _ = writeln!(
             out,
-            "| {} | {} {} | {} | {} | {} |",
+            "| {} | {} {} | {} | {} | {} | {} |",
             t.key,
             t.package,
             t.version,
             cell_text(&components.join(", ")),
             t.decode_limits,
-            t.ops.len()
+            t.ops.len(),
+            t.reference_for
+                .as_deref()
+                .map(|r| format!("reference for {r}"))
+                .unwrap_or_default()
+        );
+    }
+    if let Some(r) = m.testees.iter().find(|t| t.reference_for.is_some()) {
+        let _ = writeln!(
+            out,
+            "\n{} is the reference: every `expected_json` in the corpus is stellar-xdr {}'s own XDR-JSON rendering, so its `decode_json` and `encode_json` checks that agree with it are counted as `reference`, not as `pass`. They are that library agreeing with itself, not independent evidence; `shapekit conformance crosscheck` compares `expected_json` with the other SDKs' decoders instead. A reference check that disagrees is still a failure. An entry whose other checks pass is counted under `reference` in the entry summary and passes in the known-failures verdict.",
+            r.key, m.generator_stellar_xdr
         );
     }
 
@@ -69,6 +81,40 @@ pub fn render(m: &Matrix) -> String {
             let _ = write!(line, " {n} |");
         }
         let _ = writeln!(out, "{line}");
+    }
+
+    let _ = writeln!(
+        out,
+        "\nAn entry counts as its worst check, so one op an SDK lacks (go has no `encode_json`) makes the whole entry `unsupported`. The check and per-op tables below count every check on its own.\n"
+    );
+    let _ = writeln!(out, "## Summary (checks)\n");
+    let _ = writeln!(out, "{header}\n{rule}");
+    for t in &m.testees {
+        let totals = m.check_summary.get(&t.key);
+        let mut line = format!("| {} |", t.key);
+        for r in ORDER {
+            let n = totals.and_then(|c| c.get(&r)).copied().unwrap_or(0);
+            let _ = write!(line, " {n} |");
+        }
+        let _ = writeln!(out, "{line}");
+    }
+
+    let _ = writeln!(out, "\n## Summary (checks per op)\n");
+    let mut op_header = String::from("| testee | op |");
+    let mut op_rule = String::from("|---|---|");
+    for r in ORDER {
+        let _ = write!(op_header, " {r} |");
+        op_rule.push_str("---|");
+    }
+    let _ = writeln!(out, "{op_header}\n{op_rule}");
+    for t in &m.testees {
+        for (op, counts) in m.op_summary.get(&t.key).into_iter().flatten() {
+            let mut line = format!("| {} | {op} |", t.key);
+            for r in ORDER {
+                let _ = write!(line, " {} |", counts.get(&r).copied().unwrap_or(0));
+            }
+            let _ = writeln!(out, "{line}");
+        }
     }
 
     let not_pass: Vec<_> = m

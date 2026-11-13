@@ -302,8 +302,77 @@ pub fn parse(text: &str) -> Result<(String, String, String, String)> {
 pub struct DraftReport {
     pub written: Vec<String>,
     pub removed: Vec<String>,
+    /// Drafts left as they are, with the reason: the matrix does not cover every version they
+    /// name, or the file was not written by this command.
+    pub kept: Vec<(String, String)>,
 }
 
+/// The versions a drafted title names: `<package> <v1>, <v2>: <what> (<entry>)`.
+pub fn title_versions(title: &str, package: &str) -> Option<BTreeSet<String>> {
+    let (versions, _) = title
+        .strip_prefix(package)?
+        .strip_prefix(' ')?
+        .split_once(": ")?;
+    let set: BTreeSet<String> = versions.split(", ").map(str::to_string).collect();
+    (!set.is_empty() && set.iter().all(|v| !v.is_empty() && !v.contains(' '))).then_some(set)
+}
+
+/// What to do with an existing file in the drafts directory.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Existing {
+    /// Not a draft of an (sdk, entry) the matrix ran: leave it alone and say nothing.
+    Outside,
+    /// The matrix covers every version the draft names: replace or remove it.
+    Covered,
+    /// Leave it alone, for this reason.
+    Keep(String),
+}
+
+/// Decides about one existing file. `covered` maps (sdk, entry) to the versions the matrix ran.
+pub fn existing_draft(
+    name: &str,
+    text: &str,
+    versions: &VersionsFile,
+    covered: &BTreeMap<(String, String), BTreeSet<String>>,
+) -> Existing {
+    let Ok((_, title, _, vector)) = parse(text) else {
+        return Existing::Keep("not written by draft-issues".into());
+    };
+    let Some((sdk, _)) = name.split_once('-') else {
+        return Existing::Outside;
+    };
+    if name != file_name(sdk, &vector) {
+        return Existing::Outside;
+    }
+    let Some(ran) = covered.get(&(sdk.to_string(), vector.clone())) else {
+        return Existing::Outside;
+    };
+    let Ok(conf) = versions.sdk(sdk) else {
+        return Existing::Outside;
+    };
+    match title_versions(&title, &conf.package) {
+        None => Existing::Keep("its title names no versions to compare with the matrix".into()),
+        Some(named) => {
+            let outside: Vec<&str> = named
+                .iter()
+                .filter(|v| !ran.contains(*v))
+                .map(String::as_str)
+                .collect();
+            if outside.is_empty() {
+                Existing::Covered
+            } else {
+                Existing::Keep(format!(
+                    "it names {}, which the matrix did not run",
+                    outside.join(", ")
+                ))
+            }
+        }
+    }
+}
+
+/// Writes the matrix's drafts. Only drafts of (sdk, entry, version) cells the matrix covers are
+/// replaced or removed: a draft naming a version outside the matrix is kept as it is, and a new
+/// draft for it is not written, so a narrow run never shrinks a draft of a wider one.
 pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     let matrix = runner::load_matrix(&opts.matrix)?;
     let (manifest, corpus) = runner::load_manifest(&opts.manifest)?;
@@ -311,41 +380,66 @@ pub fn draft(opts: &DraftOptions) -> Result<DraftReport> {
     let drafts = drafts(&matrix, &manifest, &corpus, &versions)?;
     std::fs::create_dir_all(&opts.out)
         .with_context(|| format!("creating {}", opts.out.display()))?;
-    let keep: BTreeSet<&str> = drafts.iter().map(|d| d.file.as_str()).collect();
-    // a matrix run for one sdk says nothing about another sdk's drafts, so only those sdks are pruned
-    let prefixes: BTreeSet<String> = matrix
-        .testees
-        .iter()
-        .map(|t| format!("{}-", t.sdk))
-        .collect();
+    let mut covered: BTreeMap<(String, String), BTreeSet<String>> = BTreeMap::new();
+    for row in &matrix.entries {
+        for t in matrix
+            .testees
+            .iter()
+            .filter(|t| row.cells.contains_key(&t.key))
+        {
+            covered
+                .entry((t.sdk.clone(), row.id.clone()))
+                .or_default()
+                .insert(t.version.clone());
+        }
+    }
+    let fresh: BTreeSet<&str> = drafts.iter().map(|d| d.file.as_str()).collect();
     let mut removed = Vec::new();
+    let mut kept = Vec::new();
+    let mut names = Vec::new();
     for item in
         std::fs::read_dir(&opts.out).with_context(|| format!("listing {}", opts.out.display()))?
     {
         let item = item.with_context(|| format!("listing {}", opts.out.display()))?;
         let name = item.file_name().to_string_lossy().to_string();
-        if !name.ends_with(".md")
-            || keep.contains(name.as_str())
-            || !prefixes.iter().any(|p| name.starts_with(p.as_str()))
-        {
-            continue;
+        if name.ends_with(".md") {
+            names.push(name);
         }
-        let text = std::fs::read_to_string(item.path())
-            .with_context(|| format!("reading {}", item.path().display()))?;
-        // only drafts this command wrote are replaced; hand-written findings stay
-        if parse(&text).is_ok() {
-            std::fs::remove_file(item.path())
-                .with_context(|| format!("removing {}", item.path().display()))?;
-            removed.push(name);
+    }
+    names.sort();
+    for name in names {
+        let path = opts.out.join(&name);
+        let text = std::fs::read_to_string(&path)
+            .with_context(|| format!("reading {}", path.display()))?;
+        match existing_draft(&name, &text, &versions, &covered) {
+            Existing::Outside => {}
+            Existing::Covered if fresh.contains(name.as_str()) => {}
+            Existing::Covered => {
+                std::fs::remove_file(&path)
+                    .with_context(|| format!("removing {}", path.display()))?;
+                removed.push(name);
+            }
+            // a hand-written file is only reported when a draft would have replaced it
+            Existing::Keep(why) if fresh.contains(name.as_str()) || parse(&text).is_ok() => {
+                kept.push((name, why));
+            }
+            Existing::Keep(_) => {}
         }
     }
     let mut written = Vec::new();
     for d in &drafts {
+        if kept.iter().any(|(k, _)| k == &d.file) {
+            continue;
+        }
         let path = opts.out.join(&d.file);
         std::fs::write(&path, render(d)).with_context(|| format!("writing {}", path.display()))?;
         written.push(d.file.clone());
     }
-    Ok(DraftReport { written, removed })
+    Ok(DraftReport {
+        written,
+        removed,
+        kept,
+    })
 }
 
 pub struct FileOptions {
@@ -397,7 +491,9 @@ pub fn file(opts: &FileOptions) -> Result<BTreeMap<String, String>> {
             .with_context(|| format!("reading {}", path.display()))?;
         let (repo, title, body, vector) =
             parse(&text).with_context(|| format!("reading the draft {}", path.display()))?;
-        let url = match existing(&repo, &vector)? {
+        // the title starts with the package, as `drafts` writes it
+        let package = title.split_whitespace().next().unwrap_or("");
+        let url = match existing(&repo, &vector, package)? {
             Some(url) => url,
             None => create(&repo, &title, &body)?,
         };
@@ -428,18 +524,33 @@ fn gh(args: &[&str]) -> Result<String> {
     String::from_utf8(out.stdout).context("gh printed non-utf-8 output")
 }
 
-fn existing(repo: &str, vector: &str) -> Result<Option<String>> {
+// github search ignores punctuation, so `a.b` also finds `a.b-c`: the hits are only candidates
+fn existing(repo: &str, vector: &str, package: &str) -> Result<Option<String>> {
     let query = format!("\"{MARKER}: `{vector}`\" in:body");
     let text = gh(&[
-        "issue", "list", "--repo", repo, "--state", "all", "--search", &query, "--json", "url",
-        "--limit", "5",
+        "issue", "list", "--repo", repo, "--state", "all", "--search", &query, "--json",
+        "url,body", "--limit", "50",
     ])?;
     let found: Vec<Value> = serde_json::from_str(&text).context("parsing gh issue list")?;
-    Ok(found
-        .first()
-        .and_then(|v| v.get("url"))
+    Ok(matching_issue(&found, vector, package))
+}
+
+/// The first issue (`{url, body}` as gh lists them) whose body holds the exact marker line of
+/// `vector` and names `package` the way drafted bodies do (`` `<package>` ``).
+pub fn matching_issue(found: &[Value], vector: &str, package: &str) -> Option<String> {
+    let marker = format!("{MARKER}: `{vector}`");
+    let named = format!("`{package}`");
+    found
+        .iter()
+        .find(|issue| {
+            issue
+                .get("body")
+                .and_then(Value::as_str)
+                .is_some_and(|b| b.lines().any(|l| l.trim() == marker) && b.contains(&named))
+        })
+        .and_then(|issue| issue.get("url"))
         .and_then(Value::as_str)
-        .map(str::to_string))
+        .map(str::to_string)
 }
 
 fn create(repo: &str, title: &str, body: &str) -> Result<String> {

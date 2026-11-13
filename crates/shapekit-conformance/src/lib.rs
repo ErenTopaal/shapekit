@@ -3,6 +3,7 @@
 //! unix-only (the memory limit is an rlimit set between fork and exec).
 
 pub mod compare;
+pub mod crosscheck;
 pub mod issues;
 pub mod known;
 pub mod matrix_md;

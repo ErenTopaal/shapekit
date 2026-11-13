@@ -21,9 +21,15 @@ Anything this page and the schema disagree on is a bug in one of them.
   runner keeps and shows next to any `error` result.
 - A line can be large (a full `LedgerCloseMeta` in base64). Testees must accept request lines
   of at least 64 MiB.
+- A response line may be at most 256 MiB (268435456 bytes, not counting the `\n`). The runner
+  stops reading a longer line at that size, records a protocol violation (`error`) and restarts
+  the testee, so a testee that prints without end cannot grow the runner without bound. A
+  response that is not UTF-8 is a protocol violation too.
 - When stdin reaches end of file the testee exits with status 0.
 - The runner enforces a per-request timeout and an address-space or data-segment limit on the
-  testee process (see "Limits the runner applies"). A testee that times out, exits or is
+  testee process (see "Limits the runner applies"). The timeout covers writing the request as
+  well as reading the response: a testee that stops reading stdin cannot block the runner on a
+  request larger than the pipe buffer. A testee that times out, exits or is
   killed is restarted, said `hello` to again, and the request that was in flight is recorded
   as `error`.
 
@@ -103,7 +109,7 @@ Result members:
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose version differs from `conformance/versions.toml` |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. May be empty |
 | `ops` | array of strings | the ops this build implements, excluding `hello`. The runner does not send other ops and records them as `unsupported` |
-| `decode_limits` | `"honoured"` or `"ignored"` | whether `depth_limit` and `len_limit` reach the SDK's decoder (see `decode_encode`) |
+| `decode_limits` | `"honoured"` or `"ignored"` | whether `depth_limit` and `len_limit` reach the SDK's decoder (see `decode_encode`). `"honoured"` covers the XDR inputs of every op: `asset_order`, `pool_id`, `map_sort` and `map_validate` requests carry no limits, so a testee that reports `"honoured"` decodes their inputs at depth 1000 and with the input's own length as the length limit, or with `depth_limit` and `len_limit` when a request carries them |
 
 ## Operations
 
@@ -142,7 +148,7 @@ Request: `type` (string), `json` (JSON value).
 
 Result: `xdr` (base64).
 
-This op is the one addition to the list in the plan. It is needed because the
+This op reads JSON where every other op reads bytes. It is needed because the
 rs-stellar-xdr advisory GHSA-3xhm-p452-9wjh is a JSON-to-XDR flaw: 28.0.0 accepts a JSON
 `ScSpecFunctionV0` with two `outputs` (the XDR allows at most one) and encodes bytes that no
 decoder accepts. No decode-side op can see it. SDKs without a SEP-51 reader answer
@@ -281,7 +287,7 @@ Per manifest entry kind (`crates/shapekit-manifest/src/model.rs`). Vector cases
 | `xdr`, `decode = must-accept` | `decode_encode`, `decode_json`, `encode_json` (the last two only with an expected JSON file, `encode_json` only with `roundtrip = true`) | `decode_encode` is ok and, with `roundtrip`, returns the input bytes; `decode_json` equals the variant's expected JSON; `encode_json` of the expected JSON returns the input bytes |
 | `xdr`, `decode = must-reject` | `decode_encode` | the answer is `rejected` |
 | `xdr`, `decode = implementation-defined` | `decode_encode`, `decode_json` | every SDK that answers gives the same outcome (same status, same bytes, same JSON) |
-| `ordering`, `asset_order` cases | `asset_order` | `expected` `less`, `equal`, `greater` is the order core uses (plan R5) |
+| `ordering`, `asset_order` cases | `asset_order` | `expected` `less`, `equal`, `greater` is the order core uses (`Asset` comparison by type, code, then issuer key bytes) |
 | `ordering`, `pool_id` cases | `pool_id` | the pool ID equals `expected.pool_id`, or the answer is `rejected` when `expected.reject` is set |
 | `ordering`, `map_sort` cases | `map_sort` | the result equals `expected.map` byte for byte, or is `rejected` when the case expects a rejection |
 | `ordering`, `map_validate` cases | `map_validate` | `valid` is true for `expected = accept`, false for `reject` |
@@ -301,31 +307,77 @@ the corpus expectations were computed under.
 
 Every `xdr` variant (`testnet`, `mainnet`, `any`) is checked separately. An entry's result is
 the worst of its checks, in this order: `error`, `diverges-from-network`,
-`diverges-from-peers`, `unsupported`, `pass`. A `panic` always counts as
-`diverges-from-network`. An implementation-defined check that only one SDK answered has no
-peer to compare with and counts as `unsupported`, not as a pass.
+`diverges-from-peers`, `unsupported`, `reference`, `pass` (a `reference` check counts as a pass
+for the entry's result, see below). A `panic` always counts as `diverges-from-network`.
+
+Because an entry is as bad as its worst check, one op an SDK lacks (Go has no `encode_json`)
+makes the whole entry `unsupported`. The matrix therefore also counts every check on its own,
+per testee (`check_summary`) and per testee and op (`op_summary`), and the run prints both the
+entry and the check totals.
+
+Implementation-defined checks are decided by one vote per SDK: the SDK's `current` version in
+`versions.toml` votes when the run holds it, otherwise its last version in the run
+(versions.toml order, or the order of `--version`). An SDK whose voting version does not answer
+casts no vote. The most common vote is the majority; every testee, voting or not, whose answer
+differs from it is `diverges-from-peers`, and with a tie no answer is the majority. With fewer
+than two votes, as in any run of a single SDK however many versions it holds, there is no peer
+to compare with and the check counts as `unsupported`, not as a pass.
 
 `versions.toml` may give an SDK version a `max_protocol`. A divergence on an entry generated
 at a later protocol (`protocol.generated_at`, else `protocol.valid_min`) is then reported as
 `unsupported` with the original verdict in its detail: an SDK that predates a protocol is not
-expected to read it.
+expected to read it. A `panic` or a testee process that died is never downgraded this way:
+crashing on unknown XDR is a robustness defect, not a missing feature.
+
+### The reference testee and the cross-check
+
+Every `expected_json` in the corpus is the XDR-JSON rendering of the stellar-xdr version the
+generator links (`generated_with.stellar_xdr` in the manifest). The Rust testee at that version
+renders with the same library, so its `decode_json` and `encode_json` checks agreeing with
+`expected_json` prove nothing beyond the library agreeing with itself. The matrix marks that
+testee as the reference for `expected_json` (`reference_for` in `testees`) and counts those
+checks as `reference` (listed in the cell's `reference_checks`), never as `pass`. A reference
+check that disagrees is still a failure: it means the library cannot read back its own
+rendering. In the entry summary, a passing cell with reference checks is counted under
+`reference`.
+
+`shapekit conformance crosscheck` supplies the independent evidence: it sends every
+`decode_json` check with a canonical `expected_json` to the Go and JS testees at their
+current versions and reports, per entry, where either renders something else. A disagreement
+where two decoders render the same other value points at stellar-xdr's rendering; one where a
+single decoder differs while another agrees is that SDK's divergence. The command fails unless
+every disagreement is a single-SDK divergence already in that SDK's known-failures list.
 
 ## Known failures
 
 `conformance/known-failures/<sdk>.txt` lists one known failure per line:
 
 ```
-<entry-id> <version or *> <result> <issue link or findings/issues/ draft>
+<entry-id> <version or *> <result> <issue link or findings/issues/ draft> <check>[, <check>...]
 ```
 
-A failing entry (`diverges-from-network`, `diverges-from-peers`, `error`) with a matching line
-does not fail the run. A failing entry without one fails it. A line whose entry now passes,
-is unsupported, or fails with another result fails the run too, until the line is fixed or
-removed. Every line must name an entry in the manifest and a version in `versions.toml`.
+The first four fields are separated by whitespace. Everything after the issue is the list of
+failing checks, separated by commas, each named exactly as the matrix names it
+(`testnet/decode_json`, `case 3/strkey_decode`). Every listed check must fail with `<result>`;
+checks of one entry that fail with different results go on separate lines. `*` stands for
+every version and is only used where every version fails the same checks. A `#` starts a
+comment only at the start of a line or after whitespace, so an issue URL keeps its
+`#fragment`.
+
+Each check is judged on its own. A failing check (`diverges-from-network`,
+`diverges-from-peers`, `error`) listed with its result does not fail the run. A failing check
+that no line lists fails it, even when other checks of the same entry are listed, so a new
+regression next to a known failure is caught. A listed check that now passes, is `reference`,
+is unsupported, fails with another result, or is not a check of the entry fails the run too,
+until the line is fixed. Every line must name an entry in the manifest and a version in
+`versions.toml`. A `diverges-from-peers` check can only be reproduced by a run of more than
+one SDK; a single-SDK run does not ask for such a line to be removed.
 
 ## Limits the runner applies
 
-- Per-request timeout, default 10 s, set per SDK in `conformance/versions.toml`.
+- Per-request timeout, default 10 s, set per SDK in `conformance/versions.toml`. It covers
+  the write of the request and the read of the response.
+- Response lines of at most 256 MiB.
 - A memory limit set with `setrlimit` in the child before `exec`: `RLIMIT_AS` (address space)
   for testees whose runtime reserves little virtual memory (Rust, Go), `RLIMIT_DATA` for
   runtimes that reserve large `PROT_NONE` regions up front (Node's V8 cage), where an

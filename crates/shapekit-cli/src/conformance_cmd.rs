@@ -1,10 +1,10 @@
-//! `shapekit conformance run|reproduce|draft-issues|file-issues`.
+//! `shapekit conformance run|crosscheck|reproduce|draft-issues|file-issues`.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::Subcommand;
-use shapekit_conformance::{issues, reproduce, runner};
+use shapekit_conformance::{crosscheck, issues, reproduce, runner};
 use shapekit_manifest::EntryKind;
 
 // requests and responses with deep XDR-JSON are parsed and dropped recursively
@@ -49,6 +49,27 @@ pub enum ConformanceCommand {
         known_failures: PathBuf,
         /// Directory for divergence-matrix.json and MATRIX.md.
         #[arg(long, default_value = "target/conformance")]
+        out: PathBuf,
+    },
+    /// Compare every expected_json (stellar-xdr's own rendering) with independent decoders.
+    Crosscheck {
+        /// SDK whose current version decodes; repeatable. go and js when absent.
+        #[arg(long = "sdk")]
+        sdks: Vec<String>,
+        /// Entry id to check; repeatable.
+        #[arg(long = "entry")]
+        entries: Vec<String>,
+        /// Skip the build steps in versions.toml (the testees must already be built).
+        #[arg(long)]
+        no_build: bool,
+        #[arg(long, default_value = "corpus/manifest.json")]
+        manifest: PathBuf,
+        #[arg(long, default_value = "conformance/versions.toml")]
+        versions_file: PathBuf,
+        #[arg(long, default_value = "conformance/known-failures")]
+        known_failures: PathBuf,
+        /// Directory for crosscheck.json and CROSSCHECK.md.
+        #[arg(long, default_value = "target/conformance/crosscheck")]
         out: PathBuf,
     },
     /// Check every sighting in reproductions.toml fails before its fix and passes after it.
@@ -141,9 +162,22 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 out: Some(out.clone()),
                 passes,
             })?;
+            // entries count as their worst check, so the check totals go next to them
+            let line = |counts: &std::collections::BTreeMap<_, usize>| {
+                counts
+                    .iter()
+                    .map(|(r, n)| format!("{r} {n}"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            };
             for (key, counts) in &outcome.matrix.summary {
-                let parts: Vec<String> = counts.iter().map(|(r, n)| format!("{r} {n}")).collect();
-                println!("{key}: {}", parts.join(", "));
+                let checks = outcome
+                    .matrix
+                    .check_summary
+                    .get(key)
+                    .map(line)
+                    .unwrap_or_default();
+                println!("{key}: entries {}; checks {checks}", line(counts));
             }
             for (i, kib) in outcome.peak_rss_kib.iter().enumerate() {
                 println!("pass {}: runner peak rss {kib} KiB", i + 1);
@@ -157,6 +191,46 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 out.join("MATRIX.md").display()
             );
             Ok(outcome.ok)
+        }
+        ConformanceCommand::Crosscheck {
+            sdks,
+            entries,
+            no_build,
+            manifest,
+            versions_file,
+            known_failures,
+            out,
+        } => {
+            let report = crosscheck::run(&crosscheck::CrosscheckOptions {
+                root,
+                manifest,
+                versions: versions_file,
+                known_dir: known_failures,
+                sdks,
+                selection: runner::Selection {
+                    ids: entries,
+                    ..Default::default()
+                },
+                build: !no_build,
+                out: Some(out.clone()),
+            })?;
+            println!(
+                "{} decode_json checks against {}",
+                report.checks,
+                report.decoders.join(", ")
+            );
+            for (n, c) in &report.confirmed_by {
+                println!("confirmed by {n} of {}: {c}", report.decoders.len());
+            }
+            for d in &report.disagreements {
+                println!("{} `{}`: {}", d.entry, d.check, d.class.as_str());
+            }
+            println!(
+                "wrote {} and {}",
+                out.join("crosscheck.json").display(),
+                out.join("CROSSCHECK.md").display()
+            );
+            Ok(report.ok())
         }
         ConformanceCommand::Reproduce {
             sdks,
@@ -190,6 +264,9 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             })?;
             for f in &report.removed {
                 println!("removed stale draft {}", out.join(f).display());
+            }
+            for (f, why) in &report.kept {
+                println!("kept {}: {why}", out.join(f).display());
             }
             for f in &report.written {
                 println!("wrote {}", out.join(f).display());

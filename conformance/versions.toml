@@ -1,11 +1,15 @@
-# the sdk version matrix of the conformance runner (plan section 2.2) and how each testee is
+# the sdk version matrix of the conformance runner and how each testee is
 # built and started. paths are relative to the repository root; `shapekit conformance run`
 # runs the build steps in order, then starts `command` and checks that its hello reports
 # exactly `package` and `version`.
 #
 # per sdk:
 #   package          what hello must report as sdk
-#   current          the version a plain `conformance run` uses
+#   current          the version a plain `conformance run` uses, and the version that casts the
+#                    sdk's one vote when implementation-defined checks are decided across sdks
+#                    (a run without it lets the sdk's last version in the run vote instead).
+#                    the newest stable release; for go that is v0.9.0, while the wallet-backend
+#                    adapter and the linter stay on the v0.8.0 pin in pins.toml
 #   issues_repo      where draft-issues points the issues
 #   timeout_ms       per-request timeout
 #   memory           rlimit set in the testee between fork and exec. "as" caps the address
@@ -16,7 +20,7 @@
 # per version, max_protocol is the newest protocol whose xdr that version knows; a failure on
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. stellar-xdr 28.x is set to 29 because protocol 29 changed no xdr and there is no
-# 29.x crate (plan R4). versions without it get no such allowance.
+# 29.x crate. versions without it get no such allowance.
 #
 # rust: one source (testees/rust/src) with one thin cargo manifest and lock file per version
 # under testees/rust/versions/<version>/, each built into its own target directory.
@@ -66,7 +70,7 @@ max_protocol = 30
 
 [sdk.go]
 package = "github.com/stellar/go-stellar-sdk"
-current = "v0.8.0"
+current = "v0.9.0"
 issues_repo = "stellar/go-stellar-sdk"
 timeout_ms = 10000
 memory = { resource = "as", mib = 4096 }

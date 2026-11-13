@@ -159,7 +159,8 @@ fn strkey_decode_and_encode() {
 #[test]
 fn strkey_decode_takes_bytes() {
     let b64 = |b: &[u8]| B64.encode(b);
-    let r = ok(json!({"id": "1", "op": "strkey_decode", "text_base64": b64(ZERO_ACCOUNT.as_bytes())}));
+    let r =
+        ok(json!({"id": "1", "op": "strkey_decode", "text_base64": b64(ZERO_ACCOUNT.as_bytes())}));
     assert_eq!(r["kind"], "account");
     let stray = [ZERO_ACCOUNT.as_bytes(), &[0xff; 8]].concat();
     assert_eq!(
@@ -167,8 +168,10 @@ fn strkey_decode_takes_bytes() {
         "rejected"
     );
     assert_eq!(
-        error_class(json!({"id": "3", "op": "strkey_decode", "text": ZERO_ACCOUNT,
-                           "text_base64": b64(ZERO_ACCOUNT.as_bytes())})),
+        error_class(
+            json!({"id": "3", "op": "strkey_decode", "text": ZERO_ACCOUNT,
+                           "text_base64": b64(ZERO_ACCOUNT.as_bytes())})
+        ),
         "bad-request"
     );
 }
@@ -325,4 +328,61 @@ fn id_parse_reads_offer_ids_through_xdr_json() {
 fn to_native_is_unsupported() {
     let r = call(json!({"id": "26", "op": "to_native", "xdr": U32_7}));
     assert_eq!(r["status"], "unsupported");
+}
+
+// scvVec of one scvVec of one u32, three levels deep, as a map value
+fn nested_map() -> (String, String) {
+    use stellar_xdr::{ScMap, ScMapEntry, ScVec, WriteXdr};
+    let inner = ScVal::Vec(Some(ScVec(vec![ScVal::U32(7)].try_into().unwrap())));
+    let outer = ScVal::Vec(Some(ScVec(vec![inner].try_into().unwrap())));
+    let map = ScVal::Map(Some(ScMap(
+        vec![ScMapEntry {
+            key: ScVal::U32(1),
+            val: outer.clone(),
+        }]
+        .try_into()
+        .unwrap(),
+    )));
+    (
+        B64.encode(map.to_xdr(Limits::none()).unwrap()),
+        B64.encode(outer.to_xdr(Limits::none()).unwrap()),
+    )
+}
+
+#[test]
+fn vector_ops_honour_the_request_limits() {
+    let (map, outer) = nested_map();
+    let validate = |extra: Value| {
+        let mut r = json!({"id": "30", "op": "map_validate", "xdr": map});
+        r.as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        r
+    };
+    assert_eq!(ok(validate(json!({})))["valid"], true);
+    assert_eq!(error_class(validate(json!({"depth_limit": 2}))), "rejected");
+    assert_eq!(error_class(validate(json!({"len_limit": 8}))), "rejected");
+    let sort = |depth: u32| {
+        json!({"id": "31", "op": "map_sort", "depth_limit": depth,
+               "entries": [{"key": U32_7, "val": outer}]})
+    };
+    assert!(ok(sort(100))["xdr"].is_string());
+    assert_eq!(error_class(sort(2)), "rejected");
+}
+
+#[test]
+fn vector_ops_default_to_the_runner_decode_depth() {
+    use stellar_xdr::{ScVec, WriteXdr};
+    // past the runner's 1000-level decode depth, which an unlimited decode would accept
+    let mut deep = ScVal::U32(0);
+    for _ in 0..1001 {
+        deep = ScVal::Vec(Some(ScVec(vec![deep].try_into().unwrap())));
+    }
+    let bytes = deep.to_xdr(Limits::none()).unwrap();
+    let r = json!({"id": "32", "op": "map_sort",
+                   "entries": [{"key": U32_7, "val": B64.encode(&bytes)}]});
+    assert_eq!(error_class(r), "rejected");
+    // the input's own length is the default length limit, so a well-formed one fits
+    let r = json!({"id": "33", "op": "map_sort", "entries": [{"key": U32_7, "val": U32_7}]});
+    assert!(ok(r)["xdr"].is_string());
 }

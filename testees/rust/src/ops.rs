@@ -219,7 +219,11 @@ fn strkey_decode(req: &Request) -> Result<Value, Outcome> {
     let text = match (req.has("text"), req.has("text_base64")) {
         (true, false) => req.string("text")?.into_bytes(),
         (false, true) => req.bytes("text_base64")?,
-        _ => return Err(bad("strkey_decode needs exactly one of text and text_base64")),
+        _ => {
+            return Err(bad(
+                "strkey_decode needs exactly one of text and text_base64",
+            ));
+        }
     };
     // the generic decoder refuses seeds on purpose (it does not zeroize), so seeds go through
     // the crate's dedicated private key type as a caller would
@@ -332,8 +336,35 @@ fn array32(bytes: &[u8], what: &str) -> Result<[u8; 32], Outcome> {
     })
 }
 
+/// The depth limit the runner puts on decode requests (`DECODE_DEPTH` in the protocol doc), for
+/// xdr inside vector requests that carry no `depth_limit`.
+const DEFAULT_DEPTH: u32 = 1000;
+
+/// Limits for one xdr input of a vector op (asset_order, pool_id, map_sort, map_validate).
+/// hello says decode limits are honoured, so these inputs are never decoded unlimited: the
+/// request's `depth_limit` and `len_limit` apply when present, else the runner's decode depth
+/// and the input's own length, as for a decode request.
+fn input_limits(req: &Request, input: &[u8]) -> Result<Limits, Outcome> {
+    let depth = if req.has("depth_limit") {
+        req.get("depth_limit", "an unsigned 32-bit integer")?
+    } else {
+        DEFAULT_DEPTH
+    };
+    let len = if req.has("len_limit") {
+        req.get("len_limit", "an unsigned integer")?
+    } else {
+        input.len()
+    };
+    Ok(Limits { depth, len })
+}
+
+fn read_input<T: ReadXdr>(req: &Request, bytes: Vec<u8>) -> Result<T, Outcome> {
+    let limits = input_limits(req, &bytes)?;
+    T::from_xdr(bytes, limits).map_err(rejected)
+}
+
 fn xdr_value<T: ReadXdr>(req: &Request, name: &str) -> Result<T, Outcome> {
-    T::from_xdr(req.bytes(name)?, Limits::none()).map_err(rejected)
+    read_input(req, req.bytes(name)?)
 }
 
 fn asset_order(req: &Request) -> Result<Value, Outcome> {
@@ -382,8 +413,8 @@ fn map_sort(req: &Request) -> Result<Value, Outcome> {
             .decode(&e.val)
             .map_err(|err| bad(format!("entries[{i}].val is not base64: {err}")))?;
         parsed.push(ScMapEntry {
-            key: ScVal::from_xdr(key, Limits::none()).map_err(rejected)?,
-            val: ScVal::from_xdr(val, Limits::none()).map_err(rejected)?,
+            key: read_input(req, key)?,
+            val: read_input(req, val)?,
         });
     }
     let map = ScMap::sorted_from(parsed).map_err(rejected)?;

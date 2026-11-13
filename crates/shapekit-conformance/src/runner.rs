@@ -72,9 +72,26 @@ pub struct Cell {
     pub known_issue: Option<String>,
     /// Check counts by result.
     pub counts: BTreeMap<ResultClass, usize>,
-    /// Every check that did not pass.
+    /// Every check that did not pass, apart from reference checks.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub checks: Vec<CheckRecord>,
+    /// Checks that agree with `expected_json` on the testee that rendered it (result
+    /// `reference`): kept apart from `checks` and from passes, since they are not independent
+    /// evidence. The cell's `result` treats them as passes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reference_checks: Vec<String>,
+}
+
+impl Cell {
+    /// The class an entry is counted under in the summary: `reference` for a passing cell
+    /// whose json checks are only the reference agreeing with itself.
+    pub fn summary_class(&self) -> ResultClass {
+        if self.result == ResultClass::Pass && !self.reference_checks.is_empty() {
+            ResultClass::Reference
+        } else {
+            self.result
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -97,20 +114,42 @@ pub struct TesteeInfo {
     pub components: BTreeMap<String, String>,
     pub ops: Vec<String>,
     pub decode_limits: String,
+    /// Set on the testee whose library rendered the corpus's expected values: the rust testee
+    /// at the generator's stellar-xdr version is the reference for `expected_json`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reference_for: Option<String>,
 }
+
+/// What the reference testee is the reference for.
+pub const REFERENCE_FOR: &str = "expected_json";
+
+/// The package whose own XDR-JSON rendering the corpus generator writes as `expected_json`.
+pub const REFERENCE_PACKAGE: &str = "stellar-xdr";
 
 /// `divergence-matrix.json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Matrix {
     pub schema_version: u32,
     pub corpus_version: String,
+    /// The stellar-xdr version that rendered every `expected_json` (the manifest's
+    /// `generated_with.stellar_xdr`).
+    #[serde(default)]
+    pub generator_stellar_xdr: String,
     /// Depth limit of every decode request but a whole ledger's (`xdr.envelope.depth`).
     pub decode_depth: u32,
     /// Depth limit of a `LedgerCloseMeta` decode request (`xdr.meta.depth`).
     pub ledger_decode_depth: u32,
     pub testees: Vec<TesteeInfo>,
-    /// Entry counts by result per testee.
+    /// Entry counts per testee, by `Cell::summary_class`. An entry is as bad as its worst
+    /// check, so one op an sdk lacks makes the whole entry unsupported; `check_summary` and
+    /// `op_summary` show what that hides.
     pub summary: BTreeMap<String, BTreeMap<ResultClass, usize>>,
+    /// Check counts per testee, by result.
+    #[serde(default)]
+    pub check_summary: BTreeMap<String, BTreeMap<ResultClass, usize>>,
+    /// Check counts per testee, by op and result.
+    #[serde(default)]
+    pub op_summary: BTreeMap<String, OpCounts>,
     pub entries: Vec<EntryRow>,
     /// Known-failures problems that fail the run, as text.
     pub known_failure_problems: Vec<String>,
@@ -118,12 +157,25 @@ pub struct Matrix {
 
 pub const MATRIX_SCHEMA: u32 = 1;
 
-/// Runs every check of `entry` on every testee and returns one cell per testee key.
+/// One entry's cells, keyed by testee, and the names of all its checks.
+pub struct EntryResult {
+    pub cells: BTreeMap<String, Cell>,
+    pub checks: Vec<String>,
+    /// Check counts per testee, op and result.
+    pub ops: BTreeMap<String, OpCounts>,
+}
+
+/// Check counts by op, then by result.
+pub type OpCounts = BTreeMap<String, BTreeMap<ResultClass, usize>>;
+
+/// Runs every check of `entry` on every testee. `reference` is the key of the testee that is
+/// the reference for `expected_json`, when it is among them.
 pub fn evaluate_entry(
     entry: &Entry,
     corpus: &Path,
     testees: &mut [Testee],
-) -> Result<BTreeMap<String, Cell>> {
+    reference: Option<&str>,
+) -> Result<EntryResult> {
     let checks = plan::checks(entry, corpus)?;
     let mut cells: Vec<Cell> = testees
         .iter()
@@ -132,12 +184,29 @@ pub fn evaluate_entry(
             known_issue: None,
             counts: BTreeMap::new(),
             checks: Vec::new(),
+            reference_checks: Vec::new(),
         })
+        .collect();
+    let mut ops: Vec<OpCounts> = testees.iter().map(|_| OpCounts::new()).collect();
+    let is_reference: Vec<bool> = testees
+        .iter()
+        .map(|t| reference == Some(t.target().key().as_str()))
         .collect();
     for check in &checks {
         let verdicts = run_check(check, testees)?;
-        for ((cell, v), t) in cells.iter_mut().zip(verdicts).zip(testees.iter()) {
-            record(cell, check, beyond_protocol(entry, t.target(), v));
+        for ((((cell, v), t), &r), by_op) in cells
+            .iter_mut()
+            .zip(verdicts)
+            .zip(testees.iter())
+            .zip(&is_reference)
+            .zip(ops.iter_mut())
+        {
+            let result = record(cell, check, beyond_protocol(entry, t.target(), v), r);
+            *by_op
+                .entry(check.op.clone())
+                .or_default()
+                .entry(result)
+                .or_insert(0) += 1;
         }
     }
     if checks.is_empty() {
@@ -156,15 +225,49 @@ pub fn evaluate_entry(
                     result: ResultClass::Error,
                     detail: Some("the entry yields no checks".into()),
                     actual: Value::Null,
+                    crashed: false,
                 },
+                false,
             );
         }
     }
-    Ok(testees
-        .iter()
-        .map(|t| t.target().key())
-        .zip(cells)
-        .collect())
+    let names = if checks.is_empty() {
+        vec!["entry".to_string()]
+    } else {
+        checks.iter().map(|c| c.name.clone()).collect()
+    };
+    let keys: Vec<String> = testees.iter().map(|t| t.target().key()).collect();
+    Ok(EntryResult {
+        cells: keys.iter().cloned().zip(cells).collect(),
+        checks: names,
+        ops: keys.into_iter().zip(ops).collect(),
+    })
+}
+
+/// Which testees vote in peer judgement: one per sdk, its `current` version when the run holds
+/// it, else its last version in the run (versions.toml order, or the order of `--version`).
+pub fn voters(targets: &[&Target]) -> Vec<bool> {
+    let mut out = vec![false; targets.len()];
+    let mut sdks: Vec<&str> = Vec::new();
+    for t in targets {
+        if !sdks.contains(&t.sdk.as_str()) {
+            sdks.push(&t.sdk);
+        }
+    }
+    for sdk in sdks {
+        let mine: Vec<usize> = (0..targets.len())
+            .filter(|&i| targets[i].sdk == sdk)
+            .collect();
+        let pick = mine
+            .iter()
+            .copied()
+            .find(|&i| targets[i].current)
+            .or_else(|| mine.last().copied());
+        if let Some(i) = pick {
+            out[i] = true;
+        }
+    }
+    out
 }
 
 /// One check on every testee, implementation-defined checks decided across them.
@@ -185,6 +288,7 @@ pub fn run_check(check: &Check, testees: &mut [Testee]) -> Result<Vec<Verdict>> 
                     check.op
                 )),
                 actual: Value::String("unsupported".into()),
+                crashed: false,
             })
         } else {
             let answer = t.request(check.request.clone())?;
@@ -199,7 +303,8 @@ pub fn run_check(check: &Check, testees: &mut [Testee]) -> Result<Vec<Verdict>> 
             Judged::Done(_) => None,
         })
         .collect();
-    let mut decided = compare::judge_peers(&peers).into_iter();
+    let targets: Vec<&Target> = testees.iter().map(Testee::target).collect();
+    let mut decided = compare::judge_peers(&peers, &voters(&targets)).into_iter();
     Ok(judged
         .into_iter()
         .map(|j| {
@@ -221,11 +326,14 @@ pub fn entry_protocol(entry: &Entry) -> u32 {
         .unwrap_or(entry.protocol.valid_min)
 }
 
-fn beyond_protocol(entry: &Entry, target: &Target, v: Verdict) -> Verdict {
+/// A divergence on an entry newer than the version knows becomes unsupported. Crashes are kept:
+/// a panic or a dead process on unknown xdr is a robustness defect, not a missing feature.
+pub fn beyond_protocol(entry: &Entry, target: &Target, v: Verdict) -> Verdict {
     let p = entry_protocol(entry);
     match target.max_protocol {
         Some(max)
             if p > max
+                && !v.crashed
                 && matches!(
                     v.result,
                     ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
@@ -240,26 +348,47 @@ fn beyond_protocol(entry: &Entry, target: &Target, v: Verdict) -> Verdict {
                     v.detail.unwrap_or_default()
                 )),
                 actual: v.actual,
+                crashed: false,
             }
         }
         _ => v,
     }
 }
 
-fn record(cell: &mut Cell, check: &Check, v: Verdict) {
-    *cell.counts.entry(v.result).or_insert(0) += 1;
-    cell.result = cell.result.max(v.result);
-    if v.result != ResultClass::Pass {
+// a json check whose expected value is the reference testee's own rendering
+fn is_reference_check(check: &Check) -> bool {
+    match check.op.as_str() {
+        "decode_json" => matches!(check.expect, plan::Expect::Json(_)),
+        "encode_json" => true,
+        _ => false,
+    }
+}
+
+// records one verdict and returns the class it was counted under
+fn record(cell: &mut Cell, check: &Check, v: Verdict, reference: bool) -> ResultClass {
+    let result = if reference && v.result == ResultClass::Pass && is_reference_check(check) {
+        cell.reference_checks.push(check.name.clone());
+        ResultClass::Reference
+    } else {
+        v.result
+    };
+    *cell.counts.entry(result).or_insert(0) += 1;
+    if result == ResultClass::Reference {
+        return result;
+    }
+    cell.result = cell.result.max(result);
+    if result != ResultClass::Pass {
         cell.checks.push(CheckRecord {
             check: check.name.clone(),
             op: check.op.clone(),
-            result: v.result,
+            result,
             detail: v.detail,
             expected: compare::expected_view(&check.expect),
             actual: v.actual,
             source: check.source.clone(),
         });
     }
+    result
 }
 
 pub struct RunOptions {
@@ -336,19 +465,39 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     ensure!(!selected.is_empty(), "the selection matches no entry");
     let mut testees = start_all(&opts.root, &targets, opts.build)?;
 
+    let reference = targets
+        .iter()
+        .find(|t| {
+            t.package == REFERENCE_PACKAGE && t.version == manifest.generated_with.stellar_xdr
+        })
+        .map(Target::key);
+
     let mut rows: Vec<EntryRow> = Vec::new();
+    let mut check_names: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    let mut op_summary: BTreeMap<String, OpCounts> = BTreeMap::new();
     let mut peak_rss_kib = Vec::new();
     for pass in 0..opts.passes {
         let mut this_pass = Vec::with_capacity(selected.len());
         for entry in &selected {
-            let cells = evaluate_entry(entry, &corpus, &mut testees)
+            let result = evaluate_entry(entry, &corpus, &mut testees, reference.as_deref())
                 .with_context(|| format!("running {}", entry.id))?;
+            check_names.insert(entry.id.clone(), result.checks);
+            if pass == 0 {
+                for (key, by_op) in result.ops {
+                    let sum = op_summary.entry(key).or_default();
+                    for (op, counts) in by_op {
+                        for (r, n) in counts {
+                            *sum.entry(op.clone()).or_default().entry(r).or_insert(0) += n;
+                        }
+                    }
+                }
+            }
             this_pass.push(EntryRow {
                 id: entry.id.clone(),
                 kind: entry.kind,
                 family: entry.family.clone(),
                 linked_issues: entry.linked_issues.clone(),
-                cells,
+                cells: result.cells,
             });
         }
         peak_rss_kib.push(peak_rss()?);
@@ -366,8 +515,11 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
         .iter()
         .map(|t| {
             let h = t.hello();
+            let key = t.target().key();
             TesteeInfo {
-                key: t.target().key(),
+                reference_for: (reference.as_deref() == Some(key.as_str()))
+                    .then(|| REFERENCE_FOR.to_string()),
+                key,
                 sdk: t.target().sdk.clone(),
                 package: h.sdk.clone(),
                 version: h.sdk_version.clone(),
@@ -381,6 +533,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
 
     let all_ids: BTreeSet<String> = manifest.entries.iter().map(|e| e.id.clone()).collect();
     let mut problems = Vec::new();
+    // distinct sdks, not versions: only another sdk gives a peer vote
     let sdks: BTreeSet<&str> = targets.iter().map(|t| t.sdk.as_str()).collect();
     let other_sdks = sdks.len() > 1;
     for sdk in sdks {
@@ -392,8 +545,17 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
                     .cells
                     .get_mut(&t.key())
                     .expect("every row has a cell per target");
-                cell.known_issue = known::issue_for(&lines, &row.id, &t.version).map(String::from);
-                results.insert((row.id.clone(), t.version.clone()), cell.result);
+                let checks = cell_checks(&check_names[&row.id], cell);
+                cell.known_issue = known::issue_for(
+                    &lines,
+                    &row.id,
+                    &t.version,
+                    checks
+                        .iter()
+                        .filter(|(_, r)| r.is_failure())
+                        .map(|(c, _)| c.as_str()),
+                );
+                results.insert((row.id.clone(), t.version.clone()), checks);
             }
         }
         let all_versions: BTreeSet<String> = file
@@ -416,17 +578,31 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
             *summary
                 .entry(key.clone())
                 .or_default()
-                .entry(cell.result)
+                .entry(cell.summary_class())
                 .or_insert(0) += 1;
         }
     }
     let matrix = Matrix {
         schema_version: MATRIX_SCHEMA,
         corpus_version: manifest.corpus_version.clone(),
+        generator_stellar_xdr: manifest.generated_with.stellar_xdr.clone(),
         decode_depth: shapekit_manifest::ENVELOPE_DEPTH,
         ledger_decode_depth: shapekit_manifest::META_DEPTH,
         testees: testee_info,
         summary,
+        check_summary: op_summary
+            .iter()
+            .map(|(key, by_op)| {
+                let mut total: BTreeMap<ResultClass, usize> = BTreeMap::new();
+                for counts in by_op.values() {
+                    for (r, n) in counts {
+                        *total.entry(*r).or_insert(0) += n;
+                    }
+                }
+                (key.clone(), total)
+            })
+            .collect(),
+        op_summary,
         entries: rows,
         known_failure_problems: problems,
     };
@@ -438,6 +614,22 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
         matrix,
         peak_rss_kib,
     })
+}
+
+/// Every check of a cell by name with its result: the recorded non-passes and references, and
+/// a pass for every other check the entry has.
+pub fn cell_checks(names: &[String], cell: &Cell) -> known::CellChecks {
+    let mut out: known::CellChecks = names
+        .iter()
+        .map(|n| (n.clone(), ResultClass::Pass))
+        .collect();
+    for c in &cell.checks {
+        out.insert(c.check.clone(), c.result);
+    }
+    for c in &cell.reference_checks {
+        out.insert(c.clone(), ResultClass::Reference);
+    }
+    out
 }
 
 fn peak_rss() -> Result<i64> {

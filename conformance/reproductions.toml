@@ -1,13 +1,18 @@
-# upstream sightings the conformance runner must reproduce (plan R14). each row names the
+# upstream sightings the conformance runner must reproduce. each row names the
 # corpus entries that carry the sighting's literal inputs, optionally only some of their ops,
 # and the versions before and after the fix. `shapekit conformance reproduce` fails unless
 # every row fails on each `fail` version and passes on each `pass` version. an unsupported or
 # errored check makes a cell inconclusive, which also fails the command.
 #
-# a row fails on a version when at least one counted check diverges, and passes when every
-# counted check passes. a row with unsupported_not_counted (which must say why) leaves its
-# unsupported checks out of the count; they are still listed in the output, and a cell with
-# no counted check left is inconclusive.
+# must_diverge names the checks that carry the sighting, as the matrix names them, per entry
+# (or per probe). a row fails on a version when every named check diverges, so a broad entry
+# selection cannot hold through some other defect; it passes when every counted check passes.
+# a version where checks diverge but not every named one is "diverges elsewhere", which holds
+# for neither list. a version may not be listed under both fail and pass.
+#
+# a row with unsupported_not_counted (which must say why) leaves its unsupported checks out of
+# the count; they are still listed in the output, and a cell with no counted check left is
+# inconclusive.
 
 schema = 1
 
@@ -20,6 +25,9 @@ entries = ["cap38.liquidity-pools.synth-assets-js1766-issuers"]
 ops = ["asset_order"]
 fail = ["16.3.0", "17.2.0"]
 pass = ["16.3.1", "17.2.1"]
+must_diverge = [
+  { entry = "cap38.liquidity-pools.synth-assets-js1766-issuers", checks = ["case 0/asset_order", "case 1/asset_order"] },
+]
 
 [[reproduction]]
 id = "js-1766-map-key-order"
@@ -35,6 +43,10 @@ entries = [
 ops = ["map_sort"]
 fail = ["17.2.0"]
 pass = ["17.2.1"]
+must_diverge = [
+  { entry = "soroban.scval-shapes.synth-map-keys-bytes", checks = ["case 0/map_sort"] },
+  { entry = "soroban.scval-shapes.synth-map-keys-mixed-types", checks = ["case 0/map_sort"] },
+]
 
 [[reproduction]]
 id = "js-1785-non-canonical-ids"
@@ -48,6 +60,10 @@ entries = [
 ops = ["id_parse"]
 fail = ["17.2.1"]
 pass = ["17.3.0"]
+must_diverge = [
+  { entry = "cap03.offer-liabilities.synth-textual-offer-id-noncanonical", checks = ["case 3/id_parse", "case 4/id_parse", "case 5/id_parse", "case 6/id_parse", "case 7/id_parse", "case 8/id_parse", "case 9/id_parse", "case 10/id_parse", "case 11/id_parse", "case 12/id_parse", "case 13/id_parse", "case 14/id_parse", "case 20/id_parse", "case 21/id_parse", "case 23/id_parse", "case 24/id_parse"] },
+  { entry = "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical", checks = ["case 1/id_parse", "case 2/id_parse", "case 3/id_parse", "case 4/id_parse", "case 5/id_parse", "case 6/id_parse", "case 7/id_parse", "case 8/id_parse", "case 9/id_parse", "case 10/id_parse", "case 12/id_parse"] },
+]
 unsupported_not_counted = "MuxedAccount takes the id only as a string, so the muxed json-number cases have no api to call; the text cases and every offer case still count"
 
 [[reproduction]]
@@ -59,6 +75,9 @@ entries = ["soroban.scval-shapes.synth-map-js1789-u32-symbol"]
 ops = ["to_native"]
 fail = ["17.2.1"]
 pass = ["17.3.0"]
+must_diverge = [
+  { entry = "soroban.scval-shapes.synth-map-js1789-u32-symbol", checks = ["case 0/to_native"] },
+]
 
 [[reproduction]]
 id = "go-asset-less-than"
@@ -69,6 +88,9 @@ entries = ["cap38.liquidity-pools.synth-assets-js1766-issuers"]
 ops = ["asset_order"]
 fail = ["v0.7.1"]
 pass = ["v0.7.2"]
+must_diverge = [
+  { entry = "cap38.liquidity-pools.synth-assets-js1766-issuers", checks = ["case 0/asset_order", "case 1/asset_order"] },
+]
 
 [[reproduction]]
 id = "go-strkey-noncanonical-chars"
@@ -83,6 +105,11 @@ entries = [
 ops = ["strkey_decode"]
 fail = ["v0.8.0"]
 pass = ["v0.9.0"]
+must_diverge = [
+  { entry = "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars", checks = ["case 0/strkey_decode", "case 1/strkey_decode", "case 2/strkey_decode"] },
+  { entry = "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars", checks = ["case 0/strkey_decode", "case 1/strkey_decode", "case 2/strkey_decode", "case 4/strkey_decode"] },
+  { entry = "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars", checks = ["case 0/strkey_decode", "case 1/strkey_decode", "case 2/strkey_decode", "case 4/strkey_decode"] },
+]
 
 # the advisory is a json-to-xdr flaw: 28.0.0 reads a ScSpecFunctionV0 with two outputs from
 # json (the xdr allows one) and writes bytes no decoder accepts. the corpus entry holds those
@@ -96,6 +123,9 @@ sdk = "rust"
 entries = ["soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2"]
 fail = ["28.0.0"]
 pass = ["28.0.1"]
+must_diverge = [
+  { probe = "advisory-json", checks = ["probe/encode_json"] },
+]
 
 [[reproduction.probe]]
 name = "advisory-json"

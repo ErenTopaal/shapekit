@@ -1,5 +1,9 @@
 //! `shapekit conformance reproduce`: each upstream sighting in `conformance/reproductions.toml`
 //! must fail on the versions before its fix and pass on the versions with it.
+//!
+//! A row names the checks that carry the sighting (`must_diverge`). On a `fail` version every
+//! named check must diverge, so a broad selection cannot be satisfied by some other defect; on
+//! a `pass` version every counted check of the row must pass.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
@@ -54,6 +58,30 @@ pub struct Reproduction {
     /// inconclusive. With it, a cell is still inconclusive when no counted check remains.
     #[serde(default)]
     pub unsupported_not_counted: Option<String>,
+    /// The checks that carry the sighting: each must diverge on every `fail` version.
+    pub must_diverge: Vec<Diverge>,
+}
+
+/// Checks of one entry or probe of the row, named as the matrix names them.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Diverge {
+    #[serde(default)]
+    pub entry: Option<String>,
+    #[serde(default)]
+    pub probe: Option<String>,
+    pub checks: Vec<String>,
+}
+
+impl Diverge {
+    /// The owner as the row's checks carry it: the entry id, or `probe <name>`.
+    fn owner(&self) -> String {
+        match (&self.entry, &self.probe) {
+            (Some(e), _) => e.clone(),
+            (None, Some(p)) => format!("probe {p}"),
+            (None, None) => unreachable!("checked on load"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -105,6 +133,30 @@ impl ReproductionsFile {
                 "reproduction {} names no entries and no probes",
                 r.id
             );
+            if let Some(v) = r.fail.iter().find(|v| r.pass.contains(v)) {
+                bail!(
+                    "reproduction {}: version {v} is listed under both fail and pass",
+                    r.id
+                );
+            }
+            ensure!(
+                !r.must_diverge.is_empty(),
+                "reproduction {} names no must_diverge checks",
+                r.id
+            );
+            for d in &r.must_diverge {
+                ensure!(
+                    d.entry.is_some() != d.probe.is_some(),
+                    "reproduction {}: a must_diverge item names exactly one of entry and probe",
+                    r.id
+                );
+                ensure!(
+                    !d.checks.is_empty(),
+                    "reproduction {}: must_diverge for {} lists no checks",
+                    r.id,
+                    d.owner()
+                );
+            }
         }
         Ok(file)
     }
@@ -113,8 +165,12 @@ impl ReproductionsFile {
 /// What a row did on one version.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Observed {
+    /// Every `must_diverge` check diverges.
     Fail,
+    /// Every counted check passes.
     Pass,
+    /// Some check diverges, but not every `must_diverge` check: the sighting is not what fails.
+    Mixed,
     /// Some counted check errored or was unsupported, so neither verdict is established.
     Inconclusive,
 }
@@ -124,6 +180,7 @@ impl Observed {
         match self {
             Observed::Fail => "fail",
             Observed::Pass => "pass",
+            Observed::Mixed => "diverges elsewhere",
             Observed::Inconclusive => "inconclusive",
         }
     }
@@ -217,6 +274,16 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
             "reproduction {}: no check survives the ops filter",
             r.id
         );
+        for d in &r.must_diverge {
+            let owner = d.owner();
+            for name in &d.checks {
+                ensure!(
+                    checks.iter().any(|(o, c)| *o == owner && &c.name == name),
+                    "reproduction {}: must_diverge names {owner} `{name}`, which is not a counted check of the row",
+                    r.id
+                );
+            }
+        }
         row_checks.insert(r.id.as_str(), (ids.into_iter().collect(), checks));
     }
 
@@ -243,6 +310,8 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
             let mut notes = Vec::new();
             let mut worst = ResultClass::Pass;
             let mut counted = 0usize;
+            let mut named_diverge = 0usize;
+            let named_total: usize = r.must_diverge.iter().map(|d| d.checks.len()).sum();
             for (owner, check) in checks {
                 let v = runner::run_check(check, &mut testees)?
                     .into_iter()
@@ -256,6 +325,17 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
                         v.detail.map(|d| format!(", {d}")).unwrap_or_default()
                     ));
                 }
+                let diverges = matches!(
+                    v.result,
+                    ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
+                );
+                let named = r
+                    .must_diverge
+                    .iter()
+                    .any(|d| d.owner() == *owner && d.checks.contains(&check.name));
+                if named && diverges {
+                    named_diverge += 1;
+                }
                 if v.result == ResultClass::Unsupported && r.unsupported_not_counted.is_some() {
                     continue;
                 }
@@ -264,9 +344,12 @@ pub fn run(opts: &ReproduceOptions) -> Result<Vec<Cell>> {
             }
             let observed = match worst {
                 _ if counted == 0 => Observed::Inconclusive,
-                ResultClass::Pass => Observed::Pass,
-                ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers => Observed::Fail,
                 ResultClass::Unsupported | ResultClass::Error => Observed::Inconclusive,
+                _ if named_diverge == named_total => Observed::Fail,
+                ResultClass::Pass | ResultClass::Reference => Observed::Pass,
+                ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers => {
+                    Observed::Mixed
+                }
             };
             cells.push(Cell {
                 reproduction: r.id.clone(),

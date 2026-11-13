@@ -95,7 +95,17 @@ pub struct Target {
     pub command: Vec<String>,
     pub env: BTreeMap<String, String>,
     pub max_protocol: Option<u32>,
+    /// Whether this is the sdk's `current` version, the one that votes for the sdk when
+    /// implementation-defined checks are decided across sdks.
+    pub current: bool,
+    /// The longest response line the runner reads from this testee, in bytes without the
+    /// newline; see `MAX_RESPONSE_LINE`.
+    pub max_response_line: usize,
 }
+
+/// The response line limit docs/testee-protocol.md sets: a longer line is a protocol
+/// violation, so a testee printing without end cannot grow the runner without bound.
+pub const MAX_RESPONSE_LINE: usize = 256 << 20;
 
 impl Target {
     /// `rust@30.0.0`, the column key in the matrix.
@@ -185,6 +195,8 @@ impl VersionsFile {
             command: v.command.clone(),
             env: v.env.clone(),
             max_protocol: v.max_protocol,
+            current: v.version == s.current,
+            max_response_line: MAX_RESPONSE_LINE,
         })
     }
 

@@ -1,13 +1,14 @@
 //! Client side of the testee protocol: starts a testee under a memory limit, says hello, and
-//! sends one request at a time with a timeout. A testee that times out or dies is restarted.
+//! sends one request at a time with a timeout that covers writing the request and reading the
+//! answer. A testee that times out, dies or breaks the protocol is restarted.
 
 use std::collections::VecDeque;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::mpsc::{Receiver, RecvTimeoutError, channel};
+use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail, ensure};
 use serde::Deserialize;
@@ -112,10 +113,21 @@ pub struct Hello {
     pub decode_limits: String,
 }
 
+/// Why the stdout reader stopped short of a line.
+#[derive(Debug)]
+enum LineError {
+    Io(std::io::Error),
+    TooLong(usize),
+    NotUtf8,
+}
+
 struct Running {
     child: Child,
-    stdin: ChildStdin,
-    lines: Receiver<std::io::Result<String>>,
+    /// Request lines for the writer thread, which owns the child's stdin; dropping the sender
+    /// closes stdin once the thread is idle.
+    requests: Option<Sender<Vec<u8>>>,
+    written: Receiver<std::io::Result<()>>,
+    lines: Receiver<Result<String, LineError>>,
     stderr: Arc<Mutex<VecDeque<u8>>>,
 }
 
@@ -236,23 +248,49 @@ impl Testee {
         self.next_id += 1;
         let id = self.next_id.to_string();
         request.insert("id".into(), Value::from(id.clone()));
-        let mut line = serde_json::to_string(&Value::Object(request))
+        let mut line = serde_json::to_vec(&Value::Object(request))
             .expect("serializing a json value cannot fail");
-        line.push('\n');
-        if let Err(err) = running
-            .stdin
-            .write_all(line.as_bytes())
-            .and_then(|()| running.stdin.flush())
-        {
-            return Err(exited(running, &format!("writing the request: {err}")));
+        line.push(b'\n');
+        // a testee that stops reading blocks a write larger than the pipe buffer, so the write
+        // runs on its own thread and shares the request's deadline with the read
+        let deadline = Instant::now() + Duration::from_millis(timeout);
+        let left = || deadline.saturating_duration_since(Instant::now());
+        let sent = running
+            .requests
+            .as_ref()
+            .is_some_and(|tx| tx.send(line).is_ok());
+        if !sent {
+            return Err(exited(running, "writing the request: stdin is closed"));
         }
-        let text = match running.lines.recv_timeout(Duration::from_millis(timeout)) {
+        match running.written.recv_timeout(left()) {
+            Ok(Ok(())) => {}
+            Ok(Err(err)) => return Err(exited(running, &format!("writing the request: {err}"))),
+            Err(RecvTimeoutError::Timeout) => return Err(Failure::Timeout { ms: timeout }),
+            Err(RecvTimeoutError::Disconnected) => {
+                return Err(exited(running, "writing the request: stdin is closed"));
+            }
+        }
+        let stderr = || tail(&running.stderr);
+        let text = match running.lines.recv_timeout(left()) {
             Ok(Ok(text)) => text,
-            Ok(Err(err)) => return Err(exited(running, &format!("reading stdout: {err}"))),
+            Ok(Err(LineError::Io(err))) => {
+                return Err(exited(running, &format!("reading stdout: {err}")));
+            }
+            Ok(Err(LineError::TooLong(max))) => {
+                return Err(Failure::Protocol {
+                    message: format!("response line longer than {max} bytes"),
+                    stderr: stderr(),
+                });
+            }
+            Ok(Err(LineError::NotUtf8)) => {
+                return Err(Failure::Protocol {
+                    message: "response line is not utf-8".into(),
+                    stderr: stderr(),
+                });
+            }
             Err(RecvTimeoutError::Timeout) => return Err(Failure::Timeout { ms: timeout }),
             Err(RecvTimeoutError::Disconnected) => return Err(exited(running, "stdout closed")),
         };
-        let stderr = || tail(&running.stderr);
         let value = parse_deep(&text).map_err(|e| Failure::Protocol {
             message: format!("response is not json: {e}"),
             stderr: stderr(),
@@ -276,7 +314,7 @@ impl Drop for Testee {
     fn drop(&mut self) {
         if let Some(mut r) = self.running.take() {
             // closing stdin lets a healthy testee exit 0 on its own
-            drop(r.stdin);
+            drop(r.requests.take());
             match r.child.try_wait() {
                 Ok(Some(_)) => {}
                 _ => {
@@ -419,26 +457,13 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
     let stdout = child.stdout.take().context("child stdout")?;
     let mut stderr_pipe = child.stderr.take().context("child stderr")?;
 
+    let (requests, request_rx) = channel::<Vec<u8>>();
+    let (written_tx, written) = channel();
+    std::thread::spawn(move || write_requests(stdin, request_rx, written_tx));
+
     let (tx, rx) = channel();
-    std::thread::spawn(move || {
-        let mut reader = BufReader::new(stdout);
-        loop {
-            let mut line = String::new();
-            match reader.read_line(&mut line) {
-                Ok(0) => return,
-                Ok(_) => {
-                    let text = line.trim_end_matches(['\n', '\r']).to_string();
-                    if tx.send(Ok(text)).is_err() {
-                        return;
-                    }
-                }
-                Err(err) => {
-                    let _ = tx.send(Err(err));
-                    return;
-                }
-            }
-        }
-    });
+    let max = target.max_response_line;
+    std::thread::spawn(move || read_lines(BufReader::new(stdout), max, tx));
 
     let stderr = Arc::new(Mutex::new(VecDeque::with_capacity(STDERR_TAIL)));
     let sink = Arc::clone(&stderr);
@@ -463,10 +488,58 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
 
     Ok(Running {
         child,
-        stdin,
+        requests: Some(requests),
+        written,
         lines: rx,
         stderr,
     })
+}
+
+// owns the child's stdin; stops after the first failed write, since the pipe is then broken
+fn write_requests(
+    mut stdin: ChildStdin,
+    requests: Receiver<Vec<u8>>,
+    written: Sender<std::io::Result<()>>,
+) {
+    for line in requests {
+        let result = stdin.write_all(&line).and_then(|()| stdin.flush());
+        let failed = result.is_err();
+        if written.send(result).is_err() || failed {
+            return;
+        }
+    }
+}
+
+/// Sends each stdout line, without its line ending, until end of file. A line longer than
+/// `max` bytes is not buffered past `max + 1` bytes: the reader reports it and stops, and the
+/// runner restarts the testee.
+fn read_lines(mut reader: impl BufRead, max: usize, tx: Sender<Result<String, LineError>>) {
+    let cap = u64::try_from(max).unwrap_or(u64::MAX).saturating_add(1);
+    loop {
+        let mut buf = Vec::new();
+        match (&mut reader).take(cap).read_until(b'\n', &mut buf) {
+            Ok(0) => return,
+            Ok(_) => {
+                let complete = buf.last() == Some(&b'\n');
+                if !complete && buf.len() > max {
+                    let _ = tx.send(Err(LineError::TooLong(max)));
+                    return;
+                }
+                while matches!(buf.last(), Some(b'\n' | b'\r')) {
+                    buf.pop();
+                }
+                let line = String::from_utf8(buf).map_err(|_| LineError::NotUtf8);
+                let stop = line.is_err();
+                if tx.send(line).is_err() || stop {
+                    return;
+                }
+            }
+            Err(err) => {
+                let _ = tx.send(Err(LineError::Io(err)));
+                return;
+            }
+        }
+    }
 }
 
 // a command with a slash is a path relative to the repository root; a bare name is looked up

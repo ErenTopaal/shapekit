@@ -1,29 +1,30 @@
 # known failures of the rust testee (stellar-xdr with stellar-strkey 1.0.0).
-# format: <entry-id> <version|*> <result> <issue>; see crates/shapekit-conformance/src/known.rs.
+# format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see
+# crates/shapekit-conformance/src/known.rs and docs/testee-protocol.md, "Known failures".
 # issues point at the drafted bodies until they are filed upstream with owner approval.
 #
 # xdr-json reader accepts offer ids the network's canonical form refuses (leading zeros, a
 # plus sign, negative values); numbers past 2^53-1 moved to the unsafe-number entries, which
 # rust reads exactly and passes
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 12/id_parse, case 13/id_parse, case 14/id_parse, case 20/id_parse, case 21/id_parse, case 23/id_parse, case 24/id_parse
 # the json reader stops at serde_json's 128-level recursion limit, below the xdr depth the
 # decoder accepts, so values the crate renders cannot be read back
-soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md
-soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md
-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md
-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md
+soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/encode_json
+soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md any/encode_json
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md any/encode_json
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md any/encode_json
 # the same limit on recorded chains, which run only on the protocol 30 build
-soroban.auth-trees.p30-declared-depth-245 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-245.md
-soroban.auth-trees.p30-declared-depth-246 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-246.md
-soroban.auth-trees.p30-declared-depth-492 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-492.md
-soroban.scval-shapes.p30-map-depth-max-envelope 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-envelope.md
-soroban.scval-shapes.p30-map-depth-max-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-meta.md
-soroban.scval-shapes.p30-map-depth-over 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-over.md
-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta.md
-soroban.scval-shapes.p30-vec-depth-max-envelope 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-envelope.md
-soroban.scval-shapes.p30-vec-depth-max-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-meta.md
-soroban.scval-shapes.p30-vec-depth-over 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-over.md
+soroban.auth-trees.p30-declared-depth-245 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-245.md mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-246 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-246.md mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-492 30.0.0 diverges-from-network findings/issues/rust-soroban.auth-trees.p30-declared-depth-492.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-envelope 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-envelope.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-max-meta.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-over 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-depth-over.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-map-mixed-keys-sorted-meta.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-envelope 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-envelope.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-meta 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-max-meta.md mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-over 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-over.md mainnet/encode_json, testnet/encode_json
 # stellar-xdr reads a bool word other than 0 or 1 as false and writes it back as 0, where
 # go-stellar-sdk and js-stellar-sdk refuse it (and core's xdrpp reads it as true). the
 # entries are implementation-defined, so this shows only in a run with the other sdks.
-soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md
+soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md any/decode_encode, any/decode_json

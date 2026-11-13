@@ -12,6 +12,11 @@ use crate::testee::{ErrorClass, Failure, Reply};
 #[serde(rename_all = "kebab-case")]
 pub enum ResultClass {
     Pass,
+    /// A check that agrees with `expected_json` on the testee whose library rendered it: the
+    /// rust testee at the generator's stellar-xdr version. Its agreement is that library
+    /// agreeing with itself, so it is shown apart from passes and never counted as independent
+    /// evidence. An entry whose other checks pass still passes.
+    Reference,
     Unsupported,
     DivergesFromPeers,
     DivergesFromNetwork,
@@ -22,6 +27,7 @@ impl ResultClass {
     pub fn as_str(self) -> &'static str {
         match self {
             ResultClass::Pass => "pass",
+            ResultClass::Reference => "reference",
             ResultClass::Unsupported => "unsupported",
             ResultClass::DivergesFromPeers => "diverges-from-peers",
             ResultClass::DivergesFromNetwork => "diverges-from-network",
@@ -32,6 +38,7 @@ impl ResultClass {
     pub fn parse(s: &str) -> Option<ResultClass> {
         Some(match s {
             "pass" => ResultClass::Pass,
+            "reference" => ResultClass::Reference,
             "unsupported" => ResultClass::Unsupported,
             "diverges-from-peers" => ResultClass::DivergesFromPeers,
             "diverges-from-network" => ResultClass::DivergesFromNetwork,
@@ -62,6 +69,9 @@ pub struct Verdict {
     pub detail: Option<String>,
     /// A short form of what the testee answered, for the matrix and issue bodies.
     pub actual: Value,
+    /// The sdk panicked or the testee process died on this input. A crash is a robustness
+    /// defect whatever protocol the input is from, so it is never downgraded to unsupported.
+    pub crashed: bool,
 }
 
 /// The comparable outcome of an implementation-defined check, decided across testees later.
@@ -94,6 +104,16 @@ fn verdict(result: ResultClass, detail: impl Into<Option<String>>, actual: Value
         result,
         detail: detail.into(),
         actual: short(&actual),
+        crashed: false,
+    })
+}
+
+fn crash(result: ResultClass, detail: String, actual: Value) -> Judged {
+    Judged::Done(Verdict {
+        result,
+        detail: Some(detail),
+        actual: short(&actual),
+        crashed: true,
     })
 }
 
@@ -129,6 +149,9 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
         );
     }
     let reply = match answer {
+        Err(failure @ Failure::Exited { .. }) => {
+            return crash(ResultClass::Error, failure.to_string(), Value::Null);
+        }
         Err(failure) => return verdict(ResultClass::Error, failure.to_string(), Value::Null),
         Ok(r) => r,
     };
@@ -149,7 +172,7 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
                 );
             }
             ErrorClass::Panic => {
-                return verdict(
+                return crash(
                     ResultClass::DivergesFromNetwork,
                     format!("the sdk crashed instead of answering: {message}"),
                     json!({"error": "panic", "message": message}),
@@ -307,13 +330,22 @@ fn native_map_entries(native: &Value) -> Option<usize> {
         .map(Vec::len)
 }
 
-/// Decides implementation-defined checks: every testee whose outcome differs from the most
-/// common one diverges from its peers. With a single answering testee there is nothing to
-/// compare with, which is reported as such and never as a pass.
-pub fn judge_peers(outcomes: &[Option<Value>]) -> Vec<Option<Verdict>> {
-    let answered: Vec<&Value> = outcomes.iter().flatten().collect();
+/// Decides implementation-defined checks across sdks. `voters` marks, per outcome, the testee
+/// that votes for its sdk: one per sdk (its `current` version when the run holds it), so an sdk
+/// run at many versions does not outvote one run at few. The most common answer among the
+/// votes is the majority; every testee, voter or not, whose outcome differs from it diverges
+/// from its peers, and with a tie nobody agrees. With fewer than two votes there is no other
+/// sdk to compare with, which is reported as such and never as a pass.
+pub fn judge_peers(outcomes: &[Option<Value>], voters: &[bool]) -> Vec<Option<Verdict>> {
+    assert_eq!(outcomes.len(), voters.len(), "one voter flag per outcome");
+    let votes: Vec<&Value> = outcomes
+        .iter()
+        .zip(voters)
+        .filter(|(_, v)| **v)
+        .filter_map(|(o, _)| o.as_ref())
+        .collect();
     let mut counts: Vec<(&Value, usize)> = Vec::new();
-    for v in &answered {
+    for v in &votes {
         match counts.iter_mut().find(|(k, _)| k == v) {
             Some((_, n)) => *n += 1,
             None => counts.push((v, 1)),
@@ -321,40 +353,39 @@ pub fn judge_peers(outcomes: &[Option<Value>]) -> Vec<Option<Verdict>> {
     }
     let top = counts.iter().map(|(_, n)| *n).max().unwrap_or(0);
     let tied = counts.iter().filter(|(_, n)| *n == top).count() > 1;
+    let done = |result, detail: Option<&str>, v: &Value| Verdict {
+        result,
+        detail: detail.map(String::from),
+        actual: short(v),
+        crashed: false,
+    };
     outcomes
         .iter()
         .map(|o| {
             o.as_ref().map(|v| {
-                if answered.len() < 2 {
-                    return Verdict {
-                        result: ResultClass::Unsupported,
-                        detail: Some(
-                            "implementation-defined and no other sdk answered to compare with"
-                                .into(),
-                        ),
-                        actual: short(v),
-                    };
+                if votes.len() < 2 {
+                    return done(
+                        ResultClass::Unsupported,
+                        Some("implementation-defined and no other sdk answered to compare with"),
+                        v,
+                    );
                 }
                 let agrees = !tied && counts.iter().any(|(k, n)| *k == v && *n == top);
                 if agrees && counts.len() == 1 {
-                    Verdict {
-                        result: ResultClass::Pass,
-                        detail: None,
-                        actual: short(v),
-                    }
+                    done(ResultClass::Pass, None, v)
                 } else if agrees {
                     // the majority answer is not wrong, but the entry still has disagreement
-                    Verdict {
-                        result: ResultClass::Pass,
-                        detail: Some("agrees with the most common answer".into()),
-                        actual: short(v),
-                    }
+                    done(
+                        ResultClass::Pass,
+                        Some("agrees with the most common answer of the sdks"),
+                        v,
+                    )
                 } else {
-                    Verdict {
-                        result: ResultClass::DivergesFromPeers,
-                        detail: Some("answers differently from the other sdks".into()),
-                        actual: short(v),
-                    }
+                    done(
+                        ResultClass::DivergesFromPeers,
+                        Some("answers differently from the other sdks"),
+                        v,
+                    )
                 }
             })
         })
