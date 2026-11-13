@@ -166,7 +166,7 @@ jobs:
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
-      - name: conformance run, all versions, one matrix per sdk
+      - name: conformance run, all versions, one matrix per sdk and one for disagreeing references
         # one output directory per sdk, the layout findings/triage.toml reads in the findings job
         run: |
           set -euo pipefail
@@ -176,6 +176,9 @@ jobs:
             "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
               --out "target/conformance/$sdk" || status=1
           done
+          # implementation-defined entries diverge only next to the other sdks' answers
+          "$RUNNER_TEMP/bin/shapekit" conformance run --all-versions --no-build \
+            --flag references-disagree --out target/conformance/peers || status=1
           exit "$status"
       - name: conformance reproduce
         # the run above built every version, so the reproductions reuse those builds

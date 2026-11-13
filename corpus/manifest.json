@@ -34523,6 +34523,49 @@
         "CAP-0058"
       ],
       "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "soroban.invoke-basics",
+      "fields_exercised": [],
+      "flags": [
+        "bad-enum-value",
+        "references-disagree"
+      ],
+      "id": "soroban.invoke-basics.synth-invoke-arg-bool-2",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "a v1 envelope whose one operation invokes echo(value) on a contract with the ScVal bool argument encoded as the word 2; the contract id and the signature are placeholders. three readings of the same bytes: stellar-xdr 30.0.0 decodes it as false (bool::read_xdr is i == 1) and re-encodes 0; go-stellar-sdk refuses it as an invalid bool; stellar-core 30.0.0 reads it with xdrpp, whose xdr_traits<bool>::from_uint is u != 0 (xdrpp types.h:341, validate_enum then sees TRUE, marshal.h:176-178), so core sees true. core never hashes the submitted bytes: CommandHandler::tx decodes the blob into a TransactionEnvelope (main/CommandHandler.cpp:1071-1072), TransactionFrame::getContentsHash hashes xdr_to_opaque(networkID, ENVELOPE_TYPE_TX, mEnvelope.v1().tx), its own re-encoding with the word 1 (transactions/TransactionFrame.cpp:154-179), signatures are checked against that hash (TransactionFrame.cpp:1859-1861), and from protocol 28 the rust can_parse_transaction check also runs on the re-encoding (validateXDRForProtocol, transactions/TransactionUtils.cpp:1350-1379, called at TransactionFrame.cpp:1923). an envelope of this shape against a deployed echo contract, built with a real key and submitted to a local core 30.0.0 at protocol 30 on 2026-11-13: signed over the hash of the submitted bytes it answers ERROR txBAD_AUTH; signed over the hash of the canonical re-encoding it answers PENDING, applies it with txSUCCESS, reports the canonical hash as the transaction hash, returns true, and the ledger meta carries the envelope with the word 1, never 2. so no ledger holds these bytes, but core accepts them as input, and a decoder that reads them as false shows a different argument from the one core executes. stellar-xdr 30.0.0 decodes it but does not round-trip (re-encoded bytes differ: 248 bytes in, 248 out, first difference at byte 131) under Limits { depth: 1000 (xdr.envelope.depth), len: 248 }.",
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 22,
+        "valid_min": 22
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/soroban.invoke-basics/soroban.invoke-basics.synth-invoke-arg-bool-2/any.xdr",
+          "xdr_sha256": "49d0391eedc0733e090a1c9b1b3b151065b55d7872d98d58dc6b1e6470b4edc1"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-12",
+        "CAP-0054",
+        "CAP-0058"
+      ],
+      "expected": {
         "decode": "must-reject",
         "roundtrip": false,
         "validity": "not-emittable"

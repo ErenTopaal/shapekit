@@ -163,8 +163,12 @@ mutated arbitrary values). 8,439 inputs were filtered as depth accounting (8,328
 
 Every other disagreement, 113,063 inputs, was one root cause in eight classes, one per type
 that carries a bool: stellar-xdr reads a bool word other than 0 or 1 (as false), go-stellar-sdk
-refuses it. The minimal reproducer is the `ScVal` `00000000 00000002`. The corpus already holds
-it as `soroban.scval-shapes.synth-bool-value-2`; the issue draft is
-`findings/issues/fuzz-rust-bool-non-canonical.md`. No input made either side panic, no go
+refuses it. Core's own decoder, xdrpp, reads the same word as true and re-encodes it as 1, and
+core hashes and checks signatures against that re-encoding, never the submitted bytes. The
+minimal reproducer is the `ScVal` `00000000 00000002`. The corpus already holds it as
+`soroban.scval-shapes.synth-bool-value-2`, and in an envelope as
+`soroban.invoke-basics.synth-invoke-arg-bool-2`; the issue drafts are
+`findings/issues/fuzz-rust-bool-non-canonical.md` and
+`findings/issues/stellar-core-bool-non-canonical.md`. No input made either side panic, no go
 request failed, and no input was accepted by both sides with different re-encodings.
 `ScSpecFunctionV0`, `Asset` and `SignerKey`, which carry no bool, had no disagreement at all.

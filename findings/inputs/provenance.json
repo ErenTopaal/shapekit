@@ -23,10 +23,20 @@
     },
     {
       "kind": "conformance",
+      "path": "findings/inputs/conformance-peers.json",
+      "sha256": "f46f45fb733ab04710e46d5a1e4625de37acfcdb83be3aaa82e0fc59d00e50d5",
+      "from": "target/conformance/peers/divergence-matrix.json",
+      "from_sha256": "1bf6f516259ca4b79d84a3ed45d8c6708937017722c8da26df256909bd8a4164",
+      "command": "shapekit conformance run --all-versions --flag references-disagree --out target/conformance/peers",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 rust@28.0.0 rust@28.0.1 rust@30.0.0"
+    },
+    {
+      "kind": "conformance",
       "path": "findings/inputs/conformance-rust.json",
       "sha256": "e2bbfbdea883fedb31f73355d4fdb371adac624c88cd11bfda04690118d70f51",
       "from": "target/conformance/rust/divergence-matrix.json",
-      "from_sha256": "839a27076b6c77285cc1b743d0473fbe3c8444667529343e6dfb5d5386d03275",
+      "from_sha256": "2c0b4e08576f23886e9e5948f5794eccb9282f52122b723b95436fa02eb8ca2c",
       "command": "shapekit conformance run --sdk rust --all-versions --out target/conformance/rust",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
@@ -34,12 +44,12 @@
     {
       "kind": "harness",
       "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
-      "sha256": "060e1cdc896fb7d51ae11200d1525a6a320a92c2379845788cc51ea27f20a55f",
+      "sha256": "01ac0c6ecd9bb4dc593b98950c0d925312b1493dace2c18d613f4f79b00250ba",
       "from": "target/findings/wallet-backend-3e22515a/harness-report.json",
-      "from_sha256": "060e1cdc896fb7d51ae11200d1525a6a320a92c2379845788cc51ea27f20a55f",
+      "from_sha256": "01ac0c6ecd9bb4dc593b98950c0d925312b1493dace2c18d613f4f79b00250ba",
       "command": "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a",
       "reduction": "none",
-      "describes": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest 3a9bfac4befc1d438d1fdd17ae029ed671cffdfd49eacb40b373cb54f5d048b6"
+      "describes": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest d937e41a9fbfd7b966a5b0afd36fc3783b66873a1caf237d1a74f9f5fc06e3fe"
     },
     {
       "kind": "lint",

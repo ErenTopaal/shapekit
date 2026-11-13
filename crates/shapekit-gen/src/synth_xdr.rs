@@ -955,6 +955,15 @@ fn malformed(out: &mut Vec<XdrItem>) -> Result<()> {
         cat(&[&enc(&x::ScValType::Bool)?, &enc(&2u32)?]),
         ENVELOPE_DEPTH,
     ));
+    out.push(item(
+        Spec::new("soroban.invoke-basics", "invoke-arg-bool-2", EntryKind::Xdr)
+            .implementation_defined(Validity::NotEmittable)
+            .flags(&["bad-enum-value", "references-disagree"])
+            .notes(BOOL_2_ENVELOPE_NOTES),
+        "TransactionEnvelope",
+        bool_2_envelope()?,
+        ENVELOPE_DEPTH,
+    ));
     let mut p = Parts::plain()?;
     p.ops = cat(&[&enc(&1u32)?, &enc(&2u32)?, &enc(&payment(2).body)?]);
     out.push(item(
@@ -1048,6 +1057,39 @@ fn malformed(out: &mut Vec<XdrItem>) -> Result<()> {
         ENVELOPE_DEPTH,
     ));
     Ok(())
+}
+
+const BOOL_2_ENVELOPE_NOTES: &str = "a v1 envelope whose one operation invokes echo(value) on a contract with the ScVal bool argument encoded as the word 2; the contract id and the signature are placeholders. three readings of the same bytes: stellar-xdr 30.0.0 decodes it as false (bool::read_xdr is i == 1) and re-encodes 0; go-stellar-sdk refuses it as an invalid bool; stellar-core 30.0.0 reads it with xdrpp, whose xdr_traits<bool>::from_uint is u != 0 (xdrpp types.h:341, validate_enum then sees TRUE, marshal.h:176-178), so core sees true. core never hashes the submitted bytes: CommandHandler::tx decodes the blob into a TransactionEnvelope (main/CommandHandler.cpp:1071-1072), TransactionFrame::getContentsHash hashes xdr_to_opaque(networkID, ENVELOPE_TYPE_TX, mEnvelope.v1().tx), its own re-encoding with the word 1 (transactions/TransactionFrame.cpp:154-179), signatures are checked against that hash (TransactionFrame.cpp:1859-1861), and from protocol 28 the rust can_parse_transaction check also runs on the re-encoding (validateXDRForProtocol, transactions/TransactionUtils.cpp:1350-1379, called at TransactionFrame.cpp:1923). an envelope of this shape against a deployed echo contract, built with a real key and submitted to a local core 30.0.0 at protocol 30 on 2026-11-13: signed over the hash of the submitted bytes it answers ERROR txBAD_AUTH; signed over the hash of the canonical re-encoding it answers PENDING, applies it with txSUCCESS, reports the canonical hash as the transaction hash, returns true, and the ledger meta carries the envelope with the word 1, never 2. so no ledger holds these bytes, but core accepts them as input, and a decoder that reads them as false shows a different argument from the one core executes.";
+
+/// The [`BOOL_2_ENVELOPE_NOTES`] envelope: the same invocation with true, with the bool word set
+/// to 2. the word is found by encoding false as well, which differs in that one byte only.
+fn bool_2_envelope() -> Result<Vec<u8>> {
+    let build = |b: bool| -> Result<Vec<u8>> {
+        let body = x::OperationBody::InvokeHostFunction(x::InvokeHostFunctionOp {
+            host_function: x::HostFunction::InvokeContract(x::InvokeContractArgs {
+                contract_address: contract(50),
+                function_name: x::ScSymbol::try_from(b"echo".to_vec())?,
+                args: vec![x::ScVal::Bool(b)].try_into()?,
+            }),
+            auth: x::VecM::default(),
+        });
+        let tx = transaction(
+            vec![op(body)],
+            x::Memo::None,
+            x::Preconditions::None,
+            soroban_ext(),
+        )?;
+        enc(&envelope(tx, vec![sig(7)?])?)
+    };
+    let (yes, no) = (build(true)?, build(false)?);
+    let diff: Vec<usize> = (0..yes.len()).filter(|&i| yes[i] != no[i]).collect();
+    ensure!(
+        yes.len() == no.len() && diff.len() == 1 && yes[diff[0]] == 1,
+        "the bool word is not one differing byte: {diff:?}"
+    );
+    let mut out = yes;
+    out[diff[0]] = 2;
+    Ok(out)
 }
 
 fn event(body: x::ScVal) -> Result<x::ContractEvent> {

@@ -26,5 +26,8 @@ soroban.scval-shapes.p30-vec-depth-max-meta 30.0.0 diverges-from-network finding
 soroban.scval-shapes.p30-vec-depth-over 30.0.0 diverges-from-network findings/issues/rust-soroban.scval-shapes.p30-vec-depth-over.md mainnet/encode_json, testnet/encode_json
 # stellar-xdr reads a bool word other than 0 or 1 as false and writes it back as 0, where
 # go-stellar-sdk and js-stellar-sdk refuse it (and core's xdrpp reads it as true). the
-# entries are implementation-defined, so this shows only in a run with the other sdks.
+# entries are implementation-defined, so this shows only in a run with the other sdks. the
+# envelope entry is the same word as a contract argument, which core 30.0.0 accepted and
+# executed as true in a local run (findings/issues/stellar-core-bool-non-canonical.md).
 soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md any/decode_encode, any/decode_json
+soroban.invoke-basics.synth-invoke-arg-bool-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md any/decode_encode, any/decode_json

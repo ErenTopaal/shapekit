@@ -91,7 +91,7 @@ fn every_entry_is_synthetic_and_counts_are_stable() {
         );
     }
     let counts = s.counts();
-    assert_eq!(counts.get("xdr"), Some(&48));
+    assert_eq!(counts.get("xdr"), Some(&49));
     assert_eq!(counts.get("ordering"), Some(&17));
     assert_eq!(counts.get("strkey"), Some(&23));
     assert_eq!(counts.get("textual-id"), Some(&6));

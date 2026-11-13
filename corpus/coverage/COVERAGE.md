@@ -8,9 +8,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 710 |
+| Entries | 711 |
 | Core-emitted entries | 590 |
-| Entries by source class | core-golden 107, local-core 467, local-core-refused 18, mainnet-history 13, synthetic 102, testnet-history 3 |
+| Entries by source class | core-golden 107, local-core 467, local-core-refused 18, mainnet-history 13, synthetic 103, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
@@ -82,29 +82,29 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | CAP-0043 ECDSA Signers with P-256 and secp256k1 Curves |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed KEY_TYPE_ECDSA_P256 is absent at v30.0 |
 | CAP-0044 SPEEDEX - Configuration |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SpeedexConfigurationEntry is absent at v30.0 |
 | CAP-0045 SPEEDEX - Pricing |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
-| CAP-0046 Soroban smart contract system overview | 20 | yes | `soroban.muxed-source`, `soroban.invoke-basics` | 51 | 46 | core-golden 21, local-core 25, local-core-refused 2, synthetic 3 | any 22, mainnet 27, testnet 27, vector 2 | 28, 30 |  |
+| CAP-0046 Soroban smart contract system overview | 20 | yes | `soroban.muxed-source`, `soroban.invoke-basics` | 52 | 46 | core-golden 21, local-core 25, local-core-refused 2, synthetic 4 | any 23, mainnet 27, testnet 27, vector 2 | 28, 30 |  |
 | CAP-0046-01 Soroban Runtime Environment | 20 | yes | `soroban.scval-shapes` | 61 | 29 | core-golden 7, local-core 18, mainnet-history 4, synthetic 32 | any 24, mainnet 22, testnet 18, vector 15 | 22, 26, 30 |  |
-| CAP-0046-02 Smart Contract Lifecycle | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-02 Smart Contract Lifecycle | 20 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0046-03 Smart Contract Host Functions | 20 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; its XDR section defers to CAP-0046-01 |
-| CAP-0046-05 Smart Contract Data | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-05 Smart Contract Data | 20 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0046-06 Smart Contract Standardized Asset (Stellar Asset Contract) | 20 | yes | `cap73.sac-trust` | 22 | 22 | core-golden 4, local-core 18 | any 4, mainnet 18, testnet 18 | 28, 30 |  |
-| CAP-0046-07 Fee and resource model in smart contracts | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
-| CAP-0046-08 Smart Contract Events | 20 | yes | `soroban.invoke-basics`, `soroban.events-max` | 49 | 46 | core-golden 23, local-core 23, synthetic 3 | any 24, mainnet 23, testnet 23, vector 2 | 30 |  |
+| CAP-0046-07 Fee and resource model in smart contracts | 20 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-08 Smart Contract Events | 20 | yes | `soroban.invoke-basics`, `soroban.events-max` | 50 | 46 | core-golden 23, local-core 23, synthetic 4 | any 25, mainnet 23, testnet 23, vector 2 | 30 |  |
 | CAP-0046-09 Network Configuration Ledger Entries | 20 | yes | `cap46.config-upgrades` | 8 | 8 | core-golden 3, local-core 5 | any 3, mainnet 5, testnet 5 | 20, 30 |  |
 | CAP-0046-10 Smart Contract Budget Metering | 20 | yes | `cap46.config-upgrades` | 8 | 8 | core-golden 3, local-core 5 | any 3, mainnet 5, testnet 5 | 20, 30 |  |
 | CAP-0046-11 Soroban Authorization Framework | 20 | yes | `soroban.auth-trees` | 22 | 18 | core-golden 5, local-core 13, local-core-refused 1, synthetic 3 | any 8, mainnet 14, testnet 14 | 20, 30 |  |
-| CAP-0046-12 Soroban State Archival Interface | 20 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0046-12 Soroban State Archival Interface | 20 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0048 Smart Contract Asset Interoperability |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed AllowanceEntry is absent at v30.0 |
 | CAP-0049 Smart Contract Asset Interoperability with Wrapper |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed WrappedBalanceEntry is absent at v30.0 |
 | CAP-0050 Smart Contract Interactions |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol; proposed InvokeContractTransactionEnvelope is absent at v30.0 |
 | CAP-0051 Smart Contract Host Functionality: Secp256r1 Verification | 21 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; plus ContractCostType values, which are never serialized |
 | CAP-0052 Smart Contract Host Functionality: Base64 Encoding/Decoding |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol |
 | CAP-0053 Separate host functions to extend the TTL for contract instance and contract code | 21 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; no XDR section |
-| CAP-0054 Soroban refined VM instantiation cost model | 21 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0054 Soroban refined VM instantiation cost model | 21 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0055 Soroban streamlined linking | 21 | no |  | 0 | 0 |  |  |  | the CAP states no XDR changes beyond CAP-0054; linking cost behaviour only |
 | CAP-0056 Soroban intra-transaction module caching | 21 | no |  | 0 | 0 |  |  |  | the CAP states no XDR changes beyond CAP-0054; intra-transaction module caching only |
 | CAP-0057 State Archival Persistent Entry Eviction | 23 | no |  | 0 | 0 |  |  |  | Draft; its proposed archival proof and cold archive XDR was added in v21.1..v22.0 and removed in v22.0..v23.0, absent at v30.0 |
-| CAP-0058 Constructors for Soroban contracts | 22 | yes | `soroban.invoke-basics` | 41 | 38 | core-golden 19, local-core 19, synthetic 3 | any 20, mainnet 19, testnet 19, vector 2 | 30 |  |
+| CAP-0058 Constructors for Soroban contracts | 22 | yes | `soroban.invoke-basics` | 42 | 38 | core-golden 19, local-core 19, synthetic 4 | any 21, mainnet 19, testnet 19, vector 2 | 30 |  |
 | CAP-0059 Host functions for BLS12-381 | 22 | no |  | 0 | 0 |  |  |  | host functions only (guest/host interface); effects reach meta only through existing XDR shapes; only adds ContractCostType values; ContractCostType is never serialized (cost params are a vector indexed by it inside CONFIG_SETTING entries), so no new shape reaches LedgerCloseMeta or envelopes |
 | CAP-0060 Update to Wasmi register machine | 22 | no |  | 0 | 0 |  |  |  | Wasmi interpreter update; the CAP states no XDR changes |
 | CAP-0061 Smart Contract Standardized Asset (Stellar Asset Contract) Extension: Memo |  | no |  | 0 | 0 |  |  |  | Rejected; not implemented in any protocol |
@@ -629,7 +629,7 @@ Clawback, claimable balance clawback and trustline flag changes. CAPs: CAP-0035.
 
 ### `soroban.invoke-basics`
 
-Wasm upload, contract creation with and without constructor, invocation, TTL extension, restore. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058. Entries: core-golden 19, local-core 19, synthetic 3.
+Wasm upload, contract creation with and without constructor, invocation, TTL extension, restore. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058. Entries: core-golden 19, local-core 19, synthetic 4.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
