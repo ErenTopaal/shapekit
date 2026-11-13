@@ -57,6 +57,9 @@ fn cap40_chains_validate_and_reproduce() {
     ok(&shapekit(&[
         "manifest", "build", "--corpus", c, "--pins", p,
     ]));
+    // the committed corpus carries oracle files and verify-repro regenerates them, so this
+    // corpus needs them too
+    ok(&shapekit(&["oracle", "run", "--corpus", c]));
     let manifest = corpus.join("manifest.json");
     let text = ok(&shapekit(&[
         "manifest",
