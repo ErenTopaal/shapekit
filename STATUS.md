@@ -2,6 +2,43 @@
 
 A dated public log of what has landed. Newest entry first.
 
+## 2026-11-13: 0.1.0 release candidate
+
+What 0.1.0 holds, as checked on the commit this release is built from:
+
+- Corpus: 711 entries (590 core-emitted), 436 of 499 `LedgerCloseMeta` union arms and 44 of 45
+  indexer-visible CAPs covered, every gap with a reason in `registry/uncovered.toml`
+  (`corpus/coverage/COVERAGE.md`).
+- Harness: wallet-backend at `3e22515a` over every chain on both networks, 898 entries: 674
+  pass, 102 mishandled, 44 dropped, 78 out-of-scope. The wallet-backend reproductions (#729,
+  #731, #716 and the rest of `adapters/walletbackend/reproductions.toml`) hold.
+- SDK conformance: JS 16.3.0 to 17.4.0, Go v0.7.1 to v0.9.0, Rust 28.0.0 to 30.0.0, with the
+  js-stellar-sdk #1766, #1785 and #1789 reproductions in `conformance/reproductions.toml`.
+- Linter: `indexerlint` IDX001 to IDX003; the indexer-hardening guide is a draft pending SDF
+  review (`docs/guide/`).
+- Findings: 24 findings covering 504 failures, 0 unmapped; 17 issue drafts in
+  `findings/issues/`, none filed yet (`findings/FINDINGS.md`).
+
+Since the previous entry:
+
+- The bool word 2 finding is public: corpus entry
+  `soroban.invoke-basics.synth-invoke-arg-bool-2`, a transaction envelope whose contract
+  argument carries the bool word 2, which core's decoder reads as true and re-encodes as 1. The
+  rs-stellar-xdr draft is complete again, and a stellar-core draft is added. A conformance run
+  over every sdk at once (`--flag references-disagree`) records where rust diverges from its
+  peers; the nightly runs it and the findings read it.
+- The `serve` memory test lets a request thread started late in one round fill its arena in
+  the next, which the first CI run showed; growth after that still fails it.
+- Docs and dashboard site at <https://shapekit.org>: Fumadocs on React Router, prerendered,
+  data from `shapekit site data` (`docs/site.md`).
+- CI ran on GitHub for the first time. The pull request, site and upstream-drift workflows
+  pass, and so does a full nightly run (both harness deliveries, the five wallet-backend
+  reproductions on their pre-fix and fixed commits, fuzzing, goldens, docker tests and the
+  findings check). Three nightly problems the first run showed are fixed: the cap40 chain test
+  now runs the oracle on its corpus, the reproduce job frees runner disk before building ten
+  wallet-backend images, and `findings check --fresh-runs` compares tonight's findings without
+  the input hashes, which change with each run's timings.
+
 ## 2026-11-13: wallet-backend and stellar-rpc pins moved to current upstream
 
 - wallet-backend's current pin moves from `e967ce8b` to `3e22515a` (`main` on 2026-11-13). The
