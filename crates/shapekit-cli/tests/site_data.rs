@@ -137,18 +137,42 @@ fn site_data_matches_the_committed_files() {
     // conformance: every matrix entry is a corpus entry, and cell counts add up
     let conformance = read_json(&out.join("conformance.json"));
     assert_eq!(len(&conformance["sdks"]), 3);
+    // an sdk's cells come from its own matrix and its share of any matrix over every sdk
+    let matrices: Vec<Value> = std::fs::read_dir(root.join("findings/inputs"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .filter(|p| {
+            p.file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .starts_with("conformance-")
+        })
+        .map(|p| read_json(&p))
+        .collect();
+    assert!(
+        matrices.iter().any(|m| {
+            let t = m["testees"].as_array().unwrap();
+            t.iter().any(|x| x["sdk"] != t[0]["sdk"])
+        }),
+        "no matrix spans sdks, so the merge is not exercised"
+    );
     for sdk in conformance["sdks"].as_array().unwrap() {
-        let matrix = read_json(&root.join(sdk["matrix"].as_str().unwrap()));
-        assert_eq!(
-            sdk["entries"].as_array().unwrap().len(),
-            len(&matrix["entries"])
-        );
-        let cells: usize = matrix["entries"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|e| e["cells"].as_object().unwrap().len())
-            .sum();
+        let prefix = format!("{}@", sdk["sdk"].as_str().unwrap());
+        let mut entries = std::collections::BTreeSet::new();
+        let mut cells = std::collections::BTreeSet::new();
+        for m in &matrices {
+            for e in m["entries"].as_array().unwrap() {
+                for key in e["cells"].as_object().unwrap().keys() {
+                    if key.starts_with(&prefix) {
+                        entries.insert(e["id"].as_str().unwrap().to_owned());
+                        cells.insert((e["id"].as_str().unwrap().to_owned(), key.clone()));
+                    }
+                }
+            }
+        }
+        assert_eq!(sdk["entries"].as_array().unwrap().len(), entries.len());
+        let cells = cells.len();
         let counted: u64 = sdk["versions"]
             .as_array()
             .unwrap()

@@ -504,6 +504,73 @@ fn observe(
     }
 }
 
+/// Splits a matrix that spans sdks by testee and adds each sdk's cells to its own matrix,
+/// or makes them that sdk's matrix when there is none. A cell both runs failed keeps the
+/// per-sdk result and gains the checks it lacked.
+fn merge_mixed(
+    matrices: &mut BTreeMap<String, (String, MatrixView)>,
+    rel: &str,
+    m: MatrixView,
+) -> Result<()> {
+    let sdk_of: BTreeMap<String, String> = m
+        .testees
+        .iter()
+        .map(|t| (t.key.clone(), t.sdk.clone()))
+        .collect();
+    for t in &m.testees {
+        let (_, own) = matrices.entry(t.sdk.clone()).or_insert_with(|| {
+            (
+                rel.to_owned(),
+                MatrixView {
+                    corpus_version: m.corpus_version.clone(),
+                    testees: Vec::new(),
+                    entries: Vec::new(),
+                    known_failure_problems: m.known_failure_problems.clone(),
+                },
+            )
+        });
+        if !own.testees.iter().any(|o| o.key == t.key) {
+            own.testees.push(t.clone());
+        }
+    }
+    for e in m.entries {
+        for (key, cell) in e.cells {
+            let Some(sdk) = sdk_of.get(&key) else {
+                bail!("{rel}: cell {key} of {} has no testee", e.id);
+            };
+            let (_, own) = matrices
+                .get_mut(sdk)
+                .expect("every testee sdk was inserted above");
+            let entry = match own.entries.iter().position(|o| o.id == e.id) {
+                Some(i) => &mut own.entries[i],
+                None => {
+                    own.entries.push(inputs::MatrixEntry {
+                        id: e.id.clone(),
+                        cells: BTreeMap::new(),
+                    });
+                    own.entries.last_mut().expect("just pushed")
+                }
+            };
+            match entry.cells.get_mut(&key) {
+                Some(have) => {
+                    for c in cell.checks {
+                        if !have.checks.contains(&c) {
+                            have.checks.push(c);
+                        }
+                    }
+                    if have.known_issue.is_none() {
+                        have.known_issue = cell.known_issue;
+                    }
+                }
+                None => {
+                    entry.cells.insert(key, cell);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 fn conformance_json(
     src: &mut Sources,
     triage: &Triage,
@@ -511,6 +578,7 @@ fn conformance_json(
     reproductions: &ReproductionsFile,
 ) -> Result<Value> {
     let mut matrices: BTreeMap<String, (String, MatrixView)> = BTreeMap::new();
+    let mut mixed: Vec<(String, MatrixView)> = Vec::new();
     for rel in &triage.inputs.matrices {
         let bytes = src.read(rel)?;
         let path = src.path(rel);
@@ -519,15 +587,20 @@ fn conformance_json(
         let Some(sdk) = sdks.first().map(|s| (*s).to_owned()) else {
             bail!("{rel} has no testees");
         };
-        ensure!(
-            sdks.iter().all(|s| *s == sdk),
-            "{rel} mixes sdks; the site expects one matrix per sdk"
-        );
+        if sdks.iter().any(|s| *s != sdk) {
+            mixed.push((rel.clone(), m));
+            continue;
+        }
         ensure!(
             !matrices.contains_key(&sdk),
             "two matrices for sdk {sdk} in findings/triage.toml"
         );
         matrices.insert(sdk, (rel.clone(), m));
+    }
+    // a run over every sdk at once (the references-disagree run) holds cells a per-sdk run
+    // cannot produce, so each sdk's share of it joins that sdk's own matrix
+    for (rel, m) in mixed {
+        merge_mixed(&mut matrices, &rel, m)?;
     }
 
     let mut sdks = Vec::new();
