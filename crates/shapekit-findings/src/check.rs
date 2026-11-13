@@ -52,6 +52,26 @@ pub fn missing_decision(f: &FindingRecord) -> Option<String> {
     }
 }
 
+/// `fresh` with the hash of every input the committed record also lists replaced by the
+/// committed hash. A run's reduced output still holds its timings and memory peaks, so its
+/// hash changes with every run even when every verdict is the same; comparing with this
+/// judges the findings a run gives, not its measurements.
+pub fn with_committed_hashes(fresh: &Collection, written: Option<&Collection>) -> Collection {
+    let mut out = fresh.clone();
+    if let Some(w) = written {
+        for i in &mut out.inputs {
+            if let Some(c) = w
+                .inputs
+                .iter()
+                .find(|c| c.path == i.path && c.kind == i.kind)
+            {
+                i.sha256.clone_from(&c.sha256);
+            }
+        }
+    }
+    out
+}
+
 /// Checks a fresh collection. `written` is the committed `findings.json` and `written_md`
 /// the committed `FINDINGS.md`; both must equal what collect would write now, so the
 /// published record cannot lag the runs it claims to describe.
@@ -166,6 +186,31 @@ mod tests {
             unmapped: vec![],
             input_problems: vec![],
         }
+    }
+
+    #[test]
+    fn committed_hashes_hide_only_the_input_hashes() {
+        use crate::collect::InputRef;
+        let input = |sha: &str, detail: &str| InputRef {
+            kind: "harness".into(),
+            path: "findings/inputs/h.json".into(),
+            sha256: sha.into(),
+            detail: detail.into(),
+        };
+        let mut written = collection(vec![finding("A", Status::Filed, Some("https://x"))]);
+        written.inputs = vec![input("aaaa", "898 entries")];
+        let mut fresh = written.clone();
+        fresh.inputs = vec![input("bbbb", "898 entries")];
+        assert_ne!(fresh, written);
+        assert_eq!(with_committed_hashes(&fresh, Some(&written)), written);
+        // anything else that differs still differs
+        fresh.inputs = vec![input("bbbb", "899 entries")];
+        assert_ne!(with_committed_hashes(&fresh, Some(&written)), written);
+        let mut other = written.clone();
+        other.findings[0].id = "B".into();
+        assert_ne!(with_committed_hashes(&other, Some(&written)), written);
+        // nothing committed: unchanged
+        assert_eq!(with_committed_hashes(&fresh, None), fresh);
     }
 
     #[test]

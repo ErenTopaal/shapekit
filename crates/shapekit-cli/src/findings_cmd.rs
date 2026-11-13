@@ -22,6 +22,12 @@ pub enum FindingsCommand {
         /// problem still fails.
         #[arg(long)]
         allow_draft: bool,
+        /// The inputs were just imported from new runs (the nightly): compare findings.json
+        /// and FINDINGS.md with the inputs' hashes taken from the committed record, since a
+        /// run's timings and memory peaks change those hashes every run. Every other
+        /// difference still fails.
+        #[arg(long)]
+        fresh_runs: bool,
     },
     /// Copy every run output the triage declares under [[inputs.import]] into findings/inputs/,
     /// reduced to what collect reads, and record its provenance. Run it after new harness,
@@ -92,6 +98,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
         FindingsCommand::Check {
             common: c,
             allow_draft,
+            fresh_runs,
         } => {
             let t = triage::load(&c.triage)?;
             let col = collect(&c.root, &t)?;
@@ -110,7 +117,12 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
                 Err(e) => return Err(e).with_context(|| format!("reading {}", md_path.display())),
             };
-            let mut out = check::check(&c.root, &col, written.as_ref(), written_md.as_deref());
+            let judged = if fresh_runs {
+                check::with_committed_hashes(&col, written.as_ref())
+            } else {
+                col.clone()
+            };
+            let mut out = check::check(&c.root, &judged, written.as_ref(), written_md.as_deref());
             out.problems.extend(import::verify(&c.root, &t));
             out.ok = out.problems.is_empty() || (allow_draft && out.only_drafts());
             for p in &out.problems {

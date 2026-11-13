@@ -440,7 +440,9 @@ jobs:
         # any other problem fails the job
         run: |
           set -euo pipefail
-          out=$("$RUNNER_TEMP/bin/shapekit" findings check --allow-draft 2>&1) || { echo "$out"; exit 1; }
+          # --fresh-runs: tonight's inputs carry tonight's timings, so their hashes differ
+          # from the committed ones even when every finding is the same
+          out=$("$RUNNER_TEMP/bin/shapekit" findings check --allow-draft --fresh-runs 2>&1) || { echo "$out"; exit 1; }
           echo "$out"
           {
             echo '## findings check'
