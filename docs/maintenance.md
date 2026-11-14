@@ -5,15 +5,14 @@ steps for a new protocol version are in [protocol-upgrade-runbook.md](protocol-u
 
 ## Maintainers and duration
 
-- Maintainer: the repository owner, GitHub user `ErenTopaal`.
+- Maintainer: GitHub user `ErenTopaal`.
 - Duration: from the production release through the first protocol upgrade after delivery,
-  which is expected to be protocol 31 (CAP-89 and CAP-90, both Draft as of 2026-11-12). The
-  commitment ends when a shapekit release covering that protocol is published by following the
-  runbook, with every CI tier green.
-- No co-maintainer from SDF has been named. If one is named, this page is updated to say who.
+  protocol 31. CAP-89 and CAP-90 target protocol 31; both are in Draft status on 2026-11-14.
+  The commitment ends when a shapekit release covering protocol 31 is published by following
+  the runbook, with every CI tier green.
 
-After the commitment ends the repository stays public under Apache-2.0. Anyone may fork it or
-pick up the runbook; the corpus format, the testee protocol and the adapter interface are
+After the commitment ends the repository stays public under Apache-2.0. Anyone can fork it or
+follow the runbook; the corpus format, the testee protocol and the adapter interface are
 documented so they do not depend on this repository staying active.
 
 ## What maintenance covers
@@ -23,8 +22,8 @@ documented so they do not depend on this repository staying active.
   `@stellar/stellar-sdk`, `go-stellar-sdk` or the core golden index changes upstream. Each such
   issue carries the runbook checklist and is worked through or closed with a reason.
 - Keeping CI green: `pr.yml` on every pull request, `nightly.yml` every night. A red nightly
-  run is treated as a bug in shapekit or a real upstream change, never silenced by widening a
-  known-failures file without an issue link.
+  run is either a bug in shapekit or a real upstream change. A known-failures line is added
+  only with an issue link, never to silence a red run.
 - Triage of corpus contributions, SDK-reported divergences and harness or linter reports, by the
   rules below.
 - Releases: a signed tag runs `release.yml`, which publishes the binaries, the corpus archive
@@ -47,10 +46,9 @@ Policy, in the order issues are looked at:
    (`shapekit gen verify-repro --family <family>`), history entries must name the ledger they
    came from, and anything hand-made must carry `synthetic: true`.
 4. Requests for new SDKs, adapters or linter rules are welcome as issues; the testee protocol and
-   the adapter interface let them be built outside this repository.
+   the adapter interface let you build them outside this repository.
 
-No response time is promised beyond this ordering. Security-sensitive findings in other
-projects go through that project's private disclosure channel, not a public issue; reports
+Security-sensitive findings in other projects go through that project's private disclosure channel, not a public issue; reports
 about shapekit itself go through GitHub security advisories, as `SECURITY.md` describes.
 
 ## Changes to expected values
@@ -62,15 +60,15 @@ two approving reviews, and the pull request says which upstream source (stellar-
 a CAP, an SEP) justifies the new value. Generated files change only through the command that
 generates them, and CI checks that the committed files are what the command writes.
 
-While the project has one maintainer, the second review comes from a reviewer outside the
-project (an SDK maintainer or a stellar-core engineer) and is linked in the pull request.
+One of the two reviews comes from a reviewer outside the project, an SDK maintainer or a
+stellar-core engineer.
 
 ### Repository settings
 
-`.github/CODEOWNERS` names an owner for every path and marks the expected-value paths above
-(`corpus/`, `conformance/known-failures/`, both reproduction tables, the fuzz class list) and
-the workflows and pins. The rules are enforced by a branch ruleset on `main`, set in the
-repository's Settings, Rules:
+`.github/CODEOWNERS` names a code owner for every path and lists the expected-value paths above
+(`corpus/`, `conformance/known-failures/`, both reproduction tables, the fuzz class list), the
+workflows and the pins separately. A branch ruleset on `main` (Settings, Rules) enforces the
+rules:
 
 - require a pull request before merging, with **2** required approvals;
 - require review from Code Owners;
@@ -78,20 +76,18 @@ repository's Settings, Rules:
   push;
 - require conversation resolution;
 - require the status checks of the `pr.yml` jobs that run on every pull request (build, rust,
-  go, js, corpus, repro-select, conformance, harness) and that the branch is up to date. The
+  go, js, contracts, corpus, repro-select, conformance, harness) and that the branch is up to date. The
   `repro (<shard>)` jobs are not listed: their number depends on the selection, and a failing
   shard fails the workflow run;
 - block force pushes and deletion.
 
-Also enable private vulnerability reporting (Settings, Code security), which `SECURITY.md`
-relies on.
+Private vulnerability reporting (Settings, Code security) is on, for the reports `SECURITY.md`
+describes.
 
 GitHub applies the approval count to the whole branch: a ruleset cannot ask for two approvals
-on some paths and one on others. Two approvals on every pull request is the setting that
-enforces the expected-value rule. GitHub also counts only approvals from accounts with write
-access. While the project has one maintainer, the outside reviewer of an expected-value change
-is added as a collaborator for that review, or the change waits; a review linked in the pull
-request description does not satisfy the ruleset.
+on some paths and one on others, so every pull request needs two approvals. GitHub counts only
+approvals from accounts with write access, so the outside reviewer of an expected-value change
+is added as a collaborator for that review.
 
 ## How SDKs pin a corpus release
 

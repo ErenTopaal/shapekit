@@ -1,10 +1,10 @@
 # The website
 
-`site/` is the website for shapekit.org: the documentation under `/docs` and a dashboard over
-the committed results under `/dashboard`. The dashboard shows which shape families and CAPs the
-corpus covers, which SDK version diverges on which entry, what the wallet-backend reference run
-found, and the findings list. The site root redirects to `/docs`; a landing page can replace
-that one route module (`site/src/routes/home.tsx`) without touching the docs or the dashboard.
+The shapekit.org website is built from `site/`: the documentation under `/docs` and a
+dashboard over the committed results under `/dashboard`. The dashboard shows which shape
+families and CAPs the corpus covers, which SDK version diverges on which entry, what the
+wallet-backend reference run found, and the findings list. The site root redirects to `/docs`
+(`site/src/routes/home.tsx`).
 
 Every page is prerendered to a static HTML file at build time, so the site needs no server-side
 code: any static file server can host it. It has no analytics, no cookies and no third-party
@@ -40,17 +40,16 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 
 Docs pages are complete HTML and read without JavaScript. Each has a "Copy Markdown" button and
 an "Open" menu (the page on GitHub, its markdown, or a prompt to read it in an AI chat app; these
-are plain links, nothing is sent until the reader follows one), and ends with an "Edit on GitHub"
-link to its source file. Dashboard pages are prerendered as
-their navigation with a loading state; the browser then fetches `/data/*.json` and renders the
+are plain links, nothing is sent until you follow one), and ends with an "Edit on GitHub"
+link to its source file. Dashboard pages are prerendered as their navigation with a loading
+state; the browser then fetches `/data/*.json` and renders the
 page. Filters live in the query string (`/dashboard/sdk?entry=...`), so a filtered view can be
 linked; a finding can be linked as `/dashboard/findings#WB-W3` (it opens) and a corpus entry as
 `/dashboard/coverage/<CAP>#<entry-id>`. Each dashboard page has a "Terms used on this page" block
 that explains its vocabulary (verdicts, severities, statuses, check results, source classes,
 blockers) and links the docs page or repository file that defines it; the words are kept in
 `site/src/lib/terms.ts`, next to the source each one follows. Old dashboard links of the form
-`/#/sdk` are redirected to `/dashboard/sdk`. Next to each
-route's HTML file the build writes a `.data` file that the client router fetches on in-site
+`/#/sdk` are redirected to `/dashboard/sdk`. Next to each route's HTML file the build writes a `.data` file that the client router fetches on in-site
 navigation.
 
 ## Docs come from docs/
@@ -86,8 +85,8 @@ On the way the script:
   file name (`docs/linter.md`) reads as the page's title;
 - adapts the guide, which is written for stellar-docs: `{#id}` heading ids become Fumadocs'
   `[#id]`, `<Warning>` becomes a warn callout, its site-absolute links point at
-  developers.stellar.org, and a callout at the top says it is a draft pending SDF review whose
-  canonical copy will be on developers.stellar.org. Its generated field and caps tables, whose
+  developers.stellar.org, and a callout at the top says that the page is the draft for review
+  before publication on developers.stellar.org. Its generated field and caps tables, whose
   five and six columns hold paragraphs, become one record per row on the site; the source keeps
   the tables.
 
@@ -138,7 +137,7 @@ file it read and of every file it wrote), `coverage.json`, `entries.json`, `conf
 `harness.json` and `findings.json`. The output is deterministic: the same inputs and flags give
 the same bytes.
 
-Two things the site shows are derived rather than copied, and both are plain counts over the
+Three things the site shows are derived rather than copied, and all are plain counts over the
 committed files:
 
 - SDK totals per version: failing cells by result, cells with a known issue, every check of

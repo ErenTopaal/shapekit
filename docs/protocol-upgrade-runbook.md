@@ -3,8 +3,8 @@
 The steps for taking shapekit to a new Stellar protocol version. Every command below is a real
 command of this repository, run from the repository root with `shapekit` built from the same
 checkout (`cargo build --release -p shapekit-cli`, then `target/release/shapekit`). The
-examples use protocol 31 and stellar-core v31.0.0; substitute the real tags. `$TMP` is a scratch
-directory outside the checkout:
+examples use protocol 31 and stellar-core v31.0.0; substitute the real tags. `$TMP` is a
+temporary directory outside the checkout:
 
 ```sh
 TMP=$(mktemp -d)
@@ -14,8 +14,9 @@ Before the protocol is released (no core, stellar-xdr or crate release at the ne
 yet), do not follow the steps on the main branch: rehearse them in the separate next tier
 described in [Rehearsing before the release](#rehearsing-before-the-release-next-tier).
 
-`upstream-drift.yml` opens a tracking issue with the checklist at the end of this page when a new
-stellar-core, stellar-xdr or SDK release, or a change to core's golden index, appears. Work
+`upstream-drift.yml` runs weekly and opens a tracking issue with the checklist at the end of
+this page when a new stellar-core, stellar-xdr, SDK or stellar-cli release, or a change to
+core's golden index, appears. Work
 through the issue in order; each step is a pull request or a commit on one upgrade branch.
 
 ## Which artifacts are protocol-tier specific
@@ -63,8 +64,7 @@ and the base XDR commit that protocol is built against; that commit, not the CAP
 the new core emits.
 
 Until stellar-xdr tags the protocol there is no `v31.0`; diff `v30.0` against `origin/main`
-and `origin/next` instead (`next` is generated from `main` with every feature `#ifdef`
-ungated) and take each CAP's XDR from its text.
+and `origin/next` instead, and take each CAP's XDR from its text.
 
 ### 2. Move the pins
 
@@ -75,18 +75,10 @@ stellar-rpc tags with their commit shas, the `stellar-xdr`, `soroban-env-host`,
 `stellar/stellar-core`; the `-buildtests` images, and the next-protocol builds
 (`<version>-<build>.<commit>.noble-vnext` and `...-vnext-buildtests`, core configured with
 `--enable-next-protocol-version-unsafe-for-production`), are only in
-`stellar/unsafe-stellar-core`. The digest to pin is the one Docker Hub reports for the tag (the
-index digest for a multi-arch tag), which is what `pins verify` compares:
-
-```sh
-curl -fsS "https://hub.docker.com/v2/repositories/stellar/stellar-core/tags/<tag>" \
-  | python3 -c 'import json,sys; print(json.load(sys.stdin)["digest"])'
-docker pull stellar/stellar-core:<tag>
-docker inspect --format '{{index .RepoDigests 0}}' stellar/stellar-core:<tag>
-```
-
-The two must agree; for a multi-arch tag `docker inspect` may show a platform manifest instead,
-so pin the first.
+`stellar/unsafe-stellar-core`. The digest to pin is the one the Docker registry reports for
+the tag in its `Docker-Content-Digest` header (the index digest for a multi-arch tag).
+`pins verify` reads the digest the same way and, on a mismatch, prints
+`registry digest is <live digest>, pinned <pinned digest>`.
 
 Then:
 
@@ -100,12 +92,18 @@ It must exit 0. A pin is never moved by editing a workflow; workflows read `pins
 ### 3. Move the Rust stack
 
 Update the workspace dependencies in `Cargo.toml` and `contracts/Cargo.toml`, then refresh the
-lock file for them (`cargo update -p stellar-xdr -p soroban-env-host -p soroban-simulation`;
-the `--locked` build below fails until the lock file matches). Keep the previous
-`soroban-env-host` and `soroban-simulation` as renamed dependencies (as `-p28` is today) with a
-module for them in `sim_legacy.rs`, and in `SIMULATED_PROTOCOLS` replace the old current
-protocol by the new one and keep the old one (served by the renamed host), so chains at the
-old protocol can still be priced. Raise `MAX_PROTOCOL`, `smoke::PROTOCOL` and
+lock file for them. The lock file holds several versions of `soroban-env-host` and
+`soroban-simulation`, so name the version you are replacing:
+
+```sh
+cargo update -p stellar-xdr@30.0.0 -p soroban-env-host@30.0.0 -p soroban-simulation@30.0.0
+```
+
+The `--locked` build below fails until the lock file matches. Keep the previous
+`soroban-env-host` and `soroban-simulation` as renamed dependencies (as `-p22`, `-p24` and
+`-p28` are) with a module for them in `sim_legacy.rs`. Add the new protocol to
+`SIMULATED_PROTOCOLS` and keep the old one, which the renamed host now serves, so chains at
+the old protocol can still be priced. Raise `MAX_PROTOCOL`, `smoke::PROTOCOL` and
 `COVERED_THROUGH_PROTOCOL`, and update the tests that assert the old protocol.
 
 Recapture the Soroban settings once testnet runs the new protocol: write
@@ -117,17 +115,21 @@ yet, the release is not ready (see the next tier section for the rehearsal worka
 
 Rebuild the contracts if the SDK's interface protocol moved (`contracts/build.sh`, and
 `contracts/build-legacy.sh` for the older interface builds). Both run `stellar contract build`
-from the stellar-cli release pinned in `pins.toml` (`[[release]] stellar-cli`); a stellar-cli
-release for the new protocol moves that pin first: from soroban-sdk 30 on, the sdk's build
-script refuses a stellar-cli whose major version (`STELLAR_CLI_VERSION`) is below its own, and
-the cli's post-processing (spec shaking, wasm-opt, the `cliver` meta entry) is part of the
-committed bytes. Then:
+from the stellar-cli release pinned in `pins.toml` (`[[release]] stellar-cli`). Move that pin
+to the stellar-cli release for the new protocol first, for two reasons:
+
+- From soroban-sdk 30 on, the sdk's build script refuses a stellar-cli whose major version
+  (`STELLAR_CLI_VERSION`) is below its own.
+- The cli's post-processing (spec shaking, wasm-opt, the `cliver` meta entry) is part of the
+  committed bytes.
+
+Then:
 
 ```sh
 cargo build --workspace --locked
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
-SHAPEKIT_DOCKER_TESTS=1 cargo test -p shapekit-core-driver
+cargo test -p shapekit-core-driver -- --include-ignored
 docker pull "$(scripts/pin.sh image stellar-core)"
 shapekit gen smoke --network testnet --out "$TMP/smoke-testnet"
 shapekit gen smoke --network mainnet --out "$TMP/smoke-mainnet"
@@ -140,10 +142,10 @@ exists).
 
 ### 4. Registry
 
-Give each new CAP its full `[[cap]]` record in `registry/caps.toml`. Draft CAPs of the next
-protocol usually already have a placeholder there (`status = "Draft"`, `xdr_additions = []`,
-`indexer_visible = false`): replace it instead of adding a second record, which `registry check`
-rejects as a duplicate id. Add families and their signature fragments to
+Give each new CAP its full `[[cap]]` record in `registry/caps.toml`. If the CAP already has
+a Draft placeholder there (`status = "Draft"`, `xdr_additions = []`,
+`indexer_visible = false`), replace it instead of adding a second record, which
+`registry check` rejects as a duplicate id. Add families and their signature fragments to
 `registry/families.toml`, any newly validated fields to `registry/fields.toml` and new limits to
 `registry/caps-limits.toml`. Every record cites its source. `registry check` resolves each
 signature fragment against the `stellar-xdr` crate the build links, so a family that names a
@@ -171,9 +173,9 @@ shapekit manifest validate
 shapekit gen verify-repro --jobs 2
 ```
 
-`gen verify-repro` must report 0 differences. Bytes of existing entries may change because core
-changed; review the diff of every `.expected.json` under the two-reviewer rule in
-[maintenance.md](maintenance.md).
+`gen verify-repro` must report 0 differences. Where the new core emits different bytes, the
+bytes of existing entries change with it. Review the diff of every `.expected.json` under the
+two-review rule in [maintenance.md](maintenance.md#changes-to-expected-values).
 
 ### 6. Goldens
 
@@ -194,9 +196,8 @@ runs the oracle over the corpus; fragments carried only outside the range are li
 index as not imported. Any change to a family's fragments or range needs a re-import: the
 nightly `goldens` job re-imports into a copy and fails on any difference.
 
-Both commands read `test-lcm-current` by default; that is the tier a release build of core
-checks, and at the release the former `test-lcm-next` becomes it (its `index.json` stamps
-change to the new protocol). `check-lcm.sh` takes the `-buildtests` image from `pins.toml` and
+Both commands read `test-lcm-current` by default, the tier a release build of core checks.
+`check-lcm.sh` takes the `-buildtests` image from `pins.toml` and
 needs `test-lcm-current` in the checkout. Then move the `--tag` and
 `--index` defaults in `crates/shapekit-cli/src/main.rs` to the new snapshot, remove the old
 snapshot directory once nothing refers to it, and update the attribution in `NOTICE`.
@@ -231,8 +232,9 @@ shapekit conformance draft-issues
 ```
 
 A new divergence gets a line in `conformance/known-failures/<sdk>.txt` that links its drafted
-issue, and goes through the findings process. Filing upstream needs the owner's approval per
-batch (`shapekit conformance file-issues --i-have-owner-approval`).
+issue, and goes through [triage](maintenance.md#triage). `shapekit conformance file-issues`
+opens the drafted issues upstream with `gh`; it refuses to run unless you pass
+`--i-have-owner-approval`, which confirms that the batch is approved for filing.
 
 ### 9. Harness and the reference adapter
 
@@ -254,10 +256,16 @@ findings.
 ```sh
 (cd lint && go build -o indexerlint ./cmd/indexerlint)
 (cd adapters && ../lint/indexerlint ./...)
+git init "$TMP/wb"
+git -C "$TMP/wb" fetch --depth 1 https://github.com/stellar/wallet-backend "$(scripts/pin.sh git wallet-backend)"
+git -C "$TMP/wb" checkout FETCH_HEAD
+lint="$PWD/lint/indexerlint"; (cd "$TMP/wb" && "$lint" ./...)
 ```
 
-and run it over the new wallet-backend pin. If the protocol adds a recursive structure or a
-field core does not validate, add it to `registry/lint-rules.toml` and the analyzers.
+`indexerlint` exits 0 with no findings, 1 with findings and 2 on a usage, load or analysis
+error. Findings on wallet-backend go through [triage](maintenance.md#triage). If the protocol
+adds a recursive structure or a field core does not validate, add it to
+`registry/lint-rules.toml` and the analyzers.
 
 ### 11. CI, status and release
 
@@ -283,24 +291,25 @@ everything out of the release:
   refuses any file the manifest or a chain's `chain.json` does not vouch for, so `next/` never
   reaches the corpus archive.
 - Pins: `next/pins.toml` (same format) names the vnext image as `stellar-core` and its
-  `-vnext-buildtests` image, the core commit the image was built from, and what else the
-  rehearsal relies on. Check it with `shapekit pins verify --file next/pins.toml`. Futurenet's
-  `core_version` (Horizon root or RPC `getVersionInfo`) tells which vnext commit is live.
+  `-vnext-buildtests` image, the core commit the image was built from, and the other
+  references the rehearsal uses. Check it with `shapekit pins verify --file next/pins.toml`.
 - Rust stack: no crate release exists for the new protocol. Core's vnext build runs it with
   the current `soroban-env-host` built with its `next` feature (`stellar-core version` shows
-  the host at the new ledger protocol with pre-release 1). Do the step 3 changes in a scratch
-  export (`git archive HEAD | tar -x -C "$TMP/shapekit"`), with
+  the host at the new ledger protocol with pre-release 1). Do the step 3 changes in a separate
+  export (`mkdir "$TMP/shapekit" && git archive HEAD | tar -x -C "$TMP/shapekit"`), with
   `soroban-env-host = { version = "<current>", features = ["next"] }` and its own
   `CARGO_TARGET_DIR`, never on the main branch. Cargo unifies the features of one crate
   version, so that build cannot also keep the same host version without `next` for the old
   protocol: it simulates only the new one.
 - Settings: no network runs the new protocol yet, so there is nothing to recapture. In the
-  scratch export relax the protocol check in `ChainDriver::apply_settings` to accept settings
+  export, relax the protocol check in `ChainDriver::apply_settings` to accept settings
   captured at an older protocol; core then decides (it refuses an upgrade set whose cost
   parameter entries do not fit the protocol), and `sorobaninfo` must report the applied set.
-- Smoke chain: run the scratch build's `shapekit gen smoke --pins next/pins.toml --out
+- `next/rehearsal-build.diff` holds the export's changes as rehearsed for protocol 31.
+- Smoke chain: run the export build's `shapekit gen smoke --pins next/pins.toml --out
   next/chains/smoke.p31/<network>` for both networks, and decode the streams with the current
-  `stellar-xdr` release (`stellar-xdr decode --type LedgerCloseMeta --input stream-framed`).
+  `stellar-xdr` release
+  (`stellar-xdr decode --type LedgerCloseMeta --input stream-framed next/chains/smoke.p31/<network>/ledgers.xdr`).
   Arms the current crate cannot decode are what the new protocol adds for indexers.
 - Registry: draft records go to `next/registry/` (`caps.toml` records replace the Draft
   placeholders of the same id, families and fields are new).
@@ -308,12 +317,13 @@ everything out of the release:
   `shapekit registry check --dir "$TMP/reg"`. Families that name types the current crate does
   not have fail that check until step 3 can move to a crate with them; that failure is the
   expected result, not a reason to drop the family.
-- Goldens: `shapekit import goldens --tier test-lcm-next --corpus next` and
-  `shapekit goldens verify --tier test-lcm-next --index next/goldens/core-<tag>/index.json`. The
+- Goldens: `shapekit import goldens --core-src "$TMP/core" --tag <tag> --tier test-lcm-next
+  --corpus next` and `shapekit goldens verify --core-src "$TMP/core" --tag <tag> --tier
+  test-lcm-next --index next/goldens/core-<tag>/index.json`, with `"$TMP/core"` a checkout
+  holding `test-lcm-next`. The
   importer requires a tagged checkout; vnext commits are untagged, so use the newest release
   tag after checking that `git diff <tag> <vnext commit> -- test-lcm-next` is empty.
-  `scripts/check-lcm.sh` does not take the next tier.
-- Record each step's outcome and every place this page was wrong, and fix the page.
+  `scripts/check-lcm.sh` reads `test-lcm-current` only.
 
 ## Checklist
 

@@ -10,7 +10,7 @@ export function NotFound() {
     <Empty>
       <EmptyHeader>
         <EmptyTitle>Nothing to show here</EmptyTitle>
-        <EmptyDescription>The link may name a CAP or page that is not in this build of the data.</EmptyDescription>
+        <EmptyDescription>No page or CAP in this build of the site has this address.</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>

@@ -18,7 +18,8 @@ The pieces:
 
 ## 1. The family record
 
-Add a `[[family]]` to `registry/families.toml`:
+Add a `[[family]]` to `registry/families.toml`. The `cap40` record, with its `signature`,
+`fields` and `linked_issues` lists shortened and its `notes` left out:
 
 ```toml title="registry/families.toml"
 [[family]]
@@ -32,7 +33,7 @@ signature = [
     ".body:set_options.signer.key:ed25519_signed_payload",
     ".extra_signers[]:ed25519_signed_payload",
 ]
-source_classes = ["local-core", "testnet-history"]
+source_classes = ["local-core", "testnet-history", "synthetic", "local-core-refused"]
 fields = ["op.set_options.signer", "tx.cond.extra_signers"]
 linked_issues = ["https://github.com/stellar/wallet-backend/pull/729"]
 priority = 1
@@ -54,7 +55,7 @@ pick it up from `all()`.
 pub struct MyRecipe { pub protocol: u32 }
 
 impl Recipe for MyRecipe {
-    fn id(&self) -> &str { "cap99.my-shape" }      // derives every key; usually the family id
+    fn id(&self) -> &str { "cap99.my-shape" }      // derives every key and the chain id
     fn family(&self) -> &str { "cap99.my-shape" }  // registry family of every capture
     fn protocol(&self) -> u32 { self.protocol }    // ledger protocol of the chain
     fn soroban_settings(&self) -> bool { false }   // true: testnet Soroban settings first (protocol 30 only)
@@ -135,20 +136,21 @@ family apart.
 - **Negative twins.** Where core refuses a malformed variant, submit it with `capture_rejected`
   and check the returned result code. The entry gets `source.class = local-core-refused`,
   `expected.validity = invalid-by-core` and
-  `source.core_rejection { stage: submit, result_code, result_xdr }`. Its bytes are what the
-  generator built, not output core wrote into a ledger, which is what the separate class tells
-  a consumer; `synthetic` stays `false` because core's answer to them is real, and coverage never
-  counts them. List `local-core-refused` in the family's `source_classes`. A malformed
+  `source.core_rejection { stage: submit, result_code, result_xdr }`. The separate source
+  class tells a consumer that the bytes are what the generator built, not output core wrote
+  into a ledger. `synthetic` stays `false` because core's answer to the bytes is real.
+  Coverage never counts these entries. List `local-core-refused` in the family's
+  `source_classes`. A malformed
   transaction that core includes and fails is a normal `submit_and_close_failing` plus `capture`
   and stays `local-core`.
 - **Only core-emitted bytes.** Never hand-build an entry. Hand-crafted values belong to
   `shapekit synth` with `synthetic: true`.
 - **Soroban.** `soroban_settings() -> true` applies testnet's live CONFIG_SETTING values before
   `run` (protocol 30 only, they were captured there). Use `driver().upload`, `deploy`, `invoke`
-  and `soroban_with`. `driver().soroban(...)` simulates with soroban-simulation 30.0.0, which
-  supports protocol 30 only, and accepts source-account auth only. Below protocol 29 the
-  committed contracts trap (soroban-sdk 29 declares interface protocol 29), so an older-protocol
-  Soroban recipe uses the legacy contract builds and host of the next item.
+  and `soroban_with`. At protocol 30, `driver().soroban(...)` simulates with soroban-simulation 30.0.0 and
+  supports source-account auth only. The committed contracts are built with soroban-sdk 29,
+  which declares interface protocol 29, so the host refuses them below protocol 29. An
+  older-protocol Soroban recipe uses the legacy contract builds and hosts of the next item.
 - **Soroban below protocol 30.** Return `soroban_limits() -> true` and `soroban_settings() -> false`:
   the node starts with `TESTING_SOROBAN_HIGH_LIMIT_OVERRIDE` and no settings upgrade. The driver
   simulates with the host of the chain's protocol (`sim_legacy`, protocols 22, 24 and 28), and
@@ -160,11 +162,15 @@ family apart.
   replace the minimum before `run`, so only entries created before that upgrade (the settings
   writer's code and instance) archive quickly. `soroban.muxed-source` does both.
 - **Classic events.** Chains run with `EMIT_CLASSIC_EVENTS` and `BACKFILL_STELLAR_ASSET_EVENTS`
-  on by default, so protocol 23 and later ledgers carry the CAP-67 events. Below protocol 23 the backfill flag gives
-  TransactionMeta v4 with CAP-67 events, which is what a current core replaying old history
-  emits; set both hooks to `false` for the meta a pre-23 ledger had in its day (v3, no classic
-  events, `EventManager.cpp` and `TransactionMeta.cpp`, v30.0.0). From protocol 23 on the
-  backfill flag has no effect. `cap67.unified-events` records both variants at protocol 22.
+  on by default, so protocol 23 and later ledgers carry the CAP-67 events. From protocol 23 on,
+  the backfill flag has no effect. Below protocol 23:
+  - With both hooks on (the default), the chain gets TransactionMeta v4 with CAP-67 events,
+    which is what a current core emits when it replays old history.
+  - With both hooks set to `false`, the chain gets the meta a pre-23 ledger held when it closed:
+    TransactionMeta v3 and no classic events (core v30.0.0, `EventManager.cpp` and
+    `TransactionMeta.cpp`).
+
+  `cap67.unified-events` records both variants at protocol 22.
 - **Protocols below 13.** Core 30.0.0 runs fresh networks from protocol 1 up, but before
   protocol 13 it refuses every envelope except v0 with txNOT_SUPPORTED. `classic` and `sign`
   build v0 there (`tx::sign_for_protocol`); a v0 transaction hashes like its v1 form
@@ -173,18 +179,22 @@ family apart.
   no preconditions beyond time bounds. Ledgers below protocol 20 are LedgerCloseMeta v0; with
   both event hooks off the meta is TransactionMeta v2, which is what such a ledger held when
   core closed it. `old_protocols.rs` records chains at protocols 1, 9, 11, 12 and 17.
-- **Contrast chains.** A chain that shows what a ledger looked like before its family's shape
-  existed runs below `protocol_valid.min`. Return `below_protocol_valid() -> true`: the
-  generator then requires the protocol to be below the range (and no longer refuses it), and
-  flags every entry of the chain `below-protocol-valid`. Such an entry's protocol range
-  describes its bytes, not the family's shape: `protocol.valid_min` is the protocol the chain
-  ran at and `protocol.valid_max` the last protocol before the family's `protocol_valid.min`
-  (an inflation payout recorded at 11 has `valid_min = 11`, `valid_max = 11`, `introduced =
-  12`). `introduced` stays the family's, the protocol whose change the entry contrasts with.
-  The manifest validator requires `valid_max` on every `below-protocol-valid` entry, below
-  `introduced`, and `generated_at` inside `valid_min` to `valid_max` on every entry. Two
-  chains of one family at the same protocol need different recipe ids (the chain id is
-  `<id>.p<protocol>`) and different slugs (entry ids are `<family>.p<protocol>-<slug>`).
+- **Contrast chains.** A contrast chain shows what a ledger looked like before its family's
+  shape existed, so it runs below `protocol_valid.min`. Return `below_protocol_valid() -> true`.
+  The generator then accepts a protocol below the family's range (and requires one), and
+  flags every entry of the chain `below-protocol-valid`. The protocol range of such an entry
+  describes its bytes, not the family's shape:
+  - `protocol.valid_min` is the protocol the chain ran at.
+  - `protocol.valid_max` is the last protocol before the family's `protocol_valid.min`.
+  - `protocol.introduced` stays the family's: the protocol whose change the entry contrasts
+    with.
+
+  For example, an inflation payout recorded at protocol 11 has `valid_min = 11`,
+  `valid_max = 11` and `introduced = 12`. The manifest validator requires `valid_max` on every
+  `below-protocol-valid` entry, below `introduced`, and `generated_at` between `valid_min` and
+  `valid_max` on every entry.
+- **Two chains of one family at one protocol.** They need different recipe ids (the chain id
+  is `<id>.p<protocol>`) and different slugs (entry ids are `<family>.p<protocol>-<slug>`).
 
 ## 3. Generating
 
@@ -209,7 +219,9 @@ core container, `--jobs` at a time. Then, for each chain:
    are never touched; an id collision with one is an error.
 
 `--network testnet` or `mainnet` records one passphrase and keeps the other variant from the
-committed entry, so passphrase dependence is still decided on both.
+committed entry, so passphrase dependence is still decided on both. The committed variant is
+kept only when the same recipe, chain and protocol made it and it describes the same capture;
+otherwise `gen chains` fails, and you record both networks.
 
 `gen verify-repro` regenerates under both passphrases into a temporary directory and compares
 with the corpus: per chain the canonical ledger hashes, ledger range and the SEP-54 lake files; per
@@ -250,9 +262,10 @@ A recipe never depends on absolute ledger numbers, only on `last_closed()`.
 in the recorder's own form (`ledgers.canonical.xdr` and an `archive/` directory) and leaves
 converted ones alone; `shapekit pack verify` checks every chain against its `chain.json` and
 that the lake holds exactly the canonical form of `ledgers.xdr`. `shapekit pack archive-at
---checkpoint N` writes the archive as it stood at one checkpoint, and `shapekit serve --chain
-<chain-id> --network <network>` replays a chain over HTTP: the lake, the archive and a
-read-only JSON-RPC endpoint shaped like stellar-rpc, with `POST /control/head` to release
+--chain <chain-dir> --checkpoint N --out <dir>` writes the archive as it stood at one
+checkpoint. `shapekit serve --chain <chain-id> --network <network>` replays a chain over HTTP:
+the lake, the archive and a read-only JSON-RPC endpoint shaped like stellar-rpc.
+`POST /control/head` with `{"ledger": N}` moves the visible head, so a harness can release
 ledgers one at a time.
 
 Entry fields filled by the generator: `source.class = local-core` (`local-core-refused` for an
@@ -261,8 +274,8 @@ envelope core refused at submission), `source.recipe`,
 `protocol.generated_at`, `lcm_version` and `tx_meta_version` where they apply, `caps` and the
 protocol range from the family (for contrast entries, the range above). `fields_exercised`
 comes from the recipe's `Spec`: the `-envelope` entry of a transaction carries all of them, the
-`-meta` entry only those its bytes hold (today a signed payload signer key that lands in an
-account's signer list), since meta does not repeat the envelope. `source.tx_hash` is
+`-meta` entry only those its bytes hold, since meta does not repeat the envelope. The only
+such field is a signed payload signer key, which lands in an account's signer list. `source.tx_hash` is
 left out because a transaction hash covers the network id and so differs between the
 variants; it is derivable from each variant's envelope.
 
@@ -287,13 +300,6 @@ from core's source. `shapekit gen verify-raw-order --other <corpus>` compares co
 must hold the same changes in both, each key's changes must come in the same order, and the
 ledgers must be equal once both are canonical. To run it, copy `corpus/` and record the copy
 again with `shapekit gen chains --corpus <copy>`. On 2026-11-13, two independent core runs of
-every chain (88 recordings, both passphrases, 6940 ledgers, 9346 change lists) gave 0 per-key
-order differences over 10968 keys with two or more changes in one list and 0 content
-differences; 580 lists differed, all only in the order between keys. 10 of the 88 raw streams
-were byte-identical in both runs, all of them chains at protocols 1, 9, 11 and 12. The
-same second recording reproduced every local-core entry and every lake byte for byte.
-
-## 5. Timing
-
-Measured on the cap40 family: each chain (ten ledgers, eighteen captures) records in about 4.5 s;
-the four chains (protocols 30 and 28, both passphrases) take about 5 s with `--jobs 4`.
+every chain (88 recordings: 44 chains under both passphrases) gave 0 per-key order differences
+over 10968 keys with two or more changes in one list. 580 lists differed, all only in the
+order between keys.

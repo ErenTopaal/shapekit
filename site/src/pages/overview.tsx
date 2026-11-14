@@ -145,7 +145,7 @@ export function Overview() {
       <header className="flex flex-col gap-3 pb-6">
         <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">What shapekit found</h1>
         <p className="max-w-[70ch] text-muted-foreground sm:text-lg">
-          shapekit replays a corpus of rare but valid Stellar ledger shapes, produced by a real stellar-core, through
+          shapekit replays a corpus of rare but valid Stellar ledger shapes, most of them recorded on a real stellar-core, through
           the JavaScript, Go and Rust SDKs and through an indexer, and records where they read it wrong. This page
           summarises the results committed at <Id>{short(meta.commit, 10)}</Id>, built against stellar-core{" "}
           <Id>{gw.core_image.tag.split("-")[0]}</Id> and stellar-xdr <Id>{gw.xdr_definitions.tag}</Id>.{" "}

@@ -20,7 +20,7 @@ export const severities: { id: string; meaning: string }[] = [
 
 // crates/shapekit-findings/src/triage.rs, enum Status
 export const statuses: { id: string; meaning: string }[] = [
-  { id: "draft", meaning: "an issue body is written in the repository but nothing is filed upstream yet" },
+  { id: "draft", meaning: "an issue body is written in the repository and not filed upstream" },
   { id: "filed", meaning: "filed upstream; the link is the issue" },
   { id: "duplicate-of", meaning: "an upstream issue or fix already covers it; the link is that issue or pull request" },
   { id: "private-report", meaning: "reported through the upstream's private security channel" },
@@ -58,7 +58,7 @@ export const verdictMeaning = (v: string) => verdicts.find((x) => x.id === v)?.m
 // crates/shapekit-registry/src/model.rs, enum SourceClass, and corpus/coverage/COVERAGE.md
 export const sourceClasses: { id: string; meaning: string; core: boolean }[] = [
   { id: "core-golden", meaning: "taken from stellar-core's own golden ledger close meta (its --check-lcm test files)", core: true },
-  { id: "local-core", meaning: "recorded from the pinned stellar-core on a private standalone network", core: true },
+  { id: "local-core", meaning: "recorded from the pinned stellar-core, running standalone on a Docker network with no route off the host", core: true },
   { id: "testnet-history", meaning: "captured from testnet history", core: true },
   { id: "mainnet-history", meaning: "captured from mainnet history", core: true },
   {

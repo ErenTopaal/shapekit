@@ -313,8 +313,8 @@ function guide(raw: string, source: string): Pick<Page, "title" | "description" 
       .replace(/<\/Warning>/g, "</Callout>"),
   )
   const notice =
-    '<Callout type="warn" title="Draft, pending SDF review">\n\nThis guide has not yet been reviewed by a stellar-core or platform engineer. ' +
-    "The canonical copy will be on developers.stellar.org once the review is done.\n\n</Callout>\n\n"
+    '<Callout type="info" title="Draft for developers.stellar.org">\n\nThis guide is written for developers.stellar.org. ' +
+    "It is published there after review by a stellar-core or platform engineer; this page is the draft for that review.\n\n</Callout>\n\n"
   return {
     title: field("title"),
     description: field("description"),

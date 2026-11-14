@@ -1,8 +1,8 @@
 import { useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
-// the site root has no page of its own yet, so it points at the docs; a landing page can
-// replace this route module without touching the docs or the dashboard.
+// the site root has no page of its own and points at the docs; this one route module decides
+// what / shows, so changing it touches neither the docs nor the dashboard.
 export function meta() {
   return [{ title: "shapekit" }, { tagName: "link", rel: "canonical", href: "/docs" }]
 }

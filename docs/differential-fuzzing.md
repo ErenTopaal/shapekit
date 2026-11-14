@@ -5,11 +5,13 @@ input on which they disagree:
 
 - **rust**: `stellar-xdr` 30.0.0, linked into `shapekit` and called in process the way core
   calls it, `T::from_xdr(bytes, limits)` then `to_xdr(limits)`.
-- **go**: `go-stellar-sdk` at the current version of `conformance/versions.toml` (v0.8.0),
-  through its conformance testee and the `decode_encode` op of the
-  [testee protocol](testee-protocol.md).
+- **go**: `go-stellar-sdk` at the `current` version of `[sdk.go]` in
+  `conformance/versions.toml` (`--go-version` picks another), through its conformance testee
+  and the `decode_encode` op of the [testee protocol](testee-protocol.md).
 
-The nightly workflow runs it for 25 minutes. It goes beyond what the RFP asks for.
+The nightly workflow runs 60,000,000 inputs with the UTC date as the seed (`--seconds 2400` is
+only a safety stop), then replays every stored reproducer. It goes beyond what the RFP asks
+for.
 
 ```sh
 shapekit fuzz --seconds 1200 --seed 20261112 --jobs 4
@@ -18,25 +20,25 @@ shapekit fuzz --replay findings/fuzz          # run every stored reproducer agai
 
 ## Why not cargo-fuzz
 
-cargo-fuzz 0.13.2 with libfuzzer-sys 0.4.13 needs a nightly compiler (`-Zsanitizer`). rustup
-on the build host can install one, and `cargo +nightly fuzz` would not disturb the 1.99.1 pin
-in `rust-toolchain.toml`, because the `+toolchain` override applies to one invocation. It was
-still not used:
+cargo-fuzz 0.13.2 with libfuzzer-sys 0.4.13 (both listed in `pins.toml`) needs a nightly
+compiler (`-Zsanitizer`). `cargo +nightly fuzz` would leave the 1.99.1 pin in
+`rust-toolchain.toml` alone, because the `+toolchain` override applies to one invocation.
+shapekit does not use it, for three reasons:
 
 - libFuzzer's feedback is coverage of the process it runs in. Half of every comparison happens
   in the go testee, a separate process, so coverage would steer towards new paths in
   `stellar-xdr` only and say nothing about go.
 - Every input costs a pipe round trip to go either way, so the in-process speed libFuzzer is
-  built for is not available. The measured rate below is pipe-bound.
+  built for is not available.
 - A nightly compiler in CI is an unpinned toolchain beside a pinned one, and a second full
   build of the dependency tree with sanitizer flags, for no gain in what is compared.
 
 So the fuzzer is an ordinary subcommand on the pinned toolchain. Values come from
 `stellar-xdr`'s own `arbitrary` feature (arbitrary 1.5.0) over bytes from a seeded generator,
 and from xdr-aware mutation of corpus entries. Every class records the seed, worker index and
-iteration of its input. A whole run is reproducible from `--seed` for any `--jobs` when it is given
-`--max-inputs` and finishes before `--seconds` runs out: each worker then has a fixed share of the
-inputs and classes are merged in a fixed order. `report.json` says `reproducible: true` in that
+iteration of its input. A whole run is reproducible from `--seed` for any `--jobs` when you
+give it `--max-inputs` and it finishes before `--seconds` runs out: each worker then has a
+fixed share of the inputs, and classes are merged in a fixed order. `report.json` says `reproducible: true` in that
 case; timing goes to `timing.json` so it does not affect the report.
 
 ## Inputs
@@ -47,7 +49,7 @@ manifest, so this is the manifest's xdr types: `TransactionEnvelope`, `LedgerClo
 `SorobanAuthorizationEntry`, `ScSpecFunctionV0`, `Asset`, `SignerKey`. `--types` narrows it.
 
 Seeds: every corpus `kind = xdr` entry of those types up to `--max-seed-bytes` (64 KiB, which
-keeps all but a few large ledgers), plus the contract arguments and auth entries inside
+leaves out only the largest files, such as the 100-operation envelope), plus the contract arguments and auth entries inside
 envelopes and the key and value of contract data entries, so the small types get real seeds.
 
 Each iteration picks a type, then one of:
@@ -63,7 +65,8 @@ The mutations work on 4-byte words because XDR lengths, counts and discriminants
 big-endian words: set a word to a boundary value (0, 1, 2, `0x7fffffff`, `0x80000000`,
 `0xffffffff` and others), set a length word near the number of bytes after it, nudge a word by
 a small delta, delete or repeat a run of words, insert zero or random words, truncate, splice
-words from another input of the same type, flip a bit, append bytes.
+words from another input of the same type, flip a bit, set a byte to a boundary value, append
+bytes.
 
 ## Limits
 
@@ -94,8 +97,8 @@ refusal reached through two paths would be two classes. The class id is
 
 go-stellar-sdk spends `MaxDepth` once per generated `DecodeFrom` call; rs-stellar-xdr spends
 its depth once per `read_xdr` of every type, including the wrappers and boxes go does not
-count. At the same number the two refuse at different nesting: go reads about twice as deep.
-This is already known and recorded (`conformance/known-failures/go.txt`, the `depth` entries,
+count. At the same number the two refuse at different nesting, and go reads deeper: at depth
+1000, go decodes a bare `ScVal` holding 499 `ScVec` levels. This is already known and recorded (`conformance/known-failures/go.txt`, the `depth` entries,
 and their drafts in `findings/issues/`), so it is filtered rather than reported again.
 
 A disagreement is filtered when, and only when, lifting the refusing side's depth limit, and
@@ -156,19 +159,14 @@ inputs, the inputs per origin, and every class with its count, reproducer and bo
 
 ## First run (2026-11-12)
 
-Seed 20261112, 4 workers, 1200 s on the 10-core build host: 87,738,857 inputs, about 73,000
-per second (39.5 M seed mutations, 21.9 M pool mutations, 17.5 M arbitrary values, 8.8 M
-mutated arbitrary values). 8,439 inputs were filtered as depth accounting (8,328
-`TransactionEnvelope`, 111 `ScVal`, all `depth-accounting-go-deeper`).
-
-Every other disagreement, 113,063 inputs, was one root cause in eight classes, one per type
-that carries a bool: stellar-xdr reads a bool word other than 0 or 1 (as false), go-stellar-sdk
+The first run used seed 20261112 against go-stellar-sdk v0.8.0. Apart from the inputs filtered
+as depth accounting, every disagreement (113,063 inputs) was one root cause in eight classes,
+one per type that carries a bool: stellar-xdr reads a bool word other than 0 or 1 (as false), go-stellar-sdk
 refuses it. Core's own decoder, xdrpp, reads the same word as true and re-encodes it as 1, and
 core hashes and checks signatures against that re-encoding, never the submitted bytes. The
 minimal reproducer is the `ScVal` `00000000 00000002`. The corpus already holds it as
 `soroban.scval-shapes.synth-bool-value-2`, and in an envelope as
 `soroban.invoke-basics.synth-invoke-arg-bool-2`; the issue drafts are
 `findings/issues/fuzz-rust-bool-non-canonical.md` and
-`findings/issues/stellar-core-bool-non-canonical.md`. No input made either side panic, no go
-request failed, and no input was accepted by both sides with different re-encodings.
-`ScSpecFunctionV0`, `Asset` and `SignerKey`, which carry no bool, had no disagreement at all.
+`findings/issues/stellar-core-bool-non-canonical.md`. The eight classes, each with its
+reproducer under `findings/fuzz/`, are the classes `findings/fuzz/known-classes.txt` lists.
