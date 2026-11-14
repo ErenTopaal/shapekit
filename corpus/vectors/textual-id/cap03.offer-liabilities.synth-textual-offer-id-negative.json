@@ -1,0 +1,213 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "-1",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "-1",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAf//////////"
+            }
+          },
+          {
+            "reject": "negative"
+          }
+        ]
+      },
+      "input": {
+        "text": "-1"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "-16",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "-16",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAf/////////w"
+            }
+          },
+          {
+            "reject": "negative"
+          }
+        ]
+      },
+      "input": {
+        "text": "-16"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "-9223372036854775808",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "-9223372036854775808",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAYAAAAAAAAAA"
+            }
+          },
+          {
+            "reject": "negative"
+          }
+        ]
+      },
+      "input": {
+        "text": "-9223372036854775808"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "-1",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "-1",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAf//////////"
+            }
+          },
+          {
+            "reject": "negative"
+          }
+        ]
+      },
+      "input": {
+        "number": -1
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "-16",
+            "manage_sell_offer": {
+              "json": {
+                "amount": "10",
+                "buying": {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GABQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQHGPC"
+                  }
+                },
+                "offer_id": "-16",
+                "price": {
+                  "d": 1,
+                  "n": 1
+                },
+                "selling": "native"
+              },
+              "xdr": "AAAAAAAAAAFVU0QAAAAAAAMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAoAAAABAAAAAf/////////w"
+            }
+          },
+          {
+            "reject": "negative"
+          }
+        ]
+      },
+      "input": {
+        "number": -16
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "invalid-by-core"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "non-canonical-id"
+    ],
+    "id": "cap03.offer-liabilities.synth-textual-offer-id-negative",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785",
+      "https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/ecosystem/sep-0051.md"
+    ],
+    "notes": "negative offer ids in their canonical int64 spelling, as text (-1, -16, -9223372036854775808) and as JSON numbers (-1, -16). offerID is an int64 in ManageSellOfferOp and ManageBuyOfferOp, and SEP-51 writes an int64 as a base-10 decimal string, so each input is the exact rendering of a value the XDR type holds; an XDR-JSON reader that reads the type encodes it as written. core refuses the operation with MANAGE_SELL_OFFER_MALFORMED / MANAGE_BUY_OFFER_MALFORMED for offerID < 0 from protocol 15 (stellar-core v30.0.0 src/transactions/ManageOfferOpFrameBase.cpp, ManageOfferOpFrameBase::doCheckValid), so an API that builds operations and applies that rule refuses it. each case expects either the exact id, carried in a ManageSellOfferOp, or a refusal (negative); encoding any other id fails. -0 is not the canonical spelling of 0 and stays in the non-canonical entry.",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

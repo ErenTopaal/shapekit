@@ -93,6 +93,10 @@ fn data_of(env: TransactionEnvelope) -> Result<SorobanTransactionData> {
 
 const ARGS: [&str; 1] = ["op.invoke_host_function.invoke_contract.args"];
 
+/// js-xdr's decode depth limit, raised from 200 to 1500 nested types: the depth entries are
+/// the values a decoder with the old limit cannot read.
+const LINK_JS_XDR_155: &str = "https://github.com/stellar/js-xdr/pull/155";
+
 pub struct ScvalShapes {
     pub protocol: u32,
 }
@@ -484,7 +488,8 @@ impl ScvalShapes {
                 depth + 1
             ))
             .fields(&ARGS)
-            .flags(&["max-depth"]),
+            .flags(&["max-depth"])
+            .issues(&[LINK_JS_XDR_155]),
         )?;
         let twin = apply_failing(
             ctx,
@@ -503,7 +508,8 @@ impl ScvalShapes {
                 error.lines().next().unwrap_or_default(),
                 r.name()
             ))
-            .fields(&ARGS),
+            .fields(&ARGS)
+            .issues(&[LINK_JS_XDR_155]),
         )?;
         Ok(depth)
     }

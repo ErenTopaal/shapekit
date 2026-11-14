@@ -302,25 +302,64 @@ fn line_anchor(lines: &toml::Value) -> Result<String, GuideError> {
     }
 }
 
-/// Registry prose is written lowercase; a table cell reads better as a sentence. Only a first
-/// word made of lowercase letters is capitalised, so identifiers such as `toAccountID` stay as
-/// they are, and a missing final full stop is added.
+/// Registry prose is written lowercase; a table cell reads better as sentences. Each sentence
+/// (the start of the text, and every word after a full stop and whitespace) gets a capital only
+/// when its first word is made of lowercase letters and hyphens, so identifiers such as
+/// `toAccountID` stay as they are. `xdr` becomes `XDR`, and a missing final full stop is added.
 fn sentence(s: &str) -> String {
     let s = s.trim();
-    let first: String = s.chars().take_while(|c| !c.is_whitespace()).collect();
-    let mut out = if first == "xdr" {
-        format!("XDR{}", &s[first.len()..])
-    } else if !first.is_empty() && first.chars().all(|c| c.is_ascii_lowercase()) {
-        let mut chars = s.chars();
-        let head = chars.next().map(|c| c.to_ascii_uppercase());
-        head.into_iter().chain(chars).collect()
-    } else {
-        s.to_string()
-    };
+    let mut out = String::with_capacity(s.len() + 1);
+    let mut rest = s;
+    loop {
+        // the next sentence starts after a full stop followed by whitespace.
+        let stop = next_sentence_break(rest).unwrap_or(rest.len());
+        out.push_str(&capitalise_first_word(&rest[..stop]));
+        rest = &rest[stop..];
+        if rest.is_empty() {
+            break;
+        }
+    }
     if !out.ends_with(['.', '!', '?']) {
         out.push('.');
     }
     mdx::text(&out)
+}
+
+/// Byte offset just past the full stop and whitespace that end the first sentence of `s`, if
+/// another sentence follows.
+fn next_sentence_break(s: &str) -> Option<usize> {
+    for (i, _) in s.match_indices('.') {
+        let ws_start = i + 1;
+        let ws_len: usize = s[ws_start..]
+            .chars()
+            .take_while(|c| c.is_whitespace())
+            .map(char::len_utf8)
+            .sum();
+        if ws_len > 0 && ws_start + ws_len < s.len() {
+            return Some(ws_start + ws_len);
+        }
+    }
+    None
+}
+
+/// `s` with its first word capitalised under the rule of [`sentence`].
+fn capitalise_first_word(s: &str) -> String {
+    let end = s.find(char::is_whitespace).unwrap_or(s.len());
+    let (word, tail) = s.split_at(end);
+    // trailing punctuation such as the comma in "signatures, nonces" is not part of the word.
+    let bare = word.trim_end_matches([',', ';', ':', ')', '.']);
+    let head = if bare == "xdr" {
+        format!("XDR{}", &word[bare.len()..])
+    } else if bare.starts_with(|c: char| c.is_ascii_lowercase())
+        && bare.chars().all(|c| c.is_ascii_lowercase() || c == '-')
+    {
+        let mut chars = word.chars();
+        let first = chars.next().map(|c| c.to_ascii_uppercase());
+        first.into_iter().chain(chars).collect()
+    } else {
+        word.to_string()
+    };
+    head + tail
 }
 
 #[cfg(test)]
@@ -347,5 +386,14 @@ mod tests {
         assert_eq!(sentence("toAccountID drops it"), "toAccountID drops it.");
         assert_eq!(sentence("xdr limit only."), "XDR limit only.");
         assert_eq!(sentence("a <= b"), "A \\<= b.");
+        assert_eq!(
+            sentence("checked at apply. the id is kept. toAccountID drops it"),
+            "Checked at apply. The id is kept. toAccountID drops it."
+        );
+        assert_eq!(
+            sentence("lazily. signatures, nonces and hash-x. pre-auth-tx signers"),
+            "Lazily. Signatures, nonces and hash-x. Pre-auth-tx signers."
+        );
+        assert_eq!(sentence("in v30.0.0 only"), "In v30.0.0 only.");
     }
 }

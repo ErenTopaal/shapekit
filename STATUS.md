@@ -6,7 +6,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
 
 What 0.1.0 holds:
 
-- Corpus: 711 entries, 590 of them emitted by stellar-core. They cover 436 of the 499
+- Corpus: 712 entries, 590 of them emitted by stellar-core. They cover 436 of the 499
   `LedgerCloseMeta` union arms and 44 of the 45 CAPs an indexer can see. Every arm or CAP
   without an entry has a recorded reason in `registry/uncovered.toml`; the per-CAP view is
   `corpus/coverage/COVERAGE.md`.
@@ -48,6 +48,17 @@ Changes in this entry:
 - The wallet-backend harness gives every entry that kept its id the same verdict as before the
   rebuild, the committed SDK conformance matrices are unchanged, and so are the findings: 24
   findings, 504 failures, 0 unmapped.
+- Negative offer ids written as `int64` values (`"-16"` as text, `-16` as a JSON number) move
+  from the refusal cases of `cap03.offer-liabilities.synth-textual-offer-id-noncanonical` to a
+  new entry, `cap03.offer-liabilities.synth-textual-offer-id-negative`. `offerID` is an `int64`
+  and SEP-51 writes it as a decimal string, so a reader of the XDR type encodes these ids
+  exactly; stellar-core refuses them only when it checks the operation. A testee passes the new
+  entry by encoding the exact id or by refusing it. The `stellar-xdr` crate and
+  `@stellar/stellar-sdk` up to 17.2.1 encode the exact id and 17.3.0 refuses it, so 15 checks on
+  the crate and 25 on `@stellar/stellar-sdk` 16.3.0 to 17.2.1 that failed before now pass.
+- The `soroban.scval-shapes.p30-*-depth-*` entries link
+  [js-xdr#155](https://github.com/stellar/js-xdr/pull/155), which raised js-xdr's decode depth
+  limit from 200 to 1500 nested types, in place of the map key order and map collision issues.
 
 ## 2026-11-13: stellar-core bool finding, docs site, CI on GitHub
 
@@ -117,8 +128,11 @@ The RFP gates publication of the guide on review by a stellar-core or platform e
 - Required reviewer: a stellar-core engineer or a platform engineer at SDF.
 - State: draft, awaiting review.
 - stellar-docs change: `docs/guide/stellar-docs.patch` adds the page as
-  `docs/data/indexers/build-your-own/indexer-hardening.mdx` with an entry in `docs.json`, on
-  top of stellar-docs `main` at `734347c0`. The README shows how to apply it.
+  `docs/data/indexers/build-your-own/indexer-hardening.mdx` with a link from the Build Your Own
+  index and an entry in `docs.json`, on top of stellar-docs `main` at `62f29bbb`. Corpus
+  entries in the page link to the v0.1.0 tag. The patched pages pass stellar-docs' prettier
+  configuration and its pad check (`scripts/pad-component-tags.mjs --check`). The README shows
+  how to apply it.
 - After the review, this section records the reviewer, the date and the reviewed commit.
 
 ## 2026-11-12: CI tiers, release workflow, maintenance plan

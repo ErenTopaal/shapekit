@@ -52,7 +52,7 @@ The expected answers are recorded in:
 
 How the corpus entry was built and checked: 98 nested maps around a u32 leaf (99 ScVal levels), the deepest the host accepts, echoed into a contract data entry, an event and the return value. simulation cannot size this transaction (it encodes the envelope under xdr depth 500), so its resources are those of the deepest priced level plus a margin
 
-Related: https://github.com/stellar/js-stellar-sdk/pull/1766, https://github.com/stellar/js-stellar-sdk/issues/1789
+Related: https://github.com/stellar/js-xdr/pull/155
 
 ## Sibling issues
 

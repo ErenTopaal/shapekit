@@ -85,8 +85,6 @@ The same bytes through stellar-xdr 30.0.0, `TransactionEnvelope::from_xdr(bytes,
 
 A caller can find out whether core's depth check accepts an envelope: an envelope core refuses as too deep is refused, one core accepts is accepted. Since js-xdr's unit differs from core's per shape, one way is a check that counts depth the way stellar-xdr does (one unit per value read, including each optional and each variable-length array) and applies core's limit of 1000, offered as an option or a separate validation call next to `fromXdr`.
 
-This is the opposite direction from [#1901](https://github.com/stellar/js-stellar-sdk/issues/1901): there a ledger core closed does not decode inside a `LedgerCloseMetaBatch`, and open PR [#1902](https://github.com/stellar/js-stellar-sdk/pull/1902) raises the SDK-wide limit to 1550 so that it does. A higher generic limit is right for reading ledger data; it widens the gap described here, which is why a separate check would be needed for envelopes.
-
 ## Impact
 
 Low. No ledger contains such an envelope, since core refuses it, so readers of ledger data are not affected. Code that builds, checks or forwards transactions with the SDK cannot detect locally that core will refuse the envelope: it decodes, re-encodes and can be signed, and the refusal only comes back from core as `txMALFORMED` at submission.

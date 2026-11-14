@@ -257,7 +257,7 @@ var Fields = []Field{
 		ID:              "tx.memo.return",
 		XDRPath:         "Transaction.memo(MEMO_RETURN).retHash",
 		ValidatedByCore: "no",
-		Risk:            "a fabricated reference to a transaction that may not exist",
+		Risk:            "a fabricated reference to a transaction that need not exist",
 		Handling:        "store as 32 raw bytes; do not join on it without checking the referenced transaction exists",
 		Accessors: []Accessor{
 			{Type: "Memo", Member: "RetHash"},
@@ -445,7 +445,7 @@ var Fields = []Field{
 		ID:              "op.payment.destination",
 		XDRPath:         "PaymentOp.destination",
 		ValidatedByCore: "yes",
-		Risk:            "on a failed payment the destination may not exist at all",
+		Risk:            "on a failed payment the destination need not exist at all",
 		Handling:        "only treat the destination as a participant when the payment succeeded or meta shows a change",
 		Accessors: []Accessor{
 			{Type: "PaymentOp", Member: "Destination"},
@@ -470,7 +470,7 @@ var Fields = []Field{
 		ID:              "op.payment.asset",
 		XDRPath:         "PaymentOp.asset",
 		ValidatedByCore: "partial",
-		Risk:            "the issuer account may not exist; codes compare by raw bytes including padding",
+		Risk:            "the issuer account need not exist; codes compare by raw bytes including padding",
 		Handling:        "key assets by (type, raw code bytes, issuer key bytes), not by display string",
 		Accessors: []Accessor{
 			{Type: "PaymentOp", Member: "Asset"},
@@ -554,7 +554,7 @@ var Fields = []Field{
 		ID:              "op.manage_offer.assets_amount_price",
 		XDRPath:         "ManageSellOfferOp.{selling,buying,amount,price} | ManageBuyOfferOp.{selling,buying,buyAmount,price} | CreatePassiveSellOfferOp.{selling,buying,amount,price}",
 		ValidatedByCore: "yes",
-		Risk:            "an offer may be fully or partly crossed immediately, so the envelope amount is not the resting amount",
+		Risk:            "an offer can be fully or partly crossed immediately, so the envelope amount is not the resting amount",
 		Handling:        "read offer state and trades from meta and the result",
 		Accessors: []Accessor{
 			{Type: "ManageSellOfferOp", Member: "Selling"},
@@ -617,7 +617,7 @@ var Fields = []Field{
 		ID:              "op.change_trust.line",
 		XDRPath:         "ChangeTrustOp.line",
 		ValidatedByCore: "yes",
-		Risk:            "the issuer may not exist",
+		Risk:            "the issuer need not exist",
 		Handling:        "key the trustline asset by raw bytes",
 		Accessors: []Accessor{
 			{Type: "ChangeTrustOp", Member: "Line"},
@@ -737,7 +737,7 @@ var Fields = []Field{
 		ID:              "op.claim_claimable_balance.balance_id",
 		XDRPath:         "ClaimClaimableBalanceOp.balanceID",
 		ValidatedByCore: "yes",
-		Risk:            "on a failed claim the id may name nothing",
+		Risk:            "on a failed claim the id can name nothing",
 		Handling:        "trust only on success",
 		Accessors: []Accessor{
 			{Type: "ClaimClaimableBalanceOp", Member: "BalanceId"},
@@ -783,7 +783,7 @@ var Fields = []Field{
 		ID:              "op.clawback_claimable_balance.balance_id",
 		XDRPath:         "ClawbackClaimableBalanceOp.balanceID",
 		ValidatedByCore: "yes",
-		Risk:            "on failure the id may name nothing",
+		Risk:            "on failure the id can name nothing",
 		Handling:        "trust only on success",
 		Accessors: []Accessor{
 			{Type: "ClawbackClaimableBalanceOp", Member: "BalanceId"},
@@ -806,7 +806,7 @@ var Fields = []Field{
 		ID:              "op.begin_sponsoring.sponsored_id",
 		XDRPath:         "BeginSponsoringFutureReservesOp.sponsoredID",
 		ValidatedByCore: "partial",
-		Risk:            "the sponsored id may be an account that does not exist yet",
+		Risk:            "the sponsored id can be an account that does not exist yet",
 		Handling:        "derive sponsorship relations from sponsoring ids on ledger entries in meta",
 		Accessors: []Accessor{
 			{Type: "BeginSponsoringFutureReservesOp", Member: "SponsoredId"},
@@ -816,7 +816,7 @@ var Fields = []Field{
 		ID:              "op.revoke_sponsorship",
 		XDRPath:         "RevokeSponsorshipOp.ledgerKey | RevokeSponsorshipOp.signer",
 		ValidatedByCore: "partial",
-		Risk:            "on failure the key may name nothing",
+		Risk:            "on failure the key can name nothing",
 		Handling:        "read sponsorship changes from meta",
 		Accessors: []Accessor{
 			{Type: "RevokeSponsorshipOp", Member: "Type"},
@@ -898,7 +898,7 @@ var Fields = []Field{
 		ID:              "op.invoke_host_function.upload_wasm",
 		XDRPath:         "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM).wasm",
 		ValidatedByCore: "partial",
-		Risk:            "large opaque blob; may not be valid wasm on failed transactions",
+		Risk:            "large opaque blob; need not be valid wasm on failed transactions",
 		Handling:        "store by hash with a size cap; take the uploaded code entry from meta",
 		Accessors: []Accessor{
 			{Type: "HostFunction", Member: "Wasm"},

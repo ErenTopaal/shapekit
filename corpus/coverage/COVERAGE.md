@@ -8,9 +8,9 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 | Measure | Value |
 |---|---|
-| Entries | 711 |
+| Entries | 712 |
 | Core-emitted entries | 590 |
-| Entries by source class | core-golden 107, local-core 467, local-core-refused 18, mainnet-history 13, synthetic 103, testnet-history 3 |
+| Entries by source class | core-golden 107, local-core 467, local-core-refused 18, mainnet-history 13, synthetic 104, testnet-history 3 |
 | CAPs (indexer-visible) | 102 (45) |
 | Indexer-visible CAPs with a core-emitted entry | 44 |
 | Indexer-visible CAPs uncovered, with a reason | 1 |
@@ -39,10 +39,10 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 |---|---|---|---|---|---|---|---|---|---|
 | CAP-0001 Bump Sequence | 10 | yes | `cap01.bump-sequence` | 9 | 8 | core-golden 1, local-core 7, local-core-refused 1 | any 1, mainnet 8, testnet 8 | 30 |  |
 | CAP-0002 Transaction level signature verification | 10 | yes | `classic.failed-tx` | 124 | 123 | core-golden 5, local-core 116, local-core-refused 1, mainnet-history 2 | any 5, mainnet 119, testnet 117 | 9, 12, 23, 26, 30 |  |
-| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 27 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 4 | any 7, mainnet 17, testnet 16, vector 3 | 11, 17, 30 |  |
+| CAP-0003 Asset-backed offers | 10 | yes | `cap03.offer-liabilities` | 28 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 5 | any 7, mainnet 17, testnet 16, vector 4 | 11, 17, 30 |  |
 | CAP-0004 Improved Rounding for Cross Offer | 10 | no |  | 0 | 0 |  |  |  | offer-crossing rounding arithmetic only; results and meta keep existing shapes |
 | CAP-0005 Throttling and transaction pricing improvements | 11 | no |  | 0 | 0 |  |  |  | fee and transaction set selection only; the CAP states no changes in XDR |
-| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 27 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 4 | any 7, mainnet 17, testnet 16, vector 3 | 11, 17, 30 |  |
+| CAP-0006 Add ManageBuyOffer Operation | 11 | yes | `cap03.offer-liabilities` | 28 | 23 | core-golden 6, local-core 16, mainnet-history 1, synthetic 5 | any 7, mainnet 17, testnet 16, vector 4 | 11, 17, 30 |  |
 | CAP-0007 Deterministic Account Creation |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed CreateDeterministicAccountOp is absent at v30.0 |
 | CAP-0008 Self Identified Pre-Auth Transaction |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol; proposed SIGNER_KEY_TYPE_PRE_AUTH_SELF_TX is absent at v30.0 |
 | CAP-0009 Linear/Exterior Immutable Accounts |  | no |  | 0 | 0 |  |  |  | Draft; not implemented in any protocol |
@@ -765,7 +765,7 @@ Bump sequence and merges refused for a sequence number too far ahead. CAPs: CAP-
 
 ### `cap03.offer-liabilities`
 
-Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, mainnet-history 1, synthetic 4.
+Offers with buying and selling liabilities, including manage-buy offers. CAPs: CAP-0003, CAP-0006. Entries: core-golden 6, local-core 16, mainnet-history 1, synthetic 5.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|

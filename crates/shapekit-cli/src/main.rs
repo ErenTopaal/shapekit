@@ -149,8 +149,10 @@ enum GenCommand {
     /// Print the family of every recipe `gen chains` can record, one per line, sorted and
     /// without repeats.
     Families,
-    /// Record the smoke chain: protocol 30, testnet's Soroban settings, four
-    /// funded accounts, a payment, a trustline and one echo contract call.
+    /// Record the smoke chain on a standalone stellar-core from the core image in pins.toml:
+    /// an upgrade to the protocol in the `PROTOCOL` constant of shapekit-core-driver's smoke
+    /// module, testnet's Soroban settings, four funded accounts, a payment, a trustline and one
+    /// echo contract call.
     Smoke {
         /// Passphrase the chain runs under.
         #[arg(long, value_parser = ["testnet", "mainnet"])]

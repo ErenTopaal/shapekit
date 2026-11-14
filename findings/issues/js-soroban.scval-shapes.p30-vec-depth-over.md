@@ -102,7 +102,7 @@ The expected answers are recorded in:
 
 How the corpus entry was built and checked: 100 nested vecs, one more than the host accepts (simulation: HostError: Error(Context, ExceededLimit)): core includes the invocation and fails it with invoke_host_function Trapped, so the value exists only in the envelope
 
-Related: https://github.com/stellar/js-stellar-sdk/pull/1766, https://github.com/stellar/js-stellar-sdk/issues/1789
+Related: https://github.com/stellar/js-xdr/pull/155
 
 ## Sibling issues
 

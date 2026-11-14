@@ -36,6 +36,7 @@ pub const LINK_JS_1789: &str = "https://github.com/stellar/js-stellar-sdk/issues
 pub const LINK_PY_1246: &str = "https://github.com/StellarCN/py-stellar-base/issues/1246";
 pub const LINK_DOTNET_257: &str = "https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257";
 pub const LINK_RFC_8259: &str = "https://www.rfc-editor.org/rfc/rfc8259#section-6";
+pub const LINK_SEP_51: &str = "https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/ecosystem/sep-0051.md";
 pub const LINK_RS_581: &str = "https://github.com/stellar/rs-stellar-xdr/pull/581";
 pub const LINK_GHSA_3XHM: &str =
     "https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-3xhm-p452-9wjh";

@@ -165,7 +165,7 @@ These are the only commands that use the network, each only when run explicitly:
 |---|---|---|
 | `shapekit pins verify` | GitHub (git and the releases api), static.rust-lang.org, go.dev, nodejs.org, crates.io index, npm registry, Go module proxy, Docker Hub registry | checks every pin still resolves to the pinned bytes |
 | `shapekit capture history` | the public SEP-54 data lake (`aws-public-blockchain`, us-east-2), or with `--via rpc` a stellar-rpc endpoint (default `https://soroban-testnet.stellar.org`) | captures one ledger from public network history |
-| `shapekit conformance file-issues` | GitHub, through `gh` | opens the drafted issues upstream; it refuses to run without the `--i-have-owner-approval` flag |
+| `shapekit conformance file-issues` | GitHub, through `gh` | opens the drafted issues upstream; it refuses to run without the `--confirm` flag |
 | `shapekit conformance run` and `reproduce`, and `shapekit fuzz`, unless `--no-build` | crates.io, the Go module proxy, the npm registry, through `cargo`, `go` and `npm` | the build steps in `conformance/versions.toml` fetch the pinned SDK versions; running the testees is offline |
 | `wb-adapter` (used by `shapekit harness`) | GitHub and the image registries, on first use of a commit | clones wallet-backend and builds its image; later runs reuse both and are offline |
 

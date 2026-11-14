@@ -147,14 +147,12 @@ null = ["from"]
 
 [[finding]]
 id = "WB-W4"
-title = "question: to_muxed_id keeps only u64 values, so a text, hash or return memo of a payment to a G address is not stored; intended?"
+title = "a text, hash or return memo of a payment to a G address is stored nowhere"
 component = "wallet-backend"
 severity = "data-loss"
-status = "duplicate-of"
-link = "https://github.com/stellar/wallet-backend/issues/800"
+status = "draft"
 draft = "findings/issues/wallet-backend-W4.md"
-related = ["https://github.com/stellar/wallet-backend/pull/801"]
-cause = "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it. Its code comment says this is deliberate. #800 (open) and its PR #801 (open) add a transactions.memo column, which keeps the memo; the draft is a comment for #801: on its branch five different invalid UTF-8 text memos render as one U+FFFD and its TEXT filter cannot match them."
+cause = "CAP-67 puts the transaction memo of a payment to a G address into the transfer event's `to_muxed_id` as u64, string or bytes; wallet-backend stores `to_muxed_id` only for u64 values and no table has a memo column, so text, hash and return memos are stored nowhere."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -164,14 +162,12 @@ detail_contains = "to_muxed_id"
 
 [[finding]]
 id = "WB-W5"
-title = "contract deployments without a matching auth entry (asset contracts, contract-to-contract deploys) record no contract creation"
+title = "contract deployments that no auth entry declares (factory deploys, Stellar Asset Contracts) record no contract creation"
 component = "wallet-backend"
 severity = "data-loss"
-status = "duplicate-of"
-link = "https://github.com/stellar/wallet-backend/issues/806"
+status = "draft"
 draft = "findings/issues/wallet-backend-W5.md"
-related = ["https://github.com/stellar/wallet-backend/issues/746"]
-cause = "Contract creation state changes come from the declared auth invocation tree. A Stellar Asset Contract deployed from an asset, or a contract deployed by another contract with no auth entry for the deployment, creates a contract instance in the meta but no ACCOUNT CREATE row. #746 is the reverse case (rows for deployments that did not happen); both go away when deployments are read from the created contract instances in meta. The factory case is reported upstream as #806 (open); the draft is a comment for it adding a factory with a constructor and the Stellar Asset Contract case."
+cause = "Contract creation rows come only from the operation's own CreateContract with a FromAddress preimage and from CreateContract invocations declared in auth entries, so a contract deployed by another contract without an auth entry, and any Stellar Asset Contract deployment, gets no ACCOUNT CREATE row although the meta creates the instance."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -183,10 +179,9 @@ id = "WB-W6"
 title = "an XLM transfer through the native asset contract that creates the destination account records no account creation"
 component = "wallet-backend"
 severity = "data-loss"
-status = "duplicate-of"
-link = "https://github.com/stellar/wallet-backend/issues/804"
+status = "draft"
 draft = "findings/issues/wallet-backend-W6.md"
-cause = "A native SAC transfer to a G address that does not exist creates the account (CAP-73). The meta shows the new account entry; wallet-backend writes the balance credit but no ACCOUNT CREATE row. Reported upstream as #804 (open); the draft is an optional comment with the protocol 28 and 30 fixtures."
+cause = "From protocol 26 (CAP-73) an XLM SAC transfer to a missing G account creates it; wallet-backend writes ACCOUNT CREATE only for CreateAccount operations, so the new account gets a credit but no creation row."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -212,10 +207,9 @@ id = "WB-W8"
 title = "a pre-auth signer core removes in txChangesBefore is never recorded as removed (failed transactions, fee bumps)"
 component = "wallet-backend"
 severity = "data-loss"
-status = "duplicate-of"
-link = "https://github.com/stellar/wallet-backend/issues/805"
+status = "draft"
 draft = "findings/issues/wallet-backend-W8.md"
-cause = "Core removes a pre-authorized transaction signer in txChangesBefore: the transaction's own hash signer when the transaction is applied, even when it fails, and a fee bump's hash signer from the fee source before the inner transaction runs, even when it succeeds. wallet-backend derives signer changes only from operation effects (SetOptions changes of successful transactions), never from txChangesBefore, so neither removal is stored. The failed-transaction case is reported upstream as #805 (open); the draft is a comment for it adding the fee-bump case."
+cause = "Core removes a transaction's pre-auth signer in txChangesBefore whether the transaction succeeds or fails, and a fee bump's from the fee source before the inner transaction; wallet-backend derives SIGNER rows only from operation effects of successful transactions, so neither removal is stored."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -262,10 +256,9 @@ id = "GO-1"
 title = "strkey.Decode, DecodeAny and IsValidClaimableBalance accept a claimable balance id whose type byte is not v0"
 component = "go-stellar-sdk"
 severity = "divergence"
-status = "duplicate-of"
-link = "https://github.com/stellar/go-stellar-sdk/issues/6042"
+status = "draft"
 draft = "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md"
-cause = "DecodeAny checks a B key's length but not its claimable balance id type byte, so ids of types core does not define decode. Reported upstream as #6042 (open, same input and APIs)."
+cause = "strkey.Decode, DecodeAny and IsValidClaimableBalance check a B key's length but not its claimable balance id type byte, so ids of types the protocol does not define decode, while xdr.ClaimableBalanceId.DecodeFromStrkey refuses them."
 
 [[finding.conformance]]
 sdk = "go"
@@ -382,7 +375,7 @@ entries = ["cap03.offer-liabilities.synth-textual-offer-id-*", "cap27.muxed-acco
 
 [[finding]]
 id = "JS-16X"
-title = "16.x stops decoding at 200 nested types (js-xdr 4), below depths the network produces, and its StrKey decoders accept payloads 17.x refuses"
+title = "16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks"
 component = "js-stellar-sdk"
 severity = "divergence"
 status = "draft"
@@ -395,7 +388,7 @@ related = [
   "https://github.com/stellar/js-stellar-sdk/pull/1828",
   "https://github.com/stellar/js-xdr/pull/155",
 ]
-cause = "16.4.1 bundles js-xdr 4.0.0, whose decoders stop at 200 nested types: the deepest ScVal it decodes is 66 levels, below the host's 100, so it fails on recorded protocol 30 values and ledgers that 17.x (js-xdr 5, js-xdr#155) decodes. Its StrKey decoders also accept payloads of the wrong length (fixed on 17.x by #1583) and claimable balance ids with a non-zero type byte. RELEASE_POLICY.md gives the 16.x maintenance line parsing fixes, so the draft asks for these as parsing fixes; the other 16.x divergences are in JS-16X-POLICY."
+cause = "16.4.1 lacks six fixes that 17.x has: ScVal map key order (#1766), map key collisions (#1789, fixed by #1778), canonical textual ids (#1785), W addresses (#1811), js-xdr 5's decode depth (js-xdr#155; 16.x stops at 200 nested types, 66 ScVec levels), and the StrKey payload length and claimable balance type byte checks. One issue asks for all six backports."
 
 [[finding.conformance]]
 sdk = "js"
@@ -409,30 +402,6 @@ entries = [
   "soroban.auth-trees.p30-declared-depth-*",
   "soroban.scval-shapes.p30-*-depth-*",
   "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
-]
-
-# the 16.x divergences the maintenance line does not take; listed after JS-16X so its
-# depth and strkey cells stay there
-[[finding]]
-id = "JS-16X-POLICY"
-title = "16.x keeps the map key order, map key collision, textual id and W address behaviour that 17.x changed"
-component = "js-stellar-sdk"
-severity = "divergence"
-status = "wont-fix"
-reason = "RELEASE_POLICY.md limits the 16.x maintenance line to regenerated XDR, parsing fixes and critical security fixes. A backport of the map collision fix (#1778) was asked for in #1898 and declined (closed 2026-11-13), and the 16.4.0 release notes document W addresses as unsupported on v16. Map key order (#1766) and canonical textual ids (#1785) were not asked about separately; they are named as out of scope in the JS-16X draft."
-related = [
-  "https://github.com/stellar/js-stellar-sdk/issues/1898",
-  "https://github.com/stellar/js-stellar-sdk/pull/1766",
-  "https://github.com/stellar/js-stellar-sdk/issues/1785",
-  "https://github.com/stellar/js-stellar-sdk/issues/1789",
-  "https://github.com/stellar/js-stellar-sdk/pull/1811",
-]
-cause = "16.3.1 and 16.4.1 backported issuer ordering and the protocol 30 xdr, but not ScVal map key ordering (#1766), map key collisions (#1789, fixed in 17.3.0 by #1778), canonical textual ids (#1785) or the W strkey codec (#1811)."
-
-[[finding.conformance]]
-sdk = "js"
-versions = ["16.3.0", "16.3.1", "16.4.1"]
-entries = [
   "soroban.scval-shapes.synth-map-*",
   "cap03.offer-liabilities.synth-textual-offer-id-*",
   "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
@@ -446,8 +415,8 @@ component = "js-stellar-sdk"
 severity = "robustness"
 status = "draft"
 draft = "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md"
-related = ["https://github.com/stellar/js-xdr/pull/155", "https://github.com/stellar/js-stellar-sdk/issues/1901", "https://github.com/stellar/js-stellar-sdk/pull/1902"]
-cause = "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, so the sdk accepts and re-encodes values core refuses. Through schema.decode with a maxDepth, core's boundary falls at a different value per shape, so no single value matches core. Related: #1901 (a valid ledger that fails to decode) and PR #1902 (raises the limit to 1550, which widens this gap)."
+related = ["https://github.com/stellar/js-xdr/pull/155"]
+cause = "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, and through schema.decode core's boundary falls at a different maxDepth per shape, so no single value matches core."
 
 [[finding.conformance]]
 sdk = "js"
@@ -468,7 +437,7 @@ component = "rs-stellar-xdr"
 severity = "divergence"
 status = "draft"
 draft = "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md"
-cause = "NumberOrString passes a JSON string to str::parse, so \"+16\", \"-0\" and \"016\" read as 16 and 0; the crate's own tests assert this, so the draft is a question. The negative-id cases of the entry are not a reader bug: offerID is int64 in XDR and core refuses negative ids only in doCheckValid, so their corpus expectation (refusal by an XDR-JSON reader) needs correcting."
+cause = "NumberOrString passes a JSON string to str::parse, so \"+16\", \"-0\" and \"016\" read as 16 and 0; the crate's own tests assert this, so the draft is a question. The failing checks are \"+16\" and \"-0\" in the non-canonical entry; negative ids such as \"-16\" are valid int64 values that core refuses only in doCheckValid, so they are in the negative entry, which accepts the exact id the crate reads."
 
 [[finding.conformance]]
 sdk = "rust"
@@ -500,11 +469,10 @@ id = "RS-3"
 title = "bool decodes any u32 and reads everything but 1 as false, where core reads non-zero as true and go-stellar-sdk refuses"
 component = "rs-stellar-xdr"
 severity = "divergence"
-status = "duplicate-of"
-link = "https://github.com/stellar/rs-stellar-xdr/issues/622"
+status = "draft"
 draft = "findings/issues/fuzz-rust-bool-non-canonical.md"
 siblings = ["CORE-1"]
-cause = "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt). Reported upstream as #622 (open); two unmerged upstream branches change the bool decode."
+cause = "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt)."
 
 [[finding.conformance]]
 sdk = "rust"

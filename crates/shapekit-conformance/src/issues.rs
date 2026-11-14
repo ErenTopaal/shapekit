@@ -1,8 +1,8 @@
 //! `shapekit conformance draft-issues` and `file-issues`.
 //!
 //! Drafting writes one issue body per sdk and diverging entry into `findings/issues/`. Filing
-//! opens them upstream with the `gh` CLI. Filing is outward-facing, so it refuses to run
-//! without `--i-have-owner-approval`, which the repo owner gives per batch.
+//! opens them upstream with the `gh` CLI. Filing opens public issues in other repositories, so
+//! it refuses to run without `--confirm`, which states that the batch was reviewed.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
@@ -513,15 +513,16 @@ pub struct FileOptions {
     pub issues: PathBuf,
     /// Only files whose name is listed; all drafts when empty.
     pub only: Vec<String>,
-    pub owner_approval: bool,
+    /// Set by `--confirm`: the batch was reviewed and is to be filed upstream.
+    pub confirm: bool,
 }
 
 /// Opens every drafted issue that has no upstream issue yet and records the links in
-/// `filed.json`. Never runs without the owner's approval flag.
+/// `filed.json`. Never runs without the confirmation flag.
 pub fn file(opts: &FileOptions) -> Result<BTreeMap<String, String>> {
-    if !opts.owner_approval {
+    if !opts.confirm {
         bail!(
-            "file-issues opens public issues in upstream repositories; it runs only with --i-have-owner-approval, given by the repo owner for this batch"
+            "file-issues opens public issues in upstream repositories; it runs only with --confirm, which confirms that this batch of drafts was reviewed and is to be filed upstream"
         );
     }
     let filed_path = opts.issues.join(FILED);

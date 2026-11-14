@@ -119,13 +119,18 @@ The same checks are a checklist in the guide for indexers in other languages.
 `docs/guide/stellar-docs.patch` adds the guide to stellar/stellar-docs as
 `docs/data/indexers/build-your-own/indexer-hardening.mdx`, with a link from the Build Your Own
 index and an entry in `docs.json`. It is made from the guide in this commit with the
-review-gate comments removed and corpus entries written as plain ids (`shapekit guide table
---plain-entries`), on top of stellar-docs `main` at `734347c0`. To apply it:
+publication-gate comment lines removed and corpus entries linked at the v0.1.0 tag (`shapekit
+guide table --corpus-url https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus`), on top
+of stellar-docs `main` at `62f29bbb`. The two patched `.mdx` files pass stellar-docs' prettier
+configuration and its `scripts/pad-component-tags.mjs --check`; `mint validate` and `mint
+broken-links` have not been run on them. To apply the patch and repeat those two checks:
 
 ```sh
-cd stellar-docs && git switch -c indexer-hardening-guide origin/main
+cd stellar-docs && git switch -c indexer-hardening-guide 62f29bbb
 git am /path/to/shapekit/docs/guide/stellar-docs.patch
-pnpm install && pnpm check
+pnpm install
+pnpm exec prettier --config .prettierrc.js --check docs/data/indexers/build-your-own/*.mdx
+node scripts/pad-component-tags.mjs --check docs/data/indexers/build-your-own/*.mdx
 ```
 
 ### Regenerate the corpus

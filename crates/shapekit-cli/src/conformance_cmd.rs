@@ -97,16 +97,16 @@ pub enum ConformanceCommand {
         #[arg(long, default_value = "findings/issues")]
         out: PathBuf,
     },
-    /// Open the drafted issues upstream with gh. Needs the repo owner's approval per batch.
+    /// Open the drafted issues upstream with gh. Refuses to run without --confirm.
     FileIssues {
         #[arg(long, default_value = "findings/issues")]
         issues: PathBuf,
         /// Only these drafted files; repeatable.
         #[arg(long = "only")]
         only: Vec<String>,
-        /// Confirms the repo owner approved filing this batch upstream.
-        #[arg(long = "i-have-owner-approval")]
-        owner_approval: bool,
+        /// Confirms that this batch of drafts was reviewed and is to be filed upstream.
+        #[arg(long)]
+        confirm: bool,
     },
 }
 
@@ -277,12 +277,12 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
         ConformanceCommand::FileIssues {
             issues: dir,
             only,
-            owner_approval,
+            confirm,
         } => {
             let filed = issues::file(&issues::FileOptions {
                 issues: dir,
                 only,
-                owner_approval,
+                confirm,
             })?;
             println!("{} issues recorded in filed.json", filed.len());
             Ok(true)

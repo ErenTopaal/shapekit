@@ -710,15 +710,15 @@ fn draft_issues_for_a_divergence() {
 }
 
 #[test]
-fn file_issues_refuses_without_owner_approval() {
+fn file_issues_refuses_without_confirmation() {
     let dir = tempfile::tempdir().unwrap();
     let err = shapekit_conformance::issues::file(&shapekit_conformance::issues::FileOptions {
         issues: dir.path().to_path_buf(),
         only: Vec::new(),
-        owner_approval: false,
+        confirm: false,
     })
     .unwrap_err();
-    assert!(err.to_string().contains("--i-have-owner-approval"));
+    assert!(err.to_string().contains("--confirm"));
 }
 
 #[test]

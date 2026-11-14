@@ -1,22 +1,116 @@
 <!-- repo: stellar/wallet-backend -->
-# Comment for #804: two more ledgers that reproduce it, at protocol 28 and 30
+# An XLM transfer through the native asset contract that creates the destination account gets no ACCOUNT CREATE state change
 
-Two more inputs, in case they help as regression fixtures. Both come from standalone stellar-core 30.0.0 networks under the testnet passphrase: one network runs protocol 28, the other protocol 30. In each, `GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ` sends 100 XLM through the native SAC to `GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM`, which did not exist, and the operation meta creates its account entry:
+Checked at `main` [3e22515a](https://github.com/stellar/wallet-backend/commit/3e22515a44979fdc3a558fda3991ca2b48e38cef) (no tagged release yet).
 
-- protocol 28, ledger 69, transaction `f715fe4d1651ded84dd1d5656f5e1c1b7fa17f5236dcc339b04eff051d1dd371` ([Galexie file](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/chains/cap73.sac-trust.p28/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFBA--69.xdr.zst));
-- protocol 30, ledger 73, transaction `69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a` ([Galexie file](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/chains/cap73.sac-trust.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFB6--73.xdr.zst)).
+## What happens
 
-Run through `ProcessLedger` at `main` [3e22515a](https://github.com/stellar/wallet-backend/commit/3e22515a44979fdc3a558fda3991ca2b48e38cef) (go1.27.4), each gives the same result as in the issue: the fee debit, the transfer's debit and credit, and no `ACCOUNT` `CREATE`:
+From protocol 26, an XLM transfer through the native Stellar Asset Contract to a `G...` address that has no account entry creates the account, with the full transfer amount as its balance ([CAP-73 lines 87-89](https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/core/cap-0073.md#L87-L89)). The operation is `InvokeHostFunction`, and the operation meta holds the created `AccountEntry`.
+
+wallet-backend writes the `ACCOUNT` `CREATE` row only for a `CreateAccount` operation: `handleTransfer` adds it in a switch on the operation type ([token_transfer.go lines 289-298](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L289-L298)), and no other processor writes an `ACCOUNT` `CREATE` row for an account. For the SAC transfer only the debit and the credit are stored, so the new account has a balance in the history but no creation and no funder.
+
+Severity: data-loss (a created account with no state change). CAPs: CAP-0046-06, CAP-0073.
+
+## Reproduction
+
+Two ledgers, from standalone stellar-core 30.0.0 networks under the testnet passphrase, one running protocol 28 and one protocol 30. In each, `GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ` sends 100 XLM through the native SAC to `GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM`, which does not exist yet:
+
+- protocol 28, ledger 69, transaction `f715fe4d1651ded84dd1d5656f5e1c1b7fa17f5236dcc339b04eff051d1dd371`;
+- protocol 30, ledger 73, transaction `69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a`.
+
+<details>
+<summary>Ledger 69, protocol 28 (base64), save as <code>internal/indexer/testdata/sac_transfer_creates_account_p28.b64</code></summary>
 
 ```
-=== RUN   TestSACTransferCreatesAccountCorpus
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p28: BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=101419
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p28: BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=1000000000
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p28: BALANCE CREDIT account=GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM amount=1000000000
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p30: BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=6851
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p30: BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=1000000000
-    sac_transfer_creates_account_test.go:28: sac_transfer_creates_account_p30: BALANCE CREDIT account=GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM amount=1000000000
---- PASS: TestSACTransferCreatesAccountCorpus (0.00s)
+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
 ```
 
-The files are from the [shapekit](https://github.com/ErenTopaal/shapekit) corpus, which also has mainnet-passphrase variants of both chains.
+</details>
+
+<details>
+<summary>Ledger 73, protocol 30 (base64), save as <code>internal/indexer/testdata/sac_transfer_creates_account_p30.b64</code></summary>
+
+```
+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
+```
+
+</details>
+
+Test, saved as `internal/indexer/sac_transfer_creates_account_test.go`:
+
+```go
+package indexer
+
+import (
+	"context"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/alitto/pond/v2"
+	"github.com/stellar/go-stellar-sdk/network"
+	"github.com/stellar/go-stellar-sdk/xdr"
+	"github.com/stretchr/testify/require"
+)
+
+func TestSACTransferCreatesAccount(t *testing.T) {
+	for _, name := range []string{"sac_transfer_creates_account_p28", "sac_transfer_creates_account_p30"} {
+		b64, err := os.ReadFile("testdata/" + name + ".b64")
+		require.NoError(t, err)
+		var lcm xdr.LedgerCloseMeta
+		require.NoError(t, xdr.SafeUnmarshalBase64(strings.TrimSpace(string(b64)), &lcm))
+
+		for _, opMeta := range lcm.TxApplyProcessing(0).MustV4().Operations {
+			for _, c := range opMeta.Changes {
+				if e, ok := c.GetCreated(); ok && e.Data.Type == xdr.LedgerEntryTypeAccount {
+					acc := e.Data.MustAccount()
+					t.Logf("%s: meta creates account %s with balance %d", name, acc.AccountId.Address(), acc.Balance)
+				}
+			}
+		}
+
+		idx, err := NewIndexer(network.TestNetworkPassphrase, pond.NewPool(1), nil, false)
+		require.NoError(t, err)
+		buf := NewIndexerBuffer()
+		_, err = ProcessLedger(context.Background(), network.TestNetworkPassphrase, lcm, idx, buf)
+		require.NoError(t, err)
+		for _, sc := range buf.GetStateChanges() {
+			t.Logf("%s: state change %s %s account=%s amount=%s", name, sc.StateChangeCategory, sc.StateChangeReason, sc.AccountID, sc.Amount.String)
+		}
+	}
+}
+```
+
+`go test ./internal/indexer -run TestSACTransferCreatesAccount -count=1 -v` at 3e22515a (go1.27.4):
+
+```
+=== RUN   TestSACTransferCreatesAccount
+    sac_transfer_creates_account_test.go:26: sac_transfer_creates_account_p28: meta creates account GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM with balance 1000000000
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p28: state change BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=101419
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p28: state change BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=1000000000
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p28: state change BALANCE CREDIT account=GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM amount=1000000000
+    sac_transfer_creates_account_test.go:26: sac_transfer_creates_account_p30: meta creates account GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM with balance 1000000000
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p30: state change BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=6851
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p30: state change BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ amount=1000000000
+    sac_transfer_creates_account_test.go:37: sac_transfer_creates_account_p30: state change BALANCE CREDIT account=GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM amount=1000000000
+--- PASS: TestSACTransferCreatesAccount (0.00s)
+```
+
+The meta creates `GCF4WKRR...` with a balance of 100 XLM. The state changes hold the fee debit, the transfer's debit and its credit, and no `ACCOUNT` `CREATE`.
+
+## Expected
+
+An `ACCOUNT` `CREATE` row for `GCF4WKRR...` with `GDKMA2CZ...` as funder, the same row a `CreateAccount` of 100 XLM produces. Deriving account creation from the account entries the operation meta creates, instead of from the operation type, covers this case and any later operation that creates an account.
+
+## Also found with shapekit
+
+Found with the [shapekit](https://github.com/ErenTopaal/shapekit) replay harness, which compares what wallet-backend stores with the ledger meta. From a checkout of https://github.com/ErenTopaal/shapekit at tag v0.1.0 (Docker required; the adapter builds wallet-backend at the given commit and runs it against TimescaleDB):
+
+```sh
+cargo build --release --locked -p shapekit-cli
+(cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
+target/release/shapekit harness run --chain cap73.sac-trust.p28 --chain cap73.sac-trust.p30 --network testnet \
+  --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
+```
+
+The corpus entries are [`cap73.sac-trust.p28-xlm-transfer-creates-account-meta`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap73.sac-trust/cap73.sac-trust.p28-xlm-transfer-creates-account-meta/entry.json) and [`cap73.sac-trust.p30-xlm-transfer-creates-account-meta`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/cap73.sac-trust/cap73.sac-trust.p30-xlm-transfer-creates-account-meta/entry.json), each with an `-envelope` sibling for the same transaction. The mainnet-passphrase variants give the same result.

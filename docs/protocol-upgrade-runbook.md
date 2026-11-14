@@ -233,8 +233,8 @@ shapekit conformance draft-issues
 
 A new divergence gets a line in `conformance/known-failures/<sdk>.txt` that links its drafted
 issue, and goes through [triage](maintenance.md#triage). `shapekit conformance file-issues`
-opens the drafted issues upstream with `gh`; it refuses to run unless you pass
-`--i-have-owner-approval`, which confirms that the batch is approved for filing.
+opens the drafted issues upstream with `gh`; it refuses to run unless you pass `--confirm`,
+which confirms that this batch of drafts was reviewed and is to be filed upstream.
 
 ### 9. Harness and the reference adapter
 

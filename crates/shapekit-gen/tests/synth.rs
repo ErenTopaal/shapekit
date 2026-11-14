@@ -12,10 +12,10 @@ use serde_json::Value;
 use shapekit_gen::synth::{self, Synth};
 use shapekit_gen::synth_order::{core_asset_cmp, host_accepts, host_sort, pool_id};
 use shapekit_gen::synth_strkey::{SEP23_INVALID, SEP23_VALID, base32, crc16};
-use shapekit_gen::synth_textid::{MAX_SAFE_INTEGER, parse_text};
+use shapekit_gen::synth_textid::{MAX_SAFE_INTEGER, negative_int64_text, parse_text};
 use shapekit_gen::synth_xdr::{GHSA_3XHM_BASE64, base64_decode, decode_direct};
 use shapekit_manifest::{
-    DecodeExpectation, ENVELOPE_DEPTH, EntryKind, Limits, VectorFile, decode_limits, xdr,
+    DecodeExpectation, ENVELOPE_DEPTH, EntryKind, Limits, Validity, VectorFile, decode_limits, xdr,
 };
 use shapekit_registry::{Registry, SourceClass};
 use stellar_xdr::ReadXdr;
@@ -94,7 +94,7 @@ fn every_entry_is_synthetic_and_counts_are_stable() {
     assert_eq!(counts.get("xdr"), Some(&49));
     assert_eq!(counts.get("ordering"), Some(&17));
     assert_eq!(counts.get("strkey"), Some(&23));
-    assert_eq!(counts.get("textual-id"), Some(&6));
+    assert_eq!(counts.get("textual-id"), Some(&7));
     assert_eq!(counts.get("native-projection"), Some(&8));
 }
 
@@ -527,9 +527,35 @@ fn textual_ids_follow_the_canonical_rule() {
     let mut accepted = 0;
     let mut rejected = 0;
     let mut lenient = 0;
+    let mut negative = 0;
     for v in vectors(EntryKind::TextualId) {
         let muxed = v.entry.id.contains("muxed");
         let max = if muxed { u64::MAX } else { i64::MAX as u64 };
+        if v.entry.id.ends_with("-offer-id-negative") {
+            // valid int64 values core refuses at validation: the exact id or a refusal
+            assert_eq!(
+                v.entry.expected.decode,
+                DecodeExpectation::ImplementationDefined
+            );
+            assert_eq!(v.entry.expected.validity, Validity::InvalidByCore);
+            for case in &v.cases {
+                let id: i64 = match case["input"]["text"].as_str() {
+                    Some(t) => {
+                        assert_eq!(negative_int64_text(t), t.parse().ok(), "{t:?}");
+                        t.parse().expect("an int64")
+                    }
+                    None => case["input"]["number"].as_i64().expect("an int64"),
+                };
+                assert!(id < 0, "{id}");
+                let either = case["expected"]["either"].as_array().expect("either");
+                assert_eq!(either[0]["id"], id.to_string());
+                let op: stellar_xdr::ManageSellOfferOp = decode(&either[0]["manage_sell_offer"]);
+                assert_eq!(op.offer_id, id);
+                assert_eq!(either[1]["reject"], "negative");
+                negative += 1;
+            }
+            continue;
+        }
         if v.entry.expected.decode == DecodeExpectation::ImplementationDefined {
             // forms that name one in-range id: the exact id or a refusal
             assert!(
@@ -601,11 +627,14 @@ fn textual_ids_follow_the_canonical_rule() {
     for t in ["0x10", " 16 ", ""] {
         assert!(parse_text(t, u64::MAX).is_err(), "{t:?}");
     }
-    // negative offer ids and non-canonical text stay refused
+    // non-canonical text stays refused; "-0" is not a canonical int64 spelling
     for t in ["-16", "+16", "-0", " 16", "0x10", ""] {
         assert!(parse_text(t, i64::MAX as u64).is_err(), "{t:?}");
     }
-    assert_eq!((accepted, rejected, lenient), (22, 47, 13));
+    for t in ["-0", "-016", "+16", "-", "-9223372036854775809"] {
+        assert_eq!(negative_int64_text(t), None, "{t:?}");
+    }
+    assert_eq!((accepted, rejected, lenient, negative), (22, 42, 13, 5));
 }
 
 #[test]

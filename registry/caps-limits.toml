@@ -315,7 +315,7 @@ unit = "rows"
 derived_from = [
   { repo = "stellar/wallet-backend", ref = "5c780dd8cee2c1b9b1aec49e84928e33de1be394", path = "internal/data/statechanges.go", symbol = "maxAccountStateChangesPerToID", value = "2000" },
 ]
-rationale = "wallet-backend PR #757 bounds BatchGetAccountStateChangesByToIDs at 2000 rows per transaction with a ROW_NUMBER window; its comment calls the value a ceiling chosen from mainnet data. It is not a protocol bound: rows beyond it are dropped from the page, so apply it only to serving and keep every row at ingestion. The 4096 figure that circulates for this PR is the TOID operation-index range used by the operations loader (internal/data/operations.go), not a state-change cap."
+rationale = "BatchGetAccountStateChangesByToIDs in wallet-backend bounds each transaction at 2000 rows with a ROW_NUMBER window; the comment on maxAccountStateChangesPerToID calls the value a ceiling chosen from mainnet data. It is not a protocol bound: rows beyond it are dropped from the page, so apply it only to serving and keep every row at ingestion."
 
 # claimable balances, paths, offers
 
