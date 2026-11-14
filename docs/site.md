@@ -31,12 +31,17 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 | `/` | redirect to `/docs` (a meta refresh, works without JavaScript) | `index.html` |
 | `/docs`, `/docs/<group>/<page>` | one page per document, see below | `docs/.../index.html` |
 | `/api/search.json` | the docs search index, downloaded by the search dialog | `api/search.json` |
+| `/llms.txt`, `/llms-full.txt` | the docs for llms: an index of every page, and every page's markdown in one file | `llms.txt`, `llms-full.txt` |
+| `/llms.mdx/docs/<group>/<page>/content.md` | one docs page as markdown; `/docs/<group>/<page>.md` serves the same file | `llms.mdx/docs/.../content.md` |
 | `/dashboard` | overview | `dashboard/index.html` |
 | `/dashboard/coverage`, `/dashboard/coverage/<CAP>` | coverage per CAP, one page per CAP in `coverage.json` | `dashboard/coverage/.../index.html` |
 | `/dashboard/sdk`, `/dashboard/indexer`, `/dashboard/findings` | SDK matrix, indexer run, findings | `dashboard/<page>/index.html` |
 | any other address | not-found page | `__spa-fallback.html`, served with status 404 |
 
-Docs pages are complete HTML and read without JavaScript. Dashboard pages are prerendered as
+Docs pages are complete HTML and read without JavaScript. Each has a "Copy Markdown" button and
+an "Open" menu (the page on GitHub, its markdown, or a prompt to read it in an AI chat app; these
+are plain links, nothing is sent until the reader follows one), and ends with an "Edit on GitHub"
+link to its source file. Dashboard pages are prerendered as
 their navigation with a loading state; the browser then fetches `/data/*.json` and renders the
 page. Filters live in the query string (`/dashboard/sdk?entry=...`), so a filtered view can be
 linked. Old dashboard links of the form `/#/sdk` are redirected to `/dashboard/sdk`. Next to each
@@ -64,14 +69,39 @@ On the way the script:
 
 - takes each page's title from its first heading and its description (used for the page's
   meta description and for search) from its first sentence; the readme-derived pages have fixed
-  descriptions, and the guide keeps the title and description of its own frontmatter;
-- rewrites relative links between these files to site routes, including anchors, and links to
-  any other repository file to `https://github.com/ErenTopaal/shapekit/blob/main/...` (`tree/`
-  for a directory); a link to a file that does not exist is reported on the console;
+  descriptions, and the guide keeps the title and description of its own frontmatter. The page
+  header shows the description only where the page does not already open with it (the
+  readme-derived pages and the guide);
+- gives each sidebar group a lucide icon, and puts cards on the index page: the install and
+  quick start pages after the introduction, every other page at the end;
+- rewrites relative links between these files to site routes, including anchors (the readme's
+  own anchors point at the page their section landed on), and links to any other repository
+  file to `https://github.com/ErenTopaal/shapekit/blob/main/...` (`tree/` for a directory); a
+  link to a file that does not exist is reported on the console. A link whose text is a doc's
+  file name (`docs/linter.md`) reads as the page's title;
 - adapts the guide, which is written for stellar-docs: `{#id}` heading ids become Fumadocs'
   `[#id]`, `<Warning>` becomes a warn callout, its site-absolute links point at
   developers.stellar.org, and a callout at the top says it is a draft pending SDF review whose
-  canonical copy will be on developers.stellar.org.
+  canonical copy will be on developers.stellar.org. Its generated field and caps tables, whose
+  five and six columns hold paragraphs, become one record per row on the site; the source keeps
+  the tables.
+
+Numbered headings (`## 1. The family record`) render as Fumadocs steps (`remarkSteps`, set in
+`site/source.config.ts`), and a code block's `title="..."` names the file it shows.
+
+## Markdown for llms
+
+The build also writes the docs as markdown, with Fumadocs' llms integration
+(`site/src/lib/source.ts`): `/llms.txt` lists every page with its description, `/llms-full.txt`
+holds every page, and `/llms.mdx/docs/<page>/content.md` holds one page. The markdown is the
+generated content with Fumadocs' processed markdown (`includeProcessedMarkdown`), so links point
+at site routes; callouts become quotes, cards a list, and the guide's records nested lists
+(`site/src/lib/markdown.tsx`). These are prerendered files like the rest. The Caddyfile serves
+them with markdown and text content types and maps `/docs/<page>.md` (and `/docs.md`) onto them.
+Fumadocs answers `Accept: text/markdown` at the page's own address with server middleware,
+which a static site does not run; the Caddyfile does it instead: a request for a docs page
+whose `Accept` names `text/markdown` and not `text/html` gets the page's markdown, and docs
+responses carry `Vary: Accept`. Another server needs the same mappings for those addresses.
 
 Each docs page ends with a link to the repository file it was generated from. To add a page,
 add the document under `docs/` and list it in the `groups` table of the script.
@@ -134,7 +164,8 @@ npm run build           # prerenders every route into dist/client
 npm run preview         # serves dist/client with site/Caddyfile in the pinned caddy image (docker), port 5182
 ```
 
-`site/public/data/` and `site/content/` are ignored by git; both are always regenerated. Run
+`site/public/data/`, `site/content/` and `site/.source/` (fumadocs-mdx's output for
+`site/source.config.ts`) are ignored by git; all are always regenerated. Run
 `npm run preview` again after a build, since the build replaces `dist/`.
 
 ## Checks in CI
@@ -155,8 +186,10 @@ caddy from `/srv/current`:
 - `Cache-Control: public, max-age=31536000, immutable` for `/assets/*`, whose file names carry
   a content hash, and `no-cache` for everything else;
 - the content security policy, which allows only the site's own origin;
-- `__spa-fallback.html` with status 404 for unknown addresses.
+- `__spa-fallback.html` with status 404 for unknown addresses;
+- markdown and text content types for the llms files, and `/docs/<page>.md` and
+  `Accept: text/markdown` requests for a docs page mapped onto them.
 
 It serves plain HTTP; TLS, compression and HSTS belong to whatever terminates HTTPS in front of
 it. `npm run preview` runs exactly this file in the pinned caddy image, so a preview behaves
-like a production host. Another server needs the same four behaviours.
+like a production host. Another server needs the same five behaviours.

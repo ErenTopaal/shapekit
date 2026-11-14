@@ -24,7 +24,7 @@ the files the SDK repository keeps and the reusable workflow that does the run.
 
 ## Calling the workflow
 
-```yaml
+```yaml title=".github/workflows/shapekit.yml"
 # .github/workflows/shapekit.yml in the sdk repository
 name: shapekit conformance
 on: [pull_request]
@@ -77,7 +77,7 @@ path dependency reports the version under development. Keep a copy of
 `testees/rust/versions/<current>/Cargo.toml` in the SDK repository, for example as
 `ci/shapekit/Cargo.toml`, with the `stellar-xdr` line changed to a path:
 
-```toml
+```toml title="ci/shapekit/Cargo.toml"
 stellar-xdr = { path = "../../../../../sdk", default-features = false, features = ["std", "serde", "serde_json", "type_enum"] }
 ```
 
@@ -85,7 +85,7 @@ The path is relative to where the copy is placed, `shapekit/testees/rust/version
 five levels up is the directory holding both checkouts. Keep the rest of the copy as it is: its
 `[[bin]]` path `../../src/main.rs` points at the testee source. The versions file:
 
-```toml
+```toml title="ci/shapekit/versions.toml"
 schema = 1
 
 [sdk.rust]
@@ -119,7 +119,7 @@ reports that version and lists the directory under the component
 version, adds the `replace`, lets `go mod tidy` pick up the checkout's own requirements, and
 builds:
 
-```toml
+```toml title="ci/shapekit/versions.toml"
 schema = 1
 
 [sdk.go]
@@ -161,11 +161,11 @@ builds with pnpm; the workflow installs the `packageManager` version the checkou
 repository, for example as `ci/shapekit/package.json`; `"type": "module"` is what lets node load
 the testee:
 
-```json
+```json title="ci/shapekit/package.json"
 { "name": "shapekit-testee-js-sdk-dev", "version": "0.0.0", "private": true, "type": "module" }
 ```
 
-```toml
+```toml title="ci/shapekit/versions.toml"
 schema = 1
 
 [sdk.js]

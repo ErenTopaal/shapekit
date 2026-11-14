@@ -57,8 +57,8 @@ cargo build --release --locked -p shapekit-cli     # target/release/shapekit
 (cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
 ```
 
-Commands below run from the root of a checkout of this repository at the release tag, with the
-binaries on `PATH` as `shapekit`, `indexerlint` and `adapters/bin/wb-adapter`: their default paths
+The commands in the [quick start](#quick-start) run from the root of a checkout of this
+repository at the release tag, with the binaries on `PATH` as `shapekit`, `indexerlint` and `adapters/bin/wb-adapter`: their default paths
 (`corpus/`, `registry/`, `conformance/`, `testees/`, `pins.toml`) are relative to it.
 
 ## Quick start

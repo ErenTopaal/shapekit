@@ -5,6 +5,10 @@ export default [
   route("docs/*", "routes/docs.tsx"),
   // a resource route prerendered to one json file; the search dialog loads it in the browser
   route("api/search.json", "routes/search.ts"),
+  // the docs as markdown for llms and agents, prerendered like the search index
+  route("llms.txt", "routes/llms.txt.ts"),
+  route("llms-full.txt", "routes/llms-full.txt.ts"),
+  route("llms.mdx/docs/*", "routes/llms.mdx.docs.ts"),
   ...prefix("dashboard", [
     layout("routes/dashboard/layout.tsx", [
       index("routes/dashboard/overview.tsx"),

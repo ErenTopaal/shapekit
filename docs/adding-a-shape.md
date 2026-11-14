@@ -20,7 +20,7 @@ The pieces:
 
 Add a `[[family]]` to `registry/families.toml`:
 
-```toml
+```toml title="registry/families.toml"
 [[family]]
 id = "cap40.signed-payload-signer"
 title = "Ed25519 signed-payload signers on accounts, in extra signers and in sponsorship revokes"

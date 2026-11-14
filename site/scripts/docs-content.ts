@@ -24,11 +24,15 @@ interface Page {
   file: string
   title: string
   description: string
+  // the description is shown under the title only when the body does not already open with it
+  describe: boolean
   body: string
 }
 
 interface Group {
   title: string
+  // lucide icon name, shown next to the group's separator in the sidebar and on its index cards
+  icon: string
   // folder under content/docs, "" for the root
   dir: string
   docs: { source: string; slug: string }[]
@@ -38,15 +42,17 @@ interface Group {
 
 // sidebar order. readme-derived pages are made separately and lead "getting started".
 const groups: Group[] = [
-  { title: "Getting started", dir: "", docs: [] },
+  { title: "Getting started", icon: "BookOpen", dir: "", docs: [] },
   {
     title: "Corpus",
+    icon: "Boxes",
     dir: "corpus",
     docs: [{ source: "docs/adding-a-shape.md", slug: "adding-a-shape" }],
     links: [{ text: "Coverage per CAP", url: "/dashboard/coverage" }],
   },
   {
     title: "Harness",
+    icon: "Repeat",
     dir: "harness",
     docs: [
       { source: "docs/adapter-interface.md", slug: "adapter-interface" },
@@ -55,16 +61,18 @@ const groups: Group[] = [
   },
   {
     title: "SDK conformance",
+    icon: "ListChecks",
     dir: "sdk",
     docs: [
       { source: "docs/testee-protocol.md", slug: "testee-protocol" },
       { source: "docs/sdk-ci.md", slug: "sdk-ci" },
     ],
   },
-  { title: "Linter", dir: "linter", docs: [{ source: "docs/linter.md", slug: "indexerlint" }] },
-  { title: "Guide", dir: "guide", docs: [{ source: "docs/guide/indexer-hardening.mdx", slug: "indexer-hardening" }] },
+  { title: "Linter", icon: "ScanSearch", dir: "linter", docs: [{ source: "docs/linter.md", slug: "indexerlint" }] },
+  { title: "Guide", icon: "ShieldCheck", dir: "guide", docs: [{ source: "docs/guide/indexer-hardening.mdx", slug: "indexer-hardening" }] },
   {
     title: "Operations",
+    icon: "Wrench",
     dir: "operations",
     docs: [
       { source: "docs/infrastructure.md", slug: "infrastructure" },
@@ -81,13 +89,16 @@ const readmePages = [
   {
     route: "install",
     title: "Install",
+    icon: "Download",
     description: "Release binaries and their checks, building from source, and the checks CI runs.",
     sections: ["Install", "Building and checking"],
   },
   {
     route: "quick-start",
     title: "Quick start",
-    description: "Commands for checking the corpus, running an SDK over it, replaying chains into an indexer and linting Go indexer code.",
+    icon: "Terminal",
+    description:
+      "Commands for checking the corpus, running an SDK over it, replaying chains into an indexer, linting Go indexer code, applying the guide to stellar-docs and regenerating the corpus.",
     sections: ["Quick start"],
   },
 ]
@@ -135,6 +146,15 @@ function firstParagraph(md: string): string {
   return ""
 }
 
+function frontmatterField(raw: string, k: string, source: string): string {
+  const fm = raw.match(/^---\n([\s\S]*?)\n---\n/)
+  if (!fm) throw new Error(`${source}: no frontmatter`)
+  const m = (fm[1] ?? "").match(new RegExp(`^${k}:\\s*(.+)$`, "m"))
+  if (!m) throw new Error(`${source}: no ${k} in frontmatter`)
+  const v = (m[1] ?? "").trim()
+  return v.startsWith('"') ? (JSON.parse(v) as string) : v
+}
+
 function readmeSections(md: string): { intro: string; sections: Map<string, string> } {
   const chunks = md.split(/^## /m)
   const intro = chunks.shift() ?? ""
@@ -162,11 +182,23 @@ for (const [name, body] of readmeSecs) {
 const routes = new Map<string, string>([["README.md", "/docs"]])
 for (const g of groups) for (const d of g.docs) routes.set(d.source, `/docs/${g.dir}/${d.slug}`)
 
+// every page's title by route, for link text that names a doc file
+const titles = new Map<string, string>([["/docs", "Introduction"]])
+for (const p of readmePages) titles.set(`/docs/${p.route}`, p.title)
+for (const g of groups) {
+  for (const d of g.docs) {
+    const raw = readFileSync(path.join(repo, d.source), "utf8")
+    titles.set(`/docs/${g.dir}/${d.slug}`, d.source.endsWith(".mdx") ? frontmatterField(raw, "title", d.source) : splitTitle(raw).title)
+  }
+}
+
 let missing = 0
 function rewriteLinks(md: string, source: string): string {
   const dir = path.posix.dirname(source)
   const fix = (target: string): string => {
-    if (/^[a-z]+:/i.test(target) || target.startsWith("#")) return target
+    if (/^[a-z]+:/i.test(target)) return target
+    // the readme is split over several pages, so its own anchors may now live on another page
+    if (target.startsWith("#")) return source === "README.md" ? (readmeAnchor.get(target.slice(1)) ?? target) : target
     // site-absolute paths in the guide are developers.stellar.org pages
     if (target.startsWith("/")) return `${stellarDocs}${target}`
     const [file = "", anchor] = target.split("#")
@@ -185,7 +217,13 @@ function rewriteLinks(md: string, source: string): string {
   return mapProse(md, (prose) =>
     prose
       .replace(/(\]\()([^)\s]+)((?:\s+"[^"]*")?\))/g, (_, a: string, t: string, b: string) => `${a}${fix(t)}${b}`)
-      .replace(/^(\[[^\]]+\]:\s+)(\S+)/gm, (_, a: string, t: string) => `${a}${fix(t)}`),
+      .replace(/^(\[[^\]]+\]:\s+)(\S+)/gm, (_, a: string, t: string) => `${a}${fix(t)}`)
+      // on github a link reading "docs/linter.md" names the file it opens; on the site it opens
+      // a page, so it reads as that page's title
+      .replace(/\[`?((?:[\w-]+\/)*[\w-]+\.mdx?)`?\]\((\/docs[^)#\s]*)(#[^)\s]*)?\)/g, (m: string, _f: string, route: string, anchor?: string) => {
+        const title = titles.get(route)
+        return title ? `[${title}](${route}${anchor ?? ""})` : m
+      }),
   )
 }
 
@@ -194,6 +232,10 @@ function frontmatter(title: string, description: string): string {
 }
 
 const pages: Page[] = []
+// mark where the index page's cards go, filled in once every page's description is known: the
+// readme's own pages after the introduction, as the next step, and every other page at the end
+const START_CARDS = "{/* start cards */}"
+const ALL_CARDS = "{/* all cards */}"
 
 // index: the readme's introduction and its closing sections
 {
@@ -202,13 +244,16 @@ const pages: Page[] = []
     .filter((n) => readmeSecs.has(n))
     .map((n) => `## ${n}\n${readmeSecs.get(n)}`)
     .join("\n")
+  // mdx, so the cards to every other page can sit between the introduction and the rest; the
+  // readme has no jsx-like text outside code, which mdx would otherwise read as markup
   pages.push({
     route: "",
     source: "README.md",
-    file: "index.md",
+    file: "index.mdx",
     title: "Introduction",
     description: firstSentence(firstParagraph(rest)),
-    body: rewriteLinks(`${rest.trim()}\n\n${tail}`, "README.md"),
+    describe: false,
+    body: rewriteLinks(`${rest.trim()}\n\n${START_CARDS}\n\n${tail}\n\n## All pages\n\n${ALL_CARDS}`, "README.md"),
   })
 }
 
@@ -227,6 +272,7 @@ for (const p of readmePages) {
     file: `${p.route}.md`,
     title: p.title,
     description: p.description,
+    describe: true,
     body: rewriteLinks(body.trim(), "README.md"),
   })
 }
@@ -246,6 +292,7 @@ for (const g of groups) {
       file,
       title,
       description: firstSentence(firstParagraph(rest)),
+      describe: false,
       body: rewriteLinks(rest.trim(), d.source),
     })
   }
@@ -254,15 +301,10 @@ for (const g of groups) {
 // the guide is written for stellar-docs: its frontmatter already has a title and description,
 // its heading ids use {#id}, which mdx would read as an expression, and <Warning> is a
 // stellar-docs component that fumadocs calls a warn callout
-function guide(raw: string, source: string): Pick<Page, "title" | "description" | "body"> {
-  const fm = raw.match(/^---\n([\s\S]*?)\n---\n/)
+function guide(raw: string, source: string): Pick<Page, "title" | "description" | "describe" | "body"> {
+  const fm = raw.match(/^---\n[\s\S]*?\n---\n/)
   if (!fm) throw new Error(`${source}: no frontmatter`)
-  const field = (k: string) => {
-    const m = (fm[1] ?? "").match(new RegExp(`^${k}:\\s*(.+)$`, "m"))
-    if (!m) throw new Error(`${source}: no ${k} in frontmatter`)
-    const v = (m[1] ?? "").trim()
-    return v.startsWith('"') ? (JSON.parse(v) as string) : v
-  }
+  const field = (k: string) => frontmatterField(raw, k, source)
   let body = raw.slice(fm[0].length)
   body = mapProse(body, (prose) =>
     prose
@@ -273,8 +315,80 @@ function guide(raw: string, source: string): Pick<Page, "title" | "description" 
   const notice =
     '<Callout type="warn" title="Draft, pending SDF review">\n\nThis guide has not yet been reviewed by a stellar-core or platform engineer. ' +
     "The canonical copy will be on developers.stellar.org once the review is done.\n\n</Callout>\n\n"
-  return { title: field("title"), description: field("description"), body: notice + rewriteLinks(body.trim(), source) }
+  return {
+    title: field("title"),
+    description: field("description"),
+    describe: true,
+    body: notice + recordTables(rewriteLinks(body.trim(), source), ["field-table", "caps-table"]),
+  }
 }
+
+// the cells of a markdown table row; a pipe inside a cell is escaped as \|
+function cells(line: string): string[] {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split(/(?<!\\)\|/)
+    .map((c) => c.trim())
+}
+
+// mdx text with the characters it would read as markup written as character references
+function esc(t: string): string {
+  return t.replace(/[{}<>]/g, (c) => `&#${c.charCodeAt(0)};`)
+}
+
+// the guide's field and caps tables have five and six columns of paragraphs, which no docs
+// column is wide enough for: on the site each row becomes a record, its first cell as the head
+// and every other cell under its column name. the source keeps the tables stellar-docs renders.
+function recordTables(md: string, blocks: string[]): string {
+  for (const name of blocks) {
+    const re = new RegExp(`(\\{/\\* shapekit:begin ${name} \\*/\\}\\n)([\\s\\S]*?)(\\{/\\* shapekit:end ${name} \\*/\\})`)
+    const m = md.match(re)
+    if (!m) throw new Error(`guide: no generated block ${name}`)
+    const lines = (m[2] ?? "").split("\n")
+    const start = lines.findIndex((l) => l.startsWith("|"))
+    const head = cells(lines[start] ?? "")
+    if (!/^\|(\s*-+\s*\|)+$/.test(lines[start + 1] ?? "")) throw new Error(`guide: ${name} has no table`)
+    let end = start + 2
+    while (end < lines.length && (lines[end] ?? "").startsWith("|")) end++
+    const records = lines.slice(start + 2, end).map((row) => {
+      const c = cells(row)
+      if (c.length !== head.length) throw new Error(`guide: ${name} row has ${c.length} cells, not ${head.length}: ${row.slice(0, 80)}`)
+      const fields = head
+        .slice(1)
+        .map((h, i) => (c[i + 1] ? `<RecordField label=${JSON.stringify(h)}>${c[i + 1]}</RecordField>` : ""))
+        .filter(Boolean)
+      return [`<Record>`, `<RecordHead>${c[0]}</RecordHead>`, ...fields, `</Record>`].join("\n")
+    })
+    const replaced = [...lines.slice(0, start), records.join("\n\n"), ...lines.slice(end)].join("\n")
+    md = md.replace(re, (_, a: string, _b: string, z: string) => `${a}${replaced}${z}`)
+  }
+  return md
+}
+
+// cards to pages, in sidebar order, for the index page: the getting-started group's pages, or
+// every other group's
+function cards(start: boolean): string {
+  const items: string[] = []
+  for (const g of groups.filter((x) => (x.dir === "") === start)) {
+    const list =
+      g.dir === ""
+        ? readmePages.map((p) => ({ route: p.route, icon: p.icon }))
+        : g.docs.map((d) => ({ route: `${g.dir}/${d.slug}`, icon: g.icon }))
+    for (const it of list) {
+      const p = pages.find((x) => x.route === it.route)
+      if (!p) throw new Error(`no page for ${it.route}`)
+      items.push(
+        `<Card href=${JSON.stringify(`/docs/${it.route}`)} title={${JSON.stringify(p.title)}} icon={<PageIcon name=${JSON.stringify(it.icon)} />}>\n  ${esc(p.description)}\n</Card>`,
+      )
+    }
+  }
+  return `<Cards>\n${items.join("\n")}\n</Cards>`
+}
+const indexPage = pages.find((p) => p.route === "")
+if (!indexPage) throw new Error("no index page")
+indexPage.body = indexPage.body.replace(START_CARDS, cards(true)).replace(ALL_CARDS, cards(false))
 
 rmSync(path.join(site, "content"), { recursive: true, force: true })
 for (const p of pages) {
@@ -286,7 +400,7 @@ for (const p of pages) {
 // sidebar: one separator per group, then the group's pages and links
 const rootPages: string[] = []
 for (const g of groups) {
-  rootPages.push(`---${g.title}---`)
+  rootPages.push(`---[${g.icon}]${g.title}---`)
   if (g.dir === "") {
     rootPages.push("index", ...readmePages.map((p) => p.route))
   } else {
@@ -297,8 +411,9 @@ for (const g of groups) {
 }
 writeFileSync(path.join(out, "meta.json"), `${JSON.stringify({ pages: rootPages }, null, 2)}\n`)
 
-// which repository file each page came from, for the "view source" link
-const sources = Object.fromEntries(pages.map((p) => [p.file, p.source]))
-writeFileSync(path.join(site, "content", "sources.json"), `${JSON.stringify(sources, null, 2)}\n`)
+// per page: the repository file it came from, for the github links, and whether the page
+// header shows its description
+const info = Object.fromEntries(pages.map((p) => [p.file, { source: p.source, describe: p.describe }]))
+writeFileSync(path.join(site, "content", "pages.json"), `${JSON.stringify(info, null, 2)}\n`)
 
 console.log(`docs-content: ${pages.length} pages written to ${path.relative(site, out)}${missing ? `, ${missing} links to missing files` : ""}`)

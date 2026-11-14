@@ -30,12 +30,34 @@
 	@routedata path *.data
 	header @routedata Content-Type "text/x-script"
 
+	# the docs for llms: /llms.txt and /llms-full.txt, and the markdown of each docs page under
+	# /llms.mdx/docs/<page>/content.md, which /docs/<page>.md (and /docs.md for the index) also
+	# serve, the address fumadocs' llms integration gives a page's markdown
+	@llmstxt path /llms.txt /llms-full.txt
+	header @llmstxt Content-Type "text/plain; charset=utf-8"
+	@llmsmd path_regexp ^/(llms\.mdx/.*|docs(/[a-z0-9-]+)*\.md)$
+	header @llmsmd Content-Type "text/markdown; charset=utf-8"
+	@docsmd path_regexp docsmd ^/docs((?:/[a-z0-9-]+)*)\.md$
+	rewrite @docsmd /llms.mdx/docs{re.docsmd.1}/content.md
+	# a client that asks for markdown and not html (Accept: text/markdown) gets the markdown at
+	# the page's own address; caches keep the two apart by Accept
+	@docsaccept {
+		path_regexp docsaccept ^/docs((?:/[a-z0-9-]+)*)/?$
+		header_regexp Accept text/markdown
+		not header_regexp Accept text/html
+	}
+	rewrite @docsaccept /llms.mdx/docs{re.docsaccept.1}/content.md
+	@docspage path_regexp ^/docs(/.*)?$
+	header @docspage Vary Accept
+
 	try_files {path} {path}/index.html
 	file_server
 
 	# an address with no prerendered page gets the static fallback, which loads the client
 	# router; it then shows the not-found page, or a dashboard page that was not prerendered
 	handle_errors 404 {
+		# the fallback is html even when the address asked for markdown (/docs/nope.md)
+		header Content-Type "text/html; charset=utf-8"
 		rewrite * /__spa-fallback.html
 		file_server {
 			status 404

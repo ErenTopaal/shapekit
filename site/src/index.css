@@ -173,9 +173,14 @@ html > body[data-scroll-locked] {
   a {
     text-underline-offset: 0.18em;
     }
-  code, kbd, samp, pre {
+  /* inline code only: fumadocs sizes code blocks itself, and 0.9em on both the pre and the code
+     inside it shrank block code to about 10.5px */
+  :not(pre) > code, kbd, samp {
     @apply font-mono;
     font-size: 0.9em;
+    }
+  pre {
+    @apply font-mono;
     }
 }
 
@@ -198,4 +203,21 @@ html > body[data-scroll-locked] {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+/* docs typography. inline code holds 56-character strkeys and long repository paths, which
+   would otherwise run past the column on a phone, so it may wrap anywhere */
+.prose :where(:not(pre) > code) {
+    overflow-wrap: anywhere;
+}
+/* but not in a table: there it would let the browser squeeze a column of paths down to a few
+   letters per line, and the table frame scrolls sideways anyway */
+.prose :where(table code) {
+    overflow-wrap: normal;
+}
+/* tables keep scrolling sideways inside their frame on a phone; a slightly smaller size fits
+   more of each row */
+@media (max-width: 640px) {
+    .prose :where(table) {
+        font-size: 0.8125rem;
+    }
 }

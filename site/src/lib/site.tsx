@@ -6,6 +6,11 @@ export function blob(path: string): string {
   return `${repoUrl}/blob/main/${path}`
 }
 
+// github's editor for a file on main, which offers a fork and a pull request to anyone
+export function edit(path: string): string {
+  return `${repoUrl}/edit/main/${path}`
+}
+
 export function Wordmark() {
   return <span className="font-mono text-[1.05rem] font-medium tracking-tight">shapekit</span>
 }

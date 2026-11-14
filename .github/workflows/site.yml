@@ -79,6 +79,7 @@ jobs:
         working-directory: site/dist/client
         run: |
           for f in index.html __spa-fallback.html api/search.json docs/index.html \
+            llms.txt llms-full.txt llms.mdx/docs/content.md \
             dashboard/index.html dashboard/coverage/index.html dashboard/sdk/index.html \
             dashboard/indexer/index.html dashboard/findings/index.html; do
             test -f "$f" || { echo "missing $f"; exit 1; }
@@ -86,6 +87,8 @@ jobs:
           docs=$(find ../../content/docs -name '*.md*' | wc -l)
           pages=$(find docs -name index.html | wc -l)
           test "$docs" -eq "$pages" || { echo "$docs docs pages but $pages prerendered"; exit 1; }
+          markdown=$(find llms.mdx/docs -name content.md | wc -l)
+          test "$docs" -eq "$markdown" || { echo "$docs docs pages but $markdown markdown files"; exit 1; }
           caps=$(jq '.caps | length' data/coverage.json)
           capdirs=$(find dashboard/coverage -mindepth 2 -name index.html | wc -l)
           test "$caps" -eq "$capdirs" || { echo "$caps caps but $capdirs cap pages"; exit 1; }
