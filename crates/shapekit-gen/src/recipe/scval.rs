@@ -35,6 +35,7 @@ use stellar_xdr::{
 };
 
 use super::{ChainCtx, Recipe, Selector, Spec};
+use crate::synth::{LINK_JS_1766, LINK_JS_1789};
 
 pub const FAMILY: &str = "soroban.scval-shapes";
 
@@ -96,6 +97,10 @@ const ARGS: [&str; 1] = ["op.invoke_host_function.invoke_contract.args"];
 /// js-xdr's decode depth limit, raised from 200 to 1500 nested types: the depth entries are
 /// the values a decoder with the old limit cannot read.
 const LINK_JS_XDR_155: &str = "https://github.com/stellar/js-xdr/pull/155";
+// map key order (js-stellar-sdk#1766), keys that collide once converted (#1789) and string arms
+// holding bytes that are not utf-8 (#1823). entries that exercise none of these link nothing
+// rather than the family's defaults
+const LINK_JS_1823: &str = "https://github.com/stellar/js-stellar-sdk/issues/1823";
 
 pub struct ScvalShapes {
     pub protocol: u32,
@@ -579,7 +584,8 @@ impl Recipe for ScvalShapes {
             Spec::new(
                 "a map with one key of each of the 19 ScVal types the host converts, in host order (type discriminant first), returned unchanged",
             )
-            .fields(&ARGS),
+            .fields(&ARGS)
+            .issues(&[LINK_JS_1766]),
         )?;
         let mut reversed = mixed.0.to_vec();
         reversed.reverse();
@@ -602,7 +608,8 @@ impl Recipe for ScvalShapes {
             Spec::new(
                 "the same map with its entries reversed: the host refuses to convert a map whose keys are not strictly increasing, so core includes the invocation and fails it with invoke_host_function trapped",
             )
-            .fields(&ARGS),
+            .fields(&ARGS)
+            .issues(&[LINK_JS_1766]),
         )?;
 
         let colliding = ScVal::Map(Some(ScMap::sorted_from(colliding_entries()?)?));
@@ -614,7 +621,8 @@ impl Recipe for ScvalShapes {
                 "a map keyed by u32 1, i32 1, u64 1, i64 1, u128 1, i128 1, u256 1, i256 1, bytes \"1\", string \"1\" and symbol \"1\": eleven distinct ScVal keys that collapse to one or two keys in a native map that turns numbers and text into the same key",
             )
             .fields(&ARGS)
-            .flags(&["colliding-map-keys"]),
+            .flags(&["colliding-map-keys"])
+            .issues(&[LINK_JS_1789]),
         )?;
 
         let applied = Self::echo(ctx, &caller, &echo, integer_extremes()?)?;
@@ -624,7 +632,8 @@ impl Recipe for ScvalShapes {
             Spec::new(
                 "u32, i32, u64, i64, timepoint, duration, u128, i128, u256 and i256 at their minimum and maximum values",
             )
-            .fields(&ARGS),
+            .fields(&ARGS)
+            .issues(&[]),
         )?;
 
         let not_utf8 = string(NOT_UTF8)?;
@@ -637,7 +646,8 @@ impl Recipe for ScvalShapes {
                 "a string holding bytes that are not UTF-8, which the host accepts as opaque bytes and echoes unchanged",
             )
             .fields(&ARGS)
-            .flags(&["non-utf8"]),
+            .flags(&["non-utf8"])
+            .issues(&[LINK_JS_1823]),
         )?;
         let bad_symbol = ScVal::Symbol(ScSymbol(NOT_UTF8.to_vec().try_into()?));
         ensure!(
@@ -663,7 +673,8 @@ impl Recipe for ScvalShapes {
                 "a symbol holding the same non-UTF-8 bytes: XDR allows any bytes, the host only [a-zA-Z0-9_], so core includes the invocation and fails it with invoke_host_function trapped",
             )
             .fields(&ARGS)
-            .flags(&["non-utf8"]),
+            .flags(&["non-utf8"])
+            .issues(&[LINK_JS_1823]),
         )
         .context("capturing the refused symbol")?;
 
@@ -678,7 +689,8 @@ impl Recipe for ScvalShapes {
             Spec::new(
                 "a map from symbols to error values of type auth (invalid_action), crypto (invalid_input) and events (unexpected_size), stored, emitted and returned unchanged",
             )
-            .fields(&ARGS),
+            .fields(&ARGS)
+            .issues(&[]),
         )
     }
 }

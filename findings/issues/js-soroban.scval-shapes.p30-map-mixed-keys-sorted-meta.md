@@ -102,7 +102,7 @@ The expected answers are recorded in:
 
 How the corpus entry was built and checked: a map with one key of each of the 19 ScVal types the host converts, in host order (type discriminant first), returned unchanged
 
-Related: https://github.com/stellar/js-stellar-sdk/pull/1766, https://github.com/stellar/js-stellar-sdk/issues/1789
+Related: https://github.com/stellar/js-stellar-sdk/pull/1766
 
 ## Sibling issues
 

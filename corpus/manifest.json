@@ -35785,10 +35785,7 @@
       "flags": [],
       "id": "soroban.scval-shapes.p30-errors-auth-crypto-events-envelope",
       "kind": "xdr",
-      "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
-      ],
+      "linked_issues": [],
       "notes": "a map from symbols to error values of type auth (invalid_action), crypto (invalid_input) and events (unexpected_size), stored, emitted and returned unchanged",
       "passphrase_dependent": true,
       "protocol": {
@@ -35840,10 +35837,7 @@
       "flags": [],
       "id": "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
       "kind": "xdr",
-      "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
-      ],
+      "linked_issues": [],
       "notes": "a map from symbols to error values of type auth (invalid_action), crypto (invalid_input) and events (unexpected_size), stored, emitted and returned unchanged",
       "passphrase_dependent": true,
       "protocol": {
@@ -35899,10 +35893,7 @@
       "flags": [],
       "id": "soroban.scval-shapes.p30-integer-extremes-envelope",
       "kind": "xdr",
-      "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
-      ],
+      "linked_issues": [],
       "notes": "u32, i32, u64, i64, timepoint, duration, u128, i128, u256 and i256 at their minimum and maximum values",
       "passphrase_dependent": true,
       "protocol": {
@@ -35954,10 +35945,7 @@
       "flags": [],
       "id": "soroban.scval-shapes.p30-integer-extremes-meta",
       "kind": "xdr",
-      "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
-      ],
+      "linked_issues": [],
       "notes": "u32, i32, u64, i64, timepoint, duration, u128, i128, u256 and i256 at their minimum and maximum values",
       "passphrase_dependent": true,
       "protocol": {
@@ -36190,7 +36178,6 @@
       "id": "soroban.scval-shapes.p30-map-keys-collide-native-envelope",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
         "https://github.com/stellar/js-stellar-sdk/issues/1789"
       ],
       "notes": "a map keyed by u32 1, i32 1, u64 1, i64 1, u128 1, i128 1, u256 1, i256 1, bytes \"1\", string \"1\" and symbol \"1\": eleven distinct ScVal keys that collapse to one or two keys in a native map that turns numbers and text into the same key",
@@ -36247,7 +36234,6 @@
       "id": "soroban.scval-shapes.p30-map-keys-collide-native-meta",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
         "https://github.com/stellar/js-stellar-sdk/issues/1789"
       ],
       "notes": "a map keyed by u32 1, i32 1, u64 1, i64 1, u128 1, i128 1, u256 1, i256 1, bytes \"1\", string \"1\" and symbol \"1\": eleven distinct ScVal keys that collapse to one or two keys in a native map that turns numbers and text into the same key",
@@ -36306,8 +36292,7 @@
       "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-envelope",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/pull/1766"
       ],
       "notes": "a map with one key of each of the 19 ScVal types the host converts, in host order (type discriminant first), returned unchanged",
       "passphrase_dependent": true,
@@ -36361,8 +36346,7 @@
       "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/pull/1766"
       ],
       "notes": "a map with one key of each of the 19 ScVal types the host converts, in host order (type discriminant first), returned unchanged",
       "passphrase_dependent": true,
@@ -36421,8 +36405,7 @@
       "kind": "xdr",
       "lcm_version": 2,
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/pull/1766"
       ],
       "notes": "the same map with its entries reversed: the host refuses to convert a map whose keys are not strictly increasing, so core includes the invocation and fails it with invoke_host_function trapped",
       "passphrase_dependent": true,
@@ -36481,8 +36464,7 @@
       "id": "soroban.scval-shapes.p30-string-not-utf8-envelope",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/issues/1823"
       ],
       "notes": "a string holding bytes that are not UTF-8, which the host accepts as opaque bytes and echoes unchanged",
       "passphrase_dependent": true,
@@ -36538,8 +36520,7 @@
       "id": "soroban.scval-shapes.p30-string-not-utf8-meta",
       "kind": "xdr",
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/issues/1823"
       ],
       "notes": "a string holding bytes that are not UTF-8, which the host accepts as opaque bytes and echoes unchanged",
       "passphrase_dependent": true,
@@ -36600,8 +36581,7 @@
       "kind": "xdr",
       "lcm_version": 2,
       "linked_issues": [
-        "https://github.com/stellar/js-stellar-sdk/pull/1766",
-        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+        "https://github.com/stellar/js-stellar-sdk/issues/1823"
       ],
       "notes": "a symbol holding the same non-UTF-8 bytes: XDR allows any bytes, the host only [a-zA-Z0-9_], so core includes the invocation and fails it with invoke_host_function trapped",
       "passphrase_dependent": true,
