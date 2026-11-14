@@ -3,11 +3,13 @@
 
 ## What happens
 
-`github.com/stellar/go-stellar-sdk` v0.7.1 answers 4 of the checks of corpus entry `cap38.liquidity-pools.synth-assets-js1766-issuers` differently from the Stellar network.
+On the input below, `github.com/stellar/go-stellar-sdk` v0.7.1 answers differently from the Stellar network in 4 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `cap38.liquidity-pools.synth-assets-js1766-issuers` (kind Ordering, family `cap38.liquidity-pools`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `cap38.liquidity-pools.synth-assets-js1766-issuers` (family `cap38.liquidity-pools`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 0/asset_order` on v0.7.1
 
@@ -77,23 +79,24 @@ Actual: `{"rejected":"xdr.NewPoolId: AssetA must be < AssetB"}`
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk go --version v0.7.1 --entry cap38.liquidity-pools.synth-assets-js1766-issuers
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json case 0
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json case 1
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json case 2
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json case 3
+The expected answers are recorded in:
 
-Entry notes: the js-stellar-sdk#1766 issuers: 32 bytes of 0x3a sort first as strkey text (GA5D... before GAAA...), 32 zero bytes sort first as key bytes, which is what core uses. same code on both sides, so the issuer decides. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.
+- [`corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-js1766-issuers.json) cases 0, 1, 2, 3
+
+How the corpus entry was built and checked: the js-stellar-sdk#1766 issuers: 32 bytes of 0x3a sort first as strkey text (GA5D... before GAAA...), 32 zero bytes sort first as key bytes, which is what core uses. same code on both sides, so the issuer decides. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.
 
 Related: https://github.com/stellar/js-stellar-sdk/pull/1766
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `cap38.liquidity-pools.synth-assets-js1766-issuers`

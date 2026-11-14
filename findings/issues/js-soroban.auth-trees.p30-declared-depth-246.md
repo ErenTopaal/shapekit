@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 16.4.1 answers 4 of the checks of corpus entry `soroban.auth-trees.p30-declared-depth-246` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 16.4.1 answers differently from the Stellar network in 4 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `soroban.auth-trees.p30-declared-depth-246` (kind Xdr, family `soroban.auth-trees`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `soroban.auth-trees.p30-declared-depth-246` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `testnet/decode_encode` on 16.4.1
 
@@ -83,23 +85,27 @@ Actual: `{"rejected":"TypeError: XDR Read Error: exceeded max decoding depth"}`
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk js --version 16.4.1 --entry soroban.auth-trees.p30-declared-depth-246
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.expected.json: SEP-51 rendering by stellar-xdr 30.0.0
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.xdr: decode = must-accept, roundtrip = true
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.expected.json: SEP-51 rendering by stellar-xdr 30.0.0
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.xdr: decode = must-accept, roundtrip = true
+The expected answers are recorded in:
 
-Entry notes: an address entry declaring a chain 246 invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/mainnet.xdr): decode = must-accept, roundtrip = true
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.expected.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.expected.json): SEP-51 rendering by stellar-xdr 30.0.0
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-246/testnet.xdr): decode = must-accept, roundtrip = true
+
+How the corpus entry was built and checked: an address entry declaring a chain 246 invocations deep below its root, one past what the host decodes at depth 500: core includes it and the host traps
 
 Related: https://github.com/stellar/wallet-backend/issues/746
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `soroban.auth-trees.p30-declared-depth-246`

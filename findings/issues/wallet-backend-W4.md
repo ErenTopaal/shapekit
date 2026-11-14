@@ -1,67 +1,86 @@
 <!-- repo: stellar/wallet-backend -->
-# Question: to_muxed_id keeps only u64 values, so a text, hash or return memo of a payment to a G address is not stored. Intended?
+# Comment for #801: memo edge cases checked against this branch
 
-## What happens
+Some context first. For a classic payment to a `G...` address, CAP-67 copies the transaction memo into the transfer event's `to_muxed_id`: `MEMO_ID` as `u64`, `MEMO_TEXT` as `string`, and `MEMO_HASH` and `MEMO_RETURN` as `bytes` ([CAP-67 lines 269-272](https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/core/cap-0067.md#L269-L272)). On `main` ([3e22515a](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L119-L133)), `setToMuxedID` keeps only the `u64` form, so a text, hash or return memo was stored nowhere. This PR closes that gap by storing every memo on the transaction. I ran this branch's ingestion on ledgers with unusual memos to check that.
 
-At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/token_transfer.go` lines 119-124](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/token_transfer.go#L119-L124): `setToMuxedID` copies the CAP-67 `to_muxed_id` of a transfer or mint event into the credit row only when its content is an id (`ttp.MuxedInfo_Id`). The comment above it says this is deliberate: "text and hash memos are not ids and are left out". The column is documented as the "CAP-67 destination memo (u64)" (`internal/indexer/types/types.go` line 917).
+**What I checked.** Head [a9bcdb6b](https://github.com/stellar/wallet-backend/commit/a9bcdb6b0f27199705cf1b014999379ccafffe3b). I ran `ProcessLedger` on 15 ledgers recorded on a standalone stellar-core 30.0.0 network (protocol 30, testnet passphrase), each holding one payment whose memo is an edge case:
 
-So this may well be intended. The reason to ask is what it costs a consumer. For a classic payment to a G address that carries a text, hash or return memo, core writes that memo into the event's `to_muxed_id` (typed as `string` or `bytes`). That is the common shape of a deposit to an exchange or custodian that identifies the customer by a text memo. At this commit no other table seems to keep it either: the `transactions` table (`internal/db/migrations/2025-06-10.2-transactions.sql`) has no memo column, and `operations.operation_xdr` holds the operation, not the transaction's memo. If that reading is right, an indexer consumer cannot recover which customer a text-memo deposit was for from wallet-backend's data, while it can for a MEMO_ID deposit or an M address.
+- text memos that are not valid UTF-8: a lone `ff`, a lone continuation byte `80`, overlong `c0 80`, a surrogate `ed a0 80`, a code point above U+10FFFF `f4 90 80 80`, and a 28-byte memo cut in the middle of a multi-byte sequence;
+- a 28-byte text memo (the maximum);
+- hash and return memos of all zero bytes, all `ff` bytes, and a SHA-256 value;
+- an ordinary text and hash memo.
 
-Questions:
+In every case the indexed transaction (`types.Transaction`, which `BatchCopy` writes to `transactions`) carries the memo bytes from the envelope unchanged, with the right `MemoType`. The non-UTF-8 text memos come back from the API as the schema describes:
 
-1. Is dropping text, hash and return memos from `to_muxed_id` the intended behaviour?
-2. If so, is the memo meant to be available somewhere else (another table or the API) that I missed?
-
-Severity as the harness classifies it against the ledger: data-loss (the event carries a value that no stored row has). CAPs: CAP-0019, CAP-0024, CAP-0067.
-
-## Minimal entry
-
-Corpus entry `classic.memo-bytes.p30-memo-ff` of the shapekit corpus: chain `classic.memo-bytes.p30`, ledger 65, recorded on a standalone stellar-core 30.0.0 under the testnet passphrase (the mainnet variant gives the same result). Transaction(s): `0da58ec0335794e936efbb99b0c03fe10107294a01a9f62a27937ab32ff60dfa`.
-
-## Reproduce
-
-```sh
-(cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
+```
+=== RUN   TestMemoBytes
+    memo_bytes_test.go:47: ledger 70: memo bytes 73686170656b6974206d656d6f20637574206174206279746520e282, API memoType TEXT memo "shapekit memo cut at byte �"
+    memo_bytes_test.go:47: ledger 69: memo bytes f4908080, API memoType TEXT memo "�"
+    memo_bytes_test.go:47: ledger 68: memo bytes eda080, API memoType TEXT memo "�"
+    memo_bytes_test.go:47: ledger 67: memo bytes c080, API memoType TEXT memo "�"
+    memo_bytes_test.go:47: ledger 66: memo bytes 80, API memoType TEXT memo "�"
+    memo_bytes_test.go:47: ledger 65: memo bytes ff, API memoType TEXT memo "�"
+--- PASS: TestMemoBytes (0.00s)
 ```
 
-The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.
+**One consequence of the replacement.** Five different memos (`ff`, `80`, `c0 80`, `ed a0 80`, `f4 90 80 80`) all render as the same string, a single U+FFFD. The `TEXT` memo filter compares the stored bytes with `[]byte(filter.Value)` ([utils.go line 451](https://github.com/stellar/wallet-backend/blob/a9bcdb6b0f27199705cf1b014999379ccafffe3b/internal/serve/graphql/resolvers/utils.go#L451)). A GraphQL `String` is always valid UTF-8, so none of these memos can be found with the filter, not even by passing back the value the API returned. Core accepts such memos: the six payments with non-UTF-8 text memos above all succeeded. If that matters for deposits, one option is an extra field with the raw bytes (hex or base64) for `TEXT` memos that are not valid UTF-8, plus a filter that accepts it. If it does not matter, a sentence in the filter's description would cover it.
 
-## Expected (ledger meta) and stored
+The test I used (place in `internal/indexer/`). The ledgers are Galexie files from the [shapekit](https://github.com/ErenTopaal/shapekit) corpus: [`classic.memo-bytes.p30`](https://github.com/ErenTopaal/shapekit/tree/v0.1.0/corpus/chains/classic.memo-bytes.p30/testnet/ledgers/FFFFFFFF--0-63999) for the output above, plus [`classic.memo-arms.p30`](https://github.com/ErenTopaal/shapekit/tree/v0.1.0/corpus/chains/classic.memo-arms.p30/testnet/ledgers/FFFFFFFF--0-63999), [`classic.max-length.p30`](https://github.com/ErenTopaal/shapekit/tree/v0.1.0/corpus/chains/classic.max-length.p30/testnet/ledgers/FFFFFFFF--0-63999) and [`cap67.unified-events.p30`](https://github.com/ErenTopaal/shapekit/tree/v0.1.0/corpus/chains/cap67.unified-events.p30/testnet/ledgers/FFFFFFFF--0-63999) for the other cases.
 
-From the harness report of the run above (`harness-report.json`, entry `classic.memo-bytes.p30-memo-ff`, testnet):
+```go
+package indexer
 
-- wrong-value `token-event`: token-event differs in to_muxed_id
-  - ledger: `{"amount": "1", "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC", "event": "transfer", "from": "GDWC5XJM77XUV2YB2J4JB6I3MY3M7IJFWFMWDLD6P25JRDF2VMQBMQAG", "to": "GAVB7A4ZGZEHRUDGWXMSBHPLNQK3QVBI5NBNYZ5YL5MYNNMP4KV4NAS4", "to_muxed_id": {"type": "string", "value": "ff"}}`
-  - stored: `{"amount": "1", "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC", "event": "transfer", "from": "GDWC5XJM77XUV2YB2J4JB6I3MY3M7IJFWFMWDLD6P25JRDF2VMQBMQAG", "to": "GAVB7A4ZGZEHRUDGWXMSBHPLNQK3QVBI5NBNYZ5YL5MYNNMP4KV4NAS4", "to_muxed_id": null}`
+import (
+	"context"
+	"encoding/hex"
+	"os"
+	"path/filepath"
+	"testing"
 
-Verdict for the entry: mishandled (wrong-value): 1 wrong value(s), 0 fact(s) stored that the meta does not show.
+	"github.com/alitto/pond/v2"
+	"github.com/klauspost/compress/zstd"
+	"github.com/stellar/go-stellar-sdk/network"
+	"github.com/stellar/go-stellar-sdk/xdr"
+	"github.com/stretchr/testify/require"
 
-## Possible changes, if this is not intended
+	"github.com/stellar/wallet-backend/internal/utils"
+)
 
-Store `to_muxed_id` with its CAP-67 type (u64, string or bytes), or store the transaction memo in its own column. If it is intended, a line in the schema or API docs saying that only id memos are kept would let consumers know to read memos elsewhere.
+// SHAPEKIT_LEDGERS lists Galexie ledger files (*.xdr.zst), for example
+// corpus/chains/classic.memo-bytes.p30/testnet/ledgers/FFFFFFFF--0-63999/*.xdr.zst.
+func TestMemoBytes(t *testing.T) {
+	paths, err := filepath.Glob(os.Getenv("SHAPEKIT_LEDGERS"))
+	require.NoError(t, err)
+	dec, err := zstd.NewReader(nil)
+	require.NoError(t, err)
+	defer dec.Close()
+	for _, path := range paths {
+		raw, err := os.ReadFile(path)
+		require.NoError(t, err)
+		plain, err := dec.DecodeAll(raw, nil)
+		require.NoError(t, err)
+		var batch xdr.LedgerCloseMetaBatch
+		require.NoError(t, batch.UnmarshalBinary(plain))
+		lcm := batch.LedgerCloseMetas[0]
 
-## Other entries with the same cause
+		idx, err := NewIndexer(network.TestNetworkPassphrase, pond.NewPool(1), nil, false)
+		require.NoError(t, err)
+		buf := NewIndexerBuffer()
+		_, err = ProcessLedger(context.Background(), network.TestNetworkPassphrase, lcm, idx, buf)
+		require.NoError(t, err)
+		for _, tx := range buf.GetTransactions() {
+			if *tx.MemoType == int16(xdr.MemoTypeMemoNone) {
+				continue
+			}
+			name, value, err := utils.DecodeMemo(*tx.MemoType, tx.Memo)
+			require.NoError(t, err)
+			t.Logf("ledger %d: memo bytes %s, API memoType %s memo %q", lcm.LedgerSequence(), hex.EncodeToString(tx.Memo), name, *value)
+		}
+	}
+}
+```
 
-34 problem(s) over 17 entries (mainnet, testnet):
-
-- `cap67.unified-events.p22-backfill-payment-memo-hash`
-- `cap67.unified-events.p22-backfill-payment-memo-text`
-- `cap67.unified-events.p30-payment-memo-hash`
-- `cap67.unified-events.p30-payment-memo-text`
-- `classic.max-length.p30-memo-text-28`
-- `classic.memo-arms.p30-memo-hash-ff`
-- `classic.memo-arms.p30-memo-hash-sha256`
-- `classic.memo-arms.p30-memo-hash-zero`
-- `classic.memo-arms.p30-memo-return-ff`
-- `classic.memo-arms.p30-memo-return-sha256`
-- `classic.memo-arms.p30-memo-return-zero`
-- `classic.memo-bytes.p30-memo-above-max-code-point`
-- `classic.memo-bytes.p30-memo-lone-continuation`
-- `classic.memo-bytes.p30-memo-overlong-nul`
-- `classic.memo-bytes.p30-memo-surrogate`
-- `classic.memo-bytes.p30-memo-truncated-sequence-28`
-
-## Related
-
-- https://github.com/stellar/wallet-backend/issues/800
+```sh
+SHAPEKIT_LEDGERS='/path/to/shapekit/corpus/chains/classic.memo-bytes.p30/testnet/ledgers/FFFFFFFF--0-63999/*.xdr.zst' \
+  go test ./internal/indexer -run '^TestMemoBytes$' -count=1 -v
+```

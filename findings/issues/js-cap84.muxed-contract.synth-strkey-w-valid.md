@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 16.4.1 answers 7 of the checks of corpus entry `cap84.muxed-contract.synth-strkey-w-valid` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 16.4.1 answers differently from the Stellar network in 7 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `cap84.muxed-contract.synth-strkey-w-valid` (kind Strkey, family `cap84.muxed-contract`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `cap84.muxed-contract.synth-strkey-w-valid` (family `cap84.muxed-contract`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 0/strkey_decode` on 16.4.1
 
@@ -84,28 +86,26 @@ Expected: `{"kind":"muxed_contract","payload":"Pww0v5OtDZlx0EzMkPcFURyDiq2XNKSi+
 
 Actual: `{"rejected":"Error: StrKey.decodeMuxedContract does not exist in this sdk version"}`
 
-2 more failing checks are listed in `divergence-matrix.json`.
+2 more checks fail; the command below lists every one.
 
 ## Reproduce
+
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
 
 ```sh
 shapekit conformance run --sdk js --version 16.4.1 --entry cap84.muxed-contract.synth-strkey-w-valid
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 0
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 1
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 2
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 3
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 4
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 5
-- corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json case 6
+The expected answers are recorded in:
 
-Entry notes: valid muxed contracts (W, 22 << 3, CAP-84): 32 contract id bytes then a big-endian u64 id. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.
+- [`corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/strkey/cap84.muxed-contract.synth-strkey-w-valid.json) cases 0, 1, 2, 3, 4, 5, 6
+
+How the corpus entry was built and checked: valid muxed contracts (W, 22 << 3, CAP-84): 32 contract id bytes then a big-endian u64 id. expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `cap84.muxed-contract.synth-strkey-w-valid`

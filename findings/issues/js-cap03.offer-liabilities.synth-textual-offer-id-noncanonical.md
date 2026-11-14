@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1 answers 80 of the checks of corpus entry `cap03.offer-liabilities.synth-textual-offer-id-noncanonical` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1 answers differently from the Stellar network in 80 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `cap03.offer-liabilities.synth-textual-offer-id-noncanonical` (kind TextualId, family `cap03.offer-liabilities`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `cap03.offer-liabilities.synth-textual-offer-id-noncanonical` (family `cap03.offer-liabilities`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 3/id_parse` on 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1
 
@@ -89,39 +91,28 @@ Expected: `"rejected"`
 
 Actual: `{"id":"16"}`
 
-11 more failing checks are listed in `divergence-matrix.json`.
+11 more checks fail; the command below lists every one.
 
 ## Reproduce
+
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
 
 ```sh
 shapekit conformance run --sdk js --version 16.3.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 10
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 11
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 12
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 13
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 14
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 20
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 21
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 23
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 24
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 3
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 4
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 5
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 6
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 7
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 8
-- corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json case 9
+The expected answers are recorded in:
 
-Entry notes: non-canonical or out-of-range offer ids (int64 in XDR, 0 to 2^63-1 because core refuses negative ids from protocol 15). accepted cases carry a ManageSellOfferOp with that offer id. text is canonical only as the exact decimal rendering of an in-range value, and refused with a sign (including -0), whitespace, a radix prefix, an exponent, non-ASCII digits, when empty or out of range; a JSON number is canonical as an integer in range with |n| <= 2^53-1, and refused when negative, non-integral or out of range. leading-zero text, integral numbers written with .0 and in-range numbers above 2^53-1 are in a separate implementation-defined entry. negative offer ids are refused because core answers MANAGE_SELL_OFFER_MALFORMED / MANAGE_BUY_OFFER_MALFORMED for offerID < 0 from protocol 15 (stellar-core v30.0.0 src/transactions/ManageOfferOpFrameBase.cpp, ManageOfferOpFrameBase::doCheckValid). the reject reason is informational; a testee passes by refusing.
+- [`corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/textual-id/cap03.offer-liabilities.synth-textual-offer-id-noncanonical.json) cases 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 23, 24
+
+How the corpus entry was built and checked: non-canonical or out-of-range offer ids (int64 in XDR, 0 to 2^63-1 because core refuses negative ids from protocol 15). accepted cases carry a ManageSellOfferOp with that offer id. text is canonical only as the exact decimal rendering of an in-range value, and refused with a sign (including -0), whitespace, a radix prefix, an exponent, non-ASCII digits, when empty or out of range; a JSON number is canonical as an integer in range with |n| <= 2^53-1, and refused when negative, non-integral or out of range. leading-zero text, integral numbers written with .0 and in-range numbers above 2^53-1 are in a separate implementation-defined entry. negative offer ids are refused because core answers MANAGE_SELL_OFFER_MALFORMED / MANAGE_BUY_OFFER_MALFORMED for offerID < 0 from protocol 15 (stellar-core v30.0.0 src/transactions/ManageOfferOpFrameBase.cpp, ManageOfferOpFrameBase::doCheckValid). the reject reason is informational; a testee passes by refusing.
 
 Related: https://github.com/stellar/js-stellar-sdk/issues/1785
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `cap03.offer-liabilities.synth-textual-offer-id-noncanonical`

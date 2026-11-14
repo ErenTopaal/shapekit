@@ -3,11 +3,13 @@
 
 ## What happens
 
-`github.com/stellar/go-stellar-sdk` v0.7.1 answers 5 of the checks of corpus entry `cap27.muxed-accounts.synth-strkey-g-invalid` differently from the Stellar network.
+On the input below, `github.com/stellar/go-stellar-sdk` v0.7.1 answers differently from the Stellar network in 5 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `cap27.muxed-accounts.synth-strkey-g-invalid` (kind Strkey, family `cap27.muxed-accounts`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `cap27.muxed-accounts.synth-strkey-g-invalid` (family `cap27.muxed-accounts`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 2/strkey_decode` on v0.7.1
 
@@ -86,22 +88,22 @@ Actual: `{"kind":"account","payload":"Pww0v5OtDZlx0EzMkPcFURyDiq2XNKSi+w16A/x/6J
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk go --version v0.7.1 --entry cap27.muxed-accounts.synth-strkey-g-invalid
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json case 12
-- corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json case 13
-- corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json case 15
-- corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json case 2
-- corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json case 3
+The expected answers are recorded in:
 
-Entry notes: invalid ed25519 account public keys (G, 6 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.
+- [`corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/strkey/cap27.muxed-accounts.synth-strkey-g-invalid.json) cases 2, 3, 12, 13, 15
+
+How the corpus entry was built and checked: invalid ed25519 account public keys (G, 6 << 3). expectations are stellar-strkey 1.0.0's verdicts; SEP-23 1.4.0 says a strkey is valid only if re-encoding its binary gives back the same string, which rules out wrong lengths, set trailing bits, padding and lowercase. the reject reason is stellar-strkey's error and is informational; a testee passes by rejecting.
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `cap27.muxed-accounts.synth-strkey-g-invalid`

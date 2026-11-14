@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 16.3.0, 17.2.0 answers 8 of the checks of corpus entry `cap38.liquidity-pools.synth-assets-dotnet257` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 16.3.0, 17.2.0 answers differently from the Stellar network in 8 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `cap38.liquidity-pools.synth-assets-dotnet257` (kind Ordering, family `cap38.liquidity-pools`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `cap38.liquidity-pools.synth-assets-dotnet257` (family `cap38.liquidity-pools`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 0/asset_order` on 16.3.0, 17.2.0
 
@@ -77,23 +79,24 @@ Actual: `{"pool_id":"5d7ed1b0a01d73c36620cfdf3f680ab924aaf9985d5de112e53e901bc87
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk js --version 16.3.0 --entry cap38.liquidity-pools.synth-assets-dotnet257
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json case 0
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json case 1
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json case 2
-- corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json case 3
+The expected answers are recorded in:
 
-Entry notes: the Beans-BV/dotnet-stellar-sdk#257 issuer pair (the issue is open at the time of writing). the issue names only the issuers; the code USD is the same on both sides so the issuer decides. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.
+- [`corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/ordering/cap38.liquidity-pools.synth-assets-dotnet257.json) cases 0, 1, 2, 3
+
+How the corpus entry was built and checked: the Beans-BV/dotnet-stellar-sdk#257 issuer pair (the issue is open at the time of writing). the issue names only the issuers; the code USD is the same on both sides so the issuer decides. expected order computed with core's rule (asset type, code bytes with zero padding, issuer key bytes; isPoolShareAssetValid in stellar-core v30.0.0 src/util/types.cpp and the xdrpp union and xarray comparisons it uses), checked against stellar-xdr's derived Ord. pool_id cases expect the id core derives (sha256 of LiquidityPoolParameters with fee 30) when a < b, and a refusal otherwise, because core answers CHANGE_TRUST_MALFORMED for parameters that are not strictly ordered.
 
 Related: https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `cap38.liquidity-pools.synth-assets-dotnet257`

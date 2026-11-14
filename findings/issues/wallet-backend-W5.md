@@ -1,54 +1,91 @@
 <!-- repo: stellar/wallet-backend -->
-# Contract deployments without a matching auth entry (asset contracts, contract-to-contract deploys) record no contract creation
+# Comment for #806: a second factory input with a constructor, and the Stellar Asset Contract case
 
-## What happens
+Two additions, both checked at `main` [3e22515a](https://github.com/stellar/wallet-backend/commit/3e22515a44979fdc3a558fda3991ca2b48e38cef) (no tagged release yet).
 
-At 3e22515a44979fdc3a558fda3991ca2b48e38cef, [`internal/indexer/processors/contract_deploy.go` line 36](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/contract_deploy.go#L36): `ContractDeployProcessor.ProcessOperation` records a contract creation for the operation's own `CreateContract` only when its preimage is `FromAddress` (`emitTopLevel` skips `FromAsset`, the Stellar Asset Contract), and for nested deploys only when the deploy is declared in an auth entry (`walkInvocation`). A SAC deployment, or a contract deployed by another contract without an auth entry for it, creates a contract instance in the meta and gets no `ACCOUNT`/`CREATE` row.
+**1. Another factory deploy, with a constructor.** Ledger 87 of a standalone stellar-core 30.0.0 network (protocol 30, testnet passphrase), transaction `0210e58878e55ec3236596aee412c0fedfb630e30abf5107ab1f593f02650ab8`: an `InvokeContract` with no auth entries, in which a factory contract deploys a new instance from its own address and runs its constructor. The meta creates the contract instance `CCKQVJYFLFXNJYGOFDBFNBCYAN2D7Q7FAL6LZJVRZYATWXXZ7BHHK7XO`, and the only state change is the fee `BALANCE` `DEBIT`. It confirms that a constructor makes no difference. The ledger is a Galexie file in the [shapekit](https://github.com/ErenTopaal/shapekit) corpus: [FFFFFFA8--87.xdr.zst](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/chains/soroban.invoke-basics.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFA8--87.xdr.zst).
 
-Severity: data-loss. CAPs: CAP-0046, CAP-0046-02, CAP-0046-05, CAP-0046-06, CAP-0046-07, CAP-0046-08, CAP-0046-12, CAP-0054, CAP-0058, CAP-0073, CAP-0085.
+**2. Stellar Asset Contract deployments get no `ACCOUNT` `CREATE` either.** This one is intentional in the code: `emitTopLevel` skips a `FromAsset` preimage because "FromAsset preimages deploy a SAC, which has no creator account" ([contract_deploy.go lines 158-170](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/internal/indexer/processors/contract_deploy.go#L158-L170)). The [state changes table](https://github.com/stellar/wallet-backend/blob/3e22515a44979fdc3a558fda3991ca2b48e38cef/docs/architecture/state-changes.md#L71) says only "A contract deployment (row on the contract, creator is the deployer)", without an exception for asset contracts. A SAC deployment does have a submitter (the operation's source account), so a reader of the docs would expect a row. The SAC instance processor does record a credit-asset SAC in `contract_tokens`. The native asset's SAC is not recorded there, because `sac.AssetFromContractData` returns false for it ([go-stellar-sdk v0.8.0, `ingest/sac/contract_data.go` lines 90-94](https://github.com/stellar/go-stellar-sdk/blob/v0.8.0/ingest/sac/contract_data.go#L90-L94)). If the docs are updated for the factory case, they could say the same about SACs.
 
-## Minimal entry
+Two ledgers that show it, from another standalone stellar-core 30.0.0 network running protocol 28 (testnet passphrase), run through `ProcessLedger` as in the issue:
 
-Corpus entry `cap73.sac-trust.p28-deploy-xlm-sac-envelope` of the shapekit corpus: chain `cap73.sac-trust.p28`, ledger 66, recorded on a standalone stellar-core 30.0.0 under the testnet passphrase (the mainnet variant gives the same result). Transaction(s): `654410f98298b201d559998674893b50f1d3417e7a5bc2025825d7f3ff8c7041`.
+- ledger 65, transaction `1dfb5aea83ff199f1a0d60ddf779d31f54c3d658072ae008ebe53852816119b9`: the issuer deploys the SAC of its credit asset `TRST`;
+- ledger 66, transaction `654410f98298b201d559998674893b50f1d3417e7a5bc2025825d7f3ff8c7041`: an account deploys the SAC of the native asset.
 
-## Reproduce
+<details>
+<summary>Ledger 65 (base64), save as <code>internal/indexer/testdata/deploy_credit_sac.b64</code></summary>
 
-```sh
-(cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)
-shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"
+```
+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
 ```
 
-The harness replays the chain through a replay stellar-rpc and history archive into wallet-backend's live ingestion (TimescaleDB, `migrate up`, `ingest`), reads back `transactions`, `transactions_accounts` and `state_changes`, and compares them with what the ledger meta shows. Output: `harness-out/HARNESS.md`.
+</details>
 
-## Expected (ledger meta) and stored
+<details>
+<summary>Ledger 66 (base64), save as <code>internal/indexer/testdata/deploy_xlm_sac.b64</code></summary>
 
-From the harness report of the run above (`harness-report.json`, entry `cap73.sac-trust.p28-deploy-xlm-sac-envelope`, testnet):
+```
+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
+```
 
-- dropped `contract-deployed`: contract-deployed is missing
-  - ledger: `{"contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"}`
+</details>
 
-Verdict for the entry: dropped: 1 of 3 in-scope fact(s) missing.
+```go
+package indexer
 
-## Suggested fix
+import (
+	"context"
+	"os"
+	"strings"
+	"testing"
 
-Read deployments from the contract instance entries the operation's meta creates, for every preimage type and whether or not an auth entry declares them; #746 asks for the same correlation in the other direction.
+	"github.com/alitto/pond/v2"
+	"github.com/stellar/go-stellar-sdk/network"
+	"github.com/stellar/go-stellar-sdk/xdr"
+	"github.com/stretchr/testify/require"
+)
 
-## Other entries with the same cause
+func TestSACDeployRows(t *testing.T) {
+	for _, name := range []string{"deploy_credit_sac", "deploy_xlm_sac"} {
+		b64, err := os.ReadFile("testdata/" + name + ".b64")
+		require.NoError(t, err)
+		var lcm xdr.LedgerCloseMeta
+		require.NoError(t, xdr.SafeUnmarshalBase64(strings.TrimSpace(string(b64)), &lcm))
 
-24 problem(s) over 12 entries (mainnet, testnet):
+		for _, opMeta := range lcm.TxApplyProcessing(0).MustV4().Operations {
+			for _, c := range opMeta.Changes {
+				if e, ok := c.GetCreated(); ok && e.Data.Type == xdr.LedgerEntryTypeContractData &&
+					e.Data.MustContractData().Key.Type == xdr.ScValTypeScvLedgerKeyContractInstance {
+					id, err := e.Data.MustContractData().Contract.String()
+					require.NoError(t, err)
+					t.Logf("%s: meta creates contract instance %s", name, id)
+				}
+			}
+		}
 
-- `cap73.sac-trust.p28-deploy-credit-sac-envelope`
-- `cap73.sac-trust.p28-deploy-credit-sac-meta`
-- `cap73.sac-trust.p28-deploy-xlm-sac-meta`
-- `cap73.sac-trust.p30-deploy-credit-sac-envelope`
-- `cap73.sac-trust.p30-deploy-credit-sac-meta`
-- `cap73.sac-trust.p30-deploy-xlm-sac-envelope`
-- `cap73.sac-trust.p30-deploy-xlm-sac-meta`
-- `cap85.executable-tag.p30-contract-deploys-external-ref-envelope`
-- `cap85.executable-tag.p30-contract-deploys-external-ref-meta`
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope`
-- `soroban.invoke-basics.p30-contract-deploys-with-constructor-meta`
+		idx, err := NewIndexer(network.TestNetworkPassphrase, pond.NewPool(1), nil, false)
+		require.NoError(t, err)
+		buf := NewIndexerBuffer()
+		_, err = ProcessLedger(context.Background(), network.TestNetworkPassphrase, lcm, idx, buf)
+		require.NoError(t, err)
+		for _, sc := range buf.GetStateChanges() {
+			t.Logf("%s: state change %s %s account=%s", name, sc.StateChangeCategory, sc.StateChangeReason, sc.AccountID)
+		}
+		for id := range buf.GetSACContracts() {
+			t.Logf("%s: contract_tokens row %s", name, id)
+		}
+	}
+}
+```
 
-## Related
+`go test ./internal/indexer -run TestSACDeployRows -count=1 -v` at 3e22515a (go1.27.4):
 
-- https://github.com/stellar/wallet-backend/issues/746
+```
+=== RUN   TestSACDeployRows
+    sac_deploy_rows_test.go:28: deploy_credit_sac: meta creates contract instance CAZWR77LFFGRPUDQHUILEJGRQAACE6IGP6GIFMMAG465USHLJHCJI5T7
+    sac_deploy_rows_test.go:39: deploy_credit_sac: state change BALANCE DEBIT account=GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5
+    sac_deploy_rows_test.go:42: deploy_credit_sac: contract_tokens row CAZWR77LFFGRPUDQHUILEJGRQAACE6IGP6GIFMMAG465USHLJHCJI5T7
+    sac_deploy_rows_test.go:28: deploy_xlm_sac: meta creates contract instance CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
+    sac_deploy_rows_test.go:39: deploy_xlm_sac: state change BALANCE DEBIT account=GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ
+--- PASS: TestSACDeployRows (0.00s)
+```

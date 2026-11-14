@@ -99,7 +99,7 @@ limits = ["xdr.envelope.len", "soroban.footprint.entries", "soroban.contract_dat
 [[item]]
 id = "refusal-policy"
 title = "There is a written refusal policy."
-text = "For every place a decoder can throw or a value can exceed a cap, the indexer has a tested, documented choice: skip the value and count it, or halt. Nothing is dropped without being counted, and SDK upgrades are checked for new refusals."
+text = "For every place a decoder can throw or a value can exceed a cap, the indexer has a tested, documented choice: skip the value and count it, quarantine the transaction, or halt. Nothing is dropped without being counted, and SDK upgrades are checked for new refusals."
 links = [
   { label = "js-stellar-sdk 17.3.0 release notes", url = "https://github.com/stellar/js-stellar-sdk/releases/tag/v17.3.0" },
   { label = "stellar-etl#467", url = "https://github.com/stellar/stellar-etl/issues/467" },

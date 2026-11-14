@@ -45,7 +45,7 @@
     }
   ],
   "summary": {
-    "findings": 24,
+    "findings": 25,
     "failures": 504,
     "unmapped": 0,
     "by_component": {
@@ -54,7 +54,7 @@
         "robustness": 1
       },
       "js-stellar-sdk": {
-        "divergence": 4,
+        "divergence": 5,
         "robustness": 1
       },
       "rs-stellar-xdr": {
@@ -71,19 +71,20 @@
     },
     "by_severity": {
       "data-loss": 7,
-      "divergence": 11,
+      "divergence": 12,
       "robustness": 4,
       "wrong-data": 2
     },
     "by_status": {
-      "draft": 17,
-      "duplicate-of": 7
+      "draft": 11,
+      "duplicate-of": 13,
+      "wont-fix": 1
     }
   },
   "findings": [
     {
       "id": "WB-W3",
-      "title": "clawbacks are stored as BURN, so a clawback is indistinguishable from a payment to the issuer",
+      "title": "feature request: a state change reason for clawbacks, which are stored as BURN like a payment to the issuer",
       "component": "wallet-backend",
       "severity": "wrong-data",
       "caps": [
@@ -95,7 +96,7 @@
       "reproduce": "shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-W3.md",
-      "cause": "The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimableBalance write a BALANCE BURN row (and a DEBIT), so the CAP-67 `clawback` event of the ledger is stored as a `burn`.",
+      "cause": "The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimableBalance write a BALANCE BURN row (and a DEBIT), so the CAP-67 `clawback` event of the ledger is stored as a `burn`. wallet-backend documents this as intended (docs/architecture/state-changes.md L92), so the draft is a feature request.",
       "siblings": [],
       "related": [],
       "entries": [
@@ -380,7 +381,7 @@
       "status": "duplicate-of",
       "link": "https://github.com/stellar/wallet-backend/issues/677",
       "draft": "findings/issues/wallet-backend-W1.md",
-      "cause": "participantsForMeta switches on `meta.Operations`, the V0 arm of the TransactionMeta union, which is nil for v1 to v4 meta, so accounts that only the meta shows (the sponsor of a claimed or clawed-back claimable balance) are never participants, while accounts only the envelope names (claimants, a payment destination that is the issuer) are. Already reported upstream as #677 (open).",
+      "cause": "participantsForMeta switches on `meta.Operations`, the V0 arm of the TransactionMeta union, which is nil for v1 to v4 meta, so accounts that only the meta shows (the sponsor of a claimed or clawed-back claimable balance) are never participants, while accounts only the envelope names (claimants, a payment destination that is the issuer) are. The extra envelope-named participants match wallet-backend's documented rule (docs/architecture/state-changes.md L119-L124); the dropped meta-only ones are the bug. Already reported upstream as #677 (open); the draft is a comment for it with a concrete dropped sponsor.",
       "siblings": [],
       "related": [],
       "entries": [
@@ -942,7 +943,7 @@
     },
     {
       "id": "WB-W2",
-      "title": "transfers into or out of a claimable balance or a liquidity pool keep one side only",
+      "title": "question: BALANCE rows for claimable balance and liquidity pool transfers do not record the balance or pool",
       "component": "wallet-backend",
       "severity": "data-loss",
       "caps": [
@@ -956,9 +957,11 @@
       "reproduce": "shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-W2.md",
-      "cause": "BALANCE rows are written per account; the claimable balance (B) or liquidity pool (L) end of a transfer has no row, so the stored transfer has a null counterparty and the ledger's transfer event to or from the B or L address has no counterpart.",
+      "cause": "BALANCE rows are written per account; the claimable balance (B) or liquidity pool (L) end of a transfer has no row, so the stored transfer has a null counterparty and the ledger's transfer event to or from the B or L address has no counterpart. The single row is documented (docs/architecture/state-changes.md L67-L68, from #442), so the draft asks whether the B or L address belongs in it.",
       "siblings": [],
-      "related": [],
+      "related": [
+        "https://github.com/stellar/wallet-backend/pull/442"
+      ],
       "entries": [
         "cap23.claimable-balances.p30-claim-through-depth-4-envelope",
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
@@ -1723,12 +1726,13 @@
       ],
       "minimal_entry": "classic.memo-bytes.p30-memo-ff",
       "reproduce": "shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/wallet-backend/issues/800",
       "draft": "findings/issues/wallet-backend-W4.md",
-      "cause": "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it. Its code comment says this is deliberate, and no other table seems to keep the memo; the draft asks whether that is intended.",
+      "cause": "CAP-67 puts the destination's mux id or, failing that, the transaction memo into the transfer event's `to_muxed_id`, typed as u64, string or bytes. wallet-backend stores `to_muxed_id` only for u64 values, so a transfer whose event carries a text, hash or return memo is stored without it. Its code comment says this is deliberate. #800 (open) and its PR #801 (open) add a transactions.memo column, which keeps the memo; the draft is a comment for #801: on its branch five different invalid UTF-8 text memos render as one U+FFFD and its TEXT filter cannot match them.",
       "siblings": [],
       "related": [
-        "https://github.com/stellar/wallet-backend/issues/800"
+        "https://github.com/stellar/wallet-backend/pull/801"
       ],
       "entries": [
         "cap67.unified-events.p22-backfill-payment-memo-hash",
@@ -2010,9 +2014,10 @@
       ],
       "minimal_entry": "cap73.sac-trust.p28-deploy-xlm-sac-envelope",
       "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/wallet-backend/issues/806",
       "draft": "findings/issues/wallet-backend-W5.md",
-      "cause": "Contract creation state changes come from the declared auth invocation tree. A Stellar Asset Contract deployed from an asset, or a contract deployed by another contract with no auth entry for the deployment, creates a contract instance in the meta but no ACCOUNT CREATE row. #746 is the reverse case (rows for deployments that did not happen); both go away when deployments are read from the created contract instances in meta.",
+      "cause": "Contract creation state changes come from the declared auth invocation tree. A Stellar Asset Contract deployed from an asset, or a contract deployed by another contract with no auth entry for the deployment, creates a contract instance in the meta but no ACCOUNT CREATE row. #746 is the reverse case (rows for deployments that did not happen); both go away when deployments are read from the created contract instances in meta. The factory case is reported upstream as #806 (open); the draft is a comment for it adding a factory with a constructor and the Stellar Asset Contract case.",
       "siblings": [],
       "related": [
         "https://github.com/stellar/wallet-backend/issues/746"
@@ -2213,9 +2218,10 @@
       ],
       "minimal_entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
       "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/wallet-backend/issues/804",
       "draft": "findings/issues/wallet-backend-W6.md",
-      "cause": "A native SAC transfer to a G address that does not exist creates the account (CAP-73). The meta shows the new account entry; wallet-backend writes the balance credit but no ACCOUNT CREATE row.",
+      "cause": "A native SAC transfer to a G address that does not exist creates the account (CAP-73). The meta shows the new account entry; wallet-backend writes the balance credit but no ACCOUNT CREATE row. Reported upstream as #804 (open); the draft is an optional comment with the protocol 28 and 30 fixtures.",
       "siblings": [],
       "related": [],
       "entries": [
@@ -2330,9 +2336,10 @@
       ],
       "minimal_entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
       "reproduce": "shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/wallet-backend/issues/805",
       "draft": "findings/issues/wallet-backend-W8.md",
-      "cause": "Core removes a pre-authorized transaction signer in txChangesBefore: the transaction's own hash signer when the transaction is applied, even when it fails, and a fee bump's hash signer from the fee source before the inner transaction runs, even when it succeeds. wallet-backend derives signer changes only from operation effects (SetOptions changes of successful transactions), never from txChangesBefore, so neither removal is stored.",
+      "cause": "Core removes a pre-authorized transaction signer in txChangesBefore: the transaction's own hash signer when the transaction is applied, even when it fails, and a fee bump's hash signer from the fee source before the inner transaction runs, even when it succeeds. wallet-backend derives signer changes only from operation effects (SetOptions changes of successful transactions), never from txChangesBefore, so neither removal is stored. The failed-transaction case is reported upstream as #805 (open); the draft is a comment for it adding the fee-bump case.",
       "siblings": [],
       "related": [],
       "entries": [
@@ -2446,7 +2453,7 @@
       "reproduce": "indexerlint -format json ./... (in a checkout of wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)",
       "status": "draft",
       "draft": "findings/issues/wallet-backend-L1.md",
-      "cause": "The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurses over xdr.SorobanAuthorizedInvocation with no depth counter. The decoder (depth 1500) and core (transactions nested deeper than 1000 are refused from protocol 28) bound it today, so it is a hardening finding, not a halt.",
+      "cause": "The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurses over xdr.SorobanAuthorizedInvocation with no depth counter. The walk runs only for successful transactions, and the decoder (depth 1500) and core (envelopes nested deeper than 1000 XDR levels are refused from protocol 28) bound it today, so it is a hardening finding, not a halt.",
       "siblings": [],
       "related": [
         "https://github.com/stellar/wallet-backend/issues/746"
@@ -2463,7 +2470,7 @@
     },
     {
       "id": "GO-1",
-      "title": "strkey.DecodeAny accepts a claimable balance id whose type byte is not v0",
+      "title": "strkey.Decode, DecodeAny and IsValidClaimableBalance accept a claimable balance id whose type byte is not v0",
       "component": "go-stellar-sdk",
       "severity": "divergence",
       "caps": [
@@ -2471,9 +2478,10 @@
       ],
       "minimal_entry": "cap23.claimable-balances.synth-strkey-b-invalid",
       "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry cap23.claimable-balances.synth-strkey-b-invalid",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/go-stellar-sdk/issues/6042",
       "draft": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
-      "cause": "DecodeAny checks a B key's length but not its claimable balance id type byte, so ids of types core does not define decode.",
+      "cause": "DecodeAny checks a B key's length but not its claimable balance id type byte, so ids of types core does not define decode. Reported upstream as #6042 (open, same input and APIs).",
       "siblings": [
         "JS-16X"
       ],
@@ -2671,7 +2679,7 @@
     },
     {
       "id": "GO-4",
-      "title": "xdr.DecodeOptions.MaxDepth counts about two levels per nesting, so the sdk decodes envelopes nested deeper than core accepts",
+      "title": "xdr.DecodeOptions.MaxDepth counts fewer levels per nesting than stellar-xdr, so the sdk decodes envelopes nested deeper than core accepts",
       "component": "go-stellar-sdk",
       "severity": "robustness",
       "caps": [
@@ -2682,7 +2690,7 @@
       "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
       "status": "draft",
       "draft": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
-      "cause": "A bare ScVal holds 499 ScVec levels at MaxDepth 1000, while rs-stellar-xdr (and core) spend one level per nesting. At the depth core applies, the sdk accepts auth trees and ScVals that core refuses.",
+      "cause": "go-xdr spends one depth unit per named type, while stellar-xdr, which core runs at depth 1000 from protocol 28, also counts each optional and each array. On v0.9.0 the deepest auth chain decoded is 988 at MaxDepth 1000 (1488 at the default 1500) against core's 493, and the deepest nested ScVec argument 495 (745) against 246, so the sdk accepts auth trees and ScVals that core refuses.",
       "siblings": [
         "JS-DEPTH"
       ],
@@ -3211,12 +3219,10 @@
     },
     {
       "id": "JS-16X",
-      "title": "the 16.x line still has six divergences that 17.x fixed (map key order and collisions, textual ids, strkey lengths, W addresses, decode depth)",
+      "title": "16.x stops decoding at 200 nested types (js-xdr 4), below depths the network produces, and its StrKey decoders accept payloads 17.x refuses",
       "component": "js-stellar-sdk",
       "severity": "divergence",
       "caps": [
-        "CAP-0003",
-        "CAP-0006",
         "CAP-0023",
         "CAP-0027",
         "CAP-0038",
@@ -3230,18 +3236,16 @@
         "CAP-0046-11",
         "CAP-0046-12",
         "CAP-0054",
-        "CAP-0058",
-        "CAP-0084"
+        "CAP-0058"
       ],
       "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
       "reproduce": "shapekit conformance run --sdk js --version 16.4.1 --entry soroban.scval-shapes.synth-event-vec-depth-101",
       "status": "draft",
       "draft": "findings/issues/js-16x-backports.md",
-      "cause": "16.3.1 and 16.4.1 backported issuer ordering and the protocol 30 xdr, but not ScVal map key ordering (#1766), map key collisions (#1789), canonical textual ids (#1785), strkey payload length checks, the W strkey codec (#1811) or js-xdr 5's nesting limit (js-xdr#155, 16.x stops at 200 nested types, below depths the network accepts). One issue asks for the backports or a documented end of support.",
+      "cause": "16.4.1 bundles js-xdr 4.0.0, whose decoders stop at 200 nested types: the deepest ScVal it decodes is 66 levels, below the host's 100, so it fails on recorded protocol 30 values and ledgers that 17.x (js-xdr 5, js-xdr#155) decodes. Its StrKey decoders also accept payloads of the wrong length (fixed on 17.x by #1583) and claimable balance ids with a non-zero type byte. RELEASE_POLICY.md gives the 16.x maintenance line parsing fixes, so the draft asks for these as parsing fixes; the other 16.x divergences are in JS-16X-POLICY.",
       "siblings": [
         "GO-1",
         "GO-2",
-        "RS-1",
         "RS-2"
       ],
       "related": [
@@ -3253,18 +3257,14 @@
         "https://github.com/stellar/js-xdr/pull/155"
       ],
       "entries": [
-        "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
-        "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
         "cap23.claimable-balances.synth-strkey-b-invalid",
         "cap27.muxed-accounts.synth-strkey-g-invalid",
         "cap27.muxed-accounts.synth-strkey-m-invalid",
         "cap27.muxed-accounts.synth-strkey-s-invalid",
-        "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
         "cap38.liquidity-pools.synth-strkey-l-invalid",
         "cap40.signed-payload-signer.synth-strkey-p-invalid",
         "cap40.signed-payload-signer.synth-strkey-t-invalid",
         "cap40.signed-payload-signer.synth-strkey-x-invalid",
-        "cap84.muxed-contract.synth-strkey-w-valid",
         "soroban.auth-trees.p30-declared-depth-245",
         "soroban.auth-trees.p30-declared-depth-246",
         "soroban.auth-trees.p30-declared-depth-492",
@@ -3278,16 +3278,6 @@
         "soroban.scval-shapes.p30-vec-depth-max-meta",
         "soroban.scval-shapes.p30-vec-depth-over",
         "soroban.scval-shapes.synth-event-vec-depth-101",
-        "soroban.scval-shapes.synth-map-address-and-string",
-        "soroban.scval-shapes.synth-map-bool-and-text",
-        "soroban.scval-shapes.synth-map-bytes-and-string",
-        "soroban.scval-shapes.synth-map-js1789-u32-symbol",
-        "soroban.scval-shapes.synth-map-keys-addresses",
-        "soroban.scval-shapes.synth-map-keys-mixed-types",
-        "soroban.scval-shapes.synth-map-numeric-types",
-        "soroban.scval-shapes.synth-map-u32-string-symbol",
-        "soroban.scval-shapes.synth-map-vec-and-string",
-        "soroban.scval-shapes.synth-map-void-and-text",
         "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
         "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted"
       ],
@@ -3295,20 +3285,6 @@
         {
           "source": "conformance",
           "on": "js@16.3.0",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
           "entry": "cap23.claimable-balances.synth-strkey-b-invalid",
           "at": "js@16.3.0",
           "what": "diverges-from-network (4 check(s): case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 15/strkey_decode)"
@@ -3333,13 +3309,6 @@
           "entry": "cap27.muxed-accounts.synth-strkey-s-invalid",
           "at": "js@16.3.0",
           "what": "diverges-from-network (2 check(s): case 2/strkey_decode, case 3/strkey_decode)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
         },
         {
           "source": "conformance",
@@ -3393,76 +3362,6 @@
         {
           "source": "conformance",
           "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-address-and-string",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-bool-and-text",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-bytes-and-string",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-keys-addresses",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-keys-mixed-types",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-numeric-types",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-u32-string-symbol",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-vec-and-string",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
-          "entry": "soroban.scval-shapes.synth-map-void-and-text",
-          "at": "js@16.3.0",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.0",
           "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
           "at": "js@16.3.0",
           "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
@@ -3473,20 +3372,6 @@
           "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
           "at": "js@16.3.0",
           "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
         },
         {
           "source": "conformance",
@@ -3515,13 +3400,6 @@
           "entry": "cap27.muxed-accounts.synth-strkey-s-invalid",
           "at": "js@16.3.1",
           "what": "diverges-from-network (2 check(s): case 2/strkey_decode, case 3/strkey_decode)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
         },
         {
           "source": "conformance",
@@ -3575,76 +3453,6 @@
         {
           "source": "conformance",
           "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-address-and-string",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-bool-and-text",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-bytes-and-string",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-keys-addresses",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-keys-mixed-types",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-numeric-types",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-u32-string-symbol",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-vec-and-string",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
-          "entry": "soroban.scval-shapes.synth-map-void-and-text",
-          "at": "js@16.3.1",
-          "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.3.1",
           "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
           "at": "js@16.3.1",
           "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
@@ -3655,20 +3463,6 @@
           "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
           "at": "js@16.3.1",
           "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
-          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
         },
         {
           "source": "conformance",
@@ -3701,13 +3495,6 @@
         {
           "source": "conformance",
           "on": "js@16.4.1",
-          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
           "entry": "cap38.liquidity-pools.synth-strkey-l-invalid",
           "at": "js@16.4.1",
           "what": "diverges-from-network (2 check(s): case 2/strkey_decode, case 3/strkey_decode)"
@@ -3732,13 +3519,6 @@
           "entry": "cap40.signed-payload-signer.synth-strkey-x-invalid",
           "at": "js@16.4.1",
           "what": "diverges-from-network (2 check(s): case 2/strkey_decode, case 3/strkey_decode)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
-          "entry": "cap84.muxed-contract.synth-strkey-w-valid",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (14 check(s): case 0/strkey_decode, case 0/strkey_encode, case 1/strkey_decode, case 1/strkey_encode)"
         },
         {
           "source": "conformance",
@@ -3834,6 +3614,276 @@
         {
           "source": "conformance",
           "on": "js@16.4.1",
+          "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
+          "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
+        }
+      ]
+    },
+    {
+      "id": "JS-16X-POLICY",
+      "title": "16.x keeps the map key order, map key collision, textual id and W address behaviour that 17.x changed",
+      "component": "js-stellar-sdk",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0003",
+        "CAP-0006",
+        "CAP-0027",
+        "CAP-0046-01",
+        "CAP-0084"
+      ],
+      "minimal_entry": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+      "reproduce": "shapekit conformance run --sdk js --version 16.4.1 --entry soroban.scval-shapes.synth-map-js1789-u32-symbol",
+      "status": "wont-fix",
+      "reason": "RELEASE_POLICY.md limits the 16.x maintenance line to regenerated XDR, parsing fixes and critical security fixes. A backport of the map collision fix (#1778) was asked for in #1898 and declined (closed 2026-11-13), and the 16.4.0 release notes document W addresses as unsupported on v16. Map key order (#1766) and canonical textual ids (#1785) were not asked about separately; they are named as out of scope in the JS-16X draft.",
+      "cause": "16.3.1 and 16.4.1 backported issuer ordering and the protocol 30 xdr, but not ScVal map key ordering (#1766), map key collisions (#1789, fixed in 17.3.0 by #1778), canonical textual ids (#1785) or the W strkey codec (#1811).",
+      "siblings": [
+        "RS-1"
+      ],
+      "related": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1898",
+        "https://github.com/stellar/js-stellar-sdk/pull/1766",
+        "https://github.com/stellar/js-stellar-sdk/issues/1785",
+        "https://github.com/stellar/js-stellar-sdk/issues/1789",
+        "https://github.com/stellar/js-stellar-sdk/pull/1811"
+      ],
+      "entries": [
+        "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+        "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+        "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+        "cap84.muxed-contract.synth-strkey-w-valid",
+        "soroban.scval-shapes.synth-map-address-and-string",
+        "soroban.scval-shapes.synth-map-bool-and-text",
+        "soroban.scval-shapes.synth-map-bytes-and-string",
+        "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+        "soroban.scval-shapes.synth-map-keys-addresses",
+        "soroban.scval-shapes.synth-map-keys-mixed-types",
+        "soroban.scval-shapes.synth-map-numeric-types",
+        "soroban.scval-shapes.synth-map-u32-string-symbol",
+        "soroban.scval-shapes.synth-map-vec-and-string",
+        "soroban.scval-shapes.synth-map-void-and-text"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-address-and-string",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-bool-and-text",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-bytes-and-string",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-keys-addresses",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-keys-mixed-types",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-numeric-types",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-u32-string-symbol",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-vec-and-string",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.0",
+          "entry": "soroban.scval-shapes.synth-map-void-and-text",
+          "at": "js@16.3.0",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-address-and-string",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-bool-and-text",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-bytes-and-string",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-js1789-u32-symbol",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-keys-addresses",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-keys-mixed-types",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (3 check(s): case 0/map_sort, case 1/map_validate, case 2/map_validate)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-numeric-types",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-u32-string-symbol",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-vec-and-string",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.3.1",
+          "entry": "soroban.scval-shapes.synth-map-void-and-text",
+          "at": "js@16.3.1",
+          "what": "diverges-from-network (1 check(s): case 0/to_native)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-implementation-defined",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (1 check(s): case 3/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (16 check(s): case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
+          "entry": "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (14 check(s): case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
+          "entry": "cap84.muxed-contract.synth-strkey-w-valid",
+          "at": "js@16.4.1",
+          "what": "diverges-from-network (14 check(s): case 0/strkey_decode, case 0/strkey_encode, case 1/strkey_decode, case 1/strkey_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "js@16.4.1",
           "entry": "soroban.scval-shapes.synth-map-address-and-string",
           "at": "js@16.4.1",
           "what": "diverges-from-network (1 check(s): case 0/to_native)"
@@ -3900,26 +3950,12 @@
           "entry": "soroban.scval-shapes.synth-map-void-and-text",
           "at": "js@16.4.1",
           "what": "diverges-from-network (1 check(s): case 0/to_native)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
-          "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
-        },
-        {
-          "source": "conformance",
-          "on": "js@16.4.1",
-          "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
-          "at": "js@16.4.1",
-          "what": "diverges-from-network (3 check(s): any/decode_encode, any/decode_json, any/encode_json)"
         }
       ]
     },
     {
       "id": "JS-DEPTH",
-      "title": "17.x decodes with js-xdr 5's limit of 1500 nested types and fromXdr takes no limit, so it accepts transactions nested deeper than core does",
+      "title": "fromXdr decodes envelopes nested deeper than stellar-core accepts, and no maxDepth value matches core's limit",
       "component": "js-stellar-sdk",
       "severity": "robustness",
       "caps": [
@@ -3930,12 +3966,14 @@
       "reproduce": "shapekit conformance run --sdk js --version 17.4.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
       "status": "draft",
       "draft": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
-      "cause": "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, so the sdk accepts and re-encodes values core refuses.",
+      "cause": "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, so the sdk accepts and re-encodes values core refuses. Through schema.decode with a maxDepth, core's boundary falls at a different value per shape, so no single value matches core. Related: #1901 (a valid ledger that fails to decode) and PR #1902 (raises the limit to 1550, which widens this gap).",
       "siblings": [
         "GO-4"
       ],
       "related": [
-        "https://github.com/stellar/js-xdr/pull/155"
+        "https://github.com/stellar/js-xdr/pull/155",
+        "https://github.com/stellar/js-stellar-sdk/issues/1901",
+        "https://github.com/stellar/js-stellar-sdk/pull/1902"
       ],
       "entries": [
         "soroban.auth-trees.p30-declared-depth-493",
@@ -4046,7 +4084,7 @@
     },
     {
       "id": "RS-1",
-      "title": "the XDR-JSON reader accepts offer ids in forms the network's canonical text refuses",
+      "title": "question: the XDR-JSON reader accepts 64-bit integer strings with a plus sign, \"-0\" or leading zeros",
       "component": "rs-stellar-xdr",
       "severity": "divergence",
       "caps": [
@@ -4057,9 +4095,9 @@
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
       "status": "draft",
       "draft": "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
-      "cause": "Offer ids with leading zeros, a plus sign or a negative value are read as numbers instead of being refused.",
+      "cause": "NumberOrString passes a JSON string to str::parse, so \"+16\", \"-0\" and \"016\" read as 16 and 0; the crate's own tests assert this, so the draft is a question. The negative-id cases of the entry are not a reader bug: offerID is int64 in XDR and core refuses negative ids only in doCheckValid, so their corpus expectation (refusal by an XDR-JSON reader) needs correcting.",
       "siblings": [
-        "JS-16X",
+        "JS-16X-POLICY",
         "JS-1785"
       ],
       "related": [],
@@ -4092,7 +4130,7 @@
     },
     {
       "id": "RS-2",
-      "title": "the XDR-JSON reader stops at serde_json's 128-level recursion limit, so values the crate renders cannot be read back",
+      "title": "the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back",
       "component": "rs-stellar-xdr",
       "severity": "divergence",
       "caps": [
@@ -4291,9 +4329,10 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-bool-value-2",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-bool-value-2",
-      "status": "draft",
+      "status": "duplicate-of",
+      "link": "https://github.com/stellar/rs-stellar-xdr/issues/622",
       "draft": "findings/issues/fuzz-rust-bool-non-canonical.md",
-      "cause": "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt).",
+      "cause": "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt). Reported upstream as #622 (open); two unmerged upstream branches change the bool decode.",
       "siblings": [
         "CORE-1"
       ],

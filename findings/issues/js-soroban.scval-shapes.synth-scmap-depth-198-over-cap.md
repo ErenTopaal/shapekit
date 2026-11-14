@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 17.2.0, 17.2.1, 17.3.0, 17.4.0 answers 4 of the checks of corpus entry `soroban.scval-shapes.synth-scmap-depth-198-over-cap` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 17.2.0, 17.2.1, 17.3.0, 17.4.0 answers differently from the Stellar network in 4 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `soroban.scval-shapes.synth-scmap-depth-198-over-cap` (kind Xdr, family `soroban.scval-shapes`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `soroban.scval-shapes.synth-scmap-depth-198-over-cap` (family `soroban.scval-shapes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `any/decode_encode` on 17.2.0, 17.2.1, 17.3.0, 17.4.0
 
@@ -29,18 +31,22 @@ Actual: `{"xdr":"AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAA
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk js --version 17.2.0 --entry soroban.scval-shapes.synth-scmap-depth-198-over-cap
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/entries/soroban.scval-shapes/soroban.scval-shapes.synth-scmap-depth-198-over-cap/any.xdr: decode = must-reject (validity InvalidByCore)
+The expected answers are recorded in:
 
-Entry notes: an invoke-contract argument nested 198 ScMap levels deep, one past the deepest that decodes inside an envelope at depth 1000 (scval.depth.envelope = 246). core refuses the envelope from protocol 28 because its rust parser (TransactionEnvelope::read_xdr in can_parse_transaction) fails at depth 1000. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with DepthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 4208 (the input length) }.
+- [`corpus/entries/soroban.scval-shapes/soroban.scval-shapes.synth-scmap-depth-198-over-cap/any.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.scval-shapes/soroban.scval-shapes.synth-scmap-depth-198-over-cap/any.xdr): decode = must-reject (validity InvalidByCore)
+
+How the corpus entry was built and checked: an invoke-contract argument nested 198 ScMap levels deep, one past the deepest that decodes inside an envelope at depth 1000 (scval.depth.envelope = 246). core refuses the envelope from protocol 28 because its rust parser (TransactionEnvelope::read_xdr in can_parse_transaction) fails at depth 1000. stellar-xdr 30.0.0 rejects it (TransactionEnvelope::from_xdr) with DepthLimitExceeded under Limits { depth: 1000 (xdr.envelope.depth), len: 4208 (the input length) }.
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `soroban.scval-shapes.synth-scmap-depth-198-over-cap`

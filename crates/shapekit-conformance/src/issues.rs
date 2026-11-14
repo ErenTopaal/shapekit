@@ -17,6 +17,55 @@ use crate::plan;
 use crate::runner::{self, CheckRecord, Matrix};
 use crate::versions::VersionsFile;
 
+// drafts link the corpus and docs at the release that holds them, so the links do not move
+const SHAPEKIT_URL: &str = "https://github.com/ErenTopaal/shapekit";
+
+/// The git tag of the shapekit release that carries corpus `version`.
+pub fn release_tag(version: &str) -> String {
+    format!("v{version}")
+}
+
+// a check's source starts with a corpus path (`corpus/... case 3`, `corpus/...: decode = ...`);
+// that path becomes a link, the rest stays text
+fn link_source(source: &str, tag: &str) -> String {
+    if !source.starts_with("corpus/") {
+        return source.to_string();
+    }
+    let end = source.find([' ', ':']).unwrap_or(source.len());
+    let (path, rest) = source.split_at(end);
+    format!("[`{path}`]({SHAPEKIT_URL}/blob/{tag}/{path}){rest}")
+}
+
+// sources naming cases of one file (`<path> case <n>`) become one line, `<path> cases 2, 13`
+fn group_sources(sources: &[&str]) -> Vec<String> {
+    let mut cases: BTreeMap<&str, BTreeSet<u64>> = BTreeMap::new();
+    let mut other: BTreeSet<&str> = BTreeSet::new();
+    for s in sources {
+        match s
+            .rsplit_once(" case ")
+            .and_then(|(p, n)| n.parse::<u64>().ok().map(|n| (p, n)))
+        {
+            Some((path, n)) => {
+                cases.entry(path).or_default().insert(n);
+            }
+            None => {
+                other.insert(s);
+            }
+        }
+    }
+    let mut out: Vec<String> = cases
+        .into_iter()
+        .map(|(path, ns)| {
+            let list: Vec<String> = ns.iter().map(u64::to_string).collect();
+            let word = if list.len() == 1 { "case" } else { "cases" };
+            format!("{path} {word} {}", list.join(", "))
+        })
+        .collect();
+    out.extend(other.into_iter().map(str::to_string));
+    out.sort();
+    out
+}
+
 /// The marker every drafted body carries; filing searches upstream for it to avoid duplicates.
 pub const MARKER: &str = "shapekit vector";
 const FILED: &str = "filed.json";
@@ -118,26 +167,36 @@ pub fn drafts(
                     .trim_end_matches('.'),
                 row.id
             );
+            let tag = release_tag(&matrix.corpus_version);
             let mut body = String::new();
             let _ = writeln!(body, "## What happens\n");
+            let against = if first.result == ResultClass::DivergesFromPeers {
+                "the other Stellar SDKs (the protocol leaves this case to the implementation, so the SDKs are compared with each other)"
+            } else {
+                "the Stellar network"
+            };
             let _ = writeln!(
                 body,
-                "`{}` {} answers {} of the checks of corpus entry `{}` differently from {}.\n",
+                "On the input below, `{}` {} answers differently from {} in {} {}.\n",
                 sdk_conf.package,
                 vers.join(", "),
+                against,
                 failing.len(),
-                row.id,
-                if first.result == ResultClass::DivergesFromPeers {
-                    "the other SDKs (the network leaves this case to the implementation)"
+                if failing.len() == 1 {
+                    "check"
                 } else {
-                    "the Stellar network"
+                    "checks"
                 }
             );
-            let _ = writeln!(body, "## Minimal vector\n");
             let _ = writeln!(
                 body,
-                "Entry `{}` (kind {:?}, family `{}`) of the shapekit corpus {}. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).\n",
-                row.id, entry.kind, entry.family, matrix.corpus_version
+                "A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol]({SHAPEKIT_URL}/blob/{tag}/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.\n"
+            );
+            let _ = writeln!(body, "## Input\n");
+            let _ = writeln!(
+                body,
+                "Corpus entry `{}` (family `{}`) of the [shapekit]({SHAPEKIT_URL}) corpus {}.\n",
+                row.id, entry.family, matrix.corpus_version
             );
             // the same check failing on several versions is shown once, with its versions
             let mut by_check: Vec<(&CheckRecord, Vec<&str>)> = Vec::new();
@@ -170,37 +229,45 @@ pub fn drafts(
             if by_check.len() > SHOWN_CHECKS {
                 let _ = writeln!(
                     body,
-                    "{} more failing checks are listed in `divergence-matrix.json`.\n",
+                    "{} more checks fail; the command below lists every one.\n",
                     by_check.len() - SHOWN_CHECKS
                 );
             }
             let _ = writeln!(body, "## Reproduce\n");
             let _ = writeln!(
                 body,
-                "```sh\nshapekit conformance run --sdk {sdk} --version {} --entry {}\n```\n",
+                "From a checkout of {SHAPEKIT_URL} at tag `{tag}`:\n\n```sh\nshapekit conformance run --sdk {sdk} --version {} --entry {}\n```\n",
                 vers[0], row.id
             );
-            let _ = writeln!(body, "## Expected value and its source\n");
-            let mut sources: Vec<&str> = failing.iter().map(|(_, c)| c.source.as_str()).collect();
-            sources.sort_unstable();
-            sources.dedup();
-            for s in sources {
-                let _ = writeln!(body, "- {s}");
+            let _ = writeln!(body, "## Where the expected answers come from\n");
+            let _ = writeln!(body, "The expected answers are recorded in:\n");
+            let sources: Vec<&str> = failing.iter().map(|(_, c)| c.source.as_str()).collect();
+            for s in group_sources(&sources) {
+                let _ = writeln!(body, "- {}", link_source(&s, &tag));
             }
             if let Some(notes) = &entry.notes {
-                let _ = writeln!(body, "\nEntry notes: {notes}");
+                let _ = writeln!(
+                    body,
+                    "\nHow the corpus entry was built and checked: {notes}"
+                );
             }
             if !entry.linked_issues.is_empty() {
                 let _ = writeln!(body, "\nRelated: {}", entry.linked_issues.join(", "));
             }
             let _ = writeln!(body, "\n## Sibling issues\n");
-            let siblings: Vec<String> = affected
-                .iter()
-                .filter(|s| *s != &sdk)
-                .map(|s| format!("- {s}: `findings/issues/{}`", file_name(s, &row.id)))
-                .collect();
+            let mut siblings = Vec::new();
+            for s in affected.iter().filter(|s| *s != &sdk) {
+                let conf = versions.sdk(s)?;
+                siblings.push(format!(
+                    "- `{}` ({}) diverges on the same entry.",
+                    conf.package, conf.issues_repo
+                ));
+            }
             if siblings.is_empty() {
-                let _ = writeln!(body, "None: only this SDK diverges on this entry.");
+                let _ = writeln!(
+                    body,
+                    "None: of the SDKs tested, only this one diverges on this entry."
+                );
             } else {
                 for s in siblings {
                     let _ = writeln!(body, "{s}");

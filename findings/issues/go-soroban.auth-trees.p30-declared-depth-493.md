@@ -3,11 +3,13 @@
 
 ## What happens
 
-`github.com/stellar/go-stellar-sdk` v0.8.0, v0.9.0 answers 4 of the checks of corpus entry `soroban.auth-trees.p30-declared-depth-493` differently from the Stellar network.
+On the input below, `github.com/stellar/go-stellar-sdk` v0.8.0, v0.9.0 answers differently from the Stellar network in 4 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `soroban.auth-trees.p30-declared-depth-493` (kind Xdr, family `soroban.auth-trees`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `soroban.auth-trees.p30-declared-depth-493` (family `soroban.auth-trees`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `testnet/decode_encode` on v0.8.0, v0.9.0
 
@@ -47,21 +49,25 @@ Actual: `{"xdr":"AAAAAgAAAAAc/FAM6LNIOWOzSip7lmPnQwHeXh1lk3Gb4TWhSysc6QACCwYAAAB
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk go --version v0.8.0 --entry soroban.auth-trees.p30-declared-depth-493
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/mainnet.xdr: decode = must-reject (validity InvalidByCore)
-- corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/testnet.xdr: decode = must-reject (validity InvalidByCore)
+The expected answers are recorded in:
 
-Entry notes: an address entry declaring a chain 493 invocations deep below its root, 494 with the root, one past what core's rust parser reads at depth 1000 (can_parse_transaction): core refuses the envelope with txMALFORMED at submission. submitted with ledger 112 as the last closed ledger
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/mainnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/mainnet.xdr): decode = must-reject (validity InvalidByCore)
+- [`corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/testnet.xdr`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/entries/soroban.auth-trees/soroban.auth-trees.p30-declared-depth-493/testnet.xdr): decode = must-reject (validity InvalidByCore)
+
+How the corpus entry was built and checked: an address entry declaring a chain 493 invocations deep below its root, 494 with the root, one past what core's rust parser reads at depth 1000 (can_parse_transaction): core refuses the envelope with txMALFORMED at submission. submitted with ledger 112 as the last closed ledger
 
 Related: https://github.com/stellar/wallet-backend/issues/746
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `soroban.auth-trees.p30-declared-depth-493`

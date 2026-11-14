@@ -3,11 +3,13 @@
 
 ## What happens
 
-`@stellar/stellar-sdk` 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1 answers 5 of the checks of corpus entry `soroban.scval-shapes.synth-map-js1789-u32-symbol` differently from the Stellar network.
+On the input below, `@stellar/stellar-sdk` 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1 answers differently from the Stellar network in 5 checks.
 
-## Minimal vector
+A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
-Entry `soroban.scval-shapes.synth-map-js1789-u32-symbol` (kind NativeProjection, family `soroban.scval-shapes`) of the shapekit corpus 0.1.0. Each check below is one request of the shapekit testee protocol (`docs/testee-protocol.md`).
+## Input
+
+Corpus entry `soroban.scval-shapes.synth-map-js1789-u32-symbol` (family `soroban.scval-shapes`) of the [shapekit](https://github.com/ErenTopaal/shapekit) corpus 0.1.0.
 
 ### `case 0/to_native` on 16.3.0, 16.3.1, 16.4.1, 17.2.0, 17.2.1
 
@@ -26,20 +28,24 @@ Actual: `{"native":{"entries":[{"key":{"type":"string","value":"1"},"value":{"ty
 
 ## Reproduce
 
+From a checkout of https://github.com/ErenTopaal/shapekit at tag `v0.1.0`:
+
 ```sh
 shapekit conformance run --sdk js --version 16.3.0 --entry soroban.scval-shapes.synth-map-js1789-u32-symbol
 ```
 
-## Expected value and its source
+## Where the expected answers come from
 
-- corpus/vectors/native-projection/soroban.scval-shapes.synth-map-js1789-u32-symbol.json case 0
+The expected answers are recorded in:
 
-Entry notes: the js-stellar-sdk#1789 map literally: {u32 1: u32 10, symbol "1": u32 20}. scValToNative in 17.2.1 returned { "1": 20 }. keys are sorted the way soroban-env-host 30.0.0 sorts them and the host converts the map, so a contract can emit it. rule no-entry-lost: an error passes, a structure keeping all 2 entries with their key types passes, fewer entries fails.
+- [`corpus/vectors/native-projection/soroban.scval-shapes.synth-map-js1789-u32-symbol.json`](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus/vectors/native-projection/soroban.scval-shapes.synth-map-js1789-u32-symbol.json) case 0
+
+How the corpus entry was built and checked: the js-stellar-sdk#1789 map literally: {u32 1: u32 10, symbol "1": u32 20}. scValToNative in 17.2.1 returned { "1": 20 }. keys are sorted the way soroban-env-host 30.0.0 sorts them and the host converts the map, so a contract can emit it. rule no-entry-lost: an error passes, a structure keeping all 2 entries with their key types passes, fewer entries fails.
 
 Related: https://github.com/stellar/js-stellar-sdk/issues/1789
 
 ## Sibling issues
 
-None: only this SDK diverges on this entry.
+None: of the SDKs tested, only this one diverges on this entry.
 
 shapekit vector: `soroban.scval-shapes.synth-map-js1789-u32-symbol`

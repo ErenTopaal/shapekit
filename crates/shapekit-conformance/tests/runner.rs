@@ -694,6 +694,12 @@ fn draft_issues_for_a_divergence() {
             .contains("shapekit conformance run --sdk rust --version 30.0.0 --entry t.order-wrong")
     );
     assert!(d.body.contains("\"op\": \"asset_order\""));
+    // an upstream maintainer has no checkout, so sources are links at the release tag
+    assert!(
+        d.body
+            .contains("https://github.com/ErenTopaal/shapekit/blob/v")
+    );
+    assert!(!d.body.contains("findings/issues/"));
     let (repo, title, _, vector) =
         shapekit_conformance::issues::parse(&shapekit_conformance::issues::render(d)).unwrap();
     assert_eq!(
