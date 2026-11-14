@@ -184,6 +184,40 @@ pub fn check_node(
     Ok(format!("{want}, {artifact} sha256 matches"))
 }
 
+/// Checks GitHub's release document for a tag (`/repos/{owner}/{repo}/releases/tags/{tag}`):
+/// a published, non-prerelease release that holds the asset, and the sha256 digest GitHub
+/// computed for the asset on upload.
+pub fn check_github_release(release_doc: &str, tag: &str, asset: &str, sha256: &str) -> Verdict {
+    let doc: Value =
+        serde_json::from_str(release_doc).map_err(|e| format!("bad github response: {e}"))?;
+    if doc["tag_name"].as_str() != Some(tag) {
+        return Err(format!(
+            "github returned release {}, expected {tag}",
+            doc["tag_name"]
+        ));
+    }
+    if doc["draft"].as_bool() != Some(false) {
+        return Err(format!("release {tag} is a draft"));
+    }
+    if doc["prerelease"].as_bool() != Some(false) {
+        return Err(format!("release {tag} is a prerelease"));
+    }
+    let Some(found) = doc["assets"]
+        .as_array()
+        .ok_or("release has no asset list")?
+        .iter()
+        .find(|a| a["name"].as_str() == Some(asset))
+    else {
+        return Err(format!("release {tag} has no asset {asset}"));
+    };
+    match found["digest"].as_str().map(|d| d.strip_prefix("sha256:")) {
+        Some(Some(h)) if h == sha256 => Ok(format!("{asset} sha256 matches")),
+        Some(Some(h)) => Err(format!("{asset} sha256 is {h}, pinned {sha256}")),
+        Some(None) => Err(format!("{asset} digest is not a sha256 digest")),
+        None => Err(format!("github reports no digest for {asset}")),
+    }
+}
+
 /// Compares the `Docker-Content-Digest` header of a manifest request.
 pub fn check_image_digest(header: Option<&str>, digest: &str) -> Verdict {
     match header {
@@ -462,6 +496,60 @@ mod tests {
             )
             .unwrap_err()
             .contains("no entry")
+        );
+    }
+
+    // trimmed from api.github.com/repos/stellar/stellar-cli/releases/tags/v30.0.1
+    const CLI_RELEASE: &str = r#"{"tag_name":"v30.0.1","draft":false,"prerelease":false,"assets":[
+{"name":"stellar-cli-30.0.1-aarch64-apple-darwin.tar.gz","digest":"sha256:0000000000000000000000000000000000000000000000000000000000000000"},
+{"name":"stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz","digest":"sha256:48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f","size":26579342}]}"#;
+    const CLI_ASSET: &str = "stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz";
+    const CLI_SHA: &str = "48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f";
+
+    #[test]
+    fn github_release_asset_matches() {
+        assert_eq!(
+            check_github_release(CLI_RELEASE, "v30.0.1", CLI_ASSET, CLI_SHA),
+            Ok(format!("{CLI_ASSET} sha256 matches"))
+        );
+    }
+
+    #[test]
+    fn github_release_mismatches_fail() {
+        let zero = "0".repeat(64);
+        assert!(
+            check_github_release(CLI_RELEASE, "v30.0.1", CLI_ASSET, &zero)
+                .unwrap_err()
+                .contains(&format!("pinned {zero}"))
+        );
+        assert!(
+            check_github_release(CLI_RELEASE, "v30.0.1", "stellar-cli-30.0.1.zip", CLI_SHA)
+                .unwrap_err()
+                .contains("has no asset")
+        );
+        assert!(
+            check_github_release(CLI_RELEASE, "v30.0.0", CLI_ASSET, CLI_SHA)
+                .unwrap_err()
+                .contains("expected v30.0.0")
+        );
+    }
+
+    #[test]
+    fn github_prerelease_draft_and_missing_digest_fail() {
+        let pre = CLI_RELEASE.replace("\"prerelease\":false", "\"prerelease\":true");
+        assert_eq!(
+            check_github_release(&pre, "v30.0.1", CLI_ASSET, CLI_SHA),
+            Err("release v30.0.1 is a prerelease".to_string())
+        );
+        let draft = CLI_RELEASE.replace("\"draft\":false", "\"draft\":true");
+        assert_eq!(
+            check_github_release(&draft, "v30.0.1", CLI_ASSET, CLI_SHA),
+            Err("release v30.0.1 is a draft".to_string())
+        );
+        let undigested = CLI_RELEASE.replace(&format!("\"digest\":\"sha256:{CLI_SHA}\","), "");
+        assert_eq!(
+            check_github_release(&undigested, "v30.0.1", CLI_ASSET, CLI_SHA),
+            Err(format!("github reports no digest for {CLI_ASSET}"))
         );
     }
 

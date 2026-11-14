@@ -13,7 +13,8 @@
 //!   instance per level, since the host forbids re-entry), and the tree one
 //!   level deeper, which fails at apply;
 //! - the widest fan-out of one level that applies, and one wider, which
-//!   simulation accepts but the host refuses at apply;
+//!   simulation accepts but the host refuses at apply for exceeding the
+//!   transaction memory limit;
 //! - declared trees far deeper than the call, whose nodes below the root
 //!   are never matched and never checked: the deepest the host decodes, and
 //!   one deeper, which core includes and the host traps on; then the deepest
@@ -33,7 +34,7 @@
 //! | shape                          | accepted | first refused | where                                    |
 //! |--------------------------------|----------|---------------|------------------------------------------|
 //! | matched depth (invocations)    | 31       | 32            | host, at apply                           |
-//! | fan-out of one level           | 323      | 324           | host, at apply (simulation: 325)         |
+//! | fan-out of one level           | 330      | 331           | host, at apply (simulation: 331)         |
 //! | declared levels below the root | 245      | 246           | host xdr depth 500, at apply             |
 //! | declared levels below the root | 492      | 493           | core envelope depth 1000, at submission  |
 //!
@@ -88,9 +89,14 @@ const BALANCE: i64 = 100_000_000_000;
 pub const MATCHED_DEPTH: u32 = 31;
 
 /// Most calls one level can fan out to and still apply. Simulation
-/// accepts up to 325; core's host traps from 324 even when the transaction
-/// declares every instruction it may.
-pub const FANOUT: u32 = 323;
+/// accepts up to 331; from 331 the host fails at apply even when the
+/// transaction declares every instruction it may. The bound is the
+/// transaction memory limit (testnet `txMemoryLimit`, 41943040 bytes), not
+/// the instructions: every call instantiates the auth_tree module again, so
+/// the limit moves with the wasm. The stellar-cli build (wasm-opt and spec
+/// shaking, 1954 bytes) fits 330; the earlier plain cargo build (5316 bytes)
+/// fit 323.
+pub const FANOUT: u32 = 330;
 
 /// Deepest declared chain below a matched root that the host decodes
 /// (`DEFAULT_XDR_RW_LIMITS` depth 500 in soroban-env-host 30.0.0).
@@ -664,12 +670,17 @@ fn fanout(
         .driver()
         .soroban_with(source, hf, over_data, vec![entry])?;
     let applied = ctx.submit_and_close_failing(&env)?;
-    ensure_failed_over_limit(&applied, "a failed invocation one call wider")?;
+    // the description names the result, so only the memory limit's answer is accepted
+    ensure_invoke_result(
+        &applied,
+        |r| matches!(r, InvokeHostFunctionResult::ResourceLimitExceeded),
+        "a failed invocation one call wider",
+    )?;
     ctx.capture(
         &format!("fanout-{over}-fails"),
         Selector::ledger_of(&applied),
         Spec::new(format!(
-            "the same call fanned out {over} times, declaring the maximum instructions, which simulation still accepts: the host traps at apply and core fails the transaction"
+            "the same call fanned out {over} times, declaring the maximum instructions, which simulation still accepts: at apply the host goes past the transaction memory limit and core fails the transaction with resource_limit_exceeded"
         ))
         .fields(&ADDRESS_FIELDS)
         .flags(&["failed-tx"]),

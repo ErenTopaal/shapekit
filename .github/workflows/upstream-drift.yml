@@ -1,7 +1,7 @@
 name: upstream-drift
 
-# weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr or sdk
-# release, or change to core's golden index, gets a tracking issue carrying the checklist of
+# weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr, sdk or
+# stellar-cli release, or change to core's golden index, gets a tracking issue carrying the checklist of
 # docs/protocol-upgrade-runbook.md
 
 on:
@@ -26,6 +26,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
       - name: verify every pin still exists upstream
+        env:
+          # the [[release]] pins read github's releases api, which allows 60 unauthenticated
+          # requests an hour per address
+          GITHUB_TOKEN: ${{ github.token }}
         run: cargo run -p shapekit-cli -- pins verify
       - name: tracking issues for new upstream releases and golden index changes
         # runs even when a pin is broken, since that is exactly when the report is wanted

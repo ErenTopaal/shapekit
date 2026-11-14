@@ -22,6 +22,8 @@ pub struct Pins {
     pub images: Vec<ImagePin>,
     #[serde(default)]
     pub git: Vec<GitPin>,
+    #[serde(default, rename = "release")]
+    pub releases: Vec<ReleasePin>,
     #[serde(default, rename = "crate")]
     pub crates: Vec<CratePin>,
     #[serde(default)]
@@ -66,6 +68,22 @@ pub struct GitPin {
     #[serde(rename = "ref")]
     pub git_ref: Option<String>,
     pub sha: Option<String>,
+    pub purpose: String,
+}
+
+/// One asset of a GitHub release, for a tool used as its official binary
+/// rather than built from source.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ReleasePin {
+    pub name: String,
+    /// GitHub `owner/name`.
+    pub repository: String,
+    pub tag: String,
+    /// The commit the tag points at.
+    pub commit: String,
+    pub asset: String,
+    pub sha256: String,
     pub purpose: String,
 }
 
@@ -191,6 +209,34 @@ fn validate(pins: &Pins) -> Result<()> {
     }
 
     let mut seen = HashSet::new();
+    for r in &pins.releases {
+        let what = format!("release {}", r.name);
+        require_unique(&mut seen, "release", r.name.clone())?;
+        // only github.com is spoken to, so the repository is a bare owner/name
+        let mut parts = r.repository.split('/');
+        let well_formed = matches!(
+            (parts.next(), parts.next(), parts.next()),
+            (Some(owner), Some(repo), None) if !owner.is_empty() && !repo.is_empty() && !owner.contains('.')
+        );
+        if !well_formed {
+            bail!("{what}: repository must be a github path like owner/name");
+        }
+        if r.tag.is_empty() || r.tag.starts_with("refs/") {
+            bail!("{what}: tag must be a bare tag name such as v1.0.0");
+        }
+        if !is_lower_hex(&r.commit, 40) {
+            bail!("{what}: commit must be 40 lowercase hex characters");
+        }
+        if r.asset.is_empty() || r.asset.contains('/') {
+            bail!("{what}: asset must be a file name");
+        }
+        if !is_lower_hex(&r.sha256, 64) {
+            bail!("{what}: sha256 must be 64 lowercase hex characters");
+        }
+        require_purpose(&what, &r.purpose)?;
+    }
+
+    let mut seen = HashSet::new();
     for c in &pins.crates {
         let what = format!("crate {}@{}", c.name, c.version);
         require_unique(&mut seen, "crate", format!("{}@{}", c.name, c.version))?;
@@ -266,6 +312,15 @@ url = "https://github.com/actions/checkout"
 ref = "refs/tags/v7"
 purpose = "ci checkout"
 
+[[release]]
+name = "stellar-cli"
+repository = "stellar/stellar-cli"
+tag = "v30.0.1"
+commit = "f2a7b74175c34585f3b30a1abf42a2d41cbcc390"
+asset = "stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz"
+sha256 = "48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f"
+purpose = "contract builds"
+
 [[crate]]
 name = "toml"
 version = "1.2.1+spec-1.1.0"
@@ -295,6 +350,8 @@ purpose = "go testee"
         assert_eq!(pins.git[0].git_ref.as_deref(), Some("refs/tags/v30.0.0"));
         assert!(pins.git[1].git_ref.is_none());
         assert!(pins.git[2].sha.is_none());
+        assert_eq!(pins.releases[0].repository, "stellar/stellar-cli");
+        assert_eq!(pins.releases[0].tag, "v30.0.1");
         assert_eq!(pins.crates[0].version, "1.2.1+spec-1.1.0");
         assert_eq!(pins.npm[0].name, "@stellar/stellar-sdk");
         assert_eq!(pins.gomod[0].module, "github.com/stellar/go-stellar-sdk");
@@ -306,6 +363,7 @@ purpose = "go testee"
         let pins = load(&path).unwrap();
         assert!(pins.git.iter().any(|g| g.name == "stellar-core"));
         assert!(pins.images.iter().any(|i| i.name == "stellar-core"));
+        assert!(pins.releases.iter().any(|r| r.name == "stellar-cli"));
     }
 
     fn err_of(text: &str) -> String {
@@ -364,6 +422,29 @@ purpose = "go testee"
     fn rejects_bad_digest() {
         let text = SAMPLE.replace("digest = \"sha256:", "digest = \"md5:");
         assert!(err_of(&text).contains("digest must be sha256"));
+    }
+
+    #[test]
+    fn rejects_malformed_release() {
+        let repo = SAMPLE.replace(
+            "repository = \"stellar/stellar-cli\"",
+            "repository = \"github.com/stellar/stellar-cli\"",
+        );
+        assert!(err_of(&repo).contains("release stellar-cli: repository must be a github path"));
+        let tag = SAMPLE.replace("tag = \"v30.0.1\"", "tag = \"refs/tags/v30.0.1\"");
+        assert!(err_of(&tag).contains("bare tag name"));
+        let commit = SAMPLE.replace("f2a7b74175c34585f3b30a1abf42a2d41cbcc390", "f2a7b741");
+        assert!(err_of(&commit).contains("commit must be 40"));
+        let asset = SAMPLE.replace(
+            "asset = \"stellar-cli-30.0.1",
+            "asset = \"download/stellar-cli-30.0.1",
+        );
+        assert!(err_of(&asset).contains("asset must be a file name"));
+        let sha = SAMPLE.replace(
+            "48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f",
+            "48C70074020E09AF0A3EBBD2BF62D53C9AEC47935E49A112D3CD90FB4E37658F",
+        );
+        assert!(err_of(&sha).contains("release stellar-cli: sha256 must be 64"));
     }
 
     #[test]

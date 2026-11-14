@@ -116,7 +116,12 @@ another protocol, so no Soroban chain records until this is done; if testnet has
 yet, the release is not ready (see the next tier section for the rehearsal workaround).
 
 Rebuild the contracts if the SDK's interface protocol moved (`contracts/build.sh`, and
-`contracts/build-legacy.sh` for the older interface builds), then:
+`contracts/build-legacy.sh` for the older interface builds). Both run `stellar contract build`
+from the stellar-cli release pinned in `pins.toml` (`[[release]] stellar-cli`); a stellar-cli
+release for the new protocol moves that pin first: from soroban-sdk 30 on, the sdk's build
+script refuses a stellar-cli whose major version (`STELLAR_CLI_VERSION`) is below its own, and
+the cli's post-processing (spec shaking, wasm-opt, the `cliver` meta entry) is part of the
+committed bytes. Then:
 
 ```sh
 cargo build --workspace --locked

@@ -29,7 +29,7 @@
 //!
 //! Soroban fees can be network dependent too: recipes take resources and fees from
 //! simulation, which runs the host over network-derived contract ids, and the fee charged
-//! for soroban.auth-trees fanout-323 differs by 25 stroops between the variants. In every
+//! for soroban.auth-trees fanout-330 differs by 26 stroops between the variants. In every
 //! Soroban transaction (one with a post-apply fee change or a contract-data, contract-code
 //! or ttl change) `fee.charged`, `fee.balance_delta` and the amounts of its fee-processing
 //! and post-apply-fee changes are masked, and since such a difference carries into every

@@ -96,6 +96,28 @@ impl Http {
         })
     }
 
+    /// GETs a GitHub REST API document. The api allows 60 unauthenticated
+    /// requests an hour per address, which a shared CI runner can use up, so a
+    /// `GITHUB_TOKEN` in the environment (what Actions provides) is sent along.
+    pub fn get_github_api(&self, path: &str) -> Result<String> {
+        let url = format!("https://api.github.com/{path}");
+        let token = std::env::var("GITHUB_TOKEN").ok().filter(|t| !t.is_empty());
+        with_retries(&format!("GET {url}"), http_transient, || {
+            let mut req = self
+                .client
+                .get(&url)
+                .header(ACCEPT, "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28");
+            if let Some(token) = &token {
+                req = req.header(AUTHORIZATION, format!("Bearer {token}"));
+            }
+            let resp = req.send().with_context(|| format!("GET {url}"))?;
+            ensure_success(resp, &url)?
+                .text()
+                .with_context(|| format!("reading body of {url}"))
+        })
+    }
+
     /// Returns the manifest digest a Docker Hub tag currently points at.
     pub fn docker_hub_digest(&self, repository: &str, tag: &str) -> Result<Option<String>> {
         let token_url = format!(

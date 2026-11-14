@@ -8,6 +8,8 @@
 #   [[git]]        remote url, optional ref, commit sha. a ref without a sha is a
 #                  deliberately floating ref (only checked to exist). a sha without a
 #                  ref is a bare commit (checked by fetching it)
+#   [[release]]    github release asset of a tool used as its official binary: repository,
+#                  tag, the commit the tag names, asset file name and its sha256
 #   [[crate]]      crates.io name, exact version and the .crate sha256
 #   [[npm]]        npm package, version and dist integrity
 #   [[gomod]]      go module, version and the vcs commit the go proxy reports
@@ -36,6 +38,17 @@ version = "26.13.1"
 artifact = "node-v26.13.1-linux-x64.tar.xz"
 sha256 = "5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864"
 purpose = "node lts for the js testee"
+
+# release binaries, fetched by scripts/fetch-stellar-cli.sh
+
+[[release]]
+name = "stellar-cli"
+repository = "stellar/stellar-cli"
+tag = "v30.0.1"
+commit = "f2a7b74175c34585f3b30a1abf42a2d41cbcc390"
+asset = "stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz"
+sha256 = "48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f"
+purpose = "stellar contract build for the test contracts (contracts/build.sh, contracts/build-legacy.sh); the asset carries a github build attestation from the release workflow"
 
 # container images
 

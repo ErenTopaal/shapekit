@@ -112,6 +112,29 @@ jobs:
       - run: npx tsc
       - run: node --test "dist/**/*.test.js"
 
+  contracts:
+    # the committed wasm is what `stellar contract build` from the pinned stellar-cli release
+    # makes of the committed sources; a source, sdk, toolchain or stellar-cli change without
+    # the rebuilt wasm fails here
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          targets: wasm32v1-none
+      - name: rebuild the contracts with the pinned stellar-cli
+        run: |
+          set -euo pipefail
+          contracts/build.sh
+          contracts/build-legacy.sh
+          changed=$(git status --porcelain -- contracts)
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            echo "::error::contracts/build.sh and contracts/build-legacy.sh do not reproduce the committed wasm"
+            exit 1
+          fi
+
   corpus:
     # registry, manifest (which round-trips every entry through stellar-xdr), generated files,
     # oracle files, coverage, guide, goldens, committed chains, the release archive, text rules

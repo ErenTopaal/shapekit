@@ -1,5 +1,6 @@
 //! The repository's own test contracts (`contracts/wasm/`), built by
-//! `contracts/build.sh` with soroban-sdk 29.0.1 and checked against
+//! `contracts/build.sh` with soroban-sdk 29.0.1 through `stellar contract
+//! build` from the pinned stellar-cli release, and checked against
 //! `contracts/wasm/SHA256SUMS` by the tests, plus older-sdk builds of echo
 //! from `contracts/build-legacy.sh` (`contracts/wasm/p<N>/`).
 

@@ -49,8 +49,9 @@ upstream_xdr=$(newest_tag stellar/stellar-xdr '^v[0-9]+\.[0-9]+$')
 upstream_js=$(curl -fsS -A "$ua" https://registry.npmjs.org/@stellar%2fstellar-sdk/latest | json_field version)
 upstream_go=$(curl -fsS -A "$ua" https://proxy.golang.org/github.com/stellar/go-stellar-sdk/@latest | json_field Version)
 upstream_crate=$(curl -fsS -A "$ua" https://crates.io/api/v1/crates/stellar-xdr | json_field crate.max_stable_version)
+upstream_cli=$(newest_tag stellar/stellar-cli '^v[0-9]+\.[0-9]+\.[0-9]+$')
 
-# prints the five pinned versions, one per line, in the same order as above
+# prints the six pinned versions, one per line, in the same order as above
 read_pins() {
   python3 -I - "$pins" <<'PY'
 import re, sys, tomllib
@@ -78,17 +79,19 @@ print(git_tag("stellar-xdr"))
 print(newest("npm", "name", "@stellar/stellar-sdk"))
 print(newest("gomod", "module", "github.com/stellar/go-stellar-sdk"))
 print(newest("crate", "name", "stellar-xdr"))
+[cli] = [r for r in pins["release"] if r["name"] == "stellar-cli"]
+print(cli["tag"])
 PY
 }
 
 mapfile -t pinned < <(read_pins)
-if [ "${#pinned[@]}" -ne 5 ]; then
-  echo "could not read the five pins from $pins" >&2
+if [ "${#pinned[@]}" -ne 6 ]; then
+  echo "could not read the six pins from $pins" >&2
   exit 1
 fi
 
-names=("stellar-core" "stellar-xdr (definitions)" "@stellar/stellar-sdk" "github.com/stellar/go-stellar-sdk" "stellar-xdr (crate)")
-upstream=("$upstream_core" "$upstream_xdr" "$upstream_js" "$upstream_go" "$upstream_crate")
+names=("stellar-core" "stellar-xdr (definitions)" "@stellar/stellar-sdk" "github.com/stellar/go-stellar-sdk" "stellar-xdr (crate)" "stellar-cli")
+upstream=("$upstream_core" "$upstream_xdr" "$upstream_js" "$upstream_go" "$upstream_crate" "$upstream_cli")
 
 # one tracking issue per new upstream item; the title names the item, so a later run finds
 # the issue (open or closed) instead of opening it again

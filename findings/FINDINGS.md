@@ -1021,8 +1021,8 @@ xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the co
 
 | kind | path | sha256 | detail |
 |---|---|---|---|
-| manifest | `corpus/manifest.json` | `d937e41a9fbfd7b9` | corpus 0.1.0 |
-| harness | `findings/inputs/harness-wallet-backend-3e22515a.json` | `01ac0c6ecd9bb4dc` | wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest d937e41a9fbfd7b966a5b0afd36fc3783b66873a1caf237d1a74f9f5fc06e3fe |
+| manifest | `corpus/manifest.json` | `fb65dc54ff84879a` | corpus 0.1.0 |
+| harness | `findings/inputs/harness-wallet-backend-3e22515a.json` | `f5c7dd1b2ea1a2a4` | wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest fb65dc54ff84879adb1fb5c41a5cf39b877d4a67191b251e67e8daf2f0c32924 |
 | conformance | `findings/inputs/conformance-rust.json` | `e2bbfbdea883fedb` | corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0 |
 | conformance | `findings/inputs/conformance-go.json` | `5b18d48e65f61941` | corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
 | conformance | `findings/inputs/conformance-js.json` | `b2e054f4d50d3dbd` | corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 |

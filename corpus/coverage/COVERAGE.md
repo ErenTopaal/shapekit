@@ -639,7 +639,7 @@ Wasm upload, contract creation with and without constructor, invocation, TTL ext
 | `HostFunction:invoke_contract` | 91: `cap38.liquidity-pools.testnet-5521432`, `cap40.signed-payload-signer.testnet-4437357`, `cap63.parallel-txset.golden-81af9cfb66a06a01-18` and 88 more |  |
 | `OperationBody:extend_footprint_ttl` | 10: `cap63.parallel-txset.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-04667ce620bffee7-24`, `soroban.invoke-basics.golden-568d51258ccf9080-9` and 7 more |  |
 | `OperationBody:restore_footprint` | 14: `cap66.archival.golden-04667ce620bffee7-26`, `cap66.archival.p30-restore-footprint`, `cap76.archival-remediation.golden-04667ce620bffee7-26` and 11 more |  |
-| `InvokeHostFunctionResult:trapped` | 29: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16`, `cap67.unified-events.golden-938fb779c48ac3af-19` and 26 more |  |
+| `InvokeHostFunctionResult:trapped` | 28: `cap38.liquidity-pools.testnet-5521432`, `cap67.unified-events.golden-938fb779c48ac3af-16`, `cap67.unified-events.golden-938fb779c48ac3af-19` and 25 more |  |
 | `ContractCodeEntryExt:v1` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |
 | `ContractExecutable:wasm` | 23: `cap40.signed-payload-signer.testnet-4437357`, `cap73.sac-trust.golden-a8df5d4dbdc85ac8-2`, `cap85.executable-tag.p30-update-to-external-ref-meta` and 20 more |  |
 | `LedgerEntryData:contract_code` | 7: `soroban.events-max.golden-a8df5d4dbdc85ac8-1`, `soroban.invoke-basics.golden-7b59aa36c1776fe1-32`, `soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1` and 4 more |  |

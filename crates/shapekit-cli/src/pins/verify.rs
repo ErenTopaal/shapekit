@@ -80,6 +80,28 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
         ));
     }
 
+    for r in &pins.releases {
+        out.push((
+            "release",
+            format!("{} {}", r.name, r.tag),
+            Box::new(move || {
+                // the tag must still name the pinned commit, and the asset the pinned bytes
+                let url = format!("https://github.com/{}", r.repository);
+                let git_ref = format!("refs/tags/{}", r.tag);
+                let tag = check::check_git_ref(
+                    &net(remote::ls_remote(&url, &git_ref))?,
+                    &git_ref,
+                    Some(&r.commit),
+                )?;
+                let doc = net(
+                    http.get_github_api(&format!("repos/{}/releases/tags/{}", r.repository, r.tag))
+                )?;
+                let asset = check::check_github_release(&doc, &r.tag, &r.asset, &r.sha256)?;
+                Ok(format!("{tag}, {asset}"))
+            }),
+        ));
+    }
+
     for c in &pins.crates {
         out.push((
             "crate",

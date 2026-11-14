@@ -23,6 +23,7 @@ released binaries), and Docker for the commands that start containers (`gen`, `h
 | Node.js | 26.13.1 | `actions/setup-node`, `pins.toml` (with the archive sha256); `testees/js/package.json` requires `>=26` |
 | TypeScript | 7.0.2 | `testees/js/package.json` and its lock file |
 | golangci-lint | v2.15.0 | `pr.yml`, `pins.toml` |
+| stellar-cli | 30.0.1 (commit `f2a7b741`) | `pins.toml` (`[[release]]`: the `stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz` release asset and its sha256), installed by `scripts/fetch-stellar-cli.sh` |
 | Docker | not pinned | the engine and compose plugin of the `ubuntu-24.04` runner image |
 
 ## Stellar stack
@@ -45,7 +46,19 @@ released binaries), and Docker for the commands that start containers (`gen`, `h
 
 Each of these was the newest stable upstream release on 2026-11-13 (checked with `git ls-remote`,
 crates.io, npm and the Go module proxy; `scripts/upstream-releases.sh --dry-run` reports no
-drift). The stellar CLI (`stellar-cli` 30.0.1) is not used by any deliverable and is not pinned.
+drift).
+
+The test contracts in `contracts/` are built with `stellar contract build` from the official
+stellar-cli 30.0.1 release binary (`contracts/build.sh`, and `contracts/build-legacy.sh` for the
+older soroban-sdk builds). `scripts/fetch-stellar-cli.sh` downloads the pinned release asset,
+refuses it unless its sha256 matches `pins.toml`, and installs `stellar` under
+`target/tools/stellar-cli-30.0.1/`; `shapekit pins verify` checks that the tag still names commit
+`f2a7b741` and that GitHub reports the same sha256 for the asset. The asset also carries a GitHub
+build attestation from stellar-cli's release workflow (`gh attestation verify <asset> --repo
+stellar/stellar-cli`). Besides compiling, `stellar contract build` adds a `cliver` meta entry
+naming its version and commit, removes unused spec entries (soroban-sdk 28 and later) and runs
+wasm-opt, so the committed wasm depends on the stellar-cli release; `pr.yml` rebuilds the
+contracts and fails if the bytes differ from the committed ones.
 
 The full lists (every crate, npm package and Go module with its purpose) are in `pins.toml`.
 
@@ -89,9 +102,9 @@ network's gateway address.
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `pr.yml` | every pull request, pushes to `main` | Release build of the CLI shared by the other jobs. Rust: rustfmt, clippy with warnings denied, `cargo test`. Go: `go vet`, `go test`, golangci-lint per module, and `indexerlint` over `adapters/`. JavaScript testee: `npm ci`, typecheck, build, `node --test`. Corpus: registry check, manifest validation (round trip of every entry), synthetic entries and manifest regenerated and compared with the committed files, `oracle run` over the whole corpus compared with the committed oracle files, `coverage --check`, `guide check`, `goldens agree`, `pack verify`, adapter schema check, the release archive builds, no em dashes. `gen verify-repro` under both passphrases for a rotating window of four families plus every family the change touches (every family when shared generator code, the registry, the contracts or the pins change), sharded over up to four runners; a corpus step checks that the selection script's family list is exactly the set of recipe families the CLI registers. `conformance run` on rust 30.0.0, go v0.9.0 and js 17.4.0. `harness run` with the wallet-backend adapter at the current pin, testnet variant, on three chains |
+| `pr.yml` | every pull request, pushes to `main` | Release build of the CLI shared by the other jobs. Rust: rustfmt, clippy with warnings denied, `cargo test`. Go: `go vet`, `go test`, golangci-lint per module, and `indexerlint` over `adapters/`. JavaScript testee: `npm ci`, typecheck, build, `node --test`. Contracts: `contracts/build.sh` and `contracts/build-legacy.sh` with the pinned stellar-cli, compared byte for byte with the committed wasm. Corpus: registry check, manifest validation (round trip of every entry), synthetic entries and manifest regenerated and compared with the committed files, `oracle run` over the whole corpus compared with the committed oracle files, `coverage --check`, `guide check`, `goldens agree`, `pack verify`, adapter schema check, the release archive builds, no em dashes. `gen verify-repro` under both passphrases for a rotating window of four families plus every family the change touches (every family when shared generator code, the registry, the contracts or the pins change), sharded over up to four runners; a corpus step checks that the selection script's family list is exactly the set of recipe families the CLI registers. `conformance run` on rust 30.0.0, go v0.9.0 and js 17.4.0. `harness run` with the wallet-backend adapter at the current pin, testnet variant, on three chains |
 | `nightly.yml` | daily 03:00 UTC, and by hand | `goldens verify` and core's own `--check-lcm` run against the pinned goldens; `oracle run` over the whole corpus compared with the committed oracle files; `gen verify-repro` with no family filter, so every chain of every registered recipe, under both passphrases; `cargo test` with the docker-backed tests and the `shapekit serve` memory bound; `conformance run --all-versions` and `conformance reproduce`; `harness run` over every chain in both delivery modes (rpc on both networks run twice in one process with the memory growth check, sep54-s3 on testnet); `harness reproduce` of the wallet-backend sightings; coverage; `findings check` over the night's conformance matrices, harness report and an `indexerlint` run on wallet-backend at the pin, failing on any problem other than findings still in status draft |
-| `upstream-drift.yml` | weekly, Monday 06:00 UTC, and by hand | `shapekit pins verify`, then `scripts/upstream-releases.sh`: opens one tracking issue, with the checklist of `docs/protocol-upgrade-runbook.md`, per new stellar-core, stellar-xdr or SDK release and per change to core's golden index (at the newest core release, and the index stamps on core's default branch) |
+| `upstream-drift.yml` | weekly, Monday 06:00 UTC, and by hand | `shapekit pins verify`, then `scripts/upstream-releases.sh`: opens one tracking issue, with the checklist of `docs/protocol-upgrade-runbook.md`, per new stellar-core, stellar-xdr, SDK or stellar-cli release and per change to core's golden index (at the newest core release, and the index stamps on core's default branch) |
 | `release.yml` | a pushed `v*` tag | Refuses a tag whose signature GitHub does not verify. Builds `shapekit`, `indexerlint` and the wallet-backend adapter for linux x86-64, the corpus archive (after `pack verify`; `corpus pack` itself also checks every chain against its `chain.json` and refuses strays under `chains/`) and the golden snapshot; builds the two archives twice on separate runners and requires equal checksums; publishes them with one `SHA256SUMS`, a build provenance attestation per asset and release notes from the newest `STATUS.md` section |
 | `sdk-conformance.yml` | `workflow_call` from an SDK repository | Downloads a pinned release, checks the archive and binary checksums, runs that SDK's testee with the caller's versions file and known-failures list. See [sdk-ci.md](sdk-ci.md) |
 
@@ -123,6 +136,7 @@ the chain counts (43 to 38, and 43 to 33). The rows say which corpus size they w
 | rust | `cargo test --workspace` run | 27 s | 27 s |
 | go | vet, test and golangci-lint over three modules, indexerlint on `adapters/` | 22 s, plus 6 s to install golangci-lint | |
 | js | `npm ci`, typecheck, build, `node --test` | 10 s | |
+| contracts | `contracts/build.sh` and `contracts/build-legacy.sh` from empty target directories, `CARGO_BUILD_JOBS=4`, stellar-cli already fetched (measured 2026-11-14) | 60 s | |
 | corpus | every check listed above together | under 10 s | |
 | repro | `gen verify-repro` of every chain the corpus held then (31 selectable families, 38 chains, 76 recordings), on one machine | 661 s | |
 | repro | slowest of four shards when every family is selected (chain seconds / 2 jobs) | about 230 s | |
@@ -150,7 +164,7 @@ These are the only commands that use the network, each only when run explicitly:
 
 | Command | Talks to | Why |
 |---|---|---|
-| `shapekit pins verify` | GitHub (git), static.rust-lang.org, go.dev, nodejs.org, crates.io index, npm registry, Go module proxy, Docker Hub registry | checks every pin still resolves to the pinned bytes |
+| `shapekit pins verify` | GitHub (git and the releases api), static.rust-lang.org, go.dev, nodejs.org, crates.io index, npm registry, Go module proxy, Docker Hub registry | checks every pin still resolves to the pinned bytes |
 | `shapekit capture history` | the public SEP-54 data lake (`aws-public-blockchain`, us-east-2), or with `--via rpc` a stellar-rpc endpoint (default `https://soroban-testnet.stellar.org`) | captures one ledger from public network history |
 | `shapekit conformance file-issues` | GitHub, through `gh` | opens drafted issues upstream; refuses without `--i-have-owner-approval` |
 | `shapekit conformance run` and `reproduce`, unless `--no-build` | crates.io, the Go module proxy, the npm registry, through `cargo`, `go` and `npm` | the build steps in `conformance/versions.toml` fetch the pinned SDK versions; running the testees is offline |
@@ -166,3 +180,6 @@ Maintenance scripts, which are not part of the tools users run: `scripts/upstrea
 and `scripts/golden-drift.sh` read public release and tag information from GitHub, npm,
 crates.io and the Go module proxy, and fetch core's golden index files; the drift workflow runs
 them. `nightly.yml` and `release.yml` clone stellar-core at the pinned tag for the goldens.
+`scripts/fetch-stellar-cli.sh` (run by `contracts/build.sh` and `contracts/build-legacy.sh`)
+downloads the pinned stellar-cli release asset from GitHub once and reuses the verified copy
+afterwards; the contract builds themselves fetch the pinned crates through `cargo`.

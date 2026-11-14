@@ -19,11 +19,11 @@ the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded
   "len_limit": 16568,
   "op": "decode_encode",
   "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAABbWyQlSv3TpfbAyrjY1+qcMvBg/dhfcz1uTtT1wOsYnQAAAB71zf+Bnvd5R4SNH02S9L8fa0MwgNkqh4isQ9SQZotMi+BnwV4ez6SfvXYEvnJVvOvAZ6aAHAFVm4jsP2AhRzCCAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQKLhbxasseztWuTbIV/9tQsxqs+oiigV16TlD3/eb0cxrjoT0U5OfQ0yhLdZzXJdvg8TOZLpX9zkOJTVYuMYZAPM9B+OQCD+fiQ6jm5d9aoHzFg5odfdtkR1+qGBDADT/KW7wNEuPMAQQNtApYV87ARAUhaEqWpWjvEUJN0BL8tXAAAAbw3gtrOnZAAAAAAAAAA6/3kAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS895lCgOFAu+57xt/a86Z5HtOCHE24Yt9JRckZqOvhEAAAAAAAAAAA... (22092 chars)"
+  "xdr": "AAAAAgAAAACPOxUUaFoa4CfREB013bocHndVdaNCIMrQ4MhTzva2WQAAAB71Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1q+S3/eGDwjRwav4JZ60GhTP6p2f4hoShum9xu/YERBcAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQL278lHnL/SnKS6m2yKsyl+snCsz+IocHzD/XZZeSJNO3k222JgmWmni9i75eC8DdPRkGVSIwia28zfPqG311AH6f6vSklSDC9f6BYWwXj8Bk8R6SNgiuKKZ60O1vKdOXhCHbcIy3FTGy/W3styQ7gg7Zsby2f8IG0owspk/1ibIAAAAbw3gtrOnZAAAAAAAAAAzJuUAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22092 chars)"
 }
 ```
 
-Expected: `{"xdr":"AAAAAgAAAABbWyQlSv3TpfbAyrjY1+qcMvBg/dhfcz1uTtT1wOsYnQAAAB71zf+Bnvd5R4SNH02S9L8fa0MwgNkqh4isQ9SQZotMi+BnwV4ez6SfvXYEvnJVvOvAZ6aAHAFVm4jsP2AhRzCCAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQKLhbxasseztWuTbIV/9tQsxqs+oiigV16TlD3/eb0cxrjoT0U5OfQ0yhLdZzXJdvg8TOZLpX9zkOJTVYuMYZAPM9B+OQCD+fiQ6jm5d9aoHzFg5odfdtkR1+qGBDADT/KW7wNEuPMAQQNtApYV87ARAUhaEqWpWjvEUJN0BL8tXAAAAbw3gtrOnZAAAAAAAAAA6/3kAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS895lCgOFAu+57xt/a86Z5HtOCHE24Yt9JRckZqOvhEAAAAAAAAAAA... (22092 chars)"}`
+Expected: `{"xdr":"AAAAAgAAAACPOxUUaFoa4CfREB013bocHndVdaNCIMrQ4MhTzva2WQAAAB71Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1q+S3/eGDwjRwav4JZ60GhTP6p2f4hoShum9xu/YERBcAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQL278lHnL/SnKS6m2yKsyl+snCsz+IocHzD/XZZeSJNO3k222JgmWmni9i75eC8DdPRkGVSIwia28zfPqG311AH6f6vSklSDC9f6BYWwXj8Bk8R6SNgiuKKZ60O1vKdOXhCHbcIy3FTGy/W3styQ7gg7Zsby2f8IG0owspk/1ibIAAAAbw3gtrOnZAAAAAAAAAAzJuUAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22092 chars)"}`
 
 Actual: `{"rejected":"TypeError: XDR Read Error: exceeded max decoding depth"}`
 
@@ -37,11 +37,11 @@ the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded
   "len_limit": 16568,
   "op": "decode_json",
   "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAABbWyQlSv3TpfbAyrjY1+qcMvBg/dhfcz1uTtT1wOsYnQAAAB71zf+Bnvd5R4SNH02S9L8fa0MwgNkqh4isQ9SQZotMi+BnwV4ez6SfvXYEvnJVvOvAZ6aAHAFVm4jsP2AhRzCCAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQKLhbxasseztWuTbIV/9tQsxqs+oiigV16TlD3/eb0cxrjoT0U5OfQ0yhLdZzXJdvg8TOZLpX9zkOJTVYuMYZAPM9B+OQCD+fiQ6jm5d9aoHzFg5odfdtkR1+qGBDADT/KW7wNEuPMAQQNtApYV87ARAUhaEqWpWjvEUJN0BL8tXAAAAbw3gtrOnZAAAAAAAAAA6/3kAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS895lCgOFAu+57xt/a86Z5HtOCHE24Yt9JRckZqOvhEAAAAAAAAAAA... (22092 chars)"
+  "xdr": "AAAAAgAAAACPOxUUaFoa4CfREB013bocHndVdaNCIMrQ4MhTzva2WQAAAB71Q1MP8YnUjblULzKgF6cQOlqr6MoRA4G8k8WH0zGu1q+S3/eGDwjRwav4JZ60GhTP6p2f4hoShum9xu/YERBcAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAHlj6rNCwXno1Bn4pGsg0Y2JLSmmAn8t/NLujlmhig5xAAAAQL278lHnL/SnKS6m2yKsyl+snCsz+IocHzD/XZZeSJNO3k222JgmWmni9i75eC8DdPRkGVSIwia28zfPqG311AH6f6vSklSDC9f6BYWwXj8Bk8R6SNgiuKKZ60O1vKdOXhCHbcIy3FTGy/W3styQ7gg7Zsby2f8IG0owspk/1ibIAAAAbw3gtrOnZAAAAAAAAAAzJuUAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGSFV+f5x6r04qQKss+eUbjZYRaQUcH1/G/PXKGmEPOqLgAAAAAAAAAA... (22092 chars)"
 }
 ```
 
-Expected: `{"json":{"v2":{"evicted_keys":[],"ext":"v0","ledger_header":{"ext":"v0","hash":"5b5b24254afdd3a5f6c0cab8d8d7ea9c32f060fdd85f733d6e4ed4f5c0eb189d","header":{"base_fee":100,"base_reserve":100000000,"bucket_list_hash":"a5bbc0d12e3cc01040db40a5857cec0440521684a96a568ef11424dd012fcb57","ext":"v0","fee_pool":"3866489","id_pool":"0","inflation_seq":0,"ledger_seq":111,"ledger_version":30,"max_tx_set_size":100,"previous_ledger_hash":"f5cdff819ef77947848d1f4d92f4bf1f6b433080d92a8788ac43d490668b4c8b","scp_value":{"close_time":"1776816000","ext":{"signed_ms":{"close_time_ms":"1776816000000","lc_value_sign... (47776 chars, see the source below)`
+Expected: `{"json":{"v2":{"evicted_keys":[],"ext":"v0","ledger_header":{"ext":"v0","hash":"8f3b1514685a1ae027d1101d35ddba1c1e775575a34220cad0e0c853cef6b659","header":{"base_fee":100,"base_reserve":100000000,"bucket_list_hash":"10876dc232dc54c6cbf5b7b2dc90ee083b66c6f2d9ff081b4a30b2993fd626c8","ext":"v0","fee_pool":"3352293","id_pool":"0","inflation_seq":0,"ledger_seq":111,"ledger_version":30,"max_tx_set_size":100,"previous_ledger_hash":"f543530ff189d48db9542f32a017a7103a5aabe8ca110381bc93c587d331aed6","scp_value":{"close_time":"1776816000","ext":{"signed_ms":{"close_time_ms":"1776816000000","lc_value_sign... (47776 chars, see the source below)`
 
 Actual: `{"rejected":"TypeError: XDR Read Error: exceeded max decoding depth"}`
 
@@ -55,11 +55,11 @@ the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded
   "len_limit": 16568,
   "op": "decode_encode",
   "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAACcv0a04m6JR1vLeDUrs+VCTtuTZ+9pFRXRxkCQM0kg1gAAAB6xVHDCOYWwVJOP2Wq9duvqvyo1VBZLoRJ/dZinAR2/O6ef3SqmusEy0R+3mGOhivxQqel8DrrsiE3Q8SbWv5uxAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMCI+wXuXTwpWWUEDzP/F+wUKdnJVMMu0keu5WJ/bH8ia2m9LknfPHxw2DtEV372tCUz6qd7KUGqfDfdbIS0JweJ1MJpBZW+iTCXyQ9vIj5Y4VskLIKyKKLdqISGTZOmy9AD69zl0xolX2SeuyRJj7QsLlb/PYD7RS5qBtznL3XPAAAAbw3gtrOnZAAAAAAAAAA6/2AAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS7H5VTtpbHjkI+EWlCcjyF38hijS2tHyp2D9DOaDPk3QAAAAAAAAAA... (22092 chars)"
+  "xdr": "AAAAAgAAAACETz5HRiJTcUdrsjZcWqc+XZD8muhC19qrQP8u2XF9OgAAAB5E4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2cG+ScHi8qiNjrY1NMdmtczKaH00XDP7u+uBvuyANpGzAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMHrdciJvzBz8zdPKUwJq0vdwz6UNh5qgGNhlisdV/7ItGQ+hxGuMyAajYpvXE0XpCV3tWIa3CTSclYDLTBjcAJ+DSV/Xv0Xni3eJDTm9YNymTruVEJgZBpGnhzEtmr3M0S+6T6JLlFUp7Jh//IKcEc2zAy03GTlSkNN71KJBqCoAAAAbw3gtrOnZAAAAAAAAAAzJswAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22092 chars)"
 }
 ```
 
-Expected: `{"xdr":"AAAAAgAAAACcv0a04m6JR1vLeDUrs+VCTtuTZ+9pFRXRxkCQM0kg1gAAAB6xVHDCOYWwVJOP2Wq9duvqvyo1VBZLoRJ/dZinAR2/O6ef3SqmusEy0R+3mGOhivxQqel8DrrsiE3Q8SbWv5uxAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMCI+wXuXTwpWWUEDzP/F+wUKdnJVMMu0keu5WJ/bH8ia2m9LknfPHxw2DtEV372tCUz6qd7KUGqfDfdbIS0JweJ1MJpBZW+iTCXyQ9vIj5Y4VskLIKyKKLdqISGTZOmy9AD69zl0xolX2SeuyRJj7QsLlb/PYD7RS5qBtznL3XPAAAAbw3gtrOnZAAAAAAAAAA6/2AAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS7H5VTtpbHjkI+EWlCcjyF38hijS2tHyp2D9DOaDPk3QAAAAAAAAAA... (22092 chars)"}`
+Expected: `{"xdr":"AAAAAgAAAACETz5HRiJTcUdrsjZcWqc+XZD8muhC19qrQP8u2XF9OgAAAB5E4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2cG+ScHi8qiNjrY1NMdmtczKaH00XDP7u+uBvuyANpGzAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMHrdciJvzBz8zdPKUwJq0vdwz6UNh5qgGNhlisdV/7ItGQ+hxGuMyAajYpvXE0XpCV3tWIa3CTSclYDLTBjcAJ+DSV/Xv0Xni3eJDTm9YNymTruVEJgZBpGnhzEtmr3M0S+6T6JLlFUp7Jh//IKcEc2zAy03GTlSkNN71KJBqCoAAAAbw3gtrOnZAAAAAAAAAAzJswAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22092 chars)"}`
 
 Actual: `{"rejected":"TypeError: XDR Read Error: exceeded max decoding depth"}`
 
@@ -73,11 +73,11 @@ the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded
   "len_limit": 16568,
   "op": "decode_json",
   "type": "LedgerCloseMeta",
-  "xdr": "AAAAAgAAAACcv0a04m6JR1vLeDUrs+VCTtuTZ+9pFRXRxkCQM0kg1gAAAB6xVHDCOYWwVJOP2Wq9duvqvyo1VBZLoRJ/dZinAR2/O6ef3SqmusEy0R+3mGOhivxQqel8DrrsiE3Q8SbWv5uxAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMCI+wXuXTwpWWUEDzP/F+wUKdnJVMMu0keu5WJ/bH8ia2m9LknfPHxw2DtEV372tCUz6qd7KUGqfDfdbIS0JweJ1MJpBZW+iTCXyQ9vIj5Y4VskLIKyKKLdqISGTZOmy9AD69zl0xolX2SeuyRJj7QsLlb/PYD7RS5qBtznL3XPAAAAbw3gtrOnZAAAAAAAAAA6/2AAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGS7H5VTtpbHjkI+EWlCcjyF38hijS2tHyp2D9DOaDPk3QAAAAAAAAAA... (22092 chars)"
+  "xdr": "AAAAAgAAAACETz5HRiJTcUdrsjZcWqc+XZD8muhC19qrQP8u2XF9OgAAAB5E4ISxDnzFc91kw+NGP+uIwLScQif/O2Fr/kwWsocx2cG+ScHi8qiNjrY1NMdmtczKaH00XDP7u+uBvuyANpGzAAAAAGnoD4AAAAAAAAAAAwAAAZ2yfIwAAAAAAPOxdkD8D/41P8MXoGRc+iOuhj9lK5bSxP/clfXQGNjxAAAAQMHrdciJvzBz8zdPKUwJq0vdwz6UNh5qgGNhlisdV/7ItGQ+hxGuMyAajYpvXE0XpCV3tWIa3CTSclYDLTBjcAJ+DSV/Xv0Xni3eJDTm9YNymTruVEJgZBpGnhzEtmr3M0S+6T6JLlFUp7Jh//IKcEc2zAy03GTlSkNN71KJBqCoAAAAbw3gtrOnZAAAAAAAAAAzJswAAAAAAAAAAAAAAAAAAABkBfXhAAAAAGT+NAJiuIqaEIIhDzWrtobIFvaN4SBza3QNr/JzIxMEGwAAAAAAAAAA... (22092 chars)"
 }
 ```
 
-Expected: `{"json":{"v2":{"evicted_keys":[],"ext":"v0","ledger_header":{"ext":"v0","hash":"9cbf46b4e26e89475bcb78352bb3e5424edb9367ef691515d1c64090334920d6","header":{"base_fee":100,"base_reserve":100000000,"bucket_list_hash":"d003ebdce5d31a255f649ebb24498fb42c2e56ff3d80fb452e6a06dce72f75cf","ext":"v0","fee_pool":"3866464","id_pool":"0","inflation_seq":0,"ledger_seq":111,"ledger_version":30,"max_tx_set_size":100,"previous_ledger_hash":"b15470c23985b054938fd96abd76ebeabf2a3554164ba1127f7598a7011dbf3b","scp_value":{"close_time":"1776816000","ext":{"signed_ms":{"close_time_ms":"1776816000000","lc_value_sign... (47776 chars, see the source below)`
+Expected: `{"json":{"v2":{"evicted_keys":[],"ext":"v0","ledger_header":{"ext":"v0","hash":"844f3e4746225371476bb2365c5aa73e5d90fc9ae842d7daab40ff2ed9717d3a","header":{"base_fee":100,"base_reserve":100000000,"bucket_list_hash":"44bee93e892e5154a7b261fff20a704736cc0cb4dc64e54a434def528906a0a8","ext":"v0","fee_pool":"3352268","id_pool":"0","inflation_seq":0,"ledger_seq":111,"ledger_version":30,"max_tx_set_size":100,"previous_ledger_hash":"44e084b10e7cc573dd64c3e3463feb88c0b49c4227ff3b616bfe4c16b28731d9","scp_value":{"close_time":"1776816000","ext":{"signed_ms":{"close_time_ms":"1776816000000","lc_value_sign... (47776 chars, see the source below)`
 
 Actual: `{"rejected":"TypeError: XDR Read Error: exceeded max decoding depth"}`
 
