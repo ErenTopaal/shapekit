@@ -156,6 +156,9 @@ function frontmatterField(raw: string, k: string, source: string): string {
 }
 
 function readmeSections(md: string): { intro: string; sections: Map<string, string> } {
+  // the badge lines load images from github.com and shields.io, which the site's same-origin
+  // content security policy blocks, and the site shows the same facts on its own pages
+  md = md.replace(/^\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)\n/gm, "")
   const chunks = md.split(/^## /m)
   const intro = chunks.shift() ?? ""
   const sections = new Map<string, string>()

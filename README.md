@@ -1,5 +1,11 @@
 # shapekit
 
+[![pr](https://github.com/ErenTopaal/shapekit/actions/workflows/pr.yml/badge.svg?branch=main)](https://github.com/ErenTopaal/shapekit/actions/workflows/pr.yml)
+[![nightly](https://github.com/ErenTopaal/shapekit/actions/workflows/nightly.yml/badge.svg?branch=main)](https://github.com/ErenTopaal/shapekit/actions/workflows/nightly.yml)
+[![release](https://img.shields.io/github/v/release/ErenTopaal/shapekit)](https://github.com/ErenTopaal/shapekit/releases)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+[![docs](https://img.shields.io/badge/docs-shapekit.org-blue)](https://shapekit.org/docs)
+
 A test kit for software that reads the Stellar ledger: a corpus of rare but valid XDR shapes,
 most of them recorded on a real stellar-core, a replay harness that feeds them to an indexer, a conformance
 runner that feeds them to the JavaScript, Go and Rust SDKs, a linter for Go indexer code, and an
