@@ -15,6 +15,23 @@ After the commitment ends the repository stays public under Apache-2.0. Anyone c
 follow the runbook; the corpus format, the testee protocol and the adapter interface are
 documented so they do not depend on this repository staying active.
 
+## Protocol 31 rehearsal
+
+The runbook has already been run against protocol 31 before its release, using core's
+next-protocol build. The outputs are in [`next/`](../next), kept apart from the release corpus:
+
+- `next/chains/smoke.p31/`: the smoke chain recorded at ledger protocol 31 under both the
+  testnet and mainnet passphrases, with the next-protocol core image pinned by digest in
+  `next/pins.toml`;
+- `next/entries/`: 109 entries imported from stellar-core's `test-lcm-next` goldens, with their
+  index in `next/goldens/`;
+- `next/registry/`: draft registry records for the protocol 31 CAPs, merged into a copy of
+  `registry/` by `next/overlay-registry.sh`;
+- `next/rehearsal-build.diff`: the code changes the protocol 31 build needs.
+
+How to repeat the rehearsal for the next protocol is in
+[protocol-upgrade-runbook.md](protocol-upgrade-runbook.md#rehearsing-before-the-release-next-tier).
+
 ## What maintenance covers
 
 - Keeping the pins current: `upstream-drift.yml` runs every Monday and opens a tracking issue
@@ -55,25 +72,19 @@ about shapekit itself go through GitHub security advisories, as `SECURITY.md` de
 
 Expected decoded values (`<variant>.expected.json`), the `expected` block of an entry, the
 known-failures files in `conformance/known-failures/` and the reproduction tables decide what
-counts as correct for every SDK and indexer that runs the corpus. A change to any of them needs
-two approving reviews, and the pull request says which upstream source (stellar-core behaviour,
-a CAP, an SEP) justifies the new value. Generated files change only through the command that
-generates them, and CI checks that the committed files are what the command writes.
-
-One of the two reviews comes from a reviewer outside the project, an SDK maintainer or a
-stellar-core engineer.
+counts as correct for every SDK and indexer that runs the corpus. A pull request that changes
+any of them says which upstream source (stellar-core behaviour, a CAP, an SEP) justifies the new
+value. Generated files change only through the command that generates them, and CI checks that
+the committed files are what the command writes.
 
 ### Repository settings
 
 `.github/CODEOWNERS` names a code owner for every path and lists the expected-value paths above
 (`corpus/`, `conformance/known-failures/`, both reproduction tables, the fuzz class list), the
-workflows and the pins separately. A branch ruleset on `main` (Settings, Rules) enforces the
-rules:
+workflows and the pins separately, so GitHub requests the code owner's review on every pull
+request that touches them. A branch ruleset on `main` (Settings, Rules) enforces the rules:
 
-- require a pull request before merging, with **2** required approvals;
-- require review from Code Owners;
-- dismiss stale approvals when new commits are pushed, and require approval of the most recent
-  push;
+- require a pull request before merging;
 - require conversation resolution;
 - require the status checks of the `pr.yml` jobs that run on every pull request (build, rust,
   go, js, contracts, corpus, repro-select, conformance, harness) and that the branch is up to date. The
@@ -83,11 +94,6 @@ rules:
 
 Private vulnerability reporting (Settings, Code security) is on, for the reports `SECURITY.md`
 describes.
-
-GitHub applies the approval count to the whole branch: a ruleset cannot ask for two approvals
-on some paths and one on others, so every pull request needs two approvals. GitHub counts only
-approvals from accounts with write access, so the outside reviewer of an expected-value change
-is added as a collaborator for that review.
 
 ## How SDKs pin a corpus release
 

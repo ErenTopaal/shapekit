@@ -165,8 +165,9 @@ project runs on, are listed in [docs/infrastructure.md](docs/infrastructure.md).
 ## Maintenance
 
 Maintained by GitHub user `ErenTopaal` through the first protocol upgrade after delivery
-(protocol 31). The rules for changes, triage and how SDKs pin corpus releases are in
-[docs/maintenance.md](docs/maintenance.md).
+(protocol 31). The upgrade runbook is already rehearsed against protocol 31 with core's
+next-protocol build; the outputs are in `next/`. The rules for changes, triage and how SDKs pin
+corpus releases, and the rehearsal, are in [docs/maintenance.md](docs/maintenance.md).
 
 ## License
 
