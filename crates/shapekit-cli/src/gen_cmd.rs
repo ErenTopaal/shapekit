@@ -11,7 +11,7 @@ use shapekit_registry::Registry;
 
 use crate::{manifest_cmd, pins};
 
-/// Records the phase 3 smoke chain under one network's passphrase into
+/// Records the smoke chain under one network's passphrase into
 /// `out`, which must not exist yet.
 pub fn smoke(network: &str, out: &Path, pins: &Path) -> Result<bool> {
     let passphrase = match network {

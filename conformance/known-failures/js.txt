@@ -1,7 +1,7 @@
 # known failures of the javascript testee (@stellar/stellar-sdk, versions in versions.toml).
 # format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see
 # crates/shapekit-conformance/src/known.rs and docs/testee-protocol.md, "Known failures".
-# issues point at the drafted bodies until they are filed upstream with owner approval.
+# an issue is a drafted body under findings/issues/ until it is filed upstream, then its url.
 #
 # 16.x StrKey decoders accept payloads of the wrong length (fixed in 17.x)
 cap23.claimable-balances.synth-strkey-b-invalid 16.3.0 diverges-from-network findings/issues/js-cap23.claimable-balances.synth-strkey-b-invalid.md case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 15/strkey_decode

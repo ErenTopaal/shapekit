@@ -290,8 +290,7 @@ jobs:
           retention-days: 30
 
   harness-reproduce:
-    # wallet-backend#729, #731, #716 and the beyond-rfp #753 and #792 on their pre-fix and
-    # fixed commits
+    # wallet-backend#729, #731, #716, #753 and #792 on their pre-fix and fixed commits
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -333,7 +332,7 @@ jobs:
           retention-days: 30
 
   fuzz:
-    # beyond-rfp: corpus-seeded differential fuzzing, stellar-xdr in process against the go
+    # corpus-seeded differential fuzzing, stellar-xdr in process against the go
     # testee (docs/differential-fuzzing.md). a disagreement class missing from
     # findings/fuzz/known-classes.txt fails the job, and so does a stored reproducer that no
     # longer lands in its class. the seed is the date, so a failure replays from the log

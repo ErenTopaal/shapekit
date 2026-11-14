@@ -3,7 +3,7 @@
 //!
 //! Core gzips every `.xdr.gz` file with a header that differs between runs, so the tar is
 //! not reproducible byte for byte while its decompressed contents are. `chain.json`
-//! therefore records the SHA-256 of each member's decompressed content (Phase 10 decision),
+//! therefore records the SHA-256 of each member's decompressed content,
 //! and the tar headers themselves are fixed (mode, owner and time zeroed, members sorted)
 //! so the only run-to-run difference is inside the gzip members.
 

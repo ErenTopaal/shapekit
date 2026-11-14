@@ -49,7 +49,7 @@ const ID = "IDX003"
 var Analyzer = &analysis.Analyzer{
 	Name:       ID,
 	Doc:        doc(),
-	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx003",
+	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx003-participants-from-envelope",
 	Run:        run,
 	ResultType: suppress.ResultType,
 	FactTypes:  []analysis.Fact{new(envelopeFact), new(fillsFact)},

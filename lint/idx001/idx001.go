@@ -43,7 +43,7 @@ const ID = "IDX001"
 var Analyzer = &analysis.Analyzer{
 	Name:       ID,
 	Doc:        doc(),
-	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx001",
+	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx001-unvalidated-field-trusted",
 	Run:        run,
 	ResultType: suppress.ResultType,
 	FactTypes:  []analysis.Fact{new(persistsFact)},

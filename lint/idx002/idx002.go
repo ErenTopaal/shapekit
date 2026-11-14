@@ -33,7 +33,7 @@ const ID = "IDX002"
 var Analyzer = &analysis.Analyzer{
 	Name:       ID,
 	Doc:        doc(),
-	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx002",
+	URL:        "https://github.com/ErenTopaal/shapekit/blob/main/docs/linter.md#idx002-missing-depth-or-size-cap",
 	Run:        run,
 	ResultType: suppress.ResultType,
 }

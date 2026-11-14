@@ -99,7 +99,7 @@ id = "wallet-backend-753"
 issue = "https://github.com/stellar/wallet-backend/pull/753"
 chain = "soroban.muxed-source.p28"
 network = "testnet"
-notes = "beyond the rfp: a muxed soroban source and its base account collide in transactions_accounts (23505); the first muxed-source ledger (77, a restore) already halts ingestion"
+notes = "a muxed soroban source and its base account collide in transactions_accounts (23505); the first muxed-source ledger (77, a restore) already halts ingestion"
 
 [[reproduction.case]]
 label = "pre-fix"
@@ -122,7 +122,7 @@ id = "wallet-backend-792"
 issue = "https://github.com/stellar/wallet-backend/pull/792"
 chain = "cap84.muxed-contract.p30"
 network = "testnet"
-notes = "beyond the rfp, protocol 30: SAC transfers and mints to a W address lose the destination mux id (fixed by 54e562e1 in #792). the ledger-persist failure #792 also fixes needs a W address in a custom SEP-41 token event or a storage key, which no corpus chain has, so it is not reproduced here"
+notes = "protocol 30: SAC transfers and mints to a W address lose the destination mux id (fixed by 54e562e1 in #792). the ledger-persist failure #792 also fixes needs a W address in a custom SEP-41 token event or a storage key, which no corpus chain has, so it is not reproduced here"
 
 [[reproduction.case]]
 label = "pre-fix"

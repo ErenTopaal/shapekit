@@ -479,7 +479,7 @@ fn event_coverage(meta: &stellar_xdr::TransactionMeta) -> EventCoverage {
 }
 
 // the order of entries inside one change list is not meaningful (core release builds emit
-// it from a hash map, see the phase 3 decisions), so entry facts are sorted by content within
+// it from a hash map), so entry facts are sorted by content within
 // their scope; events and trades keep their order, which is consensus data
 fn sort_changes(changes: &mut [StateChange]) {
     let rank = |s: ChangeScope| match s {

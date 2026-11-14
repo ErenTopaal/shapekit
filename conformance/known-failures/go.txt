@@ -1,7 +1,7 @@
 # known failures of the go testee (github.com/stellar/go-stellar-sdk).
 # format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see
 # crates/shapekit-conformance/src/known.rs and docs/testee-protocol.md, "Known failures".
-# issues point at the drafted bodies until they are filed upstream with owner approval.
+# an issue is a drafted body under findings/issues/ until it is filed upstream, then its url.
 #
 # strkey.DecodeAny checks a B key's length but not its type byte, so claimable balance ids of a
 # type other than v0 decode; on v0.7.1 the missing length check (below) adds two more cases
