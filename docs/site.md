@@ -131,7 +131,7 @@ npm run typecheck       # generates the docs content and route types, then tsc
 npm run lint            # oxlint
 npm run dev -- --host   # development server
 npm run build           # prerenders every route into dist/client
-npm run preview         # serves dist/client with the production caddy configuration (docker), port 5182
+npm run preview         # serves dist/client with site/Caddyfile in the pinned caddy image (docker), port 5182
 ```
 
 `site/public/data/` and `site/content/` are ignored by git; both are always regenerated. Run
@@ -142,9 +142,8 @@ npm run preview         # serves dist/client with the production caddy configura
 `.github/workflows/site.yml` runs on pull requests and pushes to `main` that touch the site, its
 docs or its inputs. It builds the CLI, runs `shapekit site data`, then `npm ci`, the typecheck,
 the linter and the build; checks that every docs page, every CAP page and every dashboard page
-has a prerendered file; validates both caddy configurations with the pinned caddy image; and
-uploads `site/dist/client` as an artifact. It does not deploy: the site is hosted on the
-owner's server.
+has a prerendered file; validates `site/Caddyfile` with the pinned caddy image; and uploads
+`site/dist/client` as an artifact. It does not deploy; hosting is outside this repository.
 
 ## Hosting
 
@@ -156,10 +155,8 @@ caddy from `/srv/current`:
 - `Cache-Control: public, max-age=31536000, immutable` for `/assets/*`, whose file names carry
   a content hash, and `no-cache` for everything else;
 - the content security policy, which allows only the site's own origin;
-- `__spa-fallback.html` with status 404 for unknown addresses;
-- markdown and text content types for the llms files, and `/docs/<page>.md` and
-  `Accept: text/markdown` requests for a docs page mapped onto them.
+- `__spa-fallback.html` with status 404 for unknown addresses.
 
 It serves plain HTTP; TLS, compression and HSTS belong to whatever terminates HTTPS in front of
 it. `npm run preview` runs exactly this file in the pinned caddy image, so a preview behaves
-like a production host. Another server needs the same five behaviours.
+like a production host. Another server needs the same four behaviours.
