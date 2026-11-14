@@ -92,6 +92,9 @@ request that touches them. A branch ruleset on `main` (Settings, Rules) enforces
   shard fails the workflow run;
 - block force pushes and deletion.
 
+Repository administrators can bypass the ruleset, so a release or an urgent fix lands without
+waiting for a second account.
+
 Private vulnerability reporting (Settings, Code security) is on, for the reports `SECURITY.md`
 describes.
 
