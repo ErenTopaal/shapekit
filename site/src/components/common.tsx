@@ -1,9 +1,72 @@
 import { Component, useEffect, type ReactNode } from "react"
-import { useLocation } from "react-router"
+import { Link, useLocation } from "react-router"
+import { ChevronDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { blobUrl, useMeta } from "@/lib/meta"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+
+const linkClass = "text-primary underline decoration-primary/40 hover:decoration-primary"
+
+// a page of this site
+export function TextLink({
+  to,
+  children,
+  className,
+  "aria-label": label,
+}: {
+  to: string
+  children: ReactNode
+  className?: string
+  "aria-label"?: string
+}) {
+  return (
+    <Link to={to} className={cn(linkClass, className)} aria-label={label}>
+      {children}
+    </Link>
+  )
+}
+
+// a known-failure or finding reference: an upstream url, or a drafted issue body in the repository
+export function IssueRef({ value, className }: { value: string; className?: string }) {
+  if (/^https?:\/\//.test(value)) {
+    return (
+      <ExtLink href={value} className={className}>
+        {issueLabel(value)}
+      </ExtLink>
+    )
+  }
+  return (
+    <RepoLink path={value} className={className}>
+      issue draft <Id>{value.replace(/^findings\/issues\//, "")}</Id>
+    </RepoLink>
+  )
+}
+
+// the terms a page uses, defined once near the top so a reader new to the project can look them up
+export function Terms({ children, label = "Terms used on this page" }: { children: ReactNode; label?: string }) {
+  return (
+    <Collapsible className="rounded-lg border bg-card text-sm">
+      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-left font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none">
+        {label}
+        <ChevronDownIcon aria-hidden className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <dl className="grid gap-x-6 gap-y-2.5 border-t px-4 py-3 sm:grid-cols-[minmax(8rem,auto)_1fr]">{children}</dl>
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
+
+export function Term({ name, children }: { name: ReactNode; children: ReactNode }) {
+  return (
+    <>
+      <dt className="font-medium">{name}</dt>
+      <dd className="text-muted-foreground [&_a]:break-words">{children}</dd>
+    </>
+  )
+}
 
 // the data arrives after the first paint, so an in-page anchor is scrolled to once the page renders
 export function useHashScroll() {
@@ -14,8 +77,12 @@ export function useHashScroll() {
   }, [hash])
 }
 
-export function Id({ children, className }: { children: ReactNode; className?: string }) {
-  return <code className={cn("font-mono text-[0.85em] [overflow-wrap:anywhere]", className)}>{children}</code>
+export function Id({ children, className, title }: { children: ReactNode; className?: string; title?: string }) {
+  return (
+    <code className={cn("font-mono text-[0.85em] [overflow-wrap:anywhere]", className)} title={title}>
+      {children}
+    </code>
+  )
 }
 
 // a file in the repository, opened on github
@@ -32,7 +99,7 @@ export function RepoLink({
   return (
     <a
       href={blobUrl(meta, path)}
-      className={cn("text-primary underline decoration-primary/40 hover:decoration-primary", className)}
+      className={cn(linkClass, className)}
       rel="noreferrer"
       target="_blank"
     >
@@ -45,7 +112,7 @@ export function ExtLink({ href, children, className }: { href: string; children:
   return (
     <a
       href={href}
-      className={cn("text-primary underline decoration-primary/40 hover:decoration-primary", className)}
+      className={cn(linkClass, className)}
       rel="noreferrer"
       target="_blank"
     >
@@ -151,11 +218,12 @@ export function short(sha: string, n = 8): string {
 // the status palette: the only colours with meaning on the site
 export type Tone = "pass" | "diverge" | "known" | "idle" | "signal"
 
+// text in the idle grey would fall below 4.5:1, so idle text is muted ink and only its dot is grey
 const toneText: Record<Tone, string> = {
   pass: "text-pass",
   diverge: "text-diverge",
   known: "text-known",
-  idle: "text-idle",
+  idle: "text-muted-foreground",
   signal: "text-signal",
 }
 

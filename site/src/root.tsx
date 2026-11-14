@@ -40,11 +40,11 @@ export default function App() {
 export function HydrateFallback() {
   return (
     <HomeLayout {...baseOptions()} style={homeStyle}>
-      <main id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
+      <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
         <noscript>
           <p>This address has no prerendered page. The landing page and the docs work without JavaScript.</p>
         </noscript>
-      </main>
+      </div>
     </HomeLayout>
   )
 }
@@ -53,7 +53,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const notFound = isRouteErrorResponse(error) && error.status === 404
   return (
     <HomeLayout {...baseOptions()} style={homeStyle}>
-      <main id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
+      <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
         {notFound ? (
           <NotFoundBody />
         ) : (
@@ -64,7 +64,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
             </p>
           </>
         )}
-      </main>
+      </div>
     </HomeLayout>
   )
 }

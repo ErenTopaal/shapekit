@@ -5,7 +5,7 @@ import { FindingsPage } from "@/pages/findings"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await load("findings")
+  await Promise.all([load("findings"), load("entries")])
   return null
 }
 

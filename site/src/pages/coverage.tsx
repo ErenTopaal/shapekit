@@ -8,15 +8,20 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
-import { Id, useHashScroll, PageHeader, RepoLink, Section, Status, fmt } from "@/components/common"
+import { Id, useHashScroll, PageHeader, RepoLink, Section, Status, Term, Terms, TextLink, fmt } from "@/components/common"
+import { docs, sourceClasses, sources } from "@/lib/terms"
 
 type Scope = "visible" | "all" | "gaps"
 
+// registry/fields.toml's validated_by_core values, in words
+const checked: Record<string, string> = { partial: "in part", no: "never" }
+
+// the states a cap row can be in; the terms block below explains each
 function state(c: CapRow): { tone: "pass" | "diverge" | "idle" | "known"; label: string } {
   if (!c.indexer_visible) return { tone: "idle", label: "not indexer-visible" }
-  if (c.core_emitted_entries > 0) return { tone: "pass", label: "core-emitted" }
-  if (c.uncovered) return { tone: "known", label: "reason recorded" }
-  if (c.entries > 0) return { tone: "known", label: "non-core only" }
+  if (c.core_emitted_entries > 0) return { tone: "pass", label: "covered" }
+  if (c.uncovered) return { tone: "known", label: "gap, reason recorded" }
+  if (c.entries > 0) return { tone: "known", label: "non-core entries only" }
   return { tone: "diverge", label: "no entries" }
 }
 
@@ -53,14 +58,36 @@ export function CoveragePage() {
     <div className="flex flex-col">
       <PageHeader title="CAP coverage">
         <p>
-          Every CAP in the registry, with the corpus entries that carry its shapes. An entry covers a shape only
-          when stellar-core emitted it: core goldens, a local core, or public network history. Synthetic bytes
-          and envelopes core refused are counted apart. Source:{" "}
-          <RepoLink path="corpus/coverage/coverage.json" />.
+          Every CAP (Core Advancement Proposal) in the registry, with the corpus entries that carry its shapes. An
+          entry covers a shape only when stellar-core emitted it: core&apos;s own goldens, a local core, or public
+          network history. Synthetic bytes and envelopes core refused are counted apart. Source:{" "}
+          <RepoLink path="corpus/coverage/coverage.json" />, readable as <RepoLink path={sources.coverageReport} />.
         </p>
       </PageHeader>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <Terms>
+        <Term name="indexer-visible">
+          The CAP changes what an indexer reads: new XDR in transactions, results or ledger meta. The others change only
+          consensus, fees or arithmetic and leave the shapes as they were; each has its reason in{" "}
+          <RepoLink path={sources.caps} />.
+        </Term>
+        <Term name="covered">At least one entry tagged with the CAP was emitted by stellar-core.</Term>
+        <Term name="gap, reason recorded">
+          An indexer-visible CAP with no core-emitted entry (the Gaps filter); <RepoLink path={sources.uncovered} />{" "}
+          says why, with one of the blockers listed under
+          Union arms.
+        </Term>
+        <Term name="core-emitted">
+          From {sourceClasses.filter((c) => c.core).map((c) => c.id).join(", ")}. Not:{" "}
+          {sourceClasses.filter((c) => !c.core).map((c) => `${c.id} (${c.meaning})`).join("; ")}.
+        </Term>
+        <Term name="family">
+          One rare shape, defined by signature fragments in <RepoLink path={sources.families} />.{" "}
+          <TextLink to={docs.familyRecord}>The family record</TextLink>.
+        </Term>
+      </Terms>
+
+      <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:flex-wrap sm:items-center">
         <label className="sr-only" htmlFor="cap-filter">
           Filter CAPs
         </label>
@@ -81,7 +108,7 @@ export function CoveragePage() {
           aria-label="Which CAPs to list"
         >
           <ToggleGroupItem value="visible">Indexer-visible ({s.caps_indexer_visible})</ToggleGroupItem>
-          <ToggleGroupItem value="gaps">Without core entries</ToggleGroupItem>
+          <ToggleGroupItem value="gaps">Gaps ({s.caps_indexer_visible - s.caps_indexer_visible_core_emitted})</ToggleGroupItem>
           <ToggleGroupItem value="all">All ({s.caps})</ToggleGroupItem>
         </ToggleGroup>
       </div>
@@ -99,13 +126,14 @@ export function CoveragePage() {
         </Empty>
       ) : (
         <Table className="mt-2">
+          <caption className="sr-only">CAPs with their coverage state and entry counts</caption>
           <TableHeader>
             <TableRow>
               <TableHead>CAP</TableHead>
-              <TableHead className="min-w-56">Title</TableHead>
-              <TableHead className="text-right">Protocol</TableHead>
+              <TableHead className="min-w-44 sm:min-w-56">Title</TableHead>
+              <TableHead className="hidden text-right sm:table-cell">Protocol</TableHead>
               <TableHead>State</TableHead>
-              <TableHead className="text-right">Families</TableHead>
+              <TableHead className="hidden text-right sm:table-cell">Families</TableHead>
               <TableHead className="text-right">Entries</TableHead>
               <TableHead className="text-right">Core-emitted</TableHead>
             </TableRow>
@@ -121,11 +149,11 @@ export function CoveragePage() {
                     </Link>
                   </TableCell>
                   <TableCell className="whitespace-normal">{c.title}</TableCell>
-                  <TableCell className="num text-right">{c.protocol ?? ""}</TableCell>
+                  <TableCell className="num hidden text-right sm:table-cell">{c.protocol ?? ""}</TableCell>
                   <TableCell>
                     <Status tone={st.tone}>{st.label}</Status>
                   </TableCell>
-                  <TableCell className="num text-right">{c.families.length}</TableCell>
+                  <TableCell className="num hidden text-right sm:table-cell">{c.families.length}</TableCell>
                   <TableCell className="num text-right">{fmt.format(c.entries)}</TableCell>
                   <TableCell className="num text-right">{fmt.format(c.core_emitted_entries)}</TableCell>
                 </TableRow>
@@ -138,22 +166,32 @@ export function CoveragePage() {
       <Section
         title="Union arms"
         id="arms"
-        description={`${s.arms_covered} of ${s.arms_reachable} union arms reachable from ${coverage.root_type} under stellar-xdr ${coverage.stellar_xdr} have a core-emitted entry. Each of the ${s.arms_uncovered} others has a recorded reason in registry/uncovered.toml.`}
+        description={
+          <>
+            A union arm is one variant an XDR union can take, such as an operation type or a result code. {s.arms_covered}{" "}
+            of the {s.arms_reachable} arms reachable from <Id>{coverage.root_type}</Id> under stellar-xdr{" "}
+            {coverage.stellar_xdr} have a core-emitted entry. Each of the {s.arms_uncovered} others has a recorded reason
+            in <RepoLink path={sources.uncovered} />, under one of these blockers.
+          </>
+        }
       >
         <Table>
+          <caption className="sr-only">Uncovered union arms by blocker</caption>
           <TableHeader>
             <TableRow>
-              <TableHead>Why an arm is uncovered</TableHead>
+              <TableHead>Blocker</TableHead>
+              <TableHead className="min-w-56">Meaning</TableHead>
               <TableHead className="text-right">Arms</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.entries(s.arms_uncovered_by_blocker).map(([k, v]) => (
-              <TableRow key={k}>
-                <TableCell>
-                  <Id>{k}</Id>
+            {coverage.blockers.map((b) => (
+              <TableRow key={b.blocker}>
+                <TableCell className="align-top">
+                  <Id>{b.blocker}</Id>
                 </TableCell>
-                <TableCell className="num text-right">{v}</TableCell>
+                <TableCell className="text-sm whitespace-normal text-muted-foreground">{b.meaning}</TableCell>
+                <TableCell className="num text-right align-top">{s.arms_uncovered_by_blocker[b.blocker] ?? 0}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -167,11 +205,12 @@ export function CoveragePage() {
           </CollapsibleTrigger>
           <CollapsibleContent>
             <Table className="mt-3">
+              <caption className="sr-only">Every uncovered union arm with its reason</caption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Arm</TableHead>
                   <TableHead>Blocker</TableHead>
-                  <TableHead className="min-w-80">Reason</TableHead>
+                  <TableHead className="min-w-64 sm:min-w-80">Reason</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -197,14 +236,23 @@ export function CoveragePage() {
       <Section
         title="Fields core does not fully validate"
         id="fields"
-        description={`${s.fields_not_fully_validated_exercised} of ${s.fields_not_fully_validated} fields that core passes through partly or wholly unchecked are exercised by at least one entry. The guide's field table is built from the same registry.`}
+        description={
+          <>
+            {s.fields_not_fully_validated_exercised} of the {s.fields_not_fully_validated} transaction fields that
+            stellar-core passes through partly or wholly unchecked are exercised by at least one entry. An indexer must not
+            trust these fields; the{" "}
+            <TextLink to="/docs/guide/indexer-hardening#validated-and-unvalidated-fields">indexer-hardening guide</TextLink>{" "}
+            explains each, from the same <RepoLink path={sources.fields} />.
+          </>
+        }
       >
         <Table>
+          <caption className="sr-only">Fields core does not fully validate, with their entries</caption>
           <TableHeader>
             <TableRow>
               <TableHead>Field</TableHead>
               <TableHead>XDR path</TableHead>
-              <TableHead>Validated by core</TableHead>
+              <TableHead>Checked by core</TableHead>
               <TableHead className="text-right">Entries</TableHead>
               <TableHead className="text-right">Core-emitted</TableHead>
             </TableRow>
@@ -218,7 +266,7 @@ export function CoveragePage() {
                 <TableCell>
                   <Id className="text-muted-foreground">{f.xdr_path}</Id>
                 </TableCell>
-                <TableCell>{f.validated_by_core}</TableCell>
+                <TableCell>{checked[f.validated_by_core] ?? f.validated_by_core}</TableCell>
                 <TableCell className="num text-right">{f.entries}</TableCell>
                 <TableCell className="num text-right">{f.core_emitted_entries}</TableCell>
               </TableRow>

@@ -70,6 +70,8 @@ fn site_data_matches_the_committed_files() {
         "findings/findings.json",
         "conformance/versions.toml",
         "conformance/reproductions.toml",
+        "corpus/coverage/COVERAGE.md",
+        "adapters/walletbackend/reproductions.toml",
     ] {
         assert!(paths.contains(&want), "{want} is not recorded as a source");
     }
@@ -108,6 +110,26 @@ fn site_data_matches_the_committed_files() {
         })
         .sum();
     assert!(cap_entries > 0);
+
+    // every blocker the coverage names is explained, with the meaning of the committed report
+    let coverage_md = std::fs::read_to_string(root.join("corpus/coverage/COVERAGE.md")).unwrap();
+    let blockers = coverage["blockers"].as_array().unwrap();
+    for b in blockers {
+        let row = format!(
+            "| `{}` | {} |",
+            b["blocker"].as_str().unwrap(),
+            b["meaning"].as_str().unwrap()
+        );
+        assert!(coverage_md.contains(&row), "{row} is not in COVERAGE.md");
+    }
+    let explained = |name: &str| blockers.iter().any(|b| b["blocker"] == name);
+    for name in report["summary"]["arms_uncovered_by_blocker"]
+        .as_object()
+        .unwrap()
+        .keys()
+    {
+        assert!(explained(name), "blocker {name} has no meaning");
+    }
 
     // every file the site links to exists in the checkout
     let ids: std::collections::BTreeSet<&str> = entries["entries"]
@@ -181,6 +203,37 @@ fn site_data_matches_the_committed_files() {
             .map(|n| n.as_u64().unwrap())
             .sum();
         assert_eq!(counted as usize, cells, "{}", sdk["sdk"]);
+        // failing checks by op count every check of the cells except the ones not answered
+        for v in sdk["versions"].as_array().unwrap() {
+            let by_op: u64 = v["failing_checks_by_op"]
+                .as_object()
+                .unwrap()
+                .values()
+                .map(|n| n.as_u64().unwrap())
+                .sum();
+            let by_result = v["checks_by_result"].as_object().unwrap();
+            let failing: u64 = by_result
+                .iter()
+                .filter(|(k, _)| {
+                    ["error", "diverges-from-network", "diverges-from-peers"].contains(&k.as_str())
+                })
+                .map(|(_, n)| n.as_u64().unwrap())
+                .sum();
+            assert_eq!(by_op, failing, "{} {}", sdk["sdk"], v["version"]);
+            for k in by_result.keys() {
+                assert!(
+                    [
+                        "error",
+                        "diverges-from-network",
+                        "diverges-from-peers",
+                        "unsupported",
+                        "reference"
+                    ]
+                    .contains(&k.as_str()),
+                    "unexpected check result {k}"
+                );
+            }
+        }
         for e in sdk["entries"].as_array().unwrap() {
             let id = e["id"].as_str().unwrap();
             assert!(ids.contains(id), "matrix entry {id} is not in the manifest");
@@ -202,6 +255,54 @@ fn site_data_matches_the_committed_files() {
         .map(|n| n.as_u64().unwrap())
         .sum();
     assert_eq!(summed, report["totals"]["entries"].as_u64().unwrap());
+
+    // one verdict per replayed entry and network, the same as the report's rows
+    let rows = report["entries"].as_array().unwrap();
+    let verdicts = run0["verdicts"].as_object().unwrap();
+    assert_eq!(run0["distinct_entries"], verdicts.len());
+    let pairs: usize = verdicts
+        .values()
+        .map(|v| v.as_object().unwrap().len())
+        .sum();
+    assert_eq!(pairs, rows.len());
+    for r in rows {
+        let v = &verdicts[r["entry"].as_str().unwrap()][r["network"].as_str().unwrap()];
+        assert_eq!(v["verdict"], r["verdict"]);
+        assert_eq!(v["reason"], r.get("reason").cloned().unwrap_or(Value::Null));
+    }
+    let chains: u64 = run0["chains_by_network"]
+        .as_object()
+        .unwrap()
+        .values()
+        .map(|n| n.as_u64().unwrap())
+        .sum();
+    assert_eq!(chains as usize, len(&report["chains"]));
+
+    // the wallet-backend reproduction table, one row per sighting, every named entry a corpus
+    // entry, and each expectation paired with the committed run's verdict where it ran
+    let table: toml::Value = toml::from_str(
+        &std::fs::read_to_string(root.join("adapters/walletbackend/reproductions.toml")).unwrap(),
+    )
+    .unwrap();
+    let rows = harness["reproductions"]["rows"].as_array().unwrap();
+    assert_eq!(rows.len(), table["reproduction"].as_array().unwrap().len());
+    for row in rows {
+        for case in row["cases"].as_array().unwrap() {
+            for x in case["expect"].as_array().unwrap() {
+                let entry = x["entry"].as_str().unwrap();
+                assert!(
+                    ids.contains(entry),
+                    "reproduction entry {entry} is not in the manifest"
+                );
+                for at in x["at_pin"].as_array().unwrap() {
+                    assert_eq!(
+                        at["verdict"],
+                        verdicts[entry][row["network"].as_str().unwrap()]["verdict"]
+                    );
+                }
+            }
+        }
+    }
 
     // the same inputs give the same bytes
     let again = dir.path().join("again");

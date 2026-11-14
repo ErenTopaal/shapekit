@@ -1,15 +1,10 @@
 import { useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router"
 
-// the site root has no page of its own yet, so it points at the docs. the redirect is a meta
-// refresh in the prerendered html and needs no javascript; a landing page can replace this
-// route module without touching the docs or the dashboard.
+// the site root has no page of its own yet, so it points at the docs; a landing page can
+// replace this route module without touching the docs or the dashboard.
 export function meta() {
-  return [
-    { title: "shapekit" },
-    { httpEquiv: "refresh", content: "0; url=/docs" },
-    { tagName: "link", rel: "canonical", href: "/docs" },
-  ]
+  return [{ title: "shapekit" }, { tagName: "link", rel: "canonical", href: "/docs" }]
 }
 
 export default function Home() {
@@ -22,6 +17,11 @@ export default function Home() {
   }, [hash, navigate])
   return (
     <main id="main" className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-10">
+      {/* without javascript a meta refresh does the redirect. it sits in noscript because with
+          javascript it would fire before the router reads the hash, sending /#/sdk to /docs */}
+      <noscript>
+        <meta httpEquiv="refresh" content="0; url=/docs" />
+      </noscript>
       <p>
         The documentation is at <Link to="/docs" className="text-fd-primary underline underline-offset-4">/docs</Link>.
       </p>

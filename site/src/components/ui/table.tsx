@@ -1,11 +1,15 @@
 import * as React from "react"
 import { cn } from "cn"
+import { useScrollFocus } from "@/lib/scroll-focus"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+  const { ref, scrolls } = useScrollFocus<HTMLDivElement>()
   return (
     <div
+      ref={ref}
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      tabIndex={scrolls ? 0 : undefined}
+      className="relative w-full overflow-x-auto rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
     >
       <table
         data-slot="table"

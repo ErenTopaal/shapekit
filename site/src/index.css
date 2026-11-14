@@ -61,7 +61,10 @@
 }
 
 /* palette: cool ledger paper with an ink foreground; the four status colours (pass,
-   diverge, known, idle) carry all the meaning in the matrices, so nothing else is coloured */
+   diverge, known, idle) carry all the meaning in the matrices, so nothing else is coloured.
+   pass is a teal green rather than a yellow green so that pass and diverge stay apart for
+   red-green colour blindness (oklab delta e about 10 in both themes); every mark in those
+   colours also carries a label or a hatch, so colour is never the only cue */
 :root {
     --background: #f6f7f9;
     --foreground: #141a24;
@@ -82,12 +85,12 @@
     --input: #cfd5de;
     --ring: #0f5b78;
     --signal: #0f5b78;
-    --pass: #2a7a4f;
+    --pass: #007a68;
     --diverge: #b8322a;
     --known: #9c6410;
     --idle: #8b94a3;
     --chart-1: #0f5b78;
-    --chart-2: #2a7a4f;
+    --chart-2: #007a68;
     --chart-3: #b8322a;
     --chart-4: #9c6410;
     --chart-5: #8b94a3;
@@ -124,13 +127,13 @@
     --input: #343c4a;
     --ring: #6cbad8;
     --signal: #6cbad8;
-    --pass: #5fc08a;
-    --diverge: #f07a6d;
+    --pass: #34b8a4;
+    --diverge: #ec6f62;
     --known: #e2a94e;
     --idle: #737d8d;
     --chart-1: #6cbad8;
-    --chart-2: #5fc08a;
-    --chart-3: #f07a6d;
+    --chart-2: #34b8a4;
+    --chart-3: #ec6f62;
     --chart-4: #e2a94e;
     --chart-5: #737d8d;
     --sidebar: #0f1218;

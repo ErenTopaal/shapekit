@@ -5,7 +5,7 @@ import { IndexerPage } from "@/pages/indexer"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await load("harness")
+  await Promise.all([load("harness"), load("coverage")])
   return null
 }
 

@@ -118,6 +118,8 @@ export interface Coverage {
     entries: number
     core_emitted_entries: number
   }[]
+  // the blocker table of corpus/coverage/COVERAGE.md
+  blockers: { blocker: string; meaning: string }[]
 }
 
 export interface Entry {
@@ -161,8 +163,10 @@ export interface SdkVersion {
   in_matrix: boolean
   failing_cells_by_result: Counts
   failing_cells_with_known_issue: number
+  // checks that failed (error, diverges-from-network, diverges-from-peers), by op
   failing_checks_by_op: Counts
-  failing_checks_by_result: Counts
+  // every check the failing cells hold, by result, including `unsupported` ones
+  checks_by_result: Counts
   known_failure_lines: number
 }
 
@@ -238,6 +242,10 @@ export interface HarnessRun {
     without_oracle: number
   }
   chains: number
+  chains_by_network: Counts
+  distinct_entries: number
+  // every replayed entry's verdict, per network
+  verdicts: Record<string, Record<string, { verdict: string; reason: string | null }>>
   chain_errors: { chain: string; network: string; error: string }[]
   rounds: { round: number; peak_rss_bytes: number; seconds: number; same_verdicts_as_first: boolean }[]
   memory: { slack_bytes: number; budget_bytes?: number; flat: boolean; within_budget: boolean; detail: string }
@@ -253,8 +261,26 @@ export interface HarnessRun {
   problems: HarnessProblemRow[]
 }
 
+export interface HarnessExpect {
+  entry: string
+  verdict: string
+  reason: string | null
+  // the verdict of the committed run at the pinned commit, when that run replayed the entry
+  at_pin: { report: string; target_version: string; verdict: string; reason: string | null }[]
+}
+
+export interface HarnessReproduction {
+  id: string
+  issue: string
+  chain: string
+  network: string
+  notes: string | null
+  cases: { label: string; commit: string; expect: HarnessExpect[] }[]
+}
+
 export interface Harness {
   runs: HarnessRun[]
+  reproductions: { table: string; rows: HarnessReproduction[] }
   lint: {
     target: string
     version: string

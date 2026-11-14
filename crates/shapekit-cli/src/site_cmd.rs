@@ -24,6 +24,11 @@ use crate::pins;
 
 pub const SITE_SCHEMA: u32 = 1;
 const DEFAULT_REPO: &str = "ErenTopaal/shapekit";
+/// The wallet-backend sightings `shapekit harness reproduce` checks; the site lists them next
+/// to the committed run of the same target.
+const HARNESS_REPRODUCTIONS: &str = "adapters/walletbackend/reproductions.toml";
+/// The `describe.target` of runs the table above is about.
+const HARNESS_REPRODUCTIONS_TARGET: &str = "wallet-backend";
 
 #[derive(Subcommand)]
 pub enum SiteCommand {
@@ -181,7 +186,8 @@ pub fn write_data(
         .and_then(|g| g.sha.clone())
         .context("pins.toml has no stellar-protocol commit")?;
 
-    let coverage_out = coverage_json(&coverage, &registry, &protocol_sha)?;
+    let blockers = blocker_meanings(&src.text("corpus/coverage/COVERAGE.md")?)?;
+    let coverage_out = coverage_json(&coverage, &registry, &protocol_sha, &blockers)?;
     let entries_out = entries_json(&manifest);
     let conformance_out = conformance_json(&mut src, &triage, &versions, &reproductions)?;
     let harness_out = harness_json(&mut src, &triage)?;
@@ -318,7 +324,66 @@ struct FieldRowView {
     core_emitted_entries: usize,
 }
 
-fn coverage_json(c: &CoverageView, reg: &Registry, protocol_sha: &str) -> Result<Value> {
+/// The blocker table of the committed COVERAGE.md (`| `name` | meaning |` rows under
+/// `## Blockers`), so the site explains each blocker in the words the report uses.
+fn blocker_meanings(markdown: &str) -> Result<Vec<(String, String)>> {
+    let mut rows = Vec::new();
+    let mut inside = false;
+    for line in markdown.lines() {
+        if line.starts_with("## ") {
+            if inside {
+                break;
+            }
+            inside = line.trim() == "## Blockers";
+            continue;
+        }
+        if !inside {
+            continue;
+        }
+        let Some(row) = line.strip_prefix("| `") else {
+            continue;
+        };
+        let Some((name, rest)) = row.split_once("` | ") else {
+            bail!("corpus/coverage/COVERAGE.md: blocker row {line:?} is not | `name` | meaning |");
+        };
+        let meaning = rest.trim_end().trim_end_matches('|').trim_end();
+        ensure!(
+            !name.is_empty() && !meaning.is_empty(),
+            "corpus/coverage/COVERAGE.md: blocker row {line:?} has an empty cell"
+        );
+        rows.push((name.to_owned(), meaning.to_owned()));
+    }
+    ensure!(
+        !rows.is_empty(),
+        "corpus/coverage/COVERAGE.md has no ## Blockers table"
+    );
+    Ok(rows)
+}
+
+fn coverage_json(
+    c: &CoverageView,
+    reg: &Registry,
+    protocol_sha: &str,
+    blockers: &[(String, String)],
+) -> Result<Value> {
+    // every blocker a reason names must be explained, or the page would show a bare word
+    let named = c
+        .caps
+        .iter()
+        .filter_map(|r| r.uncovered.as_ref())
+        .chain(c.arms.uncovered.iter().filter_map(|a| a.uncovered.as_ref()))
+        .chain(
+            c.families
+                .iter()
+                .flat_map(|f| f.fragments.iter().filter_map(|x| x.uncovered.as_ref())),
+        );
+    for r in named {
+        ensure!(
+            blockers.iter().any(|(b, _)| *b == r.blocker),
+            "blocker {} is not in the ## Blockers table of corpus/coverage/COVERAGE.md",
+            r.blocker
+        );
+    }
     let mut caps = Vec::new();
     for row in &c.caps {
         let cap = reg.cap(&row.id).with_context(|| {
@@ -422,6 +487,7 @@ fn coverage_json(c: &CoverageView, reg: &Registry, protocol_sha: &str) -> Result
             "uncovered": uncovered_arms,
         },
         "fields": fields,
+        "blockers": blockers.iter().map(|(b, m)| json!({ "blocker": b, "meaning": m })).collect::<Vec<_>>(),
     }))
 }
 
@@ -459,6 +525,15 @@ fn entries_json(m: &Manifest) -> Value {
         "corpus_version": m.corpus_version,
         "entries": entries,
     })
+}
+
+/// Check results that count as a failure (docs/testee-protocol.md, "How the runner uses the
+/// ops"); `unsupported` and `reference` do not.
+fn is_failing_check(result: &str) -> bool {
+    matches!(
+        result,
+        "error" | "diverges-from-network" | "diverges-from-peers"
+    )
 }
 
 /// What the committed matrix shows for one reproduction row at one version.
@@ -629,7 +704,12 @@ fn conformance_json(
                             cells_known += 1;
                         }
                         for k in &c.checks {
-                            *checks_by_op.entry(k.op.clone()).or_default() += 1;
+                            // a failing cell also lists checks the version could not answer
+                            // (`unsupported`); those are not failures, so only the per-result
+                            // count holds them
+                            if is_failing_check(&k.result) {
+                                *checks_by_op.entry(k.op.clone()).or_default() += 1;
+                            }
                             *checks_by_result.entry(k.result.clone()).or_default() += 1;
                         }
                     }
@@ -648,7 +728,7 @@ fn conformance_json(
                 "failing_cells_by_result": cells_by_result,
                 "failing_cells_with_known_issue": cells_known,
                 "failing_checks_by_op": checks_by_op,
-                "failing_checks_by_result": checks_by_result,
+                "checks_by_result": checks_by_result,
                 "known_failure_lines": known_lines,
             }));
         }
@@ -743,8 +823,15 @@ fn harness_json(src: &mut Sources, triage: &Triage) -> Result<Value> {
             BTreeMap::new();
         let mut by_network: BTreeMap<String, BTreeMap<&'static str, usize>> = BTreeMap::new();
         let mut problems = Vec::new();
+        // every replayed entry's verdict per network, so a page can say "passed" and not only
+        // list failures
+        let mut verdicts: BTreeMap<&str, BTreeMap<&str, Value>> = BTreeMap::new();
         for e in &r.entries {
             let v = e.result.verdict.name();
+            verdicts.entry(e.entry.as_str()).or_default().insert(
+                e.network.as_str(),
+                json!({ "verdict": v, "reason": e.result.reason.map(|x| x.name()) }),
+            );
             *by_family
                 .entry((e.family.clone(), e.network.clone()))
                 .or_default()
@@ -788,6 +875,10 @@ fn harness_json(src: &mut Sources, triage: &Triage) -> Result<Value> {
                     .map(|err| json!({ "chain": c.chain, "network": c.network, "error": err }))
             })
             .collect();
+        let mut chains_by_network: BTreeMap<&str, usize> = BTreeMap::new();
+        for c in &r.chains {
+            *chains_by_network.entry(c.network.as_str()).or_default() += 1;
+        }
         let mut components: BTreeMap<String, String> = BTreeMap::new();
         for c in &r.chains {
             for (k, v) in &c.components {
@@ -813,6 +904,8 @@ fn harness_json(src: &mut Sources, triage: &Triage) -> Result<Value> {
             "components": components,
             "totals": r.totals,
             "chains": r.chains.len(),
+            "chains_by_network": chains_by_network,
+            "distinct_entries": verdicts.len(),
             "chain_errors": chain_errors,
             "rounds": r.rounds.iter().map(|x| json!({
                 "round": x.round,
@@ -825,8 +918,10 @@ fn harness_json(src: &mut Sources, triage: &Triage) -> Result<Value> {
             "by_network": by_network,
             "families": families,
             "problems": problems,
+            "verdicts": verdicts,
         }));
     }
+    let reproductions = harness_reproductions(src, &runs)?;
     let mut lint = Vec::new();
     for l in &triage.inputs.lint {
         let bytes = src.read(&l.result)?;
@@ -844,8 +939,70 @@ fn harness_json(src: &mut Sources, triage: &Triage) -> Result<Value> {
     Ok(json!({
         "schema": SITE_SCHEMA,
         "runs": runs,
+        "reproductions": reproductions,
         "lint": lint,
     }))
+}
+
+/// The wallet-backend reproduction table, each expectation with the verdict the committed
+/// run at the pinned commit gave the same entry. The table's own pre-fix and fixed commits
+/// are run by `shapekit harness reproduce` in the nightly workflow, which commits no result,
+/// so the committed run is the only observed verdict the site can show.
+fn harness_reproductions(src: &mut Sources, runs: &[Value]) -> Result<Value> {
+    src.read(HARNESS_REPRODUCTIONS)?;
+    let table = shapekit_harness::reproduce::load(&src.path(HARNESS_REPRODUCTIONS))?;
+    let pinned: Vec<&Value> = runs
+        .iter()
+        .filter(|r| r["describe"]["target"] == HARNESS_REPRODUCTIONS_TARGET)
+        .collect();
+    let rows: Vec<Value> = table
+        .reproduction
+        .iter()
+        .map(|r| {
+            let cases: Vec<Value> = r
+                .case
+                .iter()
+                .map(|c| {
+                    let expect: Vec<Value> = c
+                        .expect
+                        .iter()
+                        .map(|x| {
+                            let at_pin: Vec<Value> = pinned
+                                .iter()
+                                .filter_map(|run| {
+                                    let v = &run["verdicts"][&x.entry][&r.network];
+                                    (!v.is_null()).then(|| {
+                                        json!({
+                                            "report": run["report"],
+                                            "target_version": run["describe"]["target_version"],
+                                            "verdict": v["verdict"],
+                                            "reason": v["reason"],
+                                        })
+                                    })
+                                })
+                                .collect();
+                            json!({
+                                "entry": x.entry,
+                                "verdict": x.verdict,
+                                "reason": x.reason,
+                                "at_pin": at_pin,
+                            })
+                        })
+                        .collect();
+                    json!({ "label": c.label, "commit": c.commit, "expect": expect })
+                })
+                .collect();
+            json!({
+                "id": r.id,
+                "issue": r.issue,
+                "chain": r.chain,
+                "network": r.network,
+                "notes": r.notes,
+                "cases": cases,
+            })
+        })
+        .collect();
+    Ok(json!({ "table": HARNESS_REPRODUCTIONS, "rows": rows }))
 }
 
 fn findings_json(c: &Collection) -> Value {

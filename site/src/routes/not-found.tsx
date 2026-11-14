@@ -37,9 +37,9 @@ export function NotFoundBody() {
 export default function NotFound() {
   return (
     <HomeLayout {...baseOptions()} style={homeStyle}>
-      <main id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
+      <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
         <NotFoundBody />
-      </main>
+      </div>
     </HomeLayout>
   )
 }

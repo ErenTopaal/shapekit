@@ -2,7 +2,6 @@ import { Outlet, isRouteErrorResponse } from "react-router"
 import type { Route } from "./+types/layout"
 import { load } from "@/lib/data"
 import { MetaContext } from "@/lib/meta"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { DashboardShell } from "@/components/layout"
 import { DataError, Loading } from "@/components/common"
 
@@ -31,11 +30,9 @@ export function HydrateFallback() {
 export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
   return (
     <MetaContext value={loaderData.meta}>
-      <TooltipProvider>
-        <DashboardShell meta={loaderData.meta}>
-          <Outlet />
-        </DashboardShell>
-      </TooltipProvider>
+      <DashboardShell meta={loaderData.meta}>
+        <Outlet />
+      </DashboardShell>
     </MetaContext>
   )
 }

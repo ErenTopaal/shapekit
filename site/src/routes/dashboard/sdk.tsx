@@ -5,7 +5,7 @@ import { SdkPage } from "@/pages/sdk"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await load("conformance")
+  await Promise.all([load("conformance"), load("coverage")])
   return null
 }
 

@@ -5,7 +5,7 @@ import { CapPage } from "@/pages/cap"
 
 // fetches this page's data files before the page renders, so navigation shows no skeleton
 export async function clientLoader() {
-  await Promise.all([load("coverage"), load("entries"), load("conformance"), load("harness")])
+  await Promise.all([load("coverage"), load("entries"), load("conformance"), load("harness"), load("findings")])
   return null
 }
 

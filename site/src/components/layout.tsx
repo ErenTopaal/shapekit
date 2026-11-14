@@ -42,9 +42,10 @@ export function DashboardShell({ meta, children }: { meta: Meta | null; children
           </ul>
         </nav>
       </div>
-      <main id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-8">
+      {/* HomeLayout already renders the page's main landmark, so this is a plain container */}
+      <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-8">
         {children}
-      </main>
+      </div>
       <footer className="border-t">
         <div className="mx-auto flex max-w-(--fd-layout-width) flex-col gap-1 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6">
           {meta ? (

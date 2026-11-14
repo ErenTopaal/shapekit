@@ -28,7 +28,7 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 
 | Route | What it is | Prerendered as |
 |---|---|---|
-| `/` | redirect to `/docs` (a meta refresh, works without JavaScript) | `index.html` |
+| `/` | redirect to `/docs` (the router with JavaScript, a meta refresh in `<noscript>` without it) | `index.html` |
 | `/docs`, `/docs/<group>/<page>` | one page per document, see below | `docs/.../index.html` |
 | `/api/search.json` | the docs search index, downloaded by the search dialog | `api/search.json` |
 | `/llms.txt`, `/llms-full.txt` | the docs for llms: an index of every page, and every page's markdown in one file | `llms.txt`, `llms-full.txt` |
@@ -44,7 +44,12 @@ are plain links, nothing is sent until the reader follows one), and ends with an
 link to its source file. Dashboard pages are prerendered as
 their navigation with a loading state; the browser then fetches `/data/*.json` and renders the
 page. Filters live in the query string (`/dashboard/sdk?entry=...`), so a filtered view can be
-linked. Old dashboard links of the form `/#/sdk` are redirected to `/dashboard/sdk`. Next to each
+linked; a finding can be linked as `/dashboard/findings#WB-W3` (it opens) and a corpus entry as
+`/dashboard/coverage/<CAP>#<entry-id>`. Each dashboard page has a "Terms used on this page" block
+that explains its vocabulary (verdicts, severities, statuses, check results, source classes,
+blockers) and links the docs page or repository file that defines it; the words are kept in
+`site/src/lib/terms.ts`, next to the source each one follows. Old dashboard links of the form
+`/#/sdk` are redirected to `/dashboard/sdk`. Next to each
 route's HTML file the build writes a `.data` file that the client router fetches on in-site
 navigation.
 
@@ -116,9 +121,11 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 |---|---|
 | `corpus/manifest.json` | every entry: family, CAPs, protocol, source class, expected decode, file paths |
 | `corpus/coverage/coverage.json` | per-CAP, per-family, per-fragment and per-arm coverage, and the summary |
+| `corpus/coverage/COVERAGE.md` | the meaning of each blocker, from its "Blockers" table |
 | `registry/*.toml` | CAP texts (linked at the pinned stellar-protocol commit), XDR additions, family priority and protocol range |
 | `findings/triage.toml` | the paths of the committed harness report, conformance matrices and linter result |
 | `findings/inputs/*` | those reduced run outputs, as `findings/triage.toml` names them |
+| `adapters/walletbackend/reproductions.toml` | the wallet-backend sightings `shapekit harness reproduce` checks, with their commits and expected verdicts |
 | `findings/findings.json` | the findings record and its summary |
 | `conformance/versions.toml` | the SDK version matrix and the current version of each SDK |
 | `conformance/known-failures/*.txt` | known-failure lines per SDK and version |
@@ -134,19 +141,30 @@ the same bytes.
 Two things the site shows are derived rather than copied, and both are plain counts over the
 committed files:
 
-- SDK totals per version: failing cells by result, cells with a known issue, and failing checks
-  by operation, counted over the committed matrix. The committed matrices keep failing cells
+- SDK totals per version: failing cells by result, cells with a known issue, every check of
+  those cells by result, and failing checks by operation, counted over the committed matrix. A
+  failing check is one whose result is `error`, `diverges-from-network` or
+  `diverges-from-peers`; a failing cell also lists the checks its version could not answer
+  (`unsupported`), which are counted by result only. The committed matrices keep failing cells
   only (see the `reduction` field of `findings/inputs/provenance.json`), so an entry that passed
   or was unsupported at every version is not listed.
 - Reproduction rows: for each version a row names, whether the committed matrix has every named
   check of the row failing (before the fix) or no counted check failing (after it). Rows built
   from probes are not in the matrix and say so. `shapekit conformance reproduce` remains the
   check that actually runs them.
+- Harness verdicts per entry and network, the distinct entries replayed and the chains per
+  network, from the committed report. The wallet-backend reproduction rows carry, for each
+  expected verdict, the verdict the committed run gave the same entry at the pinned commit; the
+  rows' own pre-fix and fixed commits are run by `shapekit harness reproduce` in the nightly
+  workflow, which commits no result.
 
 `crates/shapekit-cli/tests/site_data.rs` runs the command over the committed files and checks
 that the summaries equal the source files', that per-version and per-family counts add up to
 the source totals, that every linked file exists, that the recorded sha256 values match, and
-that two runs give identical bytes.
+that two runs give identical bytes. It also checks that every blocker the coverage names has a
+meaning taken verbatim from `COVERAGE.md`, that the per-entry verdicts equal the report's rows,
+that failing checks by operation add up to the failing results, and that every entry a
+reproduction row names is a corpus entry.
 
 ## Building it locally
 

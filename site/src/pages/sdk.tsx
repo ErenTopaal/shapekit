@@ -1,6 +1,7 @@
 import { use, useMemo, useState } from "react"
-import { Link, useSearchParams } from "react-router"
-import { load, type Cell, type Observation, type Sdk } from "@/lib/data"
+import { useSearchParams } from "react-router"
+import { load, sum, type Cell, type FamilyRow, type Observation, type Reproduction, type Sdk } from "@/lib/data"
+import { checkResults, docs } from "@/lib/terms"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -8,66 +9,89 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
-import { ExtLink, Id, PageHeader, RepoLink, Section, Status, issueLabel, type Tone } from "@/components/common"
+import {
+  ExtLink,
+  Id,
+  IssueRef,
+  PageHeader,
+  RepoLink,
+  Section,
+  Status,
+  Term,
+  Terms,
+  TextLink,
+  issueLabel,
+  type Tone,
+} from "@/components/common"
 
 const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust" }
+const failing = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
+const failingChecks = (cell: Cell) => cell.checks.filter((k) => failing.has(k.result))
+
+// the family an entry belongs to: entry ids are the family id, a dot, and the entry's own name
+function familyOf(id: string, families: FamilyRow[]): FamilyRow | undefined {
+  return families.filter((f) => id.startsWith(`${f.id}.`)).toSorted((a, b) => b.id.length - a.id.length)[0]
+}
 
 function MatrixCell({ cell, onOpen, label }: { cell: Cell | undefined; onOpen: () => void; label: string }) {
   if (!cell) {
     return (
-      <span className="block h-7 w-full rounded-sm bg-muted/60">
+      <span className="block h-7 w-full rounded-sm bg-muted/70">
         <span className="sr-only">{label}: no failing check</span>
       </span>
     )
   }
   const known = cell.known_issue !== null
+  const n = failingChecks(cell).length
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label={`${label}: ${cell.result}, ${cell.checks.length} failing checks${known ? ", known failure" : ""}`}
+      aria-label={`${label}: ${cell.result}, ${n} failing ${n === 1 ? "check" : "checks"}${known ? ", known failure" : ", not a known failure"}. Open the checks.`}
       className={cn(
-        "num flex h-7 w-full items-center justify-center rounded-sm border text-xs font-medium focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+        "num flex h-7 w-full items-center justify-center rounded-sm border text-xs font-semibold focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
         known ? "hatch border-known/70 text-known" : "border-diverge bg-diverge/15 text-diverge",
       )}
     >
-      {cell.checks.length}
+      {n}
     </button>
   )
 }
 
 function Legend() {
   return (
-    <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+    <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-5">
       <li className="flex items-center gap-2">
-        <span aria-hidden className="hatch inline-block h-4 w-6 rounded-sm border border-known/70 text-known" />
-        diverges, listed in the known-failures file with an issue
+        <span aria-hidden className="hatch inline-block h-4 w-6 shrink-0 rounded-sm border border-known/70 text-known" />
+        diverges, a known failure
       </li>
       <li className="flex items-center gap-2">
-        <span aria-hidden className="inline-block h-4 w-6 rounded-sm border border-diverge bg-diverge/15" />
+        <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm border border-diverge bg-diverge/15" />
         diverges, not a known failure
       </li>
       <li className="flex items-center gap-2">
-        <span aria-hidden className="inline-block h-4 w-6 rounded-sm bg-muted/60" />
-        no failing check: passed, matched the reference, or the version predates the entry
+        <span aria-hidden className="inline-block h-4 w-6 shrink-0 rounded-sm bg-muted/70" />
+        no failing check
       </li>
-      <li>The number in a cell is its failing checks.</li>
+      <li>The number in a cell counts its failing checks; select a cell for them.</li>
     </ul>
   )
 }
 
-function n(x: number | undefined) {
+function count(x: number | undefined) {
   return x ? x : <span className="text-muted-foreground">0</span>
 }
 
 function Totals({ sdk }: { sdk: Sdk }) {
   const ops = [...new Set(sdk.versions.flatMap((v) => Object.keys(v.failing_checks_by_op)))].toSorted()
   const results = [...new Set(sdk.versions.flatMap((v) => Object.keys(v.failing_cells_by_result)))].toSorted()
+  const sticky = "sticky left-0 z-10 bg-background whitespace-normal min-w-40"
   return (
     <Table>
+      <caption className="sr-only">{sdk.package}: counts per version</caption>
       <TableHeader>
         <TableRow>
-          <TableHead className="sticky left-0 z-10 bg-background">Count</TableHead>
+          <TableHead className={sticky}>Count</TableHead>
           {sdk.versions.map((v) => (
             <TableHead key={v.version} className="text-right font-mono">
               {v.version}
@@ -79,47 +103,57 @@ function Totals({ sdk }: { sdk: Sdk }) {
       <TableBody className="num">
         {results.map((r) => (
           <TableRow key={r}>
-            <TableCell className="sticky left-0 z-10 bg-background">Entries: {r}</TableCell>
+            <TableCell className={sticky}>
+              Entries whose result is <Id>{r}</Id>
+            </TableCell>
             {sdk.versions.map((v) => (
               <TableCell key={v.version} className="text-right">
-                {n(v.failing_cells_by_result[r])}
+                {count(v.failing_cells_by_result[r])}
               </TableCell>
             ))}
           </TableRow>
         ))}
         <TableRow>
-          <TableCell className="sticky left-0 z-10 bg-background">Entries with a known issue</TableCell>
+          <TableCell className={sticky}>Of those, known failures</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
-              {n(v.failing_cells_with_known_issue)}
+              {count(v.failing_cells_with_known_issue)}
             </TableCell>
           ))}
         </TableRow>
         <TableRow>
-          <TableCell className="sticky left-0 z-10 bg-background">Known-failure lines that apply</TableCell>
+          <TableCell className={sticky}>Known-failure lines for the version</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
-              {n(v.known_failure_lines)}
+              {count(v.known_failure_lines)}
             </TableCell>
           ))}
         </TableRow>
         {ops.map((op) => (
           <TableRow key={op}>
-            <TableCell className="sticky left-0 z-10 bg-background">
-              Failing checks: <Id>{op}</Id>
+            <TableCell className={sticky}>
+              Failing <TextLink to={`/docs/sdk/testee-protocol#${op}`}><Id>{op}</Id></TextLink> checks
             </TableCell>
             {sdk.versions.map((v) => (
               <TableCell key={v.version} className="text-right">
-                {n(v.failing_checks_by_op[op])}
+                {count(v.failing_checks_by_op[op])}
               </TableCell>
             ))}
           </TableRow>
         ))}
         <TableRow>
-          <TableCell className="sticky left-0 z-10 bg-background">Newest protocol known</TableCell>
+          <TableCell className={sticky}>Unsupported checks in those entries</TableCell>
           {sdk.versions.map((v) => (
             <TableCell key={v.version} className="text-right">
-              {v.max_protocol ?? ""}
+              {count(v.checks_by_result.unsupported)}
+            </TableCell>
+          ))}
+        </TableRow>
+        <TableRow>
+          <TableCell className={sticky}>Newest protocol the version reads</TableCell>
+          {sdk.versions.map((v) => (
+            <TableCell key={v.version} className="text-right">
+              {v.max_protocol ?? <span className="text-muted-foreground">any</span>}
             </TableCell>
           ))}
         </TableRow>
@@ -128,18 +162,27 @@ function Totals({ sdk }: { sdk: Sdk }) {
   )
 }
 
-function Matrix({ sdk, filter, op }: { sdk: Sdk; filter: string; op: string }) {
+function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]; filter: string; op: string }) {
   const [open, setOpen] = useState<{ entry: string; version: string; cell: Cell } | null>(null)
-  const rows = useMemo(() => {
+  const groups = useMemo(() => {
     const needle = filter.trim().toLowerCase()
-    return sdk.entries.filter(
+    const rows = sdk.entries.filter(
       (e) =>
         (!needle || e.id.toLowerCase().includes(needle)) &&
-        (op === "all" || Object.values(e.cells).some((c) => c.checks.some((k) => k.op === op))),
+        (op === "all" || Object.values(e.cells).some((c) => c.checks.some((k) => k.op === op && failing.has(k.result)))),
     )
-  }, [sdk, filter, op])
+    const by = new Map<string, { family: FamilyRow | undefined; rows: typeof rows }>()
+    for (const e of rows) {
+      const f = familyOf(e.id, families)
+      const key = f?.id ?? ""
+      const g = by.get(key) ?? { family: f, rows: [] }
+      g.rows.push(e)
+      by.set(key, g)
+    }
+    return [...by.values()]
+  }, [sdk, families, filter, op])
 
-  if (rows.length === 0) {
+  if (groups.length === 0) {
     return (
       <Empty className="border">
         <EmptyHeader>
@@ -154,52 +197,73 @@ function Matrix({ sdk, filter, op }: { sdk: Sdk; filter: string; op: string }) {
     )
   }
 
+  const cols = sdk.versions.length + 1
   return (
     <>
-      <div className="relative overflow-x-auto rounded-md border">
-        <table className="w-full border-collapse text-sm">
+      <div className="rounded-md border">
+        <Table className="border-collapse">
           <caption className="sr-only">
-            Failing cells of the {sdkName[sdk.sdk]} matrix: corpus entries by SDK version
+            Failing cells of the {sdkName[sdk.sdk]} matrix: corpus entries by {sdk.package} version, grouped by shape
+            family
           </caption>
           <thead>
             <tr className="border-b">
-              <th scope="col" className="sticky left-0 z-10 bg-background px-3 py-2 text-left font-medium">
+              <th scope="col" className="sticky left-0 z-10 min-w-36 bg-background px-2 py-2 text-left font-medium sm:min-w-64 sm:px-3">
                 Entry
               </th>
               {sdk.versions.map((v) => (
-                <th key={v.version} scope="col" className="min-w-16 px-1 py-2 text-center font-mono text-xs font-medium">
+                <th key={v.version} scope="col" className="min-w-14 px-1 py-2 text-center font-mono text-xs font-medium">
                   {v.version}
+                  {v.current ? <span className="block font-sans font-normal text-muted-foreground">current</span> : null}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {rows.map((e) => (
-              <tr key={e.id} className="border-b last:border-0">
-                <th
-                  scope="row"
-                  className="sticky left-0 z-10 max-w-[11rem] bg-background px-3 py-1 text-left font-normal sm:max-w-[26rem]"
-                >
-                  <span className="block truncate font-mono text-xs" title={e.id}>
-                    {e.id}
+          {groups.map((g) => (
+            <tbody key={g.family?.id ?? "other"}>
+              <tr className="border-b bg-muted/40">
+                <th scope="colgroup" colSpan={cols} className="px-2 py-1.5 text-left text-xs font-medium sm:px-3">
+                  <span className="sticky left-2 inline-block sm:left-3">
+                    {g.family ? (
+                      <TextLink to={`/dashboard/coverage/${g.family.caps[0] ?? ""}#${g.family.id}`} className="font-mono">
+                        {g.family.id}
+                      </TextLink>
+                    ) : (
+                      "other entries"
+                    )}
                   </span>
                 </th>
-                {sdk.versions.map((v) => {
-                  const cell = e.cells[v.key]
-                  return (
-                    <td key={v.version} className="px-1 py-1">
-                      <MatrixCell
-                        cell={cell}
-                        label={`${e.id} at ${v.version}`}
-                        onOpen={() => cell && setOpen({ entry: e.id, version: v.version, cell })}
-                      />
-                    </td>
-                  )
-                })}
               </tr>
-            ))}
-          </tbody>
-        </table>
+              {g.rows.map((e) => {
+                const name = g.family ? e.id.slice(g.family.id.length + 1) : e.id
+                return (
+                  <tr key={e.id} className="border-b last:border-0">
+                    <th
+                      scope="row"
+                      className="sticky left-0 z-10 max-w-40 min-w-36 bg-background px-2 py-1 text-left font-normal sm:max-w-[26rem] sm:min-w-64 sm:px-3"
+                    >
+                      <span className="block font-mono text-xs leading-snug [overflow-wrap:anywhere]" title={e.id}>
+                        {name}
+                      </span>
+                    </th>
+                    {sdk.versions.map((v) => {
+                      const cell = e.cells[v.key]
+                      return (
+                        <td key={v.version} className="min-w-13 px-1 py-1">
+                          <MatrixCell
+                            cell={cell}
+                            label={`${e.id} at ${v.version}`}
+                            onOpen={() => cell && setOpen({ entry: e.id, version: v.version, cell })}
+                          />
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          ))}
+        </Table>
       </div>
       <Sheet open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
@@ -208,13 +272,16 @@ function Matrix({ sdk, filter, op }: { sdk: Sdk; filter: string; op: string }) {
               <SheetHeader>
                 <SheetTitle className="font-mono text-sm break-all">{open.entry}</SheetTitle>
                 <SheetDescription>
-                  {sdk.package} <Id>{open.version}</Id>: {open.cell.result}, {open.cell.checks.length} failing checks
+                  {sdk.package} <Id>{open.version}</Id>: <Id>{open.cell.result}</Id>, {failingChecks(open.cell).length} failing of{" "}
+                  {open.cell.checks.length} listed checks
                 </SheetDescription>
               </SheetHeader>
               <div className="flex flex-col gap-4 px-4 pb-6 text-sm">
                 {open.cell.known_issue ? (
                   <p>
-                    Known failure. Issue draft: <RepoLink path={open.cell.known_issue} />
+                    A known failure, listed in{" "}
+                    {sdk.known_failures_file ? <RepoLink path={sdk.known_failures_file} /> : "the known-failures file"}{" "}
+                    with <IssueRef value={open.cell.known_issue} />.
                   </p>
                 ) : (
                   <p className="text-diverge">Not listed in the known-failures file.</p>
@@ -224,18 +291,15 @@ function Matrix({ sdk, filter, op }: { sdk: Sdk; filter: string; op: string }) {
                     <li key={k.check} className="flex flex-col gap-1 py-2">
                       <span className="flex flex-wrap items-baseline justify-between gap-2">
                         <Id>{k.check}</Id>
-                        <span className="text-xs text-muted-foreground">{k.result}</span>
+                        <span className={cn("text-xs", failing.has(k.result) ? "text-diverge" : "text-muted-foreground")}>
+                          {k.result}
+                        </span>
                       </span>
-                      {k.detail ? <span className="text-muted-foreground break-words">{k.detail}</span> : null}
+                      {k.detail ? <span className="break-words text-muted-foreground">{k.detail}</span> : null}
                     </li>
                   ))}
                 </ol>
-                <Link
-                  to={`/dashboard/findings?q=${encodeURIComponent(open.entry)}`}
-                  className="text-primary underline decoration-primary/40"
-                >
-                  Findings on this entry
-                </Link>
+                <TextLink to={`/dashboard/findings?q=${encodeURIComponent(open.entry)}`}>Findings on this entry</TextLink>
               </div>
             </>
           ) : null}
@@ -245,88 +309,82 @@ function Matrix({ sdk, filter, op }: { sdk: Sdk; filter: string; op: string }) {
   )
 }
 
-function observation(o: Observation, side: "fail" | "pass"): { tone: Tone; text: string } {
-  if (o === "not-in-matrix") return { tone: "idle", text: "not in the committed matrix" }
+function observation(o: Observation, side: "fail" | "pass", r: Reproduction): { tone: Tone; text: string } {
+  if (o === "not-in-matrix")
+    return {
+      tone: "idle",
+      text: r.probes.length > 0 ? "runs as a probe, not in the matrix" : "version not in the committed matrix",
+    }
   if (side === "fail") {
     return o === "named-checks-diverge"
-      ? { tone: "pass", text: "fails as the sighting says" }
-      : { tone: "diverge", text: o === "diverges-elsewhere" ? "diverges, not on the named checks" : "does not fail" }
+      ? { tone: "pass", text: "reproduced: the named checks fail" }
+      : { tone: "diverge", text: o === "diverges-elsewhere" ? "not reproduced: fails on other checks" : "not reproduced: passes" }
   }
   return o === "no-counted-check-fails"
-    ? { tone: "pass", text: "passes" }
-    : { tone: "diverge", text: o === "named-checks-diverge" ? "still fails" : "diverges on other checks" }
+    ? { tone: "pass", text: "fixed: no counted check fails" }
+    : { tone: "diverge", text: o === "named-checks-diverge" ? "still fails" : "fails on other checks" }
 }
 
 function Reproductions() {
   const conformance = use(load("conformance"))
   return (
     <Section
-      title="Reproductions of upstream sightings"
+      title="Reproductions of upstream SDK bugs"
       id="reproductions"
       description={
         <>
-          Each row of <RepoLink path="conformance/reproductions.toml" /> names a reported SDK bug, the entries
-          that carry it, and the versions before and after the fix. Shown here is what the committed matrix holds
-          for those entries; <Id>shapekit conformance reproduce</Id> is the check that runs them.
+          Each row of <RepoLink path="conformance/reproductions.toml" /> names a bug reported upstream, the corpus entries
+          that carry it, and SDK versions before and after its fix. Shown is what the committed matrices hold for those
+          entries and versions; <Id>shapekit conformance reproduce</Id> runs the same rows, probes included, in the
+          nightly workflow.
         </>
       }
     >
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Sighting</TableHead>
-            <TableHead>Before the fix</TableHead>
-            <TableHead>After the fix</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {conformance.reproductions.map((r) => (
-            <TableRow key={r.id}>
-              <TableCell className="max-w-md align-top whitespace-normal">
-                <span className="flex flex-col gap-1">
-                  <ExtLink href={r.link}>{issueLabel(r.link)}</ExtLink>
-                  <span className="text-muted-foreground">{r.sighting.replace(/^[^:]+:\s*/, "")}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {r.entries.length > 0 ? `${r.entries.length} ${r.entries.length === 1 ? "entry" : "entries"}` : null}
-                    {r.probes.length > 0 ? `${r.entries.length > 0 ? ", " : ""}probes: ${r.probes.join(", ")}` : null}
-                    {r.ops.length > 0 ? `; ops ${r.ops.join(", ")}` : null}
-                  </span>
-                </span>
-              </TableCell>
-              {(["fail", "pass"] as const).map((side) => (
-                <TableCell key={side} className="align-top">
-                  <ul className="flex flex-col gap-1">
-                    {Object.entries(r[side]).map(([v, o]) => {
-                      const ob = observation(o, side)
-                      return (
-                        <li key={v} className="flex flex-col">
-                          <span className="font-mono text-xs">
-                            {r.sdk} {v}
-                          </span>
-                          <Status tone={ob.tone}>{ob.text}</Status>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <ul className="flex flex-col divide-y border-y">
+        {conformance.reproductions.map((r) => (
+          <li key={r.id} className="grid gap-x-6 gap-y-2 py-3 text-sm md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+            <span className="flex flex-col gap-1">
+              <ExtLink href={r.link}>{issueLabel(r.link)}</ExtLink>
+              <span className="text-muted-foreground">{r.sighting.replace(/^[^\s:]+#\d+:\s*/, "")}</span>
+              <span className="text-xs text-muted-foreground">
+                {r.entries.length > 0 ? `${r.entries.length} ${r.entries.length === 1 ? "entry" : "entries"}` : null}
+                {r.probes.length > 0 ? `${r.entries.length > 0 ? ", " : ""}probes: ${r.probes.join(", ")}` : null}
+                {r.ops.length > 0 ? `; ops ${r.ops.join(", ")}` : null}
+              </span>
+            </span>
+            {(["fail", "pass"] as const).map((side) => (
+              <div key={side} className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">{side === "fail" ? "Before the fix" : "After the fix"}</span>
+                <ul className="flex flex-col gap-1">
+                  {Object.entries(r[side]).map(([v, o]) => {
+                    const ob = observation(o, side, r)
+                    return (
+                      <li key={v} className="flex flex-col">
+                        <span className="font-mono text-xs">
+                          {sdkName[r.sdk] ?? r.sdk} {v}
+                        </span>
+                        <Status tone={ob.tone}>{ob.text}</Status>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+          </li>
+        ))}
+      </ul>
     </Section>
   )
 }
 
 export function SdkPage() {
   const conformance = use(load("conformance"))
+  const coverage = use(load("coverage"))
   const [params, setParams] = useSearchParams()
   const first = conformance.sdks.find((s) => s.sdk === "js")?.sdk ?? conformance.sdks[0]?.sdk ?? ""
   const entryParam = params.get("entry") ?? ""
   // a link from an entry opens the first sdk that fails on it
-  const entrySdk = entryParam
-    ? conformance.sdks.find((s) => s.entries.some((e) => e.id === entryParam))?.sdk
-    : undefined
+  const entrySdk = entryParam ? conformance.sdks.find((s) => s.entries.some((e) => e.id === entryParam))?.sdk : undefined
   const tab = params.get("sdk") ?? entrySdk ?? first
   const op = params.get("op") ?? "all"
   const set = (k: string, v: string, dflt: string) => {
@@ -340,25 +398,49 @@ export function SdkPage() {
     <div className="flex flex-col">
       <PageHeader title="SDK matrix">
         <p>
-          Corpus entries run through each SDK version by the conformance runner. A check diverges from the network
-          when the SDK accepts what stellar-core refuses, refuses what it emits, or reads other values. The
-          committed matrices keep failing cells only, so an entry missing here passed, or was unsupported by
-          that version, everywhere.
+          The conformance runner sends every corpus entry to each SDK version through a small program, the testee, and
+          compares the answers with what the network does: decode and re-encode the bytes, render and parse XDR-JSON,
+          decode strkeys, order assets and map keys, parse ids. An entry diverges when the SDK accepts what stellar-core
+          refuses, refuses what it emits, or reads other values. The committed matrices keep diverging entries only, so
+          an entry missing here gave no failing check at any version.{" "}
+          <TextLink to={docs.testee}>The testee protocol</TextLink>.
         </p>
       </PageHeader>
-      <Tabs value={tab} onValueChange={(v) => set("sdk", v, first)}>
-        <TabsList>
-          {conformance.sdks.map((s) => (
-            <TabsTrigger key={s.sdk} value={s.sdk}>
-              {sdkName[s.sdk] ?? s.sdk}
-            </TabsTrigger>
-          ))}
+
+      <Terms>
+        {checkResults.map((c) => (
+          <Term key={c.id} name={<Id>{c.id}</Id>}>
+            {c.meaning}.
+          </Term>
+        ))}
+        <Term name="known failure">
+          A divergence listed, per SDK version and check, in that SDK&apos;s known-failures file with the issue that
+          tracks it, so the runner reports it without failing CI and catches anything new next to it.{" "}
+          <TextLink to={docs.knownFailures}>Known failures</TextLink>.
+        </Term>
+        <Term name="cell">
+          One entry at one SDK version. An entry is checked once per file (testnet, mainnet or network-independent), so
+          one cell can hold several failing checks of the same op.
+        </Term>
+      </Terms>
+
+      <Tabs value={tab} onValueChange={(v) => set("sdk", v, first)} className="pt-6">
+        <TabsList className="h-auto w-full sm:w-fit">
+          {conformance.sdks.map((s) => {
+            const cur = s.versions.find((v) => v.current)
+            return (
+              <TabsTrigger key={s.sdk} value={s.sdk} className="flex-col gap-0 py-1 sm:flex-row sm:gap-1.5">
+                {sdkName[s.sdk] ?? s.sdk}
+                <span className="num text-xs font-normal">{sum(cur?.failing_cells_by_result)} at current</span>
+              </TabsTrigger>
+            )
+          })}
         </TabsList>
         {conformance.sdks.map((s) => (
           <TabsContent key={s.sdk} value={s.sdk} className="flex flex-col">
             <p className="pt-4 text-sm text-muted-foreground">
-              <Id className="text-foreground">{s.package}</Id>, current <Id>{s.current}</Id>, issues go to{" "}
-              <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
+              <Id className="text-foreground">{s.package}</Id>, {s.versions.length} versions, current <Id>{s.current}</Id>.
+              Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
               {s.matrix ? <RepoLink path={s.matrix} /> : "none committed"}
               {s.known_failures_file ? (
                 <>
@@ -374,7 +456,7 @@ export function SdkPage() {
                 ))}
               </ul>
             ) : null}
-            <Section title="Failing entries by version" id={`matrix-${s.sdk}`}>
+            <Section title="Diverging entries by version" id={`matrix-${s.sdk}`}>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <label className="sr-only" htmlFor={`entry-filter-${s.sdk}`}>
                   Filter entries
@@ -404,7 +486,7 @@ export function SdkPage() {
                 </Select>
               </div>
               <Legend />
-              <Matrix sdk={s} filter={entryParam} op={op} />
+              <Matrix sdk={s} families={coverage.families} filter={entryParam} op={op} />
             </Section>
             <Section title="Totals per version" id={`totals-${s.sdk}`}>
               <Totals sdk={s} />
