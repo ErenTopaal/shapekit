@@ -99,7 +99,8 @@ go-stellar-sdk spends `MaxDepth` once per generated `DecodeFrom` call; rs-stella
 its depth once per `read_xdr` of every type, including the wrappers and boxes go does not
 count. At the same number the two refuse at different nesting, and go reads deeper: at depth
 1000, go decodes a bare `ScVal` holding 499 `ScVec` levels. This is already known and recorded (`conformance/known-failures/go.txt`, the `depth` entries,
-and their drafts in `findings/issues/`), so it is filtered rather than reported again.
+filed as [go-stellar-sdk#6047](https://github.com/stellar/go-stellar-sdk/issues/6047)), so it is
+filtered rather than reported again.
 
 A disagreement is filtered when, and only when, lifting the refusing side's depth limit, and
 nothing else, makes that side accept with exactly the bytes the other side produced:
@@ -166,7 +167,7 @@ refuses it. Core's own decoder, xdrpp, reads the same word as true and re-encode
 core hashes and checks signatures against that re-encoding, never the submitted bytes. The
 minimal reproducer is the `ScVal` `00000000 00000002`. The corpus already holds it as
 `soroban.scval-shapes.synth-bool-value-2`, and in an envelope as
-`soroban.invoke-basics.synth-invoke-arg-bool-2`; the issue drafts are
-`findings/issues/fuzz-rust-bool-non-canonical.md` and
-`findings/issues/stellar-core-bool-non-canonical.md`. The eight classes, each with its
+`soroban.invoke-basics.synth-invoke-arg-bool-2`; it is filed as
+[rs-stellar-xdr#629](https://github.com/stellar/rs-stellar-xdr/issues/629) and
+[stellar-core#5509](https://github.com/stellar/stellar-core/issues/5509). The eight classes, each with its
 reproducer under `findings/fuzz/`, are the classes `findings/fuzz/known-classes.txt` lists.

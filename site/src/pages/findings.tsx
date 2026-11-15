@@ -149,7 +149,7 @@ function FindingItem({ f, entries, open, onOpen }: { f: Finding; entries: Map<st
               {f.link ? <ExtLink href={f.link}>{issueLabel(f.link)}</ExtLink> : null}
             </span>
             {f.reference ? <span className="text-xs text-muted-foreground">{f.reference}</span> : null}
-            {f.draft ? <IssueRef value={f.draft} className="text-xs" /> : null}
+            {f.draft && !f.link ? <IssueRef value={f.draft} className="text-xs" /> : null}
           </div>
         </div>
         <CollapsibleContent className="md:pl-[8.5rem]">
