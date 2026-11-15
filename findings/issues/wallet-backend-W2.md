@@ -95,6 +95,8 @@ The `B...` address that both events carry is in neither row, so nothing in the d
 
 ## Questions
 
+[#442](https://github.com/stellar/wallet-backend/pull/442) already stopped writing rows that put a `B...` address in `account_id`, so the account column is not where the other end can go.
+
 1. Is leaving the claimable balance or pool out of these rows intended, or only a consequence of `BALANCE` rows being keyed by account?
 2. If a link is wanted, would a nullable counterparty column on `BALANCE` rows (holding the `B...` or `L...` address from the event) fit the schema? `liquidity_pool_id` already exists for pool IDs.
 
