@@ -2,6 +2,35 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-15: 0.1.0 released, findings filed upstream
+
+- shapekit 0.1.0 is released from a signed tag:
+  <https://github.com/ErenTopaal/shapekit/releases/tag/v0.1.0>. Every asset has a build
+  provenance attestation, and the two independent builds of the corpus archive are byte-identical.
+- All 24 findings now link to an upstream decision; `shapekit findings check` passes with no
+  draft left. The 17 new reports:
+  - wallet-backend: [#812](https://github.com/stellar/wallet-backend/issues/812),
+    [#813](https://github.com/stellar/wallet-backend/issues/813),
+    [#814](https://github.com/stellar/wallet-backend/issues/814),
+    [#815](https://github.com/stellar/wallet-backend/issues/815),
+    [#816](https://github.com/stellar/wallet-backend/issues/816),
+    [#817](https://github.com/stellar/wallet-backend/issues/817),
+    [#818](https://github.com/stellar/wallet-backend/issues/818),
+    [#819](https://github.com/stellar/wallet-backend/issues/819),
+    [#820](https://github.com/stellar/wallet-backend/issues/820), and a reproducing ledger
+    added to [#677](https://github.com/stellar/wallet-backend/issues/677);
+  - go-stellar-sdk: [#6046](https://github.com/stellar/go-stellar-sdk/issues/6046),
+    [#6047](https://github.com/stellar/go-stellar-sdk/issues/6047);
+  - js-stellar-sdk: [#1907](https://github.com/stellar/js-stellar-sdk/issues/1907),
+    [#1908](https://github.com/stellar/js-stellar-sdk/issues/1908);
+  - rs-stellar-xdr: [#627](https://github.com/stellar/rs-stellar-xdr/issues/627),
+    [#628](https://github.com/stellar/rs-stellar-xdr/issues/628),
+    [#629](https://github.com/stellar/rs-stellar-xdr/issues/629);
+  - stellar-core: [#5509](https://github.com/stellar/stellar-core/issues/5509).
+- `conformance/known-failures/*.txt` point at the filed issues.
+- `indexerlint` runs clean on wallet-backend at `3e22515a` with `lint/baselines/wallet-backend.json`,
+  which baselines the one finding against wallet-backend#820; the nightly workflow checks it.
+
 ## 2026-11-14: 0.1.0 release candidate
 
 What 0.1.0 holds:

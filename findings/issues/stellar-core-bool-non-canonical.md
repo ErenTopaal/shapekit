@@ -93,7 +93,8 @@ xdrpp says such a check "would be slower"; it is one comparison per bool read.
 
 ## Sibling issues
 
-stellar-xdr's lenient read (anything but 1 is false) is the other half of the disagreement. A
-separate issue for stellar/rs-stellar-xdr asks it to refuse the word as well.
+stellar-xdr's lenient read (anything but 1 is false) is the other half of the disagreement:
+[stellar/rs-stellar-xdr#629](https://github.com/stellar/rs-stellar-xdr/issues/629) asks it to
+refuse the word as well.
 
 shapekit vector: `soroban.invoke-basics.synth-invoke-arg-bool-2`

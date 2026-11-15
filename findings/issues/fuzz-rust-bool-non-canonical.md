@@ -67,6 +67,6 @@ The input above is [corpus/entries/soroban.scval-shapes/soroban.scval-shapes.syn
 
 ## Sibling issues
 
-A separate issue for stellar/stellar-core describes the other half: xdrpp reads any non-zero bool word as `true`, so the submitted bytes and core's re-encoding can differ.
+[stellar/stellar-core#5509](https://github.com/stellar/stellar-core/issues/5509) describes the other half: xdrpp reads any non-zero bool word as `true`, so the submitted bytes and core's re-encoding can differ.
 
 shapekit vector: `soroban.scval-shapes.synth-bool-value-2`

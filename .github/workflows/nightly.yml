@@ -421,6 +421,12 @@ jobs:
           (cd "$RUNNER_TEMP/wb" && "$RUNNER_TEMP/bin/indexerlint" -format json ./...) \
             >"target/findings/indexerlint-wallet-backend-${pin:0:8}.json" || status=$?
           if [ "$status" -gt 1 ]; then exit "$status"; fi
+      - name: indexerlint runs clean on wallet-backend with the committed baseline
+        # the one finding at the pin is filed upstream and baselined; any new finding fails here
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/wb"
+          "$RUNNER_TEMP/bin/indexerlint" -baseline "$GITHUB_WORKSPACE/lint/baselines/wallet-backend.json" ./...
       - name: put the harness report where the triage reads it
         run: |
           set -euo pipefail

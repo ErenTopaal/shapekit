@@ -6,10 +6,10 @@
 # xdr-json reader accepts offer id text the canonical form refuses (a plus sign, -0); numbers
 # past 2^53-1 are in the implementation-defined entry and negative int64 ids in the negative
 # entry, which rust reads exactly and passes
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 12/id_parse, case 13/id_parse
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/627 case 12/id_parse, case 13/id_parse
 # the json reader stops at serde_json's 128-level recursion limit, below the xdr depth the
 # decoder accepts, so values the crate renders cannot be read back
-soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md any/encode_json
+soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network https://github.com/stellar/rs-stellar-xdr/issues/628 any/encode_json
 soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-event-vec-depth-101.md any/encode_json
 soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted.md any/encode_json
 soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network findings/issues/rust-soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted.md any/encode_json
@@ -29,5 +29,5 @@ soroban.scval-shapes.p30-vec-depth-over 30.0.0 diverges-from-network findings/is
 # entries are implementation-defined, so this shows only in a run with the other sdks. the
 # envelope entry is the same word as a contract argument, which core 30.0.0 accepted and
 # executed as true in a local run (findings/issues/stellar-core-bool-non-canonical.md).
-soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md any/decode_encode, any/decode_json
-soroban.invoke-basics.synth-invoke-arg-bool-2 * diverges-from-peers findings/issues/fuzz-rust-bool-non-canonical.md any/decode_encode, any/decode_json
+soroban.scval-shapes.synth-bool-value-2 * diverges-from-peers https://github.com/stellar/rs-stellar-xdr/issues/629 any/decode_encode, any/decode_json
+soroban.invoke-basics.synth-invoke-arg-bool-2 * diverges-from-peers https://github.com/stellar/rs-stellar-xdr/issues/629 any/decode_encode, any/decode_json

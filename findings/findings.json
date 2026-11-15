@@ -16,25 +16,25 @@
     {
       "kind": "conformance",
       "path": "findings/inputs/conformance-rust.json",
-      "sha256": "28fd585ffd73cc3e7c3632597dd3e117501f419e12dd79240e492348d6a9d106",
+      "sha256": "4168075cbe6a8984d31f680739de585ee0039552112337686657ed681377b8d9",
       "detail": "corpus 0.1.0, rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
       "kind": "conformance",
       "path": "findings/inputs/conformance-go.json",
-      "sha256": "5b18d48e65f61941c072677c13a39db15c23bd7635b96fd95d8f53a5b570ddad",
+      "sha256": "b5d531824d7ae9733f3ac117070ef0a5ceacf654e6a15126647bb703beb489bc",
       "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
     },
     {
       "kind": "conformance",
       "path": "findings/inputs/conformance-js.json",
-      "sha256": "a6363d6529ebd43e933179a2949c11282bdb7b810666383827ff75ff56a679dd",
+      "sha256": "84afa7b2546a33323cd791ffdc947c56a143f319fb6a7c19adf4f43890a2920c",
       "detail": "corpus 0.1.0, js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0"
     },
     {
       "kind": "conformance",
       "path": "findings/inputs/conformance-peers.json",
-      "sha256": "f46f45fb733ab04710e46d5a1e4625de37acfcdb83be3aaa82e0fc59d00e50d5",
+      "sha256": "95d0b7992b89552bd42b591b9d1225ce72e0afbe1a10aea4bc345959bd3db328",
       "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 rust@28.0.0 rust@28.0.1 rust@30.0.0"
     },
     {
@@ -76,8 +76,8 @@
       "wrong-data": 2
     },
     "by_status": {
-      "draft": 17,
-      "duplicate-of": 7
+      "duplicate-of": 7,
+      "filed": 17
     }
   },
   "findings": [
@@ -93,7 +93,8 @@
       ],
       "minimal_entry": "cap35.clawback.p30-clawback-claimable-balance-envelope",
       "reproduce": "shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/813",
       "draft": "findings/issues/wallet-backend-W3.md",
       "cause": "The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimableBalance write a BALANCE BURN row (and a DEBIT), so the CAP-67 `clawback` event of the ledger is stored as a `burn`. wallet-backend documents this as intended (docs/architecture/state-changes.md L92), so the draft is a feature request.",
       "siblings": [],
@@ -954,7 +955,8 @@
       ],
       "minimal_entry": "cap23.claimable-balances.p30-claim-through-depth-4-envelope",
       "reproduce": "shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/812",
       "draft": "findings/issues/wallet-backend-W2.md",
       "cause": "BALANCE rows are written per account; the claimable balance (B) or liquidity pool (L) end of a transfer has no row, so the stored transfer has a null counterparty and the ledger's transfer event to or from the B or L address has no counterpart. The single row is documented (docs/architecture/state-changes.md L67-L68, from #442), so the draft asks whether the B or L address belongs in it.",
       "siblings": [],
@@ -1725,7 +1727,8 @@
       ],
       "minimal_entry": "classic.memo-bytes.p30-memo-ff",
       "reproduce": "shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/814",
       "draft": "findings/issues/wallet-backend-W4.md",
       "cause": "CAP-67 puts the transaction memo of a payment to a G address into the transfer event's `to_muxed_id` as u64, string or bytes; wallet-backend stores `to_muxed_id` only for u64 values and no table has a memo column, so text, hash and return memos are stored nowhere.",
       "siblings": [],
@@ -2010,7 +2013,8 @@
       ],
       "minimal_entry": "cap73.sac-trust.p28-deploy-xlm-sac-envelope",
       "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/815",
       "draft": "findings/issues/wallet-backend-W5.md",
       "cause": "Contract creation rows come only from the operation's own CreateContract with a FromAddress preimage and from CreateContract invocations declared in auth entries, so a contract deployed by another contract without an auth entry, and any Stellar Asset Contract deployment, gets no ACCOUNT CREATE row although the meta creates the instance.",
       "siblings": [],
@@ -2211,7 +2215,8 @@
       ],
       "minimal_entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
       "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/816",
       "draft": "findings/issues/wallet-backend-W6.md",
       "cause": "From protocol 26 (CAP-73) an XLM SAC transfer to a missing G account creates it; wallet-backend writes ACCOUNT CREATE only for CreateAccount operations, so the new account gets a credit but no creation row.",
       "siblings": [],
@@ -2291,7 +2296,8 @@
       ],
       "minimal_entry": "cap38.liquidity-pools.p30-revoke-redeems-pool-shares",
       "reproduce": "shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/817",
       "draft": "findings/issues/wallet-backend-W7.md",
       "cause": "Revoking authorization with SetTrustLineFlags or AllowTrust redeems the holder's pool shares and removes the pool-share trustline (CAP-38). The removal is in the meta; wallet-backend writes no TRUSTLINE REMOVE for it.",
       "siblings": [],
@@ -2328,7 +2334,8 @@
       ],
       "minimal_entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
       "reproduce": "shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/818",
       "draft": "findings/issues/wallet-backend-W8.md",
       "cause": "Core removes a transaction's pre-auth signer in txChangesBefore whether the transaction succeeds or fails, and a fee bump's from the fee source before the inner transaction; wallet-backend derives SIGNER rows only from operation effects of successful transactions, so neither removal is stored.",
       "siblings": [],
@@ -2393,7 +2400,8 @@
       ],
       "minimal_entry": "cap33.sponsorship.p30-sponsored-account-envelope",
       "reproduce": "shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\"",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/819",
       "draft": "findings/issues/wallet-backend-W9.md",
       "cause": "Following Horizon's effects (the code says it was ported from them), account creation emits a signer-created state change for the master key, and set options treats the master key as a signer while its weight is above 0. The ledger has no signer entry: the master key's weight is byte 0 of the account's thresholds. Likely intended; the draft asks, and what it would cost consumers is that the row looks like a signer entry.",
       "siblings": [],
@@ -2442,7 +2450,8 @@
         "CAP-0046"
       ],
       "reproduce": "indexerlint -format json ./... (in a checkout of wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/wallet-backend/issues/820",
       "draft": "findings/issues/wallet-backend-L1.md",
       "cause": "The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurses over xdr.SorobanAuthorizedInvocation with no depth counter. The walk runs only for successful transactions, and the decoder (depth 1500) and core (envelopes nested deeper than 1000 XDR levels are refused from protocol 28) bound it today, so it is a hardening finding, not a halt.",
       "siblings": [],
@@ -2469,7 +2478,8 @@
       ],
       "minimal_entry": "cap23.claimable-balances.synth-strkey-b-invalid",
       "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry cap23.claimable-balances.synth-strkey-b-invalid",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/go-stellar-sdk/issues/6046",
       "draft": "findings/issues/go-cap23.claimable-balances.synth-strkey-b-invalid.md",
       "cause": "strkey.Decode, DecodeAny and IsValidClaimableBalance check a B key's length but not its claimable balance id type byte, so ids of types the protocol does not define decode, while xdr.ClaimableBalanceId.DecodeFromStrkey refuses them.",
       "siblings": [
@@ -2678,7 +2688,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
       "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/go-stellar-sdk/issues/6047",
       "draft": "findings/issues/go-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
       "cause": "go-xdr spends one depth unit per named type, while stellar-xdr, which core runs at depth 1000 from protocol 28, also counts each optional and each array. On v0.9.0 the deepest auth chain decoded is 988 at MaxDepth 1000 (1488 at the default 1500) against core's 493, and the deepest nested ScVec argument 495 (745) against 246, so the sdk accepts auth trees and ScVals that core refuses.",
       "siblings": [
@@ -3233,7 +3244,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
       "reproduce": "shapekit conformance run --sdk js --version 16.4.1 --entry soroban.scval-shapes.synth-event-vec-depth-101",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/js-stellar-sdk/issues/1907",
       "draft": "findings/issues/js-16x-backports.md",
       "cause": "16.4.1 lacks six fixes that 17.x has: ScVal map key order (#1766), map key collisions (#1789, fixed by #1778), canonical textual ids (#1785), W addresses (#1811), js-xdr 5's decode depth (js-xdr#155; 16.x stops at 200 nested types, 66 ScVec levels), and the StrKey payload length and claimable balance type byte checks. One issue asks for all six backports.",
       "siblings": [
@@ -3926,7 +3938,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
       "reproduce": "shapekit conformance run --sdk js --version 17.4.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/js-stellar-sdk/issues/1908",
       "draft": "findings/issues/js-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
       "cause": "Core refuses envelopes nested deeper than its decode limit; the sdk's default (1500 nested schemas since js-xdr#155) is wider and cannot be lowered through fromXdr, and through schema.decode core's boundary falls at a different maxDepth per shape, so no single value matches core.",
       "siblings": [
@@ -4053,7 +4066,8 @@
       ],
       "minimal_entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/rs-stellar-xdr/issues/627",
       "draft": "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
       "cause": "NumberOrString passes a JSON string to str::parse, so \"+16\", \"-0\" and \"016\" read as 16 and 0; the crate's own tests assert this, so the draft is a question. The failing checks are \"+16\" and \"-0\" in the non-canonical entry; negative ids such as \"-16\" are valid int64 values that core refuses only in doCheckValid, so they are in the negative entry, which accepts the exact id the crate reads.",
       "siblings": [
@@ -4099,7 +4113,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-event-vec-depth-101",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/rs-stellar-xdr/issues/628",
       "draft": "findings/issues/rust-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
       "cause": "to_xdr_json renders nested values of any depth the decoder accepts, but the reader uses serde_json with its default recursion limit, so deep auth trees, ScVals and events (including ones on recorded protocol 30 ledgers) do not round-trip through JSON.",
       "siblings": [
@@ -4289,7 +4304,8 @@
       ],
       "minimal_entry": "soroban.scval-shapes.synth-bool-value-2",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-bool-value-2",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/rs-stellar-xdr/issues/629",
       "draft": "findings/issues/fuzz-rust-bool-non-canonical.md",
       "cause": "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt).",
       "siblings": [
@@ -4340,7 +4356,8 @@
       ],
       "minimal_entry": "soroban.invoke-basics.synth-invoke-arg-bool-2",
       "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.invoke-basics.synth-invoke-arg-bool-2",
-      "status": "draft",
+      "status": "filed",
+      "link": "https://github.com/stellar/stellar-core/issues/5509",
       "draft": "findings/issues/stellar-core-bool-non-canonical.md",
       "cause": "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the converted value, so core decodes any non-zero bool word as true. The transaction hash, the signature check and the protocol 28 rust parse check all use core's re-encoding (word 1), never the submitted bytes. In a local core 30.0.0 run an envelope with the word 2 signed over the canonical hash was applied with txSUCCESS and stored with 1; signed over the submitted bytes it got txBAD_AUTH. Low severity: no authorization bypass or fund loss, but the hash of the submitted bytes differs from core's transaction hash and stellar-xdr reads the same argument as false. The matched cells are the rust testee diverging from its peers on the envelope form (the fuzz classes in findings/fuzz/known-classes.txt are the same root cause).",
       "siblings": [
