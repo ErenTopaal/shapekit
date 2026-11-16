@@ -17,9 +17,10 @@ pub const CONTRACTS_INTERFACE_PROTOCOL: u32 = 29;
 
 /// `echo` built from the same source by `contracts/build-legacy.sh` against
 /// older soroban-sdk releases, for chains below protocol 29. The suffix is
-/// the interface protocol the build declares: soroban-sdk 22.0.11 (22),
+/// the interface protocol the build declares: soroban-sdk 21.7.7 (21), 22.0.11 (22),
 /// 23.5.3 (23, used for protocol 24 since no release declares 24) and
 /// 28.0.0 (28).
+pub const ECHO_WASM_P21: &[u8] = include_bytes!("../../../contracts/wasm/p21/echo.wasm");
 pub const ECHO_WASM_P22: &[u8] = include_bytes!("../../../contracts/wasm/p22/echo.wasm");
 pub const ECHO_WASM_P23: &[u8] = include_bytes!("../../../contracts/wasm/p23/echo.wasm");
 pub const ECHO_WASM_P28: &[u8] = include_bytes!("../../../contracts/wasm/p28/echo.wasm");
@@ -32,6 +33,7 @@ pub fn echo_wasm_for(protocol: u32) -> Option<&'static [u8]> {
         (28, ECHO_WASM_P28),
         (23, ECHO_WASM_P23),
         (22, ECHO_WASM_P22),
+        (21, ECHO_WASM_P21),
     ]
     .into_iter()
     .find(|(p, _)| *p <= protocol)
@@ -108,6 +110,11 @@ mod tests {
     fn legacy_echo_builds_are_committed_and_declare_their_protocol() {
         let builds = [
             (
+                ECHO_WASM_P21,
+                21,
+                include_str!("../../../contracts/wasm/p21/SHA256SUMS"),
+            ),
+            (
                 ECHO_WASM_P22,
                 22,
                 include_str!("../../../contracts/wasm/p22/SHA256SUMS"),
@@ -135,8 +142,8 @@ mod tests {
 
     #[test]
     fn echo_for_a_protocol_never_declares_a_newer_one() {
-        assert_eq!(echo_wasm_for(21), None);
-        for protocol in 22..=30 {
+        assert_eq!(echo_wasm_for(20), None);
+        for protocol in 21..=30 {
             let wasm = echo_wasm_for(protocol).expect("a build");
             let declared = interface_protocol(wasm).expect("declared");
             assert!(declared <= protocol, "{protocol}: {declared}");
