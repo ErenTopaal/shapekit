@@ -72,6 +72,8 @@ pub enum SubmitStatus {
     Error,
     TryAgainLater,
     Filtered,
+    /// Core's tx endpoint could not decode the bytes and returned an exception, no result.
+    Undecodable,
 }
 
 #[derive(
@@ -137,6 +139,13 @@ impl Contract for ValidationTable {
                     out.push(format!(
                         "{at}: core answered {:?} at submission, so it cannot have been applied",
                         a.submission
+                    ));
+                }
+                if a.submission == SubmitStatus::Undecodable
+                    && (a.result_code.is_some() || a.result_xdr.is_some())
+                {
+                    out.push(format!(
+                        "{at}: core could not decode the bytes, so it returned no result"
                     ));
                 }
                 if a.applied != ApplyStatus::NotApplied && a.result_code.is_none() {

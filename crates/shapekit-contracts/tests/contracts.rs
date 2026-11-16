@@ -727,3 +727,47 @@ fn a_fee_bump_names_funded_roles() {
         "the fee bump fee must be positive",
     );
 }
+
+#[test]
+fn undecodable_submissions_carry_no_result() {
+    let undecodable = ProbeAttempt {
+        variant: "ext discriminant 1".into(),
+        submission: SubmitStatus::Undecodable,
+        result_code: None,
+        result_xdr: None,
+        applied: ApplyStatus::NotApplied,
+        witnesses: vec!["candidate:probe.ext-1".into()],
+    };
+    let t = ValidationTable {
+        schema_version: 1,
+        core: core(true),
+        fields: vec![FieldVerdict {
+            path: "TransactionEnvelope.tx_v0.tx.ext".into(),
+            verdict: Verdict::Validated,
+            attempts: vec![
+                attempt(
+                    "ext v0",
+                    SubmitStatus::Pending,
+                    "tx_success",
+                    ApplyStatus::Succeeded,
+                ),
+                undecodable.clone(),
+            ],
+        }],
+    };
+    holds(&t);
+    assert_eq!(
+        serde_json::to_value(SubmitStatus::Undecodable).unwrap(),
+        json!("undecodable")
+    );
+    let mut bad = t.clone();
+    bad.fields[0].attempts[1] = ProbeAttempt {
+        result_code: Some("tx_malformed".into()),
+        result_xdr: Some("AAAAAAAAAGT////7AAAAAA==".into()),
+        ..undecodable.clone()
+    };
+    has_problem(&bad, "returned no result");
+    let mut bad = t.clone();
+    bad.fields[0].attempts[1].applied = ApplyStatus::Failed;
+    has_problem(&bad, "cannot have been applied");
+}

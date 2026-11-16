@@ -142,14 +142,23 @@
     },
     "SubmitStatus": {
       "description": "The status core's `tx` endpoint answers.",
-      "enum": [
-        "pending",
-        "duplicate",
-        "error",
-        "try-again-later",
-        "filtered"
-      ],
-      "type": "string"
+      "oneOf": [
+        {
+          "enum": [
+            "pending",
+            "duplicate",
+            "error",
+            "try-again-later",
+            "filtered"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "undecodable",
+          "description": "Core's tx endpoint could not decode the bytes and returned an exception, no result.",
+          "type": "string"
+        }
+      ]
     },
     "Verdict": {
       "oneOf": [
