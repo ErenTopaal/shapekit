@@ -1,0 +1,597 @@
+{
+  "schema_version": 1,
+  "obligations": [
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:118:18da356f1396",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if len(raw) < 3 { -> if len(raw) < 4 {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:125:223b1973941c",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "entry:cap33.sponsorship.golden-3635a80135f66ca8-0",
+        "entry:cap35.clawback.p30-create-clawback-enabled-balance",
+        "entry:cap67.unified-events.p22-backfill-create-claimable-balance",
+        "entry:cap67.unified-events.p22-create-claimable-balance"
+      ],
+      "evidence": "payload := raw[1 : len(raw)-2] -> payload := raw[2 : len(raw)-2]; 6 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:162:e156280226f3",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap84.muxed-contract.synth-strkey-w-valid"
+      ],
+      "evidence": "expected = 40 // 32-byte contract id + 8-byte muxed id -> _ = expected // 32-byte contract id + 8-byte muxed id; 1 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:183:b5dc00ffdfe4",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap40.signed-payload-signer.synth-strkey-p-valid"
+      ],
+      "evidence": "declared := int(binary.BigEndian.Uint32(payload[32:headerLen])) -> declared := int(binary.BigEndian.Uint32(payload[31:headerLen])); 1 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:184:f0e77ce996c6",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap40.signed-payload-signer.synth-strkey-p-valid"
+      ],
+      "evidence": "if declared < 1 || declared > maxPayloadLen { -> if declared < 2 || declared > maxPayloadLen {; 1 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:227:fccbb70cfeb7",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "entry:cap01.bump-sequence.p30-bump-behind",
+        "entry:cap01.bump-sequence.p30-bump-forward",
+        "entry:cap01.bump-sequence.p30-bump-negative",
+        "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "evidence": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1; 620 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:22:646e45815516",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "entry:cap01.bump-sequence.p30-bump-behind",
+        "entry:cap01.bump-sequence.p30-bump-forward",
+        "entry:cap01.bump-sequence.p30-bump-negative",
+        "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'; 599 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:22:f7628b188c6e",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "entry:cap01.bump-sequence.p30-bump-behind",
+        "entry:cap01.bump-sequence.p30-bump-forward",
+        "entry:cap01.bump-sequence.p30-bump-negative",
+        "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'; 605 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:232:a12b4368b622",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "entry:cap01.bump-sequence.p30-bump-behind",
+        "entry:cap01.bump-sequence.p30-bump-forward",
+        "entry:cap01.bump-sequence.p30-bump-negative",
+        "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "evidence": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc; 615 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:64:0ec00ab8df18",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "const maxEncodedSize = (maxRawSize*8 + 4) / 5 // (8n+4)/5 is the EncodedLen for no padding -> const maxEncodedSize = (maxRawSize*8 + 3) / 5 // (8n+4)/5 is the EncodedLen for no padding; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:80:75d443d700c7",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap23.claimable-balances.synth-strkey-b-invalid",
+        "entry:cap23.claimable-balances.synth-strkey-b-valid",
+        "entry:cap27.muxed-accounts.synth-strkey-g-valid",
+        "entry:cap27.muxed-accounts.synth-strkey-m-valid",
+        "entry:cap27.muxed-accounts.synth-strkey-s-valid"
+      ],
+      "evidence": "vp := raw[0 : len(raw)-2] -> vp := raw[0 : len(raw)-3]; 11 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/main.go:81:b8016acd1bdb",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap23.claimable-balances.synth-strkey-b-invalid",
+        "entry:cap23.claimable-balances.synth-strkey-b-valid",
+        "entry:cap27.muxed-accounts.synth-strkey-g-invalid",
+        "entry:cap27.muxed-accounts.synth-strkey-g-valid",
+        "entry:cap27.muxed-accounts.synth-strkey-m-invalid"
+      ],
+      "evidence": "payload := raw[1 : len(raw)-2] -> payload := raw[1 : len(raw)-1]; 19 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/muxed_account.go:65:49ff14fd83d8",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "raw = append(raw, b.Bytes()...) -> _, _, _ = raw, raw, b.Bytes; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/muxed_contract.go:50:51abc5763211",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "binary.BigEndian.PutUint64(raw[32:], m.id) -> _, _, _ = binary.BigEndian.PutUint64, raw, m.id; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:strkey/muxed_contract.go:50:a2768846685b",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "binary.BigEndian.PutUint64(raw[32:], m.id) -> binary.BigEndian.PutUint64(raw[33:], m.id); no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/account_entry.go:44:df9be42b37c4",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if account.Ext.V1 != nil && account.Ext.V1.Ext.V2 != nil { -> if account.Ext.V1 != nil && true {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/account_flags.go:18:0319c3b74e9f",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return (accountFlags & AccountFlagsAuthImmutableFlag) != 0 -> return (accountFlags | AccountFlagsAuthImmutableFlag) != 0; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/account_id.go:101:0e2eea5312ca",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return nil -> ; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/account_id.go:14:7fec496d311e",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "panic(err) -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/account_thresholds.go:8:0db33dfb78d4",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return t[1] -> return t[0]; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:153:b679537b8732",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if len(parts) != 2 { -> if len(parts) != 3 {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:193:067347835766",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "case length >= 1 && length <= 4: -> case length >= 0 && length <= 4:; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:193:4d8ba26bf745",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:231:9d16516bfe83",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:234:f488b2e7aba5",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "copy(bytecode[:], byteArray[0:length]) -> _, _, _ = bytecode, byteArray, length; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:249:a51fd068df3b",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "a.MustExtract(&t, &c, &i) -> _, _, _, _ = a.MustExtract, t, c, i; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:393:9816225953b5",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "panic(fmt.Errorf(\"Cannot transform type %v to Asset\", a.Type)) -> _, _ = fmt.Errorf, a.Type; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:481:2b13c054c660",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return [32]byte{}, err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/asset.go:59:a37cf4a8db59",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "case length >= 5 && length <= 12: -> case length >= 6 && length <= 12:; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/claimable_balance_id.go:56:b8948829b8f2",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[0]) -> return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[1]); no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/db.go:37:03db2eb5ce2e",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return errors.New(\"Invalid value for xdr.AssetType\") -> _ = errors.New; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/db.go:68:37f4714de776",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return errors.New(\"Invalid value for xdr.Int64\") -> _ = errors.New; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/decorated_signature.go:31:565db37e656d",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "hint[i] ^= keyHint[i] -> hint[i] = keyHint[i]; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/go_string.go:157:75a93e253d1d",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "sb.WriteString(fmt.Sprintf(\"InflationDest: xdr.MustAddressPtr(%#v),\", s.InflationDest.Address())) -> _, _, _ = sb.WriteString, fmt.Sprintf, s.InflationDest.Address; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/go_string.go:250:15cc6d3d4385",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "sb.WriteString(\"(unknown)\") -> _ = sb.WriteString; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/hash.go:13:7caafcde0dd6",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "for i := 0; i < len(s); i++ { -> for i := -1; i < len(s); i++ {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/json.go:138:12b6ec7ac35e",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "parts[i] = converted -> _, _, _ = parts, i, converted; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/json.go:162:a3e4158c60af",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "payload.AbsBeforeEpoch = &absBeforeEpoch -> _, _ = payload.AbsBeforeEpoch, absBeforeEpoch; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/json.go:175:aee9beaa9a75",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return nil, err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/json.go:64:4aba0578fdc3",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return &iso8601Time{time.Unix(epoch, 0).UTC()} -> return &iso8601Time{time.Unix(epoch, 1).UTC()}; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_close_meta_batch.go:33:09a10aa61dbb",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-1].LedgerSequence() -> lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-0].LedgerSequence(); no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_close_meta_view.go:160:0f66ba9dff88",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return 0, err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:106:755b9b80b0db",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == 1 {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:106:bb29d05f8528",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == -1 {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:170:032ae0a2a4a2",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return key, err -> _, _ = key, err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:44:9e966d836fdb",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "Selling: 0, -> Selling: 1,; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:50:310c62c75796",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "accountEntry.Ext.V1.Ext.V = 2 -> _ = accountEntry.Ext.V1.Ext.V; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:88:ed661c9670ad",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if trustLineEntry.Ext.V == 0 { -> if trustLineEntry.Ext.V == 1 {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_entry.go:93:2f2449e157c5",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "Selling: 0, -> Selling: 1,; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_key.go:111:eb6bad8c1c4b",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "*key = nkey -> _, _ = key, nkey; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_key.go:122:ade2a647b476",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_key.go:171:86ad16fc9aad",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "*key = nkey -> _, _ = key, nkey; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_key.go:35:5b8027c6f1b1",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return l.AccountId.Equals(r.AccountId) && l.Asset.Equals(r.Asset) -> return true && l.Asset.Equals(r.Asset); no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/ledger_key.go:72:29486be3644b",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "*key = nkey -> _, _ = key, nkey; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/main.go:200:c332d1befc58",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return nil, err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/main.go:88:309f96920fb2",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "options.MaxInputLen = hex.DecodedLen(len(data)) -> _, _, _ = options.MaxInputLen, hex.DecodedLen, data; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account.go:118:5b770f797ffb",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return \"\", nil -> ; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account.go:70:d8895a04fc0b",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "entry:cap33.sponsorship.golden-3635a80135f66ca8-0",
+        "entry:cap35.clawback.p30-create-clawback-enabled-balance",
+        "entry:cap67.unified-events.p22-backfill-create-claimable-balance",
+        "entry:cap67.unified-events.p22-create-claimable-balance"
+      ],
+      "evidence": "case 56: -> case 55:; 6 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account.go:72:8a1f8f9567d5",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "case 69: -> case 68:; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account.go:79:aceff5de3e1f",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if err = muxed.Id.UnmarshalBinary(raw[32:]); err != nil { -> if err = muxed.Id.UnmarshalBinary(raw[31:]); err != nil {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account.go:82:5b8790d5ea27",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/muxed_account_view.go:16:7d6818c99491",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "// MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. _ = v.MustEd2... -> _ = // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. v.MustEd2...; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/operation_trace_result.go:16:5eaf88e86c84",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "operationTraceDescription = o.PaymentResult.Code.String() -> _, _ = operationTraceDescription, o.PaymentResult.Code.String; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/path_payment_result.go:33:02cb410248be",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return 0 -> ; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/price.go:85:91866fdad06c",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return fmt.Errorf(\"price denominator cannot be 0: %d/%d\", p.N, p.D) -> _, _, _ = fmt.Errorf, p.N, p.D; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/price.go:87:380a2f8ca9f2",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "if p.N < 0 || p.D < 0 { -> if p.N < 0 || false {; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/signer_key.go:151:30c8dc05e442",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "*skey, err = NewSignerKey(keytype, signer) -> _, _, _, _, _ = skey, err, NewSignerKey, keytype, signer; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/signer_key.go:52:7fe017297de6",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap40.signed-payload-signer.p28-account-four-payload-signers",
+        "entry:cap40.signed-payload-signer.p28-authorised-by-payload-32",
+        "entry:cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope",
+        "entry:cap40.signed-payload-signer.p28-extra-signer-payload-64-meta",
+        "entry:cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope"
+      ],
+      "evidence": "raw = append(raw, buffer[32:]...) -> _, _, _ = raw, raw, buffer; 33 entries change"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/stellar_value.go:73:140fe5266cb7",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return 0, fmt.Errorf(\"close time out of range: %d\", uint64(t)) -> return 1, fmt.Errorf(\"close time out of range: %d\", uint64(t)); no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/stellar_value.go:75:054332cbfc6e",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return int64(t) * 1000, nil //nolint:gosec // bounded above -> return int64(t) * 999, nil //nolint:gosec // bounded above; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/transaction_envelope.go:119:93fd86e60caa",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return nil -> ; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/transaction_meta.go:42:6a0c4e8a3f44",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return nil, nil -> ; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/trust_line_asset.go:41:9c10d2ecefc8",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "panic(err) -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/trust_line_asset.go:69:030ac4849a11",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return err -> _ = err; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/view_validate.go:14:4b28ad7cfb38",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return viewErrTrailingBytes(uint32(n), len(v)-n) //nolint:gosec // view offsets are uint32 throughout -> return viewErrTrailingBytes(uint32(n), len(v)+n) //nolint:gosec // view offsets are uint32 throughout; no entry changes"
+    },
+    {
+      "id": "seed:go@v0.9.0:xdr/xdrstream.go:270:71be6e67f6f7",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "return err -> _ = err; no entry changes"
+    }
+  ]
+}

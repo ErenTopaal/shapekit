@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "obligations": [
+    {
+      "id": "seed:rust@30.0.0:src/generated.rs:1729:17: delete field max_length from struct schemars::schema::StringValidation expression in <impl schemars::JsonSchema for BytesM<MAX>>::json_schema",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "delete field max_length from struct schemars::schema::StringValidation expression in <impl schemars::JsonSchema for BytesM<MAX>>::json_schema; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/account_flags.rs:96:9: replace <impl Name for AccountFlags>::name -> &'static str with \"\"",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl Name for AccountFlags>::name -> &'static str with \"\"; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/allow_trust_result_code.rs:76:17: replace < with ==",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with ==; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/asset.rs:101:9: replace <impl Name for Asset>::name -> &'static str with \"\"",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl Name for Asset>::name -> &'static str with \"\"; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/claimable_balance_id.rs:121:9: replace <impl WriteXdr for ClaimableBalanceId>::write_xdr -> Result<(), Error> with Ok(())",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "entry:cap23.claimable-balances.golden-67b49513ed2f1609-1",
+        "entry:cap23.claimable-balances.p30-claim-through-depth-4-envelope",
+        "entry:cap23.claimable-balances.p30-claim-through-depth-4-meta",
+        "entry:cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta"
+      ],
+      "evidence": "replace <impl WriteXdr for ClaimableBalanceId>::write_xdr -> Result<(), Error> with Ok(()); 36 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/claimant.rs:65:9: replace Claimant::name -> &'static str with \"\"",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace Claimant::name -> &'static str with \"\"; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/clawback_result.rs:73:17: replace < with >",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with >; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/ledger_key_contract_code.rs:11:9: replace LedgerKeyContractCode::const_xdr_len -> usize with 1",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace LedgerKeyContractCode::const_xdr_len -> usize with 1; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/ledger_key_liquidity_pool.rs:30:9: replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N]",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N]; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/node_id.rs:30:9: replace NodeId::const_to_xdr -> [u8; N] with [0; N]",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace NodeId::const_to_xdr -> [u8; N] with [0; N]; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/operation_result.rs:100:17: replace < with == in ConstWriter<'_>::write_type_vec_operation_result",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with == in ConstWriter<'_>::write_type_vec_operation_result; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/revoke_sponsorship_result_code.rs:11:9: replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/signer.rs:76:17: replace < with > in ConstWriter<'_>::write_type_vec_signer",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with > in ConstWriter<'_>::write_type_vec_signer; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/time_sliced_survey_response_message.rs:20:9: replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/const/transaction_history_entry.rs:54:9: replace ConstWriter<'_>::write_type_transaction_history_entry with ()",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace ConstWriter<'_>::write_type_transaction_history_entry with (); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/contract_executable_type.rs:120:9: replace <impl ReadXdr for ContractExecutableType>::read_xdr -> Result<Self, Error> with Ok(Default::default())",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap40.signed-payload-signer.testnet-4437357",
+        "entry:cap73.sac-trust.golden-504393015a71bc7a-8",
+        "entry:cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
+        "entry:cap73.sac-trust.p28-deploy-credit-sac-envelope",
+        "entry:cap73.sac-trust.p28-deploy-credit-sac-meta"
+      ],
+      "evidence": "replace <impl ReadXdr for ContractExecutableType>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 36 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/curve25519_public.rs:42:9: replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(())",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/encoded_ledger_key.rs:107:9: replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1])",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1]); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/end_sponsoring_future_reserves_result.rs:114:9: replace <impl ReadXdr for EndSponsoringFutureReservesResult>::read_xdr -> Result<Self, Error> with Ok(Default::default())",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap33.sponsorship.golden-1c7fb8566ea79e53-1",
+        "entry:cap33.sponsorship.golden-5a03a46b7b48bb06-2",
+        "entry:cap33.sponsorship.golden-6f067a349543093a-48",
+        "entry:cap33.sponsorship.p30-sponsored-account-meta",
+        "entry:cap33.sponsorship.p30-sponsored-claimable-balance-meta"
+      ],
+      "evidence": "replace <impl ReadXdr for EndSponsoringFutureReservesResult>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 12 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/extend_footprint_ttl_result_code.rs:72:9: replace ExtendFootprintTtlResultCode::name -> &'static str with \"\"",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace ExtendFootprintTtlResultCode::name -> &'static str with \"\"; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/host_function.rs:56:17: replace < with >",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with >; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/ledger_entry_changes.rs:72:9: replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default()",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default(); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/ledger_entry_type.rs:138:9: replace <impl TryFrom<i32> for LedgerEntryType>::try_from -> Result<Self, Error> with Ok(Default::default())",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap03.offer-liabilities.golden-00c0553ff45607f9-10",
+        "entry:cap03.offer-liabilities.golden-0ebc576d9b25b85a-8",
+        "entry:cap03.offer-liabilities.golden-1184dd64bb4ead8c-20",
+        "entry:cap03.offer-liabilities.golden-12c04cf739c52eac-20",
+        "entry:cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
+      ],
+      "evidence": "replace <impl TryFrom<i32> for LedgerEntryType>::try_from -> Result<Self, Error> with Ok(Default::default()); 289 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/ledger_header_flags.rs:54:15: replace += with -=",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace += with -=; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/restore_footprint_result_code.rs:144:9: replace <impl WriteXdr for RestoreFootprintResultCode>::write_xdr -> Result<(), Error> with Ok(())",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap66.archival.golden-04667ce620bffee7-26",
+        "entry:cap66.archival.p30-restore-footprint",
+        "entry:cap76.archival-remediation.golden-04667ce620bffee7-26",
+        "entry:soroban.invoke-basics.golden-04667ce620bffee7-26",
+        "entry:soroban.invoke-basics.golden-7b59aa36c1776fe1-32"
+      ],
+      "evidence": "replace <impl WriteXdr for RestoreFootprintResultCode>::write_xdr -> Result<(), Error> with Ok(()); 14 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/revoke_sponsorship_result_code.rs:127:13: delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/sc_error_type.rs:139:13: delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap66.archival.golden-04667ce620bffee7-23",
+        "entry:cap71.credentials.golden-e25799a2e2e9eea2-17",
+        "entry:cap84.muxed-contract.golden-7f92354d03578deb-11",
+        "entry:soroban.auth-trees.golden-57a486abce28859d-17",
+        "entry:soroban.auth-trees.golden-5f615b0f98ae09f3-11"
+      ],
+      "evidence": "delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from; 6 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/sc_spec_event_param_location_v0.rs:126:9: replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(())",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/sc_val_type.rs:253:13: delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from",
+      "kind": "seed",
+      "status": "met",
+      "witnesses": [
+        "entry:cap40.signed-payload-signer.testnet-4437357",
+        "entry:cap73.sac-trust.golden-504393015a71bc7a-8",
+        "entry:cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
+        "entry:cap73.sac-trust.p28-deploy-credit-sac-meta",
+        "entry:cap73.sac-trust.p28-deploy-xlm-sac-meta"
+      ],
+      "evidence": "delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from; 25 entries change"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/soroban_transaction_meta_ext.rs:81:9: replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()]",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()]; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/survey_message_command_type.rs:37:15: replace += with -=",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace += with -=; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/transaction_ext.rs:55:17: replace < with >",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with >; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/transaction_result_ext.rs:52:17: replace < with <=",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace < with <=; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/transaction_result_set.rs:42:9: replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(())",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/type_enum.rs:1472:15: replace += with -=",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace += with -=; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/type_enum.rs:3216:13: delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str; no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/generated/upgrade_type.rs:87:9: replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default())",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default()); no entry changes"
+    },
+    {
+      "id": "seed:rust@30.0.0:src/transaction_conversions.rs:76:9: replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default()",
+      "kind": "seed",
+      "status": "open",
+      "witnesses": [],
+      "evidence": "replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default(); no entry changes"
+    }
+  ]
+}

@@ -1,0 +1,897 @@
+{
+  "schema": 1,
+  "sdk": "go",
+  "package": "github.com/stellar/go-stellar-sdk",
+  "version": "v0.9.0",
+  "tool": {
+    "name": "go-mutesting",
+    "version": "v2.3.1"
+  },
+  "scope": [
+    "xdr/*.go, without tests, xdr_generated.go and xdr_views_generated.go",
+    "strkey/*.go, without tests"
+  ],
+  "population": 1924,
+  "seed": 20261116,
+  "sample": 100,
+  "counts": {
+    "caught": 12,
+    "timeout": 0,
+    "missed": 64,
+    "unviable": 24
+  },
+  "faults": [
+    {
+      "key": "strkey/main.go:118:18da356f1396",
+      "file": "strkey/main.go",
+      "line": 118,
+      "mutation": "if len(raw) < 3 { -> if len(raw) < 4 {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/main.go:125:223b1973941c",
+      "file": "strkey/main.go",
+      "line": 125,
+      "mutation": "payload := raw[1 : len(raw)-2] -> payload := raw[2 : len(raw)-2]",
+      "status": "caught",
+      "entries": [
+        "cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "cap33.sponsorship.golden-3635a80135f66ca8-0",
+        "cap35.clawback.p30-create-clawback-enabled-balance",
+        "cap67.unified-events.p22-backfill-create-claimable-balance",
+        "cap67.unified-events.p22-create-claimable-balance"
+      ],
+      "entries_changed": 6
+    },
+    {
+      "key": "strkey/main.go:162:e156280226f3",
+      "file": "strkey/main.go",
+      "line": 162,
+      "mutation": "expected = 40 // 32-byte contract id + 8-byte muxed id -> _ = expected // 32-byte contract id + 8-byte muxed id",
+      "status": "caught",
+      "entries": [
+        "cap84.muxed-contract.synth-strkey-w-valid"
+      ],
+      "entries_changed": 1
+    },
+    {
+      "key": "strkey/main.go:183:b5dc00ffdfe4",
+      "file": "strkey/main.go",
+      "line": 183,
+      "mutation": "declared := int(binary.BigEndian.Uint32(payload[32:headerLen])) -> declared := int(binary.BigEndian.Uint32(payload[31:headerLen]))",
+      "status": "caught",
+      "entries": [
+        "cap40.signed-payload-signer.synth-strkey-p-valid"
+      ],
+      "entries_changed": 1
+    },
+    {
+      "key": "strkey/main.go:184:f0e77ce996c6",
+      "file": "strkey/main.go",
+      "line": 184,
+      "mutation": "if declared < 1 || declared > maxPayloadLen { -> if declared < 2 || declared > maxPayloadLen {",
+      "status": "caught",
+      "entries": [
+        "cap40.signed-payload-signer.synth-strkey-p-valid"
+      ],
+      "entries_changed": 1
+    },
+    {
+      "key": "strkey/main.go:227:fccbb70cfeb7",
+      "file": "strkey/main.go",
+      "line": 227,
+      "mutation": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1",
+      "status": "caught",
+      "entries": [
+        "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "cap01.bump-sequence.p30-bump-behind",
+        "cap01.bump-sequence.p30-bump-forward",
+        "cap01.bump-sequence.p30-bump-negative",
+        "cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "entries_changed": 620
+    },
+    {
+      "key": "strkey/main.go:22:646e45815516",
+      "file": "strkey/main.go",
+      "line": 22,
+      "mutation": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'",
+      "status": "caught",
+      "entries": [
+        "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "cap01.bump-sequence.p30-bump-behind",
+        "cap01.bump-sequence.p30-bump-forward",
+        "cap01.bump-sequence.p30-bump-negative",
+        "cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "entries_changed": 599
+    },
+    {
+      "key": "strkey/main.go:22:f7628b188c6e",
+      "file": "strkey/main.go",
+      "line": 22,
+      "mutation": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'",
+      "status": "caught",
+      "entries": [
+        "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "cap01.bump-sequence.p30-bump-behind",
+        "cap01.bump-sequence.p30-bump-forward",
+        "cap01.bump-sequence.p30-bump-negative",
+        "cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "entries_changed": 605
+    },
+    {
+      "key": "strkey/main.go:232:a12b4368b622",
+      "file": "strkey/main.go",
+      "line": 232,
+      "mutation": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc",
+      "status": "caught",
+      "entries": [
+        "cap01.bump-sequence.golden-b71da06f9ce2dec8-2",
+        "cap01.bump-sequence.p30-bump-behind",
+        "cap01.bump-sequence.p30-bump-forward",
+        "cap01.bump-sequence.p30-bump-negative",
+        "cap01.bump-sequence.p30-bump-past-starting-sequence"
+      ],
+      "entries_changed": 615
+    },
+    {
+      "key": "strkey/main.go:273:a75f80b15c0f",
+      "file": "strkey/main.go",
+      "line": 273,
+      "mutation": "return ErrInvalidVersionByte -> _ = ErrInvalidVersionByte",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/main.go:283:8c2338a32f5a",
+      "file": "strkey/main.go",
+      "line": 283,
+      "mutation": "var localDecodingTable [256]byte -> var localDecodingTable [255]byte",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/main.go:61:1380a28bb09a",
+      "file": "strkey/main.go",
+      "line": 61,
+      "mutation": "const maxRawSize = 1 + /* version byte */ maxPayloadSize + 2 /* checksum */ -> const maxRawSize = 1 - /* version byte */ maxPayloadSize + 2 /* checksum */",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/main.go:64:0ec00ab8df18",
+      "file": "strkey/main.go",
+      "line": 64,
+      "mutation": "const maxEncodedSize = (maxRawSize*8 + 4) / 5 // (8n+4)/5 is the EncodedLen for no padding -> const maxEncodedSize = (maxRawSize*8 + 3) / 5 // (8n+4)/5 is the EncodedLen for no padding",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/main.go:80:75d443d700c7",
+      "file": "strkey/main.go",
+      "line": 80,
+      "mutation": "vp := raw[0 : len(raw)-2] -> vp := raw[0 : len(raw)-3]",
+      "status": "caught",
+      "entries": [
+        "cap23.claimable-balances.synth-strkey-b-invalid",
+        "cap23.claimable-balances.synth-strkey-b-valid",
+        "cap27.muxed-accounts.synth-strkey-g-valid",
+        "cap27.muxed-accounts.synth-strkey-m-valid",
+        "cap27.muxed-accounts.synth-strkey-s-valid"
+      ],
+      "entries_changed": 11
+    },
+    {
+      "key": "strkey/main.go:81:b8016acd1bdb",
+      "file": "strkey/main.go",
+      "line": 81,
+      "mutation": "payload := raw[1 : len(raw)-2] -> payload := raw[1 : len(raw)-1]",
+      "status": "caught",
+      "entries": [
+        "cap23.claimable-balances.synth-strkey-b-invalid",
+        "cap23.claimable-balances.synth-strkey-b-valid",
+        "cap27.muxed-accounts.synth-strkey-g-invalid",
+        "cap27.muxed-accounts.synth-strkey-g-valid",
+        "cap27.muxed-accounts.synth-strkey-m-invalid"
+      ],
+      "entries_changed": 19
+    },
+    {
+      "key": "strkey/muxed_account.go:65:49ff14fd83d8",
+      "file": "strkey/muxed_account.go",
+      "line": 65,
+      "mutation": "raw = append(raw, b.Bytes()...) -> _, _, _ = raw, raw, b.Bytes",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/muxed_contract.go:11:85ddc1ae60eb",
+      "file": "strkey/muxed_contract.go",
+      "line": 11,
+      "mutation": "contractID [32]byte -> contractID [33]byte",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/muxed_contract.go:50:51abc5763211",
+      "file": "strkey/muxed_contract.go",
+      "line": 50,
+      "mutation": "binary.BigEndian.PutUint64(raw[32:], m.id) -> _, _, _ = binary.BigEndian.PutUint64, raw, m.id",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "strkey/muxed_contract.go:50:a2768846685b",
+      "file": "strkey/muxed_contract.go",
+      "line": 50,
+      "mutation": "binary.BigEndian.PutUint64(raw[32:], m.id) -> binary.BigEndian.PutUint64(raw[33:], m.id)",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/account_entry.go:44:df9be42b37c4",
+      "file": "xdr/account_entry.go",
+      "line": 44,
+      "mutation": "if account.Ext.V1 != nil && account.Ext.V1.Ext.V2 != nil { -> if account.Ext.V1 != nil && true {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/account_flags.go:18:0319c3b74e9f",
+      "file": "xdr/account_flags.go",
+      "line": 18,
+      "mutation": "return (accountFlags & AccountFlagsAuthImmutableFlag) != 0 -> return (accountFlags | AccountFlagsAuthImmutableFlag) != 0",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/account_id.go:101:0e2eea5312ca",
+      "file": "xdr/account_id.go",
+      "line": 101,
+      "mutation": "return nil -> ",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/account_id.go:14:7fec496d311e",
+      "file": "xdr/account_id.go",
+      "line": 14,
+      "mutation": "panic(err) -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/account_thresholds.go:8:0db33dfb78d4",
+      "file": "xdr/account_thresholds.go",
+      "line": 8,
+      "mutation": "return t[1] -> return t[0]",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:153:b679537b8732",
+      "file": "xdr/asset.go",
+      "line": 153,
+      "mutation": "if len(parts) != 2 { -> if len(parts) != 3 {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:193:067347835766",
+      "file": "xdr/asset.go",
+      "line": 193,
+      "mutation": "case length >= 1 && length <= 4: -> case length >= 0 && length <= 4:",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:193:4d8ba26bf745",
+      "file": "xdr/asset.go",
+      "line": 193,
+      "mutation": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:231:9d16516bfe83",
+      "file": "xdr/asset.go",
+      "line": 231,
+      "mutation": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:234:f488b2e7aba5",
+      "file": "xdr/asset.go",
+      "line": 234,
+      "mutation": "copy(bytecode[:], byteArray[0:length]) -> _, _, _ = bytecode, byteArray, length",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:249:a51fd068df3b",
+      "file": "xdr/asset.go",
+      "line": 249,
+      "mutation": "a.MustExtract(&t, &c, &i) -> _, _, _, _ = a.MustExtract, t, c, i",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:393:9816225953b5",
+      "file": "xdr/asset.go",
+      "line": 393,
+      "mutation": "panic(fmt.Errorf(\"Cannot transform type %v to Asset\", a.Type)) -> _, _ = fmt.Errorf, a.Type",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:481:2b13c054c660",
+      "file": "xdr/asset.go",
+      "line": 481,
+      "mutation": "return [32]byte{}, err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/asset.go:59:a37cf4a8db59",
+      "file": "xdr/asset.go",
+      "line": 59,
+      "mutation": "case length >= 5 && length <= 12: -> case length >= 6 && length <= 12:",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/claim_atom.go:12:bf2cc36c44c3",
+      "file": "xdr/claim_atom.go",
+      "line": 12,
+      "mutation": "return a.V0.OfferId -> _ = a.V0.OfferId",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/claim_atom.go:16:00979f6f0dcd",
+      "file": "xdr/claim_atom.go",
+      "line": 16,
+      "mutation": "panic(errors.New(\"liquidity pools don't have offers\")) -> _ = errors.New",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/claimable_balance_id.go:56:b8948829b8f2",
+      "file": "xdr/claimable_balance_id.go",
+      "line": 56,
+      "mutation": "return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[0]) -> return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[1])",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/db.go:37:03db2eb5ce2e",
+      "file": "xdr/db.go",
+      "line": 37,
+      "mutation": "return errors.New(\"Invalid value for xdr.AssetType\") -> _ = errors.New",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/db.go:68:37f4714de776",
+      "file": "xdr/db.go",
+      "line": 68,
+      "mutation": "return errors.New(\"Invalid value for xdr.Int64\") -> _ = errors.New",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/decorated_signature.go:31:565db37e656d",
+      "file": "xdr/decorated_signature.go",
+      "line": 31,
+      "mutation": "hint[i] ^= keyHint[i] -> hint[i] = keyHint[i]",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/decorated_signature.go:7:9f55dd929c89",
+      "file": "xdr/decorated_signature.go",
+      "line": 7,
+      "mutation": "func NewDecoratedSignature(sig []byte, hint [4]byte) DecoratedSignature { -> func NewDecoratedSignature(sig []byte, hint [3]byte) DecoratedSignature {",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/go_string.go:157:75a93e253d1d",
+      "file": "xdr/go_string.go",
+      "line": 157,
+      "mutation": "sb.WriteString(fmt.Sprintf(\"InflationDest: xdr.MustAddressPtr(%#v),\", s.InflationDest.Address())) -> _, _, _ = sb.WriteString, fmt.Sprintf, s.InflationDest.Address",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/go_string.go:250:15cc6d3d4385",
+      "file": "xdr/go_string.go",
+      "line": 250,
+      "mutation": "sb.WriteString(\"(unknown)\") -> _ = sb.WriteString",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/hash.go:13:7caafcde0dd6",
+      "file": "xdr/hash.go",
+      "line": 13,
+      "mutation": "for i := 0; i < len(s); i++ { -> for i := -1; i < len(s); i++ {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/json.go:138:12b6ec7ac35e",
+      "file": "xdr/json.go",
+      "line": 138,
+      "mutation": "parts[i] = converted -> _, _, _ = parts, i, converted",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/json.go:162:a3e4158c60af",
+      "file": "xdr/json.go",
+      "line": 162,
+      "mutation": "payload.AbsBeforeEpoch = &absBeforeEpoch -> _, _ = payload.AbsBeforeEpoch, absBeforeEpoch",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/json.go:175:aee9beaa9a75",
+      "file": "xdr/json.go",
+      "line": 175,
+      "mutation": "return nil, err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/json.go:64:4aba0578fdc3",
+      "file": "xdr/json.go",
+      "line": 64,
+      "mutation": "return &iso8601Time{time.Unix(epoch, 0).UTC()} -> return &iso8601Time{time.Unix(epoch, 1).UTC()}",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta.go:10:26e9e1f18913",
+      "file": "xdr/ledger_close_meta.go",
+      "line": 10,
+      "mutation": "case 0: -> case 1:",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta.go:123:557bbaf88973",
+      "file": "xdr/ledger_close_meta.go",
+      "line": 123,
+      "mutation": "return l.MustV1().TxProcessing[i].Result -> ",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta.go:165:15723cefec9c",
+      "file": "xdr/ledger_close_meta.go",
+      "line": 165,
+      "mutation": "return l.MustV1().UpgradesProcessing -> ",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta.go:58:5c196b1ffe39",
+      "file": "xdr/ledger_close_meta.go",
+      "line": 58,
+      "mutation": "case 0: -> case 1:",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta_batch.go:33:09a10aa61dbb",
+      "file": "xdr/ledger_close_meta_batch.go",
+      "line": 33,
+      "mutation": "lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-1].LedgerSequence() -> lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-0].LedgerSequence()",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta_view.go:160:0f66ba9dff88",
+      "file": "xdr/ledger_close_meta_view.go",
+      "line": 160,
+      "mutation": "return 0, err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta_view.go:35:b5f4a2fe7f30",
+      "file": "xdr/ledger_close_meta_view.go",
+      "line": 35,
+      "mutation": "case 2: -> case 1:",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_close_meta_view.go:42:48f2e75c35a2",
+      "file": "xdr/ledger_close_meta_view.go",
+      "line": 42,
+      "mutation": "return nil, viewErrUnknownDiscriminant(0, value) -> return nil, viewErrUnknownDiscriminant(-1, value)",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:106:755b9b80b0db",
+      "file": "xdr/ledger_entry.go",
+      "line": 106,
+      "mutation": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == 1 {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:106:bb29d05f8528",
+      "file": "xdr/ledger_entry.go",
+      "line": 106,
+      "mutation": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == -1 {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:142:b7df9b88d825",
+      "file": "xdr/ledger_entry.go",
+      "line": 142,
+      "mutation": "if err := key.SetTrustline(data.TrustLine.AccountId, data.TrustLine.Asset); err != nil { return key, err } -> _, _, _, _, _, _, _ = err, key.SetTrustline, data.TrustLine.AccountId, data.TrustLine.Asset, err, key, err",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:170:032ae0a2a4a2",
+      "file": "xdr/ledger_entry.go",
+      "line": 170,
+      "mutation": "return key, err -> _, _ = key, err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:44:9e966d836fdb",
+      "file": "xdr/ledger_entry.go",
+      "line": 44,
+      "mutation": "Selling: 0, -> Selling: 1,",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:50:310c62c75796",
+      "file": "xdr/ledger_entry.go",
+      "line": 50,
+      "mutation": "accountEntry.Ext.V1.Ext.V = 2 -> _ = accountEntry.Ext.V1.Ext.V",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:88:ed661c9670ad",
+      "file": "xdr/ledger_entry.go",
+      "line": 88,
+      "mutation": "if trustLineEntry.Ext.V == 0 { -> if trustLineEntry.Ext.V == 1 {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry.go:93:2f2449e157c5",
+      "file": "xdr/ledger_entry.go",
+      "line": 93,
+      "mutation": "Selling: 0, -> Selling: 1,",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_entry_view.go:23:d26ac9d5b1cb",
+      "file": "xdr/ledger_entry_view.go",
+      "line": 23,
+      "mutation": "return LedgerKeyView(data).MustCopy() -> ",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:111:eb6bad8c1c4b",
+      "file": "xdr/ledger_key.go",
+      "line": 111,
+      "mutation": "*key = nkey -> _, _ = key, nkey",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:122:ade2a647b476",
+      "file": "xdr/ledger_key.go",
+      "line": 122,
+      "mutation": "return err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:171:86ad16fc9aad",
+      "file": "xdr/ledger_key.go",
+      "line": 171,
+      "mutation": "*key = nkey -> _, _ = key, nkey",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:222:e46d5dcc3dab",
+      "file": "xdr/ledger_key.go",
+      "line": 222,
+      "mutation": "if err := e.accountIdCompressEncodeTo(key.TrustLine.AccountId); err != nil { return err } return e.assetTrustlineCompressEncodeTo(key.TrustLine.Asset) -> _, _, _, _, _, _, _ = err, e.accountIdCompressEncodeTo, key.TrustLine.AccountId, err, err, e.assetTrustlineCompressEncodeTo, key.TrustLine.Asset",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:25:a26464f8b82f",
+      "file": "xdr/ledger_key.go",
+      "line": 25,
+      "mutation": "l := key.MustData() r := other.MustData() return l.AccountId.Equals(r.AccountId) && l.DataName == r.DataName -> _, _, _, _, _, _, _, _ = l, key.MustData, r, other.MustData, l.AccountId.Equals, r.AccountId, l.DataName, r.DataName",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:35:5b8027c6f1b1",
+      "file": "xdr/ledger_key.go",
+      "line": 35,
+      "mutation": "return l.AccountId.Equals(r.AccountId) && l.Asset.Equals(r.Asset) -> return true && l.Asset.Equals(r.Asset)",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:37:52294b282f83",
+      "file": "xdr/ledger_key.go",
+      "line": 37,
+      "mutation": "l := key.MustLiquidityPool() r := other.MustLiquidityPool() return l.LiquidityPoolId == r.LiquidityPoolId -> _, _, _, _, _, _ = l, key.MustLiquidityPool, r, other.MustLiquidityPool, l.LiquidityPoolId, r.LiquidityPoolId",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/ledger_key.go:72:29486be3644b",
+      "file": "xdr/ledger_key.go",
+      "line": 72,
+      "mutation": "*key = nkey -> _, _ = key, nkey",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/main.go:200:c332d1befc58",
+      "file": "xdr/main.go",
+      "line": 200,
+      "mutation": "return nil, err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/main.go:88:309f96920fb2",
+      "file": "xdr/main.go",
+      "line": 88,
+      "mutation": "options.MaxInputLen = hex.DecodedLen(len(data)) -> _, _, _ = options.MaxInputLen, hex.DecodedLen, data",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/muxed_account.go:118:5b770f797ffb",
+      "file": "xdr/muxed_account.go",
+      "line": 118,
+      "mutation": "return \"\", nil -> ",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/muxed_account.go:70:d8895a04fc0b",
+      "file": "xdr/muxed_account.go",
+      "line": 70,
+      "mutation": "case 56: -> case 55:",
+      "status": "caught",
+      "entries": [
+        "cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "cap33.sponsorship.golden-3635a80135f66ca8-0",
+        "cap35.clawback.p30-create-clawback-enabled-balance",
+        "cap67.unified-events.p22-backfill-create-claimable-balance",
+        "cap67.unified-events.p22-create-claimable-balance"
+      ],
+      "entries_changed": 6
+    },
+    {
+      "key": "xdr/muxed_account.go:72:8a1f8f9567d5",
+      "file": "xdr/muxed_account.go",
+      "line": 72,
+      "mutation": "case 69: -> case 68:",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/muxed_account.go:79:aceff5de3e1f",
+      "file": "xdr/muxed_account.go",
+      "line": 79,
+      "mutation": "if err = muxed.Id.UnmarshalBinary(raw[32:]); err != nil { -> if err = muxed.Id.UnmarshalBinary(raw[31:]); err != nil {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/muxed_account.go:82:5b8790d5ea27",
+      "file": "xdr/muxed_account.go",
+      "line": 82,
+      "mutation": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/muxed_account_view.go:16:7d6818c99491",
+      "file": "xdr/muxed_account_view.go",
+      "line": 16,
+      "mutation": "// MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. _ = v.MustEd2... -> _ = // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. v.MustEd2...",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/operation_trace_result.go:16:5eaf88e86c84",
+      "file": "xdr/operation_trace_result.go",
+      "line": 16,
+      "mutation": "operationTraceDescription = o.PaymentResult.Code.String() -> _, _ = operationTraceDescription, o.PaymentResult.Code.String",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/path_payment_result.go:33:02cb410248be",
+      "file": "xdr/path_payment_result.go",
+      "line": 33,
+      "mutation": "return 0 -> ",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/price.go:85:91866fdad06c",
+      "file": "xdr/price.go",
+      "line": 85,
+      "mutation": "return fmt.Errorf(\"price denominator cannot be 0: %d/%d\", p.N, p.D) -> _, _, _ = fmt.Errorf, p.N, p.D",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/price.go:87:380a2f8ca9f2",
+      "file": "xdr/price.go",
+      "line": 87,
+      "mutation": "if p.N < 0 || p.D < 0 { -> if p.N < 0 || false {",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/scval.go:117:fd361e4642ba",
+      "file": "xdr/scval.go",
+      "line": 117,
+      "mutation": "return s.MustU128() == o.MustU128() -> _, _ = s.MustU128, o.MustU128",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/scval.go:20:2e5908bda3fa",
+      "file": "xdr/scval.go",
+      "line": 20,
+      "mutation": "pubkey := address.MustAccountId().Ed25519 result, err = strkey.Encode(strkey.VersionByteAccountID, pubkey[:]) -> _, _, _, _, _, _ = pubkey, result, err, strkey.Encode, strkey.VersionByteAccountID, pubkey",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/signer_key.go:151:30c8dc05e442",
+      "file": "xdr/signer_key.go",
+      "line": 151,
+      "mutation": "*skey, err = NewSignerKey(keytype, signer) -> _, _, _, _, _ = skey, err, NewSignerKey, keytype, signer",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/signer_key.go:52:7fe017297de6",
+      "file": "xdr/signer_key.go",
+      "line": 52,
+      "mutation": "raw = append(raw, buffer[32:]...) -> _, _, _ = raw, raw, buffer",
+      "status": "caught",
+      "entries": [
+        "cap40.signed-payload-signer.p28-account-four-payload-signers",
+        "cap40.signed-payload-signer.p28-authorised-by-payload-32",
+        "cap40.signed-payload-signer.p28-extra-signer-payload-64-envelope",
+        "cap40.signed-payload-signer.p28-extra-signer-payload-64-meta",
+        "cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope"
+      ],
+      "entries_changed": 33
+    },
+    {
+      "key": "xdr/stellar_value.go:73:140fe5266cb7",
+      "file": "xdr/stellar_value.go",
+      "line": 73,
+      "mutation": "return 0, fmt.Errorf(\"close time out of range: %d\", uint64(t)) -> return 1, fmt.Errorf(\"close time out of range: %d\", uint64(t))",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/stellar_value.go:75:054332cbfc6e",
+      "file": "xdr/stellar_value.go",
+      "line": 75,
+      "mutation": "return int64(t) * 1000, nil //nolint:gosec // bounded above -> return int64(t) * 999, nil //nolint:gosec // bounded above",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction.go:64:70bda735ab5c",
+      "file": "xdr/transaction.go",
+      "line": 64,
+      "mutation": "return &tx.Cond.V2.MinSeqLedgerGap -> _ = tx.Cond.V2.MinSeqLedgerGap",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction_envelope.go:119:93fd86e60caa",
+      "file": "xdr/transaction_envelope.go",
+      "line": 119,
+      "mutation": "return nil -> ",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction_envelope.go:179:8e4736a3be45",
+      "file": "xdr/transaction_envelope.go",
+      "line": 179,
+      "mutation": "return e.FeeBump.Tx.InnerTx.V1.Tx.MinSeqLedgerGap() -> _ = e.FeeBump.Tx.InnerTx.V1.Tx.MinSeqLedgerGap",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction_envelope.go:59:ec9b97d65fb2",
+      "file": "xdr/transaction_envelope.go",
+      "line": 59,
+      "mutation": "return uint32(e.V1.Tx.Fee) -> _ = e.V1.Tx.Fee",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction_meta.go:42:6a0c4e8a3f44",
+      "file": "xdr/transaction_meta.go",
+      "line": 42,
+      "mutation": "return nil, nil -> ",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/transaction_meta.go:56:1da12edd4cb4",
+      "file": "xdr/transaction_meta.go",
+      "line": 56,
+      "mutation": "case 1, 2, 3: -> case 1, 2, 2:",
+      "status": "unviable",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/trust_line_asset.go:41:9c10d2ecefc8",
+      "file": "xdr/trust_line_asset.go",
+      "line": 41,
+      "mutation": "panic(err) -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/trust_line_asset.go:69:030ac4849a11",
+      "file": "xdr/trust_line_asset.go",
+      "line": 69,
+      "mutation": "return err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/view_validate.go:14:4b28ad7cfb38",
+      "file": "xdr/view_validate.go",
+      "line": 14,
+      "mutation": "return viewErrTrailingBytes(uint32(n), len(v)-n) //nolint:gosec // view offsets are uint32 throughout -> return viewErrTrailingBytes(uint32(n), len(v)+n) //nolint:gosec // view offsets are uint32 throughout",
+      "status": "missed",
+      "entries_changed": 0
+    },
+    {
+      "key": "xdr/xdrstream.go:270:71be6e67f6f7",
+      "file": "xdr/xdrstream.go",
+      "line": 270,
+      "mutation": "return err -> _ = err",
+      "status": "missed",
+      "entries_changed": 0
+    }
+  ]
+}
