@@ -106,8 +106,10 @@ func imageTag(commit string) string { return "shapekit-wallet-backend:" + commit
 
 // ensureImage builds the commit with its own Dockerfile unless an image built
 // from it on the same pinned base images already exists. Every FROM is
-// replaced by its digest in BaseImages.
-func (s source) ensureImage(ctx context.Context, commit string) (string, error) {
+// replaced by its digest in BaseImages. builder names the buildx builder (one
+// of the docker-container driver can carry memory and cpu limits); the current
+// builder when empty.
+func (s source) ensureImage(ctx context.Context, commit, builder string) (string, error) {
 	tag := imageTag(commit)
 	dockerfile, err := s.show(ctx, commit, "Dockerfile")
 	if err != nil {
@@ -134,7 +136,11 @@ func (s source) ensureImage(ctx context.Context, commit string) (string, error) 
 	if err := archive.Start(); err != nil {
 		return "", fmt.Errorf("git archive: %w", err)
 	}
-	args := append([]string{"buildx", "build", "--load"}, contexts...)
+	args := []string{"buildx", "build", "--load"}
+	if builder != "" {
+		args = append(args, "--builder", builder)
+	}
+	args = append(args, contexts...)
 	args = append(args, "--build-arg", "GIT_COMMIT="+commit,
 		"--label", "shapekit.wallet-backend.commit="+commit,
 		"--label", baseLabel+"="+baseSet,

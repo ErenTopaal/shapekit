@@ -24,7 +24,7 @@ import (
 var BaseImages = map[string]string{
 	"golang:1.25.9-bookworm": "docker.io/library/golang@sha256:298734aec230b5f3e8cee450ce6d7eccc39f1797ba548ee90d57e9803030c6c3",
 	"debian:bookworm-slim":   "docker.io/library/debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc",
-	"ubuntu:jammy":           "docker.io/library/ubuntu@sha256:74b12b11ffa550fba1929ad4d8d16533c34f6612728469671afba1b03b66881c",
+	"ubuntu:jammy":           "docker.io/library/ubuntu@sha256:9abcaffc92a5279fff3a6a41635c0800ea33e528425fb389658806476e7defde",
 }
 
 // baseLabel is the image label recording the pinned bases an image was built

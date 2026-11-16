@@ -32,6 +32,9 @@ type Config struct {
 	// CPUs is docker's --cpus for every container the adapter starts; no
 	// limit when empty.
 	CPUs string
+	// Builder is the buildx builder an image is built with; the current one
+	// when empty.
+	Builder string
 }
 
 // Adapter implements wire.Handler.
@@ -144,7 +147,7 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if a.target != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassBadRequest, "start sent twice")
 	}
-	t, err := startTarget(a.ctx, a.src, a.cfg.Commit, p, a.cfg.DBMemoryBytes, a.cfg.CPUs)
+	t, err := startTarget(a.ctx, a.src, a.cfg.Commit, p, a.cfg.DBMemoryBytes, a.cfg.CPUs, a.cfg.Builder)
 	a.target = t
 	if err != nil {
 		return wire.StartResult{}, err

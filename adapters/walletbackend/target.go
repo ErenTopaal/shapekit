@@ -82,7 +82,7 @@ func (t *target) runFlags() []string {
 
 // startTarget brings up the database, runs the migrations, starts the object
 // store in sep54-s3 mode, and starts ingest. It returns once ingest runs.
-func startTarget(ctx context.Context, src source, commit string, p wire.StartParams, dbMemory uint64, cpus string) (*target, error) {
+func startTarget(ctx context.Context, src source, commit string, p wire.StartParams, dbMemory uint64, cpus, builder string) (*target, error) {
 	if p.DockerNetwork == "" {
 		return nil, wire.Errorf(wire.ClassUnsupported, "wallet-backend runs in containers; the harness must pass docker_network")
 	}
@@ -97,7 +97,7 @@ func startTarget(ctx context.Context, src source, commit string, p wire.StartPar
 	if err := src.ensure(ctx, commit); err != nil {
 		return nil, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
-	image, err := src.ensureImage(ctx, commit)
+	image, err := src.ensureImage(ctx, commit, builder)
 	if err != nil {
 		return nil, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
