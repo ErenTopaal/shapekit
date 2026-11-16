@@ -11,22 +11,28 @@ import (
 // the types the go:generate line in tables.go adds to the manifest's
 var extraTypes = []string{"TransactionMeta"}
 
-// the type table must name exactly the manifest's xdr types and the extra ones, or the
-// generated file is stale
-func TestTypeTableMatchesManifest(t *testing.T) {
+// every type the manifest uses and the extra ones decode in every build, and no type is in the
+// table twice or both in it and in absentTypes; a build without a version tag has the types
+// every version shares
+func TestTypeTableCoversTheManifest(t *testing.T) {
 	names, err := manifestTypeNames()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, extra := range extraTypes {
-		if !slices.Contains(names, extra) {
-			names = append(names, extra)
+	names = append(names, extraTypes...)
+	for _, name := range names {
+		if _, ok := xdrTypes[name]; !ok {
+			t.Errorf("tables_gen.go has no %s; run go generate", name)
 		}
 	}
-	slices.Sort(names)
+	for _, name := range absentTypes {
+		if _, ok := xdrTypes[name]; ok {
+			t.Errorf("%s is in the table and listed as absent", name)
+		}
+	}
 	have := slices.Sorted(maps.Keys(xdrTypes))
-	if !slices.Equal(have, names) {
-		t.Errorf("tables_gen.go has %v, the manifest and the extra types are %v; run go generate", have, names)
+	if len(have) < 400 {
+		t.Errorf("the table has %d types; it is generated from the whole schema", len(have))
 	}
 	for name, newValue := range xdrTypes {
 		if _, ok := newValue().(interface{ MarshalBinary() ([]byte, error) }); !ok {

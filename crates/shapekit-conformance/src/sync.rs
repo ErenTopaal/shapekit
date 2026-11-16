@@ -422,6 +422,8 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 array(&[
                     s("go"),
                     s("build"),
+                    s("-tags"),
+                    crate::versions::go_build_tag(v),
                     s("-modfile"),
                     format!("versions/{v}.mod"),
                     s("-o"),

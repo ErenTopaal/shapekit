@@ -49,15 +49,31 @@ func TestMapTypes(t *testing.T) {
 	a := source("v1", map[string][]string{"ScVal": codec, "Asset": codec})
 	b := source("v2", map[string][]string{"ScVal": codec, "Asset": {"DecodeFrom"}})
 
-	got, err := mapTypes([]string{"SCVal"}, []sdkSource{a, b})
-	if err != nil || got["SCVal"] != "ScVal" {
+	got, err := mapTypes([]string{"SCVal"}, nil, []sdkSource{a, b})
+	if err != nil || got.common["SCVal"] != "ScVal" {
 		t.Errorf("case-insensitive match: %v, %v", got, err)
 	}
-	if _, err := mapTypes([]string{"Asset"}, []sdkSource{a, b}); err == nil || !strings.Contains(err.Error(), "MarshalBinary") {
+	if _, err := mapTypes([]string{"Asset"}, nil, []sdkSource{a, b}); err == nil || !strings.Contains(err.Error(), "MarshalBinary") {
 		t.Errorf("a version without MarshalBinary: %v", err)
 	}
-	if _, err := mapTypes([]string{"LedgerCloseMeta"}, []sdkSource{a}); err == nil {
-		t.Error("a type the sdk lacks was mapped")
+	if _, err := mapTypes([]string{"LedgerCloseMeta"}, nil, []sdkSource{a}); err == nil {
+		t.Error("a required type the sdk lacks was mapped")
+	}
+	// schema types: in every version, in some, in none
+	c := source("v3", map[string][]string{"ScVal": codec, "MuxedContract": codec})
+	got, err = mapTypes(nil, []string{"ScVal", "MuxedContract", "SponsorshipDescriptor"}, []sdkSource{a, c})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.common["ScVal"] != "ScVal" || got.only["v3"]["MuxedContract"] != "MuxedContract" ||
+		len(got.only["v1"]) != 0 || !slices.Equal(got.absent, []string{"SponsorshipDescriptor"}) {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestBuildTag(t *testing.T) {
+	if got := buildTag("v0.9.0"); got != "shapekit_sdk_v0_9_0" {
+		t.Errorf("got %s", got)
 	}
 }
 

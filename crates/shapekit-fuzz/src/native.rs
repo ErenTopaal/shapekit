@@ -426,7 +426,11 @@ impl Engine {
                 cmd.args(["test", "-run", "^$", "-fuzz"])
                     .arg(format!("^{GO_TARGET}$"))
                     .arg(format!("-fuzztime={secs}s"))
-                    .args(["-parallel", "2", "-modfile"])
+                    .args(["-parallel", "2", "-tags"])
+                    .arg(shapekit_conformance::versions::go_build_tag(
+                        &self.sdk_version,
+                    ))
+                    .arg("-modfile")
                     .arg(&self.sdk_dir)
                     .arg(".")
                     .env("GOWORK", "off")
@@ -516,6 +520,10 @@ impl Engine {
                 let mut cmd = Command::new("go");
                 cmd.args(["test", "-run"])
                     .arg(format!("^{GO_TARGET}$/^{name}$"))
+                    .arg("-tags")
+                    .arg(shapekit_conformance::versions::go_build_tag(
+                        &self.sdk_version,
+                    ))
                     .arg("-modfile")
                     .arg(&self.sdk_dir)
                     .arg(".")

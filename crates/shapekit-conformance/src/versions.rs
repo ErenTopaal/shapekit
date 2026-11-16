@@ -265,6 +265,12 @@ pub fn build(root: &Path, target: &Target) -> Result<()> {
     Ok(())
 }
 
+/// The build tag of a go sdk version (`shapekit_sdk_v0_9_0`): it selects the generated type
+/// table file of the types only some versions have (testees/go/tables_gen_<version>.go).
+pub fn go_build_tag(version: &str) -> String {
+    format!("shapekit_sdk_{}", version.replace(['.', '-', '+'], "_"))
+}
+
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
 /// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
 /// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,

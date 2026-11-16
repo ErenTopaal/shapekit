@@ -120,6 +120,8 @@ fn build_testee(setup: &ExecSetup, out: &Path) -> Result<()> {
         &[
             "go".to_string(),
             "build".to_string(),
+            "-tags".to_string(),
+            crate::versions::go_build_tag(&setup.version),
             "-modfile".to_string(),
             setup.modfile.display().to_string(),
             // a directory replace has no module version; hello must still report it
