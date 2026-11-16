@@ -17,7 +17,7 @@ schema_version = 1
 id = "tx.envelope.type"
 xdr_path = "TransactionEnvelope.type"
 validated_by_core = "yes"
-checks = "before protocol 13 any ENVELOPE_TYPE_TX or any muxed account anywhere in the envelope gives txNOT_SUPPORTED; from protocol 13 ENVELOPE_TYPE_TX_V0 gives txNOT_SUPPORTED. fee bump envelopes give txNOT_SUPPORTED before protocol 13. every envelope must also parse with the rust xdr parser of the ledger protocol (depth 500 c++ check before protocol 28, rust depth 1000 from 28) or it is txMALFORMED"
+checks = "before protocol 13 any ENVELOPE_TYPE_TX or any muxed account anywhere in the envelope gives txNOT_SUPPORTED; from protocol 13 ENVELOPE_TYPE_TX_V0 gives txNOT_SUPPORTED. fee bump envelopes give txNOT_SUPPORTED before protocol 13. every envelope must also parse with the rust xdr parser of the ledger protocol (depth 500 c++ check before protocol 28, rust depth 1000 from 28) or it is txMALFORMED. the refusal of v0 from protocol 13 holds for envelopes from peers and in transaction sets; core's own tx endpoint first turns a v0 envelope into the equivalent v1 envelope (same hash), so a v0 envelope submitted there is accepted and the ledger holds the v1 form"
 protocol_min = 0
 risk = "an indexer that only handles v1 envelopes drops or crashes on v0 envelopes in pre-13 history and on fee bumps from 13 on"
 handling = "switch on all three arms; treat v0 as history-only and fee bump as a wrapper whose inner v1 transaction carries the operations"
@@ -26,6 +26,8 @@ citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionFrame.cpp", symbol = "TransactionFrame::commonValidPreSeqNum", lines = "1254-1264" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/FeeBumpTransactionFrame.cpp", symbol = "FeeBumpTransactionFrame::commonValidPreSeqNum", lines = "387-400" },
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionUtils.cpp", symbol = "validateXDRForProtocol", lines = "1349-1380" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/main/CommandHandler.cpp", symbol = "CommandHandler::tx", lines = "1074-1084" },
+  { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/TransactionBridge.cpp", symbol = "txbridge::convertForV13", lines = "18-47" },
   { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-transaction.x", symbol = "TransactionEnvelope", lines = "1002-1010" },
 ]
 

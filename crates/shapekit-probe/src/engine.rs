@@ -460,15 +460,17 @@ fn field_offset(
     Ok(start + typer.offset(&st, &v, &[key(&field.name).as_str()])?.0)
 }
 
-/// Submits bytes that may not decode. xdrpp's `xdr_bad_discriminant` ("bad value of <field>
-/// in <type>") thrown out of `xdr_from_opaque` in `CommandHandler::tx` is `undecodable`.
+/// Submits bytes that may not decode. What xdrpp throws out of `xdr_from_opaque` in
+/// `CommandHandler::tx` for bytes outside the type is `undecodable`: `xdr_bad_discriminant`
+/// ("bad value of <field> in <type>") for a union or enum value, `xdr_overflow` ("xstring
+/// overflow", "xvector overflow") for a length past the bound.
 pub(crate) fn submit_raw(w: &mut World, bytes: &[u8], variant: &str) -> Result<ProbeAttempt> {
     use base64::Engine;
     let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
     match w.driver.node().submit_base64(&b64) {
         Err(shapekit_core_driver::node::NodeError::Rejected { message, .. }) => {
             ensure!(
-                message.starts_with("bad value of "),
+                message.starts_with("bad value of ") || message == "xstring overflow" || message == "xvector overflow",
                 "core's tx endpoint threw something other than a decode error: {message}"
             );
             Ok(ProbeAttempt {
