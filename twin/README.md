@@ -140,3 +140,27 @@ The default chains are the smoke chain, `cap40.signed-payload-signer.p30`,
 `cap67.unified-events.p22`: protocols 9 to 30, classic and contract
 transactions, failed transactions and the unified events backfill. Pass
 `--chain` (repeatable) for others.
+
+## Core coverage of a chain
+
+```sh
+shapekit twin coverage --chain <smoke or corpus chain id> --out <dir> \
+    [--show src/transactions/SetOptionsOpFrame.cpp:308-315]
+```
+
+The command records the chain under both passphrases on the twin, with every
+container writing its LLVM profile into `<dir>/profiles`. Core writes the
+profile when it exits, and the driver stops each node with SIGTERM, which core
+handles by shutting down normally. For corpus chains the twin's canonical
+hashes must equal the committed ones, otherwise the command stops.
+
+The profiles are merged with `llvm-profdata` and exported with `llvm-cov
+export` inside the twin image. The measured code is what decides ledger
+contents: `src/transactions` and `src/ledger`, without their tests. Regions
+are the code regions of the coverage mapping; a region compiled into several
+functions (templates, inline functions) counts as reached when any copy ran.
+
+`<dir>` receives `core-coverage.json` (reached and unreached region counts per
+file and every unreached line range, in the core coverage contract),
+`counts.json` (every region with its count) and `profiles/merged.profdata`.
+`--show` prints the regions overlapping the given lines with their counts.
