@@ -18,7 +18,7 @@
 //! |---|---|
 //! | `@account:<role>` | the role's account, `G...` |
 //! | `@muxed:<role>:<id>` | the role's account muxed with the decimal u64 `id`, `M...` |
-//! | `@contract:<label>` | the contract a `deploy` step labelled so created, `C...` |
+//! | `@contract:<label>` | the contract a `deploy` step labelled so created, or a `host-function` step whose function creates one (`create_contract`, `create_contract_v2`, the Stellar asset contract included), read from its return address, `C...` |
 //! | `@wasm:<label>` | the hex hash of the code an `upload` step labelled so uploaded |
 //! | `@seq:<role>` or `@seq:<role>+<n>` | the role's current sequence number, plus `n` |
 //! | `@ledger-start:<n>` | the starting sequence number of ledger last-closed + `n`, `(last + n) << 32` |
@@ -516,6 +516,8 @@ struct Checker<'a> {
     last_close: Option<usize>,
     /// Labels of `tx` steps that set a memo.
     with_memo: BTreeSet<String>,
+    /// Labels of `host-function` steps whose function creates a contract.
+    creators: BTreeSet<String>,
 }
 
 impl Checker<'_> {
@@ -615,7 +617,14 @@ impl Checker<'_> {
                     SymRef::Account(role) | SymRef::Muxed { role, .. } | SymRef::Seq { role, .. },
                 ) => self.role(at, &role, false),
                 Ok(SymRef::Contract(l)) => {
-                    self.want(at, &l, |k| k == LabelKind::Deploy, "a deploy step");
+                    if !self.creators.contains(&l) {
+                        self.want(
+                            at,
+                            &l,
+                            |k| k == LabelKind::Deploy,
+                            "a deploy step or a host-function step that creates a contract",
+                        );
+                    }
                 }
                 Ok(SymRef::Wasm(l)) => {
                     self.want(at, &l, |k| k == LabelKind::Upload, "an upload step");
@@ -654,6 +663,7 @@ impl Contract for RecipeIr {
             labels: BTreeMap::new(),
             last_close: None,
             with_memo: BTreeSet::new(),
+            creators: BTreeSet::new(),
         };
         let mut slugs = BTreeSet::new();
         for (i, step) in self.steps.iter().enumerate() {
@@ -875,6 +885,15 @@ impl Contract for RecipeIr {
                             rejected: expect.outcome == Outcome::Rejected,
                         },
                     );
+                    // a rejected creation makes no contract to refer to
+                    let creates = ["create_contract", "create_contract_v2"]
+                        .iter()
+                        .any(|k| function.get(k).is_some());
+                    if let (Some(l), true, false) =
+                        (label, creates, expect.outcome == Outcome::Rejected)
+                    {
+                        c.creators.insert(l.clone());
+                    }
                 }
                 Step::ExtendTtl {
                     label,

@@ -1120,3 +1120,48 @@ fn ledger_close_meta_ext_v1_is_written_only_when_set() {
     holds(&r);
     assert!(render(&r).contains("\"emit_ledger_close_meta_ext_v1\": true"));
 }
+
+#[test]
+fn a_contract_reference_names_a_deploy_or_a_creating_host_function() {
+    let host = |label: &str, function: serde_json::Value| Step::HostFunction {
+        label: Some(label.into()),
+        source: "bob".into(),
+        function,
+        auth: Default::default(),
+        resources: None,
+        expect: TxExpect::default(),
+    };
+    let calling = |contract: &str| Step::Invoke {
+        label: None,
+        source: "bob".into(),
+        contract: format!("@contract:{contract}"),
+        function: "balance".into(),
+        args: vec![],
+        auth: Default::default(),
+        resources: None,
+        expect: TxExpect::default(),
+    };
+    let with = |steps: Vec<Step>| {
+        let mut r = recipe();
+        let at = r.steps.len() - 2;
+        for (i, s) in steps.into_iter().enumerate() {
+            r.steps.insert(at + i, s);
+        }
+        r
+    };
+    let sac = json!({"create_contract": {"contract_id_preimage": {"asset": "native"}, "executable": "stellar_asset"}});
+    holds(&with(vec![host("sac", sac.clone()), calling("sac")]));
+    let v2 = json!({"create_contract_v2": {"contract_id_preimage": {"address": {"address": "@account:bob", "salt": "00"}}, "executable": {"wasm": "@wasm:echo"}, "constructor_args": []}});
+    holds(&with(vec![host("made", v2), calling("made")]));
+    // the deploy label still works
+    holds(&with(vec![calling("echo-1")]));
+    has_problem(
+        &with(vec![calling("nowhere")]),
+        "no earlier step is labelled nowhere",
+    );
+    let upload = json!({"upload_contract_wasm": "00"});
+    has_problem(
+        &with(vec![host("uploaded", upload), calling("uploaded")]),
+        "uploaded is not a deploy step or a host-function step that creates a contract",
+    );
+}
