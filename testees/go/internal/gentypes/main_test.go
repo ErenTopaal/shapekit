@@ -50,7 +50,7 @@ func TestMapTypes(t *testing.T) {
 	b := source("v2", map[string][]string{"ScVal": codec, "Asset": {"DecodeFrom"}})
 
 	got, err := mapTypes([]string{"SCVal"}, nil, []sdkSource{a, b})
-	if err != nil || got.common["SCVal"] != "ScVal" {
+	if err != nil || got.common["ScVal"] != "ScVal" {
 		t.Errorf("case-insensitive match: %v, %v", got, err)
 	}
 	if _, err := mapTypes([]string{"Asset"}, nil, []sdkSource{a, b}); err == nil || !strings.Contains(err.Error(), "MarshalBinary") {
@@ -88,5 +88,11 @@ func TestMapEnums(t *testing.T) {
 	}
 	if len(got) != 1 || got["ScValType"] != "SCValType" {
 		t.Errorf("got %v, want only the enum every version has", got)
+	}
+}
+
+func TestRustName(t *testing.T) {
+	if rustName("Error") != "SError" || rustName("ScVal") != "ScVal" {
+		t.Error("rustName")
 	}
 }

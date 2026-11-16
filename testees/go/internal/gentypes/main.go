@@ -375,9 +375,11 @@ func mapTypes(required, optional []string, sdks []sdkSource) (typeTable, error) 
 			goName = found
 			have = append(have, s.version)
 		}
+		// the table is keyed by the name the testee protocol uses, the stellar-xdr crate's
+		key := rustName(goName)
 		switch {
 		case len(have) == len(sdks):
-			t.common[name] = goName
+			t.common[key] = goName
 		case slices.Contains(required, name):
 			problems = append(problems, fmt.Sprintf("the manifest uses %s, but only %v of the sdk versions have it", name, have))
 		case len(have) == 0:
@@ -387,7 +389,7 @@ func mapTypes(required, optional []string, sdks []sdkSource) (typeTable, error) 
 				if t.only[v] == nil {
 					t.only[v] = map[string]string{}
 				}
-				t.only[v][name] = goName
+				t.only[v][key] = goName
 			}
 		}
 	}
@@ -398,6 +400,17 @@ func mapTypes(required, optional []string, sdks []sdkSource) (typeTable, error) 
 }
 
 var errNoType = errors.New("package xdr has no such type")
+
+// rustName is the stellar-xdr crate's name for a go-stellar-sdk xdr type. Both generators
+// camel-case the .x names the same way (SCPQuorumSet is ScpQuorumSet in both); the one
+// difference is the overlay's Error, which stellar-xdr renames SError. A test of the
+// conformance crate checks the table's names against the crate's own list.
+func rustName(goName string) string {
+	if goName == "Error" {
+		return "SError"
+	}
+	return goName
+}
 
 func findType(name string, s sdkSource) (string, error) {
 	candidates := []string{}

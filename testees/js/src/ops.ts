@@ -175,7 +175,14 @@ export class Ops {
   }
 
   private xdrType(name: string): Loose {
-    const type = Object.hasOwn(this.xdr, name) ? this.xdr[name] : undefined;
+    // the sdk spells a few types differently from the .x files (Uint128Parts for
+    // UInt128Parts); a name that matches one export ignoring case is that type
+    let key: string | undefined = Object.hasOwn(this.xdr, name) ? name : undefined;
+    if (key === undefined) {
+      const matches = Object.keys(this.xdr).filter((k) => k.toLowerCase() === name.toLowerCase());
+      if (matches.length === 1) key = matches[0];
+    }
+    const type = key === undefined ? undefined : this.xdr[key];
     const decodes = this.xdrValues ? typeof type?.fromXdr === "function" : typeof type?.fromXDR === "function";
     if (!decodes) {
       throw new Unsupported(`${SDK_PACKAGE} ${this.loaded.version} has no xdr type ${name}`);

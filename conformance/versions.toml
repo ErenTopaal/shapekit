@@ -96,7 +96,7 @@ memory = { resource = "as", mib = 4096 }
 [[sdk.go.versions]]
 version = "v0.7.1"
 build = [
-  { argv = ["go", "build", "-modfile", "versions/v0.7.1.mod", "-o", "../../target/testees/go/v0.7.1/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+  { argv = ["go", "build", "-tags", "shapekit_sdk_v0_7_1", "-modfile", "versions/v0.7.1.mod", "-o", "../../target/testees/go/v0.7.1/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.1/testee"]
 max_protocol = 29
@@ -105,7 +105,7 @@ max_protocol = 29
 [[sdk.go.versions]]
 version = "v0.7.2"
 build = [
-  { argv = ["go", "build", "-modfile", "versions/v0.7.2.mod", "-o", "../../target/testees/go/v0.7.2/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+  { argv = ["go", "build", "-tags", "shapekit_sdk_v0_7_2", "-modfile", "versions/v0.7.2.mod", "-o", "../../target/testees/go/v0.7.2/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.2/testee"]
 max_protocol = 29
@@ -114,7 +114,7 @@ max_protocol = 29
 [[sdk.go.versions]]
 version = "v0.7.3"
 build = [
-  { argv = ["go", "build", "-modfile", "versions/v0.7.3.mod", "-o", "../../target/testees/go/v0.7.3/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+  { argv = ["go", "build", "-tags", "shapekit_sdk_v0_7_3", "-modfile", "versions/v0.7.3.mod", "-o", "../../target/testees/go/v0.7.3/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.7.3/testee"]
 max_protocol = 29
@@ -123,7 +123,7 @@ max_protocol = 29
 [[sdk.go.versions]]
 version = "v0.8.0"
 build = [
-  { argv = ["go", "build", "-modfile", "versions/v0.8.0.mod", "-o", "../../target/testees/go/v0.8.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+  { argv = ["go", "build", "-tags", "shapekit_sdk_v0_8_0", "-modfile", "versions/v0.8.0.mod", "-o", "../../target/testees/go/v0.8.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.8.0/testee"]
 max_protocol = 30
@@ -132,7 +132,7 @@ max_protocol = 30
 [[sdk.go.versions]]
 version = "v0.9.0"
 build = [
-  { argv = ["go", "build", "-modfile", "versions/v0.9.0.mod", "-o", "../../target/testees/go/v0.9.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
+  { argv = ["go", "build", "-tags", "shapekit_sdk_v0_9_0", "-modfile", "versions/v0.9.0.mod", "-o", "../../target/testees/go/v0.9.0/testee", "."], dir = "testees/go", env = { GOWORK = "off" } },
 ]
 command = ["target/testees/go/v0.9.0/testee"]
 max_protocol = 30
