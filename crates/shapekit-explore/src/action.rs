@@ -201,6 +201,45 @@ pub fn transaction(
     )
 }
 
+/// A transaction to apply right after `first` in the same ledger: drawn like any other, from
+/// an account `first` names when there is one besides its source.
+pub fn follower(
+    schema: &Schema,
+    world: &World,
+    rng: &mut Rng,
+    menu: &OpMenu,
+    skip: &BTreeSet<String>,
+    first: &Step,
+) -> (Step, Vec<String>) {
+    let (mut b, arms) = transaction(schema, world, rng, menu, skip);
+    if let (
+        Step::Tx {
+            source: a_src,
+            operations,
+            ..
+        },
+        Step::Tx { source, .. },
+    ) = (first, &mut b)
+    {
+        let text = serde_json::to_string(operations).unwrap_or_default();
+        let named: Vec<&String> = world
+            .funded
+            .iter()
+            .filter(|r| *r != a_src && text.contains(&format!(":{r}\"")))
+            .collect();
+        if !named.is_empty() {
+            *source = (*rng.pick(&named)).clone();
+        } else if *source == *a_src {
+            // core queues one transaction per source account
+            let others: Vec<&String> = world.funded.iter().filter(|r| *r != a_src).collect();
+            if !others.is_empty() {
+                *source = (*rng.pick(&others)).clone();
+            }
+        }
+    }
+    (b, arms)
+}
+
 /// A ledger upgrade within what this protocol allows to be armed.
 pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
     let mut s = Step::Upgrade {

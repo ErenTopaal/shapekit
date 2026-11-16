@@ -237,7 +237,10 @@ pub fn run_candidate(
     for tx in [&c.a, &c.b] {
         let mut steps = prefix.to_vec();
         steps.push(tx.clone());
-        steps.push(Step::Close { label: None });
+        steps.push(Step::Close {
+            label: None,
+            order: Vec::new(),
+        });
         let spec = Spec {
             id: c.ir.id.clone(),
             protocol: c.ir.protocol,

@@ -74,7 +74,10 @@ pub fn at_protocol(ir: &RecipeIr, protocol: u32) -> RecipeIr {
                 flags: None,
                 config,
                 ..
-            } if config.is_empty() => Step::Close { label: None },
+            } if config.is_empty() => Step::Close {
+                label: None,
+                order: Vec::new(),
+            },
             Step::Upgrade { .. } => {
                 let mut s = s.clone();
                 if let Step::Upgrade {

@@ -25,7 +25,7 @@
 //!   [`ChainDriver::apply_settings`](shapekit_core_driver::chain::ChainDriver::apply_settings)
 //!   does. Nothing may be queued when such an upgrade starts.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail, ensure};
@@ -70,6 +70,31 @@ fn resources_of(r: &Option<ResourceOverride>) -> ir_soroban::Resources {
 }
 
 /// A recipe read from an IR file.
+/// Hashes of the transactions a ledger applied, in apply order.
+fn applied_hashes(lcm: &stellar_xdr::LedgerCloseMeta) -> Vec<[u8; 32]> {
+    match lcm {
+        stellar_xdr::LedgerCloseMeta::V0(m) => m
+            .tx_processing
+            .iter()
+            .map(|t| t.result.transaction_hash.0)
+            .collect(),
+        stellar_xdr::LedgerCloseMeta::V1(m) => m
+            .tx_processing
+            .iter()
+            .map(|t| t.result.transaction_hash.0)
+            .collect(),
+        stellar_xdr::LedgerCloseMeta::V2(m) => m
+            .tx_processing
+            .iter()
+            .map(|t| t.result.transaction_hash.0)
+            .collect(),
+    }
+}
+
+/// Memo id variants an ordered close tries before giving up; each try is a fresh shuffle of
+/// the apply order, so running out means the prediction is wrong rather than unlucky.
+const ORDER_VARIANTS: u64 = 256;
+
 pub struct IrRecipe {
     ir: RecipeIr,
     /// The repository root, which `upload` paths are relative to.
@@ -133,6 +158,7 @@ impl Recipe for IrRecipe {
 
     fn run(&self, ctx: &mut ChainCtx) -> Result<()> {
         let mut interp = Session::new(ctx, &self.root, self.ir.node.soroban_settings)?;
+        interp.plan(&self.ir.steps);
         for (i, step) in self.ir.steps.iter().enumerate() {
             interp
                 .step(ctx, i, step)
@@ -169,9 +195,25 @@ enum Kind {
 struct Pending {
     step: usize,
     label: Option<String>,
+    /// What was submitted, for predicting the ledger's transaction set.
+    env: TransactionEnvelope,
     hash: [u8; 32],
     expect: TxExpect,
     kind: Kind,
+}
+
+/// A transaction step built at its turn and submitted only at the ordered close, so its memo
+/// id can be chosen there.
+struct Held {
+    step: usize,
+    label: String,
+    role: String,
+    seq: i64,
+    tx: stellar_xdr::Transaction,
+    signers: Vec<SigningKey>,
+    fee_bump: Option<FeeBump>,
+    operations: usize,
+    expect: TxExpect,
 }
 
 struct Rejected {
@@ -190,6 +232,10 @@ pub struct Session<'a> {
     observed: Vec<Observed>,
     /// Steps core queued and then left out of the ledger it closed, in learning mode.
     left_out: Vec<usize>,
+    /// Labels of transaction steps some close orders: they are held until that close.
+    ordered: BTreeSet<String>,
+    /// Transaction steps held for an ordered close.
+    held: Vec<Held>,
     current: usize,
     pending: Vec<Pending>,
     applied: BTreeMap<String, Applied>,
@@ -234,6 +280,8 @@ impl<'a> Session<'a> {
             learn: false,
             observed: Vec::new(),
             left_out: Vec::new(),
+            ordered: BTreeSet::new(),
+            held: Vec::new(),
             current: 0,
             pending: Vec::new(),
             applied: BTreeMap::new(),
@@ -244,6 +292,17 @@ impl<'a> Session<'a> {
             queued_seq: BTreeMap::new(),
             writer,
         })
+    }
+
+    /// Tells the session which transaction steps of `steps` an ordered close names, so it
+    /// holds them back until that close instead of submitting them at once. Call it before
+    /// running those steps; [`IrRecipe`] does for the whole file.
+    pub fn plan(&mut self, steps: &[Step]) {
+        for s in steps {
+            if let Step::Close { order, .. } = s {
+                self.ordered.extend(order.iter().cloned());
+            }
+        }
     }
 
     /// Learning mode: submitting steps are not held to their `expect`; what core answered
@@ -356,6 +415,7 @@ impl<'a> Session<'a> {
             self.pending.push(Pending {
                 step: self.current,
                 label: label.clone(),
+                env: env.clone(),
                 hash,
                 expect: expect.clone(),
                 kind,
@@ -383,6 +443,7 @@ impl<'a> Session<'a> {
         self.pending.push(Pending {
             step: self.current,
             label: label.clone(),
+            env: env.clone(),
             hash,
             expect: expect.clone(),
             kind,
@@ -548,6 +609,24 @@ impl<'a> Session<'a> {
                 } else {
                     signers.iter().map(|r| key_of(ctx, r)).collect()
                 };
+                if let Some(l) = label
+                    && self.ordered.contains(l)
+                {
+                    // its memo is chosen at the ordered close
+                    self.queued_seq.insert(source.clone(), seq);
+                    self.held.push(Held {
+                        step: self.current,
+                        label: l.clone(),
+                        role: source.clone(),
+                        seq,
+                        tx: b.build()?,
+                        signers: keys,
+                        fee_bump: fee_bump.clone(),
+                        operations: operations.len(),
+                        expect: expect.clone(),
+                    });
+                    return Ok(());
+                }
                 let refs: Vec<&SigningKey> = keys.iter().collect();
                 let mut env = ctx.sign(b.build()?, &refs)?;
                 if let Some(bump) = fee_bump {
@@ -556,12 +635,25 @@ impl<'a> Session<'a> {
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
             Step::Close { label, order } => {
-                // the contract has ordered closes; this interpreter does not order them yet
-                ensure!(
-                    order.is_empty(),
-                    "a close step with an order: this interpreter does not order transactions yet"
-                );
+                let ordered = if !order.is_empty() || !self.held.is_empty() {
+                    self.submit_ordered(ctx, order)?
+                } else {
+                    Vec::new()
+                };
                 let seq = ctx.driver().close_empty()?;
+                if ordered.len() > 1 {
+                    let applied = applied_hashes(ctx.driver().last_meta());
+                    let at: Vec<Option<usize>> = ordered
+                        .iter()
+                        .map(|h| applied.iter().position(|a| a == h))
+                        .collect();
+                    // a transaction left out or refused in learning mode has no place to check
+                    let placed: Vec<usize> = at.into_iter().flatten().collect();
+                    ensure!(
+                        placed.windows(2).all(|w| w[0] < w[1]),
+                        "ledger {seq}: core applied the ordered transactions in another order than predicted"
+                    );
+                }
                 self.settle(ctx)?;
                 if let Some(label) = label {
                     self.closed.insert(label.clone(), seq);
@@ -901,6 +993,75 @@ impl<'a> Session<'a> {
                 }
             }
         })
+    }
+
+    /// The held transactions of an ordered close, signed with memo ids chosen so core applies
+    /// them in `order`, then submitted. The ledger the close builds holds them and whatever
+    /// was queued before; its transaction set is predicted from the last ledger's
+    /// (`super::order`), which therefore must hold a classic transaction.
+    fn submit_ordered(&mut self, ctx: &mut ChainCtx, order: &[String]) -> Result<Vec<[u8; 32]>> {
+        let held = std::mem::take(&mut self.held);
+        let names: Vec<&str> = held.iter().map(|h| h.label.as_str()).collect();
+        ensure!(
+            order.len() == held.len() && order.iter().all(|l| names.contains(&l.as_str())),
+            "the close orders {order:?}, the transactions held for it are {names:?}"
+        );
+        // the held ones in the wanted order
+        let held: Vec<Held> = {
+            let mut by: BTreeMap<String, Held> =
+                held.into_iter().map(|h| (h.label.clone(), h)).collect();
+            order
+                .iter()
+                .map(|l| by.remove(l).expect("checked above"))
+                .collect()
+        };
+        let last = ctx.driver().last_meta().clone();
+        let t = super::order::template(&last)
+            .context("an ordered close needs the ledger before it to hold a classic transaction")?;
+        let stellar_xdr::LedgerCloseMeta::V2(m) = &last else {
+            bail!("an ordered close needs a v2 ledger close meta");
+        };
+        let previous = m.ledger_header.hash.clone();
+        let queued: Vec<TransactionEnvelope> = self.pending.iter().map(|p| p.env.clone()).collect();
+        for variant in 0..ORDER_VARIANTS {
+            let mut envs = Vec::with_capacity(held.len());
+            for (k, h) in held.iter().enumerate() {
+                let mut tx = h.tx.clone();
+                // the first keeps no memo; each later one a memo id the search varies
+                if k > 0 {
+                    tx.memo = Memo::Id(variant * 16 + k as u64);
+                }
+                let refs: Vec<&SigningKey> = h.signers.iter().collect();
+                let mut env = ctx.sign(tx, &refs)?;
+                if let Some(bump) = &h.fee_bump {
+                    env = self.fee_bump(ctx, env, bump, h.operations)?;
+                }
+                envs.push(env);
+            }
+            let all: Vec<TransactionEnvelope> = queued.iter().chain(&envs).cloned().collect();
+            let (_, applied) = super::order::predict(&previous, &t, &all)?;
+            let positions: Vec<usize> = (queued.len()..all.len())
+                .map(|i| {
+                    applied
+                        .iter()
+                        .position(|a| *a == i)
+                        .expect("every index is applied")
+                })
+                .collect();
+            if positions.windows(2).all(|w| w[0] < w[1]) {
+                let mut hashes = Vec::with_capacity(envs.len());
+                for (h, env) in held.iter().zip(&envs) {
+                    self.current = h.step;
+                    let label = Some(h.label.clone());
+                    self.queue(ctx, (&h.role, h.seq), &label, env, &h.expect, Kind::Tx)?;
+                    hashes.push(envelope_hash(env, ctx.driver().network_id())?);
+                }
+                return Ok(hashes);
+            }
+        }
+        bail!(
+            "no memo id below {ORDER_VARIANTS} variants puts the transactions in the order {order:?}"
+        )
     }
 
     /// Wraps a signed transaction in a fee bump. The outer fee defaults to the base fee for

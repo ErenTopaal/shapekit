@@ -110,7 +110,10 @@ pub fn setup_steps(wasms: &[&Wasm], f: &mut Filler<'_>, source: &str) -> Vec<Ste
             wasm: w.path.clone(),
             sha256: w.sha256.clone(),
         });
-        steps.push(Step::Close { label: None });
+        steps.push(Step::Close {
+            label: None,
+            order: Vec::new(),
+        });
         names.wasm.push(code_label(&w.name));
     }
     for w in wasms {
@@ -131,7 +134,10 @@ pub fn setup_steps(wasms: &[&Wasm], f: &mut Filler<'_>, source: &str) -> Vec<Ste
             salt: salt(&w.name),
             constructor_args: args,
         });
-        steps.push(Step::Close { label: None });
+        steps.push(Step::Close {
+            label: None,
+            order: Vec::new(),
+        });
         names.contracts.push(instance_label(&w.name));
     }
     steps

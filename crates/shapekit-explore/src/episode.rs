@@ -176,6 +176,10 @@ struct Live<'e, 'a> {
     unsupported: BTreeSet<String>,
     /// What core answered each transaction, in order.
     answers: Vec<String>,
+    /// The last ledger holds a transaction, which an ordered close predicts its set from.
+    last_held_tx: bool,
+    /// Ordered pairs drawn so far, for their labels.
+    pairs: usize,
 }
 
 /// What a submitted transaction came to.
@@ -249,7 +253,10 @@ impl<'e, 'a> Live<'e, 'a> {
                 }
                 // the ledger closed without the upgrade: a plain close in the recipe
                 let _ = e;
-                self.steps[i] = Step::Close { label: None };
+                self.steps[i] = Step::Close {
+                    label: None,
+                    order: Vec::new(),
+                };
                 self.session.take_observed();
                 return self.closed(i).map(|_| ());
             }
@@ -421,6 +428,60 @@ impl<'e, 'a> Live<'e, 'a> {
         }
     }
 
+    /// Two new transactions applied in one ledger in the order given, the second usually from
+    /// an account the first names, so the first can change what the second meets.
+    fn ordered_pair(&mut self, mut a: Step, mut b: Step) -> Result<Pushed> {
+        self.pairs += 1;
+        let labels = [format!("o{}a", self.pairs), format!("o{}b", self.pairs)];
+        for (s, l) in [&mut a, &mut b].into_iter().zip(&labels) {
+            if let Step::Tx { label, memo, .. } = s {
+                *label = Some(l.clone());
+                // the interpreter owns the memo id of an ordered transaction
+                *memo = None;
+            }
+        }
+        let plan = Step::Close {
+            label: None,
+            order: labels.to_vec(),
+        };
+        self.session.plan(std::slice::from_ref(&plan));
+        let start = self.steps.len();
+        self.exact(a)?;
+        self.exact(b)?;
+        let present = |steps: &[Step], l: &String| {
+            steps[start..]
+                .iter()
+                .any(|s| matches!(s, Step::Tx { label: Some(x), .. } if x == l))
+        };
+        let order: Vec<String> = labels
+            .iter()
+            .filter(|l| present(&self.steps, l))
+            .cloned()
+            .collect();
+        if order.is_empty() {
+            return Ok(Pushed::Invalid);
+        }
+        let close = Step::Close {
+            label: None,
+            order: order.clone(),
+        };
+        let i = self.steps.len();
+        self.steps.push(close.clone());
+        self.session.step(&mut self.ctx, i, &close)?;
+        self.learn()?;
+        // refused or left out ones leave the order
+        let still: Vec<String> = order
+            .into_iter()
+            .filter(|l| present(&self.steps, l))
+            .collect();
+        let last = self.steps.len() - 1;
+        if let Step::Close { order, .. } = &mut self.steps[last] {
+            *order = still;
+        }
+        let new = self.closed(last)?;
+        Ok(Pushed::Applied(new))
+    }
+
     /// Submits a new transaction step and closes the ledger it goes into.
     fn transaction(&mut self, step: Step) -> Result<Pushed> {
         let before = self.steps.len();
@@ -434,9 +495,18 @@ impl<'e, 'a> Live<'e, 'a> {
             return Ok(Pushed::Rejected);
         }
         let i = self.steps.len();
-        self.steps.push(Step::Close { label: None });
-        self.session
-            .step(&mut self.ctx, i, &Step::Close { label: None })?;
+        self.steps.push(Step::Close {
+            label: None,
+            order: Vec::new(),
+        });
+        self.session.step(
+            &mut self.ctx,
+            i,
+            &Step::Close {
+                label: None,
+                order: Vec::new(),
+            },
+        )?;
         let n = self.steps.len();
         self.learn()?;
         let new = self.closed(self.steps.len() - 1)?;
@@ -470,13 +540,19 @@ pub fn setup(rng: &mut Rng) -> Vec<Step> {
             balance: RICH_BALANCE.into(),
         },
         // core queues one transaction per source account at a time
-        Step::Close { label: None },
+        Step::Close {
+            label: None,
+            order: Vec::new(),
+        },
         Step::Fund {
             label: None,
             roles: vec![POOR_ROLE.into()],
             balance: poor.into(),
         },
-        Step::Close { label: None },
+        Step::Close {
+            label: None,
+            order: Vec::new(),
+        },
     ]
 }
 
@@ -518,6 +594,8 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         menu_credit: Vec::new(),
         unsupported: BTreeSet::new(),
         answers: Vec::new(),
+        last_held_tx: false,
+        pairs: 0,
     };
     let prefix = if spec.prefix.is_empty() && spec.setup {
         let mut steps = setup(&mut rng);
@@ -596,9 +674,25 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             }
             let (s, arms) =
                 action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);
-            match live.transaction(s)? {
-                Pushed::Applied(new) => live.menu_credit.push((arms, new as u64)),
-                Pushed::Rejected | Pushed::Invalid => {}
+            let pushed = if live.last_held_tx && rng.chance(1, 8) {
+                let (b, more) = action::follower(
+                    env.schema,
+                    &live.world,
+                    &mut rng,
+                    menu,
+                    &live.unsupported,
+                    &s,
+                );
+                let mut arms = arms;
+                arms.extend(more);
+                (live.ordered_pair(s, b)?, arms)
+            } else {
+                (live.transaction(s)?, arms)
+            };
+            live.last_held_tx = matches!(pushed.0, Pushed::Applied(_));
+            match pushed {
+                (Pushed::Applied(new), arms) => live.menu_credit.push((arms, new as u64)),
+                (Pushed::Rejected | Pushed::Invalid, _) => {}
             }
         }
         Ok(())
