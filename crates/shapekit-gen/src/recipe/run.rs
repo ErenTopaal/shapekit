@@ -78,6 +78,7 @@ pub fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> 
         diagnostic_events: false,
         min_persistent_ttl: recipe.min_persistent_ttl(),
         invariant_checks: false,
+        emit_ledger_close_meta_ext_v1: recipe.emit_ledger_close_meta_ext_v1(),
         limits: Default::default(),
     }
 }

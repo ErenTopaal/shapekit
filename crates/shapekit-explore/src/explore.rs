@@ -154,7 +154,8 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                     backfill_stellar_asset_events: events,
                     // testnet's settings only validate at protocol 30
                     soroban_settings: opts.contracts && protocol == 30 && rng.chance(1, 2),
-                    soroban_limits: opts.contracts,
+                    // contracts need them, and so does a frozen keys upgrade's writer contract
+                    soroban_limits: opts.contracts || protocol >= episode::FROZEN_KEYS_PROTOCOL,
                     // a short persistent lifetime lets entries archive within an episode
                     min_persistent_ttl: (opts.contracts && rng.chance(1, 3)).then_some(10),
                 },

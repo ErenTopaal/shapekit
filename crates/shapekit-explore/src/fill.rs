@@ -547,9 +547,12 @@ impl<'a> Filler<'a> {
             }
             Type::VarArray { element, max_count } => {
                 let max = max_count.unwrap_or(3).min(3) as usize;
-                // one element half the time: most lists need at least one to be valid
+                // one element half the time, since most lists need at least one to be valid;
+                // a list bounded at two (the and/or predicates) is full half the time instead
                 let n = if self.depth >= MAX_DEPTH {
                     0
+                } else if max_count == &Some(2) && self.rng.chance(1, 2) {
+                    2
                 } else if max >= 1 && self.rng.chance(1, 2) {
                     1
                 } else {

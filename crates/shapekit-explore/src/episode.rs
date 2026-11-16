@@ -27,6 +27,9 @@ use crate::world::World;
 /// looked up for them.
 pub const FAMILY: &str = "explore";
 
+/// The protocol frozen ledger keys arrived with (CAP-77).
+pub const FROZEN_KEYS_PROTOCOL: u32 = 26;
+
 /// Roles a fresh episode funds richly, the first two of which issue the assets.
 pub const RICH_ROLES: &[&str] = &["a", "b", "c", "d"];
 /// The role a fresh episode funds near the reserve.
@@ -646,7 +649,15 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                 break;
             }
             if rng.chance(1, 25) {
-                let s = action::upgrade(&live.world, &mut rng, spec.max_protocol);
+                // frozen keys need the high Soroban limits the config upgrade's writer
+                // contract is uploaded under
+                let freeze = (live.world.protocol >= FROZEN_KEYS_PROTOCOL
+                    && spec.node.soroban_limits
+                    && rng.chance(1, 3))
+                .then(|| action::freeze(&live.world, &mut rng))
+                .flatten();
+                let s = freeze
+                    .unwrap_or_else(|| action::upgrade(&live.world, &mut rng, spec.max_protocol));
                 let protocol = match &s {
                     Step::Upgrade {
                         protocol_version: Some(v),
@@ -685,8 +696,23 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                     continue;
                 }
             }
-            let (s, arms) =
+            let (mut s, arms) =
                 action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);
+            // a quarter of the time, a neighbour of a transaction core applied instead
+            if rng.chance(1, 4) {
+                let applied: Vec<&Step> = live.steps[prefix_len..]
+                    .iter()
+                    .filter(|s| {
+                        matches!(s, Step::Tx { expect, .. } if expect.outcome == Outcome::Success)
+                    })
+                    .collect();
+                if !applied.is_empty() {
+                    let base = (*rng.pick(&applied)).clone();
+                    if let Some(m) = action::mutate(&live.world, &mut rng, &base) {
+                        s = m;
+                    }
+                }
+            }
             // the order of a ledger is predicted from the transaction set of the one before,
             // which only a v2 ledger close meta carries in the form the prediction reads
             let orderable =

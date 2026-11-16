@@ -111,6 +111,11 @@ pub trait Recipe: Send + Sync {
     fn below_protocol_valid(&self) -> bool {
         false
     }
+    /// `EMIT_LEDGER_CLOSE_META_EXT_V1`: every ledger from protocol 20 carries the close meta
+    /// extension with the Soroban write fee. Off by default, as in core.
+    fn emit_ledger_close_meta_ext_v1(&self) -> bool {
+        false
+    }
     fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()>;
 }
 

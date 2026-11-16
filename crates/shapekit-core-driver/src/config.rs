@@ -248,6 +248,10 @@ pub struct NodeConfig {
     /// applied passed all of them. Off for recorded chains, which never needed it; the probe
     /// turns it on.
     pub invariant_checks: bool,
+    /// `EMIT_LEDGER_CLOSE_META_EXT_V1`: from protocol 20 every ledger close meta carries the
+    /// extension with the Soroban write fee (`LedgerCloseMetaFrame::setNetworkConfiguration`,
+    /// v30.0.0). Off by default in core and for recorded chains.
+    pub emit_ledger_close_meta_ext_v1: bool,
     /// Docker resource limits of the node's containers. They bound how much of the host a
     /// node may take and never change what it writes.
     pub limits: ContainerLimits,
@@ -370,6 +374,10 @@ impl NodeConfig {
             self.diagnostic_events
         ));
         line(format!("EMIT_CLASSIC_EVENTS={}", self.emit_classic_events));
+        // written only when on, so every config without it renders as before
+        if self.emit_ledger_close_meta_ext_v1 {
+            line("EMIT_LEDGER_CLOSE_META_EXT_V1=true".into());
+        }
         line(format!(
             "BACKFILL_STELLAR_ASSET_EVENTS={}",
             self.backfill_stellar_asset_events
@@ -455,6 +463,7 @@ mod tests {
             diagnostic_events: true,
             min_persistent_ttl: None,
             invariant_checks: false,
+            emit_ledger_close_meta_ext_v1: false,
             limits: ContainerLimits::default(),
         }
     }

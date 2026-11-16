@@ -271,6 +271,33 @@ pub fn follower(
     (b, arms)
 }
 
+/// A config upgrade freezing ledger keys the ledgers showed (CAP-77, protocol 26): an account
+/// or a trustline, the kinds core accepts in a frozen keys delta.
+pub fn freeze(world: &World, rng: &mut Rng) -> Option<Step> {
+    let keys: Vec<String> = world
+        .keys
+        .values()
+        .filter(|k| k.get("account").is_some() || k.get("trustline").is_some())
+        .filter_map(|k| world.key_xdr(k))
+        .collect();
+    if keys.is_empty() {
+        return None;
+    }
+    let key = rng.pick(&keys).clone();
+    Some(Step::Upgrade {
+        label: None,
+        protocol_version: None,
+        base_fee: None,
+        base_reserve: None,
+        max_tx_set_size: None,
+        max_soroban_tx_set_size: None,
+        flags: None,
+        config: vec![serde_json::json!({
+            "frozen_ledger_keys_delta": { "keys_to_freeze": [key], "keys_to_unfreeze": [] }
+        })],
+    })
+}
+
 /// A ledger upgrade within what this protocol allows to be armed.
 pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
     let mut s = Step::Upgrade {
@@ -447,4 +474,111 @@ pub fn footprint(world: &World, rng: &mut Rng) -> Option<Step> {
             expect: TxExpect::default(),
         }
     })
+}
+
+/// A neighbour of a transaction that core applied: the same operations with one value
+/// changed (an account, an amount, an asset or a number). Small changes to something that
+/// worked reach the result codes next to success: no trust, underfunded, not authorized.
+pub fn mutate(world: &World, rng: &mut Rng, step: &Step) -> Option<Step> {
+    let Step::Tx { operations, .. } = step else {
+        return None;
+    };
+    let mut ops = operations.clone();
+    let mut leaves: Vec<Vec<PathPart>> = Vec::new();
+    for (i, op) in ops.iter().enumerate() {
+        collect(op, &mut vec![PathPart::Index(i)], &mut leaves);
+    }
+    if leaves.is_empty() {
+        return None;
+    }
+    let path = rng.pick(&leaves).clone();
+    let slot = slot(&mut ops, &path)?;
+    let assets = world.assets();
+    *slot = match slot.clone() {
+        Value::String(s) if s.starts_with("@account:") || s.starts_with("@muxed:") => {
+            if rng.chance(1, 6) {
+                Value::String(rng.pick(&world.ghosts).clone())
+            } else {
+                Value::String(format!("@account:{}", rng.pick(&world.funded)))
+            }
+        }
+        Value::String(s) if s.parse::<i64>().is_ok() => {
+            let v: i64 = if !world.amounts.is_empty() && rng.chance(1, 2) {
+                *rng.pick(&world.amounts)
+            } else {
+                *rng.pick(&[0, 1, 100, 10_000_000, 1_000_000_000_000, i64::MAX, -1])
+            };
+            Value::String(v.to_string())
+        }
+        Value::String(s) if s == "native" => rng.pick(&assets).json(),
+        Value::Object(m)
+            if m.contains_key("credit_alphanum4") || m.contains_key("credit_alphanum12") =>
+        {
+            rng.pick(&assets).json()
+        }
+        Value::Number(_) => serde_json::json!(*rng.pick(&[0u32, 1, 2, 3, 7, 255])),
+        Value::Bool(b) => Value::Bool(!b),
+        _ => return None,
+    };
+    let mut out = step.clone();
+    if let Step::Tx {
+        operations,
+        expect,
+        label,
+        ..
+    } = &mut out
+    {
+        *operations = ops;
+        *expect = TxExpect::default();
+        *label = None;
+    }
+    Some(out)
+}
+
+#[derive(Debug, Clone)]
+enum PathPart {
+    Index(usize),
+    Key(String),
+}
+
+/// Paths of the values [`mutate`] can change: strings, numbers, booleans, and credit assets
+/// as a whole.
+fn collect(v: &Value, at: &mut Vec<PathPart>, out: &mut Vec<Vec<PathPart>>) {
+    match v {
+        Value::Object(m)
+            if m.contains_key("credit_alphanum4") || m.contains_key("credit_alphanum12") =>
+        {
+            out.push(at.clone())
+        }
+        Value::Object(m) => {
+            for (k, x) in m {
+                at.push(PathPart::Key(k.clone()));
+                collect(x, at, out);
+                at.pop();
+            }
+        }
+        Value::Array(a) => {
+            for (i, x) in a.iter().enumerate() {
+                at.push(PathPart::Index(i));
+                collect(x, at, out);
+                at.pop();
+            }
+        }
+        Value::Null => {}
+        _ => out.push(at.clone()),
+    }
+}
+
+fn slot<'a>(ops: &'a mut [Value], path: &[PathPart]) -> Option<&'a mut Value> {
+    let (PathPart::Index(i), rest) = path.split_first()? else {
+        return None;
+    };
+    let mut cur = ops.get_mut(*i)?;
+    for p in rest {
+        cur = match p {
+            PathPart::Index(i) => cur.get_mut(*i)?,
+            PathPart::Key(k) => cur.get_mut(k.as_str())?,
+        };
+    }
+    Some(cur)
 }

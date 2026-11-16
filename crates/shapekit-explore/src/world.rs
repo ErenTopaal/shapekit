@@ -251,6 +251,35 @@ impl World {
         }
     }
 
+    /// The XDR of a ledger key in recipe form, hex, when every account it names is a role
+    /// (the encoding has no place for a reference).
+    pub fn key_xdr(&self, key: &Value) -> Option<String> {
+        fn resolve(w: &World, v: &Value) -> Option<Value> {
+            Some(match v {
+                Value::String(s) if s.starts_with("@@") => Value::String(s[1..].to_owned()),
+                Value::String(s) => match s.strip_prefix("@account:") {
+                    Some("root") => return None,
+                    Some(role) => Value::String(account_strkey(
+                        &derive_key(&w.recipe_id, role).verifying_key(),
+                    )),
+                    None if s.starts_with('@') => return None,
+                    None => v.clone(),
+                },
+                Value::Array(a) => {
+                    Value::Array(a.iter().map(|x| resolve(w, x)).collect::<Option<_>>()?)
+                }
+                Value::Object(m) => Value::Object(
+                    m.iter()
+                        .map(|(k, x)| Some((k.clone(), resolve(w, x)?)))
+                        .collect::<Option<_>>()?,
+                ),
+                other => other.clone(),
+            })
+        }
+        let key: LedgerKey = serde_json::from_value(resolve(self, key)?).ok()?;
+        Some(hex::encode(key.to_xdr(Limits::none()).ok()?))
+    }
+
     /// Takes in what a closed ledger changed.
     pub fn observe(&mut self, lcm: &LedgerCloseMeta, seq: u32) -> Result<()> {
         self.last_closed = seq;

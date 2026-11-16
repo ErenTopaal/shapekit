@@ -25,6 +25,7 @@ pub fn config(passphrase: &str, protocol: u32) -> NodeConfig {
         diagnostic_events: true,
         min_persistent_ttl: None,
         invariant_checks: false,
+        emit_ledger_close_meta_ext_v1: false,
         limits: Default::default(),
     }
 }
