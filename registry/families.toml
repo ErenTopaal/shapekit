@@ -972,3 +972,17 @@ fields = []
 linked_issues = []
 priority = 15
 notes = "the vectors are hand-built from the definitions, so none is core-emitted; the one fragment is the first decision point of the root type, the current LedgerCloseMeta arm, which the format vectors exercise in both directions. an entry's own protocol fields carry the protocol of the definition it exercises"
+
+[[family]]
+id = "probe.envelope-fields"
+title = "One envelope field changed at a time, with core's answer to each value"
+caps = []
+no_cap_reason = "the entries ask core about every field of every struct a transaction envelope can reach, whichever CAP introduced it; each entry is one value of one field in an otherwise valid transaction, and its notes name the field and core's answer"
+protocol_introduced = 0
+protocol_valid = { min = 0 }
+signature = ["TransactionEnvelope:tx"]
+source_classes = ["local-core", "local-core-refused", "synthetic"]
+fields = []
+linked_issues = []
+priority = 15
+notes = "written by shapekit probe all into the candidate lane, beside registry/generated/validation.json, whose attempts name these entries as witnesses. an applied attempt has two entries, the envelope and the ledger it closed in; an attempt core refused has the envelope; an attempt core could not decode has the raw bytes as a synthetic must-reject entry. every attempt runs on its own funded accounts, so two attempts of one field differ in their keys as well as in the field"
