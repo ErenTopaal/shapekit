@@ -381,6 +381,20 @@ fn clawback_setup(w: &mut World, s: &Subject) -> Result<SigningKey> {
     Ok(peer)
 }
 
+/// A path holding one asset that is not valid: an alphanumeric code of zero bytes.
+fn path_extra(w: &World, _: &Subject, f: &str) -> Result<Vec<Replacement>> {
+    Ok(match f {
+        "path" => vec![extra(
+            "one asset whose four letter code is empty",
+            json!([{"credit_alphanum4": {
+                "asset_code": "",
+                "issuer": account_strkey(&w.issuer.verifying_key()),
+            }}]),
+        )],
+        _ => Vec::new(),
+    })
+}
+
 /// The carriers of the classic structs.
 pub fn classic() -> Vec<Carrier> {
     let c = |structure, context, build| Carrier {
@@ -686,42 +700,48 @@ pub fn classic() -> Vec<Carrier> {
             "a create account of a new key",
             |w, s| simple(w, s, create(&s.fresh("created"), 100 * XLM)),
         ),
-        c(
-            "PathPaymentStrictReceiveOp",
-            "a native to native path payment, no path",
-            |w, s| {
-                simple(
-                    w,
-                    s,
-                    OperationBody::PathPaymentStrictReceive(PathPaymentStrictReceiveOp {
-                        send_asset: Asset::Native,
-                        send_max: 2 * XLM,
-                        destination: muxed_account(&s.peers[0].verifying_key()),
-                        dest_asset: Asset::Native,
-                        dest_amount: XLM,
-                        path: Default::default(),
-                    }),
-                )
-            },
-        ),
-        c(
-            "PathPaymentStrictSendOp",
-            "a native to native path payment, no path",
-            |w, s| {
-                simple(
-                    w,
-                    s,
-                    OperationBody::PathPaymentStrictSend(PathPaymentStrictSendOp {
-                        send_asset: Asset::Native,
-                        send_amount: XLM,
-                        destination: muxed_account(&s.peers[0].verifying_key()),
-                        dest_asset: Asset::Native,
-                        dest_min: XLM,
-                        path: Default::default(),
-                    }),
-                )
-            },
-        ),
+        Carrier {
+            extra: path_extra,
+            ..c(
+                "PathPaymentStrictReceiveOp",
+                "a native to native path payment, no path",
+                |w, s| {
+                    simple(
+                        w,
+                        s,
+                        OperationBody::PathPaymentStrictReceive(PathPaymentStrictReceiveOp {
+                            send_asset: Asset::Native,
+                            send_max: 2 * XLM,
+                            destination: muxed_account(&s.peers[0].verifying_key()),
+                            dest_asset: Asset::Native,
+                            dest_amount: XLM,
+                            path: Default::default(),
+                        }),
+                    )
+                },
+            )
+        },
+        Carrier {
+            extra: path_extra,
+            ..c(
+                "PathPaymentStrictSendOp",
+                "a native to native path payment, no path",
+                |w, s| {
+                    simple(
+                        w,
+                        s,
+                        OperationBody::PathPaymentStrictSend(PathPaymentStrictSendOp {
+                            send_asset: Asset::Native,
+                            send_amount: XLM,
+                            destination: muxed_account(&s.peers[0].verifying_key()),
+                            dest_asset: Asset::Native,
+                            dest_min: XLM,
+                            path: Default::default(),
+                        }),
+                    )
+                },
+            )
+        },
         c(
             "ManageSellOfferOp",
             "a new offer selling lumens for the shared credit",

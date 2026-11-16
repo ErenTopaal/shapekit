@@ -1055,7 +1055,11 @@ pub fn probes() -> Vec<LimitProbe> {
                     // put_temp stores without an event or a return value, so only the entry
                     // size bounds it; echo would also emit the value and return it
                     let put = |v: ScVal| -> Result<HostFunction> {
-                        call(&echo(w)?, "put_temp", vec![ScVal::Symbol(ScSymbol("k".try_into()?)), v])
+                        call(
+                            &echo(w)?,
+                            "put_temp",
+                            vec![ScVal::Symbol(ScSymbol("k".try_into()?)), v],
+                        )
                     };
                     let d = raised(w, crate::soroban::simulated(w, s, put(bytes(1)?)?)?)?;
                     soroban(w, s, put(bytes(n)?)?, d, Vec::new())
@@ -1304,7 +1308,12 @@ pub fn checks() -> Vec<(&'static str, Check)> {
         ("soroban.footprint.write_entries", Equal),
         ("soroban.contract_data.entry_bytes", Size(entry_sizes)),
         ("soroban.contract_data.key_bytes", Size(key_sizes)),
-        ("soroban.contract_code.bytes", Below("core refuses at submission only wasm longer than contractMaxSizeBytes (stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp 1446-1456), but at apply it holds the whole encoded CONTRACT_CODE ledger entry, about a hundred bytes more than the wasm, to the same bound (InvokeHostFunctionOpFrame.cpp 778-789, TransactionUtils.cpp 2018-2027) and fails the upload with resource_limit_exceeded. so the largest wasm that applies is a little below the setting, while envelopes carrying up to contractMaxSizeBytes of wasm are still included, failed, and are what the row's cap has to admit")),
+        (
+            "soroban.contract_code.bytes",
+            Below(
+                "core refuses at submission only wasm longer than contractMaxSizeBytes (stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp 1446-1456), but at apply it holds the whole encoded CONTRACT_CODE ledger entry, about a hundred bytes more than the wasm, to the same bound (InvokeHostFunctionOpFrame.cpp 778-789, TransactionUtils.cpp 2018-2027) and fails the upload with resource_limit_exceeded. so the largest wasm that applies is a little below the setting, while envelopes carrying up to contractMaxSizeBytes of wasm are still included, failed, and are what the row's cap has to admit",
+            ),
+        ),
         (
             "soroban.txs.per_ledger",
             Unmeasured(
