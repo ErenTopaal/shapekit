@@ -90,7 +90,7 @@ pub struct ChainCtx {
 }
 
 impl ChainCtx {
-    pub(crate) fn new(
+    pub fn new(
         driver: ChainDriver,
         recipe_id: &str,
         network: Network,
@@ -113,6 +113,17 @@ impl ChainCtx {
 
     pub fn protocol(&self) -> u32 {
         self.protocol
+    }
+
+    /// Follows a protocol upgrade the recipe applied, so envelopes are signed in the form
+    /// the new protocol takes.
+    pub(crate) fn set_protocol(&mut self, protocol: u32) {
+        self.protocol = protocol;
+    }
+
+    /// Stops the node without writing the chain.
+    pub fn stop(self) -> Result<()> {
+        Ok(self.driver.stop()?)
     }
 
     /// The network's root account, funded at genesis.
@@ -335,7 +346,7 @@ impl ChainCtx {
     }
 
     /// Writes the chain into `target` and stops the node.
-    pub(crate) fn finish(self, target: &Path) -> Result<(ChainSummary, Vec<Captured>)> {
+    pub fn finish(self, target: &Path) -> Result<(ChainSummary, Vec<Captured>)> {
         let summary = self
             .driver
             .finish(target)

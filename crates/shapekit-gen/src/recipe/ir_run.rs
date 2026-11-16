@@ -40,7 +40,10 @@ use shapekit_core_driver::keys::{
     muxed_account_with_id, muxed_strkey,
 };
 use shapekit_core_driver::settings::PreparedUpgrade;
-use shapekit_core_driver::tx::{TransactionBuilder, contract_id_from_address, contract_preimage};
+use shapekit_core_driver::node::SubmitStatus;
+use shapekit_core_driver::tx::{
+    TransactionBuilder, contract_id_from_address, contract_preimage, envelope_hash,
+};
 use stellar_xdr::{
     ConfigSettingEntry, ConfigUpgradeSet, ContractExecutable, ContractId, CreateAccountOp,
     CreateContractArgsV2, Hash, HostFunction, InvokeContractArgs, LedgerKey, LedgerUpgrade, Memo,
@@ -113,25 +116,10 @@ impl Recipe for IrRecipe {
     }
 
     fn run(&self, ctx: &mut ChainCtx) -> Result<()> {
-        let mut interp = Interp {
-            root: &self.root,
-            pending: Vec::new(),
-            applied: BTreeMap::new(),
-            closed: BTreeMap::new(),
-            rejected: BTreeMap::new(),
-            wasm: BTreeMap::new(),
-            contracts: BTreeMap::new(),
-            queued_seq: BTreeMap::new(),
-            writer: None,
-        };
-        if self.ir.node.soroban_settings {
-            // the settings applied before the first step deployed it
-            let root = ctx.root().clone();
-            interp.writer = Some(ctx.driver().settings_writer(&root)?);
-        }
+        let mut interp = Session::new(ctx, &self.root, self.ir.node.soroban_settings)?;
         for (i, step) in self.ir.steps.iter().enumerate() {
             interp
-                .step(ctx, step)
+                .step(ctx, i, step)
                 .with_context(|| format!("recipe {} step {i}", self.ir.id))?;
         }
         ensure!(
@@ -144,6 +132,17 @@ impl Recipe for IrRecipe {
     }
 }
 
+/// What core did with a submitting step run in learning mode.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Observed {
+    /// Index of the step, as passed to [`Session::step`].
+    pub step: usize,
+    pub outcome: Outcome,
+    pub result: TransactionResult,
+    /// The ledger it was applied in, or the last closed ledger when it was refused.
+    pub ledger: u32,
+}
+
 #[derive(Debug, Clone)]
 enum Kind {
     Tx,
@@ -152,6 +151,7 @@ enum Kind {
 }
 
 struct Pending {
+    step: usize,
     label: Option<String>,
     hash: [u8; 32],
     expect: TxExpect,
@@ -164,8 +164,15 @@ struct Rejected {
     ledger: u32,
 }
 
-struct Interp<'a> {
+/// Runs the steps of a recipe one at a time on a chain. [`IrRecipe`] runs a whole file
+/// through it; the explorer drives it step by step, in learning mode.
+pub struct Session<'a> {
     root: &'a Path,
+    /// Learning mode: a submitting step's `expect` is not checked; what core did is
+    /// recorded in `observed` instead.
+    learn: bool,
+    observed: Vec<Observed>,
+    current: usize,
     pending: Vec<Pending>,
     applied: BTreeMap<String, Applied>,
     closed: BTreeMap<String, u32>,
@@ -193,7 +200,50 @@ fn ledger_seq_on_chain(ctx: &mut ChainCtx, role: &str) -> Result<i64> {
         .account_seq(&account_id(&key.verifying_key()))?)
 }
 
-impl Interp<'_> {
+impl<'a> Session<'a> {
+    /// A session on `ctx`. `soroban_settings` says the chain was started with the captured
+    /// settings, whose writer contract the session then reuses.
+    pub fn new(ctx: &mut ChainCtx, root: &'a Path, soroban_settings: bool) -> Result<Self> {
+        let writer = if soroban_settings {
+            // the settings applied before the first step deployed it
+            let root = ctx.root().clone();
+            Some(ctx.driver().settings_writer(&root)?)
+        } else {
+            None
+        };
+        Ok(Session {
+            root,
+            learn: false,
+            observed: Vec::new(),
+            current: 0,
+            pending: Vec::new(),
+            applied: BTreeMap::new(),
+            closed: BTreeMap::new(),
+            rejected: BTreeMap::new(),
+            wasm: BTreeMap::new(),
+            contracts: BTreeMap::new(),
+            queued_seq: BTreeMap::new(),
+            writer,
+        })
+    }
+
+    /// Learning mode: submitting steps are not held to their `expect`; what core answered
+    /// is returned by [`Self::take_observed`] once known (at submission for a refusal, at
+    /// the next close otherwise). Upload and deploy steps are still checked.
+    pub fn set_learning(&mut self, on: bool) {
+        self.learn = on;
+    }
+
+    /// What core did with each submitting step since the last call, in step order.
+    pub fn take_observed(&mut self) -> Vec<Observed> {
+        std::mem::take(&mut self.observed)
+    }
+
+    /// Transactions queued and not yet closed.
+    pub fn queued(&self) -> usize {
+        self.pending.len()
+    }
+
     fn lookup(&self, ctx: &mut ChainCtx, r: &SymRef) -> Result<String> {
         Ok(match r {
             SymRef::Account(role) => account_strkey(&key_of(ctx, role).verifying_key()),
@@ -251,6 +301,43 @@ impl Interp<'_> {
         expect: &TxExpect,
         kind: Kind,
     ) -> Result<()> {
+        if self.learn && matches!(kind, Kind::Tx) {
+            let sub = ctx.driver().node().submit(env)?;
+            match (sub.status, sub.error) {
+                (SubmitStatus::Error, Some(result)) => {
+                    let ledger = ctx.driver().last_closed();
+                    self.observed.push(Observed {
+                        step: self.current,
+                        outcome: Outcome::Rejected,
+                        result: result.clone(),
+                        ledger,
+                    });
+                    if let Some(label) = label {
+                        self.rejected.insert(
+                            label.clone(),
+                            Rejected {
+                                env: env.clone(),
+                                result,
+                                ledger,
+                            },
+                        );
+                    }
+                    return Ok(());
+                }
+                (SubmitStatus::Pending, _) => {}
+                (status, _) => bail!("core answered {status:?} to the submission"),
+            }
+            let hash = envelope_hash(env, ctx.driver().network_id())?;
+            self.queued_seq.insert(role.to_owned(), seq);
+            self.pending.push(Pending {
+                step: self.current,
+                label: label.clone(),
+                hash,
+                expect: expect.clone(),
+                kind,
+            });
+            return Ok(());
+        }
         if expect.outcome == Outcome::Rejected {
             let result = ctx.submit_rejected(env)?;
             self.check_result(ctx, &result.result, expect)?;
@@ -270,6 +357,7 @@ impl Interp<'_> {
         let hash = ctx.driver().queue(env)?;
         self.queued_seq.insert(role.to_owned(), seq);
         self.pending.push(Pending {
+            step: self.current,
             label: label.clone(),
             hash,
             expect: expect.clone(),
@@ -301,6 +389,22 @@ impl Interp<'_> {
         for p in std::mem::take(&mut self.pending) {
             let applied = ctx.driver().applied_in_last(&p.hash)?;
             let what = p.label.as_deref().unwrap_or("an unlabelled step");
+            if self.learn && matches!(p.kind, Kind::Tx) {
+                self.observed.push(Observed {
+                    step: p.step,
+                    outcome: if applied.succeeded() {
+                        Outcome::Success
+                    } else {
+                        Outcome::Failed
+                    },
+                    result: applied.result.clone(),
+                    ledger: applied.ledger,
+                });
+                if let Some(label) = p.label {
+                    self.applied.insert(label, applied);
+                }
+                continue;
+            }
             match p.expect.outcome {
                 Outcome::Success => ensure!(
                     applied.succeeded(),
@@ -336,7 +440,9 @@ impl Interp<'_> {
         Ok(())
     }
 
-    fn step(&mut self, ctx: &mut ChainCtx, step: &Step) -> Result<()> {
+    /// Runs one step; `index` is its position in the recipe, reported back in learning mode.
+    pub fn step(&mut self, ctx: &mut ChainCtx, index: usize, step: &Step) -> Result<()> {
+        self.current = index;
         match step {
             Step::Fund {
                 label,
@@ -465,6 +571,9 @@ impl Interp<'_> {
                 let pairs: Vec<(&str, &str)> =
                     params.iter().map(|(k, v)| (*k, v.as_str())).collect();
                 let seq = ctx.driver().close_with_upgrades(&pairs)?;
+                if let Some(v) = protocol_version {
+                    ctx.set_protocol(*v);
+                }
                 let applied = upgrades(ctx.driver().last_meta());
                 for w in &want {
                     ensure!(

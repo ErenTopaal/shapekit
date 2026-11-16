@@ -78,18 +78,22 @@ fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> Node
         diagnostic_events: false,
         min_persistent_ttl: recipe.min_persistent_ttl(),
         invariant_checks: false,
+        limits: Default::default(),
     }
 }
 
 type JobResult = Result<(ChainRun, Vec<Captured>)>;
 
-fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Path) -> JobResult {
-    let started = Instant::now();
-    let work = tempfile::Builder::new()
-        .prefix("shapekit-gen-")
-        .tempdir()
-        .context("creating the node workdir")?;
-    let driver = ChainDriver::start(node_config(recipe, network, image), work.path())?;
+/// Starts the node a recipe's chain runs on in `workdir` and brings it to where the recipe's
+/// first step begins: through the first checkpoint, with the captured Soroban settings when
+/// the recipe asks for them.
+pub fn start_chain(
+    recipe: &dyn Recipe,
+    network: Network,
+    image: &CoreImage,
+    workdir: &Path,
+) -> Result<ChainCtx> {
+    let driver = ChainDriver::start(node_config(recipe, network, image), workdir)?;
     let mut ctx = ChainCtx::new(driver, recipe.id(), network, recipe.protocol());
     pad_to_first_checkpoint(&mut ctx)?;
     if recipe.soroban_settings() {
@@ -97,6 +101,16 @@ fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Pa
         ctx.driver()
             .apply_settings(&NetworkSettings::testnet()?, &root, ECHO_WASM)?;
     }
+    Ok(ctx)
+}
+
+fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Path) -> JobResult {
+    let started = Instant::now();
+    let work = tempfile::Builder::new()
+        .prefix("shapekit-gen-")
+        .tempdir()
+        .context("creating the node workdir")?;
+    let mut ctx = start_chain(recipe, network, image, work.path())?;
     recipe.run(&mut ctx)?;
     // the node is still up: core's own answer for every touched key is the reference
     let state_check = {

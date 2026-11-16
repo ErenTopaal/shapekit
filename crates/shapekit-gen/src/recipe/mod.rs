@@ -51,7 +51,9 @@ mod state_check;
 
 pub use ctx::{Captured, ChainCtx, Spec};
 pub use output::{CHAINS_DIR, ChainCheck, EntryCheck};
-pub use run::{ChainRun, GenOptions, GenReport, Repro, generate, verify_repro, verify_repro_on};
+pub use run::{
+    ChainRun, GenOptions, GenReport, Repro, generate, start_chain, verify_repro, verify_repro_on,
+};
 pub use select::{Selected, Selector, select};
 
 use shapekit_manifest::{MAINNET_PASSPHRASE, TESTNET_PASSPHRASE};
