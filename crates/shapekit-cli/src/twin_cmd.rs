@@ -208,7 +208,8 @@ pub enum TwinCommand {
     /// List every protocol version comparison in core's non-test C++ source
     /// (`protocolVersionIsBefore`, `StartsFrom`, `Equals`) with its function and protocol,
     /// both sides open. The checkout must be at the stellar-core commit pinned in the pins
-    /// file. Comparisons against a runtime value instead of a protocol constant are printed,
+    /// file; a pin by tag records the tag as the core version, a pin by bare commit (such
+    /// as next/pins.toml) records the commit. Comparisons against a runtime value instead of a protocol constant are printed,
     /// not listed.
     Gates {
         /// A stellar-core checkout.
@@ -287,16 +288,19 @@ fn pinned_core(pins_path: &Path) -> Result<CoreRef> {
         .iter()
         .find(|g| g.name == "stellar-core")
         .with_context(|| format!("{} has no [[git]] stellar-core", pins_path.display()))?;
-    let version = git
-        .git_ref
-        .as_deref()
-        .and_then(|r| r.strip_prefix("refs/tags/"))
-        .with_context(|| "the stellar-core pin names no tag")?
-        .to_owned();
     let commit = git
         .sha
         .clone()
         .with_context(|| "the stellar-core pin has no commit")?;
+    // a pin by bare commit (an unreleased core, such as the next protocol's)
+    // names the commit as its version, the form the contracts accept for it
+    let version = match git.git_ref.as_deref() {
+        None => commit.clone(),
+        Some(r) => r
+            .strip_prefix("refs/tags/")
+            .with_context(|| format!("the stellar-core pin's ref {r} is not a tag"))?
+            .to_owned(),
+    };
     Ok(CoreRef {
         version,
         commit,
