@@ -258,6 +258,9 @@ fn delegated_auth(w: &mut World, s: &Subject) -> Result<Base> {
         credentials: SorobanCredentials::AddressWithDelegates(
             SorobanAddressCredentialsWithDelegates {
                 address_credentials: SorobanAddressCredentials {
+                    // recording draws its nonce from a fixed seed, the same one for every
+                    // recording of this one shared account, so each attempt takes its own
+                    nonce: subject_nonce(s),
                     signature_expiration_ledger: w.driver.last_closed() + AUTH_VALID_FOR,
                     // the delegating account checks no signature of its own
                     signature: ScVal::Void,
@@ -299,6 +302,11 @@ fn delegated_auth(w: &mut World, s: &Subject) -> Result<Base> {
         vec![entry],
         plan,
     )
+}
+
+fn subject_nonce(s: &Subject) -> i64 {
+    let h: [u8; 32] = Sha256::digest(format!("shapekit.probe/{}/nonce", s.tag)).into();
+    i64::from_be_bytes(h[..8].try_into().expect("eight bytes")) & i64::MAX
 }
 
 fn subject_salt(s: &Subject) -> [u8; 32] {
