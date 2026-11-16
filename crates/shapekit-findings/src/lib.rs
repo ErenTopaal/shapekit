@@ -60,6 +60,12 @@
 //! channel; the public record carries only the reference) or `wont-fix` (a reason).
 //! Siblings are findings in different components that fail on one corpus entry, plus those
 //! the triage names; the relation is symmetric.
+//! The recipe is how the minimal entry's input is produced again on a local core: its recipe
+//! IR file or its recorded chain, absent for hand-built, golden and public-network inputs.
+//! The affected versions list, per SDK or target, the versions the inputs ran in their order
+//! and the ones that fail, with the first later version from which every tested one passes.
+//! Other SDKs are the versions of different SDKs that also fail one of the finding's entries,
+//! whichever finding or none takes those failures.
 //!
 //! # Check
 //!

@@ -163,6 +163,9 @@ mod tests {
             siblings: vec![],
             related: vec![],
             entries: vec!["e".into()],
+            recipe: None,
+            affected: vec![],
+            other_sdks: vec![],
             occurrences: vec![Occurrence {
                 source: "harness".into(),
                 on: "t@1".into(),

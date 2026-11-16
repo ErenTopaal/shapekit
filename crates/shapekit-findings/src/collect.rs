@@ -540,11 +540,12 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     for r in &mut records {
         r.affected = affected(&r.occurrences, &tested);
     }
-    let sdk_failures: Vec<&Occurrence> = records
+    let sdk_failures: Vec<Occurrence> = records
         .iter()
         .flat_map(|r| &r.occurrences)
         .chain(&unmapped)
         .filter(|o| o.source == "conformance")
+        .cloned()
         .collect();
     for r in &mut records {
         r.other_sdks = other_sdks(r, &sdk_failures);
@@ -671,6 +672,10 @@ fn record(
         component: def.component.clone(),
         severity: def.severity,
         caps: caps.into_iter().collect(),
+        recipe: minimal
+            .as_deref()
+            .and_then(|e| manifest.get(e))
+            .and_then(|e| recipe_of(e)),
         minimal_entry: minimal,
         reproduce,
         status: def.status,
@@ -681,10 +686,6 @@ fn record(
         cause: def.cause.clone(),
         siblings: Vec::new(),
         related: def.related.clone(),
-        recipe: minimal
-            .as_deref()
-            .and_then(|e| manifest.get(e))
-            .and_then(|e| recipe_of(e)),
         entries: entries.into_iter().collect(),
         affected: Vec::new(),
         other_sdks: Vec::new(),
@@ -730,7 +731,7 @@ fn affected(occurrences: &[Occurrence], tested: &BTreeMap<String, Vec<String>>) 
         .collect()
 }
 
-fn other_sdks(r: &FindingRecord, sdk_failures: &[&Occurrence]) -> Vec<String> {
+fn other_sdks(r: &FindingRecord, sdk_failures: &[Occurrence]) -> Vec<String> {
     let own: BTreeSet<&str> = r
         .occurrences
         .iter()
@@ -925,5 +926,66 @@ mod tests {
             "v0.8.0",
             "cap23.claimable-balances.synth-strkey-b-valid"
         ));
+    }
+
+    fn occ(on: &str, entry: &str) -> Occurrence {
+        Occurrence {
+            source: "conformance".into(),
+            on: on.into(),
+            entry: Some(entry.into()),
+            at: on.into(),
+            what: "diverges-from-network".into(),
+        }
+    }
+
+    #[test]
+    fn affected_versions_follow_the_tested_order() {
+        let tested = BTreeMap::from([(
+            "go".to_string(),
+            vec![
+                "v0.7.1".into(),
+                "v0.7.2".into(),
+                "v0.8.0".into(),
+                "v0.9.0".into(),
+            ],
+        )]);
+        let a = affected(&[occ("go@v0.7.2", "e"), occ("go@v0.7.1", "e")], &tested);
+        assert_eq!(a.len(), 1);
+        assert_eq!(a[0].failing, vec!["v0.7.1", "v0.7.2"]);
+        assert_eq!(a[0].passes_from.as_deref(), Some("v0.8.0"));
+        let a = affected(&[occ("go@v0.9.0", "e")], &tested);
+        assert_eq!(a[0].passes_from, None);
+    }
+
+    #[test]
+    fn other_sdks_are_failures_of_other_sdks_on_the_same_entries() {
+        let failures = vec![
+            occ("go@v0.9.0", "e"),
+            occ("js@17.4.0", "e"),
+            occ("rust@30.0.0", "other"),
+        ];
+        let r = FindingRecord {
+            id: "GO-X".into(),
+            title: "t".into(),
+            component: "go-stellar-sdk".into(),
+            severity: Severity::Divergence,
+            caps: vec![],
+            minimal_entry: None,
+            reproduce: None,
+            status: Status::Draft,
+            link: None,
+            reference: None,
+            reason: None,
+            draft: None,
+            cause: "c".into(),
+            siblings: vec![],
+            related: vec![],
+            entries: vec!["e".into()],
+            recipe: None,
+            affected: vec![],
+            other_sdks: vec![],
+            occurrences: vec![occ("go@v0.9.0", "e")],
+        };
+        assert_eq!(other_sdks(&r, &failures), vec!["js@17.4.0"]);
     }
 }

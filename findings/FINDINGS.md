@@ -53,6 +53,8 @@ The state change vocabulary has no CLAWBACK reason. Clawback and ClawbackClaimab
 - status: filed ([stellar/wallet-backend#813](https://github.com/stellar/wallet-backend/issues/813))
 - minimal entry: `cap35.clawback.p30-clawback-claimable-balance-envelope`
 - reproduce: `shapekit harness run --chain cap35.clawback.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap35.clawback.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 36 failure(s) on 9 entries
 
 <details><summary>occurrences</summary>
@@ -108,6 +110,8 @@ participantsForMeta switches on `meta.Operations`, the V0 arm of the Transaction
 - status: duplicate-of ([stellar/wallet-backend#677](https://github.com/stellar/wallet-backend/issues/677))
 - minimal entry: `cap23.claimable-balances.p30-claim-through-depth-4-envelope`
 - reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap23.claimable-balances.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 76 failure(s) on 20 entries
 
 <details><summary>occurrences</summary>
@@ -203,6 +207,8 @@ BALANCE rows are written per account; the claimable balance (B) or liquidity poo
 - status: filed ([stellar/wallet-backend#812](https://github.com/stellar/wallet-backend/issues/812))
 - minimal entry: `cap23.claimable-balances.p30-claim-through-depth-4-envelope`
 - reproduce: `shapekit harness run --chain cap23.claimable-balances.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap23.claimable-balances.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - related upstream: [stellar/wallet-backend#442](https://github.com/stellar/wallet-backend/pull/442)
 - observed: 104 failure(s) on 19 entries
 
@@ -327,6 +333,8 @@ CAP-67 puts the transaction memo of a payment to a G address into the transfer e
 - status: filed ([stellar/wallet-backend#814](https://github.com/stellar/wallet-backend/issues/814))
 - minimal entry: `classic.memo-bytes.p30-memo-ff`
 - reproduce: `shapekit harness run --chain classic.memo-bytes.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:classic.memo-bytes.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 34 failure(s) on 17 entries
 
 <details><summary>occurrences</summary>
@@ -380,6 +388,8 @@ Contract creation rows come only from the operation's own CreateContract with a 
 - status: filed ([stellar/wallet-backend#815](https://github.com/stellar/wallet-backend/issues/815))
 - minimal entry: `cap73.sac-trust.p28-deploy-xlm-sac-envelope`
 - reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap73.sac-trust.p28`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 24 failure(s) on 12 entries
 
 <details><summary>occurrences</summary>
@@ -423,6 +433,8 @@ From protocol 26 (CAP-73) an XLM SAC transfer to a missing G account creates it;
 - status: filed ([stellar/wallet-backend#816](https://github.com/stellar/wallet-backend/issues/816))
 - minimal entry: `cap73.sac-trust.p28-xlm-transfer-creates-account-envelope`
 - reproduce: `shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap73.sac-trust.p28`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 8 failure(s) on 4 entries
 
 <details><summary>occurrences</summary>
@@ -450,6 +462,8 @@ Revoking authorization with SetTrustLineFlags or AllowTrust redeems the holder's
 - status: filed ([stellar/wallet-backend#817](https://github.com/stellar/wallet-backend/issues/817))
 - minimal entry: `cap38.liquidity-pools.p30-revoke-redeems-pool-shares`
 - reproduce: `shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap38.liquidity-pools.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 2 failure(s) on 1 entry
 
 <details><summary>occurrences</summary>
@@ -471,6 +485,8 @@ Core removes a transaction's pre-auth signer in txChangesBefore whether the tran
 - status: filed ([stellar/wallet-backend#818](https://github.com/stellar/wallet-backend/issues/818))
 - minimal entry: `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope`
 - reproduce: `shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap15.fee-bump.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 6 failure(s) on 3 entries
 
 <details><summary>occurrences</summary>
@@ -496,6 +512,8 @@ Following Horizon's effects (the code says it was ported from them), account cre
 - status: filed ([stellar/wallet-backend#819](https://github.com/stellar/wallet-backend/issues/819))
 - minimal entry: `cap33.sponsorship.p30-sponsored-account-envelope`
 - reproduce: `shapekit harness run --chain cap33.sponsorship.p30 --network testnet --adapter "adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef"`
+- recipe: `chain:cap33.sponsorship.p30`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - observed: 4 failure(s) on 2 entries
 
 <details><summary>occurrences</summary>
@@ -518,6 +536,7 @@ The walkInvocation closure in (*ContractDeployProcessor).ProcessOperation recurs
 - CAPs: CAP-0046
 - status: filed ([stellar/wallet-backend#820](https://github.com/stellar/wallet-backend/issues/820))
 - reproduce: `indexerlint -format json ./... (in a checkout of wallet-backend at 3e22515a44979fdc3a558fda3991ca2b48e38cef)`
+- affected wallet-backend: fails on 3e22515a44979fdc3a558fda3991ca2b48e38cef (1 of 1 tested)
 - related upstream: [stellar/wallet-backend#746](https://github.com/stellar/wallet-backend/issues/746)
 - observed: 1 failure(s) on 0 entries
 
@@ -539,6 +558,8 @@ strkey.Decode, DecodeAny and IsValidClaimableBalance check a B key's length but 
 - status: filed ([stellar/go-stellar-sdk#6046](https://github.com/stellar/go-stellar-sdk/issues/6046))
 - minimal entry: `cap23.claimable-balances.synth-strkey-b-invalid`
 - reproduce: `shapekit conformance run --sdk go --version v0.9.0 --entry cap23.claimable-balances.synth-strkey-b-invalid`
+- affected go: fails on v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 (5 of 5 tested)
+- other SDKs failing the same entries: js@16.3.0, js@16.3.1, js@16.4.1
 - siblings: [JS-16X](#js-16x)
 - observed: 5 failure(s) on 1 entry
 
@@ -564,6 +585,8 @@ v0.7.1 Decode and DecodeAny do not check the payload length against the version 
 - status: duplicate-of ([stellar/go-stellar-sdk#5977](https://github.com/stellar/go-stellar-sdk/pull/5977))
 - minimal entry: `cap38.liquidity-pools.synth-strkey-l-invalid`
 - reproduce: `shapekit conformance run --sdk go --version v0.7.1 --entry cap38.liquidity-pools.synth-strkey-l-invalid`
+- affected go: fails on v0.7.1 (1 of 5 tested), passes from v0.7.2
+- other SDKs failing the same entries: js@16.3.0, js@16.3.1, js@16.4.1
 - siblings: [JS-16X](#js-16x)
 - observed: 8 failure(s) on 8 entries
 
@@ -592,6 +615,8 @@ v0.7.1 xdr.Asset.LessThan compares issuers as strkey text instead of key bytes, 
 - status: duplicate-of ([stellar/go-stellar-sdk#5974](https://github.com/stellar/go-stellar-sdk/pull/5974))
 - minimal entry: `cap38.liquidity-pools.synth-assets-equal`
 - reproduce: `shapekit conformance run --sdk go --version v0.7.1 --entry cap38.liquidity-pools.synth-assets-equal`
+- affected go: fails on v0.7.1 (1 of 5 tested), passes from v0.7.2
+- other SDKs failing the same entries: js@16.3.0, js@17.2.0
 - siblings: [JS-1766](#js-1766)
 - observed: 4 failure(s) on 4 entries
 
@@ -616,6 +641,8 @@ go-xdr spends one depth unit per named type, while stellar-xdr, which core runs 
 - status: filed ([stellar/go-stellar-sdk#6047](https://github.com/stellar/go-stellar-sdk/issues/6047))
 - minimal entry: `soroban.scval-shapes.synth-scvec-depth-247-over-cap`
 - reproduce: `shapekit conformance run --sdk go --version v0.9.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap`
+- affected go: fails on v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 (5 of 5 tested)
+- other SDKs failing the same entries: js@17.2.0, js@17.2.1, js@17.3.0, js@17.4.0
 - siblings: [JS-DEPTH](#js-depth)
 - observed: 17 failure(s) on 4 entries
 
@@ -653,6 +680,7 @@ Decode, DecodeAny and Version checked the canonical length on the raw input, the
 - status: duplicate-of ([stellar/go-stellar-sdk#6026](https://github.com/stellar/go-stellar-sdk/pull/6026))
 - minimal entry: `cap27.muxed-accounts.synth-strkey-g-noncanonical-chars`
 - reproduce: `shapekit conformance run --sdk go --version v0.8.0 --entry cap27.muxed-accounts.synth-strkey-g-noncanonical-chars`
+- affected go: fails on v0.7.1, v0.7.2, v0.7.3, v0.8.0 (4 of 5 tested), passes from v0.9.0
 - observed: 12 failure(s) on 3 entries
 
 <details><summary>occurrences</summary>
@@ -684,6 +712,8 @@ Asset issuers were compared as strkey text and ScVal map keys by their native fo
 - status: duplicate-of ([stellar/js-stellar-sdk#1766](https://github.com/stellar/js-stellar-sdk/pull/1766))
 - minimal entry: `soroban.scval-shapes.synth-map-keys-mixed-types`
 - reproduce: `shapekit conformance run --sdk js --version 17.2.0 --entry soroban.scval-shapes.synth-map-keys-mixed-types`
+- affected js: fails on 16.3.0, 17.2.0 (2 of 7 tested), passes from 17.2.1
+- other SDKs failing the same entries: go@v0.7.1
 - siblings: [GO-3](#go-3)
 - observed: 9 failure(s) on 6 entries
 
@@ -713,6 +743,7 @@ Converting an ScMap to a JS object keys entries by their string form, so distinc
 - status: duplicate-of ([stellar/js-stellar-sdk#1789](https://github.com/stellar/js-stellar-sdk/issues/1789))
 - minimal entry: `soroban.scval-shapes.synth-map-js1789-u32-symbol`
 - reproduce: `shapekit conformance run --sdk js --version 17.2.1 --entry soroban.scval-shapes.synth-map-js1789-u32-symbol`
+- affected js: fails on 17.2.0, 17.2.1 (2 of 7 tested), passes from 17.3.0
 - observed: 14 failure(s) on 7 entries
 
 <details><summary>occurrences</summary>
@@ -746,6 +777,8 @@ Ids given as text with leading zeros, a sign or past 2^64 were accepted and wrap
 - status: duplicate-of ([stellar/js-stellar-sdk#1785](https://github.com/stellar/js-stellar-sdk/issues/1785))
 - minimal entry: `cap27.muxed-accounts.synth-textual-muxed-id-noncanonical`
 - reproduce: `shapekit conformance run --sdk js --version 17.2.1 --entry cap27.muxed-accounts.synth-textual-muxed-id-noncanonical`
+- affected js: fails on 17.2.0, 17.2.1 (2 of 7 tested), passes from 17.3.0
+- other SDKs failing the same entries: rust@28.0.0, rust@28.0.1, rust@30.0.0
 - siblings: [RS-1](#rs-1)
 - observed: 6 failure(s) on 3 entries
 
@@ -772,6 +805,8 @@ Ids given as text with leading zeros, a sign or past 2^64 were accepted and wrap
 - status: filed ([stellar/js-stellar-sdk#1907](https://github.com/stellar/js-stellar-sdk/issues/1907))
 - minimal entry: `soroban.scval-shapes.synth-event-vec-depth-101`
 - reproduce: `shapekit conformance run --sdk js --version 16.4.1 --entry soroban.scval-shapes.synth-event-vec-depth-101`
+- affected js: fails on 16.3.0, 16.3.1, 16.4.1 (3 of 7 tested), passes from 17.2.0
+- other SDKs failing the same entries: go@v0.7.1, go@v0.7.2, go@v0.7.3, go@v0.8.0, go@v0.9.0, rust@28.0.0, rust@28.0.1, rust@30.0.0
 - siblings: [GO-1](#go-1), [GO-2](#go-2), [RS-1](#rs-1), [RS-2](#rs-2)
 - related upstream: [stellar/js-stellar-sdk#1766](https://github.com/stellar/js-stellar-sdk/pull/1766), [stellar/js-stellar-sdk#1785](https://github.com/stellar/js-stellar-sdk/issues/1785), [stellar/js-stellar-sdk#1789](https://github.com/stellar/js-stellar-sdk/issues/1789), [stellar/js-stellar-sdk#1811](https://github.com/stellar/js-stellar-sdk/pull/1811), [stellar/js-stellar-sdk#1828](https://github.com/stellar/js-stellar-sdk/pull/1828), [stellar/js-xdr#155](https://github.com/stellar/js-xdr/pull/155)
 - observed: 89 failure(s) on 37 entries
@@ -882,6 +917,8 @@ Core refuses envelopes nested deeper than its decode limit; the sdk's default (1
 - status: filed ([stellar/js-stellar-sdk#1908](https://github.com/stellar/js-stellar-sdk/issues/1908))
 - minimal entry: `soroban.scval-shapes.synth-scvec-depth-247-over-cap`
 - reproduce: `shapekit conformance run --sdk js --version 17.4.0 --entry soroban.scval-shapes.synth-scvec-depth-247-over-cap`
+- affected js: fails on 17.2.0, 17.2.1, 17.3.0, 17.4.0 (4 of 7 tested)
+- other SDKs failing the same entries: go@v0.7.1, go@v0.7.2, go@v0.7.3, go@v0.8.0, go@v0.9.0
 - siblings: [GO-4](#go-4)
 - related upstream: [stellar/js-xdr#155](https://github.com/stellar/js-xdr/pull/155)
 - observed: 14 failure(s) on 4 entries
@@ -917,6 +954,8 @@ NumberOrString passes a JSON string to str::parse, so "+16", "-0" and "016" read
 - status: filed ([stellar/rs-stellar-xdr#627](https://github.com/stellar/rs-stellar-xdr/issues/627))
 - minimal entry: `cap03.offer-liabilities.synth-textual-offer-id-noncanonical`
 - reproduce: `shapekit conformance run --sdk rust --version 30.0.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical`
+- affected rust: fails on 28.0.0, 28.0.1, 30.0.0 (3 of 3 tested)
+- other SDKs failing the same entries: js@16.3.0, js@16.3.1, js@16.4.1, js@17.2.0, js@17.2.1
 - siblings: [JS-16X](#js-16x), [JS-1785](#js-1785)
 - observed: 3 failure(s) on 1 entry
 
@@ -940,6 +979,8 @@ to_xdr_json renders nested values of any depth the decoder accepts, but the read
 - status: filed ([stellar/rs-stellar-xdr#628](https://github.com/stellar/rs-stellar-xdr/issues/628))
 - minimal entry: `soroban.scval-shapes.synth-event-vec-depth-101`
 - reproduce: `shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-event-vec-depth-101`
+- affected rust: fails on 28.0.0, 28.0.1, 30.0.0 (3 of 3 tested)
+- other SDKs failing the same entries: js@16.3.0, js@16.3.1, js@16.4.1
 - siblings: [JS-16X](#js-16x)
 - observed: 22 failure(s) on 14 entries
 
@@ -982,6 +1023,7 @@ impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false
 - status: filed ([stellar/rs-stellar-xdr#629](https://github.com/stellar/rs-stellar-xdr/issues/629))
 - minimal entry: `soroban.scval-shapes.synth-bool-value-2`
 - reproduce: `shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.scval-shapes.synth-bool-value-2`
+- affected rust: fails on 28.0.0, 28.0.1, 30.0.0 (3 of 3 tested)
 - siblings: [CORE-1](#core-1)
 - observed: 3 failure(s) on 1 entry
 
@@ -1005,6 +1047,7 @@ xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the co
 - status: filed ([stellar/stellar-core#5509](https://github.com/stellar/stellar-core/issues/5509))
 - minimal entry: `soroban.invoke-basics.synth-invoke-arg-bool-2`
 - reproduce: `shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.invoke-basics.synth-invoke-arg-bool-2`
+- affected rust: fails on 28.0.0, 28.0.1, 30.0.0 (3 of 3 tested)
 - siblings: [RS-3](#rs-3)
 - observed: 3 failure(s) on 1 entry
 
