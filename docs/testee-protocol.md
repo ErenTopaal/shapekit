@@ -256,7 +256,9 @@ negative numbers).
 
 The testee hands `input` to the SDK API that takes a textual or numeric ID (JS `MuxedAccount`
 and `Operation.manageSellOffer`; in Rust the only textual path is the XDR-JSON reader of the
-`id` and `offer_id` fields), in the JSON type it arrived as. A testee must read numbers
+`id` and `offer_id` fields; in Go the Horizon response types, `horizon.Offer.ID` and
+`horizon.Transaction.AccountMuxedID`, which read IDs from JSON strings only), in the JSON type
+it arrived as. A testee must read numbers
 without going through a binary floating point type, unless that is what the SDK itself does
 with them. If the SDK has no API for the input's JSON type, answer `unsupported`.
 

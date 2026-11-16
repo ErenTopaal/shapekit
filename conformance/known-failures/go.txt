@@ -50,3 +50,7 @@ cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.1 diverges-fr
 cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.2 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026 case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode
 cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.7.3 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026 case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode
 cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars v0.8.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/6026 case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 4/strkey_decode
+#
+# id_parse reads offer ids through horizon.Offer.ID (`json:"id,string"`), which strconv.ParseInt
+# reads: a plus sign and minus zero are accepted
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network findings/issues/go-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 12/id_parse, case 13/id_parse

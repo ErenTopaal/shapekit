@@ -30,6 +30,7 @@ var ops = []string{
 	"tx_hash",
 	"balance_id",
 	"contract_id",
+	"id_parse",
 }
 
 var unsupportedOps = map[string]string{
@@ -39,9 +40,6 @@ var unsupportedOps = map[string]string{
 		"slice of ScMapEntry and the sdk keeps entries in the order given",
 	"map_validate": "go-stellar-sdk has no ScMap validation: xdr.ScMap decodes any key order and " +
 		"no sdk function checks it",
-	"id_parse": "go-stellar-sdk takes muxed ids as uint64 (xdr.MuxedAccountFromAccountId) and " +
-		"offer ids as int64 (txnbuild.ManageSellOffer.OfferID); it has no textual or json-number " +
-		"id input of its own",
 	"to_native": "go-stellar-sdk has no native projection of an ScVal: callers read the typed " +
 		"xdr.ScVal arms, and ScVal.String is a display string, not a native value",
 }
@@ -68,6 +66,8 @@ func dispatch(req request) (map[string]any, error) {
 		return balanceID(req)
 	case "contract_id":
 		return contractID(req)
+	case "id_parse":
+		return idParse(req)
 	case "coverage_snapshot":
 		return coverageSnapshot(req)
 	}
