@@ -235,3 +235,140 @@ pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
     }
     s
 }
+
+/// A contract call: a deployed instance, one of its functions, arguments filled from its
+/// interface. Calls that name accounts are authorized by those accounts' signatures.
+pub fn invoke(
+    schema: &Schema,
+    world: &World,
+    rng: &mut Rng,
+    deployed: &[(String, &crate::contract::Wasm)],
+    names: &crate::spec::Names,
+) -> Option<Step> {
+    use shapekit_contracts::recipe_ir::{AuthSpec, ResourceOverride};
+    let (label, wasm) = rng.pick(deployed).clone();
+    let funcs: Vec<&crate::spec::Function> = wasm
+        .iface
+        .functions
+        .iter()
+        .filter(|f| f.name != "__constructor")
+        .collect();
+    if funcs.is_empty() {
+        return None;
+    }
+    let source = rng.pick(&world.funded).clone();
+    let func = (*rng.pick(&funcs)).clone();
+    let mut f = Filler::new(schema, world, rng, &source);
+    let args: Vec<Value> = func
+        .inputs
+        .iter()
+        .map(|t| crate::spec::value(&mut f, &wasm.iface, names, t, 0))
+        .collect();
+    let named: Vec<String> = f
+        .named
+        .iter()
+        .filter(|r| world.funded.contains(*r))
+        .cloned()
+        .collect();
+    let text = serde_json::to_string(&args).unwrap_or_default();
+    let auth = if named.iter().any(|r| text.contains(&format!("@account:{r}\""))) {
+        AuthSpec::Record {
+            allow_non_root: rng.chance(1, 2),
+            address_v2: world.protocol >= 27 && rng.chance(1, 2),
+            signers: named.iter().map(|r| (r.clone(), Vec::new())).collect(),
+        }
+    } else {
+        AuthSpec::Source
+    };
+    let resources = rng.chance(1, 12).then(|| match rng.below(3) {
+        0 => ResourceOverride {
+            instructions: Some(1000),
+            disk_read_bytes: None,
+            write_bytes: None,
+            resource_fee: None,
+        },
+        1 => ResourceOverride {
+            instructions: None,
+            disk_read_bytes: None,
+            write_bytes: Some(0),
+            resource_fee: None,
+        },
+        _ => ResourceOverride {
+            instructions: None,
+            disk_read_bytes: None,
+            write_bytes: None,
+            resource_fee: Some(1),
+        },
+    });
+    Some(Step::Invoke {
+        label: None,
+        source,
+        contract: label,
+        function: func.name,
+        args,
+        auth,
+        resources,
+        expect: TxExpect::default(),
+    })
+}
+
+/// A host function written out: a Stellar asset contract for one of the episode's assets, a
+/// contract created with either create function from uploaded code, or any value of the type.
+pub fn host_function(
+    schema: &Schema,
+    world: &World,
+    rng: &mut Rng,
+    names: &crate::spec::Names,
+) -> Step {
+    use shapekit_contracts::recipe_ir::AuthSpec;
+    let source = rng.pick(&world.funded).clone();
+    let mut f = Filler::new(schema, world, rng, &source);
+    let salt = hex::encode(f.rng.bytes(32));
+    let preimage = serde_json::json!({ "address": { "address": format!("@account:{source}"), "salt": salt } });
+    let wasm = (!names.wasm.is_empty())
+        .then(|| serde_json::json!({ "wasm": format!("@wasm:{}", f.rng.pick(&names.wasm)) }));
+    let function = match (f.rng.below(5), wasm) {
+        (0 | 1, _) => {
+            let asset = f.def("Asset");
+            serde_json::json!({ "create_contract": { "contract_id_preimage": { "asset": asset }, "executable": "stellar_asset" } })
+        }
+        (2, Some(w)) => serde_json::json!({ "create_contract": { "contract_id_preimage": preimage, "executable": w } }),
+        (3, Some(w)) => serde_json::json!({ "create_contract_v2": { "contract_id_preimage": preimage, "executable": w, "constructor_args": [] } }),
+        _ => f.def("HostFunction"),
+    };
+    Step::HostFunction {
+        label: None,
+        source,
+        function,
+        auth: AuthSpec::Source,
+        resources: None,
+        expect: TxExpect::default(),
+    }
+}
+
+/// An extend or a restore over Soroban entries the ledgers showed.
+pub fn footprint(world: &World, rng: &mut Rng) -> Option<Step> {
+    let keys: Vec<Value> = world.soroban_keys.values().cloned().collect();
+    if keys.is_empty() {
+        return None;
+    }
+    let n = 1 + rng.below(keys.len().min(2));
+    let picked: Vec<Value> = (0..n).map(|_| rng.pick(&keys).clone()).collect();
+    let source = rng.pick(&world.funded).clone();
+    Some(if rng.chance(1, 2) {
+        Step::ExtendTtl {
+            label: None,
+            source,
+            keys: picked,
+            extend_to: *rng.pick(&[1u32, 100, 10_000, 3_000_000]),
+            expect: TxExpect::default(),
+        }
+    } else {
+        Step::Restore {
+            label: None,
+            source,
+            keys: picked,
+            expect: TxExpect::default(),
+        }
+    })
+}

@@ -408,6 +408,16 @@ impl<'a> Filler<'a> {
             Some("limit") => *self
                 .rng
                 .pick(&[0, 1, 1000, 10_000_000_000, i64::MAX, i64::MAX, -1]),
+            // an amount the ledgers hold, or one stroop either side of it
+            _ if !self.world.amounts.is_empty() && self.rng.chance(2, 5) => {
+                let v = *self.rng.pick(&self.world.amounts);
+                match self.rng.below(4) {
+                    0 => v.saturating_add(1),
+                    1 => v.saturating_sub(1),
+                    2 => v / 2,
+                    _ => v,
+                }
+            }
             _ => *self.rng.pick(AMOUNTS),
         };
         Value::String(v.to_string())

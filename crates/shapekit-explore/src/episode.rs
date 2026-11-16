@@ -49,6 +49,8 @@ pub struct Env<'a> {
     /// Where node work directories and profiles go.
     pub work: &'a Path,
     pub seen: &'a Seen,
+    /// The repository's test contract builds, for contract episodes.
+    pub contracts: &'a [crate::contract::Wasm],
 }
 
 #[derive(Debug, Clone)]
@@ -94,6 +96,8 @@ pub struct Stats {
     pub left_out: usize,
     /// Time spent merging and reading the twin's profile.
     pub coverage_seconds: f64,
+    /// Filled steps that never reached core, by the first words of the reason.
+    pub fill_errors: BTreeMap<String, usize>,
     /// Refusals at submission by core's answer.
     pub refusals: BTreeMap<String, usize>,
 }
@@ -107,6 +111,9 @@ impl Stats {
         self.upgrades_refused += o.upgrades_refused;
         self.left_out += o.left_out;
         self.coverage_seconds += o.coverage_seconds;
+        for (k, v) in &o.fill_errors {
+            *self.fill_errors.entry(k.clone()).or_insert(0) += v;
+        }
         for (k, v) in &o.refusals {
             *self.refusals.entry(k.clone()).or_insert(0) += v;
         }
@@ -179,19 +186,16 @@ enum Pushed {
     Invalid,
 }
 
-fn is_fill_error(e: &anyhow::Error) -> bool {
-    e.chain().any(|c| {
-        let s = c.to_string();
-        s.contains("is not valid XDR-JSON")
-            || s.contains("overflows")
-            || s.contains("cannot grow")
-            // TryAgainLater, Duplicate or Filtered: core neither queued nor judged it
-            || s.contains("to the submission")
-            || s.contains("a fee bump wraps a v1 envelope")
-            || s.contains("a v0 transaction cannot carry")
-            // the source was merged away earlier in the episode
-            || (s.starts_with("account ") && s.ends_with(" does not exist"))
-    })
+/// Whether a step submits a transaction.
+fn submits(step: &Step) -> bool {
+    matches!(
+        step,
+        Step::Tx { .. }
+            | Step::Invoke { .. }
+            | Step::HostFunction { .. }
+            | Step::ExtendTtl { .. }
+            | Step::Restore { .. }
+    )
 }
 
 impl<'e, 'a> Live<'e, 'a> {
@@ -217,12 +221,23 @@ impl<'e, 'a> Live<'e, 'a> {
     fn exact(&mut self, step: Step) -> Result<()> {
         let i = self.steps.len();
         let before = self.ctx.driver().last_closed();
+        let queued = self.session.queued();
         self.steps.push(step.clone());
         match self.session.step(&mut self.ctx, i, &step) {
             Ok(()) => {}
-            Err(e) if matches!(step, Step::Tx { .. }) && is_fill_error(&e) => {
+            // a submitting step that failed before core queued anything: the filled values
+            // do not make a transaction core can be asked about (they do not decode, the
+            // simulation refused them, the source is gone)
+            Err(e)
+                if submits(&step)
+                    && self.session.queued() == queued
+                    && self.ctx.driver().last_closed() == before =>
+            {
                 self.steps.pop();
                 self.stats.invalid_fills += 1;
+                let mut why = format!("{:#}", e);
+                why.truncate(120);
+                *self.stats.fill_errors.entry(why).or_insert(0) += 1;
                 return Ok(());
             }
             Err(e) if matches!(step, Step::Upgrade { .. }) => {
@@ -240,8 +255,9 @@ impl<'e, 'a> Live<'e, 'a> {
             }
             Err(e) => return Err(e),
         }
+        self.note_deploy(&step)?;
         self.learn()?;
-        if matches!(step, Step::Tx { .. }) && self.ctx.driver().last_closed() == before {
+        if submits(&step) && self.ctx.driver().last_closed() == before {
             // refused (dropped by learn) or queued for the next close
             return Ok(());
         }
@@ -324,6 +340,63 @@ impl<'e, 'a> Live<'e, 'a> {
         drop.sort_unstable();
         for i in drop.into_iter().rev() {
             self.steps.remove(i);
+        }
+        Ok(())
+    }
+
+    /// The deployed test contract instances and the labels arguments can name.
+    fn contract_names(
+        &self,
+        env: &'e Env<'a>,
+    ) -> (Vec<(String, &'e crate::contract::Wasm)>, crate::spec::Names) {
+        let mut names = crate::spec::Names::default();
+        let mut deployed = Vec::new();
+        let mut code: BTreeMap<&str, &str> = BTreeMap::new();
+        for s in &self.steps {
+            match s {
+                Step::Upload { label, sha256, .. } => {
+                    names.wasm.push(label.clone());
+                    code.insert(label, sha256);
+                }
+                Step::Deploy { label, code: c, .. } => {
+                    names.contracts.push(label.clone());
+                    if let Some(w) = code
+                        .get(c.as_str())
+                        .and_then(|h| env.contracts.iter().find(|w| w.sha256 == *h))
+                    {
+                        deployed.push((label.clone(), w));
+                    }
+                }
+                _ => {}
+            }
+        }
+        (deployed, names)
+    }
+
+    /// Names a deployed contract in the world, so its address in ledger keys and values
+    /// becomes a `@contract:` reference.
+    fn note_deploy(&mut self, step: &Step) -> Result<()> {
+        if let Step::Deploy {
+            label,
+            source,
+            salt,
+            ..
+        } = step
+        {
+            let key = self.ctx.account(source);
+            let deployer = shapekit_core_driver::keys::account_address(&key.verifying_key());
+            let salt: [u8; 32] = hex::decode(salt)?
+                .try_into()
+                .map_err(|_| anyhow::anyhow!("salt is not 32 bytes"))?;
+            let id = shapekit_core_driver::tx::contract_id_from_address(
+                &self.ctx.network_id(),
+                &deployer,
+                &salt,
+            )?;
+            self.world
+                .contract_labels
+                .insert(shapekit_core_driver::keys::contract_strkey(&id), label.clone());
+            self.world.contracts.insert(id.0.0);
         }
         Ok(())
     }
@@ -446,7 +519,18 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         answers: Vec::new(),
     };
     let prefix = if spec.prefix.is_empty() && spec.setup {
-        setup(&mut rng)
+        let mut steps = setup(&mut rng);
+        if spec.contracts {
+            // the newest build of each test contract this protocol runs, one instance each
+            let wasms = crate::contract::for_protocol(env.contracts, spec.protocol);
+            let mut probe = World::new(&spec.id, Network::Testnet.passphrase(), spec.protocol);
+            for r in funded_roles(&steps) {
+                probe.add_role(&r);
+            }
+            let mut f = crate::fill::Filler::new(env.schema, &probe, &mut rng, RICH_ROLES[0]);
+            steps.extend(crate::contract::setup_steps(&wasms, &mut f, RICH_ROLES[0]));
+        }
+        steps
     } else {
         spec.prefix.clone()
     };
@@ -487,6 +571,22 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                     live.world.protocol = v;
                 }
                 continue;
+            }
+            if spec.contracts {
+                let (deployed, names) = live.contract_names(env);
+                let pick = rng.below(20);
+                let step = match pick {
+                    0..=6 if !deployed.is_empty() => {
+                        action::invoke(env.schema, &live.world, &mut rng, &deployed, &names)
+                    }
+                    7 | 8 => Some(action::host_function(env.schema, &live.world, &mut rng, &names)),
+                    9 | 10 => action::footprint(&live.world, &mut rng),
+                    _ => None,
+                };
+                if let Some(step) = step {
+                    live.transaction(step)?;
+                    continue;
+                }
             }
             let (s, arms) =
                 action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);

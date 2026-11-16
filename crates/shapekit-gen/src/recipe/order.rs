@@ -38,12 +38,12 @@ fn full_hash(env: &TransactionEnvelope) -> Result<[u8; 32]> {
 
 /// The base fee of the classic component and the Soroban phase of a ledger
 /// that held classic transactions only, to build the next set from.
-struct Template {
+pub(crate) struct Template {
     base_fee: Option<i64>,
     soroban_phase: TransactionPhase,
 }
 
-fn template(lcm: &LedgerCloseMeta) -> Result<Template> {
+pub(crate) fn template(lcm: &LedgerCloseMeta) -> Result<Template> {
     let LedgerCloseMeta::V2(m) = lcm else {
         bail!("ordering needs a v2 ledger close meta");
     };
@@ -75,7 +75,7 @@ fn template(lcm: &LedgerCloseMeta) -> Result<Template> {
 
 /// The set core builds from `envs` on top of `previous`, and the indices of
 /// `envs` in the order core applies them.
-fn predict(
+pub(crate) fn predict(
     previous: &Hash,
     t: &Template,
     envs: &[TransactionEnvelope],

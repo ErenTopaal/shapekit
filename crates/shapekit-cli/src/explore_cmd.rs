@@ -145,6 +145,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 .collect();
             let schema = Schema::pinned();
             let root = std::env::current_dir().context("reading the working directory")?;
+            let wasms = shapekit_explore::contract::load_all(&root)?;
             let work = scratch()?;
             let seen = Seen::default();
             let env = Env {
@@ -156,6 +157,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 reachable: &reachable,
                 work: &work,
                 seen: &seen,
+                contracts: &wasms,
             };
             let opts = Options {
                 budget: Duration::from_secs(budget * 60),
@@ -353,6 +355,7 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
     let image = CoreImage::from_pins(pins)
         .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
     let root = std::env::current_dir()?;
+    let wasms = shapekit_explore::contract::load_all(&root)?;
     let mut irs = Vec::new();
     let mut files: Vec<PathBuf> = std::fs::read_dir(recipes)
         .with_context(|| format!("reading {}", recipes.display()))?
@@ -387,6 +390,7 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
         reachable: &reachable,
         work: &work,
         seen: &seenf,
+        contracts: &wasms,
     };
     std::fs::create_dir_all(out.join("pairs"))?;
     let next = std::sync::atomic::AtomicUsize::new(0);
@@ -552,6 +556,7 @@ fn gates_cmd(
     let schema = Schema::pinned();
     let reachable = arms::reachable()?;
     let root = std::env::current_dir()?;
+    let wasms = shapekit_explore::contract::load_all(&root)?;
     let work = scratch()?;
     let seen = Seen::default();
     let env = Env {
@@ -563,6 +568,7 @@ fn gates_cmd(
         reachable: &reachable,
         work: &work,
         seen: &seen,
+        contracts: &wasms,
     };
     let next = std::sync::atomic::AtomicUsize::new(0);
     let failures = std::sync::Mutex::new(Vec::new());

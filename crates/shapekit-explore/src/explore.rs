@@ -77,6 +77,7 @@ pub struct Report {
     pub left_out: usize,
     pub coverage_seconds: f64,
     pub refusals: BTreeMap<String, usize>,
+    pub fill_errors: BTreeMap<String, usize>,
     pub signature_paths: usize,
     pub core_regions: usize,
     pub targets: usize,
@@ -89,6 +90,9 @@ pub struct Report {
 }
 
 pub const RECIPES: &str = "recipes";
+
+/// Seeds longer than this are not extended.
+const MAX_SEED_STEPS: usize = 160;
 pub const REPORT: &str = "report.json";
 
 fn write_recipe(dir: &Path, name: &str, ir: &RecipeIr) -> Result<()> {
@@ -119,8 +123,14 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
     let (mut spec, mut menu) = {
         let g = state.lock().expect("no worker panics holding the lock");
         let menu = g.menu.clone();
-        let spec = if !g.seeds.is_empty() && rng.chance(2, 5) {
-            let s = &g.seeds[rng.below(g.seeds.len())];
+        // seeds short enough to replay cheaply; longer ones still count as witnesses
+        let seeds: Vec<&Seed> = g
+            .seeds
+            .iter()
+            .filter(|s| s.ir.steps.len() <= MAX_SEED_STEPS)
+            .collect();
+        let spec = if !seeds.is_empty() && rng.chance(1, 2) {
+            let s = seeds[rng.below(seeds.len())];
             Spec {
                 id: s.ir.id.clone(),
                 protocol: s.ir.protocol,
@@ -142,7 +152,11 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                 node: NodeOptions {
                     emit_classic_events: events,
                     backfill_stellar_asset_events: events,
-                    ..NodeOptions::default()
+                    // testnet's settings only validate at protocol 30
+                    soroban_settings: opts.contracts && protocol == 30 && rng.chance(1, 2),
+                    soroban_limits: opts.contracts,
+                    // a short persistent lifetime lets entries archive within an episode
+                    min_persistent_ttl: (opts.contracts && rng.chance(1, 3)).then_some(10),
                 },
                 prefix: Vec::new(),
                 actions: opts.actions,
@@ -173,7 +187,8 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
     let mut kept: Episode = ep;
     if !new_arms.is_empty() {
         let steps = episode::shrunk_steps(&kept);
-        if steps.len() < kept.ir.steps.len() {
+        // a replay costs a whole chain, so only a shrink that drops a quarter is tried
+        if steps.len() * 4 <= kept.ir.steps.len() * 3 {
             spec.prefix = steps;
             spec.actions = 0;
             let mut scratch = OpMenu {
@@ -309,6 +324,7 @@ pub fn run(env: &Env<'_>, opts: &Options) -> Result<Report> {
         left_out: g.stats.left_out,
         coverage_seconds: g.stats.coverage_seconds,
         refusals: g.stats.refusals.clone(),
+        fill_errors: g.stats.fill_errors.clone(),
         signature_paths: paths,
         core_regions: regions,
         targets: opts.targets.len(),

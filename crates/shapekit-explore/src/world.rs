@@ -21,6 +21,9 @@ use stellar_xdr::{
 pub const CODES4: &[&str] = &["USD", "EUR"];
 pub const CODES12: &[&str] = &["LONGASSET12"];
 
+/// Amounts kept for the filler to reuse.
+const MAX_AMOUNTS: usize = 64;
+
 /// Core's only liquidity pool fee (`LIQUIDITY_POOL_FEE_V18`, 30 basis points).
 pub const POOL_FEE: i32 = 30;
 
@@ -72,8 +75,16 @@ pub struct World {
     pub balances: BTreeSet<String>,
     /// Live liquidity pools by hex id, with their two assets as XDR-JSON.
     pub pools: BTreeMap<String, (Value, Value)>,
+    /// Amounts the ledgers hold (balances, limits, offer and claimable balance amounts, pool
+    /// reserves), the latest last.
+    pub amounts: Vec<i64>,
     /// Credit assets some account holds a trustline to.
     pub trusted: BTreeSet<AssetRef>,
+    /// Contract strkey to the deploy label that created it.
+    pub contract_labels: BTreeMap<String, String>,
+    /// Live Soroban ledger entries' keys (contract data and code), XDR-JSON in recipe form;
+    /// only keys whose contracts a deploy label names.
+    pub soroban_keys: BTreeMap<String, Value>,
     /// Contracts the chain holds an instance of.
     pub contracts: BTreeSet<[u8; 32]>,
     /// Live classic ledger entries' keys, XDR-JSON in recipe form.
@@ -101,7 +112,10 @@ impl World {
             offers: BTreeSet::new(),
             balances: BTreeSet::new(),
             pools: BTreeMap::new(),
+            amounts: Vec::new(),
             trusted: BTreeSet::new(),
+            contract_labels: BTreeMap::new(),
+            soroban_keys: BTreeMap::new(),
             contracts: BTreeSet::new(),
             keys: BTreeMap::new(),
             last_closed: 0,
@@ -193,6 +207,9 @@ impl World {
         match value {
             Value::String(s) => match self.roles_by_strkey.get(&s) {
                 Some(role) => Value::String(format!("@account:{role}")),
+                None if self.contract_labels.contains_key(&s) => {
+                    Value::String(format!("@contract:{}", self.contract_labels[&s]))
+                }
                 None if s.starts_with('@') => Value::String(format!("@{s}")),
                 None => Value::String(s),
             },
@@ -208,19 +225,51 @@ impl World {
         }
     }
 
+    fn note_amounts(&mut self, data: &LedgerEntryData) {
+        let found: Vec<i64> = match data {
+            LedgerEntryData::Account(a) => vec![a.balance],
+            LedgerEntryData::Trustline(t) => vec![t.balance, t.limit],
+            LedgerEntryData::Offer(o) => vec![o.amount],
+            LedgerEntryData::ClaimableBalance(b) => vec![b.amount],
+            LedgerEntryData::LiquidityPool(p) => {
+                let LiquidityPoolEntryBody::LiquidityPoolConstantProduct(cp) = &p.body;
+                vec![cp.reserve_a, cp.reserve_b, cp.total_pool_shares]
+            }
+            _ => Vec::new(),
+        };
+        for v in found {
+            self.amounts.retain(|x| *x != v);
+            self.amounts.push(v);
+        }
+        if self.amounts.len() > MAX_AMOUNTS {
+            let extra = self.amounts.len() - MAX_AMOUNTS;
+            self.amounts.drain(..extra);
+        }
+    }
+
     /// Takes in what a closed ledger changed.
     pub fn observe(&mut self, lcm: &LedgerCloseMeta, seq: u32) -> Result<()> {
         self.last_closed = seq;
         for list in change_lists(lcm) {
             for c in list.iter() {
                 let key = change_key(c);
-                if matches!(
-                    key,
-                    LedgerKey::ContractData(_)
-                        | LedgerKey::ContractCode(_)
-                        | LedgerKey::Ttl(_)
-                        | LedgerKey::ConfigSetting(_)
-                ) {
+                if matches!(key, LedgerKey::Ttl(_) | LedgerKey::ConfigSetting(_)) {
+                    continue;
+                }
+                if matches!(key, LedgerKey::ContractData(_) | LedgerKey::ContractCode(_)) {
+                    let json = self.recipe_form(serde_json::to_value(&key)?);
+                    let text = serde_json::to_string(&json)?;
+                    match c {
+                        LedgerEntryChange::Removed(_) => {
+                            self.soroban_keys.remove(&text);
+                        }
+                        // a contract no deploy label names would make the key passphrase
+                        // dependent
+                        _ if !names_raw_contract(&json) => {
+                            self.soroban_keys.insert(text, json);
+                        }
+                        _ => {}
+                    }
                     continue;
                 }
                 let key_json = self.recipe_form(serde_json::to_value(&key)?);
@@ -260,6 +309,7 @@ impl World {
                     | LedgerEntryChange::Updated(e)
                     | LedgerEntryChange::Restored(e) => {
                         self.keys.insert(key_text, key_json);
+                        self.note_amounts(&e.data);
                         match &e.data {
                             LedgerEntryData::Trustline(t) => {
                                 let asset = self.recipe_form(serde_json::to_value(&t.asset)?);
@@ -293,6 +343,16 @@ impl World {
             }
         }
         Ok(())
+    }
+}
+
+/// Whether a value in recipe form still holds a contract strkey.
+fn names_raw_contract(v: &Value) -> bool {
+    match v {
+        Value::String(s) => s.len() == 56 && s.starts_with('C'),
+        Value::Array(a) => a.iter().any(names_raw_contract),
+        Value::Object(m) => m.values().any(names_raw_contract),
+        _ => false,
     }
 }
 

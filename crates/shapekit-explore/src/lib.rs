@@ -6,6 +6,7 @@
 
 pub mod action;
 pub mod arms;
+pub mod contract;
 pub mod coverage;
 pub mod episode;
 pub mod explore;
@@ -14,5 +15,6 @@ pub mod fill;
 pub mod gates;
 pub mod pairs;
 pub mod rng;
+pub mod spec;
 pub mod verify;
 pub mod world;
