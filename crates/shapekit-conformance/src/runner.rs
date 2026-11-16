@@ -695,6 +695,10 @@ pub struct CoverageRecord {
     pub tool: String,
     pub processes: u32,
     pub ranges: Vec<String>,
+    /// Ranges the tool reports as never run, for a tool that leaves some ranges out of both
+    /// lists (see `coverage_snapshot` in docs/testee-protocol.md).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uncovered: Option<Vec<String>>,
 }
 
 fn write_coverage(dir: &Path, testees: &mut [Testee]) -> Result<()> {
@@ -716,12 +720,20 @@ fn write_coverage(dir: &Path, testees: &mut [Testee]) -> Result<()> {
             .to_string();
         let ranges: Vec<String> = serde_json::from_value(result["ranges"].clone())
             .with_context(|| format!("{key}: coverage_snapshot ranges"))?;
+        let uncovered: Option<Vec<String>> = match result.get("uncovered") {
+            None => None,
+            Some(v) => Some(
+                serde_json::from_value(v.clone())
+                    .with_context(|| format!("{key}: coverage_snapshot uncovered"))?,
+            ),
+        };
         out.insert(
             key,
             CoverageRecord {
                 tool,
                 processes: t.starts,
                 ranges,
+                uncovered,
             },
         );
     }

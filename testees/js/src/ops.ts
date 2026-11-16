@@ -154,7 +154,7 @@ export class Ops {
         if (!this.coverage) {
           throw new Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1");
         }
-        return { tool: `v8 ${process.versions.v8} precise block coverage`, ranges: this.coverage.snapshot() };
+        return { tool: `v8 ${process.versions.v8} precise block coverage`, ...this.coverage.snapshot() };
       default:
         throw new BadRequest(`unknown op ${req.op}`);
     }

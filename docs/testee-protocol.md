@@ -338,7 +338,13 @@ build or mode does:
 | Go | built with `-cover -covermode=atomic -coverpkg=github.com/stellar/go-stellar-sdk/...,.`; `runtime/coverage` writes the counters on request and `go tool covdata textfmt` reads them | a statement block of a go-stellar-sdk file, `<package path>/<file>:<line>.<col>,<line>.<col>` |
 | JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
 
-Result: `tool` (what measured it), `ranges` (sorted strings, each range once). Range strings are
+Result: `tool` (what measured it), `ranges` (sorted strings, each range once), and for the
+JavaScript testee `uncovered` (the ranges V8 reports with a count of 0, in the same form). V8
+lists a nested block only while its count differs from the count of the block around it, so a
+block can be missing from both lists: it then ran exactly as often as its parent. To decide
+whether a range ran, look it up in `ranges`, then in `uncovered`, and otherwise take the
+answer of the smallest listed range that contains it. Rust regions and Go blocks are a fixed
+set, so those testees send no `uncovered`. Range strings are
 only compared within one SDK version and one tool: the union over runs, or the ranges one
 run adds, is what is meaningful. Counters live in the process, so what a testee covered before
 the runner restarted it is not in a later snapshot.

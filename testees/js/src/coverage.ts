@@ -56,20 +56,24 @@ export class Coverage {
     return new Coverage(this.session, packageDir);
   }
 
-  // every block of the package that ran at least once since the process started, as
-  // <path inside the package>:<start offset>-<end offset>
-  snapshot(): string[] {
+  // the blocks of the package as <path inside the package>:<start offset>-<end offset>: those
+  // that ran at least once since the process started, and those v8 reports with a count of 0.
+  // v8 lists a nested block only while its count differs from its parent's, so a block missing
+  // from both lists ran exactly as often as the block around it; the uncovered list is what
+  // lets a comparison tell such a block from one that never ran
+  snapshot(): { ranges: string[]; uncovered: string[] } {
     const taken = this.post("Profiler.takePreciseCoverage") as { result: ScriptCoverage[] };
-    const out = new Set<string>();
+    const ran = new Set<string>();
+    const never = new Set<string>();
     for (const script of taken.result) {
       if (!script.url.startsWith(this.prefix)) continue;
       const path = script.url.slice(this.prefix.length);
       for (const fn of script.functions) {
         for (const r of fn.ranges) {
-          if (r.count > 0) out.add(`${path}:${r.startOffset}-${r.endOffset}`);
+          (r.count > 0 ? ran : never).add(`${path}:${r.startOffset}-${r.endOffset}`);
         }
       }
     }
-    return [...out].sort();
+    return { ranges: [...ran].sort(), uncovered: [...never].sort() };
   }
 }
