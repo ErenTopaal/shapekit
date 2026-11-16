@@ -134,10 +134,16 @@ pub fn check(ctx: &Context) -> Result<Report> {
     let ws = work.join("ws");
     write_workspace(ctx, &ws)?;
     let target_dir = work.join("target");
-    let cargo_env = vec![(
-        "CARGO_TARGET_DIR".to_string(),
-        target_dir.display().to_string(),
-    )];
+    // no debug info: a debug build of the crate with every feature on is large, and each
+    // mutant rebuilds it
+    let cargo_env = vec![
+        (
+            "CARGO_TARGET_DIR".to_string(),
+            target_dir.display().to_string(),
+        ),
+        ("CARGO_PROFILE_DEV_DEBUG".to_string(), "0".to_string()),
+        ("CARGO_PROFILE_TEST_DEBUG".to_string(), "0".to_string()),
+    ];
 
     run(
         &[
@@ -218,6 +224,10 @@ pub fn check(ctx: &Context) -> Result<Report> {
             "--all-features".to_string(),
             "--re".to_string(),
             format!("^{}$", regex_escape(&m.name)),
+            // cargo-mutants 27.1.0 adds struct literal field mutants without applying --re,
+            // so the run is also kept to the sampled mutant's file
+            "--file".to_string(),
+            m.file.clone(),
             "--timeout".to_string(),
             "900".to_string(),
             "--build-timeout".to_string(),
@@ -245,11 +255,17 @@ pub fn check(ctx: &Context) -> Result<Report> {
         let mine: Vec<&Outcome> = outcomes
             .outcomes
             .iter()
-            .filter(|o| o.scenario.get("Mutant").is_some())
+            .filter(|o| {
+                o.scenario
+                    .get("Mutant")
+                    .and_then(|x| x.get("name"))
+                    .and_then(serde_json::Value::as_str)
+                    == Some(m.name.as_str())
+            })
             .collect();
         ensure!(
             mine.len() == 1,
-            "cargo-mutants ran {} mutants for {}",
+            "cargo-mutants reports {} outcomes for {}",
             mine.len(),
             m.name
         );
