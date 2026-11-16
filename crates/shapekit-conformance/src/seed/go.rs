@@ -152,11 +152,13 @@ pub fn exec(paths: &Paths, setup_file: &Path) -> Result<i32> {
     // after this command and only needs it to exist, so the copy is emptied now that its bytes
     // are in memory
     std::fs::write(&changed, b"").with_context(|| format!("emptying {}", changed.display()))?;
+    // go-mutesting names files as it was given them, ./xdr/asset.go
     let rel = original
         .strip_prefix(&setup.sdk_dir)
         .unwrap_or(&original)
         .display()
         .to_string();
+    let rel = rel.strip_prefix("./").unwrap_or(&rel).to_string();
 
     if setup.sampled.is_empty() {
         let (line, change) = describe(&orig_text, &String::from_utf8_lossy(&changed_bytes));
