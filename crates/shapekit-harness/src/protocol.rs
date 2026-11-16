@@ -86,6 +86,10 @@ pub enum DeliveryMode {
     /// The SEP-54 lake read from an S3-compatible object store the adapter runs.
     #[serde(rename = "sep54-s3")]
     Sep54S3,
+    /// The SEP-54 lake read from a Google Cloud Storage compatible store the adapter runs
+    /// (version 2).
+    #[serde(rename = "sep54-gcs")]
+    Sep54Gcs,
     /// `getLedgers` and the other read methods of the replay server's JSON-RPC endpoint.
     #[serde(rename = "rpc")]
     Rpc,
@@ -96,6 +100,7 @@ impl DeliveryMode {
         match self {
             DeliveryMode::Sep54Filesystem => "sep54-filesystem",
             DeliveryMode::Sep54S3 => "sep54-s3",
+            DeliveryMode::Sep54Gcs => "sep54-gcs",
             DeliveryMode::Rpc => "rpc",
         }
     }
@@ -104,6 +109,7 @@ impl DeliveryMode {
         [
             DeliveryMode::Sep54Filesystem,
             DeliveryMode::Sep54S3,
+            DeliveryMode::Sep54Gcs,
             DeliveryMode::Rpc,
         ]
         .into_iter()

@@ -118,6 +118,23 @@ tag = "noble"
 digest = "sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8"
 purpose = "base of the coverage twin build (twin/Dockerfile), the distribution core's own build images use"
 
+# base images of stellar-etl's own docker/Dockerfile at the pinned tag. the adapter builds each
+# FROM on these digests through buildx named contexts (adapters/stellaretl/build.go, BaseImages)
+
+[[image]]
+name = "stellar-etl-golang"
+repository = "library/golang"
+tag = "1.27.3"
+digest = "sha256:e519d3b0a5b285e5aa53ab9eef02bc6bbb9cb04608389b743a136a9ce75f0d1e"
+purpose = "build stage of stellar-etl's Dockerfile at the pinned tag"
+
+[[image]]
+name = "stellar-etl-ubuntu"
+repository = "library/ubuntu"
+tag = "24.04"
+digest = "sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8"
+purpose = "runtime stage of stellar-etl's Dockerfile at the pinned tag"
+
 # stellar repositories
 
 [[git]]

@@ -53,7 +53,7 @@ pub struct Common {
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
     /// Delivery mode to ask the adapter for; its default when absent.
-    #[arg(long, value_parser = ["sep54-filesystem", "sep54-s3", "rpc"])]
+    #[arg(long, value_parser = ["sep54-filesystem", "sep54-s3", "sep54-gcs", "rpc"])]
     delivery: Option<String>,
     /// Memory limit the adapter applies to the target, in bytes.
     #[arg(long, default_value_t = 4 * 1024 * 1024 * 1024)]

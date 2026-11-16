@@ -32,6 +32,7 @@ const (
 const (
 	DeliverySep54Filesystem = "sep54-filesystem"
 	DeliverySep54S3         = "sep54-s3"
+	DeliverySep54GCS        = "sep54-gcs"
 	DeliveryRPC             = "rpc"
 )
 
