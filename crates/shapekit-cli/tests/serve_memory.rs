@@ -271,14 +271,19 @@ fn check(samples: &[Sample], i: &Inputs) -> Result<(), String> {
 }
 
 /// Live bytes once nothing allocates or frees any more: the server's request threads can
-/// still be dropping a response or building the ledger state for the new head after the
-/// client has its answer, so a round's end is read only when the count has stayed the same
-/// for 100 ms (at most 10 s).
+/// still be dropping a response or closing the round's connection after the client has its
+/// answer, so a round's end is read only when the count has stayed the same for 100 ms. A
+/// count that does not settle within 10 s fails the test: a reading taken while something
+/// still runs would measure that work, not what the server keeps.
 fn settled() -> usize {
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
     let mut last = LIVE.load(Ordering::Relaxed);
     let mut same = 0;
-    while same < 10 && std::time::Instant::now() < deadline {
+    while same < 10 {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "live bytes did not stay the same for 100 ms within 10 s (last {last}); something in the process keeps allocating"
+        );
         std::thread::sleep(std::time::Duration::from_millis(10));
         let now = LIVE.load(Ordering::Relaxed);
         if now == last {
