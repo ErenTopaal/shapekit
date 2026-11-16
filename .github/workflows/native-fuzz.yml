@@ -1,0 +1,72 @@
+name: native-fuzz
+
+# each sdk's own coverage-guided fuzzer on its decoder for ten minutes, checked by the encoding
+# laws (shapekit native-fuzz): cargo-fuzz on stellar-xdr, go test -fuzz on go-stellar-sdk,
+# jazzer.js on @stellar/stellar-sdk. classes in conformance/native-fuzz/known-classes.txt are
+# skipped; a new class is written to the candidate lane, listed in the job summary and uploaded,
+# and does not turn the run red, since it is a finding to triage.
+
+on:
+  schedule:
+    - cron: "30 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-fuzz
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [rust, go, js]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+      - name: build shapekit
+        run: cargo build --release --locked -p shapekit-cli
+      - name: fuzz
+        run: |
+          set -euo pipefail
+          target/release/shapekit native-fuzz --target "${{ matrix.target }}" --seconds 600 \
+            --out "native-fuzz-out/${{ matrix.target }}"
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          report="native-fuzz-out/${{ matrix.target }}/report.json"
+          if [ -f "$report" ]; then
+            {
+              echo "### native fuzz: ${{ matrix.target }}"
+              echo
+              echo '```json'
+              cat "$report"
+              echo '```'
+            } >>"$GITHUB_STEP_SUMMARY"
+          fi
+          git status --short candidate/ >>"$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: native-fuzz-${{ matrix.target }}
+          path: |
+            native-fuzz-out/
+            candidate/
+          retention-days: 30

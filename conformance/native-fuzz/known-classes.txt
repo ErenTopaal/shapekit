@@ -1,0 +1,14 @@
+# native fuzz classes that are triaged already (shapekit native-fuzz). a listed class is
+# skipped from the start of a run, so the run looks for others.
+# format: <target> <class> <issue or reason>
+#
+# stellar-xdr reads a bool word other than 0 or 1 and writes it back as 0 (go-stellar-sdk
+# refuses it); one root cause, one class per fuzzed type that carries a bool. corpus entry:
+# soroban.scval-shapes.synth-bool-value-2
+rust ScVal:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust TransactionEnvelope:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust LedgerCloseMeta:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust ContractEvent:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust SorobanAuthorizationEntry:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust TransactionResultMeta:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629
+rust TransactionResultMetaV1:roundtrip:x->0 https://github.com/stellar/rs-stellar-xdr/issues/629

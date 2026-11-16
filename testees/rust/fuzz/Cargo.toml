@@ -1,0 +1,28 @@
+# the coverage-guided target for stellar-xdr, run by cargo-fuzz (`shapekit fuzz native --target
+# rust`). it builds on the pinned stable toolchain with `-s none`; not a member of the root
+# workspace.
+[package]
+name = "shapekit-native-fuzz-rust"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99.1"
+license = "Apache-2.0"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+shapekit-laws = { path = "../../../crates/shapekit-laws" }
+shapekit-manifest = { path = "../../../crates/shapekit-manifest" }
+stellar-xdr = { version = "=30.0.0", default-features = false, features = ["std"] }
+
+[[bin]]
+name = "xdr_laws"
+path = "fuzz_targets/xdr_laws.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

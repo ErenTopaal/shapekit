@@ -11,6 +11,7 @@
 
 pub mod minimize;
 pub mod mutate;
+pub mod native;
 pub mod oracle;
 pub mod report;
 pub mod types;
@@ -611,7 +612,7 @@ pub fn class_id(ty: FuzzType, kind: Kind, signature: &str) -> String {
     format!("fuzz.{}-{}-{}", kebab(ty.name()), kind.slug(), &h[..8])
 }
 
-fn kebab(name: &str) -> String {
+pub(crate) fn kebab(name: &str) -> String {
     let mut out = String::new();
     let chars: Vec<char> = name.chars().collect();
     for (i, c) in chars.iter().enumerate() {

@@ -14,6 +14,7 @@ mod guide_cmd;
 mod harness_cmd;
 mod laws_cmd;
 mod manifest_cmd;
+mod native_fuzz_cmd;
 mod oracle_cmd;
 mod pack_cmd;
 mod pins;
@@ -125,6 +126,8 @@ enum Command {
     /// Differential decode and re-encode fuzzing, stellar-xdr in process against the go
     /// testee, seeded from the corpus.
     Fuzz(fuzz_cmd::FuzzArgs),
+    /// Each sdk's own coverage-guided fuzzer on its decoder, checked by the encoding laws.
+    NativeFuzz(native_fuzz_cmd::NativeFuzzArgs),
     /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
     Coverage(coverage_cmd::CoverageArgs),
     /// The static site in site/: its JSON data, derived from committed files only.
@@ -638,6 +641,7 @@ fn main() -> ExitCode {
         Command::Harness { command } => harness_cmd::run(command),
         Command::Findings { command } => findings_cmd::run(command),
         Command::Fuzz(args) => fuzz_cmd::run(args),
+        Command::NativeFuzz(args) => native_fuzz_cmd::run(args),
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
         Command::Contracts { command } => contracts_cmd::run(command),
