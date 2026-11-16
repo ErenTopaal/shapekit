@@ -3,7 +3,6 @@
 //! testnet's Soroban settings and the repository's test contracts.
 
 use std::path::Path;
-use std::process::Command;
 
 use anyhow::{Context, Result, bail, ensure};
 use ed25519_dalek::SigningKey;
@@ -34,11 +33,6 @@ const BANK_BALANCE: i64 = 1_000_000_000_000_000;
 
 /// Starting balance of every attempt account, 1,000 XLM.
 pub const BALANCE: i64 = 10_000_000_000;
-
-/// Memory and cpu limits applied to the node container, the brief's limits for a container
-/// that is not a heavy build. The driver starts the container without limits.
-const NODE_MEMORY: &str = "2g";
-const NODE_CPUS: &str = "2";
 
 /// The accounts of one attempt: the transaction's source and three helpers, all funded.
 pub struct Subject {
@@ -141,29 +135,6 @@ pub struct World {
     pub contracts: Option<Contracts>,
 }
 
-/// Puts the brief's container limits on the node.
-fn limit_container(name: &str) -> Result<()> {
-    let out = Command::new("docker")
-        .args([
-            "update",
-            "--memory",
-            NODE_MEMORY,
-            "--memory-swap",
-            NODE_MEMORY,
-            "--cpus",
-            NODE_CPUS,
-            name,
-        ])
-        .output()
-        .context("running docker update")?;
-    ensure!(
-        out.status.success(),
-        "docker update {name} failed: {}",
-        String::from_utf8_lossy(&out.stderr)
-    );
-    Ok(())
-}
-
 impl World {
     /// Boots core for `kind` and funds the banks and the issuer; a Soroban world also gets
     /// testnet's settings and the test contracts.
@@ -176,7 +147,6 @@ impl World {
         let protocol = cfg.protocol;
         let root = root_key(&cfg.passphrase);
         let driver = ChainDriver::start(cfg, workdir).context("starting core")?;
-        limit_container(driver.node().container())?;
         let banks: Vec<SigningKey> = (0..BANKS)
             .map(|i| derive_key(KEY_DOMAIN, &format!("bank-{i}")))
             .collect();
