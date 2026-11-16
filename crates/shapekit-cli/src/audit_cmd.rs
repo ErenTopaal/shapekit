@@ -107,10 +107,12 @@ pub enum AuditCommand {
         #[arg(long)]
         cursor: PathBuf,
         /// Where to start when the cursor file does not exist: a ledger number, or `newest`
-        /// for the newest ledger in the lake.
+        /// for the newest ledger in the lake. Without it a missing cursor is an error, so a
+        /// lost cursor never skips ledgers silently.
         #[arg(long)]
         start: Option<String>,
-        /// Check at most this many ledgers; the rest is left for the next run.
+        /// Check at most this many ledgers, oldest first; the rest is left for the next run, so
+        /// a cursor far behind the newest ledger catches up over several bounded runs.
         #[arg(long, default_value_t = 1000)]
         max_ledgers: u32,
         /// Where to write the audit report. Nothing is written when no ledger closed since
@@ -208,14 +210,19 @@ pub fn run(command: AuditCommand) -> Result<bool> {
             let tip = read_cursor(&cursor, network)?;
             let newest = l.newest()?;
             let start = match (&tip, start.as_deref()) {
-                (Some(_), _) => None,
+                (Some(t), Some(s)) => bail!(
+                    "{} holds a cursor at ledger {}; --start {s} would move it, so remove one of the two",
+                    cursor.display(),
+                    t.ledger
+                ),
+                (Some(_), None) => None,
                 (None, Some("newest")) => Some(newest),
                 (None, Some(s)) => Some(
                     s.parse::<u32>()
                         .with_context(|| format!("--start {s} is neither a ledger nor newest"))?,
                 ),
                 (None, None) => bail!(
-                    "{} does not exist; give --start for the first run",
+                    "{} does not exist. The sentinel does not guess where it stopped: restore the cursor, or give --start with the first ledger to check (--start newest skips everything before the newest ledger)",
                     cursor.display()
                 ),
             };
@@ -244,9 +251,17 @@ pub fn run(command: AuditCommand) -> Result<bool> {
                     l.location()
                 ),
             }
+            // ledgers that closed after the cursor and before this run's own share: a backlog
+            // left by runs that did not happen or did not finish, filled oldest first
+            let behind = newest - window.first + 1;
             let audit = shapekit_sentinel::watch(&l, tip, window, lake.jobs)?;
             let held = finish(&audit, &l, None, &out, started)?;
             let last = audit.tip().context("the window checked no ledger")?.clone();
+            let left = newest - last.ledger;
+            println!(
+                "backlog: {behind} ledgers were behind the newest ({newest}); this run checked {}, {left} are left for the next run",
+                audit.ledgers().len()
+            );
             write_atomic(
                 &cursor,
                 &serde_json::to_vec_pretty(&Cursor {

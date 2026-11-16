@@ -1,14 +1,24 @@
 name: sentinel
 
 # every ledger that closes on pubnet and testnet goes through the law book, read from the
-# public SEP-54 data lake. each run continues from the cursor the previous run left in the
-# actions cache, so consecutive runs neither skip nor repeat a ledger, and the header chain
-# is checked across runs. the job summary lists the exact ledger ranges each run covered.
+# public SEP-54 data lake. each run continues from the cursor the previous run stored on the
+# sentinel-state branch, so consecutive runs neither skip nor repeat a ledger, and the header
+# chain is checked across runs. a run checks at most 1,500 ledgers, oldest first: a cursor
+# left behind by runs that did not happen catches up over the following runs, and the job
+# summary says how far behind it was and how many ledgers are left. a missing cursor fails
+# the run; nothing is skipped unless a dispatch names the ledger to start at.
 
 on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      pubnet_start:
+        description: first pubnet ledger to check, only when there is no stored pubnet cursor (a number, or newest)
+        required: false
+      testnet_start:
+        description: first testnet ledger to check, only when there is no stored testnet cursor (a number, or newest)
+        required: false
 
 permissions:
   contents: read
@@ -16,6 +26,7 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: "0"
+  STATE_BRANCH: sentinel-state
 
 jobs:
   watch:
@@ -24,12 +35,15 @@ jobs:
       matrix:
         network: [pubnet, testnet]
     # one run per network at a time: two runs reading the same cursor would check the same
-    # ledgers twice and race on saving it
+    # ledgers twice and race on storing it
     concurrency:
       group: sentinel-${{ matrix.network }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      # only to push the cursor to the sentinel-state branch
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - name: restore the shapekit binary built from this source
@@ -51,40 +65,84 @@ jobs:
         with:
           path: target/release/shapekit
           key: ${{ steps.bin.outputs.cache-primary-key }}
-      - name: restore the cursor
-        id: cursor
-        uses: actions/cache/restore@v6
-        with:
-          path: sentinel/cursor.json
-          # cache entries cannot be overwritten, so every run saves under its own key and
-          # the newest entry with this prefix is restored
-          key: sentinel-cursor-${{ matrix.network }}-${{ github.run_id }}
-          restore-keys: sentinel-cursor-${{ matrix.network }}-
-      - name: check every ledger since the cursor
+      - name: read the cursor from the state branch
         env:
           NETWORK: ${{ matrix.network }}
         run: |
           set -euo pipefail
           mkdir -p sentinel
-          if [ -f sentinel/cursor.json ]; then
-            echo "cursor restored from ${{ steps.cursor.outputs.cache-matched-key }}"
-            cat sentinel/cursor.json
-            start=()
-          else
-            # no cursor: either the first run, or the cache entry expired. the summary says so,
-            # since ledgers between the lost cursor and the newest one are not checked
-            echo "::warning::no cursor for $NETWORK, starting at the newest ledger in the lake"
-            start=(--start newest)
+          # 2 means the branch does not exist yet; any other failure is an error, never a
+          # missing cursor
+          set +e
+          git ls-remote --exit-code --heads origin "$STATE_BRANCH" > /dev/null
+          rc=$?
+          set -e
+          case "$rc" in
+            0)
+              git fetch --quiet --depth 1 origin "$STATE_BRANCH"
+              if git cat-file -e "FETCH_HEAD:$NETWORK.json" 2> /dev/null; then
+                git show "FETCH_HEAD:$NETWORK.json" > sentinel/cursor.json
+                echo "cursor from $STATE_BRANCH $(git rev-parse --short FETCH_HEAD):"
+                cat sentinel/cursor.json
+              fi
+              ;;
+            2) echo "there is no $STATE_BRANCH branch yet" ;;
+            *) exit "$rc" ;;
+          esac
+      - name: check every ledger since the cursor
+        env:
+          NETWORK: ${{ matrix.network }}
+          START: ${{ matrix.network == 'pubnet' && inputs.pubnet_start || inputs.testnet_start }}
+        run: |
+          set -euo pipefail
+          start=()
+          if [ ! -f sentinel/cursor.json ]; then
+            if [ -z "${START:-}" ]; then
+              echo "::error::no $NETWORK cursor on $STATE_BRANCH. Ledgers since the last stored cursor would be skipped, so the run stops. Restore $NETWORK.json on $STATE_BRANCH, or dispatch the workflow with ${NETWORK}_start."
+              exit 1
+            fi
+            start=(--start "$START")
+          elif [ -n "${START:-}" ]; then
+            echo "::error::${NETWORK}_start was given, but $STATE_BRANCH holds a $NETWORK cursor; remove one of the two"
+            exit 1
           fi
           target/release/shapekit audit watch --network "$NETWORK" \
             --cursor sentinel/cursor.json "${start[@]}" --max-ledgers 1500 \
-            --out "sentinel/report-$NETWORK.json"
-      - name: save the cursor
+            --out "sentinel/report-$NETWORK.json" | tee sentinel/watch.log
+      - name: store the cursor on the state branch
         if: always() && hashFiles('sentinel/cursor.json') != ''
-        uses: actions/cache/save@v6
-        with:
-          path: sentinel/cursor.json
-          key: sentinel-cursor-${{ matrix.network }}-${{ github.run_id }}
+        env:
+          NETWORK: ${{ matrix.network }}
+        run: |
+          set -euo pipefail
+          state="$RUNNER_TEMP/state"
+          # the two networks write different files, so a push that loses a race is retried on
+          # top of the other one
+          for attempt in 1 2 3 4 5; do
+            git worktree remove --force "$state" 2> /dev/null || true
+            if git fetch --quiet --depth 1 origin "$STATE_BRANCH" 2> /dev/null; then
+              git worktree add --quiet --detach "$state" FETCH_HEAD
+            else
+              git worktree add --quiet --orphan -b "sentinel-state-$attempt" "$state"
+            fi
+            cp sentinel/cursor.json "$state/$NETWORK.json"
+            git -C "$state" add "$NETWORK.json"
+            if git -C "$state" diff --cached --quiet; then
+              echo "the stored cursor is already current"
+              exit 0
+            fi
+            ledger=$(sed -n 's/.*"ledger": *\([0-9]*\).*/\1/p' sentinel/cursor.json)
+            git -C "$state" -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit --quiet -m "$NETWORK cursor at ledger $ledger"
+            if git -C "$state" push --quiet origin "HEAD:refs/heads/$STATE_BRANCH"; then
+              echo "stored the $NETWORK cursor at ledger $ledger"
+              exit 0
+            fi
+            sleep $((attempt * 3))
+          done
+          echo "::error::could not store the $NETWORK cursor on $STATE_BRANCH"
+          exit 1
       - name: job summary
         if: always() && hashFiles(format('sentinel/report-{0}.json', matrix.network)) != ''
         env:
@@ -92,7 +150,11 @@ jobs:
         run: |
           set -euo pipefail
           target/release/shapekit audit summary --report "sentinel/report-$NETWORK.json" >> "$GITHUB_STEP_SUMMARY"
-          echo "cursor after this run: $(cat sentinel/cursor.json)" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo
+            grep '^backlog:' sentinel/watch.log || true
+            echo "cursor after this run: $(cat sentinel/cursor.json)"
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
