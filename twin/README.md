@@ -119,3 +119,24 @@ The scanner is a tokenizer, not a compiler. It strips comments, literals and
 preprocessor lines and follows braces to find the enclosing function. It stops
 with an error when it cannot read a function name or an argument list, rather
 than guessing.
+
+## Byte equality with the release image
+
+```sh
+shapekit twin verify --out <dir>
+```
+
+Coverage measured on the twin describes the release build only if both write
+the same ledgers. The command records the same chains under both passphrases
+on the release image (`pins.toml`) and on the twin (`twin/pins.toml`) and
+compares the SHA-256 of their canonical streams. For corpus chains it also
+compares the twin's hash with the one committed in
+`corpus/chains/<chain>/<network>/chain.json`, and for the smoke chain it checks
+the release image's testnet hash against the value measured before the twin
+existed. It exits 1 on any difference.
+
+The default chains are the smoke chain, `cap40.signed-payload-signer.p30`,
+`cap73.sac-trust.p30`, `classic.failed-tx.change-trust-native.p9` and
+`cap67.unified-events.p22`: protocols 9 to 30, classic and contract
+transactions, failed transactions and the unified events backfill. Pass
+`--chain` (repeatable) for others.
