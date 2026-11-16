@@ -96,6 +96,9 @@ fn write_workspace(ctx: &Context, ws: &Path) -> Result<()> {
         "[workspace]\nmembers = [\"stellar-xdr\", \"harness\"]\nresolver = \"2\"\n",
     )?;
     unpack_crate(&ctx.version, &ws.join(CRATE))?;
+    // the workspace lives outside the repository, so it takes the repository's toolchain along
+    std::fs::copy(root.join("rust-toolchain.toml"), ws.join("rust-toolchain.toml"))
+        .context("copying rust-toolchain.toml")?;
     let pins = root.join(format!("testees/rust/versions/{}", ctx.version));
     let manifest = std::fs::read_to_string(pins.join("Cargo.toml"))?;
     let main = root.join("testees/rust/src/main.rs");
