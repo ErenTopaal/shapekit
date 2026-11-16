@@ -121,3 +121,26 @@ pub fn check(
         problems,
     }
 }
+
+/// Records `recipe` under `network` into `target` in the corpus's committed form: the chain
+/// summary, the canonical ledgers as a SEP-54 lake and the history archive.
+pub fn record_into(
+    recipe: &IrRecipe,
+    network: Network,
+    image: &CoreImage,
+    work: &Path,
+    target: &Path,
+) -> Result<String> {
+    let dir = tempfile::Builder::new()
+        .prefix("explore-record-")
+        .tempdir_in(work)?;
+    let mut ctx = start_chain(recipe, network, image, dir.path())?;
+    if let Err(e) = recipe.run(&mut ctx) {
+        ctx.stop()?;
+        return Err(e);
+    }
+    let (summary, _) = ctx.finish(target)?;
+    shapekit_pack::pack_chain(target, shapekit_pack::Layout::default())
+        .map_err(|e| anyhow::anyhow!("packing {}: {e}", target.display()))?;
+    Ok(summary.canonical_stream_sha256)
+}

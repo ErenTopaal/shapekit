@@ -93,6 +93,16 @@ pub enum ExploreCommand {
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
     },
+    /// Record one recipe under both passphrases into a directory in the committed chain form
+    /// (`<out>/testnet`, `<out>/mainnet`).
+    Record {
+        #[arg(long)]
+        recipe: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Record every recipe of a run again under both passphrases, twice each, and check the
     /// streams repeat and the credited arms are there.
     Verify {
@@ -215,6 +225,26 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             pins,
             twin_pins,
         } => gates_cmd(&gates, &recipes, &protocol, jobs, &out, &pins, &twin_pins),
+        ExploreCommand::Record { recipe, out, pins } => {
+            if out.exists() {
+                bail!("{} already exists", out.display());
+            }
+            let image = CoreImage::from_pins(&pins)
+                .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+            let root = std::env::current_dir()?;
+            let ir = IrRecipe::load(&recipe, &root)?;
+            let work = scratch()?;
+            for n in shapekit_gen::recipe::Network::BOTH {
+                let target = out.join(n.name());
+                let hash = verify::record_into(&ir, n, &image, &work, &target)?;
+                println!(
+                    "{} ({}): canonical stream {hash}",
+                    recipe.display(),
+                    n.name()
+                );
+            }
+            Ok(true)
+        }
         ExploreCommand::Verify {
             dir,
             repeat,
