@@ -96,10 +96,16 @@ pub fn verify(opts: &VerifyOptions<'_>) -> Result<Vec<Comparison>> {
     }
     let smoke = opts.chains.iter().any(|c| c == SMOKE);
 
+    let setup = RecordSetup {
+        registry: opts.registry,
+        generated_with: opts.generated_with.clone(),
+        jobs: opts.jobs,
+        networks: Network::BOTH.to_vec(),
+    };
     let mut by_image = Vec::new();
     for (name, image) in [("release", &opts.release), ("twin", &opts.twin)] {
         let dir = opts.out.join(name);
-        by_image.push(record_all(image, &recipes, smoke, &dir, opts)?);
+        by_image.push(record_all(image, &recipes, smoke, &dir, &setup)?);
     }
     let (release, twin) = (&by_image[0], &by_image[1]);
 
@@ -144,19 +150,29 @@ fn committed_hash(path: &Path) -> Result<String> {
         .with_context(|| format!("{} has no canonical_stream_sha256", path.display()))
 }
 
-type ByChain = BTreeMap<(String, &'static str), Recorded>;
+pub type ByChain = BTreeMap<(String, &'static str), Recorded>;
 
-fn record_all(
+/// What [`record_all`] needs besides the image and chains.
+pub struct RecordSetup<'a> {
+    pub registry: &'a Registry,
+    pub generated_with: GeneratedWith,
+    pub jobs: usize,
+    pub networks: Vec<Network>,
+}
+
+/// Records the smoke chain (if asked) and `recipes` on `image` into `dir`,
+/// returning each chain's canonical hash by (chain id, network).
+pub fn record_all(
     image: &CoreImage,
     recipes: &[&dyn recipe::Recipe],
     smoke_chain: bool,
     dir: &Path,
-    opts: &VerifyOptions<'_>,
+    opts: &RecordSetup<'_>,
 ) -> Result<ByChain> {
     let mut out = ByChain::new();
     std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
     if smoke_chain {
-        for n in Network::BOTH {
+        for &n in &opts.networks {
             let target = dir.join(SMOKE).join(n.name());
             if target.exists() {
                 bail!("{} already exists", target.display());
@@ -195,7 +211,7 @@ fn record_all(
             corpus,
             registry: opts.registry,
             image: image.clone(),
-            networks: Network::BOTH.to_vec(),
+            networks: opts.networks.clone(),
             jobs: opts.jobs,
             generated_with: opts.generated_with.clone(),
         };

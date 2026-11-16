@@ -120,6 +120,33 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Record one chain on the coverage twin and read which regions of core's
+    /// transaction and ledger code it reaches: the core coverage summary
+    /// (`core-coverage.json`) and the merged profile, written into `--out`.
+    Coverage {
+        /// `smoke` or a corpus chain id.
+        #[arg(long)]
+        chain: String,
+        #[arg(long, default_value = "testnet")]
+        network: String,
+        /// Pins naming the release image; their stack is recorded with recipe chains.
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        /// Pins naming the twin image.
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        /// Print the regions overlapping these lines, `<file>:<from>-<to>` with the file
+        /// as a path in core's repository.
+        #[arg(long)]
+        show: Vec<String>,
+        /// Output directory; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Record the same chains under both passphrases on the release image and on the
     /// coverage twin and compare their canonical stream hashes; corpus chains are also
     /// compared with the hash committed in the corpus. Exits 1 on any difference.
@@ -165,6 +192,25 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::Coverage {
+            chain,
+            network,
+            pins,
+            twin_pins,
+            corpus,
+            registry,
+            show,
+            out,
+        } => coverage(CoverageArgs {
+            chain,
+            network,
+            pins,
+            twin_pins,
+            corpus,
+            registry,
+            show,
+            out,
+        }),
         TwinCommand::Verify {
             chains,
             pins,
@@ -289,5 +335,158 @@ fn gates(core_src: &Path, out: &Path, pins_path: &Path) -> Result<bool> {
             .filter(|g| g.build_tests_only && g.protocol.is_some())
             .count()
     );
+    Ok(true)
+}
+
+struct CoverageArgs {
+    chain: String,
+    network: String,
+    pins: PathBuf,
+    twin_pins: PathBuf,
+    corpus: PathBuf,
+    registry: PathBuf,
+    show: Vec<String>,
+    out: PathBuf,
+}
+
+fn parse_show(s: &str) -> Result<(String, u32, u32)> {
+    let (file, lines) = s
+        .rsplit_once(':')
+        .with_context(|| format!("--show {s:?} is not <file>:<from>-<to>"))?;
+    let (a, b) = lines
+        .split_once('-')
+        .with_context(|| format!("--show {s:?} is not <file>:<from>-<to>"))?;
+    Ok((file.to_owned(), a.parse()?, b.parse()?))
+}
+
+fn coverage(a: CoverageArgs) -> Result<bool> {
+    use shapekit_gen::recipe::{self, Network, chain_id};
+    use shapekit_twin::coverage as cov;
+    use shapekit_twin::verify::{RecordSetup, record_all};
+
+    let shows = a
+        .show
+        .iter()
+        .map(|s| parse_show(s))
+        .collect::<Result<Vec<_>>>()?;
+    let network = match a.network.as_str() {
+        "testnet" => Network::Testnet,
+        "mainnet" => Network::Mainnet,
+        other => bail!("unknown network {other:?}, expected testnet or mainnet"),
+    };
+    if a.out.exists() {
+        bail!("{} already exists", a.out.display());
+    }
+    let mut twin = CoreImage::from_pins(&a.twin_pins)
+        .with_context(|| format!("reading the twin image pin from {}", a.twin_pins.display()))?;
+    if !twin.local {
+        bail!(
+            "{} pins a registry image; the twin is a local build pinned by image_id",
+            a.twin_pins.display()
+        );
+    }
+    let profiles = a.out.join("profiles");
+    std::fs::create_dir_all(&profiles)
+        .with_context(|| format!("creating {}", profiles.display()))?;
+    let profiles = profiles.canonicalize()?;
+    twin.profile_dir = Some(profiles.clone());
+
+    let registry = Registry::load(&a.registry)
+        .with_context(|| format!("loading the registry in {}", a.registry.display()))?;
+    let setup = RecordSetup {
+        registry: &registry,
+        generated_with: manifest_cmd::generated_with(&pins::load(&a.pins)?)?,
+        jobs: 1,
+        networks: vec![network],
+    };
+    let all = recipe::all();
+    let recipes: Vec<&dyn recipe::Recipe> = if a.chain == SMOKE {
+        Vec::new()
+    } else {
+        vec![
+            all.iter()
+                .find(|r| chain_id(r.as_ref()) == a.chain)
+                .with_context(|| format!("no recipe records chain {}", a.chain))?
+                .as_ref(),
+        ]
+    };
+    let recorded = record_all(
+        &twin,
+        &recipes,
+        a.chain == SMOKE,
+        &a.out.join("chain"),
+        &setup,
+    )?;
+    let run = recorded
+        .get(&(a.chain.clone(), network.name()))
+        .with_context(|| format!("chain {} was not recorded", a.chain))?;
+    println!(
+        "{} ({}) on the twin: ledgers {} to {} in {:.1}s, canonical stream {}",
+        a.chain,
+        network.name(),
+        run.first_ledger,
+        run.last_ledger,
+        run.seconds,
+        run.canonical_stream_sha256
+    );
+    if a.chain != SMOKE {
+        let committed = a
+            .corpus
+            .join("chains")
+            .join(&a.chain)
+            .join(network.name())
+            .join("chain.json");
+        let v: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(&committed)
+                .with_context(|| format!("reading {}", committed.display()))?,
+        )?;
+        if v["canonical_stream_sha256"].as_str() != Some(run.canonical_stream_sha256.as_str()) {
+            bail!(
+                "the twin's chain differs from {} ({}); its coverage would not describe the corpus chain",
+                committed.display(),
+                v["canonical_stream_sha256"]
+            );
+        }
+        println!("equal to the committed chain");
+    }
+
+    let export = cov::merge_and_export(&twin, &profiles)?;
+    let counts = cov::read_export(&export)?;
+    // the export and the raw profiles are large and fully represented by the
+    // merged profile and the summary
+    std::fs::remove_file(&export)?;
+    for e in std::fs::read_dir(&profiles)? {
+        let e = e?;
+        if e.file_name().to_string_lossy().ends_with(".profraw") {
+            std::fs::remove_file(e.path())?;
+        }
+    }
+    let mut core = pinned_core(&a.pins)?;
+    core.image = Some(cov::image_ref(&twin));
+    let summary = cov::summary(&counts, core, vec![format!("chain:{}", a.chain)]);
+    let file = a.out.join("core-coverage.json");
+    shapekit_contracts::write(&file, &summary)?;
+    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+    println!(
+        "{} files of {}: {reached} of {} regions reached, {} unreached line ranges; written to {}",
+        summary.files.len(),
+        cov::MEASURED_DIRS.join(" and "),
+        reached + missed,
+        summary.unreached.len(),
+        file.display()
+    );
+    for (f, from, to) in &shows {
+        let spans = cov::spans_in(&counts, f, *from, *to);
+        if spans.is_empty() {
+            println!("{f}:{from}-{to}: no region");
+        }
+        for (s, c) in spans {
+            println!(
+                "{f}:{}:{}-{}:{} count {c}",
+                s.line_start, s.column_start, s.line_end, s.column_end
+            );
+        }
+    }
     Ok(true)
 }

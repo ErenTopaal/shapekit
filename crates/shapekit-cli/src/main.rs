@@ -132,7 +132,8 @@ enum Command {
         #[command(subcommand)]
         command: site_cmd::SiteCommand,
     },
-    /// The coverage twin of stellar-core: byte equality with the release image, protocol gates.
+    /// The coverage twin of stellar-core: byte equality with the release image, core coverage
+    /// of a chain, protocol gates.
     Twin {
         #[command(subcommand)]
         command: twin_cmd::TwinCommand,
