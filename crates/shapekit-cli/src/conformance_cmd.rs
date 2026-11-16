@@ -38,6 +38,13 @@ pub enum ConformanceCommand {
         /// Skip the build steps in versions.toml (the testees must already be built).
         #[arg(long)]
         no_build: bool,
+        /// Run every distinct TransactionMeta of a dataset directory (index.jsonl and meta/,
+        /// as `shapekit coretest convert` writes them) instead of the corpus manifest.
+        #[arg(long, conflicts_with_all = ["entries", "kinds", "flags", "linked_issues", "coverage"])]
+        dataset: Option<PathBuf>,
+        /// With --dataset: the candidate lane failing metas are written to.
+        #[arg(long, default_value = "candidate")]
+        candidate: PathBuf,
         /// Run the coverage builds of the testees and write what each covered to
         /// coverage.json next to the matrix.
         #[arg(long)]
@@ -235,6 +242,8 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             flags,
             linked_issues,
             no_build,
+            dataset,
+            candidate,
             coverage,
             passes,
             manifest,
@@ -242,6 +251,27 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             known_failures,
             out,
         } => {
+            if let Some(dataset) = dataset {
+                let report = shapekit_conformance::dataset::run(
+                    &shapekit_conformance::dataset::DatasetOptions {
+                        root: root.clone(),
+                        dataset,
+                        versions: versions_file,
+                        sdks,
+                        only_versions: versions,
+                        all_versions,
+                        build: !no_build,
+                        out: out.clone(),
+                        candidate: root.join(candidate),
+                    },
+                )?;
+                print!("{}", shapekit_conformance::dataset::render(&report));
+                println!(
+                    "wrote {}, DATASET.md and core-test-sections.obligations.json",
+                    out.join("dataset-report.json").display()
+                );
+                return Ok(true);
+            }
             let outcome = runner::run(&runner::RunOptions {
                 root,
                 manifest,

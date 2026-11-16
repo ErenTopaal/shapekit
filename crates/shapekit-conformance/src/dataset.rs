@@ -1,0 +1,588 @@
+//! `shapekit conformance run --dataset <dir>`: a large set of `TransactionMeta` that is not
+//! in the manifest, the converted dump of core's own transaction tests (`shapekit coretest
+//! convert`), through each sdk's `decode_encode`. The directory holds `index.jsonl` (one line
+//! per meta core wrote: test, file, section, protocol, sha256) and `meta/<first two hex>/<sha256>.xdr`
+//! (each distinct meta once).
+//!
+//! A meta passes when the sdk decodes it and writes the same bytes back. A failure on a meta
+//! whose every occurrence is from a protocol newer than the sdk version's `max_protocol` is
+//! counted apart, as the corpus runner does. A dropped meta is shrunk while the sdk still
+//! drops it the same way (operations, changes and events removed one at a time) and written to
+//! the candidate lane; every test section gets a `core-test-section` obligation.
+
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::{Path, PathBuf};
+
+use anyhow::{Context, Result, ensure};
+use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD as B64;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value, json};
+use shapekit_contracts::obligations::{
+    Obligation, ObligationKind, ObligationLedger, ObligationStatus,
+};
+use stellar_xdr::{Limits, ReadXdr, TransactionMeta, WriteXdr};
+
+use crate::compare::{self, Judged, ResultClass};
+use crate::plan::Expect;
+use crate::testee::Testee;
+use crate::versions::{self, Target, VersionsFile};
+
+const TYPE: &str = "TransactionMeta";
+// requests per dropped meta when shrinking it
+const SHRINK_BUDGET: usize = 2000;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct IndexRecord {
+    pub test: String,
+    pub file: String,
+    pub section: String,
+    pub protocol: u32,
+    pub meta_version: u32,
+    pub sha256: String,
+}
+
+pub struct Dataset {
+    pub dir: PathBuf,
+    pub records: Vec<IndexRecord>,
+    /// Distinct metas: sha256 to the indices of its records.
+    pub metas: BTreeMap<String, Vec<usize>>,
+}
+
+impl Dataset {
+    pub fn load(dir: &Path) -> Result<Dataset> {
+        let path = dir.join("index.jsonl");
+        let text =
+            std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
+        let mut records = Vec::new();
+        let mut metas: BTreeMap<String, Vec<usize>> = BTreeMap::new();
+        for (n, line) in text.lines().enumerate() {
+            if line.trim().is_empty() {
+                continue;
+            }
+            let r: IndexRecord = serde_json::from_str(line)
+                .with_context(|| format!("{}:{}", path.display(), n + 1))?;
+            ensure!(
+                r.sha256.len() == 64 && r.sha256.bytes().all(|b| b.is_ascii_hexdigit()),
+                "{}:{}: {:?} is not a sha256",
+                path.display(),
+                n + 1,
+                r.sha256
+            );
+            metas.entry(r.sha256.clone()).or_default().push(records.len());
+            records.push(r);
+        }
+        ensure!(!records.is_empty(), "{} lists no meta", path.display());
+        Ok(Dataset {
+            dir: dir.to_path_buf(),
+            records,
+            metas,
+        })
+    }
+
+    /// The bytes of a distinct meta, checked against its name.
+    pub fn bytes(&self, sha: &str) -> Result<Vec<u8>> {
+        let path = self.dir.join("meta").join(&sha[..2]).join(format!("{sha}.xdr"));
+        let b = std::fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
+        let got = shapekit_manifest::sha256_hex(&b);
+        ensure!(got == sha, "{} hashes to {got}", path.display());
+        Ok(b)
+    }
+
+    pub fn sections(&self) -> BTreeMap<(String, String), BTreeSet<String>> {
+        let mut out: BTreeMap<(String, String), BTreeSet<String>> = BTreeMap::new();
+        for r in &self.records {
+            out.entry((r.file.clone(), r.section.clone()))
+                .or_default()
+                .insert(r.sha256.clone());
+        }
+        out
+    }
+
+    /// The oldest protocol a meta was written under.
+    fn protocol(&self, sha: &str) -> u32 {
+        self.metas[sha]
+            .iter()
+            .map(|&i| self.records[i].protocol)
+            .min()
+            .unwrap_or(0)
+    }
+}
+
+fn request(bytes: &[u8]) -> Map<String, Value> {
+    let mut m = Map::new();
+    m.insert("op".into(), Value::from("decode_encode"));
+    m.insert("type".into(), Value::from(TYPE));
+    m.insert("xdr".into(), Value::from(B64.encode(bytes)));
+    m.insert(
+        "depth_limit".into(),
+        Value::from(shapekit_manifest::decode_depth(TYPE)),
+    );
+    m.insert("len_limit".into(), Value::from(bytes.len()));
+    m
+}
+
+/// What one testee made of one meta: the result class and the testee's answer in short.
+fn judge(testee: &mut Testee, bytes: &[u8]) -> Result<(ResultClass, Option<String>, Value)> {
+    let answer = testee.request(request(bytes))?;
+    match compare::judge(&Expect::Bytes(B64.encode(bytes)), &answer) {
+        Judged::Done(v) => Ok((v.result, v.detail, v.actual)),
+        Judged::Peer(_) => unreachable!("a byte expectation is never judged by peers"),
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Dropped {
+    pub sha256: String,
+    pub protocol: u32,
+    pub meta_version: u32,
+    pub sections: usize,
+    pub first_section: String,
+    pub detail: Option<String>,
+    pub bytes: usize,
+    pub shrunk_bytes: usize,
+    /// The candidate entry it was written as.
+    pub entry: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct TargetResult {
+    pub key: String,
+    pub distinct: usize,
+    /// Distinct metas by result class.
+    pub results: BTreeMap<ResultClass, usize>,
+    /// Failures on metas from protocols the version does not know.
+    pub beyond_protocol: usize,
+    pub sections_passing: usize,
+    pub dropped: Vec<Dropped>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DatasetReport {
+    pub dataset: String,
+    pub metas: usize,
+    pub distinct: usize,
+    pub sections: usize,
+    pub targets: Vec<TargetResult>,
+}
+
+pub struct DatasetOptions {
+    pub root: PathBuf,
+    pub dataset: PathBuf,
+    pub versions: PathBuf,
+    pub sdks: Vec<String>,
+    pub only_versions: Vec<String>,
+    pub all_versions: bool,
+    pub build: bool,
+    pub out: PathBuf,
+    /// The candidate lane dropped metas are written to.
+    pub candidate: PathBuf,
+}
+
+fn targets(opts: &DatasetOptions) -> Result<Vec<Target>> {
+    let file = VersionsFile::load(&opts.versions)?;
+    if opts.only_versions.is_empty() {
+        return file.select(&opts.sdks, opts.all_versions);
+    }
+    ensure!(
+        opts.sdks.len() == 1,
+        "--version needs exactly one --sdk, since versions differ per sdk"
+    );
+    opts.only_versions
+        .iter()
+        .map(|v| file.target(&opts.sdks[0], v))
+        .collect()
+}
+
+/// Shrinks a dropped meta while the testee still gives it `class` and the same answer shape:
+/// whole operations, then single changes and events, are removed while the meta still encodes.
+fn shrink(testee: &mut Testee, bytes: &[u8], class: ResultClass) -> Result<Vec<u8>> {
+    let Ok(mut meta) = TransactionMeta::from_xdr(bytes, Limits::none()) else {
+        // stellar-xdr itself cannot read it, so there is no structure to remove from
+        return Ok(bytes.to_vec());
+    };
+    let mut best = bytes.to_vec();
+    let mut calls = 0;
+    loop {
+        let mut improved = false;
+        for cand in candidates(&meta) {
+            if calls >= SHRINK_BUDGET {
+                return Ok(best);
+            }
+            let Ok(b) = cand.to_xdr(Limits::none()) else {
+                continue;
+            };
+            if b.len() >= best.len() {
+                continue;
+            }
+            calls += 1;
+            if judge(testee, &b)?.0 == class {
+                best = b;
+                meta = cand;
+                improved = true;
+                break;
+            }
+        }
+        if !improved {
+            return Ok(best);
+        }
+    }
+}
+
+macro_rules! drop_each {
+    ($out:ident, $meta:ident, $variant:ident, $field:ident) => {
+        if let TransactionMeta::$variant(m) = &$meta {
+            for i in 0..m.$field.len() {
+                let mut v = m.$field.to_vec();
+                v.remove(i);
+                if let Ok(vm) = v.try_into() {
+                    let mut c = m.clone();
+                    c.$field = vm;
+                    $out.push(TransactionMeta::$variant(c));
+                }
+            }
+        }
+    };
+}
+
+/// Every meta one element smaller: an operation, a change before or after, or an event left out.
+fn candidates(meta: &TransactionMeta) -> Vec<TransactionMeta> {
+    let mut out = Vec::new();
+    drop_each!(out, meta, V1, operations);
+    drop_each!(out, meta, V1, tx_changes);
+    drop_each!(out, meta, V2, operations);
+    drop_each!(out, meta, V2, tx_changes_before);
+    drop_each!(out, meta, V2, tx_changes_after);
+    drop_each!(out, meta, V3, operations);
+    drop_each!(out, meta, V3, tx_changes_before);
+    drop_each!(out, meta, V3, tx_changes_after);
+    drop_each!(out, meta, V4, operations);
+    drop_each!(out, meta, V4, tx_changes_before);
+    drop_each!(out, meta, V4, tx_changes_after);
+    drop_each!(out, meta, V4, events);
+    drop_each!(out, meta, V4, diagnostic_events);
+    // single changes inside each operation
+    let ops: Vec<stellar_xdr::LedgerEntryChanges> = match meta {
+        TransactionMeta::V0(o) => o.iter().map(|x| x.changes.clone()).collect(),
+        TransactionMeta::V1(m) => m.operations.iter().map(|x| x.changes.clone()).collect(),
+        TransactionMeta::V2(m) => m.operations.iter().map(|x| x.changes.clone()).collect(),
+        TransactionMeta::V3(m) => m.operations.iter().map(|x| x.changes.clone()).collect(),
+        TransactionMeta::V4(m) => m.operations.iter().map(|x| x.changes.clone()).collect(),
+    };
+    for (k, changes) in ops.iter().enumerate() {
+        for i in 0..changes.len() {
+            let mut v = changes.to_vec();
+            v.remove(i);
+            let Ok(smaller) = v.try_into() else { continue };
+            let smaller: stellar_xdr::LedgerEntryChanges = smaller;
+            let mut c = meta.clone();
+            match &mut c {
+                TransactionMeta::V0(o) => {
+                    let mut ops = o.to_vec();
+                    ops[k].changes = smaller;
+                    if let Ok(vm) = ops.try_into() {
+                        *o = vm;
+                    }
+                }
+                TransactionMeta::V1(m) => {
+                    let mut ops = m.operations.to_vec();
+                    ops[k].changes = smaller;
+                    if let Ok(vm) = ops.try_into() {
+                        m.operations = vm;
+                    }
+                }
+                TransactionMeta::V2(m) => {
+                    let mut ops = m.operations.to_vec();
+                    ops[k].changes = smaller;
+                    if let Ok(vm) = ops.try_into() {
+                        m.operations = vm;
+                    }
+                }
+                TransactionMeta::V3(m) => {
+                    let mut ops = m.operations.to_vec();
+                    ops[k].changes = smaller;
+                    if let Ok(vm) = ops.try_into() {
+                        m.operations = vm;
+                    }
+                }
+                TransactionMeta::V4(m) => {
+                    let mut ops = m.operations.to_vec();
+                    ops[k].changes = smaller;
+                    if let Ok(vm) = ops.try_into() {
+                        m.operations = vm;
+                    }
+                }
+            }
+            out.push(c);
+        }
+    }
+    out
+}
+
+pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
+    let data = Dataset::load(&opts.dataset)?;
+    let sections = data.sections();
+    let targets = targets(opts)?;
+    let mut results = Vec::new();
+    for target in &targets {
+        if opts.build {
+            eprintln!("building {}", target.key());
+            versions::build(&opts.root, target)?;
+        }
+        let mut testee = Testee::start(&opts.root, target)?;
+        let mut counts: BTreeMap<ResultClass, usize> = BTreeMap::new();
+        let mut failed: BTreeMap<String, (ResultClass, Option<String>)> = BTreeMap::new();
+        let mut beyond = 0;
+        for (i, sha) in data.metas.keys().enumerate() {
+            if i % 5000 == 0 {
+                eprintln!("{}: {i} of {} metas", target.key(), data.metas.len());
+            }
+            let bytes = data.bytes(sha)?;
+            let (class, detail, _) = judge(&mut testee, &bytes)?;
+            let newer = target
+                .max_protocol
+                .is_some_and(|max| data.protocol(sha) > max);
+            if class != ResultClass::Pass && newer {
+                beyond += 1;
+                continue;
+            }
+            *counts.entry(class).or_default() += 1;
+            if class != ResultClass::Pass {
+                failed.insert(sha.clone(), (class, detail));
+            }
+        }
+        let sections_passing = sections
+            .values()
+            .filter(|shas| shas.iter().all(|s| !failed.contains_key(s)))
+            .count();
+        let mut dropped = Vec::new();
+        for (sha, (class, detail)) in &failed {
+            let bytes = data.bytes(sha)?;
+            let small = shrink(&mut testee, &bytes, *class)?;
+            let recs: Vec<&IndexRecord> = data.metas[sha].iter().map(|&i| &data.records[i]).collect();
+            let entry = write_candidate(opts, target, sha, &small, *class, detail.as_deref(), recs[0])?;
+            dropped.push(Dropped {
+                sha256: sha.clone(),
+                protocol: data.protocol(sha),
+                meta_version: recs[0].meta_version,
+                sections: recs
+                    .iter()
+                    .map(|r| (&r.file, &r.section))
+                    .collect::<BTreeSet<_>>()
+                    .len(),
+                first_section: format!("{} | {}", recs[0].file, recs[0].section),
+                detail: detail.clone(),
+                bytes: bytes.len(),
+                shrunk_bytes: small.len(),
+                entry,
+            });
+        }
+        results.push(TargetResult {
+            key: target.key(),
+            distinct: data.metas.len(),
+            results: counts,
+            beyond_protocol: beyond,
+            sections_passing,
+            dropped,
+        });
+    }
+    let report = DatasetReport {
+        dataset: opts.dataset.display().to_string(),
+        metas: data.records.len(),
+        distinct: data.metas.len(),
+        sections: sections.len(),
+        targets: results,
+    };
+    std::fs::create_dir_all(&opts.out)?;
+    let mut text = serde_json::to_string_pretty(&report)?;
+    text.push('\n');
+    std::fs::write(opts.out.join("dataset-report.json"), text)?;
+    std::fs::write(opts.out.join("DATASET.md"), render(&report))?;
+    let ledger = obligations(&report, &sections);
+    let mut text = serde_json::to_string_pretty(&ledger)?;
+    text.push('\n');
+    std::fs::write(opts.out.join("core-test-sections.obligations.json"), text)?;
+    Ok(report)
+}
+
+/// One `core-test-section` obligation per section. A section's metas are not corpus entries,
+/// and the ledger's witnesses name corpus, candidate, chain or recipe entries only, so a
+/// section is left open with what the run showed: how many of its metas each sdk version
+/// round-trips.
+pub fn obligations(
+    report: &DatasetReport,
+    sections: &BTreeMap<(String, String), BTreeSet<String>>,
+) -> ObligationLedger {
+    let failing: Vec<(String, BTreeSet<&str>)> = report
+        .targets
+        .iter()
+        .map(|t| (t.key.clone(), t.dropped.iter().map(|d| d.sha256.as_str()).collect()))
+        .collect();
+    let mut out = Vec::new();
+    for ((file, section), shas) in sections {
+        let per: Vec<String> = failing
+            .iter()
+            .map(|(k, f)| {
+                let bad = shas.iter().filter(|s| f.contains(s.as_str())).count();
+                format!("{k} {}/{}", shas.len() - bad, shas.len())
+            })
+            .collect();
+        out.push(Obligation {
+            id: Obligation::id_for(ObligationKind::CoreTestSection, &format!("{file}|{section}")),
+            kind: ObligationKind::CoreTestSection,
+            status: ObligationStatus::Open,
+            witnesses: Vec::new(),
+            evidence: Some(format!(
+                "{} distinct metas of core's test dump; round-tripped: {}",
+                shas.len(),
+                per.join(", ")
+            )),
+        });
+    }
+    out.sort_by(|a, b| a.id.cmp(&b.id));
+    out.dedup_by(|a, b| a.id == b.id);
+    ObligationLedger {
+        schema_version: 1,
+        obligations: out,
+    }
+}
+
+fn write_candidate(
+    opts: &DatasetOptions,
+    target: &Target,
+    sha: &str,
+    bytes: &[u8],
+    class: ResultClass,
+    detail: Option<&str>,
+    first: &IndexRecord,
+) -> Result<Option<String>> {
+    let registry = shapekit_registry::Registry::load(&opts.root.join("registry"))
+        .map_err(|e| anyhow::anyhow!("loading registry/: {e}"))?;
+    let families = registry
+        .families
+        .map(|f| f.families)
+        .context("registry/families.toml is missing")?;
+    let Some(fam) = family_for(&families, bytes) else {
+        return Ok(None);
+    };
+    let small_sha = shapekit_manifest::sha256_hex(bytes);
+    let id = format!(
+        "{}.core-test-{}-{}",
+        fam.id,
+        target.sdk,
+        &small_sha[..12]
+    );
+    let dir = opts.candidate.join("entries").join(&fam.id).join(&id);
+    if dir.exists() {
+        return Ok(Some(id));
+    }
+    let notes = format!(
+        "core test meta {sha} from \"{}\", section \"{}\", protocol {}; {} {} it ({}{}), shrunk to {} bytes. the bytes are core's own output under its test network passphrase",
+        first.file,
+        first.section,
+        first.protocol,
+        target.key(),
+        if class == ResultClass::DivergesFromNetwork { "drops" } else { "fails on" },
+        class.as_str(),
+        detail.map(|d| format!(": {d}")).unwrap_or_default(),
+        bytes.len()
+    );
+    let value = json!({
+        "caps": fam.caps,
+        "expected": {"decode": "must-accept", "roundtrip": true, "validity": "valid"},
+        "family": fam.id,
+        "fields_exercised": [],
+        "flags": ["core-test-dump", target.sdk],
+        "id": id,
+        "kind": "xdr",
+        "linked_issues": [],
+        "notes": notes,
+        "passphrase_dependent": true,
+        "protocol": {"introduced": fam.protocol_introduced, "valid_min": fam.protocol_valid.min, "generated_at": first.protocol},
+        "source": {"class": "core-test-dump"},
+        "synthetic": false,
+        "variants": {"any": {
+            "xdr_file": format!("entries/{}/{id}/any.xdr", fam.id),
+            "xdr_sha256": small_sha,
+        }},
+        "xdr_type": TYPE,
+    });
+    let entry: shapekit_manifest::Entry = serde_json::from_value(value)
+        .with_context(|| format!("{id}: the record is not a manifest entry"))?;
+    std::fs::create_dir_all(&dir)?;
+    std::fs::write(dir.join("any.xdr"), bytes)?;
+    let mut text = serde_json::to_string_pretty(&entry)?;
+    text.push('\n');
+    std::fs::write(dir.join("entry.json"), text)?;
+    Ok(Some(id))
+}
+
+/// The first family by priority that takes core-test-dump entries and whose fragments the
+/// meta's shape signature matches.
+fn family_for<'a>(
+    families: &'a [shapekit_registry::Family],
+    bytes: &[u8],
+) -> Option<&'a shapekit_registry::Family> {
+    let sig = shapekit_manifest::shape_signature(
+        TYPE,
+        bytes,
+        shapekit_manifest::decode_limits(TYPE, bytes.len()),
+    )
+    .ok()?;
+    let mut ordered: Vec<&shapekit_registry::Family> = families
+        .iter()
+        .filter(|f| {
+            f.source_classes
+                .iter()
+                .any(|c| c.as_str() == "core-test-dump")
+        })
+        .collect();
+    ordered.sort_by(|a, b| (a.priority, &a.id).cmp(&(b.priority, &b.id)));
+    ordered.into_iter().find(|f| {
+        f.signature
+            .iter()
+            .any(|frag| shapekit_manifest::fragment_matches(&sig, frag))
+    })
+}
+
+pub fn render(r: &DatasetReport) -> String {
+    let mut out = format!(
+        "# Core's test metas through the SDKs\n\n{} metas core wrote in its transaction tests, {} distinct, in {} test sections.\n\n\
+         | testee | distinct | round-trip | fail | beyond max_protocol | sections passing |\n|---|---|---|---|---|---|\n",
+        r.metas, r.distinct, r.sections
+    );
+    for t in &r.targets {
+        let pass = t.results.get(&ResultClass::Pass).copied().unwrap_or(0);
+        let fail: usize = t
+            .results
+            .iter()
+            .filter(|(c, _)| **c != ResultClass::Pass)
+            .map(|(_, n)| n)
+            .sum();
+        out.push_str(&format!(
+            "| {} | {} | {pass} | {fail} | {} | {} of {} |\n",
+            t.key, t.distinct, t.beyond_protocol, t.sections_passing, r.sections
+        ));
+    }
+    for t in &r.targets {
+        if t.dropped.is_empty() {
+            continue;
+        }
+        out.push_str(&format!(
+            "\n## Failing in {}\n\n| meta | protocol | sections | result | shrunk to | candidate |\n|---|---|---|---|---|---|\n",
+            t.key
+        ));
+        for d in &t.dropped {
+            out.push_str(&format!(
+                "| {} | {} | {} | {} | {} bytes | {} |\n",
+                &d.sha256[..16],
+                d.protocol,
+                d.sections,
+                d.detail.as_deref().unwrap_or("").replace('|', "\\|"),
+                d.shrunk_bytes,
+                d.entry.as_deref().unwrap_or("no family takes it")
+            ));
+        }
+    }
+    out
+}
