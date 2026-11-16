@@ -158,7 +158,7 @@ for (const r of releases) {
   describe(`@stellar/stellar-sdk ${r.version}`, () => {
     test("hello reads the installed versions", async () => {
       const hello = ok(await ask(r.program, { op: "hello" }));
-      assert.equal(hello.protocol, 1);
+      assert.equal(hello.protocol, 2);
       assert.equal(hello.sdk, "@stellar/stellar-sdk");
       assert.equal(hello.sdk_version, r.version);
       assert.equal(hello.components["@stellar/js-xdr"], r.xdrJson ? "5.0.0" : "4.0.0");

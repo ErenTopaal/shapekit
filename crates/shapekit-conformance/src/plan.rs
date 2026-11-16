@@ -33,6 +33,12 @@ pub enum Expect {
     Rejected,
     Order(i64),
     PoolId(String),
+    /// `result.<member>` equals this lowercase hex: a hash or id the network wrote into a
+    /// ledger (see `anchors`).
+    Hex {
+        member: String,
+        value: String,
+    },
     Valid(bool),
     Id(String),
     /// Either this id or a refusal passes; any other id fails. Used where the network has one
@@ -161,6 +167,16 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                         });
                     }
                 }
+                if crate::anchors::anchored(entry) {
+                    out.extend(anchored_checks(
+                        entry,
+                        corpus,
+                        variant,
+                        v,
+                        &bytes,
+                        &file_source,
+                    ));
+                }
             }
             DecodeExpectation::MustReject => out.push(Check {
                 name: format!("{variant}/decode_encode"),
@@ -186,6 +202,64 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
         }
     }
     Ok(out)
+}
+
+/// The checks whose answers the ledger anchors (see `anchors`), for a variant of an entry
+/// that is the network's own output.
+fn anchored_checks(
+    entry: &Entry,
+    corpus: &Path,
+    variant: &str,
+    v: &shapekit_manifest::Variant,
+    bytes: &[u8],
+    file_source: &str,
+) -> Vec<Check> {
+    let unmappable = |op: &str, why: String| Check {
+        name: format!("{variant}/{op}"),
+        op: op.into(),
+        request: Map::new(),
+        expect: Expect::Unmappable(why),
+        source: file_source.to_string(),
+    };
+    let xdr_type = entry.xdr_type.as_deref().unwrap_or_default();
+    let anchors_here = xdr_type == "LedgerCloseMeta"
+        || (xdr_type == "TransactionEnvelope"
+            && entry.source.chain.is_some()
+            && entry.source.ledger_seq.is_some());
+    if !anchors_here {
+        return Vec::new();
+    }
+    let Some(passphrase) = v.network_passphrase.as_deref() else {
+        return vec![unmappable(
+            "tx_hash",
+            "the variant names no network passphrase".into(),
+        )];
+    };
+    if xdr_type == "LedgerCloseMeta" {
+        return match crate::anchors::decode_ledger(bytes) {
+            Ok(lcm) => crate::anchors::ledger_checks(variant, passphrase, &lcm, file_source),
+            Err(e) => vec![unmappable(
+                "tx_hash",
+                format!("the ledger does not decode: {e}"),
+            )],
+        };
+    }
+    let (Some(chain), Some(seq)) = (&entry.source.chain, entry.source.ledger_seq) else {
+        unreachable!("checked above");
+    };
+    match crate::anchors::decode_envelope(bytes) {
+        Ok(env) => crate::anchors::envelope_checks(
+            variant,
+            passphrase,
+            &env,
+            crate::anchors::chain_ledger(corpus, chain, variant, seq),
+            &format!("{file_source}, applied in ledger {seq} of chain {chain}"),
+        ),
+        Err(e) => vec![unmappable(
+            "tx_hash",
+            format!("the envelope does not decode: {e}"),
+        )],
+    }
 }
 
 fn read_verified_text(corpus: &Path, rel: &str, sha256: &str) -> Result<String, String> {

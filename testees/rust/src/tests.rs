@@ -24,7 +24,7 @@ fn error_class(request: Value) -> String {
 #[test]
 fn hello_reports_the_linked_versions() {
     let r = ok(json!({"id": "0", "op": "hello"}));
-    assert_eq!(r["protocol"], 1);
+    assert_eq!(r["protocol"], 2);
     assert_eq!(r["sdk"], "stellar-xdr");
     assert_eq!(r["sdk_version"], stellar_xdr::VERSION.pkg);
     assert_eq!(r["components"]["stellar-strkey"], "1.0.0");

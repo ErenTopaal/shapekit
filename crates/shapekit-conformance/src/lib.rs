@@ -2,6 +2,7 @@
 //! The protocol is docs/testee-protocol.md; testees run as child processes, so this crate is
 //! unix-only (the memory limit is an rlimit set between fork and exec).
 
+pub mod anchors;
 pub mod compare;
 pub mod crosscheck;
 pub mod issues;

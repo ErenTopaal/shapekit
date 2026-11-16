@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/ErenTopaal/shapekit/schema/testee-protocol.schema.json",
-  "title": "shapekit testee protocol, version 1",
+  "title": "shapekit testee protocol, version 2",
   "description": "One JSON object per line over stdin (requests) and stdout (responses). See docs/testee-protocol.md.",
   "oneOf": [
     {
@@ -50,10 +50,106 @@
         "order"
       ]
     },
+    "BalanceIdRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "balance_id"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        },
+        "network_passphrase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "op_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "len_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "xdr",
+        "network_passphrase",
+        "op_index"
+      ]
+    },
+    "BalanceIdResult": {
+      "type": "object",
+      "properties": {
+        "balance_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{72}$"
+        }
+      },
+      "required": [
+        "balance_id"
+      ]
+    },
     "Base64": {
       "type": "string",
       "contentEncoding": "base64",
       "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+    },
+    "ContractIdRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "contract_id"
+        },
+        "preimage": {
+          "$ref": "#/$defs/Base64"
+        },
+        "network_passphrase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "len_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "preimage",
+        "network_passphrase"
+      ]
+    },
+    "ContractIdResult": {
+      "type": "object",
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "contract_id"
+      ]
     },
     "DecodeEncodeRequest": {
       "type": "object",
@@ -163,7 +259,10 @@
       "type": "object",
       "properties": {
         "protocol": {
-          "const": 1
+          "enum": [
+            1,
+            2
+          ]
         },
         "sdk": {
           "type": "string",
@@ -193,7 +292,10 @@
               "map_sort",
               "map_validate",
               "id_parse",
-              "to_native"
+              "to_native",
+              "tx_hash",
+              "balance_id",
+              "contract_id"
             ]
           },
           "uniqueItems": true
@@ -562,6 +664,15 @@
         },
         {
           "$ref": "#/$defs/ToNativeRequest"
+        },
+        {
+          "$ref": "#/$defs/TxHashRequest"
+        },
+        {
+          "$ref": "#/$defs/BalanceIdRequest"
+        },
+        {
+          "$ref": "#/$defs/ContractIdRequest"
         }
       ]
     },
@@ -607,6 +718,15 @@
                 },
                 {
                   "$ref": "#/$defs/ToNativeResult"
+                },
+                {
+                  "$ref": "#/$defs/TxHashResult"
+                },
+                {
+                  "$ref": "#/$defs/BalanceIdResult"
+                },
+                {
+                  "$ref": "#/$defs/ContractIdResult"
                 }
               ]
             }
@@ -804,6 +924,54 @@
       },
       "required": [
         "native"
+      ]
+    },
+    "TxHashRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "tx_hash"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        },
+        "network_passphrase": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inner": {
+          "type": "boolean"
+        },
+        "depth_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "len_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "xdr",
+        "network_passphrase"
+      ]
+    },
+    "TxHashResult": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "hash"
       ]
     },
     "XdrResult": {

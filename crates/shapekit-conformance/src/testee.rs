@@ -16,9 +16,13 @@ use serde_json::{Map, Value};
 
 use crate::versions::{MemoryResource, Target};
 
-pub const PROTOCOL_VERSION: u64 = 1;
+pub const PROTOCOL_VERSION: u64 = 2;
 
-/// Every op of protocol version 1 except `hello`.
+/// Protocol versions the runner talks to. Version 2 only adds ops, so a version 1 testee
+/// still runs; it cannot list the new ops, whose checks then count as `unsupported`.
+pub const PROTOCOLS: [u64; 2] = [1, 2];
+
+/// Every op of protocol version 2 except `hello`.
 pub const OPS: &[&str] = &[
     "decode_encode",
     "decode_json",
@@ -31,6 +35,9 @@ pub const OPS: &[&str] = &[
     "map_validate",
     "id_parse",
     "to_native",
+    "tx_hash",
+    "balance_id",
+    "contract_id",
 ];
 
 // how much of a testee's stderr is kept for error reports
@@ -188,8 +195,8 @@ impl Testee {
         let hello: Hello = serde_json::from_value(result)
             .with_context(|| format!("{}: hello result", self.target.key()))?;
         ensure!(
-            hello.protocol == PROTOCOL_VERSION,
-            "{}: testee speaks protocol {}, the runner {PROTOCOL_VERSION}",
+            PROTOCOLS.contains(&hello.protocol),
+            "{}: testee speaks protocol {}, the runner 1 or {PROTOCOL_VERSION}",
             self.target.key(),
             hello.protocol
         );
@@ -382,7 +389,7 @@ pub fn parse_deep(text: &str) -> serde_json::Result<Value> {
     Ok(value)
 }
 
-/// Checks one response object against protocol version 1.
+/// Checks one response object against the protocol.
 pub fn parse_reply(value: &Value, id: &str) -> Result<Reply, String> {
     let obj = value.as_object().ok_or("response is not an object")?;
     match obj.get("id").and_then(Value::as_str) {

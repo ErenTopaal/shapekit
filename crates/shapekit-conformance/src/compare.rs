@@ -127,6 +127,7 @@ pub fn expected_view(expect: &Expect) -> Value {
         Expect::Rejected => json!("rejected"),
         Expect::Order(o) => json!({"order": o}),
         Expect::PoolId(p) => json!({"pool_id": p}),
+        Expect::Hex { member, value } => json!({ member.as_str(): value }),
         Expect::Valid(v) => json!({"valid": v}),
         Expect::Id(i) => json!({"id": i}),
         Expect::IdOrRejected(i) => json!({"either": [{"id": i}, "rejected"]}),
@@ -262,6 +263,16 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
         Expect::PoolId(p) => match member("pool_id").and_then(Value::as_str) {
             Some(x) => compare(x == p, "the sdk's pool id differs from core's"),
             None => missing("pool_id"),
+        },
+        Expect::Hex {
+            member: name,
+            value,
+        } => match member(name).and_then(Value::as_str) {
+            Some(x) => compare(
+                x == value,
+                &format!("the sdk's {name} differs from the one the network wrote"),
+            ),
+            None => missing(name),
         },
         Expect::Valid(v) => match member("valid").and_then(Value::as_bool) {
             Some(x) => compare(

@@ -13,7 +13,9 @@ use sha2::{Digest, Sha256};
 use stellar_strkey::ed25519;
 use stellar_strkey::{ClaimableBalance, Contract, HashX, LiquidityPool, PreAuthTx, Strkey};
 use stellar_xdr::{
-    Asset, Limited, Limits, LiquidityPoolConstantProductParameters, LiquidityPoolParameters,
+    AccountId, Asset, ClaimableBalanceId, ContractIdPreimage, FeeBumpTransactionInnerTx, Hash,
+    HashIdPreimage, HashIdPreimageContractId, HashIdPreimageOperationId, Limited, Limits,
+    MuxedAccount, OperationBody, PublicKey, TransactionEnvelope, Uint256, LiquidityPoolConstantProductParameters, LiquidityPoolParameters,
     ManageSellOfferOp, ReadXdr, ScMap, ScMapEntry, ScVal, Type, TypeVariant, Validate, WriteXdr,
 };
 
@@ -31,6 +33,9 @@ pub const OPS: &[&str] = &[
     "map_sort",
     "map_validate",
     "id_parse",
+    "tx_hash",
+    "balance_id",
+    "contract_id",
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -135,6 +140,9 @@ pub fn run(req: &Request) -> Outcome {
         "map_sort" => map_sort(req),
         "map_validate" => map_validate(req),
         "id_parse" => id_parse(req),
+        "tx_hash" => tx_hash(req),
+        "balance_id" => balance_id(req),
+        "contract_id" => contract_id(req),
         "to_native" => Err(Outcome::Unsupported(
             "stellar-xdr has no native projection of an ScVal: its conversions go to a target \
              type the caller names, so the typed ScVal is the value rust code works with"
@@ -394,6 +402,94 @@ fn pool_id(req: &Request) -> Result<Value, Outcome> {
     );
     let bytes = params.to_xdr(Limits::none()).map_err(rejected)?;
     Ok(json!({"pool_id": hex::encode(Sha256::digest(&bytes))}))
+}
+
+// stellar-xdr hashes envelopes with a network id, the sha-256 of the passphrase
+fn network_id(req: &Request) -> Result<[u8; 32], Outcome> {
+    let passphrase = req.string("network_passphrase")?;
+    Ok(Sha256::digest(passphrase.as_bytes()).into())
+}
+
+fn tx_hash(req: &Request) -> Result<Value, Outcome> {
+    let env: TransactionEnvelope = xdr_value(req, "xdr")?;
+    let network = network_id(req)?;
+    let inner = if req.has("inner") {
+        req.get::<bool>("inner", "a boolean")?
+    } else {
+        false
+    };
+    let hash = if inner {
+        let TransactionEnvelope::TxFeeBump(fb) = &env else {
+            return Err(bad("inner is only defined for a fee bump envelope"));
+        };
+        let FeeBumpTransactionInnerTx::Tx(e) = &fb.tx.inner_tx;
+        e.hash(network).map_err(rejected)?
+    } else {
+        env.hash(network).map_err(rejected)?
+    };
+    Ok(json!({"hash": hex::encode(hash)}))
+}
+
+// stellar-xdr has the HashIdPreimage types but no id functions, so an id is the sha-256 of
+// the preimage as the crate encodes it, as with pool_id
+fn preimage_hash(p: &HashIdPreimage) -> Result<[u8; 32], Outcome> {
+    let bytes = p.to_xdr(Limits::none()).map_err(rejected)?;
+    Ok(Sha256::digest(&bytes).into())
+}
+
+fn balance_id(req: &Request) -> Result<Value, Outcome> {
+    let env: TransactionEnvelope = xdr_value(req, "xdr")?;
+    let index: u32 = req.get("op_index", "an unsigned 32-bit integer")?;
+    // the operation belongs to the inner transaction of a fee bump
+    let (source, seq_num, ops) = match &env {
+        TransactionEnvelope::TxV0(e) => (
+            PublicKey::PublicKeyTypeEd25519(Uint256(e.tx.source_account_ed25519.0)),
+            e.tx.seq_num.clone(),
+            e.tx.operations.to_vec(),
+        ),
+        TransactionEnvelope::Tx(e) => (
+            source_key(&e.tx.source_account),
+            e.tx.seq_num.clone(),
+            e.tx.operations.to_vec(),
+        ),
+        TransactionEnvelope::TxFeeBump(fb) => {
+            let FeeBumpTransactionInnerTx::Tx(e) = &fb.tx.inner_tx;
+            (
+                source_key(&e.tx.source_account),
+                e.tx.seq_num.clone(),
+                e.tx.operations.to_vec(),
+            )
+        }
+    };
+    match ops.get(index as usize).map(|o| &o.body) {
+        Some(OperationBody::CreateClaimableBalance(_)) => {}
+        Some(_) => return Err(rejected("the operation is not CreateClaimableBalance")),
+        None => return Err(rejected("the transaction has no operation at that index")),
+    }
+    let id = preimage_hash(&HashIdPreimage::OpId(HashIdPreimageOperationId {
+        source_account: AccountId(source),
+        seq_num,
+        op_num: index,
+    }))?;
+    let balance = ClaimableBalanceId::ClaimableBalanceIdTypeV0(Hash(id));
+    let bytes = balance.to_xdr(Limits::none()).map_err(rejected)?;
+    Ok(json!({"balance_id": hex::encode(bytes)}))
+}
+
+fn source_key(m: &MuxedAccount) -> PublicKey {
+    match m {
+        MuxedAccount::Ed25519(k) => PublicKey::PublicKeyTypeEd25519(k.clone()),
+        MuxedAccount::MuxedEd25519(med) => PublicKey::PublicKeyTypeEd25519(med.ed25519.clone()),
+    }
+}
+
+fn contract_id(req: &Request) -> Result<Value, Outcome> {
+    let preimage: ContractIdPreimage = read_input(req, req.bytes("preimage")?)?;
+    let id = preimage_hash(&HashIdPreimage::ContractId(HashIdPreimageContractId {
+        network_id: Hash(network_id(req)?),
+        contract_id_preimage: preimage,
+    }))?;
+    Ok(json!({"contract_id": hex::encode(id)}))
 }
 
 #[derive(Deserialize)]

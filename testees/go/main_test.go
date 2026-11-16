@@ -48,8 +48,8 @@ func TestHello(t *testing.T) {
 		t.Fatalf("hello: %v", got)
 	}
 	result := got[0]["result"].(map[string]any)
-	if result["protocol"] != float64(1) || result["sdk"] != sdkModule || result["sdk_version"] != want {
-		t.Errorf("hello result %v, want protocol 1, %s %s", result, sdkModule, want)
+	if result["protocol"] != float64(protocolVersion) || result["sdk"] != sdkModule || result["sdk_version"] != want {
+		t.Errorf("hello result %v, want protocol %d, %s %s", result, protocolVersion, sdkModule, want)
 	}
 	if result["decode_limits"] != "honoured" { //nolint:misspell // the protocol spells it this way
 		t.Errorf("decode_limits %v", result["decode_limits"])

@@ -27,6 +27,9 @@ var ops = []string{
 	"strkey_encode",
 	"asset_order",
 	"pool_id",
+	"tx_hash",
+	"balance_id",
+	"contract_id",
 }
 
 var unsupportedOps = map[string]string{
@@ -59,6 +62,12 @@ func dispatch(req request) (map[string]any, error) {
 		return assetOrder(req)
 	case "pool_id":
 		return poolID(req)
+	case "tx_hash":
+		return txHash(req)
+	case "balance_id":
+		return balanceID(req)
+	case "contract_id":
+		return contractID(req)
 	}
 	if reason, ok := unsupportedOps[req.op]; ok {
 		return nil, unsupported(reason)

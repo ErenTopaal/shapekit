@@ -6,7 +6,9 @@ data through the SDK's own decoder, encoder, strkey codec, ordering functions an
 projection, and compares what comes back with the network's answer (the corpus manifest) and
 with the other SDKs.
 
-Protocol version: **1**. The machine-readable form is
+Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id` and `contract_id`
+and changes nothing else, so the runner also accepts a version 1 testee; that testee cannot
+list the new ops, and their checks count as `unsupported`. The machine-readable form is
 [schema/testee-protocol.schema.json](../schema/testee-protocol.schema.json). This page and the
 schema describe the same protocol; if they disagree, report it as a bug.
 
@@ -108,7 +110,7 @@ Result members:
 
 | member | type | meaning |
 |---|---|---|
-| `protocol` | integer | must be `1` |
+| `protocol` | integer | `2` (the runner also accepts `1`) |
 | `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS) |
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose `sdk` or `sdk_version` differs from the `package` and `version` in the versions file |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. Can be empty |
@@ -281,6 +283,47 @@ losslessly as a native value:
 
 Result: `native`.
 
+### tx_hash
+
+Request: `xdr` (base64 XDR `TransactionEnvelope`), `network_passphrase` (string),
+`depth_limit`, `len_limit`, and optionally `inner` (boolean).
+
+The SDK builds its transaction object from the envelope and the passphrase and returns the
+transaction hash: the hash of the outer transaction, for a fee bump the fee bump's own hash.
+With `inner: true` the testee returns the hash of a fee bump's inner transaction; `inner` on
+an envelope that is not a fee bump is a `bad-request`. An SDK whose hash function takes a
+network id instead of a passphrase (Rust `stellar-xdr`) gets the SHA-256 of the passphrase,
+which is the network id by definition.
+
+Result: `hash` (lowercase hex, 64 characters).
+
+### balance_id
+
+Request: `xdr` (base64 XDR `TransactionEnvelope`), `network_passphrase`, `op_index` (integer),
+`depth_limit`, `len_limit`.
+
+The ID of the claimable balance the `CreateClaimableBalance` operation at `op_index` creates.
+For a fee bump the operation belongs to the inner transaction. An operation of another type,
+or an index past the last operation, is `rejected`. An SDK without a balance ID function (Rust
+`stellar-xdr`) computes SHA-256 of the `HashIdPreimage` (`ENVELOPE_TYPE_OP_ID`) written by the
+SDK's own encoder.
+
+Result: `balance_id` (lowercase hex of the `ClaimableBalanceId` XDR, 72 characters: the 4-byte
+type, then the 32-byte hash).
+
+### contract_id
+
+Request: `preimage` (base64 XDR `ContractIdPreimage`), `network_passphrase`, `depth_limit`,
+`len_limit`.
+
+The ID of the contract the preimage deploys on that network. An SDK with a function for asset
+preimages (`Asset.contractId`, `xdr.Asset.ContractID`) uses it. For a preimage without such a
+function, the testee computes the SDK's SHA-256 of the `HashIdPreimage`
+(`ENVELOPE_TYPE_CONTRACT_ID`) written by the SDK's own encoder, the way the SDK's asset
+function does.
+
+Result: `contract_id` (lowercase hex, 64 characters).
+
 ## How the runner uses the ops
 
 The table lists, per manifest entry kind
@@ -293,6 +336,8 @@ strkey). A case the runner cannot map is an `error` (a runner bug), never skippe
 |---|---|---|
 | `xdr`, `decode = must-accept` | `decode_encode`, `decode_json`, `encode_json` (the last two only with an expected JSON file, `encode_json` only with `roundtrip = true`) | `decode_encode` is ok and, with `roundtrip`, returns the input bytes; `decode_json` equals the variant's expected JSON; `encode_json` of the expected JSON returns the input bytes |
 | `xdr`, `decode = must-reject` | `decode_encode` | the answer is `rejected` |
+| `xdr` `LedgerCloseMeta` that the network wrote (`validity = valid`, not synthetic) | also `tx_hash` for every envelope of the transaction set (and `inner: true` for each applied fee bump), `balance_id` for every successful `CreateClaimableBalance`, `contract_id` for every contract a successful `InvokeHostFunction` created | the hash or ID equals the one the ledger holds: the `transactionHash` of the envelope's result pair, the balance ID the operation returned, the ID of the contract instance the operation created |
+| `xdr` `TransactionEnvelope` applied in a committed chain (`source.chain`, `source.ledger_seq`) | also `tx_hash` | the hash equals the `transactionHash` of the envelope's result pair in that ledger of `corpus/chains/<chain>/<variant>/` |
 | `xdr`, `decode = implementation-defined` | `decode_encode`, `decode_json` | every SDK that answers gives the same outcome (same status, same bytes, same JSON) |
 | `ordering`, `asset_order` cases | `asset_order` | `expected` `less`, `equal`, `greater` is the order core uses (`Asset` comparison by type, code, then issuer key bytes) |
 | `ordering`, `pool_id` cases | `pool_id` | the pool ID equals `expected.pool_id`, or the answer is `rejected` when `expected.reject` is set |
@@ -301,6 +346,13 @@ strkey). A case the runner cannot map is an `error` (a runner bug), never skippe
 | `strkey` | `strkey_decode`, and `strkey_encode` for valid strings | decode gives the expected kind and raw payload, or `rejected` for invalid strings; encode of that kind and payload gives back the text |
 | `textual-id` | `id_parse` | the ID equals `expected.id`, or `rejected` when the case expects a rejection. A case whose `expected` is `{"either": [{"id": ...}, {"reject": ...}]}` passes with exactly that ID or with `rejected`; any other ID diverges. This form is used where reading the exact ID and refusing are both correct: decimal text with leading zeros, integral JSON numbers written with a zero fraction, JSON numbers above 2^53-1, and negative offer IDs, which the XDR `int64` holds and stellar-core refuses only when it checks the operation. Such a case is judged against its own expectation even when the entry is `implementation-defined` |
 | `native-projection` | `to_native` | `rejected`, or a native map that keeps every entry of the input map |
+
+The runner derives each expected hash and ID with the law library (`crates/shapekit-laws`) and
+uses it only where the ledger confirms it: a derived transaction hash must be the hash core
+wrote in a result pair of that ledger, a derived contract ID must be the ID of an instance the
+operation created. Where the ledger does not confirm a derivation, the check is an `error`,
+never a finding against an SDK. Entries that core did not write (synthetic entries, envelopes
+core refused, history envelopes with no committed ledger) get no such checks.
 
 Where the expected XDR-JSON contains stellar-xdr's `<INVALID:` marker (it writes one for a
 value with no strkey form, such as a signed-payload signer with an empty payload), SEP-51 has

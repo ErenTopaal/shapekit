@@ -14,7 +14,7 @@ import (
 	"runtime/debug"
 )
 
-const protocolVersion = 1
+const protocolVersion = 2
 
 func main() {
 	if err := serve(os.Stdin, os.Stdout); err != nil {

@@ -9,7 +9,7 @@ use std::process::ExitCode;
 
 use serde_json::{Value, json};
 
-pub const PROTOCOL_VERSION: u32 = 1;
+pub const PROTOCOL_VERSION: u32 = 2;
 
 // deep values (nested scvals, long auth trees) recurse through serde and the xdr decoder, so
 // requests run on a thread whose stack is far larger than the default main thread's

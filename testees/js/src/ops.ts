@@ -102,6 +102,11 @@ export class Ops {
     if (typeof this.m.scvSortedMap === "function") ops.push("map_sort");
     ops.push("id_parse");
     if (typeof this.m.scValToNative === "function") ops.push("to_native");
+    if (typeof this.m.TransactionBuilder?.fromXDR === "function") ops.push("tx_hash");
+    if (typeof this.m.Transaction?.prototype?.getClaimableBalanceId === "function") ops.push("balance_id");
+    if (typeof this.m.Asset?.prototype?.contractId === "function" && typeof this.m.hash === "function") {
+      ops.push("contract_id");
+    }
     return ops;
   }
 
@@ -134,6 +139,12 @@ export class Ops {
         return this.idParse(req);
       case "to_native":
         return this.toNative(req);
+      case "tx_hash":
+        return this.txHash(req);
+      case "balance_id":
+        return this.balanceId(req);
+      case "contract_id":
+        return this.contractId(req);
       default:
         throw new BadRequest(`unknown op ${req.op}`);
     }
@@ -254,6 +265,62 @@ export class Ops {
     const assetB = this.asset(req, "b");
     const id: Uint8Array = sdk(() => this.m.getLiquidityPoolId("constant_product", { assetA, assetB, fee }));
     return { pool_id: Buffer.from(id).toString("hex") };
+  }
+
+  // the transaction the sdk builds from an envelope; a fee bump's inner one when asked
+  private transaction(req: Request, inner: boolean): Loose {
+    const passphrase = str(req, "network_passphrase");
+    const envelope = bytes(req, "xdr").toString("base64");
+    const tx: Loose = sdk(() => this.m.TransactionBuilder.fromXDR(envelope, passphrase));
+    const isFeeBump = tx instanceof this.m.FeeBumpTransaction;
+    if (!inner) return tx;
+    if (!isFeeBump) throw new BadRequest("inner is only defined for a fee bump envelope");
+    return tx.innerTransaction;
+  }
+
+  private txHash(req: Request): Result {
+    const inner = req.members["inner"] === true;
+    const tx = this.transaction(req, inner);
+    const h: Uint8Array = sdk(() => tx.hash());
+    return { hash: Buffer.from(h).toString("hex") };
+  }
+
+  private balanceId(req: Request): Result {
+    const index = req.members["op_index"];
+    if (typeof index !== "number" || !Number.isInteger(index)) {
+      throw new BadRequest("balance_id needs integer member op_index");
+    }
+    let tx = this.transaction(req, false);
+    // the id comes from the transaction that holds the operation, the inner one of a fee bump
+    if (tx instanceof this.m.FeeBumpTransaction) tx = tx.innerTransaction;
+    const id: string = sdk(() => tx.getClaimableBalanceId(index));
+    return { balance_id: id.toLowerCase() };
+  }
+
+  // Asset.contractId is the sdk's api for an asset's contract; a preimage from an address
+  // has no api of its own, so its id is the sdk's hash of the sdk's encoding of the
+  // HashIdPreimage, the way Asset.contractId builds it
+  private contractId(req: Request): Result {
+    const passphrase = str(req, "network_passphrase");
+    const preimage = this.decodeAs(this.xdrType("ContractIdPreimage"), bytes(req, "preimage"));
+    // 17.x unions carry their arm as `type` and the value as a field; 16.x js-xdr unions as
+    // switch() and an accessor method
+    const arm: string = this.xdrValues ? preimage.type : sdk(() => preimage.switch().name);
+    if (arm === "contractIdPreimageFromAsset") {
+      const xdrAsset = this.xdrValues ? preimage.fromAsset : sdk(() => preimage.fromAsset());
+      const asset = sdk(() => this.m.Asset.fromOperation(xdrAsset));
+      const id: string = sdk(() => asset.contractId(passphrase));
+      return { contract_id: Buffer.from(sdk(() => this.m.StrKey.decodeContract(id))).toString("hex") };
+    }
+    const networkId: Uint8Array = sdk(() => this.m.hash(Buffer.from(passphrase, "utf8")));
+    const full = sdk(() =>
+      this.xdr.HashIdPreimage.envelopeTypeContractId(
+        new this.xdr.HashIdPreimageContractId({ networkId, contractIdPreimage: preimage }),
+      ),
+    );
+    const encoded: Uint8Array = sdk(() => (this.xdrValues ? full.toXdr() : full.toXDR()));
+    const id: Uint8Array = sdk(() => this.m.hash(encoded));
+    return { contract_id: Buffer.from(id).toString("hex") };
   }
 
   private mapSort(req: Request): Result {

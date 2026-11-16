@@ -1,7 +1,7 @@
 // the testee protocol's message shapes (docs/testee-protocol.md) and the errors ops raise to
 // pick a response status.
 
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 

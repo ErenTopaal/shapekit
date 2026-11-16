@@ -42,6 +42,10 @@ cap38.liquidity-pools.synth-assets-js1766-issuers 16.3.0 diverges-from-network f
 cap38.liquidity-pools.synth-assets-js1766-issuers 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 cap38.liquidity-pools.synth-assets-py1246-testnet-pool 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+# the same order check makes TransactionBuilder.fromXDR refuse a recorded testnet ledger's
+# ChangeTrust on a pool share, so the sdk has no hash for it
+cap38.liquidity-pools.testnet-5521432 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md testnet/tx_hash 3
+cap38.liquidity-pools.testnet-5521432 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md testnet/tx_hash 3
 #
 # js-stellar-sdk#1766: scvSortedMap ordered keys by their native form (17.2.0; never fixed on 16.x)
 soroban.scval-shapes.synth-map-keys-addresses 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
@@ -130,16 +134,16 @@ soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.3.0 diverges-from
 soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 any/decode_encode, any/decode_json
 soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 any/decode_encode, any/decode_json
 # the same limit on recorded chains, which run on the 16.x build with protocol 30 support
-soroban.auth-trees.p30-declared-depth-245 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.auth-trees.p30-declared-depth-246 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.auth-trees.p30-declared-depth-492 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.scval-shapes.p30-map-depth-max-envelope 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
+soroban.auth-trees.p30-declared-depth-245 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash 0, mainnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-246 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash 0, mainnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-492 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash 0, mainnet/tx_hash 0
+soroban.scval-shapes.p30-map-depth-max-envelope 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash, mainnet/tx_hash
 soroban.scval-shapes.p30-map-depth-max-meta 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.scval-shapes.p30-map-depth-over 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
+soroban.scval-shapes.p30-map-depth-over 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash 0, mainnet/tx_hash 0
 soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.scval-shapes.p30-vec-depth-max-envelope 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
+soroban.scval-shapes.p30-vec-depth-max-envelope 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash, mainnet/tx_hash
 soroban.scval-shapes.p30-vec-depth-max-meta 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
-soroban.scval-shapes.p30-vec-depth-over 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
+soroban.scval-shapes.p30-vec-depth-over 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json, testnet/tx_hash 0, mainnet/tx_hash 0
 #
 # 17.x decodes under js-xdr 5's default limit of 1500 nested schemas and its fromXdr takes no
 # limit, so it accepts transactions nested deeper than core does
