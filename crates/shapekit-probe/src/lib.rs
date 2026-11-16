@@ -7,6 +7,7 @@
 //! Each attempt uses its own source account, so no attempt's sequence number or balance depends
 //! on another's.
 
+pub mod fields;
 pub mod variants;
 
 use std::path::Path;
