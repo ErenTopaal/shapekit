@@ -3,6 +3,7 @@
 // needs, and answers unsupported when the release has none.
 
 import type { Json } from "./protocol.js";
+import type { Coverage } from "./coverage.js";
 import { BadRequest, PROTOCOL_VERSION, SdkError, Unsupported, sdk } from "./protocol.js";
 import { describeNative } from "./native.js";
 import { Sep51 } from "./sep51.js";
@@ -85,8 +86,11 @@ export class Ops {
   private readonly xdrValues: boolean;
   private sep51: Sep51 | undefined;
 
-  constructor(loaded: LoadedSdk) {
+  private readonly coverage: Coverage | undefined;
+
+  constructor(loaded: LoadedSdk, coverage?: Coverage) {
     this.loaded = loaded;
+    this.coverage = coverage?.forPackage(loaded.dir);
     this.m = loaded.module;
     this.xdr = this.m.xdr;
     this.xdrValues = typeof this.xdr.ScVal.fromXdr === "function" && this.xdr.ScVal.schema !== undefined;
@@ -107,6 +111,7 @@ export class Ops {
     if (typeof this.m.Asset?.prototype?.contractId === "function" && typeof this.m.hash === "function") {
       ops.push("contract_id");
     }
+    if (this.coverage) ops.push("coverage_snapshot");
     return ops;
   }
 
@@ -145,6 +150,11 @@ export class Ops {
         return this.balanceId(req);
       case "contract_id":
         return this.contractId(req);
+      case "coverage_snapshot":
+        if (!this.coverage) {
+          throw new Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1");
+        }
+        return { tool: `v8 ${process.versions.v8} precise block coverage`, ranges: this.coverage.snapshot() };
       default:
         throw new BadRequest(`unknown op ${req.op}`);
     }

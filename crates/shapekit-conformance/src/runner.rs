@@ -4,9 +4,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result, ensure};
+use anyhow::{Context, Result, bail, ensure};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{Map, Value};
 use shapekit_manifest::{Entry, EntryKind, Manifest, build as manifest_build};
 
 use crate::compare::{self, Judged, ResultClass, Verdict};
@@ -410,6 +410,9 @@ pub struct RunOptions {
     /// Starts the one selected version with this command line instead of its own, so a build
     /// of the sdk with a seeded fault runs under the version's settings and known failures.
     pub command: Option<Vec<String>>,
+    /// Run the coverage builds of the testees and write what each one covered to
+    /// `coverage.json` in `out` (see `versions::coverage_target`).
+    pub coverage: bool,
 }
 
 pub struct RunOutcome {
@@ -422,6 +425,12 @@ pub struct RunOutcome {
 /// Resolves the targets a run covers.
 pub fn targets(file: &VersionsFile, opts: &RunOptions) -> Result<Vec<Target>> {
     let mut targets = select_targets(file, opts)?;
+    if opts.coverage {
+        targets = targets
+            .iter()
+            .map(versions::coverage_target)
+            .collect::<Result<_>>()?;
+    }
     if let Some(command) = &opts.command {
         ensure!(
             targets.len() == 1 && !command.is_empty(),
@@ -541,6 +550,14 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
             );
         }
         rows = this_pass;
+    }
+
+    if opts.coverage {
+        let out = opts
+            .out
+            .as_ref()
+            .context("a coverage run needs an output directory")?;
+        write_coverage(out, &mut testees)?;
     }
 
     let testee_info: Vec<TesteeInfo> = testees
@@ -668,6 +685,51 @@ fn peak_rss() -> Result<i64> {
     use nix::sys::resource::{UsageWho, getrusage};
     let usage = getrusage(UsageWho::RUSAGE_SELF).context("getrusage")?;
     Ok(usage.max_rss())
+}
+
+/// What each testee covered over the whole run, from one `coverage_snapshot` at its end.
+/// Counters live in the testee process, so a testee the runner had to restart lost what its
+/// earlier processes covered; `processes` says how many there were.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CoverageRecord {
+    pub tool: String,
+    pub processes: u32,
+    pub ranges: Vec<String>,
+}
+
+fn write_coverage(dir: &Path, testees: &mut [Testee]) -> Result<()> {
+    let mut out: BTreeMap<String, CoverageRecord> = BTreeMap::new();
+    for t in testees.iter_mut() {
+        let key = t.target().key();
+        let reply = t
+            .request(Map::from_iter([(
+                "op".to_string(),
+                Value::from("coverage_snapshot"),
+            )]))?
+            .map_err(|f| anyhow::anyhow!("{key}: coverage_snapshot failed: {f}"))?;
+        let crate::testee::Reply::Ok(result) = reply else {
+            bail!("{key}: coverage_snapshot was answered with {reply:?}");
+        };
+        let tool = result["tool"]
+            .as_str()
+            .with_context(|| format!("{key}: coverage_snapshot has no tool"))?
+            .to_string();
+        let ranges: Vec<String> = serde_json::from_value(result["ranges"].clone())
+            .with_context(|| format!("{key}: coverage_snapshot ranges"))?;
+        out.insert(
+            key,
+            CoverageRecord {
+                tool,
+                processes: t.starts,
+                ranges,
+            },
+        );
+    }
+    std::fs::create_dir_all(dir)?;
+    let mut text = serde_json::to_string_pretty(&out)?;
+    text.push('\n');
+    std::fs::write(dir.join("coverage.json"), text)
+        .with_context(|| format!("writing {}", dir.join("coverage.json").display()))
 }
 
 pub fn write_outputs(dir: &Path, matrix: &Matrix) -> Result<()> {

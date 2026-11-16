@@ -81,6 +81,7 @@ pub fn corpus_cells(
         out: None,
         passes: 1,
         command: Some(command.to_vec()),
+        coverage: false,
     })?;
     let key = format!("{sdk}@{version}");
     let mut out = Fingerprint::new();

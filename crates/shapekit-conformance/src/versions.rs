@@ -264,3 +264,128 @@ pub fn build(root: &Path, target: &Target) -> Result<()> {
     }
     Ok(())
 }
+
+/// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
+/// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
+/// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,
+/// and the javascript testee started with `SHAPEKIT_COVERAGE=1`. The build steps are the ones
+/// `conformance sync-versions` writes; a versions file whose steps have another shape is
+/// refused rather than guessed at.
+pub fn coverage_target(t: &Target) -> Result<Target> {
+    let mut c = t.clone();
+    let swap = |s: &str| s.replacen("target/testees/", "target/testees-cov/", 1);
+    match t.sdk.as_str() {
+        "rust" => {
+            let mut done = false;
+            for step in &mut c.build {
+                if let Some(i) = step.argv.iter().position(|a| a == "--target-dir")
+                    && let Some(dir) = step.argv.get_mut(i + 1)
+                    && dir.starts_with("target/testees/")
+                {
+                    *dir = swap(dir);
+                    step.env.insert(
+                        "RUSTFLAGS".to_string(),
+                        "-C instrument-coverage --cfg shapekit_coverage".to_string(),
+                    );
+                    // the flags instrument build scripts too, which would leave .profraw files
+                    // in the source tree when they run
+                    step.env
+                        .insert("LLVM_PROFILE_FILE".to_string(), "/dev/null".to_string());
+                    done = true;
+                }
+            }
+            ensure!(
+                done,
+                "{}: no cargo build step with --target-dir target/testees/...",
+                t.key()
+            );
+        }
+        "go" => {
+            let mut done = false;
+            for step in &mut c.build {
+                if step.argv.first().map(String::as_str) != Some("go") {
+                    continue;
+                }
+                if let Some(i) = step.argv.iter().position(|a| a == "-o")
+                    && let Some(out) = step.argv.get_mut(i + 1)
+                    && out.contains("target/testees/")
+                {
+                    *out = out.replacen("target/testees/", "target/testees-cov/", 1);
+                    // the testee's own package must be instrumented too, or the runtime has no
+                    // meta-data to write; atomic is the mode runtime/coverage writes counters for
+                    step.argv.splice(
+                        2..2,
+                        [
+                            "-cover".to_string(),
+                            "-covermode=atomic".to_string(),
+                            format!("-coverpkg={}/...,.", t.package),
+                        ],
+                    );
+                    done = true;
+                }
+            }
+            ensure!(
+                done,
+                "{}: no go build step with -o .../target/testees/...",
+                t.key()
+            );
+        }
+        "js" => {
+            c.env
+                .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
+            return Ok(c);
+        }
+        other => bail!("no coverage build for sdk {other}"),
+    }
+    let cmd = c.command.first_mut().context("the target has no command")?;
+    ensure!(
+        cmd.starts_with("target/testees/"),
+        "{}: the command {cmd} is not under target/testees/",
+        t.key()
+    );
+    *cmd = swap(cmd);
+    Ok(c)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn coverage_targets_of_the_committed_matrix() {
+        let file = VersionsFile::load(
+            &Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/versions.toml"),
+        )
+        .unwrap();
+        for sdk in ["rust", "go", "js"] {
+            let t = file.target(sdk, &file.sdk(sdk).unwrap().current).unwrap();
+            let c = coverage_target(&t).unwrap();
+            match sdk {
+                "rust" => {
+                    let step = &c.build[0];
+                    assert!(
+                        step.argv
+                            .iter()
+                            .any(|a| a.starts_with("target/testees-cov/rust/"))
+                    );
+                    assert!(step.env["RUSTFLAGS"].contains("instrument-coverage"));
+                    assert!(c.command[0].starts_with("target/testees-cov/rust/"));
+                }
+                "go" => {
+                    let step = &c.build[0];
+                    assert_eq!(step.argv[2], "-cover");
+                    assert!(
+                        step.argv
+                            .iter()
+                            .any(|a| a.contains("target/testees-cov/go/"))
+                    );
+                    assert!(c.command[0].starts_with("target/testees-cov/go/"));
+                }
+                _ => {
+                    assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");
+                    assert_eq!(c.command, t.command);
+                }
+            }
+        }
+    }
+}

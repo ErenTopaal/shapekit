@@ -3,12 +3,14 @@
 
 import { createInterface } from "node:readline";
 
+import { Coverage } from "./coverage.js";
 import { Ops } from "./ops.js";
 import { handle } from "./request.js";
 import { loadSdk } from "./sdk.js";
 
 async function main(): Promise<void> {
-  const ops = new Ops(await loadSdk());
+  const coverage = Coverage.start();
+  const ops = new Ops(await loadSdk(), coverage);
   const lines = createInterface({ input: process.stdin, crlfDelay: Infinity });
   for await (const line of lines) {
     if (line === "") continue;

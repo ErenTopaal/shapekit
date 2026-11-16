@@ -326,6 +326,7 @@ fn options(c: &Corpus, passes: u32) -> RunOptions {
         out: Some(c.dir.path().join("out")),
         passes,
         command: None,
+        coverage: false,
     }
 }
 

@@ -68,11 +68,21 @@ func dispatch(req request) (map[string]any, error) {
 		return balanceID(req)
 	case "contract_id":
 		return contractID(req)
+	case "coverage_snapshot":
+		return coverageSnapshot(req)
 	}
 	if reason, ok := unsupportedOps[req.op]; ok {
 		return nil, unsupported(reason)
 	}
 	return nil, badRequest("unknown op %s", req.op)
+}
+
+// helloOps lists coverage_snapshot only for a build that can answer it
+func helloOps() []string {
+	if instrumented() {
+		return append(append([]string{}, ops...), "coverage_snapshot")
+	}
+	return ops
 }
 
 func hello() (map[string]any, error) {
@@ -97,7 +107,7 @@ func hello() (map[string]any, error) {
 		"sdk":         sdkModule,
 		"sdk_version": sdkVersion,
 		"components":  components,
-		"ops":         ops,
+		"ops":         helloOps(),
 		// DecodeOptions carries both: MaxDepth is the depth, MaxInputLen the length
 		"decode_limits": "honoured", //nolint:misspell // the protocol spells it this way
 	}, nil

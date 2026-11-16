@@ -2,6 +2,8 @@
 //! (docs/testee-protocol.md) with stellar-xdr and stellar-strkey. One source, built once per
 //! pinned stellar-xdr version from the manifests under `versions/`.
 
+#[cfg(shapekit_coverage)]
+mod coverage;
 mod ops;
 
 use std::io::{BufRead, Write};
@@ -16,6 +18,11 @@ pub const PROTOCOL_VERSION: u32 = 2;
 const STACK_BYTES: usize = 512 << 20;
 
 fn main() -> ExitCode {
+    #[cfg(shapekit_coverage)]
+    if let Err(message) = coverage::init() {
+        eprintln!("testee: {message}");
+        return ExitCode::FAILURE;
+    }
     let worker = std::thread::Builder::new()
         .name("testee".into())
         .stack_size(STACK_BYTES)

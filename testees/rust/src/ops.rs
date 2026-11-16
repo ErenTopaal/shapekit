@@ -43,6 +43,8 @@ pub enum ErrorClass {
     Rejected,
     Panic,
     BadRequest,
+    #[cfg_attr(not(shapekit_coverage), allow(dead_code))]
+    Internal,
 }
 
 impl ErrorClass {
@@ -51,6 +53,7 @@ impl ErrorClass {
             ErrorClass::Rejected => "rejected",
             ErrorClass::Panic => "panic",
             ErrorClass::BadRequest => "bad-request",
+            ErrorClass::Internal => "internal",
         }
     }
 }
@@ -143,6 +146,12 @@ pub fn run(req: &Request) -> Outcome {
         "tx_hash" => tx_hash(req),
         "balance_id" => balance_id(req),
         "contract_id" => contract_id(req),
+        #[cfg(shapekit_coverage)]
+        "coverage_snapshot" => crate::coverage::snapshot().map_err(|m| Outcome::Error(ErrorClass::Internal, m)),
+        #[cfg(not(shapekit_coverage))]
+        "coverage_snapshot" => Err(Outcome::Unsupported(
+            "the testee was built without -C instrument-coverage --cfg shapekit_coverage".into(),
+        )),
         "to_native" => Err(Outcome::Unsupported(
             "stellar-xdr has no native projection of an ScVal: its conversions go to a target \
              type the caller names, so the typed ScVal is the value rust code works with"
@@ -156,13 +165,22 @@ pub fn run(req: &Request) -> Outcome {
     }
 }
 
+// coverage_snapshot only in a build instrumented for it
+fn ops() -> Vec<&'static str> {
+    let mut out = OPS.to_vec();
+    if cfg!(shapekit_coverage) {
+        out.push("coverage_snapshot");
+    }
+    out
+}
+
 fn hello() -> Value {
     json!({
         "protocol": crate::PROTOCOL_VERSION,
         "sdk": "stellar-xdr",
         "sdk_version": stellar_xdr::VERSION.pkg,
         "components": {"stellar-strkey": stellar_strkey::VERSION.pkg},
-        "ops": OPS,
+        "ops": ops(),
         "decode_limits": "honoured",
     })
 }

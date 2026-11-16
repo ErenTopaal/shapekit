@@ -38,6 +38,10 @@ pub enum ConformanceCommand {
         /// Skip the build steps in versions.toml (the testees must already be built).
         #[arg(long)]
         no_build: bool,
+        /// Run the coverage builds of the testees and write what each covered to
+        /// coverage.json next to the matrix.
+        #[arg(long)]
+        coverage: bool,
         /// Run the selection this many times in one invocation and require equal results.
         #[arg(long, default_value_t = 1)]
         passes: u32,
@@ -231,6 +235,7 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             flags,
             linked_issues,
             no_build,
+            coverage,
             passes,
             manifest,
             versions_file,
@@ -255,6 +260,7 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 out: Some(out.clone()),
                 passes,
                 command: None,
+                coverage,
             })?;
             // entries count as their worst check, so the check totals go next to them
             let line = |counts: &std::collections::BTreeMap<_, usize>| {

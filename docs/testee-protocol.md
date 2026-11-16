@@ -6,7 +6,7 @@ data through the SDK's own decoder, encoder, strkey codec, ordering functions an
 projection, and compares what comes back with the network's answer (the corpus manifest) and
 with the other SDKs.
 
-Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id` and `contract_id`
+Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id`, `contract_id` and `coverage_snapshot`
 and changes nothing else, so the runner also accepts a version 1 testee; that testee cannot
 list the new ops, and their checks count as `unsupported`. The machine-readable form is
 [schema/testee-protocol.schema.json](../schema/testee-protocol.schema.json). This page and the
@@ -323,6 +323,29 @@ function, the testee computes the SDK's SHA-256 of the `HashIdPreimage`
 function does.
 
 Result: `contract_id` (lowercase hex, 64 characters).
+
+### coverage_snapshot
+
+Request: no members besides `op`.
+
+The code of the SDK package that ran at least once since the testee process started. A testee
+lists the op in `hello` only when it collects coverage, which costs time, so only a coverage
+build or mode does:
+
+| testee | how | a range is |
+|---|---|---|
+| Rust | built with `RUSTFLAGS="-C instrument-coverage --cfg shapekit_coverage"`; the profiler runtime writes the counters on request and the toolchain's `llvm-profdata` and `llvm-cov export` (rustup's `llvm-tools` component) read them | a code region of a `stellar-xdr` source file, `src/<file>:<line>:<col>-<line>:<col>` |
+| Go | built with `-cover -covermode=atomic -coverpkg=github.com/stellar/go-stellar-sdk/...,.`; `runtime/coverage` writes the counters on request and `go tool covdata textfmt` reads them | a statement block of a go-stellar-sdk file, `<package path>/<file>:<line>.<col>,<line>.<col>` |
+| JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
+
+Result: `tool` (what measured it), `ranges` (sorted strings, each range once). Range strings are
+only compared within one SDK version and one tool: the union over runs, or the ranges one
+run adds, is what is meaningful. Counters live in the process, so what a testee covered before
+the runner restarted it is not in a later snapshot.
+
+`shapekit conformance run --coverage` builds and starts these variants (the Rust and Go builds
+go to `target/testees-cov/`), runs the selection, asks each testee for one snapshot at the end
+and writes `coverage.json` next to the matrix, with the number of processes each testee needed.
 
 ## How the runner uses the ops
 

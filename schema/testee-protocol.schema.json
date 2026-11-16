@@ -151,6 +151,42 @@
         "contract_id"
       ]
     },
+    "CoverageSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "coverage_snapshot"
+        }
+      },
+      "required": [
+        "id",
+        "op"
+      ]
+    },
+    "CoverageSnapshotResult": {
+      "type": "object",
+      "properties": {
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ranges": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "tool",
+        "ranges"
+      ]
+    },
     "DecodeEncodeRequest": {
       "type": "object",
       "properties": {
@@ -295,7 +331,8 @@
               "to_native",
               "tx_hash",
               "balance_id",
-              "contract_id"
+              "contract_id",
+              "coverage_snapshot"
             ]
           },
           "uniqueItems": true
@@ -673,6 +710,9 @@
         },
         {
           "$ref": "#/$defs/ContractIdRequest"
+        },
+        {
+          "$ref": "#/$defs/CoverageSnapshotRequest"
         }
       ]
     },
@@ -727,6 +767,9 @@
                 },
                 {
                   "$ref": "#/$defs/ContractIdResult"
+                },
+                {
+                  "$ref": "#/$defs/CoverageSnapshotResult"
                 }
               ]
             }

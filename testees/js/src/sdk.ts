@@ -15,6 +15,8 @@ export type Loose = any;
 export interface LoadedSdk {
   module: Loose;
   version: string;
+  // the installed package's directory
+  dir: string;
   components: { [name: string]: string };
 }
 
@@ -76,6 +78,7 @@ export async function loadSdk(): Promise<LoadedSdk> {
   return {
     module,
     version: pkg.version,
+    dir,
     components: { [XDR_PACKAGE]: dependencyVersion(dir, XDR_PACKAGE) },
   };
 }

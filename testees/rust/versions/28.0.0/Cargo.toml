@@ -24,3 +24,7 @@ stellar-strkey = "=1.0.0"
 stellar-xdr = { version = "=28.0.0", default-features = false, features = ["std", "serde", "serde_json", "type_enum"] }
 
 [workspace]
+
+[lints.rust]
+# set by the coverage build (RUSTFLAGS="-C instrument-coverage --cfg shapekit_coverage")
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(shapekit_coverage)"] }
