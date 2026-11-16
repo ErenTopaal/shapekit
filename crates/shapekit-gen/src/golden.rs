@@ -360,7 +360,9 @@ pub fn select(set: &GoldenSet, registry: &Registry) -> Result<(Vec<Selection>, V
         .context("registry has no families.toml")?;
     let mut out = Vec::new();
     let mut skipped = Vec::new();
-    for family in &families.families {
+    // a family without caps holds vectors of the xdr definitions, not a protocol shape, so no
+    // golden ledger is imported into it
+    for family in families.families.iter().filter(|f| !f.caps.is_empty()) {
         let mut chosen: BTreeMap<usize, Vec<String>> = BTreeMap::new();
         for fragment in &family.signature {
             let smallest = |in_range_only: bool| {
