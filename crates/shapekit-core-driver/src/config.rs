@@ -125,6 +125,11 @@ pub struct CoreImage {
     /// Pinned by local image ID rather than registry manifest digest.
     #[serde(skip)]
     pub local: bool,
+    /// Host directory every container of this image writes its LLVM coverage
+    /// profiles into, for a coverage build such as the twin. Set by the
+    /// caller, never read from pins; `None` runs containers as they are.
+    #[serde(skip)]
+    pub profile_dir: Option<std::path::PathBuf>,
 }
 
 #[derive(serde::Deserialize)]
@@ -188,6 +193,7 @@ impl CoreImage {
             tag: entry.tag,
             digest,
             local,
+            profile_dir: None,
         })
     }
 
@@ -201,6 +207,14 @@ impl CoreImage {
         }
     }
 }
+
+/// Where a container with a profile directory finds it.
+pub const CONTAINER_PROFILE_DIR: &str = "/profiles";
+
+/// `LLVM_PROFILE_FILE` inside such a container. Every container of a node
+/// runs core as process 1, so the host name (the container id) tells their
+/// profiles apart.
+pub const CONTAINER_PROFILE_FILE: &str = "/profiles/core-%h-%p.profraw";
 
 /// Everything that decides what a standalone node produces.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -375,6 +389,7 @@ mod tests {
                 tag: "t".into(),
                 digest: format!("sha256:{}", "0".repeat(64)),
                 local: false,
+                profile_dir: None,
             },
             protocol: 30,
             soroban_high_limits: true,

@@ -20,8 +20,8 @@ use stellar_xdr::{
 };
 
 use crate::config::{
-    CFG_FILE, CONTAINER_DATA_DIR, ConfigError, HISTORY_ARCHIVE_NAME, HISTORY_DIR, META_FILE,
-    NodeConfig, UPGRADE_TIME,
+    CFG_FILE, CONTAINER_DATA_DIR, CONTAINER_PROFILE_DIR, CONTAINER_PROFILE_FILE, ConfigError,
+    HISTORY_ARCHIVE_NAME, HISTORY_DIR, META_FILE, NodeConfig, UPGRADE_TIME,
 };
 use crate::http::{CoreHttp, HttpError, percent_encode};
 use crate::meta::decode_limits;
@@ -396,9 +396,21 @@ impl CoreNode {
 
         let mount = format!("{}:{CONTAINER_DATA_DIR}", workdir.display());
         let conf = format!("{CONTAINER_DATA_DIR}/{CFG_FILE}");
+        // a coverage build writes its profile when core exits; the directory
+        // is outside the workdir so the profiles outlive it
+        let profile_args: Vec<String> = match &cfg.image.profile_dir {
+            Some(dir) => vec![
+                "-v".into(),
+                format!("{}:{CONTAINER_PROFILE_DIR}", dir.display()),
+                "-e".into(),
+                format!("LLVM_PROFILE_FILE={CONTAINER_PROFILE_FILE}"),
+            ],
+            None => Vec::new(),
+        };
         let base = |extra: &[&str]| -> Vec<String> {
             let mut v: Vec<String> = vec!["run".into()];
             v.extend(extra.iter().map(|s| s.to_string()));
+            v.extend(profile_args.iter().cloned());
             for a in [
                 "--network",
                 &network,
