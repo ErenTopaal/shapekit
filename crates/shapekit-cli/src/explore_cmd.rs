@@ -70,6 +70,29 @@ pub enum ExploreCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Witness both sides of core's protocol gates: every recipe on the coverage twin at
+    /// every protocol, beside empty reference chains, and write the gate list with each
+    /// side's status and the output difference each gate's version makes.
+    Gates {
+        /// The gate list `shapekit twin gates` wrote, all sides open.
+        #[arg(long)]
+        gates: PathBuf,
+        /// Directories of recipe IR files, searched recursively; repeatable.
+        #[arg(long)]
+        recipes: Vec<PathBuf>,
+        /// Protocols to run at: one number, a comma list or a range.
+        #[arg(long, default_value = "1-30")]
+        protocol: String,
+        #[arg(long, default_value_t = 3)]
+        jobs: usize,
+        /// Where runs are kept (reused on a second call) and the results are written.
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+    },
     /// Record every recipe of a run again under both passphrases, twice each, and check the
     /// streams repeat and the credited arms are there.
     Verify {
@@ -181,6 +204,15 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             out,
             pins,
         } => pairs(&recipes, max, jobs, &out, &pins),
+        ExploreCommand::Gates {
+            gates,
+            recipes,
+            protocol,
+            jobs,
+            out,
+            pins,
+            twin_pins,
+        } => gates_cmd(&gates, &recipes, &protocol, jobs, &out, &pins, &twin_pins),
         ExploreCommand::Verify {
             dir,
             repeat,
@@ -437,4 +469,171 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
     }
     println!("pairs: {}", out.join("pairs.json").display());
     Ok(errors.is_empty())
+}
+
+fn recipe_files(dir: &Path, out: &mut Vec<PathBuf>) -> Result<()> {
+    for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let p = e?.path();
+        if p.is_dir() {
+            recipe_files(&p, out)?;
+        } else if p.extension().is_some_and(|x| x == "json") {
+            out.push(p);
+        }
+    }
+    Ok(())
+}
+
+fn gates_cmd(
+    gates_path: &Path,
+    dirs: &[PathBuf],
+    protocol: &str,
+    jobs: usize,
+    out: &Path,
+    pins: &Path,
+    twin_pins: &Path,
+) -> Result<bool> {
+    use shapekit_contracts::gates::GateList;
+    use shapekit_explore::gates::{self, RunKind};
+
+    let mut list: GateList =
+        shapekit_contracts::load(gates_path).map_err(|e| anyhow::anyhow!("{e}"))?;
+    let protocols = parse_protocols(protocol)?;
+    let release = CoreImage::from_pins(pins)
+        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    let twin = CoreImage::from_pins(twin_pins)
+        .with_context(|| format!("reading the twin image pin from {}", twin_pins.display()))?;
+    let mut files = Vec::new();
+    for d in dirs {
+        recipe_files(d, &mut files)?;
+    }
+    files.sort();
+    let mut recipes = Vec::new();
+    for f in &files {
+        let ir = shapekit_gen::recipe::ir::load(f)?;
+        let name = format!(
+            "{}.{}",
+            f.parent()
+                .and_then(|p| p.file_name())
+                .unwrap_or_default()
+                .to_string_lossy(),
+            f.file_stem().unwrap_or_default().to_string_lossy()
+        );
+        recipes.push((name, ir));
+    }
+    let runs_dir = out.join("runs");
+    std::fs::create_dir_all(&runs_dir)?;
+    let done: BTreeSet<String> = gates::load_all(&runs_dir)?
+        .iter()
+        .map(|r| r.name())
+        .collect();
+    // genesis and padded references at every protocol, then each recipe at every protocol
+    let mut todo: Vec<(RunKind, Option<usize>, u32)> = Vec::new();
+    for &p in &protocols {
+        todo.push((RunKind::Genesis, None, p));
+        todo.push((RunKind::Padded, None, p));
+        for i in 0..recipes.len() {
+            todo.push((RunKind::Recipe, Some(i), p));
+        }
+    }
+    let name_of = |(k, i, p): &(RunKind, Option<usize>, u32)| match (k, i) {
+        (RunKind::Genesis, _) => format!("genesis@p{p}"),
+        (RunKind::Padded, _) => format!("empty-ledgers@p{p}"),
+        (_, Some(i)) => format!("{}@p{p}", recipes[*i].0),
+        _ => unreachable!("a recipe run names its recipe"),
+    };
+    todo.retain(|t| !done.contains(&name_of(t)));
+    println!(
+        "{} recipes at {} protocols: {} runs recorded before, {} to record",
+        recipes.len(),
+        protocols.len(),
+        done.len(),
+        todo.len()
+    );
+    let schema = Schema::pinned();
+    let reachable = arms::reachable()?;
+    let root = std::env::current_dir()?;
+    let work = scratch()?;
+    let seen = Seen::default();
+    let env = Env {
+        schema: &schema,
+        image: &twin,
+        coverage: true,
+        release: &release,
+        root: &root,
+        reachable: &reachable,
+        work: &work,
+        seen: &seen,
+    };
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let failures = std::sync::Mutex::new(Vec::new());
+    std::thread::scope(|s| {
+        for _ in 0..jobs.clamp(1, todo.len().max(1)) {
+            s.spawn(|| {
+                loop {
+                    let i = next.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    let Some(t) = todo.get(i) else { break };
+                    let name = name_of(t);
+                    let started = std::time::Instant::now();
+                    let run = match t {
+                        (RunKind::Genesis, _, p) => {
+                            gates::genesis(&env, *p).map(|counts| gates::GateRun {
+                                kind: RunKind::Genesis,
+                                recipe: None,
+                                protocol: *p,
+                                counts,
+                                answers: Vec::new(),
+                            })
+                        }
+                        (RunKind::Padded, _, p) => gates::record(&env, None, *p),
+                        (_, Some(r), p) => {
+                            let (n, ir) = &recipes[*r];
+                            gates::record(&env, Some((n, ir)), *p)
+                        }
+                        _ => unreachable!("a recipe run names its recipe"),
+                    };
+                    match run.and_then(|r| gates::save(&r, &runs_dir)) {
+                        Ok(()) => eprintln!("{name}: {:.1}s", started.elapsed().as_secs_f64()),
+                        Err(e) => {
+                            eprintln!("{name}: {e:#}");
+                            failures
+                                .lock()
+                                .expect("no thread panics holding the lock")
+                                .push(format!("{name}: {e:#}"));
+                        }
+                    }
+                }
+            });
+        }
+    });
+    let runs = gates::load_all(&runs_dir)?;
+    let (summary, diffs) = gates::statuses(&mut list, &runs);
+    std::fs::write(
+        out.join("gates.json"),
+        serde_json::to_string_pretty(&list)? + "\n",
+    )?;
+    std::fs::write(
+        out.join("differences.json"),
+        serde_json::to_string_pretty(&diffs)? + "\n",
+    )?;
+    std::fs::write(
+        out.join("summary.json"),
+        serde_json::to_string_pretty(&summary)? + "\n",
+    )?;
+    println!(
+        "{} gates, {} sides: {} met, {} unmeetable, {} open ({} of them at calls the coverage mapping has no region for); {} gates show an output difference between N-1 and N",
+        summary.gates,
+        summary.sides,
+        summary.met,
+        summary.unmeetable,
+        summary.open,
+        summary.open_unmeasured,
+        summary.gates_with_difference
+    );
+    let failures = failures
+        .into_inner()
+        .expect("no thread panics holding the lock");
+    for f in &failures {
+        println!("run failed: {f}");
+    }
+    Ok(failures.is_empty())
 }
