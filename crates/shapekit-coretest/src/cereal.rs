@@ -13,7 +13,7 @@
 //! | 2 | `opaque[N]` | lowercase hex |
 //! | 3 | `opaque<N>` | lowercase hex |
 //! | 4 | non-byte arrays | json array (also generic) |
-//! | 5 | enums | member name, or the decimal value as a string when the value has no name |
+//! | 5 | enums, and `bool`, which xdrpp declares an enum | member name (`"TRUE"`, `"FALSE"` for a bool), or the decimal value as a string when the value has no name |
 //! | 6 | optionals (`T*`) | `null` or the value |
 //! | 7 | `PublicKey` | `G...` strkey |
 //! | 8 | `SCAddress` | `G...`, `C...`, hex for a claimable balance or pool id, `{id, ed25519}` for a muxed account, `{id, contractId}` for a muxed contract |
@@ -254,11 +254,14 @@ impl<'s> Pass<'s, '_> {
                 self.out.extend_from_slice(&n.to_be_bytes());
             }
             Type::Bool => {
-                let b = v.as_bool().ok_or_else(|| CerealError {
-                    path: path.into(),
-                    message: format!("expected a bool, found {v}"),
-                })?;
-                self.out.extend_from_slice(&u32::from(b).to_be_bytes());
+                // xdrpp declares bool an enum named FALSE and TRUE (`xdr_traits<bool>`,
+                // xdrpp/types.h), so rule 5 writes it as one of the two names
+                let b = match v.as_str() {
+                    Some("FALSE") => 0u32,
+                    Some("TRUE") => 1,
+                    _ => return err(path, format!("expected \"TRUE\" or \"FALSE\", found {v}")),
+                };
+                self.out.extend_from_slice(&b.to_be_bytes());
             }
             Type::Float | Type::Double => return err(path, "floating point types are not in use"),
             Type::OpaqueFixed { size } => {
@@ -669,6 +672,16 @@ mod tests {
         let doc: Value = serde_json::from_str(r#"{"Asset": "INVALID"}"#).unwrap();
         let e = Converter::new(&schema).document(&doc, "Asset").unwrap_err();
         assert!(e.message.contains("no inverse"), "{e}");
+    }
+
+    #[test]
+    fn bools_are_enum_names() {
+        let t = convert(r#"{"SCVal": {"type": "SCV_BOOL", "b": "TRUE"}}"#, "SCVal");
+        assert_eq!(t, [0, 0, 0, 0, 0, 0, 0, 1]);
+        let schema = Schema::pinned();
+        let doc: Value =
+            serde_json::from_str(r#"{"SCVal": {"type": "SCV_BOOL", "b": true}}"#).unwrap();
+        assert!(Converter::new(&schema).document(&doc, "SCVal").is_err());
     }
 
     #[test]
