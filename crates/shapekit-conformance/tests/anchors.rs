@@ -29,6 +29,9 @@ fn every_anchored_check_is_confirmed_by_its_ledger() {
     }
     assert!(unmapped.is_empty(), "{unmapped:#?}");
     for op in shapekit_conformance::anchors::OPS {
-        assert!(counts.get(op).copied().unwrap_or(0) > 0, "no {op} check in the corpus");
+        assert!(
+            counts.get(op).copied().unwrap_or(0) > 0,
+            "no {op} check in the corpus"
+        );
     }
 }
