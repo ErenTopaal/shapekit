@@ -97,8 +97,11 @@ fn write_workspace(ctx: &Context, ws: &Path) -> Result<()> {
     )?;
     unpack_crate(&ctx.version, &ws.join(CRATE))?;
     // the workspace lives outside the repository, so it takes the repository's toolchain along
-    std::fs::copy(root.join("rust-toolchain.toml"), ws.join("rust-toolchain.toml"))
-        .context("copying rust-toolchain.toml")?;
+    std::fs::copy(
+        root.join("rust-toolchain.toml"),
+        ws.join("rust-toolchain.toml"),
+    )
+    .context("copying rust-toolchain.toml")?;
     let pins = root.join(format!("testees/rust/versions/{}", ctx.version));
     let manifest = std::fs::read_to_string(pins.join("Cargo.toml"))?;
     let main = root.join("testees/rust/src/main.rs");
@@ -202,8 +205,8 @@ pub fn check(ctx: &Context) -> Result<Report> {
         list_argv.push("--exclude".to_string());
         list_argv.push(format!("{CRATE}/{e}"));
     }
-    let listed: Vec<Listed> =
-        serde_json::from_str(&output(&list_argv, &ws, &cargo_env)?).context("parsing the mutant list")?;
+    let listed: Vec<Listed> = serde_json::from_str(&output(&list_argv, &ws, &cargo_env)?)
+        .context("parsing the mutant list")?;
     let population = listed.len();
     ensure!(population > 0, "cargo-mutants lists no mutant");
     let chosen: Vec<&Listed> = sample(population, ctx.sample, ctx.seed)
@@ -362,6 +365,9 @@ mod tests {
             regex_escape("src/a.rs:6:5: replace main with ()"),
             "src/a\\.rs:6:5: replace main with \\(\\)"
         );
-        assert_eq!(regex_escape("<impl Foo>::x -> Vec<u8>"), "<impl Foo>::x -> Vec<u8>");
+        assert_eq!(
+            regex_escape("<impl Foo>::x -> Vec<u8>"),
+            "<impl Foo>::x -> Vec<u8>"
+        );
     }
 }

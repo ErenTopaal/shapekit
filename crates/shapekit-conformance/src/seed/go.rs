@@ -39,7 +39,10 @@ fn scope_files(sdk_dir: &Path) -> Result<Vec<String>> {
             .with_context(|| format!("reading {}/{dir}", sdk_dir.display()))?;
         for e in rd {
             let name = e?.file_name().to_string_lossy().into_owned();
-            if name.ends_with(".go") && !name.ends_with("_test.go") && !GENERATED.contains(&name.as_str()) {
+            if name.ends_with(".go")
+                && !name.ends_with("_test.go")
+                && !GENERATED.contains(&name.as_str())
+            {
                 out.push(format!("./{dir}/{name}"));
             }
         }
@@ -137,9 +140,8 @@ fn build_testee(setup: &ExecSetup, out: &Path) -> Result<()> {
 /// The exec command go-mutesting calls for every mutation; returns its exit code.
 pub fn exec(paths: &Paths, setup_file: &Path) -> Result<i32> {
     let setup: ExecSetup = read_json(setup_file)?;
-    let original = PathBuf::from(
-        std::env::var("MUTATE_ORIGINAL").context("MUTATE_ORIGINAL is not set")?,
-    );
+    let original =
+        PathBuf::from(std::env::var("MUTATE_ORIGINAL").context("MUTATE_ORIGINAL is not set")?);
     let changed =
         PathBuf::from(std::env::var("MUTATE_CHANGED").context("MUTATE_CHANGED is not set")?);
     let orig_text = std::fs::read_to_string(&original)
@@ -337,7 +339,10 @@ pub fn check(ctx: &Context) -> Result<Report> {
         unique.entry(l.digest.clone()).or_insert(l);
     }
     let population: Vec<Listed> = unique.into_values().collect();
-    ensure!(!population.is_empty(), "go-mutesting generates no mutation in the scope");
+    ensure!(
+        !population.is_empty(),
+        "go-mutesting generates no mutation in the scope"
+    );
     let chosen: Vec<&Listed> = sample(population.len(), ctx.sample, ctx.seed)
         .into_iter()
         .map(|i| &population[i])
@@ -352,7 +357,11 @@ pub fn check(ctx: &Context) -> Result<Report> {
     for l in &chosen {
         let record = setup.records.join(format!("{}.json", l.digest));
         if !record.is_file() {
-            bail!("go-mutesting did not run the sampled mutation {} of {}", l.digest, l.file);
+            bail!(
+                "go-mutesting did not run the sampled mutation {} of {}",
+                l.digest,
+                l.file
+            );
         }
         let outcome: ProbeOutcome = read_json(&record)?;
         let status = if record.with_extension("unviable").is_file() {
@@ -406,7 +415,10 @@ mod tests {
     fn describes_the_changed_lines() {
         let a = "package x\nfunc f() int {\n\treturn a + b\n}\n";
         let b = "package x\nfunc f() int {\n\treturn a - b\n}\n";
-        assert_eq!(describe(a, b), (3, "return a + b -> return a - b".to_string()));
+        assert_eq!(
+            describe(a, b),
+            (3, "return a + b -> return a - b".to_string())
+        );
         let c = "package x\nfunc f() int {\n}\n";
         assert_eq!(describe(a, c), (3, "return a + b -> ".to_string()));
     }

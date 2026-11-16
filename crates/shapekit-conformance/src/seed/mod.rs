@@ -40,12 +40,7 @@ pub struct Paths {
 }
 
 impl Paths {
-    pub fn new(
-        root: &Path,
-        manifest: &Path,
-        versions: &Path,
-        known_dir: &Path,
-    ) -> Result<Paths> {
+    pub fn new(root: &Path, manifest: &Path, versions: &Path, known_dir: &Path) -> Result<Paths> {
         let abs = |p: &Path| -> Result<PathBuf> {
             let p = if p.is_absolute() {
                 p.to_path_buf()
@@ -67,7 +62,12 @@ impl Paths {
 pub type Fingerprint = BTreeMap<String, Cell>;
 
 /// Runs the whole corpus on one version with `command` as its testee and returns its cells.
-pub fn corpus_cells(paths: &Paths, sdk: &str, version: &str, command: &[String]) -> Result<Fingerprint> {
+pub fn corpus_cells(
+    paths: &Paths,
+    sdk: &str,
+    version: &str,
+    command: &[String],
+) -> Result<Fingerprint> {
     let outcome = runner::run(&RunOptions {
         root: paths.root.clone(),
         manifest: paths.manifest.clone(),
@@ -171,7 +171,13 @@ pub fn probe(
 
 /// The unmodified build's cells, the reference every fault is compared with. The run must not
 /// fail: a baseline that cannot run makes every fault look caught.
-pub fn write_baseline(paths: &Paths, sdk: &str, version: &str, command: &[String], out: &Path) -> Result<()> {
+pub fn write_baseline(
+    paths: &Paths,
+    sdk: &str,
+    version: &str,
+    command: &[String],
+    out: &Path,
+) -> Result<()> {
     let cells = corpus_cells(paths, sdk, version, command)
         .context("running the corpus on the unmodified build")?;
     write_json(out, &cells)
@@ -281,7 +287,12 @@ impl Report {
 
 pub fn counts(faults: &[Fault]) -> BTreeMap<Status, usize> {
     let mut out = BTreeMap::new();
-    for s in [Status::Caught, Status::Timeout, Status::Missed, Status::Unviable] {
+    for s in [
+        Status::Caught,
+        Status::Timeout,
+        Status::Missed,
+        Status::Unviable,
+    ] {
         out.insert(s, 0);
     }
     for f in faults {
@@ -291,7 +302,14 @@ pub fn counts(faults: &[Fault]) -> BTreeMap<Status, usize> {
 }
 
 /// A fault's outcome as the report keeps it.
-pub fn fault_from(key: String, file: String, line: u32, mutation: String, status: Status, probe: Option<&ProbeOutcome>) -> Fault {
+pub fn fault_from(
+    key: String,
+    file: String,
+    line: u32,
+    mutation: String,
+    status: Status,
+    probe: Option<&ProbeOutcome>,
+) -> Fault {
     let (entries, changed, note) = match probe {
         Some(ProbeOutcome::Changed { entries }) => (
             entries.iter().take(WITNESS_LIMIT).cloned().collect(),
@@ -417,10 +435,7 @@ pub fn render_md(reports: &[Report]) -> String {
             .iter()
             .filter(|f| f.status == Status::Missed)
             .collect();
-        out.push_str(&format!(
-            "\n## Missed in {} {}\n\n",
-            r.sdk, r.version
-        ));
+        out.push_str(&format!("\n## Missed in {} {}\n\n", r.sdk, r.version));
         if missed.is_empty() {
             out.push_str("None.\n");
         } else {
@@ -510,17 +525,29 @@ pub struct Context {
     pub exe: PathBuf,
 }
 
+/// How a seed check runs.
+#[derive(Debug, Clone, Copy)]
+pub struct Settings {
+    pub sample: usize,
+    pub seed: u64,
+    pub build: bool,
+    pub jobs: usize,
+}
+
 impl Context {
     pub fn new(
         paths: Paths,
         sdk: &str,
         version: Option<&str>,
         work: &Path,
-        sample: usize,
-        seed: u64,
-        build: bool,
-        jobs: usize,
+        settings: Settings,
     ) -> Result<Context> {
+        let Settings {
+            sample,
+            seed,
+            build,
+            jobs,
+        } = settings;
         let file = VersionsFile::load(&paths.versions)?;
         let s = file.sdk(sdk)?;
         let version = version.unwrap_or(&s.current).to_string();

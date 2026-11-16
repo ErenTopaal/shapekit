@@ -90,7 +90,12 @@ fn tool_version(tool: &Path) -> Result<String> {
     struct Pkg {
         version: String,
     }
-    let p: Pkg = read_json(&tool.join("node_modules").join(STRYKER_PACKAGE).join("package.json"))?;
+    let p: Pkg = read_json(
+        &tool
+            .join("node_modules")
+            .join(STRYKER_PACKAGE)
+            .join("package.json"),
+    )?;
     Ok(p.version)
 }
 
@@ -175,8 +180,8 @@ pub fn check(ctx: &Context) -> Result<Report> {
         tool.join("list-mutants.mjs").display().to_string(),
     ];
     list_argv.extend(files.iter().cloned());
-    let listed: Vec<Listed> = serde_json::from_str(&output(&list_argv, work, &[])?)
-        .context("parsing the mutant list")?;
+    let listed: Vec<Listed> =
+        serde_json::from_str(&output(&list_argv, work, &[])?).context("parsing the mutant list")?;
     let population = listed.len();
     ensure!(population > 0, "stryker generates no mutant in the scope");
     let chosen: Vec<&Listed> = sample(population, ctx.sample, ctx.seed)

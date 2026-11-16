@@ -411,10 +411,12 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 &sdk,
                 version.as_deref(),
                 &work,
-                sample,
-                seed,
-                !no_build,
-                jobs,
+                seed::Settings {
+                    sample,
+                    seed,
+                    build: !no_build,
+                    jobs,
+                },
             )?;
             let report = seed::check(&ctx)?;
             let out = root.join(out);
