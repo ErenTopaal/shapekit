@@ -75,6 +75,10 @@ if [ ! -e "$src/.twin-fetched" ]; then
     git -C "$src" submodule update -q --init --recursive --depth 1
     touch "$src/.twin-fetched"
 fi
+# core's version string is `git describe --always --tags`; the shallow fetch
+# has no tags, so describe prints the commit, and a 40 digit abbreviation
+# makes it the full sha (the release image prints "30.0.0 (<sha>)")
+git -C "$src" config core.abbrev 40
 got=$(git -C "$src" rev-parse HEAD)
 if [ "$got" != "$commit" ]; then
     echo "source in $src is at $got, pins.toml pins $commit; delete $workdir to refetch" >&2
@@ -142,21 +146,25 @@ cp "$src/src/stellar-core" "$rt/stellar-core"
 docker build -q --target runtime --build-arg "BASE=$base" -t "$image" -f "$twin/Dockerfile" "$rt" >/dev/null
 took[image]=$(( $(now) - t0 ))
 
-reported=$(docker run --rm --memory 2g --cpus 2 "$image" version 2>/dev/null | sed -n 's/^stellar-core .*(\([0-9a-f]*\))$/\1/p' | head -1)
-if [ "$reported" != "$commit" ]; then
-    echo "$image reports commit '$reported', expected $commit" >&2
-    exit 1
-fi
-
 size=$(docker image inspect --format '{{.Size}}' "$image")
 disk=$(du -sb "$workdir" | cut -f1)
-echo "image        $image ($(docker image inspect --format '{{.Id}}' "$image"))"
-echo "commit       $reported"
-echo "jobs         make -j$jobs, cargo $jobs, limit $memory memory, $cpus cpus"
-echo "fetch        ${took[fetch]} s"
-echo "toolchain    ${took[toolchain]} s"
-echo "compile      ${took[compile]} s"
-echo "image build  ${took[image]} s"
-echo "peak memory  $peak bytes (compile container, cgroup memory.peak)"
-echo "work dir     $disk bytes ($workdir)"
-echo "image size   $size bytes"
+{
+    echo "image        $image ($(docker image inspect --format '{{.Id}}' "$image"))"
+    echo "jobs         make -j$jobs, cargo $jobs, limit $memory memory, $cpus cpus"
+    echo "fetch        ${took[fetch]} s"
+    echo "toolchain    ${took[toolchain]} s"
+    echo "compile      ${took[compile]} s"
+    echo "image build  ${took[image]} s"
+    echo "peak memory  $peak bytes (compile container, cgroup memory.peak)"
+    echo "work dir     $disk bytes ($workdir)"
+    echo "image size   $size bytes"
+} | tee "$workdir/measurements.txt"
+
+# the version line is core's version string, here the full commit
+version_out=$(docker run --rm --memory 2g --cpus 2 "$image" version 2>/dev/null)
+if ! grep -qx "$commit" <<<"$version_out"; then
+    echo "$image does not report commit $commit in its version output:" >&2
+    head -3 <<<"$version_out" >&2
+    exit 1
+fi
+echo "commit       $commit (stellar-core version)"
