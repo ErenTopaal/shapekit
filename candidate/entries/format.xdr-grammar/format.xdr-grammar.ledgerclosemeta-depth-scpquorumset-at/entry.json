@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ScpQuorumSet holding itself 500 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:LedgerCloseMeta#depth-ScpQuorumSet:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at/any.expected.json",
+      "expected_json_sha256": "9e9edc84e1c402616ad0e7ab6557a53cafeee3561ef6cfdd63dcc6b1d14847d2",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at/any.xdr",
+      "xdr_sha256": "84550b94ba9d8f741badf84da65b32be178e8d31b0f7d65e344cbb99eea91975"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

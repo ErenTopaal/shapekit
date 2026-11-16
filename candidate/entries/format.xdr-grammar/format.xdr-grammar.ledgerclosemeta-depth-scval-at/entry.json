@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerclosemeta-depth-scval-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ScVal holding itself 251 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:LedgerCloseMeta#depth-ScVal:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-at/any.expected.json",
+      "expected_json_sha256": "40f22ad2e9c83fe67ea828e368f5eeb0f01959672a2a7cf7bf86043c7999f86f",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-at/any.xdr",
+      "xdr_sha256": "7c9ba7e984b42f4b6ff58e83c2d42e6fd2dc22b438c06d675a63074b6883aec5"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

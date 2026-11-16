@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.transactionenvelope-depth-scval-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ScVal holding itself 246 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:TransactionEnvelope#depth-ScVal:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-at/any.expected.json",
+      "expected_json_sha256": "74508f5a9a336d033be158bdd938a605f6f914ff6e7812f37ee641f784a402ef",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-at/any.xdr",
+      "xdr_sha256": "7e2158b013dae47def74d2bf86eaee2fa8c6ec28075f88dc44ee5cff51ae813e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

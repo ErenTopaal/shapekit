@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.claimpredicate-depth-claimpredicate-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ClaimPredicate holding itself 498 times, 1000 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ClaimPredicate, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:ClaimPredicate#depth-ClaimPredicate:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-at/any.expected.json",
+      "expected_json_sha256": "e0bb63b4b1bfe15f97ef1fbbf23fd659d158b45944f3123e97989e7f3a2530c1",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-at/any.xdr",
+      "xdr_sha256": "595ed1386d4d23a21f3c99c408f09a9b4da85e71222ba85e3d2f53a148103962"
+    }
+  },
+  "xdr_type": "ClaimPredicate"
+}

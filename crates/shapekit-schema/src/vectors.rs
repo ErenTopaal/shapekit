@@ -55,12 +55,18 @@ pub enum VectorError {
     },
     #[error("encoding the smallest value of {0}: {1}")]
     Encode(String, String),
+    #[error("depth vectors of {group} inside {root}: {why}")]
+    Depth {
+        group: String,
+        root: String,
+        why: String,
+    },
 }
 
 /// Smallest values per definition, computed once.
 pub struct Builder<'a> {
-    schema: &'a Schema,
-    interp: Interp<'a>,
+    pub(crate) schema: &'a Schema,
+    pub(crate) interp: Interp<'a>,
     smallest: BTreeMap<String, Value>,
 }
 
@@ -96,7 +102,7 @@ impl<'a> Builder<'a> {
         self.smallest.get(name)
     }
 
-    fn smallest_type(&self, ty: &Type) -> Option<Value> {
+    pub(crate) fn smallest_type(&self, ty: &Type) -> Option<Value> {
         Some(match ty {
             Type::Int => Value::Int(0),
             Type::UnsignedInt => Value::UnsignedInt(0),
@@ -159,7 +165,7 @@ impl<'a> Builder<'a> {
         self.interp.encode(name, v).map_or(usize::MAX, |b| b.len())
     }
 
-    fn encode(&self, name: &str, v: &Value) -> Result<Vec<u8>, VectorError> {
+    pub(crate) fn encode(&self, name: &str, v: &Value) -> Result<Vec<u8>, VectorError> {
         self.interp
             .encode(name, v)
             .map_err(|e| VectorError::Encode(name.to_string(), e.to_string()))
@@ -433,7 +439,12 @@ impl<'a> Builder<'a> {
         })
     }
 
-    fn distinct_definition(&self, def: &Definition, k: u64, depth: u32) -> Option<Value> {
+    pub(crate) fn distinct_definition(
+        &self,
+        def: &Definition,
+        k: u64,
+        depth: u32,
+    ) -> Option<Value> {
         match def {
             Definition::Typedef(t) => self.distinct_type(&t.ty, k, depth),
             Definition::Struct(s) => s

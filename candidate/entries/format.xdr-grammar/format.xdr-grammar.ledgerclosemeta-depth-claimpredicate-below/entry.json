@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ClaimPredicate holding itself 499 times, 1011 levels deep by the measured count against a limit of 1012 (1009 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:LedgerCloseMeta#depth-ClaimPredicate:below"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below/any.expected.json",
+      "expected_json_sha256": "34c9cc4024a4e6d8e48844bff94387ce24eea2d661a5363ceacac3361764f32a",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below/any.xdr",
+      "xdr_sha256": "0c64181c9ab510892004191113847dde9c83230e708bd3ff44e1281fd2fac33e"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

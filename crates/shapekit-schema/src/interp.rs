@@ -79,6 +79,8 @@ struct Reader<'b> {
     bytes: &'b [u8],
     at: usize,
     depth: u32,
+    /// The most nested types entered at once so far.
+    deepest: u32,
 }
 
 impl Reader<'_> {
@@ -158,10 +160,21 @@ impl<'a> Interp<'a> {
 
     /// Decodes exactly one value of the named type from all of `bytes`.
     pub fn decode(&self, type_name: &str, bytes: &[u8]) -> Result<Value, DecodeError> {
+        self.decode_nesting(type_name, bytes).map(|(v, _)| v)
+    }
+
+    /// [`Self::decode`], and the most nested types the value holds by this interpreter's count
+    /// (the root definition is 1).
+    pub fn decode_nesting(
+        &self,
+        type_name: &str,
+        bytes: &[u8],
+    ) -> Result<(Value, u32), DecodeError> {
         let mut r = Reader {
             bytes,
             at: 0,
             depth: 0,
+            deepest: 0,
         };
         let ty = Type::Ref {
             name: type_name.to_string(),
@@ -170,7 +183,7 @@ impl<'a> Interp<'a> {
         if r.at != bytes.len() {
             return Err(r.fail(DecodeErrorKind::Trailing(bytes.len() - r.at)));
         }
-        Ok(v)
+        Ok((v, r.deepest))
     }
 
     fn nested<T>(
@@ -182,6 +195,7 @@ impl<'a> Interp<'a> {
             return Err(r.fail(DecodeErrorKind::Depth(self.depth_limit)));
         }
         r.depth += 1;
+        r.deepest = r.deepest.max(r.depth);
         let out = f(r);
         r.depth -= 1;
         out

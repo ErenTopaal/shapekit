@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "SorobanAuthorizedInvocation holding itself 496 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:LedgerCloseMeta#depth-SorobanAuthorizedInvocation:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at/any.expected.json",
+      "expected_json_sha256": "944c58fd8cdf4b841471c69ed3372f51771a015c594a8d06fbb958ad1973d15b",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at/any.xdr",
+      "xdr_sha256": "5939451949e14c1992ca67c9a79b909a038517254bc425e2e01a1c083ee43917"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

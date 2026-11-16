@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.scspectypedef-depth-scspectypedef-at",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ScSpecTypeDef holding itself 247 times, 1000 levels deep by the measured count against a limit of 1000 (500 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScSpecTypeDef, so a decoder that allows that many levels must read it",
+  "obligations": [
+    "format:ScSpecTypeDef#depth-ScSpecTypeDef:at"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-at/any.expected.json",
+      "expected_json_sha256": "33111e1b260b0f9ff7f3ac420cec81ec15d48f3e976a303340e49eca7bea803b",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-at/any.xdr",
+      "xdr_sha256": "9f3a80e05d39f2700bb96cfdccc2f4566dbb332e3e69085cee88e4e2669bcb91"
+    }
+  },
+  "xdr_type": "ScSpecTypeDef"
+}

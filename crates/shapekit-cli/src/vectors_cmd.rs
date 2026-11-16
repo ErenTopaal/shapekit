@@ -61,7 +61,15 @@ pub fn run(command: VectorsCommand) -> Result<bool> {
             out,
             history,
             check,
-        } => gen_format(&out, &history, check),
+        } => {
+            // the recursion-depth vectors nest values a thousand levels deep, which the
+            // interpreter and stellar-xdr both walk recursively
+            std::thread::Builder::new()
+                .stack_size(1 << 30)
+                .spawn(move || gen_format(&out, &history, check))?
+                .join()
+                .map_err(|_| anyhow::anyhow!("the vector generator panicked"))?
+        }
         VectorsCommand::Gaps {
             registry,
             out,
@@ -313,6 +321,10 @@ fn gaps(registry: &Path, out: &Path, check: bool) -> Result<bool> {
     Ok(same)
 }
 
+/// A format vector waiting to be written: the vector, the protocol its types first appear in,
+/// its notes and its linked issues.
+type Pending<'a> = (shapekit_schema::vectors::Vector, u32, String, Vec<&'a str>);
+
 const FORMAT_FAMILY: &str = "format.xdr-grammar";
 
 /// A lowercase id slug from free text: runs of anything but a-z and 0-9 become one dash.
@@ -345,10 +357,8 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
     };
     let builder = Builder::new(&schema);
 
-    let mut files: BTreeMap<PathBuf, Vec<u8>> = BTreeMap::new();
-    let mut ids = std::collections::BTreeSet::new();
-    let mut refused_by_stellar_xdr = Vec::new();
-    let (mut points, mut vectors) = (std::collections::BTreeSet::new(), 0usize);
+    // every vector with the protocol its types first appear in, its notes and linked issues
+    let mut pending: Vec<Pending> = Vec::new();
     for d in schema.definitions() {
         if matches!(d, Definition::Const(_)) {
             continue;
@@ -359,59 +369,6 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
             .with_context(|| format!("{ty} has no first-seen tag"))?;
         let protocol = protocol_of(seen)?;
         for v in builder.vectors(d.name())? {
-            let mut id = format!(
-                "{FORMAT_FAMILY}.{}",
-                slug(v.obligation.trim_start_matches("format:"))
-            );
-            let mut n = 2;
-            while ids.contains(&id) {
-                id = format!(
-                    "{FORMAT_FAMILY}.{}-{n}",
-                    slug(v.obligation.trim_start_matches("format:"))
-                );
-                n += 1;
-            }
-            ids.insert(id.clone());
-            points.insert(format!("{}{}", v.type_name, v.point));
-            vectors += 1;
-
-            let dir = format!("entries/{FORMAT_FAMILY}/{id}");
-            let xdr_file = format!("{dir}/any.xdr");
-            let mut variant = json!({
-                "xdr_file": xdr_file,
-                "xdr_sha256": shapekit_manifest::sha256_hex(&v.bytes),
-            });
-            let expected = match v.expect {
-                Expect::MustAccept => {
-                    let limits = shapekit_manifest::decode_limits(&v.type_name, v.bytes.len());
-                    match shapekit_manifest::xdr::to_xdr_json(&v.type_name, &v.bytes, limits) {
-                        Ok(text) => {
-                            let json_file = format!("{dir}/any.expected.json");
-                            variant["expected_json_file"] = json!(json_file);
-                            variant["expected_json_sha256"] =
-                                json!(shapekit_manifest::sha256_hex(text.as_bytes()));
-                            files.insert(out.join(&json_file), text.into_bytes());
-                        }
-                        Err(err) => {
-                            // a value RFC 4506 allows that stellar-xdr does not read is a
-                            // finding, not a vector to commit with a guessed expectation
-                            refused_by_stellar_xdr.push(format!("{id}: {err}"));
-                            ids.remove(&id);
-                            vectors -= 1;
-                            continue;
-                        }
-                    }
-                    json!({"decode": "must-accept", "roundtrip": true, "validity": "valid"})
-                }
-                Expect::MustReject => {
-                    json!({"decode": "must-reject", "roundtrip": false, "validity": "not-emittable"})
-                }
-                Expect::ImplementationDefined => json!({
-                    "decode": "implementation-defined",
-                    "roundtrip": false,
-                    "validity": "not-emittable",
-                }),
-            };
             let bool_word = v.expect == Expect::ImplementationDefined;
             let notes = if bool_word {
                 format!(
@@ -429,30 +386,99 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
             } else {
                 Vec::new()
             };
-            let entry = json!({
-                "id": id,
-                "kind": "xdr",
-                "family": FORMAT_FAMILY,
-                "caps": [],
-                "protocol": {"introduced": protocol, "valid_min": protocol},
-                "xdr_type": v.type_name,
-                "source": {"class": "synthetic"},
-                "synthetic": true,
-                "passphrase_dependent": false,
-                "variants": {"any": variant},
-                "expected": expected,
-                "flags": ["format-vector"],
-                "fields_exercised": [],
-                "linked_issues": linked,
-                "notes": notes,
-                "obligations": [v.obligation],
-            });
-            files.insert(
-                out.join(format!("{dir}/entry.json")),
-                render_json(&entry).into_bytes(),
-            );
-            files.insert(out.join(&xdr_file), v.bytes.clone());
+            pending.push((v, protocol, notes, linked));
         }
+    }
+    let depth = depth_vectors(&schema, &builder, &|name: &str| -> Result<u32> {
+        let seen = first_seen
+            .get(&rust_type_name(name))
+            .with_context(|| format!("{name} has no first-seen tag"))?;
+        protocol_of(seen)
+    })?;
+    let depth_count = depth.len();
+    pending.extend(depth);
+
+    let mut files: BTreeMap<PathBuf, Vec<u8>> = BTreeMap::new();
+    let mut ids = std::collections::BTreeSet::new();
+    let mut refused_by_stellar_xdr = Vec::new();
+    let (mut points, mut vectors) = (std::collections::BTreeSet::new(), 0usize);
+    for (v, protocol, notes, linked) in pending {
+        let mut id = format!(
+            "{FORMAT_FAMILY}.{}",
+            slug(v.obligation.trim_start_matches("format:"))
+        );
+        let mut n = 2;
+        while ids.contains(&id) {
+            id = format!(
+                "{FORMAT_FAMILY}.{}-{n}",
+                slug(v.obligation.trim_start_matches("format:"))
+            );
+            n += 1;
+        }
+        ids.insert(id.clone());
+        points.insert(format!("{}{}", v.type_name, v.point));
+        vectors += 1;
+
+        let dir = format!("entries/{FORMAT_FAMILY}/{id}");
+        let xdr_file = format!("{dir}/any.xdr");
+        let mut variant = json!({
+            "xdr_file": xdr_file,
+            "xdr_sha256": shapekit_manifest::sha256_hex(&v.bytes),
+        });
+        let expected = match v.expect {
+            Expect::MustAccept => {
+                let limits = shapekit_manifest::decode_limits(&v.type_name, v.bytes.len());
+                match shapekit_manifest::xdr::to_xdr_json(&v.type_name, &v.bytes, limits) {
+                    Ok(text) => {
+                        let json_file = format!("{dir}/any.expected.json");
+                        variant["expected_json_file"] = json!(json_file);
+                        variant["expected_json_sha256"] =
+                            json!(shapekit_manifest::sha256_hex(text.as_bytes()));
+                        files.insert(out.join(&json_file), text.into_bytes());
+                    }
+                    Err(err) => {
+                        // a value RFC 4506 allows that stellar-xdr does not read is a
+                        // finding, not a vector to commit with a guessed expectation
+                        refused_by_stellar_xdr.push(format!("{id}: {err}"));
+                        ids.remove(&id);
+                        vectors -= 1;
+                        continue;
+                    }
+                }
+                json!({"decode": "must-accept", "roundtrip": true, "validity": "valid"})
+            }
+            Expect::MustReject => {
+                json!({"decode": "must-reject", "roundtrip": false, "validity": "not-emittable"})
+            }
+            Expect::ImplementationDefined => json!({
+                "decode": "implementation-defined",
+                "roundtrip": false,
+                "validity": "not-emittable",
+            }),
+        };
+        let entry = json!({
+            "id": id,
+            "kind": "xdr",
+            "family": FORMAT_FAMILY,
+            "caps": [],
+            "protocol": {"introduced": protocol, "valid_min": protocol},
+            "xdr_type": v.type_name,
+            "source": {"class": "synthetic"},
+            "synthetic": true,
+            "passphrase_dependent": false,
+            "variants": {"any": variant},
+            "expected": expected,
+            "flags": ["format-vector"],
+            "fields_exercised": [],
+            "linked_issues": linked,
+            "notes": notes,
+            "obligations": [v.obligation],
+        });
+        files.insert(
+            out.join(format!("{dir}/entry.json")),
+            render_json(&entry).into_bytes(),
+        );
+        files.insert(out.join(&xdr_file), v.bytes.clone());
     }
 
     let root = out.join("entries").join(FORMAT_FAMILY);
@@ -480,7 +506,7 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
         }
     }
     println!(
-        "{} decision points, {vectors} vectors in {} entries {}",
+        "{} decision points, {vectors} vectors in {} entries {} ({depth_count} recursion-depth vectors)",
         points.len(),
         ids.len(),
         if check { "checked" } else { "written" }
@@ -489,6 +515,91 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
         println!("stellar-xdr refuses a value the interpreter accepts: {r}");
     }
     Ok(same && refused_by_stellar_xdr.is_empty())
+}
+
+/// The levels stellar-xdr needs to read `bytes` as `type_name`: the smallest depth limit it
+/// decodes them under, the count the corpus limits are written in (`decode_depth`). One limit
+/// lower must fail on depth and nothing else.
+fn stellar_xdr_depth(type_name: &str, bytes: &[u8]) -> std::result::Result<u32, String> {
+    let try_at = |depth: u32| {
+        shapekit_manifest::xdr::decode(
+            type_name,
+            bytes,
+            Limits {
+                depth,
+                len: bytes.len(),
+            },
+        )
+    };
+    const CEILING: u32 = 1 << 14;
+    try_at(CEILING).map_err(|e| format!("stellar-xdr refuses it at depth {CEILING}: {e}"))?;
+    let (mut lo, mut hi) = (0, CEILING);
+    while hi - lo > 1 {
+        let mid = lo + (hi - lo) / 2;
+        if try_at(mid).is_ok() {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    match try_at(hi - 1) {
+        Err(shapekit_manifest::ToolkitError::Decode(stellar_xdr::Error::DepthLimitExceeded)) => {
+            Ok(hi)
+        }
+        other => Err(format!(
+            "one level under {hi} stellar-xdr does not stop on depth: {other:?}"
+        )),
+    }
+}
+
+/// The recursion-depth vectors: for each recursive group, inside the group's own entry type
+/// and inside `TransactionEnvelope` and `LedgerCloseMeta` where they reach it, one value a
+/// level under the corpus limit for that root (`decode_depth`), one on it and one a level
+/// over it, counted the way stellar-xdr counts. Each comes with the protocol its types first
+/// appear in, its notes and its linked issues.
+fn depth_vectors<'a>(
+    schema: &shapekit_schema::Schema,
+    builder: &shapekit_schema::vectors::Builder<'_>,
+    protocol: &dyn Fn(&str) -> Result<u32>,
+) -> Result<Vec<Pending<'a>>> {
+    use shapekit_schema::nesting::Side;
+
+    let graph = schema.graph();
+    let mut out = Vec::new();
+    for group in graph.recursive_groups() {
+        let entry = builder.group_entry(&group);
+        let mut roots = vec![entry.clone()];
+        for r in ["TransactionEnvelope", "LedgerCloseMeta"] {
+            if graph.reachable(r)?.contains(entry.as_str()) {
+                roots.push(r.to_string());
+            }
+        }
+        for root in roots {
+            let limit =
+                shapekit_manifest::decode_depth(&shapekit_schema::names::rust_type_name(&root));
+            let found = builder.depth_vectors(&group, &root, limit, &mut |ty, bytes| {
+                stellar_xdr_depth(ty, bytes)
+            })?;
+            for d in found {
+                let mut p = 0;
+                for t in &d.types {
+                    p = p.max(protocol(t)?);
+                }
+                let notes = match d.side {
+                    Side::Below | Side::At => format!(
+                        "{}, counted by stellar-xdr. stellar-xdr reads it under the corpus limit for {}, so a decoder that allows that many levels must read it",
+                        d.vector.note, d.vector.type_name
+                    ),
+                    Side::Above => format!(
+                        "{}, counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for {}: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+                        d.vector.note, d.vector.type_name
+                    ),
+                };
+                out.push((d.vector, p, notes, Vec::new()));
+            }
+        }
+    }
+    Ok(out)
 }
 
 fn walk(dir: &Path) -> Result<std::collections::BTreeSet<PathBuf>> {

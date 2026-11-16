@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "implementation-defined",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-above",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "ScpQuorumSet holding itself 502 times, 1013 levels deep by the measured count against a limit of 1012 (1012 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+  "obligations": [
+    "format:LedgerCloseMeta#depth-ScpQuorumSet:above"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-above/any.xdr",
+      "xdr_sha256": "05ed35a96ae2d6b6e1e47014411bdcb9a9d396468eb66b41aec8ddeacc41519b"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

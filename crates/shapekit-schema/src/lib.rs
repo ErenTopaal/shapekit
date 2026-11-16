@@ -12,6 +12,7 @@ pub mod history;
 pub mod interp;
 pub mod mutate;
 pub mod names;
+pub mod nesting;
 pub mod vectors;
 
 use std::collections::BTreeMap;

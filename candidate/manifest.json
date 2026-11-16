@@ -15908,6 +15908,118 @@
     {
       "caps": [],
       "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.claimpredicate-depth-claimpredicate-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 499 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for ClaimPredicate: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:ClaimPredicate#depth-ClaimPredicate:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-above/any.xdr",
+          "xdr_sha256": "b62240895562bbb2e27d87b898d8b5a2bce60f0aca8dfec1b239f14ac03eef76"
+        }
+      },
+      "xdr_type": "ClaimPredicate"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.claimpredicate-depth-claimpredicate-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 498 times, 1000 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ClaimPredicate, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ClaimPredicate#depth-ClaimPredicate:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-at/any.expected.json",
+          "expected_json_sha256": "e0bb63b4b1bfe15f97ef1fbbf23fd659d158b45944f3123e97989e7f3a2530c1",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-at/any.xdr",
+          "xdr_sha256": "595ed1386d4d23a21f3c99c408f09a9b4da85e71222ba85e3d2f53a148103962"
+        }
+      },
+      "xdr_type": "ClaimPredicate"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.claimpredicate-depth-claimpredicate-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 498 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ClaimPredicate, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ClaimPredicate#depth-ClaimPredicate:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-below/any.expected.json",
+          "expected_json_sha256": "55caee03bc1ca9534f20e275a1572cfb47ced656425b7536cf52d60c231608ef",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.claimpredicate-depth-claimpredicate-below/any.xdr",
+          "xdr_sha256": "28b03419020e61af7fe6e36cefa5b84594811de2a79cf115b362feac60a26d2c"
+        }
+      },
+      "xdr_type": "ClaimPredicate"
+    },
+    {
+      "caps": [],
+      "expected": {
         "decode": "must-accept",
         "roundtrip": true,
         "validity": "valid"
@@ -48632,6 +48744,566 @@
         }
       },
       "xdr_type": "LedgerBounds"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 500 times, 1013 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ClaimPredicate:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-above/any.xdr",
+          "xdr_sha256": "30045cac1714214d997d25735841a3dc5e5900881ae8b45c93e44b451ac2fee9"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 500 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ClaimPredicate:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at/any.expected.json",
+          "expected_json_sha256": "1318cd4d9c44171e1fbefdaab91929afbdb4dffdce85ab6e6fe90a7c462dd25c",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at/any.xdr",
+          "xdr_sha256": "f9bc2689ca48e9dbf28dadf59886aea8bb4ab28b292c6cf7722a9363ee08b854"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 499 times, 1011 levels deep by the measured count against a limit of 1012 (1009 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ClaimPredicate:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below/any.expected.json",
+          "expected_json_sha256": "34c9cc4024a4e6d8e48844bff94387ce24eea2d661a5363ceacac3361764f32a",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below/any.xdr",
+          "xdr_sha256": "0c64181c9ab510892004191113847dde9c83230e708bd3ff44e1281fd2fac33e"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 502 times, 1013 levels deep by the measured count against a limit of 1012 (1012 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScpQuorumSet:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-above/any.xdr",
+          "xdr_sha256": "05ed35a96ae2d6b6e1e47014411bdcb9a9d396468eb66b41aec8ddeacc41519b"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 500 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScpQuorumSet:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at/any.expected.json",
+          "expected_json_sha256": "9e9edc84e1c402616ad0e7ab6557a53cafeee3561ef6cfdd63dcc6b1d14847d2",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at/any.xdr",
+          "xdr_sha256": "84550b94ba9d8f741badf84da65b32be178e8d31b0f7d65e344cbb99eea91975"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 501 times, 1011 levels deep by the measured count against a limit of 1012 (1010 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScpQuorumSet:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below/any.expected.json",
+          "expected_json_sha256": "5f7e720fdd2dd9e24316d75a9387e831b499387d75ac6b03f239a1d70be0e417",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below/any.xdr",
+          "xdr_sha256": "c5ea78c54ff71313f0e8bddf127f52de221e016341a365972a8fb87cd64d7aab"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scval-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 251 times, 1013 levels deep by the measured count against a limit of 1012 (1012 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScVal:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-above/any.xdr",
+          "xdr_sha256": "b1a069944c4ea830ea75714bfc5f0caabf035d814b59694fde7ce1d6564b5f34"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scval-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 251 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScVal:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-at/any.expected.json",
+          "expected_json_sha256": "40f22ad2e9c83fe67ea828e368f5eeb0f01959672a2a7cf7bf86043c7999f86f",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-at/any.xdr",
+          "xdr_sha256": "7c9ba7e984b42f4b6ff58e83c2d42e6fd2dc22b438c06d675a63074b6883aec5"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-scval-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 250 times, 1011 levels deep by the measured count against a limit of 1012 (1010 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-ScVal:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-below/any.expected.json",
+          "expected_json_sha256": "7a0046fe11c50128b0ea5aee4b3536e2c6622e3dee176b78b60ae6f70abaccc3",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-scval-below/any.xdr",
+          "xdr_sha256": "57aed50b41f5633ca7b6310f7f33eeffa5045961d85a900780260aac94fa05ac"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 496 times, 1013 levels deep by the measured count against a limit of 1012 (1012 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanAuthorizedInvocation:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-above/any.xdr",
+          "xdr_sha256": "fb367549b66a8e05d04d1547d474103d3a2cd1e1aa1eac334a1f2c3bf211b9c9"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 496 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanAuthorizedInvocation:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at/any.expected.json",
+          "expected_json_sha256": "944c58fd8cdf4b841471c69ed3372f51771a015c594a8d06fbb958ad1973d15b",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at/any.xdr",
+          "xdr_sha256": "5939451949e14c1992ca67c9a79b909a038517254bc425e2e01a1c083ee43917"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 495 times, 1011 levels deep by the measured count against a limit of 1012 (1010 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanAuthorizedInvocation:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-below/any.expected.json",
+          "expected_json_sha256": "8620feeddb9d65c7d80dd9f6f5712030dbabdeaf9d40b91e722000d41686adef",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-below/any.xdr",
+          "xdr_sha256": "8416034065641d16807cdacc45ba40b5616dcccdd5cb9b8d23de24203d1baa6e"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 496 times, 1013 levels deep by the measured count against a limit of 1012 (1012 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for LedgerCloseMeta: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanDelegateSignature:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-above/any.xdr",
+          "xdr_sha256": "e9670fa6df4269edbc4f8045ea680d88116080a6a50377853c16e275c262e96b"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 495 times, 1012 levels deep by the measured count against a limit of 1012 (1011 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanDelegateSignature:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-at/any.expected.json",
+          "expected_json_sha256": "d346f920dcaec5e85885d2394939dc546249372186e7d7189dc810fb277c00fc",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-at/any.xdr",
+          "xdr_sha256": "a5263598feb488f266a0922523a1e9903602f6c85bd7e612b69050ea41db67ab"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 495 times, 1011 levels deep by the measured count against a limit of 1012 (1010 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for LedgerCloseMeta, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:LedgerCloseMeta#depth-SorobanDelegateSignature:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-below/any.expected.json",
+          "expected_json_sha256": "57403e34948e958ba29d8644275a6e4e6e8a32002f9bf943d94b92d74f0070dd",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-below/any.xdr",
+          "xdr_sha256": "3ca201de5de3c6f8b872c9e0651b5e024e404370a51dcc98d066e0073bff2724"
+        }
+      },
+      "xdr_type": "LedgerCloseMeta"
     },
     {
       "caps": [],
@@ -92404,6 +93076,118 @@
     {
       "caps": [],
       "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scpquorumset-depth-scpquorumset-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 499 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for ScpQuorumSet: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:ScpQuorumSet#depth-ScpQuorumSet:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scpquorumset-depth-scpquorumset-above/any.xdr",
+          "xdr_sha256": "1649b56b41796dfaf2871e89ae57c4e0e6472d31f3fd7d74e660e6181446105d"
+        }
+      },
+      "xdr_type": "ScpQuorumSet"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scpquorumset-depth-scpquorumset-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 497 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScpQuorumSet, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScpQuorumSet#depth-ScpQuorumSet:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scpquorumset-depth-scpquorumset-at/any.expected.json",
+          "expected_json_sha256": "43f9d66b264593c7ac919fdf05ab5fe2956da7a569c707132d617d30fe46b088",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scpquorumset-depth-scpquorumset-at/any.xdr",
+          "xdr_sha256": "a28ca5c4823f47bdd351873dd365f01a5fa26ee41de09a6d05dd2f39ff8bd5ab"
+        }
+      },
+      "xdr_type": "ScpQuorumSet"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scpquorumset-depth-scpquorumset-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScpQuorumSet holding itself 498 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScpQuorumSet, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScpQuorumSet#depth-ScpQuorumSet:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scpquorumset-depth-scpquorumset-below/any.expected.json",
+          "expected_json_sha256": "eae8f24cfbf3eb759ed89ebb3ee7b262b6a286b5343ec7ed8a002ae7178e7045",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scpquorumset-depth-scpquorumset-below/any.xdr",
+          "xdr_sha256": "8601806b2734c2c20343aacd612bb8514259698651017898aee0a7a7a743867f"
+        }
+      },
+      "xdr_type": "ScpQuorumSet"
+    },
+    {
+      "caps": [],
+      "expected": {
         "decode": "must-accept",
         "roundtrip": true,
         "validity": "valid"
@@ -99467,6 +100251,118 @@
           "expected_json_sha256": "c2f78bf8d2408f34b1465b43e75046b515bc49549684788c52ec9948abf93b36",
           "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-bytes-n/any.xdr",
           "xdr_sha256": "dc27e7244c702e26ce6450a49dc88aca0f4fe8ba5c4f3bba7888efb344f7a033"
+        }
+      },
+      "xdr_type": "ScSpecTypeDef"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scspectypedef-depth-scspectypedef-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScSpecTypeDef holding itself 247 times, 1001 levels deep by the measured count against a limit of 1000 (501 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for ScSpecTypeDef: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:ScSpecTypeDef#depth-ScSpecTypeDef:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-above/any.xdr",
+          "xdr_sha256": "7272b3c9555e970ab0d825cde048a9baaa096d6676fc325074803cbd171d5218"
+        }
+      },
+      "xdr_type": "ScSpecTypeDef"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scspectypedef-depth-scspectypedef-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScSpecTypeDef holding itself 247 times, 1000 levels deep by the measured count against a limit of 1000 (500 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScSpecTypeDef, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScSpecTypeDef#depth-ScSpecTypeDef:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-at/any.expected.json",
+          "expected_json_sha256": "33111e1b260b0f9ff7f3ac420cec81ec15d48f3e976a303340e49eca7bea803b",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-at/any.xdr",
+          "xdr_sha256": "9f3a80e05d39f2700bb96cfdccc2f4566dbb332e3e69085cee88e4e2669bcb91"
+        }
+      },
+      "xdr_type": "ScSpecTypeDef"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scspectypedef-depth-scspectypedef-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScSpecTypeDef holding itself 249 times, 999 levels deep by the measured count against a limit of 1000 (500 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScSpecTypeDef, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScSpecTypeDef#depth-ScSpecTypeDef:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-below/any.expected.json",
+          "expected_json_sha256": "94a86ccf5dea642f2c9bc176486568dd8d240991b04d44ceff11b21b96700d6a",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scspectypedef-depth-scspectypedef-below/any.xdr",
+          "xdr_sha256": "3ef9e1a3f4ca0aeae60d10091b59abb7d8b871d58696a1287f0a0645c2b4cd0d"
         }
       },
       "xdr_type": "ScSpecTypeDef"
@@ -108796,6 +109692,118 @@
           "expected_json_sha256": "75c2e2e165de2253c7fee5a1a5fb4b3c8ed427aa2b72a2a58f381f5d0582101f",
           "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-contract-instance/any.xdr",
           "xdr_sha256": "a7afd6c04b656c91fd7b50eb527700705d95b0ed9b487653c8057a8ec9e4e8eb"
+        }
+      },
+      "xdr_type": "ScVal"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scval-depth-scval-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 249 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for ScVal: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:ScVal#depth-ScVal:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-depth-scval-above/any.xdr",
+          "xdr_sha256": "b7096e034cc1a11182c7faf0af771253548533b328305ddc724cef6c35610bb3"
+        }
+      },
+      "xdr_type": "ScVal"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scval-depth-scval-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 249 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScVal, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScVal#depth-ScVal:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-depth-scval-at/any.expected.json",
+          "expected_json_sha256": "5c8f654891018eaa4cb37d31da03f71d950d44051223d41c3e993aa67c90e6d9",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-depth-scval-at/any.xdr",
+          "xdr_sha256": "ee94f79bbd5302971a5dd43fac8294d30f38a64bb0bffb3b41ea33f0cd2a6dfe"
+        }
+      },
+      "xdr_type": "ScVal"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.scval-depth-scval-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 249 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for ScVal, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:ScVal#depth-ScVal:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-depth-scval-below/any.expected.json",
+          "expected_json_sha256": "4b4488ea460ae95e1c76359ba9c82686e3e6c842d7c7f79786eeba976e8acf41",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-depth-scval-below/any.xdr",
+          "xdr_sha256": "d991d6e6462483d3c835bf6c0d47db86111f32124df58521764ae737ed6b28d9"
         }
       },
       "xdr_type": "ScVal"
@@ -118979,6 +119987,118 @@
     {
       "caps": [],
       "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 497 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for SorobanAuthorizedInvocation: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:SorobanAuthorizedInvocation#depth-SorobanAuthorizedInvocation:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-above/any.xdr",
+          "xdr_sha256": "1fed2850ba3445faad0d58a8929dbd039f51b083bdcb5f6592ce368fc383b236"
+        }
+      },
+      "xdr_type": "SorobanAuthorizedInvocation"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 496 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for SorobanAuthorizedInvocation, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:SorobanAuthorizedInvocation#depth-SorobanAuthorizedInvocation:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-at/any.expected.json",
+          "expected_json_sha256": "29d43de36c016f84ba81408d943efcc202558f49b8fa7d0e9adae528bee76c22",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-at/any.xdr",
+          "xdr_sha256": "b28934b8757b53ad0c14ca5cac7344f0a5ff67e5b3192d0b9e1be33e9c926e7a"
+        }
+      },
+      "xdr_type": "SorobanAuthorizedInvocation"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 496 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for SorobanAuthorizedInvocation, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:SorobanAuthorizedInvocation#depth-SorobanAuthorizedInvocation:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-below/any.expected.json",
+          "expected_json_sha256": "79f956965df21dba4f923f31be4532a02e85ef1b2863e273201eda8bad16d9a0",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-below/any.xdr",
+          "xdr_sha256": "a06c12b48c7aadf0628f17b0485818e9ede505615a6b7ab57fd032785dcbc1f5"
+        }
+      },
+      "xdr_type": "SorobanAuthorizedInvocation"
+    },
+    {
+      "caps": [],
+      "expected": {
         "decode": "must-accept",
         "roundtrip": true,
         "validity": "valid"
@@ -119869,6 +120989,118 @@
         }
       },
       "xdr_type": "SorobanCredentialsType"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 498 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for SorobanDelegateSignature: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:SorobanDelegateSignature#depth-SorobanDelegateSignature:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-above/any.xdr",
+          "xdr_sha256": "f1a969d375f40d58db1327bbe28f402e9d792eb49ab228b4a0171a34247ba56b"
+        }
+      },
+      "xdr_type": "SorobanDelegateSignature"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 497 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for SorobanDelegateSignature, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:SorobanDelegateSignature#depth-SorobanDelegateSignature:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-at/any.expected.json",
+          "expected_json_sha256": "059c9fc4a902250bbf690bb6755bf27daeee75bc3cecf1d2318f0c5b58017ad8",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-at/any.xdr",
+          "xdr_sha256": "c0f382c3a299244918a6c9f76e19d5fd17ab704b26c3069bb15b3ef7d84cfd2f"
+        }
+      },
+      "xdr_type": "SorobanDelegateSignature"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 497 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for SorobanDelegateSignature, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:SorobanDelegateSignature#depth-SorobanDelegateSignature:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-below/any.expected.json",
+          "expected_json_sha256": "cbe99272fdb1cfcba103ced6f7f6539096e2ad9393b45c5623f6d7495b6f5beb",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-below/any.xdr",
+          "xdr_sha256": "3badbb5667150588ec2ecf4d4e4c5086370ac9c4d3dea8557e678c5f54f3169b"
+        }
+      },
+      "xdr_type": "SorobanDelegateSignature"
     },
     {
       "caps": [],
@@ -129374,6 +130606,454 @@
         }
       },
       "xdr_type": "Transaction"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-claimpredicate-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 494 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for TransactionEnvelope: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ClaimPredicate:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-claimpredicate-above/any.xdr",
+          "xdr_sha256": "1750505c64b9174c19d87e2d3aee609dd1e8722b56efc911c4881dee2f387721"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-claimpredicate-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 493 times, 1000 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ClaimPredicate:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-claimpredicate-at/any.expected.json",
+          "expected_json_sha256": "a0fd1f443ae6b0cd26a69e8933f6f9c30f46e4ae8102d31df64a165b1012182e",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-claimpredicate-at/any.xdr",
+          "xdr_sha256": "5bcaf847bbdb9c204ad37c6d1a431016eb4fd417c5c250e4c7d7a1ae165d7127"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-claimpredicate-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ClaimPredicate holding itself 493 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ClaimPredicate:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-claimpredicate-below/any.expected.json",
+          "expected_json_sha256": "16e01d942b12f73268d3abf0ab2277c548f5b7a14fa05908b88b1ed3aacad296",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-claimpredicate-below/any.xdr",
+          "xdr_sha256": "2dacdd1afcc9adc25f68eaf953e0335f34af565dbdbb204d9420a15171e5e758"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-scval-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 247 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for TransactionEnvelope: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ScVal:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 22,
+        "valid_min": 22
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-above/any.xdr",
+          "xdr_sha256": "c97e2e633283d6ac35ac407e81e944a32f284f4c71121acc5979c194c894147f"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-scval-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 246 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ScVal:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 22,
+        "valid_min": 22
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-at/any.expected.json",
+          "expected_json_sha256": "74508f5a9a336d033be158bdd938a605f6f914ff6e7812f37ee641f784a402ef",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-at/any.xdr",
+          "xdr_sha256": "7e2158b013dae47def74d2bf86eaee2fa8c6ec28075f88dc44ee5cff51ae813e"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-scval-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "ScVal holding itself 246 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-ScVal:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 22,
+        "valid_min": 22
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-below/any.expected.json",
+          "expected_json_sha256": "72922fbe2b1616b233b56f3631ce1e2931a28d946430641de450e23810afb3fe",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-scval-below/any.xdr",
+          "xdr_sha256": "80f5c177b1ce6bfec6d84e48bc9ec0dde422a51358d508052474b16bb9c8f89f"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 492 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for TransactionEnvelope: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanAuthorizedInvocation:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-above/any.xdr",
+          "xdr_sha256": "565153fe315f0587b780027d18964fb5c403a027dfafb469e6c986dd45836e71"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 492 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanAuthorizedInvocation:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-at/any.expected.json",
+          "expected_json_sha256": "2ce110fdcc820515022ad395583339cf62ebc1df9d4b636e3f12ca8b2b4c685d",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-at/any.xdr",
+          "xdr_sha256": "cb15c2cb4c7c05b5adbd29a4774385b540d0ac0518b2e5966a4cc3a099982867"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanAuthorizedInvocation holding itself 491 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanAuthorizedInvocation:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-below/any.expected.json",
+          "expected_json_sha256": "da0d269826a65c3dba2d4a6e470e39ae1f1e39bfe834ff3a2c202e9d87c0ca52",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobanauthorizedinvocation-below/any.xdr",
+          "xdr_sha256": "a8ea0c1f828814a3b473b272f886d586b08d9e2c83217e513c4e39026cc19529"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-above",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 492 times, 1001 levels deep by the measured count against a limit of 1000 (1000 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr refuses it under the corpus limit for TransactionEnvelope: one level too deep. Where the limit falls is implementation-defined, because decoders count levels differently: stellar-xdr counts every value it reads (each definition, number, optional, array and box), go-stellar-sdk counts one level per named type it decodes and takes the limit from the caller, js-xdr 5 counts structs, unions, arrays, optionals and type references against its own limit of 1500, and js-xdr 4 counts structs, unions, arrays and optionals against a limit of 200; neither js-xdr takes a limit from the stellar-sdk caller",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanDelegateSignature:above"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-above/any.xdr",
+          "xdr_sha256": "ead010a0af897e3c60e66d975a7a4e8e56c1de4eb48fccc0e09155b485c8563f"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-at",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 491 times, 1000 levels deep by the measured count against a limit of 1000 (999 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanDelegateSignature:at"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-at/any.expected.json",
+          "expected_json_sha256": "47245d7f53ef811c934176143eab149f43e7c80fb289d99542ad15761352e8ab",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-at/any.xdr",
+          "xdr_sha256": "126c838e95561f70e7a72555ba17057e7f11d4ee38cef62421ac5e9f674e134f"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
+    },
+    {
+      "caps": [],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "format.xdr-grammar",
+      "fields_exercised": [],
+      "flags": [
+        "format-vector"
+      ],
+      "id": "format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-below",
+      "kind": "xdr",
+      "linked_issues": [],
+      "notes": "SorobanDelegateSignature holding itself 491 times, 999 levels deep by the measured count against a limit of 1000 (998 levels by the interpreter's count), counted by stellar-xdr. stellar-xdr reads it under the corpus limit for TransactionEnvelope, so a decoder that allows that many levels must read it",
+      "obligations": [
+        "format:TransactionEnvelope#depth-SorobanDelegateSignature:below"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 27,
+        "valid_min": 27
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "variants": {
+        "any": {
+          "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-below/any.expected.json",
+          "expected_json_sha256": "f7c48252420c0c68cddf75f8ae3cc13a7f5d34181933b5c007a5b3ea60b44631",
+          "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-below/any.xdr",
+          "xdr_sha256": "17d5ec1dcd3877d13396fea9fc4a1eacbc30985117b429031d79e70253818f7b"
+        }
+      },
+      "xdr_type": "TransactionEnvelope"
     },
     {
       "caps": [],

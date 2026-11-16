@@ -46,10 +46,17 @@ impl Cmp<'_> {
                 .ok_or(())
                 .or_else(|_| bad("bool")),
             (Type::OpaqueFixed { .. } | Type::OpaqueVar { .. }, Value::Opaque(b)) => {
-                (j.as_str().and_then(|s| hex::decode(s).ok()).as_deref() == Some(b.as_slice()))
-                    .then_some(())
-                    .ok_or(())
-                    .or_else(|_| bad("opaque"))
+                // hex, or for a few fixed arrays (Curve25519 keys, HMAC) a list of numbers
+                let listed = j.as_array().map(|a| {
+                    a.iter()
+                        .map(|n| n.as_u64().and_then(|n| u8::try_from(n).ok()))
+                        .collect::<Option<Vec<u8>>>()
+                });
+                (j.as_str().and_then(|s| hex::decode(s).ok()).as_deref() == Some(b.as_slice())
+                    || listed.flatten().as_deref() == Some(b.as_slice()))
+                .then_some(())
+                .ok_or(())
+                .or_else(|_| bad("opaque"))
             }
             (Type::String { .. }, Value::String(b)) => {
                 if j.as_str().and_then(unescape).as_deref() == Some(b.as_slice()) {
@@ -163,13 +170,15 @@ impl Cmp<'_> {
                 .ok_or(format!("{path}: unknown marker {j}"))?;
             let key = stellar_strkey::ed25519::PublicKey::from_string(account)
                 .map_err(|e| format!("{path}: {account}: {e}"))?;
-            let Value::Union {
-                arm: Some(inner), ..
-            } = v
-            else {
-                return Err(format!("{path}: {name} is not a signed-payload signer"));
+            // the marker stands for the signer key union or for its payload struct alone
+            let inner = match v {
+                Value::Union {
+                    arm: Some(inner), ..
+                } => inner.as_ref(),
+                Value::Struct(_) => v,
+                _ => return Err(format!("{path}: {name} is not a signed-payload signer")),
             };
-            return match inner.as_ref() {
+            return match inner {
                 Value::Struct(f)
                     if f.len() == 2
                         && f[0] == Value::Opaque(key.0.to_vec())
@@ -303,4 +312,90 @@ fn agree() {
         }
     }
     assert_eq!(files, 1103);
+}
+
+fn candidate() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../candidate")
+}
+
+#[test]
+fn interpreter_agrees_with_stellar_xdr_on_every_accepted_format_vector() {
+    std::thread::Builder::new()
+        .stack_size(1 << 30)
+        .spawn(agree_format)
+        .unwrap()
+        .join()
+        .unwrap();
+}
+
+/// Every format vector of the candidate lane that a decoder must accept: stellar-xdr reads it
+/// under the corpus limit for its type, the interpreter reads it, and the two give the same
+/// value tree. The recursion-depth vectors past the limit must be refused by stellar-xdr on
+/// depth alone, and read by both one level higher.
+fn agree_format() {
+    let schema = Schema::pinned();
+    let mut interp = Interp::new(&schema);
+    // RFC 4506 sets no depth limit; the limit under test is stellar-xdr's
+    interp.depth_limit = u32::MAX;
+    let cmp = Cmp {
+        schema: &schema,
+        interp,
+    };
+    let m: Json =
+        serde_json::from_slice(&std::fs::read(candidate().join("manifest.json")).unwrap()).unwrap();
+    let (mut accepted, mut deep, mut past) = (0, 0, 0);
+    for e in m["entries"].as_array().unwrap() {
+        if e["family"] != "format.xdr-grammar" {
+            continue;
+        }
+        let id = e["id"].as_str().unwrap();
+        let depth_vector = id.contains("-depth-");
+        let decode = e["expected"]["decode"].as_str().unwrap();
+        if decode != "must-accept" && !depth_vector {
+            continue;
+        }
+        let ty = e["xdr_type"].as_str().unwrap();
+        let xdr_name = schema
+            .definitions()
+            .iter()
+            .find(|d| rust_type_name(d.name()) == ty)
+            .map(|d| d.name().to_string())
+            .unwrap_or_else(|| panic!("{ty} is not in the schema"));
+        let file = e["variants"]["any"]["xdr_file"].as_str().unwrap();
+        let bytes = std::fs::read(candidate().join(file)).unwrap();
+        let limits = shapekit_manifest::decode_limits(ty, bytes.len());
+        let read = |limits: Limits| shapekit_manifest::xdr::decode(ty, &bytes, limits);
+        let theirs = if decode == "must-accept" {
+            read(limits).unwrap_or_else(|err| panic!("{id}: stellar-xdr refuses it: {err}"))
+        } else {
+            match read(limits.clone()) {
+                Err(shapekit_manifest::ToolkitError::Decode(
+                    stellar_xdr::Error::DepthLimitExceeded,
+                )) => {}
+                other => panic!("{id}: stellar-xdr does not stop on depth: {other:?}"),
+            }
+            past += 1;
+            read(Limits {
+                depth: limits.depth + 1,
+                len: limits.len,
+            })
+            .unwrap_or_else(|err| panic!("{id}: stellar-xdr refuses it one level higher: {err}"))
+        };
+        let ours = cmp
+            .interp
+            .decode(&xdr_name, &bytes)
+            .unwrap_or_else(|err| panic!("{id}: the interpreter refuses it: {err}"));
+        assert_eq!(cmp.interp.encode(&xdr_name, &ours).unwrap(), bytes, "{id}");
+        let j = serde_json::to_value(&theirs).unwrap();
+        cmp.same_definition(&xdr_name, &ours, &j, ty)
+            .unwrap_or_else(|err| panic!("{id}: {}", short(&err)));
+        accepted += 1;
+        if depth_vector {
+            deep += 1;
+        }
+    }
+    eprintln!(
+        "{accepted} format vectors agree, {deep} of them recursion-depth vectors, {past} past the limit"
+    );
+    assert_eq!((deep, past), (45, 15));
 }
