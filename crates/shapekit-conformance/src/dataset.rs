@@ -37,7 +37,9 @@ pub struct IndexRecord {
     pub test: String,
     pub file: String,
     pub section: String,
-    pub protocol: u32,
+    /// From the section name; `None` for a test that runs at core's current protocol only and
+    /// names none.
+    pub protocol: Option<u32>,
     pub meta_version: u32,
     pub sha256: String,
 }
@@ -52,8 +54,8 @@ pub struct Dataset {
 impl Dataset {
     pub fn load(dir: &Path) -> Result<Dataset> {
         let path = dir.join("index.jsonl");
-        let text =
-            std::fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
+        let text = std::fs::read_to_string(&path)
+            .with_context(|| format!("reading {}", path.display()))?;
         let mut records = Vec::new();
         let mut metas: BTreeMap<String, Vec<usize>> = BTreeMap::new();
         for (n, line) in text.lines().enumerate() {
@@ -69,7 +71,10 @@ impl Dataset {
                 n + 1,
                 r.sha256
             );
-            metas.entry(r.sha256.clone()).or_default().push(records.len());
+            metas
+                .entry(r.sha256.clone())
+                .or_default()
+                .push(records.len());
             records.push(r);
         }
         ensure!(!records.is_empty(), "{} lists no meta", path.display());
@@ -82,7 +87,11 @@ impl Dataset {
 
     /// The bytes of a distinct meta, checked against its name.
     pub fn bytes(&self, sha: &str) -> Result<Vec<u8>> {
-        let path = self.dir.join("meta").join(&sha[..2]).join(format!("{sha}.xdr"));
+        let path = self
+            .dir
+            .join("meta")
+            .join(&sha[..2])
+            .join(format!("{sha}.xdr"));
         let b = std::fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
         let got = shapekit_manifest::sha256_hex(&b);
         ensure!(got == sha, "{} hashes to {got}", path.display());
@@ -99,13 +108,22 @@ impl Dataset {
         out
     }
 
-    /// The oldest protocol a meta was written under.
-    fn protocol(&self, sha: &str) -> u32 {
+    /// The newest protocol any section names: the protocol of the core that wrote the dump,
+    /// which a section naming none runs at.
+    pub fn current_protocol(&self) -> u32 {
+        self.records
+            .iter()
+            .filter_map(|r| r.protocol)
+            .max()
+            .unwrap_or(0)
+    }
+
+    /// The oldest protocol a meta was written under, where its sections name one.
+    fn protocol(&self, sha: &str) -> Option<u32> {
         self.metas[sha]
             .iter()
-            .map(|&i| self.records[i].protocol)
+            .filter_map(|&i| self.records[i].protocol)
             .min()
-            .unwrap_or(0)
     }
 }
 
@@ -134,7 +152,7 @@ fn judge(testee: &mut Testee, bytes: &[u8]) -> Result<(ResultClass, Option<Strin
 #[derive(Debug, Clone, Serialize)]
 pub struct Dropped {
     pub sha256: String,
-    pub protocol: u32,
+    pub protocol: Option<u32>,
     pub meta_version: u32,
     pub sections: usize,
     pub first_section: String,
@@ -339,9 +357,12 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
             }
             let bytes = data.bytes(sha)?;
             let (class, detail, _) = judge(&mut testee, &bytes)?;
-            let newer = target
-                .max_protocol
-                .is_some_and(|max| data.protocol(sha) > max);
+            // a meta from a section that names no protocol is from core's current one
+            let newer = match (target.max_protocol, data.protocol(sha)) {
+                (Some(max), Some(p)) => p > max,
+                (Some(max), None) => max < data.current_protocol(),
+                (None, _) => false,
+            };
             if class != ResultClass::Pass && newer {
                 beyond += 1;
                 continue;
@@ -359,8 +380,18 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
         for (sha, (class, detail)) in &failed {
             let bytes = data.bytes(sha)?;
             let small = shrink(&mut testee, &bytes, *class)?;
-            let recs: Vec<&IndexRecord> = data.metas[sha].iter().map(|&i| &data.records[i]).collect();
-            let entry = write_candidate(opts, target, sha, &small, *class, detail.as_deref(), recs[0])?;
+            let recs: Vec<&IndexRecord> =
+                data.metas[sha].iter().map(|&i| &data.records[i]).collect();
+            let entry = write_candidate(
+                opts,
+                target,
+                sha,
+                &small,
+                *class,
+                detail.as_deref(),
+                recs[0],
+                data.current_protocol(),
+            )?;
             dropped.push(Dropped {
                 sha256: sha.clone(),
                 protocol: data.protocol(sha),
@@ -416,7 +447,12 @@ pub fn obligations(
     let failing: Vec<(String, BTreeSet<&str>)> = report
         .targets
         .iter()
-        .map(|t| (t.key.clone(), t.dropped.iter().map(|d| d.sha256.as_str()).collect()))
+        .map(|t| {
+            (
+                t.key.clone(),
+                t.dropped.iter().map(|d| d.sha256.as_str()).collect(),
+            )
+        })
         .collect();
     let mut out = Vec::new();
     for ((file, section), shas) in sections {
@@ -428,7 +464,10 @@ pub fn obligations(
             })
             .collect();
         out.push(Obligation {
-            id: Obligation::id_for(ObligationKind::CoreTestSection, &format!("{file}|{section}")),
+            id: Obligation::id_for(
+                ObligationKind::CoreTestSection,
+                &format!("{file}|{section}"),
+            ),
             kind: ObligationKind::CoreTestSection,
             status: ObligationStatus::Open,
             witnesses: Vec::new(),
@@ -455,6 +494,7 @@ fn write_candidate(
     class: ResultClass,
     detail: Option<&str>,
     first: &IndexRecord,
+    current: u32,
 ) -> Result<Option<String>> {
     let registry = shapekit_registry::Registry::load(&opts.root.join("registry"))
         .map_err(|e| anyhow::anyhow!("loading registry/: {e}"))?;
@@ -466,12 +506,7 @@ fn write_candidate(
         return Ok(None);
     };
     let small_sha = shapekit_manifest::sha256_hex(bytes);
-    let id = format!(
-        "{}.core-test-{}-{}",
-        fam.id,
-        target.sdk,
-        &small_sha[..12]
-    );
+    let id = format!("{}.core-test-{}-{}", fam.id, target.sdk, &small_sha[..12]);
     let dir = opts.candidate.join("entries").join(&fam.id).join(&id);
     if dir.exists() {
         return Ok(Some(id));
@@ -480,9 +515,13 @@ fn write_candidate(
         "core test meta {sha} from \"{}\", section \"{}\", protocol {}; {} {} it ({}{}), shrunk to {} bytes. the bytes are core's own output under its test network passphrase",
         first.file,
         first.section,
-        first.protocol,
+        first.protocol.unwrap_or(current),
         target.key(),
-        if class == ResultClass::DivergesFromNetwork { "drops" } else { "fails on" },
+        if class == ResultClass::DivergesFromNetwork {
+            "drops"
+        } else {
+            "fails on"
+        },
         class.as_str(),
         detail.map(|d| format!(": {d}")).unwrap_or_default(),
         bytes.len()
@@ -498,7 +537,7 @@ fn write_candidate(
         "linked_issues": [],
         "notes": notes,
         "passphrase_dependent": true,
-        "protocol": {"introduced": fam.protocol_introduced, "valid_min": fam.protocol_valid.min, "generated_at": first.protocol},
+        "protocol": {"introduced": fam.protocol_introduced, "valid_min": fam.protocol_valid.min, "generated_at": first.protocol.unwrap_or(current)},
         "source": {"class": "core-test-dump"},
         "synthetic": false,
         "variants": {"any": {
@@ -576,7 +615,7 @@ pub fn render(r: &DatasetReport) -> String {
             out.push_str(&format!(
                 "| {} | {} | {} | {} | {} bytes | {} |\n",
                 &d.sha256[..16],
-                d.protocol,
+                d.protocol.map_or("current".to_string(), |p| p.to_string()),
                 d.sections,
                 d.detail.as_deref().unwrap_or("").replace('|', "\\|"),
                 d.shrunk_bytes,
