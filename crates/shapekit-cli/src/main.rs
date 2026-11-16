@@ -21,6 +21,7 @@ mod schema_cmd;
 mod serve_cmd;
 mod site_cmd;
 mod synth_cmd;
+mod twin_cmd;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -126,6 +127,11 @@ enum Command {
     Site {
         #[command(subcommand)]
         command: site_cmd::SiteCommand,
+    },
+    /// The coverage twin of stellar-core: protocol gates.
+    Twin {
+        #[command(subcommand)]
+        command: twin_cmd::TwinCommand,
     },
     /// The law book: laws every ledger satisfies, anchored on the network's own hashes.
     Laws {
@@ -611,6 +617,7 @@ fn main() -> ExitCode {
         Command::Site { command } => site_cmd::run(command),
         Command::Schema { command } => schema_cmd::run(command),
         Command::Laws { command } => laws_cmd::run(command),
+        Command::Twin { command } => twin_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,
