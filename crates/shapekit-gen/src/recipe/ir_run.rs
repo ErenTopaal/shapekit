@@ -13,6 +13,8 @@
 //! - fee: [`shapekit_core_driver::tx::BASE_FEE`] per operation, the same as
 //!   [`ChainDriver::classic`](shapekit_core_driver::chain::ChainDriver::classic);
 //! - preconditions: none;
+//! - deploy: `create_contract_v2` from protocol 22 (CAP-58, which added constructors) and
+//!   `create_contract` before it;
 //! - a fee bump's outer fee: the base fee for each inner operation plus one;
 //! - envelope: v0 below protocol 13 and v1 from then on, as [`ChainCtx::sign`] does;
 //! - sequence numbers: the account's sequence number on the last closed ledger plus one, or
@@ -76,6 +78,9 @@ fn resources_of(r: &Option<ResourceOverride>) -> ir_soroban::Resources {
 pub fn orderable_after(lcm: &stellar_xdr::LedgerCloseMeta) -> bool {
     super::order::template(lcm).is_ok()
 }
+
+/// The protocol `create_contract_v2` and constructors arrived with (CAP-58).
+pub const CREATE_CONTRACT_V2_PROTOCOL: u32 = 22;
 
 /// Hashes of the transactions a ledger applied, in apply order.
 fn applied_hashes(lcm: &stellar_xdr::LedgerCloseMeta) -> Vec<[u8; 32]> {
@@ -780,11 +785,23 @@ impl<'a> Session<'a> {
                 for (i, a) in constructor_args.iter().enumerate() {
                     args.push(self.typed::<ScVal>(ctx, a, &format!("constructor argument {i}"))?);
                 }
-                let hf = HostFunction::CreateContractV2(CreateContractArgsV2 {
-                    contract_id_preimage: contract_preimage(&deployer, &salt),
-                    executable: ContractExecutable::Wasm(code_hash),
-                    constructor_args: args.try_into()?,
-                });
+                let hf = if ctx.protocol() >= CREATE_CONTRACT_V2_PROTOCOL {
+                    HostFunction::CreateContractV2(CreateContractArgsV2 {
+                        contract_id_preimage: contract_preimage(&deployer, &salt),
+                        executable: ContractExecutable::Wasm(code_hash),
+                        constructor_args: args.try_into()?,
+                    })
+                } else {
+                    ensure!(
+                        args.is_empty(),
+                        "constructors arrived with protocol {CREATE_CONTRACT_V2_PROTOCOL}, the chain runs {}",
+                        ctx.protocol()
+                    );
+                    HostFunction::CreateContract(stellar_xdr::CreateContractArgs {
+                        contract_id_preimage: contract_preimage(&deployer, &salt),
+                        executable: ContractExecutable::Wasm(code_hash),
+                    })
+                };
                 let seq = self.next_seq(ctx, source)?;
                 let env = ctx.driver().soroban_at(&key, hf, seq)?;
                 self.contracts.insert(label.clone(), id.clone());

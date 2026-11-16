@@ -470,11 +470,20 @@ impl ChainDriver {
     ) -> Result<ContractId, ChainError> {
         let deployer = account_address(&source.verifying_key());
         let want = contract_id_from_address(&self.network_id, &deployer, salt)?;
-        let hf = HostFunction::CreateContractV2(CreateContractArgsV2 {
-            contract_id_preimage: contract_preimage(&deployer, salt),
-            executable: ContractExecutable::Wasm(code.clone()),
-            constructor_args: Default::default(),
-        });
+        // create_contract_v2 arrived with protocol 22 (CAP-58); before it, the original
+        // create_contract does the same for a contract without a constructor
+        let hf = if self.node.ledger_context()?.protocol_version >= 22 {
+            HostFunction::CreateContractV2(CreateContractArgsV2 {
+                contract_id_preimage: contract_preimage(&deployer, salt),
+                executable: ContractExecutable::Wasm(code.clone()),
+                constructor_args: Default::default(),
+            })
+        } else {
+            HostFunction::CreateContract(stellar_xdr::CreateContractArgs {
+                contract_id_preimage: contract_preimage(&deployer, salt),
+                executable: ContractExecutable::Wasm(code.clone()),
+            })
+        };
         let env = self.soroban(source, hf)?;
         let applied = self.apply_ok(&env)?;
         match applied.return_value() {
