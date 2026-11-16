@@ -18,6 +18,7 @@ fn bump_sequence_dumps_every_protocol() {
         limits: Limits::default(),
         out: dir.path().join("out"),
         tests: vec!["bump sequence".into()],
+        order_from: None,
     };
     let report = run::run(&opts, &|_, _, _| {}).unwrap();
     assert!(report.passed(), "{report:#?}");

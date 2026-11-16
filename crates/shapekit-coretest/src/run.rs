@@ -59,6 +59,20 @@ pub struct Options {
     pub out: PathBuf,
     /// Test cases to run; empty means every `[tx]` case the image lists.
     pub tests: Vec<String>,
+    /// A report of an earlier run: cases start longest first by the seconds it recorded,
+    /// cases it does not hold before all others. In list order when absent.
+    pub order_from: Option<PathBuf>,
+}
+
+/// Sorts `names` longest first by the seconds `earlier` recorded; unknown names first.
+pub fn order_by(names: &mut [String], earlier: &Report) {
+    let seconds: BTreeMap<&str, f64> = earlier
+        .tests
+        .iter()
+        .map(|t| (t.name.as_str(), t.seconds))
+        .collect();
+    let key = |n: &String| seconds.get(n.as_str()).copied().unwrap_or(f64::INFINITY);
+    names.sort_by(|a, b| key(b).total_cmp(&key(a)));
 }
 
 /// What one test case produced.
@@ -344,11 +358,14 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
     })?;
     let owner = format!("{}:{}", meta.uid(), meta.gid());
 
-    let names = if opts.tests.is_empty() {
+    let mut names = if opts.tests.is_empty() {
         list_tests(&opts.image)?
     } else {
         opts.tests.clone()
     };
+    if let Some(path) = &opts.order_from {
+        order_by(&mut names, &Report::load(path)?);
+    }
     for name in &names {
         check_name(name)?;
     }
@@ -421,6 +438,29 @@ mod tests {
         assert!(check_name("a,b").is_err());
         assert!(check_name("[tx]").is_err());
         assert!(check_name("").is_err());
+    }
+
+    #[test]
+    fn earlier_seconds_order_longest_first_unknown_first() {
+        let earlier = Report {
+            image: String::new(),
+            rng_seed: RNG_SEED,
+            shards: 1,
+            cpus: "1".into(),
+            memory: "1g".into(),
+            totals: Totals::default(),
+            tests: [("a", 5.0), ("b", 50.0), ("c", 1.0)]
+                .iter()
+                .map(|(n, s)| TestRun {
+                    name: (*n).into(),
+                    seconds: *s,
+                    ..TestRun::default()
+                })
+                .collect(),
+        };
+        let mut names: Vec<String> = ["a", "b", "c", "new"].iter().map(|s| s.to_string()).collect();
+        order_by(&mut names, &earlier);
+        assert_eq!(names, ["new", "b", "a", "c"]);
     }
 
     #[test]

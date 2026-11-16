@@ -28,6 +28,9 @@ pub enum CoretestCommand {
         /// Run only this test case (repeatable); every [tx] case when omitted.
         #[arg(long = "test")]
         tests: Vec<String>,
+        /// run.json of an earlier run: start the cases that took longest there first.
+        #[arg(long)]
+        order_from: Option<PathBuf>,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -41,8 +44,9 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
             memory,
             out,
             tests,
+            order_from,
             pins,
-        } => run_tests(shards, cpus, memory, out, tests, &pins),
+        } => run_tests(shards, cpus, memory, out, tests, order_from, &pins),
     }
 }
 
@@ -52,6 +56,7 @@ fn run_tests(
     memory: String,
     out: PathBuf,
     tests: Vec<String>,
+    order_from: Option<PathBuf>,
     pins: &std::path::Path,
 ) -> Result<bool> {
     let image = Image::from_pins(pins, shapekit_coretest::BUILDTESTS_IMAGE_PIN)?;
@@ -61,6 +66,7 @@ fn run_tests(
         limits: Limits { cpus, memory },
         out: out.clone(),
         tests,
+        order_from,
     };
     let progress = |t: &TestRun, done: usize, total: usize| {
         let state = match (&t.error, t.exit_code) {
