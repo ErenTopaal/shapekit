@@ -33,6 +33,8 @@ mod ctx;
 pub mod events_max;
 pub mod failed_tx;
 pub mod invoke_basics;
+pub mod ir;
+pub mod ir_run;
 pub mod max_length;
 pub mod memo_arms;
 pub mod memo_bytes;
@@ -49,7 +51,7 @@ mod state_check;
 
 pub use ctx::{Captured, ChainCtx, Spec};
 pub use output::{CHAINS_DIR, ChainCheck, EntryCheck};
-pub use run::{ChainRun, GenOptions, GenReport, Repro, generate, verify_repro};
+pub use run::{ChainRun, GenOptions, GenReport, Repro, generate, verify_repro, verify_repro_on};
 pub use select::{Selected, Selector, select};
 
 use shapekit_manifest::{MAINNET_PASSPHRASE, TESTNET_PASSPHRASE};

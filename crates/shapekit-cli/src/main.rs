@@ -230,6 +230,23 @@ enum GenCommand {
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
     },
+    /// Record the chain of a recipe IR file and compare it with the committed corpus: the
+    /// chain's canonical hashes per passphrase and, with both, every entry it owns.
+    RunIr {
+        /// The recipe file, corpus/recipes/<family>/<name>.json.
+        file: PathBuf,
+        /// testnet, mainnet or both.
+        #[arg(long, default_value = "both")]
+        network: String,
+        #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
+        jobs: u16,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Regenerate the recipe chains under both passphrases into a temporary
     /// directory and compare canonical hashes and entry files with the corpus.
     VerifyRepro {
@@ -486,6 +503,26 @@ fn main() -> ExitCode {
         Command::Gen {
             command: GenCommand::VerifyRawOrder { other, corpus },
         } => gen_cmd::verify_raw_order(&corpus, &other),
+        Command::Gen {
+            command:
+                GenCommand::RunIr {
+                    file,
+                    network,
+                    jobs,
+                    corpus,
+                    registry,
+                    pins,
+                },
+        } => gen_cmd::run_ir(
+            &file,
+            &network,
+            jobs,
+            &gen_cmd::GenPaths {
+                corpus: &corpus,
+                registry: &registry,
+                pins: &pins,
+            },
+        ),
         Command::Gen {
             command:
                 GenCommand::VerifyRepro {

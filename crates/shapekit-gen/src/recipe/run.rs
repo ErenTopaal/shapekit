@@ -13,7 +13,7 @@ use shapekit_core_driver::config::{CoreImage, NodeConfig};
 use shapekit_core_driver::contracts::ECHO_WASM;
 use shapekit_core_driver::recorder::CHAIN_FILE;
 use shapekit_core_driver::settings::NetworkSettings;
-use shapekit_manifest::build::ENTRY_FILE;
+use shapekit_manifest::build::{ENTRIES_DIR, ENTRY_FILE};
 use shapekit_manifest::{GeneratedWith, MANIFEST_SCHEMA_VERSION, Manifest, validate};
 use shapekit_pack::chain::LEDGERS_DIR;
 use shapekit_pack::{Layout, lake_digest, pack_chain};
@@ -354,6 +354,16 @@ pub struct Repro {
 /// writes for them, and the oracle files `shapekit oracle run` derives from
 /// the regenerated chains, byte for byte.
 pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Repro> {
+    verify_repro_on(recipes, opts, &Network::BOTH)
+}
+
+/// [`verify_repro`] under the given passphrases only. Chains are compared for each of
+/// them; entries hold a variant per passphrase, so they are compared only when both run.
+pub fn verify_repro_on(
+    recipes: &[&dyn Recipe],
+    opts: &GenOptions<'_>,
+    networks: &[Network],
+) -> Result<Repro> {
     let fresh = tempfile::Builder::new()
         .prefix("shapekit-repro-")
         .tempdir()
@@ -362,21 +372,36 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
         corpus: fresh.path().to_path_buf(),
         registry: opts.registry,
         image: opts.image.clone(),
-        networks: Network::BOTH.to_vec(),
+        networks: networks.to_vec(),
         jobs: opts.jobs,
         generated_with: opts.generated_with.clone(),
     };
+    let both = Network::BOTH.iter().all(|n| networks.contains(n));
+    if !both {
+        // an entry holds a variant per passphrase; the one not regenerated is kept from the
+        // committed entry, so the committed entries of each chain are the starting point
+        for r in recipes {
+            for (id, dir) in chain_entries(&opts.corpus, r.family(), &chain_id(*r))? {
+                let to = fresh.path().join(ENTRIES_DIR).join(r.family()).join(&id);
+                copy_dir(&dir, &to)?;
+            }
+        }
+    }
     let report = generate(recipes, &fresh_opts)?;
     // the oracle is rerun with the code under test, so a change to the interpreter that the
-    // committed oracle files were not regenerated for shows up here as a byte difference
-    shapekit_oracle::corpus::run(fresh.path())
-        .map_err(|e| anyhow!("oracle run over the regenerated chains: {e}"))?;
+    // committed oracle files were not regenerated for shows up here as a byte difference. it
+    // reads every variant's chain, so it runs only when both were regenerated, which is also
+    // the only case the entries and their oracle files are compared in
+    if both {
+        shapekit_oracle::corpus::run(fresh.path())
+            .map_err(|e| anyhow!("oracle run over the regenerated chains: {e}"))?;
+    }
     let mut diffs = Vec::new();
     let mut chains_compared = 0;
     let mut entries_compared = 0;
     for r in recipes {
         let cid = chain_id(*r);
-        for n in Network::BOTH {
+        for &n in networks {
             chains_compared += 1;
             let rel = Path::new(CHAINS_DIR).join(&cid).join(n.name());
             let committed = opts.corpus.join(&rel);
@@ -399,6 +424,9 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
             if a != b {
                 diffs.push(format!("{}: ledger lake differs", rel.display()));
             }
+        }
+        if !both {
+            continue;
         }
         let family = r.family();
         let ours = chain_entries(&opts.corpus, family, &cid)?;
@@ -456,4 +484,24 @@ pub fn verify_repro(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<Re
         chains_compared,
         entries_compared,
     })
+}
+
+fn copy_dir(from: &Path, to: &Path) -> Result<()> {
+    for e in walkdir::WalkDir::new(from) {
+        let e = e.with_context(|| format!("walking {}", from.display()))?;
+        let rel = e
+            .path()
+            .strip_prefix(from)
+            .expect("walkdir stays below its root");
+        let target = to.join(rel);
+        if e.file_type().is_dir() {
+            std::fs::create_dir_all(&target)
+                .with_context(|| format!("creating {}", target.display()))?;
+        } else {
+            std::fs::copy(e.path(), &target).with_context(|| {
+                format!("copying {} to {}", e.path().display(), target.display())
+            })?;
+        }
+    }
+    Ok(())
 }

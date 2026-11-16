@@ -177,6 +177,37 @@ pub fn verify_repro(families: &[String], jobs: u16, paths: &GenPaths<'_>) -> Res
     Ok(repro.differences.is_empty())
 }
 
+/// `shapekit gen run-ir`: records the chain of one recipe IR file under the chosen
+/// passphrases in a temporary corpus and compares it with the committed corpus: the canonical
+/// ledger hashes and lake of each chain and, when both passphrases run, every entry the chain
+/// owns.
+pub fn run_ir(file: &Path, network: &str, jobs: u16, paths: &GenPaths<'_>) -> Result<bool> {
+    let networks = match network {
+        "testnet" => vec![Network::Testnet],
+        "mainnet" => vec![Network::Mainnet],
+        "both" => Network::BOTH.to_vec(),
+        other => bail!("unknown network {other:?}, expected testnet, mainnet or both"),
+    };
+    let registry = Registry::load(paths.registry)
+        .with_context(|| format!("loading the registry in {}", paths.registry.display()))?;
+    // upload paths in a recipe are relative to the repository root, the working directory
+    let root = std::env::current_dir().context("reading the working directory")?;
+    let ir = recipe::ir_run::IrRecipe::load(file, &root)?;
+    let opts = options(paths, &registry, networks.clone(), jobs)?;
+    let repro = recipe::verify_repro_on(&[&ir], &opts, &networks)?;
+    print_report(&repro.report);
+    for d in &repro.differences {
+        println!("difference: {d}");
+    }
+    println!(
+        "{} differences over {} chains and {} entries",
+        repro.differences.len(),
+        repro.chains_compared,
+        repro.entries_compared
+    );
+    Ok(repro.differences.is_empty())
+}
+
 /// `shapekit gen checkpoints`: a chain with no transactions that runs through `last`, so
 /// its archive holds real checkpoints. Used to test history archive delivery, which the
 /// short recipe chains (no checkpoint before ledger 63) cannot exercise. Written into `out`

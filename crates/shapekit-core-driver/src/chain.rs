@@ -254,6 +254,38 @@ impl ChainDriver {
         })
     }
 
+    /// Submits `env` without closing a ledger; it waits in core's queue for the next close.
+    /// Returns its hash. Fails unless core queued it.
+    pub fn queue(&mut self, env: &TransactionEnvelope) -> Result<[u8; 32], ChainError> {
+        let hash = envelope_hash(env, &self.network_id)?;
+        let sub = self.node.submit(env)?;
+        if sub.status != SubmitStatus::Pending {
+            return Err(ChainError::NotQueued {
+                status: sub.status,
+                result: sub.error.map(Box::new),
+            });
+        }
+        Ok(hash)
+    }
+
+    /// What the last closed ledger applied for the transaction with `hash`.
+    pub fn applied_in_last(&self, hash: &[u8; 32]) -> Result<Applied, ChainError> {
+        let ledger = self.last_closed;
+        transactions(self.last_meta())
+            .into_iter()
+            .find(|(h, _, _)| h.0 == *hash)
+            .map(|(_, result, meta)| Applied {
+                ledger,
+                hash: *hash,
+                result,
+                meta,
+            })
+            .ok_or_else(|| ChainError::Missing {
+                ledger,
+                hash: hex::encode(hash),
+            })
+    }
+
     /// [`Self::apply`], failing unless the transaction succeeded.
     pub fn apply_ok(&mut self, env: &TransactionEnvelope) -> Result<Applied, ChainError> {
         let applied = self.apply(env)?;
@@ -307,6 +339,17 @@ impl ChainDriver {
         source: &SigningKey,
         host_function: HostFunction,
     ) -> Result<TransactionEnvelope, ChainError> {
+        self.soroban_at(source, host_function, self.next_seq_num(source)?)
+    }
+
+    /// [`Self::soroban`] with the sequence number the transaction carries given by the caller,
+    /// for a source that already has a transaction waiting for the next close.
+    pub fn soroban_at(
+        &self,
+        source: &SigningKey,
+        host_function: HostFunction,
+        seq_num: i64,
+    ) -> Result<TransactionEnvelope, ChainError> {
         let ctx = self.node.ledger_context()?;
         let sim = AnySimulator::new(self.node.snapshot()?, &ctx)?;
         let source_id = account_id(&source.verifying_key());
@@ -324,7 +367,7 @@ impl ChainDriver {
         {
             return Err(ChainError::NeedsSignatures(r.auth));
         }
-        self.soroban_with(source, host_function, r.transaction_data, r.auth)
+        self.soroban_with_at(source, host_function, r.transaction_data, r.auth, seq_num)
     }
 
     /// Builds and signs a Soroban transaction with resources chosen by the
@@ -336,19 +379,33 @@ impl ChainDriver {
         data: SorobanTransactionData,
         auth: Vec<SorobanAuthorizationEntry>,
     ) -> Result<TransactionEnvelope, ChainError> {
-        let tx = TransactionBuilder::new(
-            muxed_account(&source.verifying_key()),
+        self.soroban_with_at(
+            source,
+            host_function,
+            data,
+            auth,
             self.next_seq_num(source)?,
         )
-        .fee(BASE_FEE)
-        .operation(
-            None,
-            OperationBody::InvokeHostFunction(InvokeHostFunctionOp {
-                host_function,
-                auth: Default::default(),
-            }),
-        )
-        .build()?;
+    }
+
+    fn soroban_with_at(
+        &self,
+        source: &SigningKey,
+        host_function: HostFunction,
+        data: SorobanTransactionData,
+        auth: Vec<SorobanAuthorizationEntry>,
+        seq_num: i64,
+    ) -> Result<TransactionEnvelope, ChainError> {
+        let tx = TransactionBuilder::new(muxed_account(&source.verifying_key()), seq_num)
+            .fee(BASE_FEE)
+            .operation(
+                None,
+                OperationBody::InvokeHostFunction(InvokeHostFunctionOp {
+                    host_function,
+                    auth: Default::default(),
+                }),
+            )
+            .build()?;
         let tx = assemble_soroban(tx, data, Some(auth))?;
         Ok(TransactionEnvelope::Tx(sign_transaction(
             tx,

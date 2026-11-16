@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "id": "cap01.bump-sequence",
+  "family": "cap01.bump-sequence",
+  "protocol": 30,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": ["alice", "bob", "maxed", "mover"],
+      "balance": "100000000000"
+    },
+    { "step": "close" },
+    {
+      "step": "tx",
+      "label": "forward",
+      "source": "alice",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "@seq:alice+1048576" } } }
+      ]
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "bump-forward",
+      "select": { "kind": "ledger", "of": "forward" },
+      "notes": "bump sequence moves the source's sequence number 2^20 ahead",
+      "fields": ["op.bump_sequence.bump_to"]
+    },
+    {
+      "step": "tx",
+      "label": "behind",
+      "source": "alice",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "1" } } }
+      ]
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "bump-behind",
+      "select": { "kind": "ledger", "of": "behind" },
+      "notes": "bump sequence to 1, behind the source's sequence number: it succeeds and changes nothing beyond the transaction's own sequence number, yet the operation meta holds a STATE and an UPDATED change of the source account with identical entries",
+      "fields": ["op.bump_sequence.bump_to"]
+    },
+    {
+      "step": "tx",
+      "label": "maxed",
+      "source": "maxed",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "9223372036854775807" } } }
+      ]
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "bump-to-i64-max",
+      "select": { "kind": "ledger", "of": "maxed" },
+      "notes": "bump sequence to i64::MAX, after which the account can never submit another transaction",
+      "fields": ["op.bump_sequence.bump_to"]
+    },
+    {
+      "step": "tx",
+      "label": "negative",
+      "source": "alice",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "-1" } } }
+      ],
+      "expect": {
+        "outcome": "rejected",
+        "result": { "tx_failed": [{ "op_inner": { "bump_sequence": "bad_seq" } }] }
+      }
+    },
+    {
+      "step": "capture",
+      "slug": "bump-negative",
+      "select": { "kind": "rejected", "of": "negative" },
+      "notes": "bump sequence to -1, refused by core at submission with bump_sequence bad_seq",
+      "fields": ["op.bump_sequence.bump_to"]
+    },
+    {
+      "step": "tx",
+      "label": "bump-then-merge",
+      "source": "mover",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "@ledger-start:3" } } },
+        { "source_account": null, "body": { "account_merge": "@account:bob" } }
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            { "op_inner": { "bump_sequence": "success" } },
+            { "op_inner": { "account_merge": "seqnum_too_far" } }
+          ]
+        }
+      }
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "bump-then-merge-seqnum-too-far",
+      "select": { "kind": "transaction", "of": "bump-then-merge" },
+      "notes": "one transaction bumps its source past the ledger's starting sequence number and then merges it, so the merge fails with seqnum_too_far and the bump is rolled back",
+      "fields": ["op.bump_sequence.bump_to", "op.account_merge.destination"]
+    },
+    {
+      "step": "tx",
+      "label": "past-start",
+      "source": "mover",
+      "operations": [
+        { "source_account": null, "body": { "bump_sequence": { "bump_to": "@ledger-start:3" } } }
+      ]
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "bump-past-starting-sequence",
+      "select": { "kind": "ledger", "of": "past-start" },
+      "notes": "bump sequence past the starting sequence number of the following ledgers, which makes the account unmergeable until the ledger sequence catches up",
+      "fields": ["op.bump_sequence.bump_to"]
+    },
+    {
+      "step": "tx",
+      "label": "merge",
+      "source": "mover",
+      "operations": [
+        { "source_account": null, "body": { "account_merge": "@account:bob" } }
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": { "tx_failed": [{ "op_inner": { "account_merge": "seqnum_too_far" } }] }
+      }
+    },
+    { "step": "close" },
+    {
+      "step": "capture",
+      "slug": "merge-seqnum-too-far",
+      "select": { "kind": "ledger", "of": "merge" },
+      "notes": "an account merge whose source's sequence number is past the ledger's starting sequence number, failing with seqnum_too_far",
+      "fields": ["op.account_merge.destination"]
+    }
+  ]
+}

@@ -262,6 +262,36 @@ impl ChainCtx {
         env: &TransactionEnvelope,
         spec: Spec,
     ) -> Result<TransactionResult> {
+        let result = self
+            .submit_rejected(env)
+            .with_context(|| format!("capture {slug}"))?;
+        let ledger = self.driver.last_closed();
+        self.record_rejected(slug, env, &result, ledger, spec)?;
+        Ok(result)
+    }
+
+    /// Submits `env`, which core must refuse at submission, and returns core's result. No
+    /// ledger closes.
+    pub fn submit_rejected(&mut self, env: &TransactionEnvelope) -> Result<TransactionResult> {
+        let sub = self.driver.node().submit(env)?;
+        match (sub.status, sub.error) {
+            (SubmitStatus::Error, Some(r)) => Ok(r),
+            (status, _) => {
+                bail!("core answered {status:?}, the envelope was expected to be refused")
+            }
+        }
+    }
+
+    /// Records `env`, which core refused at submission with `result` while `ledger_seq` was
+    /// the last closed ledger, as an invalid-by-core entry.
+    pub fn record_rejected(
+        &mut self,
+        slug: &str,
+        env: &TransactionEnvelope,
+        result: &TransactionResult,
+        ledger_seq: u32,
+        spec: Spec,
+    ) -> Result<()> {
         let full = self.claim_slug(slug)?;
         let bytes = env.to_xdr(Limits::none())?;
         let decodes = xdr::decode(
@@ -279,17 +309,10 @@ impl ChainCtx {
                 "does not decode, so it has to be marked must-reject"
             }
         );
-        let sub = self.driver.node().submit(env)?;
-        let result = match (sub.status, sub.error) {
-            (SubmitStatus::Error, Some(r)) => r,
-            (status, _) => bail!(
-                "capture {slug}: core answered {status:?}, the envelope was expected to be refused"
-            ),
-        };
         let hash = envelope_hash(env, self.driver.network_id())?;
         self.captured.push(Captured {
             slug: full,
-            ledger_seq: self.driver.last_closed(),
+            ledger_seq,
             selected: Selected {
                 suffix: "",
                 xdr_type: "TransactionEnvelope",
@@ -303,12 +326,12 @@ impl ChainCtx {
             validity: Validity::InvalidByCore,
             rejection: Some(CoreRejection {
                 stage: RejectionStage::Submit,
-                result_code: result_code(&result)?,
+                result_code: result_code(result)?,
                 result_xdr: result.to_xdr_base64(Limits::none())?,
             }),
             spec,
         });
-        Ok(result)
+        Ok(())
     }
 
     /// Writes the chain into `target` and stops the node.

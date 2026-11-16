@@ -118,3 +118,25 @@ fn cap40_chains_validate_and_reproduce() {
         "{text}"
     );
 }
+
+#[test]
+#[ignore = "needs docker and the pinned stellar-core image; run with --include-ignored"]
+fn cap01_ir_recipe_reproduces_the_committed_chain() {
+    let root = repo("");
+    let out = Command::new(env!("CARGO_BIN_EXE_shapekit"))
+        .current_dir(&root)
+        .args([
+            "gen",
+            "run-ir",
+            "corpus/recipes/cap01.bump-sequence/bump-sequence.json",
+            "--network",
+            "both",
+        ])
+        .output()
+        .expect("running shapekit");
+    let text = ok(&out);
+    assert!(
+        text.contains("0 differences over 2 chains and 8 entries"),
+        "{text}"
+    );
+}
