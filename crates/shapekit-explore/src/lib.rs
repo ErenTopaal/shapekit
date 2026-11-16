@@ -6,10 +6,13 @@
 
 pub mod action;
 pub mod arms;
+pub mod coverage;
 pub mod episode;
 pub mod explore;
 pub mod feedback;
 pub mod fill;
+pub mod gates;
+pub mod pairs;
 pub mod rng;
 pub mod verify;
 pub mod world;

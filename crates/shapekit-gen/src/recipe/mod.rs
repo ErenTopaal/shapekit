@@ -35,6 +35,7 @@ pub mod failed_tx;
 pub mod invoke_basics;
 pub mod ir;
 pub mod ir_run;
+pub mod ir_soroban;
 pub mod max_length;
 pub mod memo_arms;
 pub mod memo_bytes;
@@ -52,7 +53,8 @@ mod state_check;
 pub use ctx::{Captured, ChainCtx, Spec};
 pub use output::{CHAINS_DIR, ChainCheck, EntryCheck};
 pub use run::{
-    ChainRun, GenOptions, GenReport, Repro, generate, start_chain, verify_repro, verify_repro_on,
+    ChainRun, GenOptions, GenReport, Repro, generate, node_config, start_chain, verify_repro,
+    verify_repro_on,
 };
 pub use select::{Selected, Selector, select};
 

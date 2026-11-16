@@ -13,7 +13,9 @@ use shapekit_core_driver::config::CoreImage;
 use shapekit_gen::recipe::ir_run::{IrRecipe, Session};
 use shapekit_gen::recipe::{ChainCtx, Network, start_chain};
 use shapekit_schema::Schema;
-use shapekit_twin::coverage::{Counts, merge_and_export, read_export};
+use shapekit_twin::coverage::{Counts, merge_and_export};
+
+use crate::coverage::read_export_all;
 
 use crate::action::{self, OpMenu};
 use crate::arms::{arms_in, ledger_signature};
@@ -38,6 +40,9 @@ pub struct Env<'a> {
     /// Measure core coverage: `image` is the coverage twin and every episode's profile is
     /// merged and read.
     pub coverage: bool,
+    /// The release image, for runs that only need the ledgers (shrinking replays). It writes
+    /// the same ledgers as the twin.
+    pub release: &'a CoreImage,
     /// The repository root, which upload paths are relative to.
     pub root: &'a Path,
     pub reachable: &'a BTreeSet<String>,
@@ -59,6 +64,8 @@ pub struct Spec {
     pub actions: usize,
     pub contracts: bool,
     pub seed: u64,
+    /// Fund the roles first when there is no prefix. Off for a bare chain.
+    pub setup: bool,
 }
 
 impl Spec {
@@ -85,6 +92,8 @@ pub struct Stats {
     pub upgrades_refused: usize,
     /// Queued, then left out of the ledger by core.
     pub left_out: usize,
+    /// Time spent merging and reading the twin's profile.
+    pub coverage_seconds: f64,
     /// Refusals at submission by core's answer.
     pub refusals: BTreeMap<String, usize>,
 }
@@ -97,6 +106,7 @@ impl Stats {
         self.invalid_fills += o.invalid_fills;
         self.upgrades_refused += o.upgrades_refused;
         self.left_out += o.left_out;
+        self.coverage_seconds += o.coverage_seconds;
         for (k, v) in &o.refusals {
             *self.refusals.entry(k.clone()).or_insert(0) += v;
         }
@@ -138,6 +148,10 @@ pub struct Episode {
     pub prefix_len: usize,
     pub stats: Stats,
     pub seconds: f64,
+    /// Meta of the chain's last ledger.
+    pub last_ledger: stellar_xdr::LedgerCloseMeta,
+    /// What core answered each transaction, in submission order.
+    pub answers: Vec<String>,
 }
 
 struct Live<'e, 'a> {
@@ -151,6 +165,10 @@ struct Live<'e, 'a> {
     new_paths: usize,
     stats: Stats,
     menu_credit: Vec<(Vec<String>, u64)>,
+    /// Operations core refused as not supported at this protocol.
+    unsupported: BTreeSet<String>,
+    /// What core answered each transaction, in order.
+    answers: Vec<String>,
 }
 
 /// What a submitted transaction came to.
@@ -170,6 +188,7 @@ fn is_fill_error(e: &anyhow::Error) -> bool {
             // TryAgainLater, Duplicate or Filtered: core neither queued nor judged it
             || s.contains("to the submission")
             || s.contains("a fee bump wraps a v1 envelope")
+            || s.contains("a v0 transaction cannot carry")
             // the source was merged away earlier in the episode
             || (s.starts_with("account ") && s.ends_with(" does not exist"))
     })
@@ -237,6 +256,8 @@ impl<'e, 'a> Live<'e, 'a> {
     fn learn(&mut self) -> Result<()> {
         let mut drop = self.session.take_left_out();
         self.stats.left_out += drop.len();
+        self.answers
+            .extend(drop.iter().map(|_| "left out".to_owned()));
         for o in self.session.take_observed() {
             let fee_bump = matches!(
                 &self.steps[o.step],
@@ -255,6 +276,15 @@ impl<'e, 'a> Live<'e, 'a> {
                         .recipe_form(serde_json::to_value(&o.result.result)?),
                 )
             };
+            self.answers.push(format!(
+                "{} {}",
+                match o.outcome {
+                    Outcome::Rejected => "refused",
+                    Outcome::Success => "applied",
+                    Outcome::Failed => "failed",
+                },
+                refusal_code(&o.result.result)
+            ));
             match o.outcome {
                 Outcome::Rejected => {
                     self.stats.rejected += 1;
@@ -263,6 +293,7 @@ impl<'e, 'a> Live<'e, 'a> {
                         .refusals
                         .entry(refusal_code(&o.result.result))
                         .or_insert(0) += 1;
+                    self.note_unsupported(o.step, &o.result.result);
                     drop.push(o.step);
                 }
                 Outcome::Success => self.stats.applied += 1,
@@ -291,6 +322,25 @@ impl<'e, 'a> Live<'e, 'a> {
             self.steps.remove(i);
         }
         Ok(())
+    }
+
+    /// Remembers the operations core answered `op_not_supported` for.
+    fn note_unsupported(&mut self, step: usize, r: &stellar_xdr::TransactionResultResult) {
+        use stellar_xdr::{OperationResult, TransactionResultResult as R};
+        let R::TxFailed(ops) = r else { return };
+        let Step::Tx { operations, .. } = &self.steps[step] else {
+            return;
+        };
+        for (op, res) in operations.iter().zip(ops.iter()) {
+            if matches!(res, OperationResult::OpNotSupported)
+                && let Some(arm) = op
+                    .get("body")
+                    .and_then(|b| b.as_object())
+                    .and_then(|b| b.keys().next())
+            {
+                self.unsupported.insert(arm.clone());
+            }
+        }
     }
 
     /// Submits a new transaction step and closes the ledger it goes into.
@@ -388,8 +438,10 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         new_paths: 0,
         stats: Stats::default(),
         menu_credit: Vec::new(),
+        unsupported: BTreeSet::new(),
+        answers: Vec::new(),
     };
-    let prefix = if spec.prefix.is_empty() {
+    let prefix = if spec.prefix.is_empty() && spec.setup {
         setup(&mut rng)
     } else {
         spec.prefix.clone()
@@ -432,7 +484,8 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                 }
                 continue;
             }
-            let (s, arms) = action::transaction(env.schema, &live.world, &mut rng, menu);
+            let (s, arms) =
+                action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);
             match live.transaction(s)? {
                 Pushed::Applied(new) => live.menu_credit.push((arms, new as u64)),
                 Pushed::Rejected | Pushed::Invalid => {}
@@ -440,6 +493,7 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         }
         Ok(())
     });
+    let last_ledger = live.ctx.driver().last_meta().clone();
     let Live {
         ctx,
         steps,
@@ -448,6 +502,7 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         new_paths,
         stats,
         menu_credit,
+        answers,
         ..
     } = live;
     let stopped = ctx.stop();
@@ -458,10 +513,13 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             menu.credit(&a, n);
         }
     }
+    let measured = Instant::now();
     let counts = match &profiles {
-        Some(p) => Some(read_export(&merge_and_export(env.image, p)?)?),
+        Some(p) => Some(read_export_all(&merge_and_export(env.image, p)?)?),
         None => None,
     };
+    let mut stats = stats;
+    stats.coverage_seconds = measured.elapsed().as_secs_f64();
     Ok(Episode {
         ir: spec.ir(steps),
         arms,
@@ -471,6 +529,8 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         prefix_len,
         stats,
         seconds: started.elapsed().as_secs_f64(),
+        last_ledger,
+        answers,
     })
 }
 

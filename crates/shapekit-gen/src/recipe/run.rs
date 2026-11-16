@@ -67,7 +67,7 @@ pub use shapekit_manifest::BELOW_PROTOCOL_VALID;
 
 /// The node every recipe chain runs on. Diagnostic events stay off: core
 /// would add wall-clock timings to them (see the smoke chain).
-fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> NodeConfig {
+pub fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> NodeConfig {
     NodeConfig {
         passphrase: network.passphrase().to_owned(),
         image: image.clone(),

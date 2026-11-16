@@ -141,13 +141,26 @@ impl<'a> Filler<'a> {
     /// An asset: one some account trusts, native, or any the issuers issue.
     fn asset_ref(&mut self) -> AssetRef {
         let trusted: Vec<AssetRef> = self.world.trusted.iter().cloned().collect();
-        match self.rng.below(5) {
+        let a = match self.rng.below(5) {
             0 | 1 if !trusted.is_empty() => self.rng.pick(&trusted).clone(),
             0 => AssetRef::native(),
             _ => {
                 let assets = self.world.assets();
                 self.rng.pick(&assets).clone()
             }
+        };
+        self.name_issuer(&a);
+        a
+    }
+
+    /// An asset's issuer counts as named by the transaction, so later account fields and
+    /// the transaction source can be the issuer.
+    fn name_issuer(&mut self, a: &AssetRef) {
+        if let Some(i) = &a.issuer
+            && !self.named.contains(i)
+            && self.world.funded.contains(i)
+        {
+            self.named.push(i.clone());
         }
     }
 
@@ -161,7 +174,9 @@ impl<'a> Filler<'a> {
         if assets.is_empty() {
             return AssetRef::native();
         }
-        self.rng.pick(&assets).clone()
+        let a = self.rng.pick(&assets).clone();
+        self.name_issuer(&a);
+        a
     }
 
     fn pool_share(&mut self) -> Value {
@@ -511,8 +526,11 @@ impl<'a> Filler<'a> {
             }
             Type::VarArray { element, max_count } => {
                 let max = max_count.unwrap_or(3).min(3) as usize;
+                // one element half the time: most lists need at least one to be valid
                 let n = if self.depth >= MAX_DEPTH {
                     0
+                } else if max >= 1 && self.rng.chance(1, 2) {
+                    1
                 } else {
                     self.rng.below(max + 1)
                 };

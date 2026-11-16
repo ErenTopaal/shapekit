@@ -75,6 +75,7 @@ pub struct Report {
     pub invalid_fills: usize,
     pub upgrades_refused: usize,
     pub left_out: usize,
+    pub coverage_seconds: f64,
     pub refusals: BTreeMap<String, usize>,
     pub signature_paths: usize,
     pub core_regions: usize,
@@ -129,6 +130,7 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                 actions: opts.actions,
                 contracts: opts.contracts,
                 seed: rng.next_u64(),
+                setup: true,
             }
         } else {
             let protocol = *rng.pick(&opts.protocols);
@@ -146,6 +148,7 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                 actions: opts.actions,
                 contracts: opts.contracts,
                 seed: rng.next_u64(),
+                setup: true,
             }
         };
         (spec, menu)
@@ -177,7 +180,12 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                 arms: Vec::new(),
                 novelty: Vec::new(),
             };
-            let replay = episode::run(env, &spec, &mut scratch)?;
+            let ledgers_only = Env {
+                image: env.release,
+                coverage: false,
+                ..*env
+            };
+            let replay = episode::run(&ledgers_only, &spec, &mut scratch)?;
             let mut g = state.lock().expect("no worker panics holding the lock");
             g.replays += 1;
             if new_arms.iter().all(|a| replay.arms.contains_key(a)) {
@@ -299,6 +307,7 @@ pub fn run(env: &Env<'_>, opts: &Options) -> Result<Report> {
         invalid_fills: g.stats.invalid_fills,
         upgrades_refused: g.stats.upgrades_refused,
         left_out: g.stats.left_out,
+        coverage_seconds: g.stats.coverage_seconds,
         refusals: g.stats.refusals.clone(),
         signature_paths: paths,
         core_regions: regions,

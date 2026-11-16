@@ -1,6 +1,8 @@
 //! The next step of an episode: a transaction of one to three operations filled from the
 //! schema, or now and then a ledger upgrade.
 
+use std::collections::BTreeSet;
+
 use serde_json::Value;
 use shapekit_contracts::recipe_ir::{FeeBump, Step, TxExpect};
 use shapekit_schema::Schema;
@@ -35,8 +37,24 @@ impl OpMenu {
 
     /// An operation arm; arms that recently showed something new are drawn more often, and
     /// every arm keeps a floor so none starves.
-    pub fn pick(&self, rng: &mut Rng) -> usize {
-        let w: Vec<u64> = self.novelty.iter().map(|n| 8 + (*n).min(40)).collect();
+    /// Arms in `skip` (operations core said it does not support at this protocol) are
+    /// never drawn; when every arm is skipped the draw ignores `skip`.
+    pub fn pick(&self, rng: &mut Rng, skip: &BTreeSet<String>) -> usize {
+        let mut w: Vec<u64> = self
+            .arms
+            .iter()
+            .zip(&self.novelty)
+            .map(|(a, n)| {
+                if skip.contains(a) {
+                    0
+                } else {
+                    8 + (*n).min(40)
+                }
+            })
+            .collect();
+        if w.iter().all(|x| *x == 0) {
+            w = self.novelty.iter().map(|n| 8 + (*n).min(40)).collect();
+        }
         rng.weighted(&w)
     }
 
@@ -62,8 +80,21 @@ pub fn transaction(
     world: &World,
     rng: &mut Rng,
     menu: &OpMenu,
+    skip: &BTreeSet<String>,
 ) -> (Step, Vec<String>) {
-    let source = rng.pick(&world.funded).clone();
+    // issuers act on their assets (flags, clawback, authorization), so a share of the
+    // transactions come from them
+    let issuers: Vec<String> = world
+        .issuers
+        .iter()
+        .filter(|i| world.funded.contains(*i))
+        .cloned()
+        .collect();
+    let mut source = if !issuers.is_empty() && rng.chance(3, 10) {
+        rng.pick(&issuers).clone()
+    } else {
+        rng.pick(&world.funded).clone()
+    };
     let n = match rng.below(10) {
         0..=6 => 1,
         7 | 8 => 2,
@@ -74,7 +105,7 @@ pub fn transaction(
     let mut f = Filler::new(schema, world, rng, &source);
     let mut op_sources = Vec::new();
     for _ in 0..n {
-        let arm = menu.arms[menu.pick(f.rng)].clone();
+        let arm = menu.arms[menu.pick(f.rng, skip)].clone();
         let body = f
             .union_arm("OperationBody", &arm)
             .expect("the menu holds OperationBody arms");
@@ -104,6 +135,13 @@ pub fn transaction(
     let memo = f.rng.chance(1, 4).then(|| f.def("Memo"));
     let cond = f.rng.chance(1, 5).then(|| f.def("Preconditions"));
     let named = f.named.clone();
+    // a quarter of the time the transaction comes from a role its operations name
+    if f.rng.chance(1, 4) {
+        let cands: Vec<&String> = named.iter().filter(|r| world.funded.contains(*r)).collect();
+        if !cands.is_empty() {
+            source = (*f.rng.pick(&cands)).clone();
+        }
+    }
     let mut signers = Vec::new();
     if !op_sources.is_empty() || rng.chance(1, 12) {
         signers.push(source.clone());
@@ -118,7 +156,7 @@ pub fn transaction(
                 signers.push(extra);
             }
         }
-        if rng.chance(1, 10) {
+        if rng.chance(1, 20) {
             // the source left out: a transaction without its source's signature
             signers.remove(0);
             if signers.is_empty() {
@@ -148,8 +186,8 @@ pub fn transaction(
         Step::Tx {
             label: None,
             source,
-            source_mux_id: rng
-                .chance(1, 12)
+            // v0 envelopes, below protocol 13, have no muxed source
+            source_mux_id: (world.protocol >= 13 && rng.chance(1, 12))
                 .then(|| rng.pick(&["0", "1", "18446744073709551615"]).to_string()),
             operations: ops,
             signers,
@@ -187,7 +225,9 @@ pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
     };
     match rng.below(5) {
         0 if world.protocol < max_protocol => *protocol_version = Some(world.protocol + 1),
-        1 => *base_fee = Some(*rng.pick(&[50, 100, 1000])),
+        // above the interpreter's fee of 100 per operation every later transaction would be
+        // refused, so the upgrade stays at or below it
+        1 => *base_fee = Some(*rng.pick(&[50, 100])),
         2 => *base_reserve = Some(*rng.pick(&[5_000_000, 20_000_000, 100_000_000])),
         3 => *max_tx_set_size = Some(*rng.pick(&[1, 100, 1000])),
         _ => *flags = Some(*rng.pick(&[0, 1, 2, 4, 7])),

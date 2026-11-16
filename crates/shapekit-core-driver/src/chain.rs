@@ -388,7 +388,36 @@ impl ChainDriver {
         )
     }
 
-    fn soroban_with_at(
+    /// A simulator over the node's current state, at its ledger's protocol.
+    pub fn simulator(&self) -> Result<AnySimulator, ChainError> {
+        let ctx = self.node.ledger_context()?;
+        Ok(AnySimulator::new(self.node.snapshot()?, &ctx)?)
+    }
+
+    /// A signed single-operation Soroban transaction for any Soroban operation (an
+    /// invocation with its auth already in the operation, an extend or a restore), with the
+    /// resources in `data` and the given sequence number.
+    pub fn soroban_op_at(
+        &self,
+        source: &SigningKey,
+        body: OperationBody,
+        data: SorobanTransactionData,
+        seq_num: i64,
+    ) -> Result<TransactionEnvelope, ChainError> {
+        let tx = TransactionBuilder::new(muxed_account(&source.verifying_key()), seq_num)
+            .fee(BASE_FEE)
+            .operation(None, body)
+            .build()?;
+        let tx = assemble_soroban(tx, data, None)?;
+        Ok(TransactionEnvelope::Tx(sign_transaction(
+            tx,
+            &self.network_id,
+            &[source],
+        )?))
+    }
+
+    /// [`Self::soroban_with`] with the sequence number given by the caller.
+    pub fn soroban_with_at(
         &self,
         source: &SigningKey,
         host_function: HostFunction,

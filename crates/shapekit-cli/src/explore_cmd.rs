@@ -53,6 +53,23 @@ pub enum ExploreCommand {
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
     },
+    /// Pairs of recipes from one start state whose transactions differ only in how they name
+    /// the same account, kept when core leaves every changed ledger entry byte for byte the
+    /// same under both.
+    Pairs {
+        /// A directory of recipe IR files to start from (an `explore run` output's recipes).
+        #[arg(long)]
+        recipes: PathBuf,
+        /// At most this many candidates are run.
+        #[arg(long, default_value_t = 40)]
+        max: usize,
+        #[arg(long, default_value_t = 3)]
+        jobs: usize,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Record every recipe of a run again under both passphrases, twice each, and check the
     /// streams repeat and the credited arms are there.
     Verify {
@@ -88,10 +105,15 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 bail!("{} already exists", out.display());
             }
             let protocols = parse_protocols(&protocol)?;
-            let image_pins = if coverage { &twin_pins } else { &pins };
-            let image = CoreImage::from_pins(image_pins).with_context(|| {
-                format!("reading the core image pin from {}", image_pins.display())
-            })?;
+            let release = CoreImage::from_pins(&pins)
+                .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+            let image = if coverage {
+                CoreImage::from_pins(&twin_pins).with_context(|| {
+                    format!("reading the twin image pin from {}", twin_pins.display())
+                })?
+            } else {
+                release.clone()
+            };
             let reachable = arms::reachable()?;
             let witnessed = arms::core_witnessed(&coverage_report)?;
             let targets: BTreeSet<String> = witnessed
@@ -106,6 +128,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 schema: &schema,
                 image: &image,
                 coverage,
+                release: &release,
                 root: &root,
                 reachable: &reachable,
                 work: &work,
@@ -151,6 +174,13 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             println!("report: {}", out.join(REPORT).display());
             Ok(r.errors.is_empty())
         }
+        ExploreCommand::Pairs {
+            recipes,
+            max,
+            jobs,
+            out,
+            pins,
+        } => pairs(&recipes, max, jobs, &out, &pins),
         ExploreCommand::Verify {
             dir,
             repeat,
@@ -281,4 +311,130 @@ fn verify_dir(dir: &Path, repeat: usize, jobs: usize, pins: &Path) -> Result<boo
     }
     println!("details: {}", out.display());
     Ok(bad.is_empty())
+}
+
+fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Result<bool> {
+    use shapekit_explore::pairs;
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let image = CoreImage::from_pins(pins)
+        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    let root = std::env::current_dir()?;
+    let mut irs = Vec::new();
+    let mut files: Vec<PathBuf> = std::fs::read_dir(recipes)
+        .with_context(|| format!("reading {}", recipes.display()))?
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().is_some_and(|x| x == "json"))
+        .collect();
+    files.sort();
+    for f in files {
+        let name = f
+            .file_stem()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .into_owned();
+        irs.push((name, shapekit_gen::recipe::ir::load(&f)?));
+    }
+    let mut cands = pairs::candidates(&irs);
+    let total = cands.len();
+    // one candidate per recipe and rewrite first, so a small budget still sees every kind
+    let mut seen = BTreeSet::new();
+    cands.sort_by_key(|c| !seen.insert((c.from.clone(), c.rewrite as u8)));
+    cands.truncate(max);
+    let schema = Schema::pinned();
+    let reachable = arms::reachable()?;
+    let work = scratch()?;
+    let seenf = Seen::default();
+    let env = Env {
+        schema: &schema,
+        image: &image,
+        coverage: false,
+        release: &image,
+        root: &root,
+        reachable: &reachable,
+        work: &work,
+        seen: &seenf,
+    };
+    std::fs::create_dir_all(out.join("pairs"))?;
+    let next = std::sync::atomic::AtomicUsize::new(0);
+    let results = std::sync::Mutex::new(Vec::new());
+    std::thread::scope(|s| {
+        for _ in 0..jobs.clamp(1, cands.len().max(1)) {
+            s.spawn(|| {
+                loop {
+                    let i = next.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    let Some(c) = cands.get(i) else { break };
+                    let name = format!("p{i:04}");
+                    let r = pairs::run_candidate(&env, c, &name).and_then(|(rep, a, b)| {
+                        if rep.records_equal {
+                            let dir = out.join("pairs").join(&name);
+                            std::fs::create_dir_all(&dir)?;
+                            std::fs::write(
+                                dir.join("a.json"),
+                                serde_json::to_string_pretty(&a)? + "\n",
+                            )?;
+                            std::fs::write(
+                                dir.join("b.json"),
+                                serde_json::to_string_pretty(&b)? + "\n",
+                            )?;
+                        }
+                        Ok(rep)
+                    });
+                    match &r {
+                        Ok(rep) => eprintln!(
+                            "{name}: {} step {} {:?}: {}",
+                            rep.from,
+                            rep.step,
+                            rep.rewrite,
+                            if rep.records_equal {
+                                "same records"
+                            } else if rep.both_applied {
+                                "records differ"
+                            } else {
+                                "not applied under both"
+                            }
+                        ),
+                        Err(e) => eprintln!("{name}: {e:#}"),
+                    }
+                    results
+                        .lock()
+                        .expect("no thread panics holding the lock")
+                        .push(r.map_err(|e| format!("{name}: {e:#}")));
+                }
+            });
+        }
+    });
+    let results = results
+        .into_inner()
+        .expect("no thread panics holding the lock");
+    let mut reports: Vec<pairs::PairReport> = Vec::new();
+    let mut errors = Vec::new();
+    for r in results {
+        match r {
+            Ok(rep) => reports.push(rep),
+            Err(e) => errors.push(e),
+        }
+    }
+    reports.sort_by(|a, b| a.pair.cmp(&b.pair));
+    std::fs::write(
+        out.join("pairs.json"),
+        serde_json::to_string_pretty(&reports)? + "\n",
+    )?;
+    let equal = reports.iter().filter(|r| r.records_equal).count();
+    let differ = reports
+        .iter()
+        .filter(|r| r.both_applied && !r.records_equal)
+        .count();
+    println!(
+        "{total} candidates, {} run: {equal} pairs with the same records, {differ} whose records differ, {} not applied under both, {} errors",
+        cands.len(),
+        reports.len() - equal - differ,
+        errors.len()
+    );
+    for e in &errors {
+        println!("error: {e}");
+    }
+    println!("pairs: {}", out.join("pairs.json").display());
+    Ok(errors.is_empty())
 }
