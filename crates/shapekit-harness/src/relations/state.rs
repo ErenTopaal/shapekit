@@ -73,6 +73,10 @@ type Fields = BTreeMap<String, String>;
 #[derive(Debug, Clone, Default)]
 pub struct CoreState {
     pub entries: BTreeMap<(EntryKind, Vec<String>), Fields>,
+    /// Each entry's XDR with the holder of the key (the account, the balance holder or
+    /// the pool id) set to zero bytes: two entries with the same bytes here are records
+    /// core holds identically except for whose they are.
+    pub unkeyed: BTreeMap<(EntryKind, Vec<String>), Vec<u8>>,
 }
 
 fn flag(v: bool) -> String {
@@ -210,6 +214,9 @@ impl CoreState {
             }
             _ => return,
         };
+        if let Some(b) = unkeyed_xdr(e) {
+            self.unkeyed.insert((kind, key.clone()), b);
+        }
         self.entries.insert((kind, key), f);
     }
 
@@ -240,6 +247,37 @@ impl CoreState {
         }
         Ok(s)
     }
+}
+
+fn zero_account() -> stellar_xdr::AccountId {
+    stellar_xdr::AccountId(stellar_xdr::PublicKey::PublicKeyTypeEd25519(
+        stellar_xdr::Uint256([0; 32]),
+    ))
+}
+
+/// The entry's XDR with its holder zeroed, for the kinds compared.
+fn unkeyed_xdr(e: &LedgerEntry) -> Option<Vec<u8>> {
+    use stellar_xdr::WriteXdr;
+    let mut e = e.clone();
+    match &mut e.data {
+        LedgerEntryData::Account(a) => a.account_id = zero_account(),
+        LedgerEntryData::Trustline(t) => t.account_id = zero_account(),
+        LedgerEntryData::LiquidityPool(p) => {
+            p.liquidity_pool_id = stellar_xdr::PoolId(stellar_xdr::Hash([0; 32]))
+        }
+        LedgerEntryData::ContractData(d) => {
+            let ScVal::Vec(Some(v)) = &mut d.key else {
+                return None;
+            };
+            let mut items: Vec<ScVal> = v.to_vec();
+            if let Some(ScVal::Address(a)) = items.get_mut(1) {
+                *a = stellar_xdr::ScAddress::Account(zero_account());
+            }
+            d.key = ScVal::Vec(Some(items.try_into().ok()?));
+        }
+        _ => return None,
+    }
+    e.to_xdr(stellar_xdr::Limits::none()).ok()
 }
 
 /// How a key column's cell becomes a key value: the cell itself (decoded through the known
@@ -321,7 +359,7 @@ fn resolve_cell(cell: &str, known: &Known) -> String {
 }
 
 /// Resolves the key columns of one row.
-fn row_key(
+pub(crate) fn row_key(
     dump: &Dump,
     table: &Table,
     row: &[Option<String>],
@@ -766,6 +804,8 @@ pub struct ChainState {
     pub ordinary: bool,
     pub verdicts: BTreeMap<String, u64>,
     pub state: StateReport,
+    /// Records core holds equally, and whether the target does too.
+    pub route: super::route::RouteReport,
     /// Where the state comparison and the oracle's verdicts tell different stories.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub disagreement: Option<String>,
@@ -793,6 +833,7 @@ pub fn check_chain(c: &RunChain, mapping: &Mapping) -> ChainState {
         network: c.network.clone(),
         ordinary: c.ordinary,
         verdicts: c.verdicts.clone(),
+        route: super::route::check(&c.dump, &c.core, &c.known, mapping),
         state,
         disagreement,
     }

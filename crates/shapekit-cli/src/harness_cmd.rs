@@ -674,6 +674,37 @@ fn state(c: StateCommand) -> Result<bool> {
                 for x in r.state.stale.iter().chain(&r.state.missing).take(5) {
                     println!("  {x}");
                 }
+                if !r.route.groups.is_empty() {
+                    println!(
+                        "  route: {} groups of records core holds equally ({}), {} table comparisons, {} differences",
+                        r.route.groups.len(),
+                        r.route
+                            .groups
+                            .iter()
+                            .map(|g| format!(
+                                "{} x{}, {} bytes",
+                                g.entry.name(),
+                                g.keys.len(),
+                                g.bytes
+                            ))
+                            .collect::<Vec<_>>()
+                            .join("; "),
+                        r.route.compared,
+                        r.route.differences.len()
+                    );
+                }
+                for d in &r.route.differences {
+                    println!(
+                        "  route difference in {} for {}: {}",
+                        d.table,
+                        d.keys
+                            .iter()
+                            .map(|k| k.join(" "))
+                            .collect::<Vec<_>>()
+                            .join(" / "),
+                        d.detail
+                    );
+                }
             }
             println!(
                 "ordinary chains where the mapping holds: {ord_ok} of {ord}; chains: {}; disagreements with the oracle: {}",
