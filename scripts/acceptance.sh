@@ -9,7 +9,8 @@
 #                                        regenerated under both passphrases
 #
 # needs cargo, go and node on PATH; full mode also needs docker and network access. runs from
-# the repository root wherever it is started. run outputs go to target/acceptance/.
+# the repository root wherever it is started, builds without debug info, and writes run
+# outputs to target/acceptance/.
 # docs/maintenance.md, "Acceptance gate", describes both modes.
 set -euo pipefail
 
@@ -28,6 +29,9 @@ case "${1:-}" in
 esac
 
 cd "$(git rev-parse --show-toplevel)"
+
+# without debug info a workspace build stays a few gigabytes; with it, tens
+export CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0
 
 for tool in cargo go node; do
   if ! command -v "$tool" >/dev/null; then
