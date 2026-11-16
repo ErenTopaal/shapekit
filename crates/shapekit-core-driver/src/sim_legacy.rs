@@ -9,9 +9,15 @@
 //!
 //! | protocol | soroban-simulation, soroban-env-host | stellar-xdr | core 30.0.0 applies with |
 //! |---|---|---|---|
+//! | 21 | 21.2.2 | 21.2.0 | soroban-env-host 21.2.2 |
 //! | 22 | 22.1.4 | 22.1.0 | soroban-env-host 22.0.0 |
+//! | 23 | 23.0.2 | 23.0.0 | soroban-env-host 23.0.0 |
 //! | 24 | 24.0.0 | 24.0.0 | soroban-env-host 24.0.0 |
+//! | 25 | 25.2.2 | 25.0.0 | soroban-env-host 25.0.0 |
+//! | 26 | 26.1.4 | 26.0.1 | soroban-env-host 26.0.0 |
+//! | 27 | 27.0.1 | 27.0.0 | soroban-env-host 27.0.0 |
 //! | 28 | 28.0.2 | 28.0.0 | soroban-env-host 28.0.0 |
+//! | 29 | 29.0.2 | 28.0.0 | soroban-env-host 29.0.0 |
 //!
 //! Patch releases of a host keep its protocol's behaviour, which is what lets
 //! simulation use the newest patch of the host core applies with. Each host
@@ -41,7 +47,7 @@ use crate::sim::{
 
 /// Ledger protocols a simulator exists for: the ones below 30 that this
 /// module covers, plus 30 itself through [`Simulator`].
-pub const SIMULATED_PROTOCOLS: [u32; 4] = [22, 24, 28, 30];
+pub const SIMULATED_PROTOCOLS: [u32; 10] = [21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
 
 /// Average of the live state size window, as core computes it. Every value
 /// read is converted from the snapshot, so a missing or malformed entry
@@ -71,8 +77,8 @@ fn average_state_size(snapshot: &FetchingSnapshot) -> Result<u64, SimError> {
     Ok(sum / window.len() as u64)
 }
 
-// one module per host release. the hosts differ in three places, passed in
-// as expressions: how the auth mode is expressed, how the network config is
+// one module per host release. the hosts differ in four places, passed in:
+// the type of the auth mode, how it is expressed, how the network config is
 // loaded, and whether archived entries need their own snapshot trait.
 macro_rules! legacy_simulator {
     (
@@ -81,6 +87,7 @@ macro_rules! legacy_simulator {
         protocol: $protocol:literal,
         host: $host:ident,
         sim: $sim:ident,
+        mode: $mode:ty,
         enforce: |$entries:ident| $enforce:expr,
         record: |$non_root:ident, $v2:ident| $record:expr,
         load: |$snap:ident, $avg:ident| $load:expr,
@@ -90,7 +97,6 @@ macro_rules! legacy_simulator {
         pub mod $name {
             use std::rc::Rc;
 
-            use $host::e2e_invoke::RecordingInvocationAuthMode;
             use $host::storage::{EntryWithLiveUntil, SnapshotSource};
             use $host::xdr::{self as old, ScErrorCode, ScErrorType};
             use $host::{HostError, LedgerInfo};
@@ -107,6 +113,9 @@ macro_rules! legacy_simulator {
                 SIMULATION_PRNG_SEED, SimError, INSTRUCTIONS_ADDEND, INSTRUCTIONS_MULTIPLIER,
                 REFUNDABLE_FEE_MULTIPLIER, TX_SIZE_ADDEND, TX_SIZE_MULTIPLIER,
             };
+
+            /// What this host's simulation takes as its auth mode.
+            type RecordingInvocationAuthMode = $mode;
 
             /// Ledger protocol this host runs, and the only one it accepts.
             pub const PROTOCOL: u32 = $protocol;
@@ -380,6 +389,7 @@ legacy_simulator! {
     protocol: 22,
     host: soroban_env_host_p22,
     sim: soroban_simulation_p22,
+    mode: soroban_env_host_p22::e2e_invoke::RecordingInvocationAuthMode,
     // without its unstable-next-api feature (which stellar-rpc 22 did not
     // enable) this host's mode is an option: `None` records with non-root
     // auth disabled, and there is no way to allow it
@@ -416,6 +426,7 @@ legacy_simulator! {
     protocol: 24,
     host: soroban_env_host_p24,
     sim: soroban_simulation_p24,
+    mode: soroban_env_host_p24::e2e_invoke::RecordingInvocationAuthMode,
     enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
     record: |allow_non_root, address_v2| if address_v2 {
         Err(SimError::NotAtProtocol {
@@ -435,6 +446,134 @@ legacy_simulator! {
     protocol: 28,
     host: soroban_env_host_p28,
     sim: soroban_simulation_p28,
+    mode: soroban_env_host_p28::e2e_invoke::RecordingInvocationAuthMode,
+    enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
+    record: |allow_non_root, address_v2| Ok::<_, SimError>(
+        RecordingInvocationAuthMode::recording(!allow_non_root, address_v2)
+    ),
+    load: |snap, _avg| NetworkConfig::load_from_snapshot(snap),
+    extra: {}
+}
+
+legacy_simulator! {
+    /// Protocol 21: soroban-simulation 21.2.2. Its simulation takes the signed entries, or
+    /// none to record root authorization, and archived entries sit in the live state as at
+    /// protocol 22.
+    mod p21,
+    protocol: 21,
+    host: soroban_env_host_p21,
+    sim: soroban_simulation_p21,
+    mode: Option<Vec<soroban_env_host_p21::xdr::SorobanAuthorizationEntry>>,
+    enforce: |entries| Some(entries),
+    record: |allow_non_root, address_v2| if address_v2 {
+        Err(SimError::NotAtProtocol {
+            protocol: PROTOCOL,
+            what: "address-v2 credentials (CAP-71, protocol 27)".into(),
+        })
+    } else if allow_non_root {
+        Err(SimError::NotAtProtocol {
+            protocol: PROTOCOL,
+            what: "recording non-root auth (soroban-simulation 21 records root auth only)".into(),
+        })
+    } else {
+        Ok::<RecordingInvocationAuthMode, SimError>(None)
+    },
+    load: |snap, avg| NetworkConfig::load_from_snapshot(snap, avg),
+    extra: {
+        impl soroban_simulation_p21::SnapshotSourceWithArchive for Snap {
+            fn get_including_archived(
+                &self,
+                key: &Rc<old::LedgerKey>,
+            ) -> Result<Option<EntryWithLiveUntil>, HostError> {
+                self.entry(key)
+            }
+        }
+    }
+}
+
+legacy_simulator! {
+    /// Protocol 23: soroban-simulation 23.0.2.
+    mod p23,
+    protocol: 23,
+    host: soroban_env_host_p23,
+    sim: soroban_simulation_p23,
+    mode: soroban_env_host_p23::e2e_invoke::RecordingInvocationAuthMode,
+    enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
+    record: |allow_non_root, address_v2| if address_v2 {
+        Err(SimError::NotAtProtocol {
+            protocol: PROTOCOL,
+            what: "address-v2 credentials (CAP-71, protocol 27)".into(),
+        })
+    } else {
+        Ok(RecordingInvocationAuthMode::Recording(!allow_non_root))
+    },
+    load: |snap, avg| NetworkConfig::load_from_snapshot(snap, avg),
+    extra: {}
+}
+
+legacy_simulator! {
+    /// Protocol 25: soroban-simulation 25.2.2, which still takes the state size as an
+    /// argument without its unstable-next-api feature.
+    mod p25,
+    protocol: 25,
+    host: soroban_env_host_p25,
+    sim: soroban_simulation_p25,
+    mode: soroban_env_host_p25::e2e_invoke::RecordingInvocationAuthMode,
+    enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
+    record: |allow_non_root, address_v2| if address_v2 {
+        Err(SimError::NotAtProtocol {
+            protocol: PROTOCOL,
+            what: "address-v2 credentials (CAP-71, protocol 27)".into(),
+        })
+    } else {
+        Ok(RecordingInvocationAuthMode::Recording(!allow_non_root))
+    },
+    load: |snap, avg| NetworkConfig::load_from_snapshot(snap, avg),
+    extra: {}
+}
+
+legacy_simulator! {
+    /// Protocol 26: soroban-simulation 26.1.4.
+    mod p26,
+    protocol: 26,
+    host: soroban_env_host_p26,
+    sim: soroban_simulation_p26,
+    mode: soroban_env_host_p26::e2e_invoke::RecordingInvocationAuthMode,
+    enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
+    record: |allow_non_root, address_v2| if address_v2 {
+        Err(SimError::NotAtProtocol {
+            protocol: PROTOCOL,
+            what: "address-v2 credentials (CAP-71, protocol 27)".into(),
+        })
+    } else {
+        Ok(RecordingInvocationAuthMode::Recording(!allow_non_root))
+    },
+    load: |snap, _avg| NetworkConfig::load_from_snapshot(snap),
+    extra: {}
+}
+
+legacy_simulator! {
+    /// Protocol 27: soroban-simulation 27.0.1.
+    mod p27,
+    protocol: 27,
+    host: soroban_env_host_p27,
+    sim: soroban_simulation_p27,
+    mode: soroban_env_host_p27::e2e_invoke::RecordingInvocationAuthMode,
+    enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
+    record: |allow_non_root, address_v2| Ok::<_, SimError>(
+        RecordingInvocationAuthMode::recording(!allow_non_root, address_v2)
+    ),
+    load: |snap, _avg| NetworkConfig::load_from_snapshot(snap),
+    extra: {}
+}
+
+legacy_simulator! {
+    /// Protocol 29: soroban-simulation 29.0.2.
+    mod p29,
+    protocol: 29,
+    host: soroban_env_host_p29,
+    sim: soroban_simulation_p29,
+    mode: soroban_env_host_p29::e2e_invoke::RecordingInvocationAuthMode,
     enforce: |entries| RecordingInvocationAuthMode::Enforcing(entries),
     record: |allow_non_root, address_v2| Ok::<_, SimError>(
         RecordingInvocationAuthMode::recording(!allow_non_root, address_v2)
@@ -444,9 +583,15 @@ legacy_simulator! {
 }
 
 enum Inner {
+    P21(p21::Simulator),
     P22(p22::Simulator),
+    P23(p23::Simulator),
     P24(p24::Simulator),
+    P25(p25::Simulator),
+    P26(p26::Simulator),
+    P27(p27::Simulator),
     P28(p28::Simulator),
+    P29(p29::Simulator),
     Current(Simulator),
 }
 
@@ -478,7 +623,13 @@ impl AnySimulator {
         }
         let fetching = Rc::new(FetchingSnapshot::new(Box::new(fetcher)));
         let inner = match protocol {
+            p21::PROTOCOL => Inner::P21(p21::Simulator::new(fetching, ctx)?),
             p22::PROTOCOL => Inner::P22(p22::Simulator::new(fetching, ctx)?),
+            p23::PROTOCOL => Inner::P23(p23::Simulator::new(fetching, ctx)?),
+            p25::PROTOCOL => Inner::P25(p25::Simulator::new(fetching, ctx)?),
+            p26::PROTOCOL => Inner::P26(p26::Simulator::new(fetching, ctx)?),
+            p27::PROTOCOL => Inner::P27(p27::Simulator::new(fetching, ctx)?),
+            p29::PROTOCOL => Inner::P29(p29::Simulator::new(fetching, ctx)?),
             p24::PROTOCOL => Inner::P24(p24::Simulator::new(fetching, ctx)?),
             p28::PROTOCOL => Inner::P28(p28::Simulator::new(fetching, ctx)?),
             other => {
@@ -500,6 +651,12 @@ impl AnySimulator {
     pub fn prefetch(&self, keys: &[LedgerKey]) -> Result<(), SimError> {
         match &self.inner {
             Inner::P22(s) => s.prefetch(keys),
+            Inner::P21(s) => s.prefetch(keys),
+            Inner::P23(s) => s.prefetch(keys),
+            Inner::P25(s) => s.prefetch(keys),
+            Inner::P26(s) => s.prefetch(keys),
+            Inner::P27(s) => s.prefetch(keys),
+            Inner::P29(s) => s.prefetch(keys),
             Inner::P24(s) => s.prefetch(keys),
             Inner::P28(s) => s.prefetch(keys),
             Inner::Current(s) => s.prefetch(keys),
@@ -514,6 +671,12 @@ impl AnySimulator {
     ) -> Result<InvokeSimulation, SimError> {
         match &self.inner {
             Inner::P22(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P21(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P23(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P25(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P26(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P27(s) => s.simulate_invoke(&host_function, auth_mode, source),
+            Inner::P29(s) => s.simulate_invoke(&host_function, auth_mode, source),
             Inner::P24(s) => s.simulate_invoke(&host_function, auth_mode, source),
             Inner::P28(s) => s.simulate_invoke(&host_function, auth_mode, source),
             Inner::Current(s) => s.simulate_invoke(host_function, auth_mode, source),
@@ -528,6 +691,12 @@ impl AnySimulator {
     ) -> Result<ExtendTtlSimulation, SimError> {
         match &self.inner {
             Inner::P22(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P21(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P23(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P25(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P26(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P27(s) => s.simulate_extend_ttl(keys, extend_to),
+            Inner::P29(s) => s.simulate_extend_ttl(keys, extend_to),
             Inner::P24(s) => s.simulate_extend_ttl(keys, extend_to),
             Inner::P28(s) => s.simulate_extend_ttl(keys, extend_to),
             Inner::Current(s) => s.simulate_extend_ttl(keys, extend_to),
@@ -538,6 +707,12 @@ impl AnySimulator {
     pub fn simulate_restore(&self, keys: &[LedgerKey]) -> Result<SorobanTransactionData, SimError> {
         match &self.inner {
             Inner::P22(s) => s.simulate_restore(keys),
+            Inner::P21(s) => s.simulate_restore(keys),
+            Inner::P23(s) => s.simulate_restore(keys),
+            Inner::P25(s) => s.simulate_restore(keys),
+            Inner::P26(s) => s.simulate_restore(keys),
+            Inner::P27(s) => s.simulate_restore(keys),
+            Inner::P29(s) => s.simulate_restore(keys),
             Inner::P24(s) => s.simulate_restore(keys),
             Inner::P28(s) => s.simulate_restore(keys),
             Inner::Current(s) => s.simulate_restore(keys),
@@ -562,7 +737,7 @@ mod tests {
 
     #[test]
     fn protocols_without_a_host_are_refused() {
-        for p in [21, 23, 25, 26, 27, 29, 31] {
+        for p in [19, 20, 31] {
             match AnySimulator::new(MemorySnapshot::new(), &ctx(p)) {
                 Err(SimError::NoSimulator { ledger, supported }) => {
                     assert_eq!(ledger, p);
@@ -578,7 +753,7 @@ mod tests {
     fn older_hosts_read_the_state_size_window_first() {
         // an empty snapshot gets as far as the first entry every older host
         // needs, so the error shows the protocol's own path was taken
-        for p in [22, 24, 28] {
+        for p in 21..=29 {
             match AnySimulator::new(MemorySnapshot::new(), &ctx(p)) {
                 Err(SimError::Setup(m)) => {
                     assert!(m.contains("live state size window"), "{p}: {m}")

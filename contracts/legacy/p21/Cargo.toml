@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+# auth_tree and factory are left out: protocol 21 chains only need echo, and factory needs
+# ContractExecutable and deploy_contract, which this soroban-sdk does not have
+members = ["echo"]
+
+[workspace.dependencies]
+soroban-sdk = "=21.7.7"
+
+# same release profile as contracts/Cargo.toml
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
