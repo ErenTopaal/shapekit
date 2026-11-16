@@ -1,4 +1,5 @@
-//! `shapekit twin`: the coverage twin of stellar-core and the protocol gate list.
+//! `shapekit twin`: the coverage twin of stellar-core, its byte equality with the release
+//! image, and the protocol gate list.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -6,12 +7,145 @@ use std::process::Command;
 use anyhow::{Context, Result, bail};
 use shapekit_contracts::CoreRef;
 use shapekit_contracts::gates::Comparison;
+use shapekit_core_driver::config::CoreImage;
+use shapekit_registry::Registry;
 use shapekit_twin::gates;
+use shapekit_twin::verify::{DEFAULT_CHAINS, SMOKE, VerifyOptions};
 
-use crate::pins;
+use crate::{manifest_cmd, pins};
+
+/// The smoke chain's testnet canonical hash on the release image, as
+/// measured on stellar-core 30.0.0 before the twin existed.
+const SMOKE_TESTNET_RELEASE: &str =
+    "926fbc8145c40b9d66f3c3a67a9177c22c131232dfaacb9ace37461be95bd818";
+
+struct VerifyArgs {
+    chains: Vec<String>,
+    pins: PathBuf,
+    twin_pins: PathBuf,
+    corpus: PathBuf,
+    registry: PathBuf,
+    jobs: u16,
+    out: PathBuf,
+}
+
+fn verify(a: VerifyArgs) -> Result<bool> {
+    if a.out.exists() {
+        bail!("{} already exists", a.out.display());
+    }
+    let release = CoreImage::from_pins(&a.pins)
+        .with_context(|| format!("reading the core image pin from {}", a.pins.display()))?;
+    let twin = CoreImage::from_pins(&a.twin_pins)
+        .with_context(|| format!("reading the twin image pin from {}", a.twin_pins.display()))?;
+    if !twin.local {
+        bail!(
+            "{} pins a registry image; the twin is a local build pinned by image_id",
+            a.twin_pins.display()
+        );
+    }
+    let registry = Registry::load(&a.registry)
+        .with_context(|| format!("loading the registry in {}", a.registry.display()))?;
+    let generated_with = manifest_cmd::generated_with(&pins::load(&a.pins)?)?;
+    let chains = if a.chains.is_empty() {
+        DEFAULT_CHAINS.iter().map(|c| c.to_string()).collect()
+    } else {
+        a.chains
+    };
+    let opts = VerifyOptions {
+        release: release.clone(),
+        twin: twin.clone(),
+        chains,
+        corpus: a.corpus,
+        registry: &registry,
+        generated_with,
+        jobs: usize::from(a.jobs),
+        out: a.out.clone(),
+    };
+    println!("release {}", release.reference());
+    println!(
+        "twin    {} ({}:{})",
+        twin.reference(),
+        twin.repository,
+        twin.tag
+    );
+    let results = shapekit_twin::verify::verify(&opts)?;
+    let mut ok = true;
+    for c in &results {
+        let corpus = match c.matches_corpus() {
+            None => String::new(),
+            Some(true) => ", corpus equal".into(),
+            Some(false) => {
+                ok = false;
+                format!(
+                    ", CORPUS DIFFERS ({})",
+                    c.committed.as_deref().unwrap_or("")
+                )
+            }
+        };
+        ok &= c.equal();
+        println!(
+            "{} ({}): ledgers {} to {}, release {} ({:.1}s), twin {} ({:.1}s): {}{corpus}",
+            c.chain,
+            c.network.name(),
+            c.twin.first_ledger,
+            c.twin.last_ledger,
+            c.release.canonical_stream_sha256,
+            c.release.seconds,
+            c.twin.canonical_stream_sha256,
+            c.twin.seconds,
+            if c.equal() { "equal" } else { "DIFFERS" },
+        );
+        if c.chain == SMOKE
+            && c.network.name() == "testnet"
+            && c.release.canonical_stream_sha256 != SMOKE_TESTNET_RELEASE
+        {
+            ok = false;
+            println!(
+                "smoke chain (testnet) on the release image is {}, expected {SMOKE_TESTNET_RELEASE}",
+                c.release.canonical_stream_sha256
+            );
+        }
+    }
+    let equal = results.iter().filter(|c| c.equal()).count();
+    let corpus: Vec<bool> = results.iter().filter_map(|c| c.matches_corpus()).collect();
+    println!(
+        "{equal} of {} comparisons equal, {} of {} corpus hashes equal; chains in {}",
+        results.len(),
+        corpus.iter().filter(|b| **b).count(),
+        corpus.len(),
+        a.out.display()
+    );
+    Ok(ok)
+}
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Record the same chains under both passphrases on the release image and on the
+    /// coverage twin and compare their canonical stream hashes; corpus chains are also
+    /// compared with the hash committed in the corpus. Exits 1 on any difference.
+    Verify {
+        /// Chains to compare: `smoke` or corpus chain ids. Defaults to the smoke chain,
+        /// cap40.signed-payload-signer.p30, cap73.sac-trust.p30,
+        /// classic.failed-tx.change-trust-native.p9 and cap67.unified-events.p22.
+        #[arg(long = "chain")]
+        chains: Vec<String>,
+        /// Pins naming the release image.
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        /// Pins naming the twin image.
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        /// Chains recorded at once on each image.
+        #[arg(long, default_value_t = 2)]
+        jobs: u16,
+        /// Where the recorded chains are written; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// List every protocol version comparison in core's non-test C++ source
     /// (`protocolVersionIsBefore`, `StartsFrom`, `Equals`) with its function and protocol,
     /// both sides open. The checkout must be at the stellar-core commit pinned in the pins
@@ -31,6 +165,23 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::Verify {
+            chains,
+            pins,
+            twin_pins,
+            corpus,
+            registry,
+            jobs,
+            out,
+        } => verify(VerifyArgs {
+            chains,
+            pins,
+            twin_pins,
+            corpus,
+            registry,
+            jobs,
+            out,
+        }),
         TwinCommand::Gates {
             core_src,
             out,
