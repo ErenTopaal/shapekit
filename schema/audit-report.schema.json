@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "AuditNetwork": {
+      "enum": [
+        "pubnet",
+        "testnet"
+      ],
+      "type": "string"
+    },
+    "CoverageDelta": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline": {
+          "description": "What the run is compared with, `corpus` for the committed corpus.",
+          "type": "string"
+        },
+        "baseline_ranges": {
+          "description": "Code ranges the baseline reaches.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "new": {
+          "default": [],
+          "description": "Each range the baseline does not reach, with the first ledger that reached it.",
+          "items": {
+            "$ref": "#/$defs/NewBranch"
+          },
+          "type": "array"
+        },
+        "ranges": {
+          "description": "Code ranges the baseline and this run reach together.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "baseline",
+        "baseline_ranges",
+        "ranges"
+      ],
+      "type": "object"
+    },
+    "EnvelopeCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "fee_bump": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "v0": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "v1": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "v0",
+        "v1",
+        "fee_bump"
+      ],
+      "type": "object"
+    },
+    "LawResult": {
+      "additionalProperties": false,
+      "properties": {
+        "checked": {
+          "description": "How many values the law was checked on.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "examples": {
+          "default": [],
+          "description": "Some of the violations, at most as many as `violations`.",
+          "items": {
+            "$ref": "#/$defs/Violation"
+          },
+          "type": "array"
+        },
+        "law": {
+          "description": "The law's name as `shapekit laws` lists it.",
+          "type": "string"
+        },
+        "violations": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "law",
+        "checked",
+        "violations"
+      ],
+      "type": "object"
+    },
+    "NewBranch": {
+      "additionalProperties": false,
+      "properties": {
+        "ledger": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "location": {
+          "description": "The range in the consumer's source, `<file>:<line>:<column>-<line>:<column>`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "location",
+        "ledger"
+      ],
+      "type": "object"
+    },
+    "SdkRef": {
+      "additionalProperties": false,
+      "properties": {
+        "sdk": {
+          "description": "`rust`, `go` or `js`.",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sdk",
+        "version"
+      ],
+      "type": "object"
+    },
+    "Violation": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "ledger": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ledger",
+        "detail"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/audit-report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One audit run over public ledgers: the network, the ledgers checked, checked and violation counts per law, and consumer branches reached beyond a baseline.",
+  "properties": {
+    "coverage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CoverageDelta"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Consumer branches the run reached beyond a baseline, when coverage was measured."
+    },
+    "envelopes": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EnvelopeCounts"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Envelopes by type, when the run decoded envelopes."
+    },
+    "laws": {
+      "description": "One row per law, sorted by name.",
+      "items": {
+        "$ref": "#/$defs/LawResult"
+      },
+      "type": "array"
+    },
+    "ledgers": {
+      "description": "Every ledger checked, ascending, each once.",
+      "items": {
+        "format": "uint32",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "network": {
+      "$ref": "#/$defs/AuditNetwork"
+    },
+    "protocols": {
+      "description": "The protocol versions those ledgers were closed at, ascending.",
+      "items": {
+        "format": "uint32",
+        "minimum": 0,
+        "type": "integer"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "sdk": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SdkRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The SDK testee the ledgers went through; absent when only the in-process checks ran."
+    },
+    "seed": {
+      "description": "The seed the ledgers were drawn with; absent for a contiguous window.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "transactions": {
+      "description": "Transactions in those ledgers.",
+      "format": "uint64",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "network",
+    "ledgers",
+    "protocols",
+    "transactions",
+    "laws"
+  ],
+  "title": "shapekit audit report, version 1",
+  "type": "object"
+}

@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "CoreRef": {
+      "additionalProperties": false,
+      "description": "The stellar-core a table was measured on or read from.",
+      "properties": {
+        "commit": {
+          "description": "The full commit sha the tag names.",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImageRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The image that ran, absent for tables read from source."
+        },
+        "version": {
+          "description": "The release tag, `v30.0.0`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "commit"
+      ],
+      "type": "object"
+    },
+    "FileCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "description": "Path in core's repository.",
+          "type": "string"
+        },
+        "regions_reached": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "regions_unreached": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "regions_reached",
+        "regions_unreached"
+      ],
+      "type": "object"
+    },
+    "ImageRef": {
+      "additionalProperties": false,
+      "description": "A container image: a registry image with its manifest digest, or a local build with its\nimage id in `digest`.",
+      "properties": {
+        "digest": {
+          "description": "`sha256:<64 hex>`.",
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "Region": {
+      "additionalProperties": false,
+      "properties": {
+        "class": {
+          "$ref": "#/$defs/RegionClass"
+        },
+        "core_tests": {
+          "default": [],
+          "description": "The core tests that reach the region, `[tx] payment/merge` style names. Required for\n`reachable-by-core-tests`, empty for `unknown`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "file": {
+          "type": "string"
+        },
+        "line_end": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "line_start": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file",
+        "line_start",
+        "line_end",
+        "class"
+      ],
+      "type": "object"
+    },
+    "RegionClass": {
+      "oneOf": [
+        {
+          "const": "reachable-by-core-tests",
+          "description": "Some core test reaches it, so it is reachable and a recipe can be searched for.",
+          "type": "string"
+        },
+        {
+          "const": "unknown",
+          "description": "Neither a chain nor a core test reaches it; whether anything can is not known.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/core-coverage.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "corpus/coverage/core-coverage.json: reached and unreached region counts per core source file for the measured chains, and every unreached region with the core tests that reach it.",
+  "properties": {
+    "chains": {
+      "description": "The chains measured, as `chain:<id>` witness references, sorted.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "core": {
+      "$ref": "#/$defs/CoreRef",
+      "description": "The coverage build of core that ran the chains."
+    },
+    "files": {
+      "description": "Per source file, sorted by path, each path once.",
+      "items": {
+        "$ref": "#/$defs/FileCoverage"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "unreached": {
+      "description": "The regions no measured chain reaches, sorted by (file, line_start, line_end).",
+      "items": {
+        "$ref": "#/$defs/Region"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "core",
+    "chains",
+    "files",
+    "unreached"
+  ],
+  "title": "shapekit core coverage summary, version 1",
+  "type": "object"
+}

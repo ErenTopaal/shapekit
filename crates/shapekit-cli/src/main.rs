@@ -2,6 +2,7 @@
 
 mod capture_cmd;
 mod conformance_cmd;
+mod contracts_cmd;
 mod coverage_cmd;
 mod findings_cmd;
 mod fuzz_cmd;
@@ -128,6 +129,11 @@ enum Command {
     Schema {
         #[command(subcommand)]
         command: schema_cmd::SchemaCommand,
+    },
+    /// The data formats the generators and checks exchange, and their schemas.
+    Contracts {
+        #[command(subcommand)]
+        command: contracts_cmd::ContractsCommand,
     },
     /// The corpus as a release asset.
     Corpus {
@@ -557,6 +563,7 @@ fn main() -> ExitCode {
         Command::Fuzz(args) => fuzz_cmd::run(args),
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
+        Command::Contracts { command } => contracts_cmd::run(command),
         Command::Site { command } => site_cmd::run(command),
         Command::Schema { command } => schema_cmd::run(command),
     };

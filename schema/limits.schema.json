@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "CoreRef": {
+      "additionalProperties": false,
+      "description": "The stellar-core a table was measured on or read from.",
+      "properties": {
+        "commit": {
+          "description": "The full commit sha the tag names.",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImageRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The image that ran, absent for tables read from source."
+        },
+        "version": {
+          "description": "The release tag, `v30.0.0`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "commit"
+      ],
+      "type": "object"
+    },
+    "ImageRef": {
+      "additionalProperties": false,
+      "description": "A container image: a registry image with its manifest digest, or a local build with its\nimage id in `digest`.",
+      "properties": {
+        "digest": {
+          "description": "`sha256:<64 hex>`.",
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "Limit": {
+      "additionalProperties": false,
+      "properties": {
+        "first_rejected": {
+          "description": "Decimal integer: the next value, which core refused or failed.",
+          "type": "string"
+        },
+        "max_accepted": {
+          "description": "Decimal integer: the largest value core accepted and applied successfully.",
+          "type": "string"
+        },
+        "measure": {
+          "description": "What was varied when it is not the field's own value, `invocations in one auth tree\nlevel` for example.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "network_settings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "The network settings in force, setting name to decimal value, for limits that follow\nfrom them (`contract_compute_v0.tx_max_instructions` for example).",
+          "type": "object"
+        },
+        "path": {
+          "description": "The field the quantity belongs to, as `shapekit schema` names it.",
+          "type": "string"
+        },
+        "rejection": {
+          "$ref": "#/$defs/LimitRejection"
+        },
+        "witnesses": {
+          "description": "The entries of the accepted and the refused value.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "max_accepted",
+        "first_rejected",
+        "rejection",
+        "witnesses"
+      ],
+      "type": "object"
+    },
+    "LimitRejection": {
+      "additionalProperties": false,
+      "properties": {
+        "result_code": {
+          "description": "The XDR-JSON name of the result: the transaction result arm, `tx_malformed`, or for a\nfailed operation the operation result, `invoke_host_function.resource_limit_exceeded`.",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/Stage"
+        }
+      },
+      "required": [
+        "stage",
+        "result_code"
+      ],
+      "type": "object"
+    },
+    "Stage": {
+      "description": "Where a submitted transaction was refused or failed.",
+      "oneOf": [
+        {
+          "const": "submit",
+          "description": "Refused by core's `tx` endpoint; the transaction never reached a ledger.",
+          "type": "string"
+        },
+        {
+          "const": "apply",
+          "description": "Included in a ledger and failed there.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/limits.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "registry/generated/limits.json: for each bounded quantity, the largest value core accepts, the first it refuses with core's result code, and the network settings in force.",
+  "properties": {
+    "core": {
+      "$ref": "#/$defs/CoreRef"
+    },
+    "limits": {
+      "description": "Sorted by (path, measure), each pair once.",
+      "items": {
+        "$ref": "#/$defs/Limit"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "core",
+    "limits"
+  ],
+  "title": "shapekit limits, version 1",
+  "type": "object"
+}

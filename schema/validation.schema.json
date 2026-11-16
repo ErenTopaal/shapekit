@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "ApplyStatus": {
+      "oneOf": [
+        {
+          "const": "not-applied",
+          "description": "The transaction never reached a ledger.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "It reached a ledger and failed there.",
+          "type": "string"
+        },
+        {
+          "const": "succeeded",
+          "description": "It reached a ledger and succeeded.",
+          "type": "string"
+        }
+      ]
+    },
+    "CoreRef": {
+      "additionalProperties": false,
+      "description": "The stellar-core a table was measured on or read from.",
+      "properties": {
+        "commit": {
+          "description": "The full commit sha the tag names.",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImageRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The image that ran, absent for tables read from source."
+        },
+        "version": {
+          "description": "The release tag, `v30.0.0`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "commit"
+      ],
+      "type": "object"
+    },
+    "FieldVerdict": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "description": "Every value tried. A verdict rests on at least two.",
+          "items": {
+            "$ref": "#/$defs/ProbeAttempt"
+          },
+          "type": "array"
+        },
+        "path": {
+          "description": "The field's path from `TransactionEnvelope`, as `shapekit schema` names it.",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/Verdict"
+        }
+      },
+      "required": [
+        "path",
+        "verdict",
+        "attempts"
+      ],
+      "type": "object"
+    },
+    "ImageRef": {
+      "additionalProperties": false,
+      "description": "A container image: a registry image with its manifest digest, or a local build with its\nimage id in `digest`.",
+      "properties": {
+        "digest": {
+          "description": "`sha256:<64 hex>`.",
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "ProbeAttempt": {
+      "additionalProperties": false,
+      "description": "One value of the field, submitted and closed.",
+      "properties": {
+        "applied": {
+          "$ref": "#/$defs/ApplyStatus"
+        },
+        "result_code": {
+          "description": "The XDR-JSON arm name of the transaction result, `tx_success` or `tx_bad_seq`; absent\nwhen core returned no result (a pending transaction left out of the ledger).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "result_xdr": {
+          "description": "The `TransactionResult`, base64 XDR, as core returned it at submission or wrote it in\nthe ledger.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "submission": {
+          "$ref": "#/$defs/SubmitStatus"
+        },
+        "variant": {
+          "description": "The value, in words: `memo id 2^64-1`, `sequence number plus one`.",
+          "type": "string"
+        },
+        "witnesses": {
+          "default": [],
+          "description": "The entries holding the envelope and, when it was applied, its ledger.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "variant",
+        "submission",
+        "applied"
+      ],
+      "type": "object"
+    },
+    "SubmitStatus": {
+      "description": "The status core's `tx` endpoint answers.",
+      "enum": [
+        "pending",
+        "duplicate",
+        "error",
+        "try-again-later",
+        "filtered"
+      ],
+      "type": "string"
+    },
+    "Verdict": {
+      "oneOf": [
+        {
+          "const": "validated",
+          "description": "Core refuses or fails some value of the field: the attempts end in at least two\noutcomes.",
+          "type": "string"
+        },
+        {
+          "const": "partial",
+          "description": "Core checks some property of the field but not all; the attempts end in at least two\noutcomes and the ones core accepted include values a full check would refuse.",
+          "type": "string"
+        },
+        {
+          "const": "not-validated",
+          "description": "Every value tried ends in the same outcome. Measured, not proven: a value outside the\ntried ones could still be refused.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/validation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "registry/generated/validation.json: for each envelope field, whether core validates it, with every value tried, core's answer to it and the entries that witness it.",
+  "properties": {
+    "core": {
+      "$ref": "#/$defs/CoreRef",
+      "description": "The core every attempt ran on."
+    },
+    "fields": {
+      "description": "Sorted by path, each path once.",
+      "items": {
+        "$ref": "#/$defs/FieldVerdict"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "core",
+    "fields"
+  ],
+  "title": "shapekit validation verdicts, version 1",
+  "type": "object"
+}

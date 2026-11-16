@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "Branch": {
+      "enum": [
+        "true",
+        "false"
+      ],
+      "type": "string"
+    },
+    "Comparison": {
+      "description": "The helper core calls, from `src/util/ProtocolVersion.h`.",
+      "oneOf": [
+        {
+          "const": "is-before",
+          "description": "`protocolVersionIsBefore(v, V_N)`: true below N.",
+          "type": "string"
+        },
+        {
+          "const": "starts-from",
+          "description": "`protocolVersionStartsFrom(v, V_N)`: true from N on.",
+          "type": "string"
+        },
+        {
+          "const": "equals",
+          "description": "`protocolVersionEquals(v, V_N)`: true at N only.",
+          "type": "string"
+        }
+      ]
+    },
+    "CoreRef": {
+      "additionalProperties": false,
+      "description": "The stellar-core a table was measured on or read from.",
+      "properties": {
+        "commit": {
+          "description": "The full commit sha the tag names.",
+          "type": "string"
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImageRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The image that ran, absent for tables read from source."
+        },
+        "version": {
+          "description": "The release tag, `v30.0.0`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "commit"
+      ],
+      "type": "object"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "description": "1-based column of the call, telling apart two gates on one line.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "comparison": {
+          "$ref": "#/$defs/Comparison"
+        },
+        "file": {
+          "description": "Path in core's repository, `src/transactions/SetOptionsOpFrame.cpp`.",
+          "type": "string"
+        },
+        "function": {
+          "description": "The function the call sits in, `SetOptionsOpFrame::doCheckValid`.",
+          "type": "string"
+        },
+        "line": {
+          "description": "1-based line of the comparison call.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sides": {
+          "description": "The branch where the comparison is true and the one where it is false, in that order.",
+          "items": {
+            "$ref": "#/$defs/GateSide"
+          },
+          "type": "array"
+        },
+        "version": {
+          "description": "N of the `ProtocolVersion::V_N` constant compared against.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "file",
+        "line",
+        "column",
+        "function",
+        "comparison",
+        "version",
+        "sides"
+      ],
+      "type": "object"
+    },
+    "GateSide": {
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "$ref": "#/$defs/Branch"
+        },
+        "evidence": {
+          "description": "Why the branch cannot run (required for `unmeetable`), or what is known about an open\none.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/ObligationStatus"
+        },
+        "witnesses": {
+          "default": [],
+          "description": "Recipes or entries that run this branch. Required for `met`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "branch",
+        "status"
+      ],
+      "type": "object"
+    },
+    "ImageRef": {
+      "additionalProperties": false,
+      "description": "A container image: a registry image with its manifest digest, or a local build with its\nimage id in `digest`.",
+      "properties": {
+        "digest": {
+          "description": "`sha256:<64 hex>`.",
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ],
+      "type": "object"
+    },
+    "ObligationStatus": {
+      "oneOf": [
+        {
+          "const": "met",
+          "description": "At least one witness meets it.",
+          "type": "string"
+        },
+        {
+          "const": "unmeetable",
+          "description": "It cannot be met, and `evidence` says why.",
+          "type": "string"
+        },
+        {
+          "const": "open",
+          "description": "Neither met nor shown unmeetable yet.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/gates.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "registry/generated/gates.json: every protocol version comparison in core's non-test source, with the status and witnesses of its true and its false branch.",
+  "properties": {
+    "core": {
+      "$ref": "#/$defs/CoreRef",
+      "description": "The core source the gates were read from."
+    },
+    "gates": {
+      "description": "Sorted by (file, line, column), each place once.",
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "core",
+    "gates"
+  ],
+  "title": "shapekit protocol gates, version 1",
+  "type": "object"
+}

@@ -1,0 +1,122 @@
+{
+  "$defs": {
+    "Obligation": {
+      "additionalProperties": false,
+      "description": "One obligation. Its id starts with its kind and a colon, `gate-side:...`, so ledgers\nwritten by different producers merge without collisions.",
+      "properties": {
+        "evidence": {
+          "description": "Why it cannot be met (required for `unmeetable`), or what is known about an open one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ObligationKind"
+        },
+        "status": {
+          "$ref": "#/$defs/ObligationStatus"
+        },
+        "witnesses": {
+          "default": [],
+          "description": "What meets it, as witness references (`entry:`, `candidate:`, `chain:`, `recipe:`).\nRequired for `met`, empty otherwise.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "status"
+      ],
+      "type": "object"
+    },
+    "ObligationKind": {
+      "oneOf": [
+        {
+          "const": "format",
+          "description": "A decision point of the XDR schema, in its accept or its reject direction.",
+          "type": "string"
+        },
+        {
+          "const": "gap",
+          "description": "A point where a language's native types lose information an XDR value carries.",
+          "type": "string"
+        },
+        {
+          "const": "core-test-section",
+          "description": "A test section of core's own transaction tests.",
+          "type": "string"
+        },
+        {
+          "const": "gate-side",
+          "description": "One side of a protocol version gate in core's source.",
+          "type": "string"
+        },
+        {
+          "const": "field",
+          "description": "An envelope field core was asked about.",
+          "type": "string"
+        },
+        {
+          "const": "sdk-version",
+          "description": "A published SDK version the corpus runs against.",
+          "type": "string"
+        },
+        {
+          "const": "seed",
+          "description": "A fault seeded into an SDK, which the corpus should catch.",
+          "type": "string"
+        }
+      ]
+    },
+    "ObligationStatus": {
+      "oneOf": [
+        {
+          "const": "met",
+          "description": "At least one witness meets it.",
+          "type": "string"
+        },
+        {
+          "const": "unmeetable",
+          "description": "It cannot be met, and `evidence` says why.",
+          "type": "string"
+        },
+        {
+          "const": "open",
+          "description": "Neither met nor shown unmeetable yet.",
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/obligations.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "corpus/coverage/obligations.json: every obligation the corpus owes a witness for, with its status (met, unmeetable or open), its witnesses and its evidence.",
+  "properties": {
+    "obligations": {
+      "description": "Sorted by id, each id once.",
+      "items": {
+        "$ref": "#/$defs/Obligation"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "obligations"
+  ],
+  "title": "shapekit obligation ledger, version 1",
+  "type": "object"
+}

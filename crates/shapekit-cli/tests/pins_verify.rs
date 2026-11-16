@@ -65,6 +65,7 @@ fn registered_commands() {
             "coverage",
             "site",
             "schema",
+            "contracts",
             "corpus",
             "help",
         ]

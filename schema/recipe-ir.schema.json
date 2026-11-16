@@ -1,0 +1,567 @@
+{
+  "$defs": {
+    "NodeOptions": {
+      "additionalProperties": false,
+      "description": "How the standalone core is configured before the first step.",
+      "properties": {
+        "backfill_stellar_asset_events": {
+          "default": true,
+          "description": "`BACKFILL_STELLAR_ASSET_EVENTS`.",
+          "type": "boolean"
+        },
+        "emit_classic_events": {
+          "default": true,
+          "description": "`EMIT_CLASSIC_EVENTS`.",
+          "type": "boolean"
+        },
+        "min_persistent_ttl": {
+          "description": "`TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME`, at least 10; core's default when absent.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "soroban_limits": {
+          "default": false,
+          "description": "Start core with its high Soroban limit override; implied by `soroban_settings`.",
+          "type": "boolean"
+        },
+        "soroban_settings": {
+          "default": false,
+          "description": "Apply testnet's Soroban network settings before the first step (protocol 30 only).",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Outcome": {
+      "oneOf": [
+        {
+          "const": "success",
+          "description": "Included in the next ledger and successful.",
+          "type": "string"
+        },
+        {
+          "const": "failed",
+          "description": "Included in the next ledger and failed there.",
+          "type": "string"
+        },
+        {
+          "const": "rejected",
+          "description": "Refused at submission.",
+          "type": "string"
+        }
+      ]
+    },
+    "Selection": {
+      "description": "Which bytes a capture takes, tagged by `kind`. `of` names a labelled step.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "The `LedgerCloseMeta` of the ledger the step closed in (a `close` or `upgrade` step,\nor a step whose transaction a later close applied).",
+          "properties": {
+            "kind": {
+              "const": "ledger",
+              "type": "string"
+            },
+            "of": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "of"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The step's transaction: its envelope and its result meta, two entries.",
+          "properties": {
+            "kind": {
+              "const": "transaction",
+              "type": "string"
+            },
+            "of": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "of"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The ledger entry under `key` (XDR-JSON `LedgerKey`) as the step's ledger left it.",
+          "properties": {
+            "key": true,
+            "kind": {
+              "const": "ledger-entry",
+              "type": "string"
+            },
+            "of": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "of",
+            "key"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The envelope of a step refused at submission, with core's result.",
+          "properties": {
+            "kind": {
+              "const": "rejected",
+              "type": "string"
+            },
+            "of": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "of"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Step": {
+      "description": "One step, tagged by `step`.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "The root account creates an account for each role, in one transaction.",
+          "properties": {
+            "balance": {
+              "description": "Starting balance of each, decimal stroops.",
+              "type": "string"
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "roles": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "step": {
+              "const": "fund",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "roles",
+            "balance"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A classic transaction.",
+          "properties": {
+            "cond": {
+              "description": "XDR-JSON `Preconditions`; the interpreter's default time bounds when absent."
+            },
+            "expect": {
+              "$ref": "#/$defs/TxExpect",
+              "default": {
+                "outcome": "success"
+              }
+            },
+            "fee": {
+              "description": "Fee in stroops; the interpreter's default when absent.",
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "memo": {
+              "description": "XDR-JSON `Memo`; none when absent."
+            },
+            "operations": {
+              "description": "XDR-JSON `Operation` values.",
+              "items": true,
+              "type": "array"
+            },
+            "signers": {
+              "default": [],
+              "description": "Roles that sign, in order; the source alone when empty.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "source": {
+              "description": "The role whose account is the transaction source and pays the fee.",
+              "type": "string"
+            },
+            "source_mux_id": {
+              "description": "Decimal u64: the source is muxed with this id.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "step": {
+              "const": "tx",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "source",
+            "operations"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Closes one ledger with everything queued since the last close.",
+          "properties": {
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "step": {
+              "const": "close",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Arms ledger upgrades, then closes the ledger that applies them.",
+          "properties": {
+            "base_fee": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "base_reserve": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "config": {
+              "default": [],
+              "description": "XDR-JSON `ConfigSettingEntry` values, applied as one config upgrade set.",
+              "items": true,
+              "type": "array"
+            },
+            "flags": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "max_tx_set_size": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "protocol_version": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "step": {
+              "const": "upgrade",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Uploads contract code.",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "sha256": {
+              "description": "Hex sha256 of the file, which is also the code's hash on chain.",
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "upload",
+              "type": "string"
+            },
+            "wasm": {
+              "description": "The wasm file, relative to the repository root.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "label",
+            "source",
+            "wasm",
+            "sha256"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Creates a contract instance of uploaded code.",
+          "properties": {
+            "code": {
+              "description": "Label of the `upload` step.",
+              "type": "string"
+            },
+            "constructor_args": {
+              "default": [],
+              "description": "XDR-JSON `ScVal` constructor arguments.",
+              "items": true,
+              "type": "array"
+            },
+            "label": {
+              "type": "string"
+            },
+            "salt": {
+              "description": "32 bytes, hex.",
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "deploy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "label",
+            "source",
+            "code",
+            "salt"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Calls a contract function, footprint and resources from simulation.",
+          "properties": {
+            "args": {
+              "default": [],
+              "description": "XDR-JSON `ScVal` arguments.",
+              "items": true,
+              "type": "array"
+            },
+            "contract": {
+              "description": "Label of the `deploy` step, or a `@contract:` reference.",
+              "type": "string"
+            },
+            "expect": {
+              "$ref": "#/$defs/TxExpect",
+              "default": {
+                "outcome": "success"
+              }
+            },
+            "function": {
+              "type": "string"
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "invoke",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "source",
+            "contract",
+            "function"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Records bytes of the chain as corpus entry `<family>.p<protocol>-<slug>`.",
+          "properties": {
+            "fields": {
+              "default": [],
+              "description": "Field ids from `registry/fields.toml`.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "flags": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "issues": {
+              "description": "Linked issues; the family's when absent.",
+              "items": {
+                "type": "string"
+              },
+              "type": [
+                "array",
+                "null"
+              ]
+            },
+            "must_reject": {
+              "default": false,
+              "description": "The bytes do not decode under the shared decode limits.",
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "select": {
+              "$ref": "#/$defs/Selection"
+            },
+            "slug": {
+              "type": "string"
+            },
+            "step": {
+              "const": "capture",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "slug",
+            "select",
+            "notes"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "TxExpect": {
+      "additionalProperties": false,
+      "description": "What a transaction must come to.",
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/Outcome",
+          "default": "success"
+        },
+        "result": {
+          "description": "XDR-JSON `TransactionResultResult` the result must equal, when given."
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/ErenTopaal/shapekit/schema/recipe-ir.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "corpus/recipes/<family>/<name>.json: a recipe as network-independent steps (fund, tx, close, upgrade, upload, deploy, invoke, capture) with symbolic references for values that depend on the network or the chain's state.",
+  "properties": {
+    "below_protocol_valid": {
+      "default": false,
+      "description": "The chain runs below its family's `protocol_valid.min` on purpose, to record contrast\nentries; each is flagged `below-protocol-valid`.",
+      "type": "boolean"
+    },
+    "family": {
+      "description": "The `registry/families.toml` family every capture belongs to.",
+      "type": "string"
+    },
+    "id": {
+      "description": "Derives every role's key; recipes sharing an id share their accounts.",
+      "type": "string"
+    },
+    "node": {
+      "$ref": "#/$defs/NodeOptions",
+      "default": {
+        "backfill_stellar_asset_events": true,
+        "emit_classic_events": true,
+        "soroban_limits": false,
+        "soroban_settings": false
+      }
+    },
+    "protocol": {
+      "description": "The protocol the chain is upgraded to after genesis.",
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "schema_version": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "id",
+    "family",
+    "protocol",
+    "steps"
+  ],
+  "title": "shapekit recipe IR, version 1",
+  "type": "object"
+}
