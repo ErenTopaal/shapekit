@@ -6,6 +6,7 @@ mod conformance_cmd;
 mod contracts_cmd;
 mod coretest_cmd;
 mod coverage_cmd;
+mod explore_cmd;
 mod findings_cmd;
 mod fuzz_cmd;
 mod gen_cmd;
@@ -143,6 +144,12 @@ enum Command {
     Twin {
         #[command(subcommand)]
         command: twin_cmd::TwinCommand,
+    },
+    /// The recipe explorer: recipes found by filling transactions from the schema and the
+    /// chain's state, kept when core's ledgers show something new.
+    Explore {
+        #[command(subcommand)]
+        command: explore_cmd::ExploreCommand,
     },
     /// The law book: laws every ledger satisfies, anchored on the network's own hashes.
     Laws {
@@ -655,6 +662,7 @@ fn main() -> ExitCode {
         Command::Schema { command } => schema_cmd::run(command),
         Command::Laws { command } => laws_cmd::run(command),
         Command::Twin { command } => twin_cmd::run(command),
+        Command::Explore { command } => explore_cmd::run(command),
         Command::Vectors { command } => vectors_cmd::run(command),
         Command::Audit { command } => audit_cmd::run(command),
     };
