@@ -147,6 +147,7 @@ fn attempt(variant: &str, sub: SubmitStatus, code: &str, applied: ApplyStatus) -
         result_xdr: Some("AAAAAAAAAGT////7AAAAAA==".into()),
         applied,
         witnesses: vec![format!("candidate:probe.{}", variant.replace(' ', "-"))],
+        carrier: None,
     }
 }
 
@@ -737,6 +738,7 @@ fn undecodable_submissions_carry_no_result() {
         result_xdr: None,
         applied: ApplyStatus::NotApplied,
         witnesses: vec!["candidate:probe.ext-1".into()],
+        carrier: None,
     };
     let t = ValidationTable {
         schema_version: 1,
@@ -805,4 +807,49 @@ fn limits_past_an_xdr_bound_are_refused_by_the_decoder() {
         result_code: None,
     };
     has_problem(&t, "has no rejection result code");
+}
+
+#[test]
+fn outcomes_compare_within_a_carrier() {
+    let carried = |variant: &str, carrier: &str, code: &str| ProbeAttempt {
+        carrier: Some(carrier.into()),
+        ..attempt(variant, SubmitStatus::Pending, code, ApplyStatus::Succeeded)
+    };
+    // the mux id is never refused; the two carriers' bases end differently
+    let mut t = ValidationTable {
+        schema_version: 1,
+        core: core(true),
+        fields: vec![FieldVerdict {
+            path: "MuxedAccountMed25519.id".into(),
+            verdict: Verdict::NotValidated,
+            attempts: vec![
+                carried("payment 0", "payment", "tx_success"),
+                carried("payment max", "payment", "tx_success"),
+                carried("fee bump 0", "fee-bump", "tx_fee_bump_inner_success"),
+                carried("fee bump max", "fee-bump", "tx_fee_bump_inner_success"),
+            ],
+        }],
+    };
+    holds(&t);
+    t.fields[0].verdict = Verdict::Validated;
+    has_problem(&t, "every attempt ends the same way");
+    t.fields[0].verdict = Verdict::NotValidated;
+    t.fields[0].attempts.pop();
+    has_problem(
+        &t,
+        "in carrier fee-bump: a verdict needs at least two attempts",
+    );
+    t.fields[0].attempts.push(ProbeAttempt {
+        carrier: Some("fee-bump".into()),
+        ..attempt(
+            "fee bump bad",
+            SubmitStatus::Error,
+            "tx_bad_auth",
+            ApplyStatus::NotApplied,
+        )
+    });
+    has_problem(
+        &t,
+        "in carrier fee-bump is not-validated, but its attempts end in 2",
+    );
 }

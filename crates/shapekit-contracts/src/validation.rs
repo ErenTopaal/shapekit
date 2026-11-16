@@ -59,6 +59,10 @@ pub struct ProbeAttempt {
     /// The entries holding the envelope and, when it was applied, its ledger.
     #[serde(default)]
     pub witnesses: Vec<String>,
+    /// The transaction the field sat in, when the field was probed in more than one; attempts
+    /// with the same carrier share one base transaction.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carrier: Option<String>,
 }
 
 /// The status core's `tx` endpoint answers.
@@ -112,22 +116,42 @@ impl Contract for ValidationTable {
         sorted_unique("field", &self.fields, |f| f.path.clone(), &mut out);
         for f in &self.fields {
             let what = format!("field {}", f.path);
-            if f.attempts.len() < 2 {
+            // each carrier has its own base transaction, so outcomes compare within a carrier
+            let mut groups: std::collections::BTreeMap<Option<&str>, Vec<&ProbeAttempt>> =
+                std::collections::BTreeMap::new();
+            for a in &f.attempts {
+                groups.entry(a.carrier.as_deref()).or_default().push(a);
+            }
+            if groups.is_empty() {
                 out.push(format!("{what}: a verdict needs at least two attempts"));
             }
-            let mut outcomes: Vec<_> = f.attempts.iter().map(ProbeAttempt::outcome).collect();
-            outcomes.sort();
-            outcomes.dedup();
-            match f.verdict {
-                Verdict::NotValidated if outcomes.len() > 1 => out.push(format!(
-                    "{what} is not-validated, but its attempts end in {} different outcomes",
-                    outcomes.len()
-                )),
-                Verdict::Validated | Verdict::Partial if outcomes.len() < 2 => out.push(format!(
+            let mut any_mixed = false;
+            for (carrier, attempts) in &groups {
+                let at = match carrier {
+                    Some(c) => format!("{what} in carrier {c}"),
+                    None => what.clone(),
+                };
+                if attempts.len() < 2 {
+                    out.push(format!("{at}: a verdict needs at least two attempts"));
+                }
+                let mut outcomes: Vec<_> = attempts.iter().map(|a| a.outcome()).collect();
+                outcomes.sort();
+                outcomes.dedup();
+                if outcomes.len() > 1 {
+                    any_mixed = true;
+                    if f.verdict == Verdict::NotValidated {
+                        out.push(format!(
+                            "{at} is not-validated, but its attempts end in {} different outcomes",
+                            outcomes.len()
+                        ));
+                    }
+                }
+            }
+            if matches!(f.verdict, Verdict::Validated | Verdict::Partial) && !any_mixed {
+                out.push(format!(
                     "{what} is {:?}, but every attempt ends the same way",
                     f.verdict
-                )),
-                _ => {}
+                ));
             }
             for a in &f.attempts {
                 let at = format!("{what}, attempt {:?}", a.variant);

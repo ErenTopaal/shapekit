@@ -103,6 +103,13 @@
         "applied": {
           "$ref": "#/$defs/ApplyStatus"
         },
+        "carrier": {
+          "description": "The transaction the field sat in, when the field was probed in more than one; attempts\nwith the same carrier share one base transaction.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "result_code": {
           "description": "The XDR-JSON arm name of the transaction result, `tx_success` or `tx_bad_seq`; absent\nwhen core returned no result (a pending transaction left out of the ledger).",
           "type": [

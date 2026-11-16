@@ -174,6 +174,7 @@ impl Probe {
                     ApplyStatus::Failed
                 },
                 witnesses: Vec::new(),
+                carrier: None,
             },
             Err(ChainError::NotQueued { status, result }) => ProbeAttempt {
                 variant: variant.name.to_owned(),
@@ -191,6 +192,7 @@ impl Probe {
                     .transpose()?,
                 applied: ApplyStatus::NotApplied,
                 witnesses: Vec::new(),
+                carrier: None,
             },
             Err(e) => return Err(e).with_context(|| format!("attempt {:?}", variant.name)),
         };
