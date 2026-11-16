@@ -15,9 +15,13 @@ yet), do not follow the steps on the main branch: rehearse them in the separate 
 described in [Rehearsing before the release](#rehearsing-before-the-release-next-tier).
 
 `upstream-drift.yml` runs weekly and opens a tracking issue with the checklist at the end of
-this page when a new stellar-core, stellar-xdr, SDK or stellar-cli release, or a change to
-core's golden index, appears. Work
-through the issue in order; each step is a pull request or a commit on one upgrade branch.
+this page when a new stellar-core, stellar-xdr, SDK or stellar-cli release, a change to core's
+golden index or a change to a CAP text appears. The issue also holds what
+`scripts/upstream-regenerate.sh` produced against the new version: the schema diff and family
+dating for new XDR definitions, the protocol gate list for a new core, a conformance run for a
+new SDK, and the changed CAP texts with the protocol each names. Run the same script locally to
+repeat any of them. Work through the issue in order; each step is a pull request or a commit on
+one upgrade branch.
 
 ## Which artifacts are protocol-tier specific
 
@@ -48,14 +52,19 @@ rules) is protocol independent and changes only when the new protocol needs it.
 ### 1. Read what changed
 
 ```sh
-git clone --filter=blob:none https://github.com/stellar/stellar-xdr "$TMP/xdr"
-git -C "$TMP/xdr" diff v30.0 v31.0 -- '*.x'
+scripts/fetch-xdr-definitions.sh v31.0 refs/tags/v31.0
+shapekit schema diff v30.0 v31.0
+shapekit schema first-seen
 git clone --filter=blob:none https://github.com/stellar/stellar-protocol "$TMP/protocol"
 grep -l 'Protocol version: 31' "$TMP/protocol/core"/cap-*.md
 docker run --rm "$(scripts/pin.sh image stellar-core)" version
 ```
 
-The `grep` finds every CAP whose preamble names the protocol; do not rely on a list of numbers.
+`fetch-xdr-definitions.sh` writes `schema/xdr/v31.0/xdr.json` with the generator the
+`stellar-xdr` crate itself uses; `schema diff` lists the names added and removed and the
+definitions whose structure changed, and `schema first-seen` gives the tag each name first
+appears in. The `grep` finds every CAP whose preamble names the protocol; do not rely on a list
+of numbers.
 For every CAP in the protocol, note the XDR types and arms it adds and whether an indexer can
 see them. A CAP's own XDR patch is not the merged XDR: check each type against the diff. Read
 the core release notes for meta changes that come without a CAP. `stellar-core version` (run on
@@ -63,8 +72,8 @@ the new image once step 2 has pinned it) lists, per Soroban host, the `rs-stella
 and the base XDR commit that protocol is built against; that commit, not the CAP text, is what
 the new core emits.
 
-Until stellar-xdr tags the protocol there is no `v31.0`; diff `v30.0` against `origin/main`
-and `origin/next` instead, and take each CAP's XDR from its text.
+Until stellar-xdr tags the protocol there is no `v31.0`; `schema/xdr/next/` holds the `next`
+branch (`shapekit schema diff v30.0 next`), and each CAP's XDR comes from its text.
 
 ### 2. Move the pins
 
@@ -153,7 +162,12 @@ new type or arm only passes once step 3 has moved to a crate that has it.
 
 ```sh
 shapekit registry check
+shapekit schema families
 ```
+
+`schema families` dates every family's fragments in the schema history and flags a family whose
+`protocol_introduced` disagrees with the tag its fragments first appear in. A behaviour change
+without new XDR (CAP-73 is one) legitimately differs; say so in the family's notes.
 
 ### 5. Recipes and chains
 
@@ -176,6 +190,26 @@ shapekit gen verify-repro --jobs 2
 `gen verify-repro` must report 0 differences. Where the new core emits different bytes, the
 bytes of existing entries change with it. Review the diff of every `.expected.json` under the
 two-review rule in [maintenance.md](maintenance.md#changes-to-expected-values).
+
+Regenerate what is derived from the schema and from core's own source and tests:
+
+```sh
+shapekit vectors gen --out candidate
+shapekit vectors gaps --out candidate
+shapekit manifest build --corpus candidate
+shapekit vectors mutate-check
+git clone --depth 1 --branch v31.0.0 https://github.com/stellar/stellar-core "$TMP/core-src"
+shapekit twin gates --core-src "$TMP/core-src" --out registry/generated/gates.json
+shapekit coretest run --out "$TMP/coretest"
+shapekit coretest convert --run "$TMP/coretest" --core-src "$TMP/core-src" --out "$TMP/dataset"
+shapekit conformance run --dataset "$TMP/dataset"
+```
+
+`vectors mutate-check` exits 1 while a schema mutant survives. `twin gates` lists every protocol
+gate of the new core; `coretest run` takes the `-buildtests` image from `pins.toml` and runs
+core's own transaction tests at every protocol, and
+`coretest convert` checks every meta against core's committed short hashes. The dataset run
+writes the metas an SDK fails into the candidate lane.
 
 ### 6. Goldens
 
@@ -212,26 +246,24 @@ shapekit guide check
 ```
 
 Every new fragment is either covered by an entry or listed in `registry/uncovered.toml` with a
-reason.
+reason. `shapekit coverage` also rewrites the obligation ledger,
+`corpus/coverage/obligations.json`, from the fragments in `registry/obligation-sources.toml`,
+the gap tables and the obligations the entries name; its per-kind counts are in `COVERAGE.md`.
 
 ### 8. SDK testees and the version matrix
 
-For each SDK release that supports the new protocol, add a version:
-
-- Rust: `testees/rust/versions/<version>/Cargo.toml` and its `Cargo.lock`.
-- Go: `testees/go/versions/<version>.mod` and `.sum`.
-- JavaScript: `testees/js/versions/<version>/package.json` and `package-lock.json`.
-
-Add the version to `conformance/versions.toml` with its build steps and `max_protocol`, move
-`current`, then:
+Let the registries decide the versions:
 
 ```sh
+shapekit conformance sync-versions
 shapekit conformance run --all-versions
 shapekit conformance reproduce
 shapekit conformance draft-issues
 ```
 
-A new divergence gets a line in `conformance/known-failures/<sdk>.txt` that links its drafted
+`sync-versions` reads crates.io, npm and the Go module proxy and writes
+`conformance/versions.toml` and the per-version testee files under `testees/*/versions/`, moving
+`current` to the newest stable release. A new divergence gets a line in `conformance/known-failures/<sdk>.txt` that links its drafted
 issue, and goes through [triage](maintenance.md#triage). `shapekit conformance file-issues`
 opens the drafted issues upstream with `gh`; it refuses to run unless you pass `--confirm`,
 which confirms that this batch of drafts was reviewed and is to be filed upstream.
@@ -269,9 +301,14 @@ adds a recursive structure or a field core does not validate, add it to
 
 ### 11. CI, status and release
 
-Run `nightly.yml` by hand (workflow dispatch) on the upgrade branch and wait for it to pass.
-Then add a dated section to `STATUS.md` naming the protocol, the new pins and the coverage
-numbers, merge, and tag:
+Run the whole gate locally, which runs what `nightly.yml` runs:
+
+```sh
+scripts/acceptance.sh --full
+```
+
+It must end with `acceptance (full): every check passed`. Then add a dated section to
+`STATUS.md` naming the protocol, the new pins and the coverage numbers, merge, and tag:
 
 ```sh
 git tag -s v<version> -m "shapekit v<version>: protocol 31"
@@ -330,15 +367,15 @@ everything out of the release:
 The drift workflow copies this list into its tracking issue.
 
 <!-- checklist:start -->
-- [ ] 1. Read the XDR diff, the CAPs and the core release notes
+- [ ] 1. Definitions written with `scripts/fetch-xdr-definitions.sh`; `schema diff` and `schema first-seen` read with the CAPs and the core release notes
 - [ ] 2. Move the pins in `pins.toml`; `shapekit pins verify` passes
 - [ ] 3. Move the Rust stack and protocol constants, recapture testnet's Soroban settings; build, clippy and tests pass; `gen smoke` records the new protocol on both networks
-- [ ] 4. Registry records for new CAPs (replacing their Draft placeholders), families, fields and limits; `shapekit registry check` passes
-- [ ] 5. Recipes for new families; every chain regenerated under both passphrases; `shapekit gen verify-repro` reports 0 differences
+- [ ] 4. Registry records for new CAPs (replacing their Draft placeholders), families, fields and limits; `shapekit registry check` passes; `schema families` differences explained
+- [ ] 5. Recipes for new families; every chain regenerated under both passphrases; `shapekit gen verify-repro` reports 0 differences; vectors, gate list and core test dataset regenerated; `vectors mutate-check` passes
 - [ ] 6. Goldens imported at the new tag; `goldens verify`, `scripts/check-lcm.sh` and `goldens agree` pass
-- [ ] 7. `shapekit coverage --check` and `shapekit guide check` pass
-- [ ] 8. Testees and `conformance/versions.toml` updated; `conformance run --all-versions` and `conformance reproduce` pass
+- [ ] 7. `shapekit coverage --check` (with the obligation ledger) and `shapekit guide check` pass
+- [ ] 8. `conformance sync-versions` run; `conformance run --all-versions` and `conformance reproduce` pass
 - [ ] 9. Adapter protocol map and wallet-backend pin updated; `harness run` and `harness reproduce` pass
 - [ ] 10. `indexerlint` re-run over the adapters and the new wallet-backend pin
-- [ ] 11. `nightly.yml` green on the branch; `STATUS.md` entry; signed tag pushed
+- [ ] 11. `scripts/acceptance.sh --full` passes; `STATUS.md` entry; signed tag pushed
 <!-- checklist:end -->
