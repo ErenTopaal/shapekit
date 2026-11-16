@@ -8,6 +8,7 @@
 //! on another's.
 
 pub mod fields;
+pub mod values;
 pub mod variants;
 
 use std::path::Path;
