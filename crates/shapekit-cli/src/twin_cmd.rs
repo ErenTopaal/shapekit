@@ -463,7 +463,8 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
     }
     let mut core = pinned_core(&a.pins)?;
     core.image = Some(cov::image_ref(&twin));
-    let summary = cov::summary(&counts, core, vec![format!("chain:{}", a.chain)]);
+    cov::write_counts(&a.out.join("counts.json"), &counts)?;
+    let summary = cov::summary(&counts, core, vec![format!("chain:{}", a.chain)], &[]);
     let file = a.out.join("core-coverage.json");
     shapekit_contracts::write(&file, &summary)?;
     let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();

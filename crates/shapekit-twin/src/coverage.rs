@@ -123,9 +123,16 @@ pub fn read_export(path: &Path) -> Result<Counts> {
 }
 
 /// The core coverage contract over region counts: per file the reached and
-/// unreached spans, and every unreached line range once. All unreached
-/// regions are `unknown` until core's own tests are measured.
-pub fn summary(counts: &Counts, core: CoreRef, chains: Vec<String>) -> CoreCoverage {
+/// unreached spans, and every unreached line range once. An unreached range
+/// is `reachable-by-core-tests` when one of `tests` (test name and its
+/// counts on the same binary) reaches a span in it, naming those tests, and
+/// `unknown` otherwise.
+pub fn summary(
+    counts: &Counts,
+    core: CoreRef,
+    chains: Vec<String>,
+    tests: &[(String, Counts)],
+) -> CoreCoverage {
     let mut files = Vec::new();
     let mut unreached = Vec::new();
     for (path, spans) in counts {
@@ -136,20 +143,33 @@ pub fn summary(counts: &Counts, core: CoreRef, chains: Vec<String>) -> CoreCover
             regions_reached: reached,
             regions_unreached: missed,
         });
-        let mut ranges: Vec<(u32, u32)> = spans
-            .iter()
-            .filter(|(_, c)| **c == 0)
-            .map(|(s, _)| (s.line_start, s.line_end))
-            .collect();
-        ranges.sort();
-        ranges.dedup();
-        for (a, b) in ranges {
+        let mut ranges: BTreeMap<(u32, u32), std::collections::BTreeSet<String>> = BTreeMap::new();
+        for (span, c) in spans {
+            if *c > 0 {
+                continue;
+            }
+            let names = ranges.entry((span.line_start, span.line_end)).or_default();
+            for (test, tc) in tests {
+                if tc
+                    .get(path)
+                    .and_then(|m| m.get(span))
+                    .is_some_and(|n| *n > 0)
+                {
+                    names.insert(test.clone());
+                }
+            }
+        }
+        for ((a, b), names) in ranges {
             unreached.push(Region {
                 file: path.clone(),
                 line_start: a,
                 line_end: b,
-                class: RegionClass::Unknown,
-                core_tests: Vec::new(),
+                class: if names.is_empty() {
+                    RegionClass::Unknown
+                } else {
+                    RegionClass::ReachableByCoreTests
+                },
+                core_tests: names.into_iter().collect(),
             });
         }
     }
@@ -160,6 +180,74 @@ pub fn summary(counts: &Counts, core: CoreRef, chains: Vec<String>) -> CoreCover
         files,
         unreached,
     }
+}
+
+/// Counts of several runs of the same binary as one: a span's count is the
+/// sum of its counts.
+pub fn merge_counts<'a>(all: impl IntoIterator<Item = &'a Counts>) -> Counts {
+    let mut out = Counts::new();
+    for c in all {
+        for (file, spans) in c {
+            let f = out.entry(file.clone()).or_default();
+            for (s, n) in spans {
+                *f.entry(*s).or_insert(0) += n;
+            }
+        }
+    }
+    out
+}
+
+/// Writes counts as JSON: file to `[line_start, column_start, line_end,
+/// column_end, count]` rows.
+pub fn write_counts(path: &Path, counts: &Counts) -> Result<()> {
+    let rows: BTreeMap<&String, Vec<[u64; 5]>> = counts
+        .iter()
+        .map(|(f, m)| {
+            (
+                f,
+                m.iter()
+                    .map(|(s, c)| {
+                        [
+                            u64::from(s.line_start),
+                            u64::from(s.column_start),
+                            u64::from(s.line_end),
+                            u64::from(s.column_end),
+                            *c,
+                        ]
+                    })
+                    .collect(),
+            )
+        })
+        .collect();
+    std::fs::write(path, serde_json::to_vec(&rows)?)
+        .with_context(|| format!("writing {}", path.display()))
+}
+
+pub fn read_counts(path: &Path) -> Result<Counts> {
+    let rows: BTreeMap<String, Vec<[u64; 5]>> = serde_json::from_slice(
+        &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    Ok(rows
+        .into_iter()
+        .map(|(f, v)| {
+            let m = v
+                .into_iter()
+                .map(|[a, b, c, d, n]| {
+                    (
+                        Span {
+                            line_start: a as u32,
+                            column_start: b as u32,
+                            line_end: c as u32,
+                            column_end: d as u32,
+                        },
+                        n,
+                    )
+                })
+                .collect();
+            (f, m)
+        })
+        .collect())
 }
 
 /// The spans of `file` overlapping lines `from..=to`, with their counts.
@@ -273,7 +361,11 @@ mod tests {
             commit: "0e49751aa9ddf892302cca02cea7f3f5d97df9f1".into(),
             image: None,
         };
-        let s = summary(&counts, core, vec!["chain:x".into()]);
+        let mut t = Counts::new();
+        t.entry("src/transactions/A.cpp".into())
+            .or_default()
+            .insert(span(14, 15), 2);
+        let s = summary(&counts, core.clone(), vec!["chain:x".into()], &[]);
         assert_eq!(s.files[0].regions_reached, 1);
         assert_eq!(s.files[0].regions_unreached, 1);
         assert_eq!(s.unreached.len(), 1);
@@ -283,5 +375,27 @@ mod tests {
         );
         assert!(s.problems().is_empty(), "{:?}", s.problems());
         assert_eq!(spans_in(&counts, "src/transactions/A.cpp", 11, 11).len(), 1);
+        let with_tests = summary(
+            &counts,
+            core,
+            vec!["chain:x".into()],
+            &[("[tx] t".into(), t)],
+        );
+        assert_eq!(
+            with_tests.unreached[0].class,
+            RegionClass::ReachableByCoreTests
+        );
+        assert_eq!(
+            with_tests.unreached[0].core_tests,
+            vec!["[tx] t".to_owned()]
+        );
+        assert!(with_tests.problems().is_empty());
+        let dir = tempfile::tempdir().unwrap();
+        write_counts(&dir.path().join("c.json"), &counts).unwrap();
+        assert_eq!(read_counts(&dir.path().join("c.json")).unwrap(), counts);
+        assert_eq!(
+            merge_counts([&counts, &counts])["src/transactions/A.cpp"][&span(10, 12)],
+            6
+        );
     }
 }
