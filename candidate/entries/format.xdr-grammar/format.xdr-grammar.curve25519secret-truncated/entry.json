@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.curve25519secret-truncated",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the smallest value without its last byte in the smallest value of Curve25519Secret",
+  "obligations": [
+    "format:Curve25519Secret:#truncated"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.curve25519secret-truncated/any.xdr",
+      "xdr_sha256": "fd08be957bda07dc529ad8100df732f9ce12ae3e42bcda6acabe12c02dfd6989"
+    }
+  },
+  "xdr_type": "Curve25519Secret"
+}

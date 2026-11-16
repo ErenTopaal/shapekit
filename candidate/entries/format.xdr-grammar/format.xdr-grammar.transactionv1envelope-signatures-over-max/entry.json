@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.transactionv1envelope-signatures-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "21 elements, one past the bound in the smallest value of TransactionV1Envelope",
+  "obligations": [
+    "format:TransactionV1Envelope.signatures:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transactionv1envelope-signatures-over-max/any.xdr",
+      "xdr_sha256": "701888327132e0e3ad5a0cdc9116a24d32fa450a819b7863e8e70d7d397af95d"
+    }
+  },
+  "xdr_type": "TransactionV1Envelope"
+}

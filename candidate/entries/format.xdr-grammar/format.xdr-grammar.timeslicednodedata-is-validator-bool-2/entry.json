@@ -1,0 +1,39 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "implementation-defined",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.timeslicednodedata-is-validator-bool-2",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/issues/629",
+    "https://github.com/stellar/stellar-core/issues/5509"
+  ],
+  "notes": "bool word 2, which RFC 4506 does not define. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+  "obligations": [
+    "format:TimeSlicedNodeData.is_validator:#bool-2"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 22,
+    "valid_min": 22
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.timeslicednodedata-is-validator-bool-2/any.xdr",
+      "xdr_sha256": "4b55267c6e1f64867e2044b568e96e26404488ca539f2ed3b33431a200c69976"
+    }
+  },
+  "xdr_type": "TimeSlicedNodeData"
+}

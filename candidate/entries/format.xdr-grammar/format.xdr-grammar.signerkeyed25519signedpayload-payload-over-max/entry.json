@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.signerkeyed25519signedpayload-payload-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 65, one past the bound in the smallest value of SignerKeyEd25519SignedPayload",
+  "obligations": [
+    "format:SignerKeyEd25519SignedPayload.payload:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.signerkeyed25519signedpayload-payload-over-max/any.xdr",
+      "xdr_sha256": "82e7d8f0cec022d81d98cf41da480ed2569c508d6326a1dbcb8335e8cdfc3b71"
+    }
+  },
+  "xdr_type": "SignerKeyEd25519SignedPayload"
+}

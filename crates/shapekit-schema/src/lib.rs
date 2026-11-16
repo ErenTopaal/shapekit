@@ -9,7 +9,9 @@ pub mod fragment;
 pub mod gaps;
 pub mod graph;
 pub mod history;
+pub mod interp;
 pub mod names;
+pub mod vectors;
 
 use std::collections::BTreeMap;
 use std::path::Path;

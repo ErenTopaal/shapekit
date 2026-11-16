@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerheaderflags-withdrawal-flag",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "member DISABLE_LIQUIDITY_POOL_WITHDRAWAL_FLAG (4) in the smallest value of LedgerHeaderFlags",
+  "obligations": [
+    "format:LedgerHeaderFlags:=withdrawal_flag"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerheaderflags-withdrawal-flag/any.expected.json",
+      "expected_json_sha256": "53729272b9c5a59ab5bb3c46d02157b18d784462790eb4ee0b6a68d45235ef79",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerheaderflags-withdrawal-flag/any.xdr",
+      "xdr_sha256": "1bc5d0e3df0ea12c4d0078668d14924f95106bbe173e196de50fe13a900b0937"
+    }
+  },
+  "xdr_type": "LedgerHeaderFlags"
+}

@@ -1,0 +1,39 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "implementation-defined",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.scval-bool-bool-2",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/issues/629",
+    "https://github.com/stellar/stellar-core/issues/5509"
+  ],
+  "notes": "bool word 2, which RFC 4506 does not define. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+  "obligations": [
+    "format:ScVal:bool:#bool-2"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.scval-bool-bool-2/any.xdr",
+      "xdr_sha256": "cd04a4754498e06db5a13c5f371f1f04ff6d2470f24aa9bd886540e5dce77f70"
+    }
+  },
+  "xdr_type": "ScVal"
+}

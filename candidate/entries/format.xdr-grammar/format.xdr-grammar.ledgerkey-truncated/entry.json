@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.ledgerkey-truncated",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the smallest value without its last byte in the smallest value of LedgerKey",
+  "obligations": [
+    "format:LedgerKey:#truncated"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.ledgerkey-truncated/any.xdr",
+      "xdr_sha256": "820705aaf39be3b558d56597e4a7b87aa1868632f07505de4ffccf9e0a986ed7"
+    }
+  },
+  "xdr_type": "LedgerKey"
+}

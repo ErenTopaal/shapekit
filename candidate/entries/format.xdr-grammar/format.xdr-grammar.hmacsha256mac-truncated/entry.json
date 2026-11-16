@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.hmacsha256mac-truncated",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the smallest value without its last byte in the smallest value of HmacSha256Mac",
+  "obligations": [
+    "format:HmacSha256Mac:#truncated"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.hmacsha256mac-truncated/any.xdr",
+      "xdr_sha256": "fd08be957bda07dc529ad8100df732f9ce12ae3e42bcda6acabe12c02dfd6989"
+    }
+  },
+  "xdr_type": "HmacSha256Mac"
+}

@@ -13,6 +13,22 @@ use stellar_xdr::{Limits, ScMap, ScMapEntry, ScString, ScSymbol, ScVal, WriteXdr
 
 #[derive(clap::Subcommand)]
 pub enum VectorsCommand {
+    /// Write the format vectors of every schema definition as xdr entries of the
+    /// format.xdr-grammar family under <out>/entries/format.xdr-grammar/: for each decision a
+    /// decoder makes, an input it must accept per allowed choice and one it must refuse per
+    /// disallowed one, each confirmed by the reference interpreter. Run `shapekit manifest
+    /// build --corpus <out>` afterwards.
+    Gen {
+        #[arg(long, default_value = "candidate")]
+        out: PathBuf,
+        /// The schema history, for the protocol each definition first appears in.
+        #[arg(long, default_value = "schema/xdr")]
+        history: PathBuf,
+        /// Compare with the files already under <out> instead of writing; exits 1 on a
+        /// difference.
+        #[arg(long)]
+        check: bool,
+    },
     /// Turn the vectors of registry/gaps/<language>.toml into conformance entries: one entry
     /// per gap row and id kind, under <out>/vectors/. Run `shapekit manifest build --corpus
     /// <out>` afterwards.
@@ -30,6 +46,11 @@ pub enum VectorsCommand {
 
 pub fn run(command: VectorsCommand) -> Result<bool> {
     match command {
+        VectorsCommand::Gen {
+            out,
+            history,
+            check,
+        } => gen_format(&out, &history, check),
         VectorsCommand::Gaps {
             registry,
             out,
@@ -279,4 +300,201 @@ fn gaps(registry: &Path, out: &Path, check: bool) -> Result<bool> {
         if check { "checked" } else { "written" }
     );
     Ok(same)
+}
+
+const FORMAT_FAMILY: &str = "format.xdr-grammar";
+
+/// A lowercase id slug from free text: runs of anything but a-z and 0-9 become one dash.
+fn slug(text: &str) -> String {
+    let mut out = String::new();
+    for c in text.chars().flat_map(char::to_lowercase) {
+        if c.is_ascii_lowercase() || c.is_ascii_digit() {
+            out.push(c);
+        } else if !out.ends_with('-') {
+            out.push('-');
+        }
+    }
+    out.trim_matches('-').to_string()
+}
+
+fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
+    use shapekit_schema::Definition;
+    use shapekit_schema::names::rust_type_name;
+    use shapekit_schema::vectors::{Builder, Expect};
+
+    let schema = shapekit_schema::Schema::pinned();
+    let history = shapekit_schema::history::History::load(history_dir)
+        .with_context(|| format!("loading {}", history_dir.display()))?;
+    let first_seen = history.first_seen();
+    let protocol_of = |label: &str| -> Result<u32> {
+        history
+            .get(label)
+            .and_then(|t| t.protocol)
+            .with_context(|| format!("tag {label} names no protocol"))
+    };
+    let builder = Builder::new(&schema);
+
+    let mut files: BTreeMap<PathBuf, Vec<u8>> = BTreeMap::new();
+    let mut ids = std::collections::BTreeSet::new();
+    let mut refused_by_stellar_xdr = Vec::new();
+    let (mut points, mut vectors) = (std::collections::BTreeSet::new(), 0usize);
+    for d in schema.definitions() {
+        if matches!(d, Definition::Const(_)) {
+            continue;
+        }
+        let ty = rust_type_name(d.name());
+        let seen = first_seen
+            .get(&ty)
+            .with_context(|| format!("{ty} has no first-seen tag"))?;
+        let protocol = protocol_of(seen)?;
+        for v in builder.vectors(d.name())? {
+            let mut id = format!(
+                "{FORMAT_FAMILY}.{}",
+                slug(v.obligation.trim_start_matches("format:"))
+            );
+            let mut n = 2;
+            while ids.contains(&id) {
+                id = format!(
+                    "{FORMAT_FAMILY}.{}-{n}",
+                    slug(v.obligation.trim_start_matches("format:"))
+                );
+                n += 1;
+            }
+            ids.insert(id.clone());
+            points.insert(format!("{}{}", v.type_name, v.point));
+            vectors += 1;
+
+            let dir = format!("entries/{FORMAT_FAMILY}/{id}");
+            let xdr_file = format!("{dir}/any.xdr");
+            let mut variant = json!({
+                "xdr_file": xdr_file,
+                "xdr_sha256": shapekit_manifest::sha256_hex(&v.bytes),
+            });
+            let expected = match v.expect {
+                Expect::MustAccept => {
+                    let limits = shapekit_manifest::decode_limits(&v.type_name, v.bytes.len());
+                    match shapekit_manifest::xdr::to_xdr_json(&v.type_name, &v.bytes, limits) {
+                        Ok(text) => {
+                            let json_file = format!("{dir}/any.expected.json");
+                            variant["expected_json_file"] = json!(json_file);
+                            variant["expected_json_sha256"] =
+                                json!(shapekit_manifest::sha256_hex(text.as_bytes()));
+                            files.insert(out.join(&json_file), text.into_bytes());
+                        }
+                        Err(err) => {
+                            // a value RFC 4506 allows that stellar-xdr does not read is a
+                            // finding, not a vector to commit with a guessed expectation
+                            refused_by_stellar_xdr.push(format!("{id}: {err}"));
+                            ids.remove(&id);
+                            vectors -= 1;
+                            continue;
+                        }
+                    }
+                    json!({"decode": "must-accept", "roundtrip": true, "validity": "valid"})
+                }
+                Expect::MustReject => {
+                    json!({"decode": "must-reject", "roundtrip": false, "validity": "not-emittable"})
+                }
+                Expect::ImplementationDefined => json!({
+                    "decode": "implementation-defined",
+                    "roundtrip": false,
+                    "validity": "not-emittable",
+                }),
+            };
+            let bool_word = v.expect == Expect::ImplementationDefined;
+            let notes = if bool_word {
+                format!(
+                    "{}. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+                    v.note
+                )
+            } else {
+                format!("{} in the smallest value of {}", v.note, v.type_name)
+            };
+            let linked: Vec<&str> = if bool_word {
+                vec![
+                    "https://github.com/stellar/rs-stellar-xdr/issues/629",
+                    "https://github.com/stellar/stellar-core/issues/5509",
+                ]
+            } else {
+                Vec::new()
+            };
+            let entry = json!({
+                "id": id,
+                "kind": "xdr",
+                "family": FORMAT_FAMILY,
+                "caps": [],
+                "protocol": {"introduced": protocol, "valid_min": protocol},
+                "xdr_type": v.type_name,
+                "source": {"class": "synthetic"},
+                "synthetic": true,
+                "passphrase_dependent": false,
+                "variants": {"any": variant},
+                "expected": expected,
+                "flags": ["format-vector"],
+                "fields_exercised": [],
+                "linked_issues": linked,
+                "notes": notes,
+                "obligations": [v.obligation],
+            });
+            files.insert(
+                out.join(format!("{dir}/entry.json")),
+                render_json(&entry).into_bytes(),
+            );
+            files.insert(out.join(&xdr_file), v.bytes.clone());
+        }
+    }
+
+    let root = out.join("entries").join(FORMAT_FAMILY);
+    let mut same = true;
+    if check {
+        for (path, bytes) in &files {
+            if std::fs::read(path).ok().as_deref() != Some(bytes.as_slice()) {
+                println!("differs: {}", path.display());
+                same = false;
+            }
+        }
+        let on_disk = walk(&root)?;
+        for p in on_disk.difference(&files.keys().cloned().collect()) {
+            println!("not generated: {}", p.display());
+            same = false;
+        }
+    } else {
+        if root.exists() {
+            std::fs::remove_dir_all(&root)
+                .with_context(|| format!("clearing {}", root.display()))?;
+        }
+        for (path, bytes) in &files {
+            std::fs::create_dir_all(path.parent().expect("an entry file has a directory"))?;
+            std::fs::write(path, bytes).with_context(|| format!("writing {}", path.display()))?;
+        }
+    }
+    println!(
+        "{} decision points, {vectors} vectors in {} entries {}",
+        points.len(),
+        ids.len(),
+        if check { "checked" } else { "written" }
+    );
+    for r in &refused_by_stellar_xdr {
+        println!("stellar-xdr refuses a value the interpreter accepts: {r}");
+    }
+    Ok(same && refused_by_stellar_xdr.is_empty())
+}
+
+fn walk(dir: &Path) -> Result<std::collections::BTreeSet<PathBuf>> {
+    let mut out = std::collections::BTreeSet::new();
+    if !dir.exists() {
+        return Ok(out);
+    }
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(d) = stack.pop() {
+        for e in std::fs::read_dir(&d)? {
+            let p = e?.path();
+            if p.is_dir() {
+                stack.push(p);
+            } else {
+                out.insert(p);
+            }
+        }
+    }
+    Ok(out)
 }

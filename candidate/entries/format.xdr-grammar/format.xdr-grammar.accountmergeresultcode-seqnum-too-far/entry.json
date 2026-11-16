@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.accountmergeresultcode-seqnum-too-far",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "member ACCOUNT_MERGE_SEQNUM_TOO_FAR (-5) in the smallest value of AccountMergeResultCode",
+  "obligations": [
+    "format:AccountMergeResultCode:=seqnum_too_far"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.accountmergeresultcode-seqnum-too-far/any.expected.json",
+      "expected_json_sha256": "08016fbeff24663e55da105ff8f359d872a97b08e416f488a73c33f22481222c",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.accountmergeresultcode-seqnum-too-far/any.xdr",
+      "xdr_sha256": "143cd8cdfb8e038c84015f41b2872f28c5f5a44821f2da894be9b076817b278c"
+    }
+  },
+  "xdr_type": "AccountMergeResultCode"
+}

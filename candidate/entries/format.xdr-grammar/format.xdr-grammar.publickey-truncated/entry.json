@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.publickey-truncated",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "the smallest value without its last byte in the smallest value of PublicKey",
+  "obligations": [
+    "format:PublicKey:#truncated"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.publickey-truncated/any.xdr",
+      "xdr_sha256": "0d5535e13cc9708d0ff0289af2fae27e564b6bcbcd9242f5140d96957744a517"
+    }
+  },
+  "xdr_type": "PublicKey"
+}

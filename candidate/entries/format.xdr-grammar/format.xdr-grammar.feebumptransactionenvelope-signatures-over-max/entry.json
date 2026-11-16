@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.feebumptransactionenvelope-signatures-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "21 elements, one past the bound in the smallest value of FeeBumpTransactionEnvelope",
+  "obligations": [
+    "format:FeeBumpTransactionEnvelope.signatures:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.feebumptransactionenvelope-signatures-over-max/any.xdr",
+      "xdr_sha256": "e5ca6c2f6a9d6dd09ed4cda19dd1052b5200e4bedcc7047f0c24f44ddc1af32b"
+    }
+  },
+  "xdr_type": "FeeBumpTransactionEnvelope"
+}

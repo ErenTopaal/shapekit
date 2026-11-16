@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.hello-version-str-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 101, one past the bound in the smallest value of Hello",
+  "obligations": [
+    "format:Hello.version_str:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.hello-version-str-over-max/any.xdr",
+      "xdr_sha256": "0b3144ece5abf1f97357ec73aefba7f0e9a1b580ba090e6e1b8a6fe20ab33187"
+    }
+  },
+  "xdr_type": "Hello"
+}

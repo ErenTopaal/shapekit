@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.preconditionsv2-extra-signers-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "3 elements, one past the bound in the smallest value of PreconditionsV2",
+  "obligations": [
+    "format:PreconditionsV2.extra_signers:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.preconditionsv2-extra-signers-over-max/any.xdr",
+      "xdr_sha256": "0d2d7c6a09fdb23488b1f81ae1156ed0b890cc89c8c69cc5ab02c5a04e9d366c"
+    }
+  },
+  "xdr_type": "PreconditionsV2"
+}

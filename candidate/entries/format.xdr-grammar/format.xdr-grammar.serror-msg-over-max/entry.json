@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.serror-msg-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 101, one past the bound in the smallest value of SError",
+  "obligations": [
+    "format:SError.msg:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.serror-msg-over-max/any.xdr",
+      "xdr_sha256": "e93996d8b73c74123cf9ce4381a0ef984e8abe08ed7998f0cd391c7fc14baf63"
+    }
+  },
+  "xdr_type": "SError"
+}

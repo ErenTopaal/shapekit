@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.peerstats-version-str-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 100, the bound in the smallest value of PeerStats",
+  "obligations": [
+    "format:PeerStats.version_str:#max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.peerstats-version-str-max/any.expected.json",
+      "expected_json_sha256": "640b70dca4e86c1ff4db397a627a7b884594a406f49c361ed810fddb789a4852",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.peerstats-version-str-max/any.xdr",
+      "xdr_sha256": "a4fa69aa33957580760222561ad1092a2f08cc5fdd91928c6f237ca42d46b2bb"
+    }
+  },
+  "xdr_type": "PeerStats"
+}

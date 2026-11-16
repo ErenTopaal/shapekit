@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.upgradetype-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 129, one past the bound in the smallest value of UpgradeType",
+  "obligations": [
+    "format:UpgradeType:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.upgradetype-over-max/any.xdr",
+      "xdr_sha256": "86175e3d603d3f47cd08c1f63350f332350457fea4b3729dbc9070a9cb4e2568"
+    }
+  },
+  "xdr_type": "UpgradeType"
+}

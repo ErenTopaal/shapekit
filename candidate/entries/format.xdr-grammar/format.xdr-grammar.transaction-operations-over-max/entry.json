@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.transaction-operations-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "101 elements, one past the bound in the smallest value of Transaction",
+  "obligations": [
+    "format:Transaction.operations:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.transaction-operations-over-max/any.xdr",
+      "xdr_sha256": "4b1bc5e95a757567213bd7c1c6823444683212361d12f2d6075f0b5656633078"
+    }
+  },
+  "xdr_type": "Transaction"
+}

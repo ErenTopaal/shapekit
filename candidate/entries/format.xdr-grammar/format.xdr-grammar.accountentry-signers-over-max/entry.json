@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.accountentry-signers-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "21 elements, one past the bound in the smallest value of AccountEntry",
+  "obligations": [
+    "format:AccountEntry.signers:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.accountentry-signers-over-max/any.xdr",
+      "xdr_sha256": "ef632ebee256e0034d4325cb0c25004aa5e2b5fa22757cc76c66b8a3ab0a5528"
+    }
+  },
+  "xdr_type": "AccountEntry"
+}

@@ -1,0 +1,38 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.accountflags-clawback-enabled-flag",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "member AUTH_CLAWBACK_ENABLED_FLAG (8) in the smallest value of AccountFlags",
+  "obligations": [
+    "format:AccountFlags:=clawback_enabled_flag"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "expected_json_file": "entries/format.xdr-grammar/format.xdr-grammar.accountflags-clawback-enabled-flag/any.expected.json",
+      "expected_json_sha256": "d14d1582c643b8070b69f3e5ce2b2c654eed9a6a11a6f70523359db912d5fabd",
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.accountflags-clawback-enabled-flag/any.xdr",
+      "xdr_sha256": "17eb70034b5b71092521d184c5e7b069d47de657e51aef2be11a00c115036943"
+    }
+  },
+  "xdr_type": "AccountFlags"
+}

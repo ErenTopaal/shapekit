@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.hello-version-str-nonzero-padding",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 1 with a padding byte of 1 in the smallest value of Hello",
+  "obligations": [
+    "format:Hello.version_str:#nonzero-padding"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.hello-version-str-nonzero-padding/any.xdr",
+      "xdr_sha256": "6db398c194116dae07c3e4576f7dae502e269c27ea34305da519464a427bce0e"
+    }
+  },
+  "xdr_type": "Hello"
+}

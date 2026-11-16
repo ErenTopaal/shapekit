@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.stellarmessage-peers-over-max",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "101 elements, one past the bound in the smallest value of StellarMessage",
+  "obligations": [
+    "format:StellarMessage:peers:#over-max"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.stellarmessage-peers-over-max/any.xdr",
+      "xdr_sha256": "6f99b373779c6c3da980522989ad65576047c4cc8a57714f36e6a796cabb414f"
+    }
+  },
+  "xdr_type": "StellarMessage"
+}

@@ -1,0 +1,39 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "implementation-defined",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.evictioniterator-is-curr-bucket-bool-2",
+  "kind": "xdr",
+  "linked_issues": [
+    "https://github.com/stellar/rs-stellar-xdr/issues/629",
+    "https://github.com/stellar/stellar-core/issues/5509"
+  ],
+  "notes": "bool word 2, which RFC 4506 does not define. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+  "obligations": [
+    "format:EvictionIterator.is_curr_bucket:#bool-2"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.evictioniterator-is-curr-bucket-bool-2/any.xdr",
+      "xdr_sha256": "1309ac3f4e41512820fbf259ae492bb686480eb4a7f5fa4bbc38215266ad984c"
+    }
+  },
+  "xdr_type": "EvictionIterator"
+}

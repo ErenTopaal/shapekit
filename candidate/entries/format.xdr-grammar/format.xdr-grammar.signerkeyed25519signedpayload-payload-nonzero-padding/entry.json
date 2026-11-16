@@ -1,0 +1,36 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "format.xdr-grammar",
+  "fields_exercised": [],
+  "flags": [
+    "format-vector"
+  ],
+  "id": "format.xdr-grammar.signerkeyed25519signedpayload-payload-nonzero-padding",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "length 1 with a padding byte of 1 in the smallest value of SignerKeyEd25519SignedPayload",
+  "obligations": [
+    "format:SignerKeyEd25519SignedPayload.payload:#nonzero-padding"
+  ],
+  "passphrase_dependent": false,
+  "protocol": {
+    "introduced": 20,
+    "valid_min": 20
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "any": {
+      "xdr_file": "entries/format.xdr-grammar/format.xdr-grammar.signerkeyed25519signedpayload-payload-nonzero-padding/any.xdr",
+      "xdr_sha256": "dc77dcd9e4fa442f5dc1e1435d024c629cf6967ab7a1bb0d8c775858d99c04fc"
+    }
+  },
+  "xdr_type": "SignerKeyEd25519SignedPayload"
+}
