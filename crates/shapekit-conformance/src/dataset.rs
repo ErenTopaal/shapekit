@@ -368,14 +368,21 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
                 continue;
             }
             *counts.entry(class).or_default() += 1;
-            if class != ResultClass::Pass {
+            // a testee without the type or op answers unsupported: a gap in the testee, not
+            // the sdk dropping the meta
+            if class != ResultClass::Pass && class != ResultClass::Unsupported {
                 failed.insert(sha.clone(), (class, detail));
             }
         }
-        let sections_passing = sections
-            .values()
-            .filter(|shas| shas.iter().all(|s| !failed.contains_key(s)))
-            .count();
+        let unsupported = counts.get(&ResultClass::Unsupported).copied().unwrap_or(0);
+        let sections_passing = if unsupported > 0 {
+            0
+        } else {
+            sections
+                .values()
+                .filter(|shas| shas.iter().all(|s| !failed.contains_key(s)))
+                .count()
+        };
         let mut dropped = Vec::new();
         for (sha, (class, detail)) in &failed {
             let bytes = data.bytes(sha)?;

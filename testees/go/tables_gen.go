@@ -20,6 +20,7 @@ var xdrTypes = map[string]func() any{
 	"SignerKey":                 func() any { return new(xdr.SignerKey) },
 	"SorobanAuthorizationEntry": func() any { return new(xdr.SorobanAuthorizationEntry) },
 	"TransactionEnvelope":       func() any { return new(xdr.TransactionEnvelope) },
+	"TransactionMeta":           func() any { return new(xdr.TransactionMeta) },
 	"TransactionResultMeta":     func() any { return new(xdr.TransactionResultMeta) },
 	"TransactionResultMetaV1":   func() any { return new(xdr.TransactionResultMetaV1) },
 }

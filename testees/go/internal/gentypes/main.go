@@ -31,19 +31,26 @@ func main() {
 	manifest := flag.String("manifest", "../../corpus/manifest.json", "corpus manifest to read xdr_type names from")
 	versions := flag.String("versions", "versions", "directory holding one <version>.mod per sdk version")
 	out := flag.String("out", "tables_gen.go", "file to write")
+	extra := flag.String("extra", "", "comma separated xdr types to add to the manifest's")
 	flag.Parse()
 
-	if err := run(*manifest, *versions, *out); err != nil {
+	if err := run(*manifest, *versions, *out, *extra); err != nil {
 		fmt.Fprintln(os.Stderr, "gentypes:", err)
 		os.Exit(1)
 	}
 }
 
-func run(manifestPath, versionsDir, out string) error {
+func run(manifestPath, versionsDir, out, extra string) error {
 	names, err := manifestTypes(manifestPath)
 	if err != nil {
 		return err
 	}
+	for name := range strings.SplitSeq(extra, ",") {
+		if name = strings.TrimSpace(name); name != "" && !slices.Contains(names, name) {
+			names = append(names, name)
+		}
+	}
+	slices.Sort(names)
 
 	modfiles, err := filepath.Glob(filepath.Join(versionsDir, "*.mod"))
 	if err != nil {

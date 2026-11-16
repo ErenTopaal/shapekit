@@ -8,15 +8,25 @@ import (
 	"testing"
 )
 
-// the type table must name exactly the manifest's xdr types, or the generated file is stale
+// the types the go:generate line in tables.go adds to the manifest's
+var extraTypes = []string{"TransactionMeta"}
+
+// the type table must name exactly the manifest's xdr types and the extra ones, or the
+// generated file is stale
 func TestTypeTableMatchesManifest(t *testing.T) {
 	names, err := manifestTypeNames()
 	if err != nil {
 		t.Fatal(err)
 	}
+	for _, extra := range extraTypes {
+		if !slices.Contains(names, extra) {
+			names = append(names, extra)
+		}
+	}
+	slices.Sort(names)
 	have := slices.Sorted(maps.Keys(xdrTypes))
 	if !slices.Equal(have, names) {
-		t.Errorf("tables_gen.go has %v, the manifest uses %v; run go generate", have, names)
+		t.Errorf("tables_gen.go has %v, the manifest and the extra types are %v; run go generate", have, names)
 	}
 	for name, newValue := range xdrTypes {
 		if _, ok := newValue().(interface{ MarshalBinary() ([]byte, error) }); !ok {
