@@ -1,8 +1,11 @@
 name: upstream-drift
 
 # weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr, sdk or
-# stellar-cli release, or change to core's golden index, gets a tracking issue carrying the checklist of
-# docs/protocol-upgrade-runbook.md, and a conformance/versions.toml that conformance sync-versions
+# stellar-cli release, change to core's golden index or change to a CAP text gets a tracking
+# issue carrying the checklist of docs/protocol-upgrade-runbook.md and what
+# scripts/upstream-regenerate.sh produced against the new version (schema diff and family dating
+# for xdr definitions, the gate list for core, a conformance run for an sdk, the changed CAP
+# texts with their protocols), and a conformance/versions.toml that conformance sync-versions
 # would change gets one listing the difference
 
 on:
@@ -21,24 +24,30 @@ concurrency:
 jobs:
   drift:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # an sdk release builds its testee and runs the corpus through it
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: testees/js/**/package-lock.json
+      - run: cargo build --release --locked -p shapekit-cli
       - name: verify every pin still exists upstream
         env:
           # the [[release]] pins read github's releases api, which allows 60 unauthenticated
           # requests an hour per address
           GITHUB_TOKEN: ${{ github.token }}
-        run: cargo run -p shapekit-cli -- pins verify
-      - name: tracking issues for new upstream releases and golden index changes
-        # runs even when a pin is broken, since that is exactly when the report is wanted
-        if: ${{ !cancelled() }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: scripts/upstream-releases.sh
+        run: target/release/shapekit pins verify
       - name: tracking issue when the sdk version matrix is behind the registries
         if: ${{ !cancelled() }}
         env:
@@ -48,7 +57,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           report="$RUNNER_TEMP/sync-versions.md"
-          if cargo run -p shapekit-cli -- conformance sync-versions --check --report "$report"; then
+          if target/release/shapekit conformance sync-versions --check --report "$report"; then
             exit 0
           fi
           # no report means the command itself failed, not that the matrix is behind
@@ -62,3 +71,13 @@ jobs:
           else
             gh issue create --title "$title" --body-file "$report"
           fi
+      - name: tracking issues for new upstream releases, golden index and CAP text changes
+        # runs even when a pin is broken, since that is exactly when the report is wanted. after
+        # the matrix check, because regenerating an sdk release rewrites conformance/versions.toml
+        if: ${{ !cancelled() }}
+        env:
+          # an sdk release runs sync-versions, which dates a stellar-xdr tag through the github api
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: scripts/upstream-releases.sh

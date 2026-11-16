@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# compares the newest upstream releases and core's golden index with what pins.toml and the
-# committed golden snapshot hold, and opens one tracking issue, carrying the protocol upgrade
-# runbook's checklist, for each new upstream item.
+# compares the newest upstream releases, core's golden index and the CAP texts with what
+# pins.toml and the committed golden snapshot hold, and opens one tracking issue, carrying the
+# protocol upgrade runbook's checklist and what scripts/upstream-regenerate.sh produced against
+# the new version, for each new upstream item.
 #
 # usage: scripts/upstream-releases.sh [--dry-run]
 #   --dry-run  print the report and skip every gh call
@@ -91,6 +92,8 @@ if [ "${#pinned[@]}" -ne 6 ]; then
 fi
 
 names=("stellar-core" "stellar-xdr (definitions)" "@stellar/stellar-sdk" "github.com/stellar/go-stellar-sdk" "stellar-xdr (crate)" "stellar-cli")
+# the scripts/upstream-regenerate.sh item of each name; stellar-cli has nothing to regenerate
+regen=("core" "xdr" "js" "go" "rust" "")
 upstream=("$upstream_core" "$upstream_xdr" "$upstream_js" "$upstream_go" "$upstream_crate" "$upstream_cli")
 
 # one tracking issue per new upstream item; the title names the item, so a later run finds
@@ -107,7 +110,13 @@ for i in "${!names[@]}"; do
     mark="differs"
     differ=$((differ + 1))
     titles+=("upstream: ${names[$i]} ${upstream[$i]}")
-    details+=("${names[$i]} ${upstream[$i]} is out; pins.toml pins ${pinned[$i]}.")
+    detail="${names[$i]} ${upstream[$i]} is out; pins.toml pins ${pinned[$i]}."
+    if [ -n "${regen[$i]}" ]; then
+      out=$("$root/scripts/upstream-regenerate.sh" "${regen[$i]}" "${upstream[$i]}" 2>&1) ||
+        out+=$'\n\n'"scripts/upstream-regenerate.sh ${regen[$i]} ${upstream[$i]} failed; the output above says where."
+      detail+=$'\n\n'"$out"
+    fi
+    details+=("$detail")
   fi
   report+=$'\n'"| ${names[$i]} | ${pinned[$i]} | ${upstream[$i]} | $mark |"
 done
@@ -130,7 +139,21 @@ if [ -n "$golden_lines" ]; then
   details+=("The core golden index differs from corpus/goldens:"$'\n\n'"$(printf '%s\n' "$golden_lines" | sed 's/^/- /')")
 fi
 
+# CAP texts: stellar-protocol's default branch against the pinned commit. Only a change to a
+# core/cap-*.md text is an item; SEP edits are not
+protocol_head=$(git ls-remote https://github.com/stellar/stellar-protocol HEAD | cut -f1)
+cap_report=$("$root/scripts/upstream-regenerate.sh" caps "$protocol_head" 2>&1) ||
+  cap_report+=$'\n\n'"scripts/upstream-regenerate.sh caps $protocol_head failed; the output above says where."
+if printf '%s\n' "$cap_report" | grep -q '^| CAP text |\|failed'; then
+  differ=$((differ + 1))
+  titles+=("upstream: CAP texts at stellar-protocol ${protocol_head:0:12}")
+  details+=("CAP texts changed since the pinned stellar-protocol commit:"$'\n\n'"$cap_report")
+fi
+
 echo "$report"
+echo
+echo "CAP texts:"
+echo "$cap_report"
 echo
 if [ -n "$golden_lines" ]; then
   echo "golden index differences:"
