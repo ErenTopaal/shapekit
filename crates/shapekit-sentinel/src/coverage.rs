@@ -3,9 +3,12 @@
 //! Rust regions and Go blocks are a fixed set, so a range ran exactly when the snapshot lists
 //! it. V8 lists a nested block only while its count differs from the block around it, and its
 //! snapshot carries the count-0 ranges as `uncovered` (docs/testee-protocol.md): a range in
-//! neither list ran as often as the smallest listed range that contains it. V8 also resets its
-//! counters on every snapshot (`Profiler.takePreciseCoverage`), so one of its snapshots covers
-//! the time since the snapshot before; llvm and go counters only grow.
+//! neither list ran as often as the smallest listed range that contains it. Every testee's
+//! snapshot covers the whole process since it started: llvm and go counters only grow, and the
+//! JavaScript testee folds V8's reads together, since `Profiler.takePreciseCoverage` resets
+//! V8's own counters on every read. A later snapshot therefore lists everything an earlier one
+//! did. The comparison does not depend on that: the baseline is the union of its snapshots,
+//! and a range is credited to the first ledger whose snapshot shows it.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -92,6 +95,17 @@ impl Snapshot {
     }
 }
 
+/// Credits each range `now` shows as run, and no baseline snapshot does, to `ledger`, unless an
+/// earlier ledger already reached it. Snapshots are cumulative, so a range a ledger reaches
+/// stays in every later snapshot; the first ledger keeps the credit.
+pub fn credit(new: &mut BTreeMap<String, u32>, baseline: &[Snapshot], now: &Snapshot, ledger: u32) {
+    for r in &now.ran {
+        if !new.contains_key(r) && !baseline.iter().any(|b| b.ran(r)) {
+            new.insert(r.clone(), ledger);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,6 +127,47 @@ mod tests {
         assert!(!base.ran("a.js:40-50"));
         // a file the snapshot does not know never ran
         assert!(!base.ran("b.js:0-5"));
+    }
+
+    fn v8(ran: &[&str], uncovered: &[&str]) -> Snapshot {
+        Snapshot::parse(&json!({"tool": "v8 x", "ranges": ran, "uncovered": uncovered})).unwrap()
+    }
+
+    #[test]
+    fn cumulative_snapshots_credit_the_first_ledger_once() {
+        // before the corpus, then after it: the second lists everything the first did
+        let before = v8(&["a.js:0-100"], &["a.js:30-60", "a.js:70-80"]);
+        let after = v8(&["a.js:0-100", "a.js:70-80"], &["a.js:30-60"]);
+        assert!(before.ran.is_subset(&after.ran));
+        let baseline = [before, after];
+        let mut new = BTreeMap::new();
+        // ledger 7 reaches 30-60 (listed) and 40-50 (inside it, now listed as run)
+        let l7 = v8(
+            &["a.js:0-100", "a.js:70-80", "a.js:30-60", "a.js:40-50"],
+            &[],
+        );
+        credit(&mut new, &baseline, &l7, 7);
+        // ledger 9 still lists both, cumulative, and adds 72-75 inside 70-80, which the
+        // baseline already ran: neither credit moves and 72-75 is not new
+        let l9 = v8(
+            &[
+                "a.js:0-100",
+                "a.js:70-80",
+                "a.js:30-60",
+                "a.js:40-50",
+                "a.js:72-75",
+            ],
+            &[],
+        );
+        assert!(l7.ran.is_subset(&l9.ran));
+        credit(&mut new, &baseline, &l9, 9);
+        assert_eq!(
+            new,
+            BTreeMap::from([("a.js:30-60".to_string(), 7), ("a.js:40-50".to_string(), 7)])
+        );
+        // the union of the baseline equals its last snapshot when snapshots are cumulative
+        let union: BTreeSet<&String> = baseline.iter().flat_map(|b| b.ran.iter()).collect();
+        assert_eq!(union, baseline[1].ran.iter().collect());
     }
 
     #[test]

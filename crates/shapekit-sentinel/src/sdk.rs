@@ -59,9 +59,9 @@ struct Coverage {
     /// What the baseline is: `corpus` for the committed corpus, `corpus+candidate` with the
     /// candidate lane added.
     name: String,
-    /// Every snapshot taken before the first ledger. V8's takePreciseCoverage resets its
-    /// counters, so each of its snapshots covers only the time since the one before; a range
-    /// ran in the baseline when any of these says so.
+    /// Every snapshot taken before the first ledger; a range ran in the baseline when any of
+    /// them says so. Snapshots are cumulative, so this is the last one, but the union does not
+    /// rely on it.
     baseline: Vec<Snapshot>,
     /// Ranges beyond the baseline, with the first ledger that reached each.
     new: BTreeMap<String, u32>,
@@ -218,11 +218,7 @@ impl SdkAudit {
             }
             let now = self.snapshot()?;
             let c = self.coverage.as_mut().expect("checked above");
-            for r in now.ran {
-                if !c.new.contains_key(&r) && !c.baseline.iter().any(|b| b.ran(&r)) {
-                    c.new.insert(r, seq);
-                }
-            }
+            crate::coverage::credit(&mut c.new, &c.baseline, &now, seq);
         }
         Ok(())
     }
