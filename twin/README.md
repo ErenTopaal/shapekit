@@ -41,7 +41,10 @@ peak memory (cgroup `memory.peak`), the work directory's size and the image
 size, also written to `<work dir>/measurements.txt`.
 
 The image is local: it has no registry digest. `twin/pins.toml` pins it by
-image ID, and a rebuild gives a new ID to write there.
+image ID. The build is not bit-reproducible: a rebuild of the same inputs gives
+a new image ID, which has to be written into the pin and checked again with
+`shapekit twin verify`. The script refuses to reuse an existing tag, so a
+rebuild never untags the pinned image; give it a new `--tag`.
 
 ## Contract host coverage
 

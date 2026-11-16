@@ -2,11 +2,13 @@
 # builds the coverage twin: the stellar-core commit pinned in pins.toml, compiled
 # with clang and --enable-codecoverage, packaged as shapekit/core-twin:<version>-cov.
 #
-# usage: twin/build.sh [--jobs N] [--memory SIZE] [--cpus N] [--workdir DIR]
+# usage: twin/build.sh [--jobs N] [--memory SIZE] [--cpus N] [--workdir DIR] [--tag TAG]
 #
 #   --jobs     make parallelism (default 3); cargo gets the same number of jobs
 #   --memory   memory limit of the compile container (default 6g)
 #   --cpus     cpu limit of the compile container (default 4)
+#   --tag      image tag (default <core version>-cov); the script refuses a tag
+#              that already exists, so a pinned image is never untagged
 #   --workdir  where the source tree, cargo cache and build tree live (default
 #              $TMPDIR/twin-build). it holds tens of gigabytes, so it must be on
 #              disk; a path under /tmp is refused.
@@ -16,13 +18,14 @@
 # wall time per phase, peak memory of the compile container, disk used.
 set -euo pipefail
 
-jobs=3 memory=6g cpus=4 workdir=""
+jobs=3 memory=6g cpus=4 workdir="" tag=""
 while [ $# -gt 0 ]; do
     case $1 in
         --jobs) jobs=$2; shift 2 ;;
         --memory) memory=$2; shift 2 ;;
         --cpus) cpus=$2; shift 2 ;;
         --workdir) workdir=$2; shift 2 ;;
+        --tag) tag=$2; shift 2 ;;
         *) echo "unknown argument $1" >&2; exit 2 ;;
     esac
 done
@@ -41,7 +44,14 @@ tag=$("$repo/scripts/pin.sh" tag stellar-core)
 version=${tag#v}
 base=$("$repo/scripts/pin.sh" image twin-ubuntu)
 url=$(python3 -I -c 'import sys,tomllib; print(next(e["url"] for e in tomllib.load(open(sys.argv[1],"rb"))["git"] if e["name"]=="stellar-core"))' "$repo/pins.toml")
-image="shapekit/core-twin:${version}-cov"
+image="shapekit/core-twin:${tag:-${version}-cov}"
+# a pinned twin is referenced by image id; moving its tag to a new build
+# leaves the pinned image untagged, where a prune removes it. a rebuild that
+# is not meant to replace the pin gets its own --tag.
+if docker image inspect "$image" >/dev/null 2>&1; then
+    echo "$image already exists ($(docker image inspect --format '{{.Id}}' "$image")); pass a new --tag" >&2
+    exit 2
+fi
 toolchain="shapekit/core-twin-toolchain:${version}"
 
 # core's release profile builds its rust library (all ten contract hosts in one
