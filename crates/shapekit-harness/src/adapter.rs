@@ -84,6 +84,7 @@ fn cmd_name(c: &Command) -> &'static str {
         Command::Status => "status",
         Command::Export { .. } => "export",
         Command::Dump { .. } => "dump",
+        Command::Restart => "restart",
         Command::Stop => "stop",
     }
 }

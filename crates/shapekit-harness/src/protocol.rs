@@ -55,6 +55,10 @@ pub enum Command {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         tables: Vec<String>,
     },
+    /// Since protocol 2, for adapters whose `describe` lists the `restart` capability: stop
+    /// the target's ingesting process and start it again on the same store, the way a
+    /// deployment restarts it. Answered with [`RestartResult`] once it runs again.
+    Restart,
     /// Tear the target down. Answered with [`StopResult`]; the adapter then exits.
     Stop,
 }
@@ -67,6 +71,8 @@ pub enum Command {
 pub enum Capability {
     /// The adapter answers `dump` (protocol 2).
     Dump,
+    /// The adapter answers `restart` (protocol 2).
+    Restart,
 }
 
 /// How ledgers reach the target.
@@ -338,6 +344,9 @@ pub struct DumpResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct RestartResult {}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct StopResult {
     /// The tail of the target's logs (at most 1 MiB), kept next to the report.
     pub logs: String,
@@ -498,6 +507,7 @@ enum AnyResult {
     Status(StatusResult),
     Export(ExportResult),
     Dump(DumpResult),
+    Restart(RestartResult),
     Stop(StopResult),
 }
 

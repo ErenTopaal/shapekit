@@ -28,6 +28,11 @@ pub enum HarnessCommand {
     /// identifiers and amounts the chain carried, and truncated or fabricated values are
     /// listed.
     Carry(CarryArgs),
+    /// Compare the dumps two runs kept, chain by chain: delivery modes, a restart, the two
+    /// network variants. Columns that differ between two runs of one configuration
+    /// (--control) are left out; the network variants are translated through the
+    /// identifiers core wrote differently in the two chains.
+    Relate(RelateArgs),
     /// Check, or with --write regenerate, schema/adapter-protocol.schema.json and the
     /// vocabulary section of docs/adapter-interface.md.
     Schema {
@@ -69,6 +74,10 @@ pub struct Common {
     /// Do not ask the adapter for a dump of the target's tables after the export.
     #[arg(long)]
     no_dump: bool,
+    /// Restart the target's ingesting process once, halfway through each chain (needs an
+    /// adapter that offers restart).
+    #[arg(long)]
+    restart: bool,
 }
 
 #[derive(Args)]
@@ -102,6 +111,45 @@ pub struct RunArgs {
     expect: Option<PathBuf>,
     #[command(flatten)]
     common: Common,
+}
+
+#[derive(Args)]
+pub struct RelateArgs {
+    /// The logs directory of the base run (where its `<chain>.<network>.dump.json` are).
+    #[arg(long)]
+    base: PathBuf,
+    /// The logs directory of the run compared with it.
+    #[arg(long)]
+    other: PathBuf,
+    /// The logs directory of a second run of the base configuration, to measure noise.
+    #[arg(long)]
+    control: Option<PathBuf>,
+    #[arg(long, default_value = "corpus")]
+    corpus: PathBuf,
+    /// Write the reports as JSON here.
+    #[arg(long)]
+    out: Option<PathBuf>,
+}
+
+/// `<chain>.<network>.dump.json` files of a logs directory, by (chain, network).
+fn dumps_in(
+    dir: &std::path::Path,
+) -> Result<std::collections::BTreeMap<(String, String), PathBuf>> {
+    let mut out = std::collections::BTreeMap::new();
+    for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let p = e?.path();
+        let Some(name) = p.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let Some(stem) = name.strip_suffix(".dump.json") else {
+            continue;
+        };
+        let Some((chain, network)) = stem.rsplit_once('.') else {
+            continue;
+        };
+        out.insert((chain.to_owned(), network.to_owned()), p.clone());
+    }
+    Ok(out)
 }
 
 #[derive(Args)]
@@ -231,6 +279,7 @@ fn options(c: &Common, adapter: Vec<String>, logs: PathBuf) -> Result<RunOptions
         docker: !c.no_docker,
         logs,
         dump: !c.no_dump,
+        restart: c.restart,
     })
 }
 
@@ -299,6 +348,87 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 std::fs::write(out, text).with_context(|| format!("writing {}", out.display()))?;
             }
             Ok(r.truncated == 0 && r.fabricated == 0)
+        }
+        HarnessCommand::Relate(a) => {
+            use shapekit_harness::dump::Dump;
+            use shapekit_harness::relations::replay;
+            let base = dumps_in(&a.base)?;
+            let other = dumps_in(&a.other)?;
+            let control = a.control.as_deref().map(dumps_in).transpose()?;
+            if base.is_empty() {
+                bail!("{} holds no dump", a.base.display());
+            }
+            let mut reports = Vec::new();
+            for ((chain, net), path) in &base {
+                // the same network first; otherwise the chain's other variant
+                let Some(((_, onet), opath)) = other
+                    .get_key_value(&(chain.clone(), net.clone()))
+                    .or_else(|| other.iter().find(|((c, _), _)| c == chain))
+                else {
+                    println!("{chain} ({net}): no dump in {}", a.other.display());
+                    reports.push(None);
+                    continue;
+                };
+                let bd = Dump::read(path)?;
+                let od = Dump::read(opath)?;
+                let noise = match control
+                    .as_ref()
+                    .and_then(|c| c.get(&(chain.clone(), net.clone())))
+                {
+                    Some(cp) => replay::noise_columns(&bd, &Dump::read(cp)?),
+                    None => Default::default(),
+                };
+                let tr = if onet == net {
+                    replay::Translation::default()
+                } else {
+                    let dir = a.corpus.join("chains").join(chain);
+                    replay::Translation::between_chains(&dir.join(net), &dir.join(onet))?
+                };
+                let mut r = replay::compare(&bd, &od, &tr, &noise);
+                r.chain = chain.clone();
+                r.base = format!("{} ({net})", a.base.display());
+                r.other = format!("{} ({onet})", a.other.display());
+                println!(
+                    "{chain} ({net} vs {onet}): {}, {} tables, {} rows, noise columns: {}{}",
+                    if r.equal { "same" } else { "DIFFERENT" },
+                    r.tables,
+                    r.rows,
+                    if r.noise_columns.is_empty() {
+                        "none".to_owned()
+                    } else {
+                        r.noise_columns.join(", ")
+                    },
+                    if r.translated {
+                        format!(", {} translated values", r.translation_values)
+                    } else {
+                        String::new()
+                    }
+                );
+                for d in &r.differences {
+                    println!(
+                        "  {}: {} rows only in base, {} only in other; columns {}",
+                        d.table,
+                        d.only_base,
+                        d.only_other,
+                        d.columns.join(", ")
+                    );
+                }
+                for t in r
+                    .tables_only_base
+                    .iter()
+                    .chain(&r.tables_only_other)
+                    .chain(&r.column_mismatches)
+                {
+                    println!("  table {t} is not comparable");
+                }
+                reports.push(Some(r));
+            }
+            if let Some(out) = &a.out {
+                let mut text = serde_json::to_string_pretty(&reports)?;
+                text.push('\n');
+                std::fs::write(out, text).with_context(|| format!("writing {}", out.display()))?;
+            }
+            Ok(reports.iter().all(|r| r.as_ref().is_some_and(|r| r.equal)))
         }
         HarnessCommand::Schema { write, root } => {
             let stale = sync_generated(&root, write)?;

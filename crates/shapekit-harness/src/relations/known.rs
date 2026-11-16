@@ -134,6 +134,25 @@ fn base_account(s: &str) -> Option<String> {
     }
 }
 
+/// A strkey written in each encoding a store is known to keep addresses in. Empty when `s`
+/// is not a strkey.
+pub fn encodings_of(s: &str) -> Vec<(String, Encoding)> {
+    let Some(bytes) = strkey_bytes(s) else {
+        return Vec::new();
+    };
+    vec![
+        (s.to_owned(), Encoding::Strkey),
+        (hex::encode(&bytes), Encoding::VersionedHex),
+        (hex::encode(&bytes[1..]), Encoding::PayloadHex),
+    ]
+}
+
+/// A strkey in the ledgers' JSON form: the shape check before the strict decode keeps the
+/// decoder off ordinary strings.
+pub fn is_strkey(s: &str) -> bool {
+    s.len() >= 56 && s.as_bytes()[0].is_ascii_uppercase() && Strkey::from_string(s).is_ok()
+}
+
 fn is_decimal(s: &str) -> bool {
     let d = s.strip_prefix('-').unwrap_or(s);
     !d.is_empty() && d.len() <= 40 && d.bytes().all(|b| b.is_ascii_digit())
@@ -144,19 +163,16 @@ impl Known {
         if !self.addresses.insert(s.to_owned()) {
             return;
         }
-        let Some(bytes) = strkey_bytes(s) else {
-            return;
-        };
-        let form = |encoding| Form {
-            value: s.to_owned(),
-            encoding,
-            address: true,
-        };
-        self.forms.insert(s.to_owned(), form(Encoding::Strkey));
-        self.forms
-            .insert(hex::encode(&bytes), form(Encoding::VersionedHex));
-        self.forms
-            .insert(hex::encode(&bytes[1..]), form(Encoding::PayloadHex));
+        for (text, encoding) in encodings_of(s) {
+            self.forms.insert(
+                text,
+                Form {
+                    value: s.to_owned(),
+                    encoding,
+                    address: true,
+                },
+            );
+        }
         if let Some(base) = base_account(s) {
             self.add_address(&base);
         }
@@ -179,10 +195,7 @@ impl Known {
     fn walk(&mut self, v: &Value, key: Option<&str>, net: &Network) {
         match v {
             Value::String(s) => {
-                if s.len() >= 56
-                    && s.as_bytes()[0].is_ascii_uppercase()
-                    && Strkey::from_string(s).is_ok()
-                {
+                if is_strkey(s) {
                     self.add_address(s);
                 } else if key.is_some_and(|k| AMOUNT_KEYS.contains(&k)) {
                     self.add_amount(s);
@@ -212,7 +225,7 @@ impl Known {
     }
 
     /// The asset's Stellar Asset Contract: its id follows from the asset and the passphrase.
-    fn add_asset(&mut self, asset: &Asset, net: &Network) {
+    pub fn add_asset(&mut self, asset: &Asset, net: &Network) {
         let id = net.asset_contract_id(asset);
         self.add_address(&Strkey::Contract(stellar_strkey::Contract(id)).to_string());
     }

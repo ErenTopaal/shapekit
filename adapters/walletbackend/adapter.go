@@ -117,7 +117,7 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 	}
 	var caps []string
 	if protocol >= 2 {
-		caps = []string{wire.CapabilityDump}
+		caps = []string{wire.CapabilityDump, wire.CapabilityRestart}
 	}
 	return wire.DescribeResult{
 		Protocol:        protocol,
@@ -224,6 +224,21 @@ func (a *Adapter) Dump(tables []string, table func(wire.DumpTable) error, row fu
 		return res, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	return res, nil
+}
+
+// Restart answers restart: docker restarts the ingest container, which keeps
+// the database, so wallet-backend resumes from its stored cursor as it does
+// after a deployment restart.
+func (a *Adapter) Restart() (wire.RestartResult, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.target == nil || a.target.store == nil {
+		return wire.RestartResult{}, wire.Errorf(wire.ClassBadRequest, "restart before a successful start")
+	}
+	if _, err := docker(a.ctx, "restart", a.target.ingest); err != nil {
+		return wire.RestartResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	return wire.RestartResult{}, nil
 }
 
 // Stop answers stop.

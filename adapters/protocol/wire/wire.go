@@ -21,9 +21,12 @@ const ProtocolVersion = 2
 // dump command and no capabilities.
 const MinProtocolVersion = 1
 
-// CapabilityDump is listed in describe by an adapter whose handler answers
-// dump (version 2).
-const CapabilityDump = "dump"
+// Capabilities an adapter lists in describe (version 2): its handler answers
+// dump (Dumper) or restart (Restarter).
+const (
+	CapabilityDump    = "dump"
+	CapabilityRestart = "restart"
+)
 
 // Delivery modes.
 const (
@@ -214,6 +217,15 @@ type Dumper interface {
 	Dump(tables []string, table func(DumpTable) error, row func(DumpRow) error) (DumpResult, error)
 }
 
+// RestartResult answers restart.
+type RestartResult struct{}
+
+// Restarter is implemented by handlers that answer restart: stop the target's
+// ingesting process and start it again on the same store.
+type Restarter interface {
+	Restart() (RestartResult, error)
+}
+
 // StopResult answers stop.
 type StopResult struct {
 	Logs string `json:"logs"`
@@ -392,7 +404,7 @@ func parseRequest(line []byte) (*Request, error) {
 		if *req.From > *req.To {
 			return &req, fmt.Errorf("export from %d is after to %d", *req.From, *req.To)
 		}
-	case "dump", "status", "stop":
+	case "dump", "restart", "status", "stop":
 	default:
 		return &req, fmt.Errorf("unknown cmd %q", req.Cmd)
 	}
@@ -439,6 +451,13 @@ func dispatch(req *Request, h Handler, w *lineWriter) (bool, error) {
 			func(r DumpRow) error {
 				return w.write(response{ID: req.ID, Status: "row", Row: &r})
 			})
+	case "restart":
+		r, ok := h.(Restarter)
+		if !ok {
+			err = Errorf(ClassUnsupported, "this adapter does not answer restart")
+			break
+		}
+		result, err = r.Restart()
 	case "stop":
 		result, err = h.Stop()
 		done = true

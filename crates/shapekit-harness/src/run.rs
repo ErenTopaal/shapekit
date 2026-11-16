@@ -22,8 +22,8 @@ use crate::dockernet;
 use crate::dump::{Dump, DumpSummary};
 use crate::protocol::{
     AdvanceResult, Bootstrap, Capability, Command, Delivery, DeliveryMode, DescribeResult,
-    ExportRecord, Health, Lake, LedgerWindow, Limits, StartParams, StartResult, StatusResult,
-    StopResult, TxRecord, Unmapped, vocabulary_fields,
+    ExportRecord, Health, Lake, LedgerWindow, Limits, RestartResult, StartParams, StartResult,
+    StatusResult, StopResult, TxRecord, Unmapped, vocabulary_fields,
 };
 use crate::relations::carry::{self, CarryReport};
 use crate::relations::known::Known;
@@ -40,6 +40,7 @@ pub struct Timeouts {
     pub export: Duration,
     pub dump: Duration,
     pub stop: Duration,
+    pub restart: Duration,
     /// From `start` until the target reports the bootstrap ledger ingested.
     pub bootstrap: Duration,
     /// How long a target may go without ingesting a released ledger.
@@ -58,6 +59,7 @@ impl Default for Timeouts {
             status: Duration::from_secs(300),
             export: Duration::from_secs(10 * 60),
             dump: Duration::from_secs(10 * 60),
+            restart: Duration::from_secs(5 * 60),
             stop: Duration::from_secs(5 * 60),
             bootstrap: Duration::from_secs(10 * 60),
             ledger: Duration::from_secs(120),
@@ -82,6 +84,9 @@ pub struct RunOptions {
     /// Ask an adapter that offers `dump` for what the target stored, after the export, and
     /// keep it as `<logs>/<chain>.<network>.dump.json`.
     pub dump: bool,
+    /// Restart the target's ingesting process once, after it ingested the ledger halfway
+    /// between the bootstrap ledger and the chain's last. Needs the `restart` capability.
+    pub restart: bool,
 }
 
 /// What happened to one chain.
@@ -112,6 +117,9 @@ pub struct ChainResult {
     pub unattributed_rows: u64,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub unattributed_sample: Vec<Unmapped>,
+    /// The ledger after which the target's ingesting process was restarted (`--restart`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub restarted_after: Option<u32>,
     /// The target's stored tables, when the adapter offers `dump` and the target ingested a
     /// ledger after the bootstrap ledger.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -227,6 +235,7 @@ fn run_chain(
             exported_records: 0,
             unattributed_rows: 0,
             unattributed_sample: Vec::new(),
+            restarted_after: None,
             dump: None,
             carry: None,
             dump_error: None,
@@ -443,6 +452,9 @@ fn drive_adapter(
         );
     }
     ctx.result.delivery = Some(mode);
+    if opts.restart && !describe.offers(Capability::Restart) {
+        bail!("--restart needs an adapter that offers the restart capability");
+    }
 
     let first_entry = job
         .entries
@@ -534,7 +546,13 @@ fn drive_adapter(
         let started: StartResult = adapter.call(Command::Start(Box::new(params)), t.start)?;
         ctx.result.components = started.components;
         let mut stop = wait_for(ctx, adapter, bootstrap, t.bootstrap, opts)?;
+        let restart_after = opts
+            .restart
+            .then(|| bootstrap + last.saturating_sub(bootstrap) / 2);
         if stop.is_none() {
+            if restart_after == Some(bootstrap) {
+                restart(ctx, adapter, bootstrap, t.restart)?;
+            }
             for ledger in bootstrap + 1..=last {
                 set_head(&control, &base, ledger)?;
                 check_served(&control, &base, ledger)?;
@@ -546,6 +564,9 @@ fn drive_adapter(
                 stop = wait_for(ctx, adapter, ledger, t.ledger, opts)?;
                 if stop.is_some() {
                     break;
+                }
+                if restart_after == Some(ledger) {
+                    restart(ctx, adapter, ledger, t.restart)?;
                 }
             }
         }
@@ -623,6 +644,12 @@ fn take_dump(
         }
         Err(e) => ctx.result.dump_error = Some(format!("{e:#}")),
     }
+}
+
+fn restart(ctx: &mut Ctx<'_>, adapter: &mut Adapter, after: u32, timeout: Duration) -> Result<()> {
+    adapter.call::<RestartResult>(Command::Restart, timeout)?;
+    ctx.result.restarted_after = Some(after);
+    Ok(())
 }
 
 fn set_head(client: &reqwest::blocking::Client, base: &str, ledger: u32) -> Result<()> {

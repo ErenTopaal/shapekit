@@ -88,7 +88,7 @@ family does not hide the others.
 ```
 
 - `id`: string, unique within one adapter process.
-- `cmd`: `describe`, `start`, `advance`, `status`, `export`, `dump` or `stop`. The command's members
+- `cmd`: `describe`, `start`, `advance`, `status`, `export`, `dump`, `restart` or `stop`. The command's members
   sit next to `cmd`.
 
 ### Response
@@ -131,7 +131,7 @@ Result:
 | `vocab_version` | integer | the oracle vocabulary version the claims and exports use; must equal the harness's |
 | `protocols` | `{"min", "max"}` | ledger protocols the target build ingests; chains outside are `out-of-scope` |
 | `claims` | object | what the target records, see "Claims" |
-| `capabilities` | array | optional commands the adapter answers: `dump`. Version 2; absent means none |
+| `capabilities` | array | optional commands the adapter answers: `dump`, `restart`. Version 2; absent means none |
 
 #### Versions
 
@@ -280,6 +280,14 @@ The harness sends `dump` after `export` and before `stop`, only when the target 
 ledger after the bootstrap ledger, and writes the answer to
 `logs/<chain>.<network>.dump.json`. `--no-dump` skips it. A failed dump does not change any
 verdict; the chain lists the error and the run exits non-zero.
+
+### restart
+
+Version 2, sent only to an adapter whose `describe` lists the `restart` capability, and only
+with `harness run --restart`. Request: `{"cmd": "restart"}`. Stop the target's ingesting
+process and start it again on the same store, the way a deployment restarts it, then answer
+`{}`. The harness then releases the next ledger as usual; a target that does not resume
+stops there like any other.
 
 ## Claims
 
@@ -452,6 +460,37 @@ state comparison builds its column mapping from.
 corpus/chains/<chain>/<network> [--through <ledger>]` runs the same check on a kept dump and
 exits non-zero when it finds a problem.
 
+## Replay invariance
+
+How ledgers reach the target, a restart in the middle, and which network passphrase the
+chain was recorded under must not change what the target stores. `shapekit harness relate`
+compares the dumps of two runs chain by chain:
+
+```sh
+shapekit harness run --adapter "$A" --chain <id> --network testnet --repeat 2 --out base
+shapekit harness run --adapter "$A" --chain <id> --network testnet --delivery sep54-s3 --out s3
+shapekit harness relate --base base/logs/round-1 --control base/logs/round-2 --other s3/logs
+```
+
+- Tables are compared as multisets of rows; row order does not matter.
+- `--control` names a second run of the base configuration. Columns that differ between the
+  base and the control (ingestion timestamps, for example) are noise: they are blanked on
+  both sides and listed, never assumed.
+- When the other run holds the chain's other network variant (`--network mainnet`), the
+  harness walks the two chains' ledgers in step and translates every address and hash core
+  wrote differently (transaction hashes, the genesis root, asset contract ids, in each
+  encoding the carry check knows) before comparing. Numbers are not translated. Places where the two chains differ in shape (a network
+  setting written as another arm) are listed and nothing under them is translated. A value
+  the target derives from a translated one in another form stays a difference.
+- `--restart` on `harness run` restarts the target's ingesting process once, after the
+  ledger halfway between the bootstrap ledger and the chain's last, through the version 2
+  `restart` command (capability `restart`): the adapter stops the process and starts it on
+  the same store, as a deployment restart does. The chain's `restarted_after` says where.
+
+Each chain is reported `same` or `DIFFERENT` with, per table, the rows found on one side
+only and the columns whose values differ. The command exits non-zero when any chain
+differs; `--out` writes the reports as JSON.
+
 ## Output
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):
@@ -548,8 +587,9 @@ shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit ha
 wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`, cloned from
 github.com/stellar/wallet-backend on first use); `--db-memory` caps the database container
 (default 1 GiB); `--cpus` passes docker's `--cpus` to every container it starts (default: no
-limit). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes, and `dump`:
-every base table of the database's `public` schema, rows ordered by every column.
+limit). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes, `dump` (every
+base table of the database's `public` schema, rows ordered by every column) and `restart`
+(`docker restart` of the ingest container).
 
 - **Build.** `git archive <commit> | docker buildx build --load -` with the commit's own
   `Dockerfile`, image `shapekit-wallet-backend:<commit>`. Each `FROM` in that Dockerfile is

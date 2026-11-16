@@ -59,6 +59,9 @@
           "$ref": "#/$defs/DumpResult"
         },
         {
+          "$ref": "#/$defs/RestartResult"
+        },
+        {
           "$ref": "#/$defs/StopResult"
         }
       ],
@@ -85,6 +88,11 @@
         {
           "const": "dump",
           "description": "The adapter answers `dump` (protocol 2).",
+          "type": "string"
+        },
+        {
+          "const": "restart",
+          "description": "The adapter answers `restart` (protocol 2).",
           "type": "string"
         }
       ]
@@ -1748,6 +1756,19 @@
           "type": "object"
         },
         {
+          "description": "Since protocol 2, for adapters whose `describe` lists the `restart` capability: stop\nthe target's ingesting process and start it again on the same store, the way a\ndeployment restarts it. Answered with [`RestartResult`] once it runs again.",
+          "properties": {
+            "cmd": {
+              "const": "restart",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cmd"
+          ],
+          "type": "object"
+        },
+        {
           "description": "Tear the target down. Answered with [`StopResult`]; the adapter then exits.",
           "properties": {
             "cmd": {
@@ -1869,6 +1890,9 @@
       "required": [
         "id"
       ],
+      "type": "object"
+    },
+    "RestartResult": {
       "type": "object"
     },
     "RowRef": {
