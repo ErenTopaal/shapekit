@@ -271,7 +271,10 @@ pub fn invoke(
         .cloned()
         .collect();
     let text = serde_json::to_string(&args).unwrap_or_default();
-    let auth = if named.iter().any(|r| text.contains(&format!("@account:{r}\""))) {
+    let auth = if named
+        .iter()
+        .any(|r| text.contains(&format!("@account:{r}\"")))
+    {
         AuthSpec::Record {
             allow_non_root: rng.chance(1, 2),
             address_v2: world.protocol >= 27 && rng.chance(1, 2),
@@ -324,7 +327,8 @@ pub fn host_function(
     let source = rng.pick(&world.funded).clone();
     let mut f = Filler::new(schema, world, rng, &source);
     let salt = hex::encode(f.rng.bytes(32));
-    let preimage = serde_json::json!({ "address": { "address": format!("@account:{source}"), "salt": salt } });
+    let preimage =
+        serde_json::json!({ "address": { "address": format!("@account:{source}"), "salt": salt } });
     let wasm = (!names.wasm.is_empty())
         .then(|| serde_json::json!({ "wasm": format!("@wasm:{}", f.rng.pick(&names.wasm)) }));
     let function = match (f.rng.below(5), wasm) {
@@ -332,8 +336,12 @@ pub fn host_function(
             let asset = f.def("Asset");
             serde_json::json!({ "create_contract": { "contract_id_preimage": { "asset": asset }, "executable": "stellar_asset" } })
         }
-        (2, Some(w)) => serde_json::json!({ "create_contract": { "contract_id_preimage": preimage, "executable": w } }),
-        (3, Some(w)) => serde_json::json!({ "create_contract_v2": { "contract_id_preimage": preimage, "executable": w, "constructor_args": [] } }),
+        (2, Some(w)) => {
+            serde_json::json!({ "create_contract": { "contract_id_preimage": preimage, "executable": w } })
+        }
+        (3, Some(w)) => {
+            serde_json::json!({ "create_contract_v2": { "contract_id_preimage": preimage, "executable": w, "constructor_args": [] } })
+        }
         _ => f.def("HostFunction"),
     };
     Step::HostFunction {

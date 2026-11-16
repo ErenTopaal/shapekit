@@ -393,9 +393,10 @@ impl<'e, 'a> Live<'e, 'a> {
                 &deployer,
                 &salt,
             )?;
-            self.world
-                .contract_labels
-                .insert(shapekit_core_driver::keys::contract_strkey(&id), label.clone());
+            self.world.contract_labels.insert(
+                shapekit_core_driver::keys::contract_strkey(&id),
+                label.clone(),
+            );
             self.world.contracts.insert(id.0.0);
         }
         Ok(())
@@ -579,7 +580,12 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                     0..=6 if !deployed.is_empty() => {
                         action::invoke(env.schema, &live.world, &mut rng, &deployed, &names)
                     }
-                    7 | 8 => Some(action::host_function(env.schema, &live.world, &mut rng, &names)),
+                    7 | 8 => Some(action::host_function(
+                        env.schema,
+                        &live.world,
+                        &mut rng,
+                        &names,
+                    )),
                     9 | 10 => action::footprint(&live.world, &mut rng),
                     _ => None,
                 };
