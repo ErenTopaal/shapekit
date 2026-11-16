@@ -9,12 +9,16 @@ use shapekit_schema::{Definition, Schema, Type};
 pub struct Replacement {
     pub name: String,
     pub value: Value,
+    /// The value's XDR, when XDR-JSON cannot write it: stellar-xdr renders a signed payload
+    /// signer with an empty payload as an `<INVALID:...>` string it cannot read back.
+    pub xdr: Option<Vec<u8>>,
 }
 
 fn rep(name: impl Into<String>, value: Value) -> Replacement {
     Replacement {
         name: name.into(),
         value,
+        xdr: None,
     }
 }
 

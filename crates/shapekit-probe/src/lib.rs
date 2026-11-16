@@ -7,10 +7,17 @@
 //! Each attempt uses its own source account, so no attempt's sequence number or balance depends
 //! on another's.
 
+pub mod carriers;
 pub mod edit;
+pub mod engine;
 pub mod fields;
+pub mod run;
+pub mod sign;
+pub mod soroban;
 pub mod values;
 pub mod variants;
+pub mod witness;
+pub mod world;
 
 use std::path::Path;
 
@@ -211,4 +218,20 @@ impl Probe {
     pub fn finish(self, target: &Path) -> Result<ChainSummary> {
         Ok(self.driver.finish(target)?)
     }
+}
+
+/// The node config of a probe run at `protocol`: the smoke chain's config with every invariant
+/// checked, so whatever core applies has passed all of them. From protocol 20 the node starts
+/// under core's high Soroban test limits, which only the settings bootstrap uses; the world
+/// then installs testnet's settings.
+pub fn node_config(
+    passphrase: &str,
+    image: shapekit_core_driver::config::CoreImage,
+    protocol: u32,
+) -> shapekit_core_driver::config::NodeConfig {
+    let mut cfg = shapekit_core_driver::smoke::node_config(passphrase, image);
+    cfg.protocol = protocol;
+    cfg.soroban_high_limits = protocol >= 20;
+    cfg.invariant_checks = true;
+    cfg
 }
