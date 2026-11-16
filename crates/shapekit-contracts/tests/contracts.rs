@@ -910,6 +910,7 @@ fn soroban_auth_modes_and_footprint_steps() {
             source: "bob".into(),
             keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
             extend_to: 1000,
+            resources: None,
             expect: TxExpect::default(),
         },
     );
@@ -919,6 +920,7 @@ fn soroban_auth_modes_and_footprint_steps() {
             label: Some("restore".into()),
             source: "bob".into(),
             keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
+            resources: None,
             expect: TxExpect::default(),
         },
     );
@@ -1037,4 +1039,52 @@ fn an_untagged_core_names_its_commit_as_its_version() {
     holds(&g);
     g.core.version = "30.0.1".into();
     has_problem(&g, "neither a release tag like v30.0.0 nor the commit");
+}
+
+#[test]
+fn footprint_steps_take_resource_overrides() {
+    use shapekit_contracts::recipe_ir::ResourceOverride;
+    let low = ResourceOverride {
+        instructions: Some(1),
+        disk_read_bytes: Some(0),
+        write_bytes: Some(0),
+        resource_fee: Some(1),
+    };
+    for step in [
+        Step::ExtendTtl {
+            label: Some("extend".into()),
+            source: "bob".into(),
+            keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
+            extend_to: 1000,
+            resources: Some(low),
+            expect: TxExpect {
+                outcome: Outcome::Failed,
+                result: None,
+            },
+        },
+        Step::Restore {
+            label: Some("restore".into()),
+            source: "bob".into(),
+            keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
+            resources: Some(low),
+            expect: TxExpect {
+                outcome: Outcome::Failed,
+                result: None,
+            },
+        },
+    ] {
+        let mut r = recipe();
+        let at = r.steps.len() - 2;
+        r.steps.insert(at, step);
+        holds(&r);
+        assert!(render(&r).contains("\"resource_fee\": 1"));
+        let mut bad = r.clone();
+        match &mut bad.steps[at] {
+            Step::ExtendTtl { resources, .. } | Step::Restore { resources, .. } => {
+                resources.as_mut().unwrap().resource_fee = Some(-1);
+            }
+            _ => unreachable!(),
+        }
+        has_problem(&bad, "the resource fee cannot be negative");
+    }
 }

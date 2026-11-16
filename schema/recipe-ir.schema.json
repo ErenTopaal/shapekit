@@ -701,6 +701,17 @@
                 "null"
               ]
             },
+            "resources": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ResourceOverride"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Replaces simulated resource values."
+            },
             "source": {
               "type": "string"
             },
@@ -737,6 +748,17 @@
                 "string",
                 "null"
               ]
+            },
+            "resources": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ResourceOverride"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Replaces simulated resource values."
             },
             "source": {
               "type": "string"

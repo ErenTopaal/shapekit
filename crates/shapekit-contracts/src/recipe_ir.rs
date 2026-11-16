@@ -228,6 +228,9 @@ pub enum Step {
         /// XDR-JSON `LedgerKey` values.
         keys: Vec<Value>,
         extend_to: u32,
+        /// Replaces simulated resource values.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        resources: Option<ResourceOverride>,
         #[serde(default)]
         expect: TxExpect,
     },
@@ -239,6 +242,9 @@ pub enum Step {
         source: String,
         /// XDR-JSON `LedgerKey` values.
         keys: Vec<Value>,
+        /// Replaces simulated resource values.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        resources: Option<ResourceOverride>,
         #[serde(default)]
         expect: TxExpect,
     },
@@ -865,6 +871,7 @@ impl Contract for RecipeIr {
                     label,
                     source,
                     keys,
+                    resources,
                     expect,
                     ..
                 }
@@ -872,9 +879,11 @@ impl Contract for RecipeIr {
                     label,
                     source,
                     keys,
+                    resources,
                     expect,
                 } => {
                     c.role(&at, source, false);
+                    c.resources(&at, resources.as_ref());
                     if keys.is_empty() {
                         c.out
                             .push(format!("{at}: the footprint needs at least one key"));
