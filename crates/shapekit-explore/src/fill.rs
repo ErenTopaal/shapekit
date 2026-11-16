@@ -457,7 +457,7 @@ impl<'a> Filler<'a> {
                 f
             }
             Some("masterWeight" | "lowThreshold" | "medThreshold" | "highThreshold" | "weight") => {
-                *self.rng.pick(&[0, 1, 1, 2, 10, 255, 256])
+                *self.rng.pick(&[0, 1, 1, 1, 2, 10, 255, 256])
             }
             Some("authorize") => *self.rng.pick(&[0, 1, 2, 3]),
             Some("fee") => *self.rng.pick(&[30, 30, 30, 0, 100]),
@@ -525,7 +525,9 @@ impl<'a> Filler<'a> {
             }
             Type::String { max_size } => self.string(field, max_size.unwrap_or(32)),
             Type::Optional { element } => {
-                if self.depth >= MAX_DEPTH || self.rng.chance(1, 2) {
+                // most optional fields stay out: a struct of many (set_options) filled at
+                // once mostly locks the account out instead of trying one change
+                if self.depth >= MAX_DEPTH || self.rng.chance(7, 10) {
                     Value::Null
                 } else {
                     self.nested(element, field)

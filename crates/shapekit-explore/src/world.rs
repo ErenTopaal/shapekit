@@ -91,6 +91,8 @@ pub struct World {
     pub keys: BTreeMap<String, Value>,
     pub last_closed: u32,
     pub protocol: u32,
+    /// The ledger's base fee, from the last header.
+    pub base_fee: u32,
 }
 
 impl World {
@@ -120,6 +122,7 @@ impl World {
             keys: BTreeMap::new(),
             last_closed: 0,
             protocol,
+            base_fee: 100,
         }
     }
 
@@ -250,6 +253,11 @@ impl World {
     /// Takes in what a closed ledger changed.
     pub fn observe(&mut self, lcm: &LedgerCloseMeta, seq: u32) -> Result<()> {
         self.last_closed = seq;
+        self.base_fee = match lcm {
+            LedgerCloseMeta::V0(m) => m.ledger_header.header.base_fee,
+            LedgerCloseMeta::V1(m) => m.ledger_header.header.base_fee,
+            LedgerCloseMeta::V2(m) => m.ledger_header.header.base_fee,
+        };
         for list in change_lists(lcm) {
             for c in list.iter() {
                 let key = change_key(c);

@@ -164,13 +164,25 @@ pub fn transaction(
             }
         }
     }
-    let fee = rng.chance(1, 50).then(|| *rng.pick(&[1u32, 99, 10_000]));
+    // the fee core charges per operation follows the base fee upgrades; a fee of 1 is refused
+    let per_op = world.base_fee.max(100);
+    let fee = if rng.chance(1, 50) {
+        Some(*rng.pick(&[1u32, 10_000]))
+    } else if per_op > 100 {
+        Some(per_op * n as u32)
+    } else {
+        None
+    };
     // fee bumps wrap v1 envelopes, which core takes from protocol 13 on
     let fee_bump = (world.protocol >= 13 && rng.chance(1, 8)).then(|| {
         let payer = rng.pick(&world.funded).clone();
-        let fee = rng
-            .chance(1, 10)
-            .then(|| *rng.pick(&[1i64, 1_000_000, i64::MAX]));
+        let fee = if rng.chance(1, 10) {
+            Some(*rng.pick(&[1i64, 1_000_000, i64::MAX]))
+        } else if per_op > 100 {
+            Some(i64::from(per_op) * (n as i64 + 1))
+        } else {
+            None
+        };
         let signers = if rng.chance(1, 8) {
             vec![rng.pick(&world.funded).clone()]
         } else {
@@ -265,9 +277,7 @@ pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
     };
     match rng.below(5) {
         0 if world.protocol < max_protocol => *protocol_version = Some(world.protocol + 1),
-        // above the interpreter's fee of 100 per operation every later transaction would be
-        // refused, so the upgrade stays at or below it
-        1 => *base_fee = Some(*rng.pick(&[50, 100])),
+        1 => *base_fee = Some(*rng.pick(&[50, 100, 1000])),
         2 => *base_reserve = Some(*rng.pick(&[5_000_000, 20_000_000, 100_000_000])),
         3 => *max_tx_set_size = Some(*rng.pick(&[1, 100, 1000])),
         _ => *flags = Some(*rng.pick(&[0, 1, 2, 4, 7])),
