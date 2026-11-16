@@ -3141,6 +3141,7 @@ dependencies = [
  "shapekit-manifest",
  "shapekit-oracle",
  "shapekit-pack",
+ "shapekit-probe",
  "shapekit-registry",
  "shapekit-schema",
  "shapekit-sentinel",
@@ -3383,6 +3384,20 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.21",
  "zstd",
+]
+
+[[package]]
+name = "shapekit-probe"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "ed25519-dalek 3.0.0",
+ "serde",
+ "serde_json",
+ "shapekit-contracts",
+ "shapekit-core-driver",
+ "stellar-xdr 30.0.0",
+ "tempfile",
 ]
 
 [[package]]

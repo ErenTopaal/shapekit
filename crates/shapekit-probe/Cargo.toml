@@ -1,0 +1,20 @@
+[package]
+name = "shapekit-probe"
+description = "Asks a standalone stellar-core which envelope fields it validates: one valid transaction, one field changed, core's verdict recorded."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+ed25519-dalek.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+shapekit-contracts.workspace = true
+shapekit-core-driver.workspace = true
+stellar-xdr = { workspace = true, features = ["base64"] }
+
+[dev-dependencies]
+tempfile.workspace = true

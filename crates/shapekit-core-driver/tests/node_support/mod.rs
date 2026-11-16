@@ -24,6 +24,7 @@ pub fn config(passphrase: &str, protocol: u32) -> NodeConfig {
         backfill_stellar_asset_events: true,
         diagnostic_events: true,
         min_persistent_ttl: None,
+        invariant_checks: false,
     }
 }
 

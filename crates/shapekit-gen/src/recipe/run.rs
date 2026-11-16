@@ -77,6 +77,7 @@ fn node_config(recipe: &dyn Recipe, network: Network, image: &CoreImage) -> Node
         backfill_stellar_asset_events: recipe.backfill_stellar_asset_events(),
         diagnostic_events: false,
         min_persistent_ttl: recipe.min_persistent_ttl(),
+        invariant_checks: false,
     }
 }
 

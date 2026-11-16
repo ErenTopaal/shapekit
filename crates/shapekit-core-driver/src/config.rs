@@ -229,6 +229,11 @@ pub struct NodeConfig {
     /// entry within a few ledgers instead of core's initial 4096. A later
     /// settings upgrade replaces it, entries created before keep their TTL.
     pub min_persistent_ttl: Option<u32>,
+    /// `INVARIANT_CHECKS = [".*"]`: core runs every invariant (`src/invariant/`) on every
+    /// ledger it closes and stops with a fatal error when one fails, so whatever the node
+    /// applied passed all of them. Off for recorded chains, which never needed it; the probe
+    /// turns it on.
+    pub invariant_checks: bool,
 }
 
 /// Node seed for a passphrase, see the module docs for the layout.
@@ -325,6 +330,9 @@ impl NodeConfig {
         if let Some(ttl) = self.min_persistent_ttl {
             line(format!("TESTING_MINIMUM_PERSISTENT_ENTRY_LIFETIME={ttl}"));
         }
+        if self.invariant_checks {
+            line("INVARIANT_CHECKS=[\".*\"]".into());
+        }
         line(String::new());
         line("[QUORUM_SET]".into());
         line("THRESHOLD_PERCENT=100".into());
@@ -374,7 +382,20 @@ mod tests {
             backfill_stellar_asset_events: true,
             diagnostic_events: true,
             min_persistent_ttl: None,
+            invariant_checks: false,
         }
+    }
+
+    #[test]
+    fn invariant_checks_render_only_when_asked() {
+        let mut c = sample("Test SDF Network ; September 2015");
+        assert!(!c.render().unwrap().contains("INVARIANT_CHECKS"));
+        c.invariant_checks = true;
+        assert!(
+            c.render()
+                .unwrap()
+                .contains("\nINVARIANT_CHECKS=[\".*\"]\n")
+        );
     }
 
     #[test]

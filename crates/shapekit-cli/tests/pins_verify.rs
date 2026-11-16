@@ -71,6 +71,7 @@ fn registered_commands() {
             "schema",
             "contracts",
             "corpus",
+            "probe",
             "help",
         ]
     );

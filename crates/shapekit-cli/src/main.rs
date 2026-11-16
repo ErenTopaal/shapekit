@@ -16,6 +16,7 @@ mod manifest_cmd;
 mod oracle_cmd;
 mod pack_cmd;
 mod pins;
+mod probe_cmd;
 mod promote_cmd;
 mod registry_cmd;
 mod schema_cmd;
@@ -165,6 +166,12 @@ enum Command {
     Corpus {
         #[command(subcommand)]
         command: coverage_cmd::CorpusCommand,
+    },
+    /// Which envelope fields core validates: single-field changes of a valid transaction,
+    /// submitted to a standalone core.
+    Probe {
+        #[command(subcommand)]
+        command: probe_cmd::ProbeCommand,
     },
 }
 
@@ -628,6 +635,7 @@ fn main() -> ExitCode {
         Command::Corpus { command } => coverage_cmd::corpus(command),
         Command::Contracts { command } => contracts_cmd::run(command),
         Command::Site { command } => site_cmd::run(command),
+        Command::Probe { command } => probe_cmd::run(command),
         Command::Schema { command } => schema_cmd::run(command),
         Command::Laws { command } => laws_cmd::run(command),
         Command::Twin { command } => twin_cmd::run(command),
