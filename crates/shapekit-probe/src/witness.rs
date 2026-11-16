@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use shapekit_contracts::validation::{ApplyStatus, ProbeAttempt, SubmitStatus};
 use shapekit_core_driver::canonical::canonicalize_lcm;
 use shapekit_gen::entry_io::write_xdr_entry;
@@ -161,11 +161,17 @@ pub fn write_in(candidate: &Path, family: &str, e: &Evidence) -> Result<Vec<Stri
     match a.applied {
         ApplyStatus::NotApplied => {
             if a.submission != SubmitStatus::Error {
-                bail!(
-                    "{}: core answered {:?} without applying; no refusal to record",
-                    e.slug,
-                    a.submission
-                );
+                // core declined to queue the envelope without a result (try again later: its
+                // declared resources exceed what a ledger takes), so it is no core output and
+                // no refusal core can be quoted for; the bytes stay as the probe's own
+                entry.source.class = SourceClass::Synthetic;
+                entry.source.recipe = None;
+                entry.source.chain = None;
+                entry.synthetic = true;
+                entry.expected.validity = Validity::NotEmittable;
+                write_xdr_entry(candidate, entry, "testnet", &e.envelope)
+                    .with_context(|| format!("writing {id}"))?;
+                return Ok(out);
             }
             entry.source.class = SourceClass::LocalCoreRefused;
             entry.source.core_rejection = Some(rejection(RejectionStage::Submit)?);
