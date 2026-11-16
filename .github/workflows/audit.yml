@@ -1,0 +1,75 @@
+name: audit
+
+# the growing random audit: every night a new seed draws 3,000 ledgers from the whole pubnet
+# history in the public SEP-54 data lake and every law is checked on each of them. the seed
+# is the date, so any night's sample can be drawn again with the same command.
+
+on:
+  schedule:
+    - cron: "40 4 * * *"
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: seed to draw with (default the date as yyyymmdd)
+        required: false
+      n:
+        description: ledgers to draw
+        required: false
+        default: "3000"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  laws:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: restore the shapekit binary built from this source
+        id: bin
+        uses: actions/cache/restore@v6
+        with:
+          path: target/release/shapekit
+          key: shapekit-bin-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**', 'rust-toolchain.toml') }}
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@1.99.1
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - if: steps.bin.outputs.cache-hit != 'true'
+        run: cargo build --release --locked -p shapekit-cli
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: target/release/shapekit
+          key: ${{ steps.bin.outputs.cache-primary-key }}
+      - name: draw and check
+        env:
+          SEED: ${{ inputs.seed }}
+          N: ${{ inputs.n || '3000' }}
+        run: |
+          set -euo pipefail
+          seed="${SEED:-$(date -u +%Y%m%d)}"
+          mkdir -p audit
+          target/release/shapekit audit run --network pubnet --n "$N" --seed "$seed" \
+            --out audit/report.json
+      - name: job summary
+        if: always() && hashFiles('audit/report.json') != ''
+        run: target/release/shapekit audit summary --report audit/report.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: audit
+          path: audit/
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,102 @@
+name: sentinel
+
+# every ledger that closes on pubnet and testnet goes through the law book, read from the
+# public SEP-54 data lake. each run continues from the cursor the previous run left in the
+# actions cache, so consecutive runs neither skip nor repeat a ledger, and the header chain
+# is checked across runs. the job summary lists the exact ledger ranges each run covered.
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  watch:
+    strategy:
+      fail-fast: false
+      matrix:
+        network: [pubnet, testnet]
+    # one run per network at a time: two runs reading the same cursor would check the same
+    # ledgers twice and race on saving it
+    concurrency:
+      group: sentinel-${{ matrix.network }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: restore the shapekit binary built from this source
+        id: bin
+        uses: actions/cache/restore@v6
+        with:
+          path: target/release/shapekit
+          key: shapekit-bin-${{ hashFiles('Cargo.lock', 'Cargo.toml', 'crates/**', 'rust-toolchain.toml') }}
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@1.99.1
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - if: steps.bin.outputs.cache-hit != 'true'
+        run: cargo build --release --locked -p shapekit-cli
+      - if: steps.bin.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: target/release/shapekit
+          key: ${{ steps.bin.outputs.cache-primary-key }}
+      - name: restore the cursor
+        id: cursor
+        uses: actions/cache/restore@v6
+        with:
+          path: sentinel/cursor.json
+          # cache entries cannot be overwritten, so every run saves under its own key and
+          # the newest entry with this prefix is restored
+          key: sentinel-cursor-${{ matrix.network }}-${{ github.run_id }}
+          restore-keys: sentinel-cursor-${{ matrix.network }}-
+      - name: check every ledger since the cursor
+        env:
+          NETWORK: ${{ matrix.network }}
+        run: |
+          set -euo pipefail
+          mkdir -p sentinel
+          if [ -f sentinel/cursor.json ]; then
+            echo "cursor restored from ${{ steps.cursor.outputs.cache-matched-key }}"
+            cat sentinel/cursor.json
+            start=()
+          else
+            # no cursor: either the first run, or the cache entry expired. the summary says so,
+            # since ledgers between the lost cursor and the newest one are not checked
+            echo "::warning::no cursor for $NETWORK, starting at the newest ledger in the lake"
+            start=(--start newest)
+          fi
+          target/release/shapekit audit watch --network "$NETWORK" \
+            --cursor sentinel/cursor.json "${start[@]}" --max-ledgers 1500 \
+            --out "sentinel/report-$NETWORK.json"
+      - name: save the cursor
+        if: always() && hashFiles('sentinel/cursor.json') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: sentinel/cursor.json
+          key: sentinel-cursor-${{ matrix.network }}-${{ github.run_id }}
+      - name: job summary
+        if: always() && hashFiles(format('sentinel/report-{0}.json', matrix.network)) != ''
+        env:
+          NETWORK: ${{ matrix.network }}
+        run: |
+          set -euo pipefail
+          target/release/shapekit audit summary --report "sentinel/report-$NETWORK.json" >> "$GITHUB_STEP_SUMMARY"
+          echo "cursor after this run: $(cat sentinel/cursor.json)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: sentinel-${{ matrix.network }}
+          path: sentinel/
+          retention-days: 30
+          if-no-files-found: ignore
