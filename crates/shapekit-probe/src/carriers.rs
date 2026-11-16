@@ -4,11 +4,12 @@
 
 use anyhow::{Context, Result, bail};
 use ed25519_dalek::SigningKey;
+use serde_json::json;
 use sha2::{Digest, Sha256};
 use shapekit_core_driver::chain::Applied;
 use shapekit_core_driver::config::close_time;
 use shapekit_core_driver::keys::{
-    account_id, ed25519_signer, muxed_account, signed_payload_signer,
+    account_id, account_strkey, ed25519_signer, muxed_account, signed_payload_signer,
 };
 use shapekit_core_driver::tx::{BASE_FEE, fee_bump};
 use stellar_xdr::{
@@ -29,6 +30,7 @@ use stellar_xdr::{
 };
 
 use crate::sign::SignPlan;
+use crate::values::Replacement;
 use crate::world::{Subject, World, WorldKind, create};
 
 /// The base transaction of one attempt.
@@ -62,6 +64,24 @@ pub struct Carrier {
     pub world: WorldKind,
     pub outcome: BaseOutcome,
     pub build: fn(&mut World, &Subject) -> Result<Base>,
+    /// Values the type alone does not give but the field's meaning does, added after the
+    /// type's replacements: a time bound already past, a claimant named twice. Called with
+    /// the field's `.x` name.
+    pub extra: Extra,
+}
+
+pub type Extra = fn(&World, &Subject, &str) -> Result<Vec<Replacement>>;
+
+pub fn no_extra(_: &World, _: &Subject, _: &str) -> Result<Vec<Replacement>> {
+    Ok(Vec::new())
+}
+
+pub fn extra(name: &str, value: serde_json::Value) -> Replacement {
+    Replacement {
+        name: name.to_owned(),
+        value,
+        xdr: None,
+    }
 }
 
 /// One lumen.
@@ -117,6 +137,11 @@ fn change_trust(asset: &Asset) -> OperationBody {
 /// `who` trusts the shared credit and holds `amount` of it.
 fn hold_credit(w: &mut World, who: &SigningKey, amount: i64) -> Result<()> {
     let asset = w.credit4();
+    hold(w, who, asset, amount)
+}
+
+/// `who` trusts `asset` of the shared issuer and holds `amount` of it.
+fn hold(w: &mut World, who: &SigningKey, asset: Asset, amount: i64) -> Result<()> {
     w.classic_ok(who, vec![change_trust(&asset)], &[])?;
     let issuer = w.issuer.clone();
     w.classic_ok(
@@ -307,8 +332,55 @@ fn with_cond(w: &World, s: &Subject, cond: Preconditions, signers: &[&SigningKey
     })
 }
 
+/// The subject pays peer 0 ten units of `asset`; both hold a trustline.
+fn credit_payment(w: &mut World, s: &Subject, asset: Asset, arm: &str) -> Result<Base> {
+    let src = s.source.clone();
+    hold(w, &src, asset.clone(), 100 * XLM)?;
+    let peer = s.peers[0].clone();
+    w.classic_ok(&peer, vec![change_trust(&asset)], &[])?;
+    let b = simple(
+        w,
+        s,
+        OperationBody::Payment(PaymentOp {
+            destination: muxed_account(&peer.verifying_key()),
+            asset,
+            amount: 10 * XLM,
+        }),
+    )?;
+    Ok(Base {
+        at: Some(format!("/tx/tx/operations/0/body/payment/asset/{arm}")),
+        ..b
+    })
+}
+
 fn pay_base(w: &mut World, s: &Subject) -> Result<Base> {
     simple(w, s, payment(&s.peers[0]))
+}
+
+const V0_REFUSED: &str = "TransactionFrame::commonValidPreSeqNum answers txNOT_SUPPORTED for a v0 envelope from protocol 13 (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1257-1265)";
+
+fn muxed7(k: &SigningKey) -> MuxedAccount {
+    MuxedAccount::MuxedEd25519(MuxedAccountMed25519 {
+        id: 7,
+        ed25519: Uint256(k.verifying_key().to_bytes()),
+    })
+}
+
+/// The subject issues `SUBJ` with clawback enabled and peer 0 holds 100 of it. Returns peer 0.
+fn clawback_setup(w: &mut World, s: &Subject) -> Result<SigningKey> {
+    let (src, peer) = (s.source.clone(), s.peers[0].clone());
+    w.classic_ok(&src, vec![set_flags(AUTH_REVOCABLE | AUTH_CLAWBACK)], &[])?;
+    w.classic_ok(&peer, vec![change_trust(&own_asset(s))], &[])?;
+    w.classic_ok(
+        &src,
+        vec![OperationBody::Payment(PaymentOp {
+            destination: muxed_account(&peer.verifying_key()),
+            asset: own_asset(s),
+            amount: 100 * XLM,
+        })],
+        &[],
+    )?;
+    Ok(peer)
 }
 
 /// The carriers of the classic structs.
@@ -320,6 +392,7 @@ pub fn classic() -> Vec<Carrier> {
         world: WorldKind::Current,
         outcome: BaseOutcome::Succeeds,
         build,
+        extra: no_extra,
     };
     vec![
         c(
@@ -331,11 +404,14 @@ pub fn classic() -> Vec<Carrier> {
                 Ok(b)
             },
         ),
-        c("Transaction", "a payment", |w, s| {
-            let mut b = pay_base(w, s)?;
-            b.at = Some("/tx/tx".into());
-            Ok(b)
-        }),
+        Carrier {
+            id: "payment",
+            ..c("Transaction", "a payment", |w, s| {
+                let mut b = pay_base(w, s)?;
+                b.at = Some("/tx/tx".into());
+                Ok(b)
+            })
+        },
         c(
             "DecoratedSignature",
             "the source's signature on a payment",
@@ -345,35 +421,174 @@ pub fn classic() -> Vec<Carrier> {
                 Ok(b)
             },
         ),
-        c("Operation", "a payment's operation", |w, s| {
-            let mut b = pay_base(w, s)?;
-            b.at = Some("/tx/tx/operations/0".into());
-            Ok(b)
-        }),
+        Carrier {
+            id: "payment",
+            ..c("Operation", "a payment's operation", |w, s| {
+                let mut b = pay_base(w, s)?;
+                b.at = Some("/tx/tx/operations/0".into());
+                Ok(b)
+            })
+        },
+        Carrier {
+            id: "merge",
+            ..c("Operation", "a merge of the source into a peer", |w, s| {
+                let mut b = simple(
+                    w,
+                    s,
+                    OperationBody::AccountMerge(muxed_account(&s.peers[0].verifying_key())),
+                )?;
+                b.at = Some("/tx/tx/operations/0".into());
+                Ok(b)
+            })
+        },
         c("PaymentOp", "a native payment", pay_base),
         c(
-            "MuxedAccountMed25519",
-            "a payment's muxed source account, id 7",
-            |w, s| {
-                let mut tx = w.tx(&s.source, vec![(None, payment(&s.peers[0]))])?;
-                tx.source_account = MuxedAccount::MuxedEd25519(MuxedAccountMed25519 {
-                    id: 7,
-                    ed25519: Uint256(s.source.verifying_key().to_bytes()),
-                });
-                Ok(Base {
-                    env: World::unsigned(tx),
-                    plan: plan(&[&s.source]),
-                    at: Some("/tx/tx/source_account".into()),
+            "AlphaNum4",
+            "a payment of the shared four letter credit to a peer that trusts it",
+            |w, s| credit_payment(w, s, w.credit4(), "credit_alphanum4"),
+        ),
+        c(
+            "AlphaNum12",
+            "a payment of the shared twelve letter credit to a peer that trusts it",
+            |w, s| credit_payment(w, s, w.credit12(), "credit_alphanum12"),
+        ),
+        Carrier {
+            id: "tx-source",
+            ..c(
+                "MuxedAccountMed25519",
+                "a payment's muxed source account, id 7",
+                |w, s| {
+                    let mut tx = w.tx(&s.source, vec![(None, payment(&s.peers[0]))])?;
+                    tx.source_account = muxed7(&s.source);
+                    Ok(Base {
+                        env: World::unsigned(tx),
+                        plan: plan(&[&s.source]),
+                        at: Some("/tx/tx/source_account".into()),
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "op-source",
+            ..c(
+                "MuxedAccountMed25519",
+                "a payment's muxed operation source, id 7",
+                |w, s| {
+                    let mut tx = w.tx(&s.source, vec![(None, payment(&s.peers[0]))])?;
+                    let mut ops = tx.operations.to_vec();
+                    ops[0].source_account = Some(muxed7(&s.source));
+                    tx.operations = ops.try_into()?;
+                    Ok(Base {
+                        env: World::unsigned(tx),
+                        plan: plan(&[&s.source]),
+                        at: Some("/tx/tx/operations/0/source_account".into()),
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "payment",
+            ..c(
+                "MuxedAccountMed25519",
+                "a payment's muxed destination, id 7",
+                |w, s| {
+                    let b = simple(
+                        w,
+                        s,
+                        OperationBody::Payment(PaymentOp {
+                            destination: muxed7(&s.peers[0]),
+                            asset: Asset::Native,
+                            amount: XLM,
+                        }),
+                    )?;
+                    Ok(Base {
+                        at: Some("/tx/tx/operations/0/body/payment/destination".into()),
+                        ..b
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "path-payment",
+            ..c(
+                "MuxedAccountMed25519",
+                "a strict receive path payment's muxed destination, id 7",
+                |w, s| {
+                    let b = simple(
+                        w,
+                        s,
+                        OperationBody::PathPaymentStrictReceive(PathPaymentStrictReceiveOp {
+                            send_asset: Asset::Native,
+                            send_max: 2 * XLM,
+                            destination: muxed7(&s.peers[0]),
+                            dest_asset: Asset::Native,
+                            dest_amount: XLM,
+                            path: Default::default(),
+                        }),
+                    )?;
+                    Ok(Base {
+                        at: Some(
+                            "/tx/tx/operations/0/body/path_payment_strict_receive/destination"
+                                .into(),
+                        ),
+                        ..b
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "clawback",
+            ..c(
+                "MuxedAccountMed25519",
+                "a clawback from a muxed holder, id 7",
+                |w, s| {
+                    let peer = clawback_setup(w, s)?;
+                    let b = simple(
+                        w,
+                        s,
+                        OperationBody::Clawback(ClawbackOp {
+                            asset: own_asset(s),
+                            from: muxed7(&peer),
+                            amount: 10 * XLM,
+                        }),
+                    )?;
+                    Ok(Base {
+                        at: Some("/tx/tx/operations/0/body/clawback/from".into()),
+                        ..b
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "fee-source",
+            ..c(
+                "MuxedAccountMed25519",
+                "a fee bump's muxed fee source, id 7",
+                |w, s| {
+                    let mut b = fee_bumped(w, s, "/tx_fee_bump/tx/fee_source")?;
+                    let TransactionEnvelope::TxFeeBump(e) = &mut b.env else {
+                        bail!("a fee bump");
+                    };
+                    e.tx.fee_source = muxed7(&s.peers[2]);
+                    Ok(b)
+                },
+            )
+        },
+        Carrier {
+            extra: |_, _, f| {
+                Ok(match f {
+                    "maxTime" => vec![extra("a close time already past, 1", json!("1"))],
+                    _ => Vec::new(),
                 })
             },
-        ),
-        c("TimeBounds", "a payment's time bounds", |w, s| {
-            let tb = TimeBounds {
-                min_time: TimePoint(0),
-                max_time: TimePoint(later(w)),
-            };
-            with_cond(w, s, Preconditions::Time(tb), &[&s.source])
-        }),
+            ..c("TimeBounds", "a payment's time bounds", |w, s| {
+                let tb = TimeBounds {
+                    min_time: TimePoint(0),
+                    max_time: TimePoint(later(w)),
+                };
+                with_cond(w, s, Preconditions::Time(tb), &[&s.source])
+            })
+        },
         c(
             "PreconditionsV2",
             "a payment's v2 preconditions, every field set, one extra signer",
@@ -382,16 +597,30 @@ pub fn classic() -> Vec<Carrier> {
                 with_cond(w, s, Preconditions::V2(p), &[&s.source, &s.peers[1]])
             },
         ),
-        c("LedgerBounds", "a payment's ledger bounds", |w, s| {
-            let p = PreconditionsV2 {
-                ledger_bounds: Some(LedgerBounds {
-                    min_ledger: 0,
-                    max_ledger: w.driver.last_closed() + 1000,
-                }),
-                ..Default::default()
-            };
-            with_cond(w, s, Preconditions::V2(p), &[&s.source])
-        }),
+        Carrier {
+            extra: |w, _, f| {
+                Ok(match f {
+                    "maxLedger" => {
+                        let next = w.driver.last_closed() + 1;
+                        vec![extra(
+                            &format!("the ledger the attempt closes in, {next}"),
+                            json!(next),
+                        )]
+                    }
+                    _ => Vec::new(),
+                })
+            },
+            ..c("LedgerBounds", "a payment's ledger bounds", |w, s| {
+                let p = PreconditionsV2 {
+                    ledger_bounds: Some(LedgerBounds {
+                        min_ledger: 0,
+                        max_ledger: w.driver.last_closed() + 1000,
+                    }),
+                    ..Default::default()
+                };
+                with_cond(w, s, Preconditions::V2(p), &[&s.source])
+            })
+        },
         c(
             "SignerKeyEd25519SignedPayload",
             "a payment's extra signer, a 32 byte signed payload",
@@ -421,6 +650,7 @@ pub fn classic() -> Vec<Carrier> {
             fee_bumped(w, s, "/tx_fee_bump/tx")
         }),
         Carrier {
+            id: "p12",
             world: WorldKind::V0,
             ..c(
                 "TransactionV0Envelope",
@@ -429,10 +659,29 @@ pub fn classic() -> Vec<Carrier> {
             )
         },
         Carrier {
+            id: "p30",
+            outcome: BaseOutcome::Refused(V0_REFUSED),
+            ..c(
+                "TransactionV0Envelope",
+                "a payment's v0 envelope at protocol 30",
+                |w, s| v0(w, s, "/tx_v0"),
+            )
+        },
+        Carrier {
+            id: "p12",
             world: WorldKind::V0,
             ..c(
                 "TransactionV0",
                 "a payment in a v0 envelope at protocol 12",
+                |w, s| v0(w, s, "/tx_v0/tx"),
+            )
+        },
+        Carrier {
+            id: "p30",
+            outcome: BaseOutcome::Refused(V0_REFUSED),
+            ..c(
+                "TransactionV0",
+                "a payment in a v0 envelope at protocol 30",
                 |w, s| v0(w, s, "/tx_v0/tx"),
             )
         },
@@ -661,11 +910,55 @@ pub fn classic() -> Vec<Carrier> {
             "a native claimable balance with one unconditional claimant",
             create_balance,
         ),
-        c(
-            "ClaimantV0",
-            "the claimant of a native claimable balance",
-            create_balance,
-        ),
+        Carrier {
+            id: "two",
+            extra: |_, s, f| {
+                Ok(match f {
+                    "destination" => vec![extra(
+                        "the other claimant's destination",
+                        json!(account_strkey(&s.peers[1].verifying_key())),
+                    )],
+                    _ => Vec::new(),
+                })
+            },
+            ..c(
+                "ClaimantV0",
+                "the first of two claimants of a native claimable balance",
+                |w, s| {
+                    let claimant = |k: &SigningKey| {
+                        Claimant::ClaimantTypeV0(ClaimantV0 {
+                            destination: acc(k),
+                            predicate: ClaimPredicate::Unconditional,
+                        })
+                    };
+                    let b = simple(
+                        w,
+                        s,
+                        OperationBody::CreateClaimableBalance(CreateClaimableBalanceOp {
+                            asset: Asset::Native,
+                            amount: XLM,
+                            claimants: vec![claimant(&s.peers[0]), claimant(&s.peers[1])]
+                                .try_into()?,
+                        }),
+                    )?;
+                    Ok(Base {
+                        at: Some(
+                            "/tx/tx/operations/0/body/create_claimable_balance/claimants/0/claimant_type_v0"
+                                .into(),
+                        ),
+                        ..b
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "one",
+            ..c(
+                "ClaimantV0",
+                "the claimant of a native claimable balance",
+                create_balance,
+            )
+        },
         c(
             "ClaimClaimableBalanceOp",
             "a claim of a balance created for the source",

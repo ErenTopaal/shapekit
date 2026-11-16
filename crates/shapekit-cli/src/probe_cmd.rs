@@ -50,6 +50,15 @@ pub enum ProbeCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Compare registry/fields.toml with the measured verdicts: every row against the struct
+    /// fields and carriers it speaks about. Exits 1 on a disagreement no source reading
+    /// settles, or on a settlement for a row that agrees.
+    Compare {
+        #[arg(long, default_value = "registry/generated/validation.json")]
+        table: PathBuf,
+        #[arg(long, default_value = "registry/fields.toml")]
+        fields: PathBuf,
+    },
 }
 
 pub fn run(command: ProbeCommand) -> Result<bool> {
@@ -75,6 +84,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             scratch.as_deref(),
             &pins,
         ),
+        ProbeCommand::Compare { table, fields } => probe_compare(&table, &fields),
     }
 }
 
@@ -261,4 +271,48 @@ fn core_ref(pins_path: &Path, image: &CoreImage) -> Result<CoreRef> {
             digest: image.digest.clone(),
         }),
     })
+}
+
+fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
+    let t: ValidationTable =
+        shapekit_contracts::load(table).with_context(|| format!("reading {}", table.display()))?;
+    let f: toml::Table = std::fs::read_to_string(fields)
+        .with_context(|| format!("reading {}", fields.display()))?
+        .parse()
+        .with_context(|| format!("parsing {}", fields.display()))?;
+    let rows = shapekit_probe::compare::compare(&t, &f)?;
+    let (mut open, mut settled, mut stale) = (0, 0, 0);
+    for r in &rows {
+        let state = match (r.agrees, r.resolved) {
+            (true, None) => "agrees",
+            (false, Some(_)) => {
+                settled += 1;
+                "settled"
+            }
+            (false, None) => {
+                open += 1;
+                "OPEN"
+            }
+            (true, Some(_)) => {
+                stale += 1;
+                "STALE settlement"
+            }
+        };
+        println!("{:<60} {:<8} {state}", r.row, r.registry);
+        if !r.agrees || r.resolved.is_some() {
+            for (site, yes, n) in &r.sites {
+                let v = if *yes { "validated" } else { "not-validated" };
+                println!("    {site:<64} {v} ({n} attempts)");
+            }
+            if let Some(reading) = r.resolved {
+                println!("    {reading}");
+            }
+        }
+    }
+    println!(
+        "{} rows: {} agree, {settled} settled by the source, {open} open, {stale} stale settlements",
+        rows.len(),
+        rows.len() - settled - open - stale
+    );
+    Ok(open == 0 && stale == 0)
 }

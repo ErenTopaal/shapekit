@@ -238,7 +238,8 @@ pub fn probe_field(
     let first = subject(0);
     w.fund(&first.funded())?;
     let p0 = prepare(w, typer, carrier, field, &first)?;
-    let reps = typer.replacements(&field.ty, &p0.value)?;
+    let mut reps = typer.replacements(&field.ty, &p0.value)?;
+    reps.extend((carrier.extra)(w, &first, &field.name)?);
     if reps.is_empty() {
         return single_valued(w, typer, carrier, field, p0);
     }
@@ -280,7 +281,8 @@ pub fn probe_field(
 
     for (i, s) in others.iter().enumerate() {
         let mut p = prepare(w, typer, carrier, field, s)?;
-        let mine = typer.replacements(&field.ty, &p.value)?;
+        let mut mine = typer.replacements(&field.ty, &p.value)?;
+        mine.extend((carrier.extra)(w, s, &field.name)?);
         ensure!(
             mine.len() == reps.len(),
             "{}: attempt {} has {} replacements, the first base had {}",

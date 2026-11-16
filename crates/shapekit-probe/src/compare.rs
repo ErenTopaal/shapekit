@@ -1,0 +1,638 @@
+//! `registry/fields.toml` against the measured verdicts. Each of its rows names a field in
+//! words and an XDR path that can reach through union arms and list several fields; here
+//! every row is tied to the struct fields of `validation.json` it speaks about, and to the
+//! carrier and values that put the row's question to core. A row that says `yes` agrees when
+//! every one of its sites is validated, a row that says `no` when none is, and a `partial` row
+//! when at least one is.
+
+use std::collections::BTreeMap;
+
+use anyhow::{Context, Result, bail};
+use shapekit_contracts::validation::{FieldVerdict, ProbeAttempt, ValidationTable};
+
+/// Where a row's question is put to core.
+pub struct Site {
+    /// The `validation.json` path.
+    pub path: &'static str,
+    /// The carrier whose attempts answer it, empty for every carrier of the path.
+    pub carrier: &'static str,
+    /// Only the replacements whose name contains this, the base attempt always included.
+    pub only: Option<&'static str>,
+    /// Leaves out the replacements whose name contains this.
+    pub except: Option<&'static str>,
+}
+
+const fn at(path: &'static str) -> Site {
+    Site {
+        path,
+        carrier: "",
+        only: None,
+        except: None,
+    }
+}
+
+const fn via(path: &'static str, carrier: &'static str) -> Site {
+    Site {
+        path,
+        carrier,
+        only: None,
+        except: None,
+    }
+}
+
+const fn only(path: &'static str, carrier: &'static str, name: &'static str) -> Site {
+    Site {
+        path,
+        carrier,
+        only: Some(name),
+        except: None,
+    }
+}
+
+const fn except(path: &'static str, carrier: &'static str, name: &'static str) -> Site {
+    Site {
+        path,
+        carrier,
+        only: None,
+        except: Some(name),
+    }
+}
+
+/// The sites of every row of `registry/fields.toml`, by row id.
+pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
+    vec![
+        (
+            "tx.envelope.type",
+            vec![
+                via("TransactionV0Envelope.tx", "p12"),
+                via("TransactionV0Envelope.tx", "p30"),
+            ],
+        ),
+        (
+            "tx.v0.source_account_ed25519",
+            vec![via("TransactionV0.sourceAccountEd25519", "p12")],
+        ),
+        (
+            "tx.signatures",
+            vec![at("TransactionV1Envelope.signatures")],
+        ),
+        ("tx.signatures.hint", vec![at("DecoratedSignature.hint")]),
+        (
+            "tx.signatures.signature",
+            vec![at("DecoratedSignature.signature")],
+        ),
+        (
+            "tx.source_account",
+            vec![via("Transaction.sourceAccount", "payment")],
+        ),
+        (
+            "tx.source_account.mux_id",
+            vec![via("MuxedAccountMed25519.id", "tx-source")],
+        ),
+        ("tx.fee", vec![via("Transaction.fee", "payment")]),
+        ("tx.seq_num", vec![via("Transaction.seqNum", "payment")]),
+        ("tx.cond.type", vec![via("Transaction.cond", "payment")]),
+        (
+            "tx.cond.time_bounds",
+            vec![at("TimeBounds.minTime"), at("TimeBounds.maxTime")],
+        ),
+        (
+            "tx.cond.ledger_bounds",
+            vec![at("LedgerBounds.minLedger"), at("LedgerBounds.maxLedger")],
+        ),
+        ("tx.cond.min_seq_num", vec![at("PreconditionsV2.minSeqNum")]),
+        ("tx.cond.min_seq_age", vec![at("PreconditionsV2.minSeqAge")]),
+        (
+            "tx.cond.min_seq_ledger_gap",
+            vec![at("PreconditionsV2.minSeqLedgerGap")],
+        ),
+        (
+            "tx.cond.extra_signers",
+            vec![at("PreconditionsV2.extraSigners")],
+        ),
+        (
+            "signer_key.signed_payload.payload",
+            vec![at("SignerKeyEd25519SignedPayload.payload")],
+        ),
+        ("tx.memo.type", vec![via("Transaction.memo", "invoke")]),
+        (
+            "tx.memo.text",
+            vec![only("Transaction.memo", "payment", "arm text")],
+        ),
+        (
+            "tx.memo.id",
+            vec![only("Transaction.memo", "payment", "arm id")],
+        ),
+        (
+            "tx.memo.hash",
+            vec![only("Transaction.memo", "payment", "arm hash")],
+        ),
+        (
+            "tx.memo.return",
+            vec![only("Transaction.memo", "payment", "arm return")],
+        ),
+        (
+            "tx.operations",
+            vec![via("Transaction.operations", "payment")],
+        ),
+        ("tx.ext", vec![via("Transaction.ext", "payment")]),
+        (
+            "tx.soroban.resource_fee",
+            vec![at("SorobanTransactionData.resourceFee")],
+        ),
+        (
+            "tx.soroban.resources.limits",
+            vec![
+                at("SorobanResources.instructions"),
+                at("SorobanResources.diskReadBytes"),
+                at("SorobanResources.writeBytes"),
+            ],
+        ),
+        (
+            "tx.soroban.footprint",
+            vec![
+                via("LedgerFootprint.readOnly", "echo"),
+                via("LedgerFootprint.readWrite", "echo"),
+            ],
+        ),
+        (
+            "tx.soroban.ext.archived_soroban_entries",
+            vec![at("SorobanResourcesExtV0.archivedSorobanEntries")],
+        ),
+        (
+            "feebump.fee_source",
+            vec![at("FeeBumpTransaction.feeSource")],
+        ),
+        (
+            "feebump.fee_source.mux_id",
+            vec![via("MuxedAccountMed25519.id", "fee-source")],
+        ),
+        ("feebump.fee", vec![at("FeeBumpTransaction.fee")]),
+        (
+            "feebump.signatures",
+            vec![at("FeeBumpTransactionEnvelope.signatures")],
+        ),
+        ("feebump.inner_tx", vec![at("FeeBumpTransaction.innerTx")]),
+        (
+            "op.source_account",
+            vec![via("Operation.sourceAccount", "payment")],
+        ),
+        (
+            "op.source_account.mux_id",
+            vec![via("MuxedAccountMed25519.id", "op-source")],
+        ),
+        (
+            "op.create_account.destination",
+            vec![at("CreateAccountOp.destination")],
+        ),
+        (
+            "op.create_account.starting_balance",
+            vec![at("CreateAccountOp.startingBalance")],
+        ),
+        ("op.payment.destination", vec![at("PaymentOp.destination")]),
+        (
+            "op.payment.destination.mux_id",
+            vec![via("MuxedAccountMed25519.id", "payment")],
+        ),
+        ("op.payment.asset", vec![at("PaymentOp.asset")]),
+        ("op.payment.amount", vec![at("PaymentOp.amount")]),
+        (
+            "op.path_payment.destination",
+            vec![
+                at("PathPaymentStrictReceiveOp.destination"),
+                at("PathPaymentStrictSendOp.destination"),
+            ],
+        ),
+        (
+            "op.path_payment.destination.mux_id",
+            vec![via("MuxedAccountMed25519.id", "path-payment")],
+        ),
+        (
+            "op.path_payment.amounts",
+            vec![
+                at("PathPaymentStrictReceiveOp.sendMax"),
+                at("PathPaymentStrictReceiveOp.destAmount"),
+                at("PathPaymentStrictSendOp.sendAmount"),
+                at("PathPaymentStrictSendOp.destMin"),
+            ],
+        ),
+        (
+            "op.path_payment.path",
+            vec![
+                at("PathPaymentStrictReceiveOp.path"),
+                at("PathPaymentStrictSendOp.path"),
+            ],
+        ),
+        (
+            "op.manage_offer.offer_id",
+            vec![
+                at("ManageSellOfferOp.offerID"),
+                at("ManageBuyOfferOp.offerID"),
+            ],
+        ),
+        (
+            "op.manage_offer.assets_amount_price",
+            vec![
+                at("ManageSellOfferOp.selling"),
+                at("ManageSellOfferOp.buying"),
+                at("ManageSellOfferOp.amount"),
+                at("ManageSellOfferOp.price"),
+                at("ManageBuyOfferOp.selling"),
+                at("ManageBuyOfferOp.buying"),
+                at("ManageBuyOfferOp.buyAmount"),
+                at("ManageBuyOfferOp.price"),
+                at("CreatePassiveSellOfferOp.selling"),
+                at("CreatePassiveSellOfferOp.buying"),
+                at("CreatePassiveSellOfferOp.amount"),
+                at("CreatePassiveSellOfferOp.price"),
+                at("Price.n"),
+                at("Price.d"),
+            ],
+        ),
+        (
+            "op.set_options.home_domain",
+            vec![at("SetOptionsOp.homeDomain")],
+        ),
+        (
+            "op.set_options.inflation_dest",
+            vec![at("SetOptionsOp.inflationDest")],
+        ),
+        (
+            "op.set_options.signer",
+            vec![
+                at("SetOptionsOp.signer"),
+                at("Signer.key"),
+                at("Signer.weight"),
+            ],
+        ),
+        (
+            "op.set_options.thresholds_and_flags",
+            vec![
+                at("SetOptionsOp.clearFlags"),
+                at("SetOptionsOp.setFlags"),
+                at("SetOptionsOp.masterWeight"),
+                at("SetOptionsOp.lowThreshold"),
+                at("SetOptionsOp.medThreshold"),
+                at("SetOptionsOp.highThreshold"),
+            ],
+        ),
+        ("op.change_trust.line", vec![at("ChangeTrustOp.line")]),
+        (
+            "op.change_trust.line.liquidity_pool",
+            vec![
+                at("LiquidityPoolConstantProductParameters.assetA"),
+                at("LiquidityPoolConstantProductParameters.assetB"),
+                at("LiquidityPoolConstantProductParameters.fee"),
+            ],
+        ),
+        ("op.change_trust.limit", vec![at("ChangeTrustOp.limit")]),
+        (
+            "op.allow_trust",
+            vec![
+                at("AllowTrustOp.trustor"),
+                at("AllowTrustOp.asset"),
+                at("AllowTrustOp.authorize"),
+            ],
+        ),
+        (
+            "op.manage_data.data_name",
+            vec![at("ManageDataOp.dataName")],
+        ),
+        // the row is about the bytes of a value; an absent value is the delete arm, which
+        // the row describes on its own (null deletes the entry)
+        (
+            "op.manage_data.data_value",
+            vec![except("ManageDataOp.dataValue", "", "absent")],
+        ),
+        (
+            "op.bump_sequence.bump_to",
+            vec![at("BumpSequenceOp.bumpTo")],
+        ),
+        (
+            "op.create_claimable_balance.claimants.destination",
+            vec![at("ClaimantV0.destination")],
+        ),
+        (
+            "op.create_claimable_balance.claimants.predicate",
+            vec![at("ClaimantV0.predicate")],
+        ),
+        (
+            "op.create_claimable_balance.asset_amount",
+            vec![
+                at("CreateClaimableBalanceOp.asset"),
+                at("CreateClaimableBalanceOp.amount"),
+            ],
+        ),
+        (
+            "op.claim_claimable_balance.balance_id",
+            vec![at("ClaimClaimableBalanceOp.balanceID")],
+        ),
+        ("op.clawback.from", vec![at("ClawbackOp.from")]),
+        (
+            "op.clawback.from.mux_id",
+            vec![via("MuxedAccountMed25519.id", "clawback")],
+        ),
+        (
+            "op.clawback.asset_amount",
+            vec![at("ClawbackOp.asset"), at("ClawbackOp.amount")],
+        ),
+        (
+            "op.clawback_claimable_balance.balance_id",
+            vec![at("ClawbackClaimableBalanceOp.balanceID")],
+        ),
+        (
+            "op.set_trust_line_flags",
+            vec![
+                at("SetTrustLineFlagsOp.trustor"),
+                at("SetTrustLineFlagsOp.asset"),
+                at("SetTrustLineFlagsOp.clearFlags"),
+                at("SetTrustLineFlagsOp.setFlags"),
+            ],
+        ),
+        (
+            "op.begin_sponsoring.sponsored_id",
+            vec![at("BeginSponsoringFutureReservesOp.sponsoredID")],
+        ),
+        (
+            "op.revoke_sponsorship",
+            vec![
+                at("RevokeSponsorshipOpSigner.accountID"),
+                at("RevokeSponsorshipOpSigner.signerKey"),
+                at("LedgerKeyAccount.accountID"),
+                at("LedgerKeyTrustLine.accountID"),
+                at("LedgerKeyTrustLine.asset"),
+                at("LedgerKeyOffer.sellerID"),
+                at("LedgerKeyOffer.offerID"),
+                at("LedgerKeyData.accountID"),
+                at("LedgerKeyData.dataName"),
+                at("LedgerKeyClaimableBalance.balanceID"),
+            ],
+        ),
+        (
+            "op.account_merge.destination",
+            vec![only("Operation.body", "merge", "same arm")],
+        ),
+        (
+            "op.liquidity_pool_deposit",
+            vec![
+                at("LiquidityPoolDepositOp.liquidityPoolID"),
+                at("LiquidityPoolDepositOp.maxAmountA"),
+                at("LiquidityPoolDepositOp.maxAmountB"),
+                at("LiquidityPoolDepositOp.minPrice"),
+                at("LiquidityPoolDepositOp.maxPrice"),
+            ],
+        ),
+        (
+            "op.liquidity_pool_withdraw",
+            vec![
+                at("LiquidityPoolWithdrawOp.liquidityPoolID"),
+                at("LiquidityPoolWithdrawOp.amount"),
+                at("LiquidityPoolWithdrawOp.minAmountA"),
+                at("LiquidityPoolWithdrawOp.minAmountB"),
+            ],
+        ),
+        (
+            "op.invoke_host_function.invoke_contract.contract_address",
+            vec![at("InvokeContractArgs.contractAddress")],
+        ),
+        (
+            "op.invoke_host_function.invoke_contract.function_name",
+            vec![at("InvokeContractArgs.functionName")],
+        ),
+        (
+            "op.invoke_host_function.invoke_contract.args",
+            vec![at("InvokeContractArgs.args")],
+        ),
+        (
+            "op.invoke_host_function.upload_wasm",
+            vec![only(
+                "InvokeHostFunctionOp.hostFunction",
+                "upload",
+                "same arm",
+            )],
+        ),
+        (
+            "op.invoke_host_function.create_contract.preimage",
+            vec![
+                at("CreateContractArgs.contractIDPreimage"),
+                at("CreateContractArgsV2.contractIDPreimage"),
+                at("ContractIDPreimageFromAddress.address"),
+                at("ContractIDPreimageFromAddress.salt"),
+            ],
+        ),
+        (
+            "op.invoke_host_function.create_contract_v2.constructor_args",
+            vec![at("CreateContractArgsV2.constructorArgs")],
+        ),
+        (
+            "op.invoke_host_function.auth",
+            vec![via("InvokeHostFunctionOp.auth", "auth")],
+        ),
+        (
+            "auth.credentials.source_account",
+            vec![via("SorobanAuthorizationEntry.credentials", "source")],
+        ),
+        (
+            "auth.credentials.address.address",
+            vec![at("SorobanAddressCredentials.address")],
+        ),
+        (
+            "auth.credentials.address.nonce",
+            vec![at("SorobanAddressCredentials.nonce")],
+        ),
+        (
+            "auth.credentials.address.signature_expiration_ledger",
+            vec![at("SorobanAddressCredentials.signatureExpirationLedger")],
+        ),
+        (
+            "auth.credentials.address.signature",
+            vec![at("SorobanAddressCredentials.signature")],
+        ),
+        (
+            "auth.credentials.address_with_delegates.delegates",
+            vec![at("SorobanAddressCredentialsWithDelegates.delegates")],
+        ),
+        (
+            "auth.root_invocation",
+            vec![
+                via("SorobanAuthorizationEntry.rootInvocation", "address"),
+                at("SorobanAuthorizedInvocation.function"),
+                at("SorobanAuthorizedInvocation.subInvocations"),
+            ],
+        ),
+        (
+            "op.extend_footprint_ttl.extend_to",
+            vec![at("ExtendFootprintTTLOp.extendTo")],
+        ),
+        (
+            "op.restore_footprint",
+            vec![
+                via("LedgerFootprint.readOnly", "restore"),
+                via("LedgerFootprint.readWrite", "restore"),
+            ],
+        ),
+    ]
+}
+
+/// A disagreement settled by reading core's source.
+pub struct Resolution {
+    pub row: &'static str,
+    /// What the source says and why the measured verdict differs, with file and lines.
+    pub reading: &'static str,
+}
+
+/// Every disagreement the source explains. A resolution for a row that agrees is stale and
+/// fails the comparison.
+pub fn resolutions() -> Vec<Resolution> {
+    vec![]
+}
+
+/// The measured verdict of one site: whether its attempts end in more than one way.
+fn site_validated(v: &FieldVerdict, s: &Site) -> Result<(bool, usize)> {
+    let prefix = format!("[{}] ", s.carrier);
+    let mine = |a: &&ProbeAttempt| s.carrier.is_empty() || a.variant.starts_with(&prefix);
+    let picked: Vec<&ProbeAttempt> = v
+        .attempts
+        .iter()
+        .filter(mine)
+        .filter(|a| {
+            let name = a.variant.strip_prefix(&prefix).unwrap_or(&a.variant);
+            if name.starts_with("base, ") {
+                return true;
+            }
+            s.only.is_none_or(|o| name.contains(o)) && s.except.is_none_or(|x| !name.contains(x))
+        })
+        .collect();
+    if picked.len() < 2 {
+        bail!(
+            "{} via {:?}: {} attempts match the site",
+            s.path,
+            s.carrier,
+            picked.len()
+        );
+    }
+    let mut outcomes: Vec<_> = picked.iter().map(|a| a.outcome()).collect();
+    outcomes.sort();
+    outcomes.dedup();
+    Ok((outcomes.len() > 1, picked.len()))
+}
+
+/// One row of the comparison.
+pub struct Compared {
+    pub row: String,
+    pub registry: String,
+    /// `validated` or `not-validated` per site, in the row's order.
+    pub sites: Vec<(String, bool, usize)>,
+    pub agrees: bool,
+    pub resolved: Option<&'static str>,
+}
+
+/// Compares every row of `fields` with the table.
+pub fn compare(table: &ValidationTable, fields: &toml::Table) -> Result<Vec<Compared>> {
+    let by_path: BTreeMap<&str, &FieldVerdict> =
+        table.fields.iter().map(|f| (f.path.as_str(), f)).collect();
+    let sites: BTreeMap<&str, Vec<Site>> = sites().into_iter().collect();
+    let resolutions = resolutions();
+    let rows = fields
+        .get("field")
+        .and_then(|f| f.as_array())
+        .context("fields.toml has no [[field]] rows")?;
+    let mut out = Vec::new();
+    for r in rows {
+        let id = r
+            .get("id")
+            .and_then(|v| v.as_str())
+            .context("a row without id")?;
+        let said = r
+            .get("validated_by_core")
+            .and_then(|v| v.as_str())
+            .with_context(|| format!("{id} has no validated_by_core"))?;
+        let ss = sites
+            .get(id)
+            .with_context(|| format!("no sites for fields.toml row {id}"))?;
+        let mut measured = Vec::new();
+        for s in ss {
+            let v = by_path
+                .get(s.path)
+                .with_context(|| format!("{id}: validation.json has no {}", s.path))?;
+            let (yes, n) = site_validated(v, s).with_context(|| format!("row {id}"))?;
+            let label = if s.carrier.is_empty() {
+                s.path.to_owned()
+            } else {
+                format!("{} [{}]", s.path, s.carrier)
+            };
+            measured.push((label, yes, n));
+        }
+        let agrees = match said {
+            "yes" => measured.iter().all(|m| m.1),
+            "no" => measured.iter().all(|m| !m.1),
+            "partial" => measured.iter().any(|m| m.1),
+            other => bail!("{id}: validated_by_core {other:?}"),
+        };
+        let resolved = resolutions.iter().find(|x| x.row == id).map(|x| x.reading);
+        out.push(Compared {
+            row: id.to_owned(),
+            registry: said.to_owned(),
+            sites: measured,
+            agrees,
+            resolved,
+        });
+    }
+    for id in sites.keys() {
+        if !out.iter().any(|c| c.row == *id) {
+            bail!("sites name {id}, which fields.toml does not have");
+        }
+    }
+    for x in &resolutions {
+        if !out.iter().any(|c| c.row == x.row) {
+            bail!(
+                "a resolution names {}, which fields.toml does not have",
+                x.row
+            );
+        }
+    }
+    Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_site_names_an_envelope_field() {
+        let schema = shapekit_schema::Schema::pinned();
+        let fields = crate::fields::envelope_fields(&schema).unwrap();
+        for (row, ss) in sites() {
+            assert!(!ss.is_empty(), "{row}");
+            for s in ss {
+                assert!(
+                    fields.iter().any(|f| f.path == s.path),
+                    "{row}: {} is no envelope field",
+                    s.path
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn every_registry_row_has_sites() {
+        let text = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../registry/fields.toml"
+        ))
+        .unwrap();
+        let t: toml::Table = text.parse().unwrap();
+        let ids: Vec<String> = t["field"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|r| r["id"].as_str().unwrap().to_owned())
+            .collect();
+        assert_eq!(ids.len(), 88);
+        let s: Vec<&str> = sites().into_iter().map(|(r, _)| r).collect();
+        for id in &ids {
+            assert!(s.contains(&id.as_str()), "{id} has no sites");
+        }
+        assert_eq!(s.len(), ids.len());
+    }
+}

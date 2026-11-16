@@ -8,6 +8,7 @@
 //! on another's.
 
 pub mod carriers;
+pub mod compare;
 pub mod edit;
 pub mod engine;
 pub mod fields;

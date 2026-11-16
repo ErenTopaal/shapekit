@@ -426,6 +426,14 @@ impl<'s> Typer<'s> {
                 }
                 _ => {}
             },
+            Type::Optional { element } if !base.is_null() => {
+                for r in self.replacements(element, base)? {
+                    out.push(Replacement {
+                        name: format!("present, {}", r.name),
+                        ..r
+                    });
+                }
+            }
             Type::Optional { element } if base.is_null() => {
                 let v = self
                     .smallest(element)

@@ -24,9 +24,9 @@ use stellar_xdr::{
     UInt256Parts, Uint256, WriteXdr,
 };
 
-use crate::carriers::{Base, BaseOutcome, Carrier, XLM};
+use crate::carriers::{Base, BaseOutcome, Carrier, XLM, no_extra};
 use crate::sign::{AuthSigner, SignPlan};
-use crate::world::{ARCHIVAL_MIN_PERSISTENT_TTL, Subject, World, WorldKind};
+use crate::world::{ARCHIVAL_MIN_PERSISTENT_TTL, ECHO_WASM, Subject, World, WorldKind};
 
 /// Ledgers an authorization signature stays valid.
 const AUTH_VALID_FOR: u32 = 100;
@@ -392,6 +392,20 @@ fn footprint_op(
     })
 }
 
+/// A restore of the value an archival world just archived.
+fn restore(w: &mut World, s: &Subject) -> Result<Base> {
+    let (_, key) = archived_value(w)?;
+    let data = simulator(w)?.simulate_restore(std::slice::from_ref(&key))?;
+    footprint_op(
+        w,
+        s,
+        OperationBody::RestoreFootprint(RestoreFootprintOp {
+            ext: ExtensionPoint::V0,
+        }),
+        data,
+    )
+}
+
 const FOOTPRINT_REFUSED: &str = "TransactionFrame::checkSorobanResources refuses a footprint holding a TTL, config setting, offer, data, claimable balance or liquidity pool key (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 868-883), so core refuses the transaction at submission";
 
 pub fn carriers() -> Vec<Carrier> {
@@ -402,9 +416,44 @@ pub fn carriers() -> Vec<Carrier> {
         world: WorldKind::Current,
         outcome: BaseOutcome::Succeeds,
         build,
+        extra: no_extra,
     };
     vec![
-        c("InvokeHostFunctionOp", "a call of echo(7)", echo_u32),
+        Carrier {
+            id: "echo",
+            ..c("InvokeHostFunctionOp", "a call of echo(7)", echo_u32)
+        },
+        Carrier {
+            id: "upload",
+            ..c(
+                "InvokeHostFunctionOp",
+                "an upload of the echo wasm",
+                |w, s| {
+                    let hf = HostFunction::UploadContractWasm(ECHO_WASM.to_vec().try_into()?);
+                    invoke(w, s, hf, &[])
+                },
+            )
+        },
+        Carrier {
+            id: "auth",
+            ..c(
+                "InvokeHostFunctionOp",
+                "a call that needs a peer's address credentials",
+                address_auth,
+            )
+        },
+        Carrier {
+            id: "invoke",
+            ..c("Transaction", "a call of echo(7)", |w, s| {
+                Ok(at(echo_u32(w, s)?, "/tx/tx"))
+            })
+        },
+        Carrier {
+            id: "invoke",
+            ..c("Operation", "a call of echo(7)", |w, s| {
+                Ok(at(echo_u32(w, s)?, "/tx/tx/operations/0"))
+            })
+        },
         c("InvokeContractArgs", "a call of echo(7)", echo_u32),
         c("SorobanTransactionData", "a call of echo(7)", |w, s| {
             Ok(at(echo_u32(w, s)?, DATA))
@@ -412,7 +461,19 @@ pub fn carriers() -> Vec<Carrier> {
         c("SorobanResources", "a call of echo(7)", |w, s| {
             Ok(at(echo_u32(w, s)?, &format!("{DATA}/resources")))
         }),
-        c("LedgerFootprint", "a call of echo(7)", echo_u32),
+        Carrier {
+            id: "echo",
+            ..c("LedgerFootprint", "a call of echo(7)", echo_u32)
+        },
+        Carrier {
+            id: "restore",
+            world: WorldKind::Archival,
+            ..c(
+                "LedgerFootprint",
+                "a restore of an archived echo value",
+                |w, s| Ok(at(restore(w, s)?, &format!("{DATA}/resources/footprint"))),
+            )
+        },
         c(
             "LedgerKeyContractData",
             "the read-write key of the value echo stores",
@@ -503,21 +564,26 @@ pub fn carriers() -> Vec<Carrier> {
             let b = echo(w, s, v)?;
             Ok(at(b, &format!("{HF}/invoke_contract/args/0/u256")))
         }),
-        c(
-            "SCContractInstance",
-            "a contract instance value passed to echo, with echo(7)'s resources",
-            |w, s| {
-                let code = w.contracts()?.echo_code.clone();
-                echo_unsimulated(
-                    w,
-                    s,
-                    ScVal::ContractInstance(ScContractInstance {
-                        executable: ContractExecutable::Wasm(code),
-                        storage: None,
-                    }),
-                )
-            },
-        ),
+        Carrier {
+            outcome: BaseOutcome::Fails(
+                "a contract instance value has no host value: soroban-env-common 30.0.0 src/convert.rs 589-600 and soroban-env-host 30.0.0 src/host/conversion.rs 650-663 refuse ScVal::ContractInstance, so the call's argument conversion traps and the operation fails",
+            ),
+            ..c(
+                "SCContractInstance",
+                "a contract instance value passed to echo, with echo(7)'s resources",
+                |w, s| {
+                    let code = w.contracts()?.echo_code.clone();
+                    echo_unsimulated(
+                        w,
+                        s,
+                        ScVal::ContractInstance(ScContractInstance {
+                            executable: ContractExecutable::Wasm(code),
+                            storage: None,
+                        }),
+                    )
+                },
+            )
+        },
         c(
             "MuxedEd25519Account",
             "a native asset transfer to a muxed account, id 9",
@@ -543,11 +609,26 @@ pub fn carriers() -> Vec<Carrier> {
                 Ok(at(b, &format!("{HF}/invoke_contract/args/1/address")))
             },
         ),
-        c(
-            "SorobanAuthorizationEntry",
-            "a peer's address credentials for one require_auth",
-            address_auth,
-        ),
+        Carrier {
+            id: "address",
+            ..c(
+                "SorobanAuthorizationEntry",
+                "a peer's address credentials for one require_auth",
+                address_auth,
+            )
+        },
+        Carrier {
+            id: "source",
+            ..c(
+                "SorobanAuthorizationEntry",
+                "source account credentials for the source's own require_auth",
+                |w, s| {
+                    let me = account_address(&s.source.verifying_key());
+                    let hf = auth_call(w, me)?;
+                    invoke(w, s, hf, &[])
+                },
+            )
+        },
         c(
             "SorobanAuthorizedInvocation",
             "the root invocation a peer authorizes",
@@ -644,17 +725,10 @@ pub fn carriers() -> Vec<Carrier> {
                 "RestoreFootprintOp",
                 "a restore of an archived echo value",
                 |w, s| {
-                    let (_, key) = archived_value(w)?;
-                    let data = simulator(w)?.simulate_restore(std::slice::from_ref(&key))?;
-                    let b = footprint_op(
-                        w,
-                        s,
-                        OperationBody::RestoreFootprint(RestoreFootprintOp {
-                            ext: ExtensionPoint::V0,
-                        }),
-                        data,
-                    )?;
-                    Ok(at(b, "/tx/tx/operations/0/body/restore_footprint"))
+                    Ok(at(
+                        restore(w, s)?,
+                        "/tx/tx/operations/0/body/restore_footprint",
+                    ))
                 },
             )
         },
