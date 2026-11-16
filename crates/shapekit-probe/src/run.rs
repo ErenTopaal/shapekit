@@ -9,7 +9,9 @@ use shapekit_schema::Schema;
 
 use crate::carriers::{self, Carrier};
 use crate::edit::Typer;
-use crate::engine::{FieldRun, probe_field, verdict};
+use shapekit_contracts::validation::Verdict;
+
+use crate::engine::{FieldRun, probe_field};
 use crate::fields::{Field, envelope_fields};
 use crate::world::{World, WorldKind};
 
@@ -66,34 +68,54 @@ pub fn run(
     if !missing.is_empty() {
         bail!("no carrier for {} fields: {missing:?}", missing.len());
     }
-    let mut worlds: BTreeMap<WorldKind, World> = BTreeMap::new();
-    let mut out = Vec::with_capacity(fields.len());
-    for f in fields {
-        let mut merged: Option<FieldRun> = None;
-        for c in &carriers[f.structure.as_str()] {
-            if !worlds.contains_key(&c.world) {
-                let dir = workdir.join(format!("{:?}", c.world).to_ascii_lowercase());
-                std::fs::create_dir_all(&dir)?;
-                let w = World::start(c.world, config(c.world.protocol()), &dir)
-                    .with_context(|| format!("starting the {:?} node", c.world))?;
-                worlds.insert(c.world, w);
-            }
-            let w = worlds.get_mut(&c.world).expect("inserted above");
-            let r = probe_field(w, &typer, c, f)
-                .with_context(|| format!("probing {} with carrier {:?}", f.path, c.id))?;
-            merged = Some(match merged {
-                None => r,
-                Some(mut m) => {
-                    m.verdict.attempts.extend(r.verdict.attempts);
-                    m.evidence.extend(r.evidence);
-                    m.verdict.verdict = verdict(&m.verdict.attempts);
-                    m
-                }
-            });
+    // every job of one world runs before the next world starts: a standalone node left idle
+    // lets its virtual clock run ahead of the close times the driver gives it
+    // (ApplicationImpl::manualClose refuses a close time before its clock's now)
+    let mut jobs: Vec<(usize, usize, &Carrier)> = Vec::new();
+    for (fi, f) in fields.iter().enumerate() {
+        for (ci, c) in carriers[f.structure.as_str()].iter().enumerate() {
+            jobs.push((fi, ci, c));
         }
-        let r = merged.expect("every field has a carrier");
+    }
+    jobs.sort_by_key(|(fi, ci, c)| (c.world, *fi, *ci));
+    let mut runs: BTreeMap<(usize, usize), FieldRun> = BTreeMap::new();
+    let mut current: Option<(WorldKind, World)> = None;
+    for (fi, ci, c) in jobs {
+        if current.as_ref().is_none_or(|(k, _)| *k != c.world) {
+            // the previous world is done; dropping it stops its node
+            drop(current.take());
+            let dir = workdir.join(format!("{:?}", c.world).to_ascii_lowercase());
+            std::fs::create_dir_all(&dir)?;
+            let w = World::start(c.world, config(c.world.protocol()), &dir)
+                .with_context(|| format!("starting the {:?} node", c.world))?;
+            current = Some((c.world, w));
+        }
+        let (_, w) = current.as_mut().expect("started above");
+        let f = &fields[fi];
+        let r = probe_field(w, &typer, c, f)
+            .with_context(|| format!("probing {} with carrier {:?}", f.path, c.id))?;
         progress(&r);
-        out.push(r);
+        runs.insert((fi, ci), r);
+    }
+    drop(current);
+    let mut out = Vec::with_capacity(fields.len());
+    let mut it = runs.into_iter().peekable();
+    while let Some(((fi, _), first)) = it.next() {
+        // each carrier has its own base, so the verdict is decided per carrier: the field is
+        // validated when some carrier's values end in more than one way
+        let mut m = first;
+        while let Some(((next, _), _)) = it.peek() {
+            if *next != fi {
+                break;
+            }
+            let (_, r) = it.next().expect("peeked");
+            if r.verdict.verdict == Verdict::Validated {
+                m.verdict.verdict = Verdict::Validated;
+            }
+            m.verdict.attempts.extend(r.verdict.attempts);
+            m.evidence.extend(r.evidence);
+        }
+        out.push(m);
     }
     Ok(out)
 }

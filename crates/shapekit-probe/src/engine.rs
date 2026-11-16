@@ -136,7 +136,7 @@ fn short(v: &Value) -> String {
 }
 
 /// Submits `env` and closes a ledger when core queued it.
-fn submit(
+pub(crate) fn submit(
     w: &mut World,
     env: &TransactionEnvelope,
     variant: &str,
@@ -462,7 +462,7 @@ fn field_offset(
 
 /// Submits bytes that may not decode. xdrpp's `xdr_bad_discriminant` ("bad value of <field>
 /// in <type>") thrown out of `xdr_from_opaque` in `CommandHandler::tx` is `undecodable`.
-fn submit_raw(w: &mut World, bytes: &[u8], variant: &str) -> Result<ProbeAttempt> {
+pub(crate) fn submit_raw(w: &mut World, bytes: &[u8], variant: &str) -> Result<ProbeAttempt> {
     use base64::Engine;
     let b64 = base64::engine::general_purpose::STANDARD.encode(bytes);
     match w.driver.node().submit_base64(&b64) {

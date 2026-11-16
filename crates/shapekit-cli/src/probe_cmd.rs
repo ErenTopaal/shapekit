@@ -50,6 +50,24 @@ pub enum ProbeCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Find the largest value core accepts for each bounded quantity and the first it refuses,
+    /// by bisection, and compare each with registry/caps-limits.toml.
+    Limits {
+        /// Only these caps-limits.toml rows (repeatable). A partial run writes only under
+        /// --scratch.
+        #[arg(long)]
+        only: Vec<String>,
+        #[arg(long, default_value = "registry/generated/limits.json")]
+        out: PathBuf,
+        #[arg(long, default_value = "candidate")]
+        candidate: PathBuf,
+        #[arg(long, default_value = "registry/caps-limits.toml")]
+        caps: PathBuf,
+        #[arg(long)]
+        scratch: Option<PathBuf>,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Compare registry/fields.toml with the measured verdicts: every row against the struct
     /// fields and carriers it speaks about. Exits 1 on a disagreement no source reading
     /// settles, or on a settlement for a row that agrees.
@@ -85,6 +103,14 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             &pins,
         ),
         ProbeCommand::Compare { table, fields } => probe_compare(&table, &fields),
+        ProbeCommand::Limits {
+            only,
+            out,
+            candidate,
+            caps,
+            scratch,
+            pins,
+        } => probe_limits(&only, &out, &candidate, &caps, scratch.as_deref(), &pins),
     }
 }
 
@@ -218,7 +244,7 @@ fn probe_all(
         (true, Some(_)) => bail!("--scratch is for runs with --only"),
     };
     let mut runs = runs;
-    shapekit_probe::witness::clear(&candidate)?;
+    shapekit_probe::witness::clear(&candidate, shapekit_probe::witness::FAMILY)?;
     for r in &mut runs {
         for (e, a) in r.evidence.iter().zip(r.verdict.attempts.iter_mut()) {
             a.witnesses = shapekit_probe::witness::write(&candidate, e)?;
@@ -315,4 +341,166 @@ fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
         rows.len() - settled - open - stale
     );
     Ok(open == 0 && stale == 0)
+}
+
+fn probe_limits(
+    only: &[String],
+    out: &Path,
+    candidate: &Path,
+    caps: &Path,
+    scratch: Option<&Path>,
+    pins: &Path,
+) -> Result<bool> {
+    use shapekit_contracts::limits::LimitsTable;
+    use shapekit_probe::limits::{Check, checks, measure, probes};
+    let caps_table: toml::Table = std::fs::read_to_string(caps)
+        .with_context(|| format!("reading {}", caps.display()))?
+        .parse()
+        .with_context(|| format!("parsing {}", caps.display()))?;
+    let rows: Vec<(String, u64)> = caps_table
+        .get("limit")
+        .and_then(|l| l.as_array())
+        .context("caps-limits.toml has no [[limit]] rows")?
+        .iter()
+        .map(|r| {
+            let id = r.get("id").and_then(|v| v.as_str()).context("a row without id")?;
+            let rec = r
+                .get("recommended")
+                .and_then(|v| v.as_integer())
+                .with_context(|| format!("{id} has no recommended value"))?;
+            Ok((id.to_owned(), u64::try_from(rec)?))
+        })
+        .collect::<Result<_>>()?;
+    let all_checks = checks();
+    for (id, _) in &rows {
+        if !all_checks.iter().any(|(r, _)| r == id) {
+            bail!("caps-limits.toml row {id} has no check");
+        }
+    }
+    let probes: Vec<_> = probes()
+        .into_iter()
+        .filter(|p| only.is_empty() || only.iter().any(|o| o == p.row))
+        .collect();
+    for (r, c) in &all_checks {
+        if !rows.iter().any(|(id, _)| id == r) {
+            bail!("a check names {r}, which caps-limits.toml does not have");
+        }
+        let measured = shapekit_probe::limits::probes().iter().any(|p| p.row == *r);
+        if matches!(c, Check::Unmeasured(_)) == measured {
+            bail!("{r}: a row is measured exactly when its check is not unmeasured");
+        }
+    }
+    let image = CoreImage::from_pins(pins)?;
+    let work = tempfile::Builder::new()
+        .prefix("shapekit-probe-limits-")
+        .tempdir()?;
+    let schema = shapekit_schema::Schema::pinned();
+    let typer = shapekit_probe::edit::Typer::new(&schema);
+    let mut worlds = std::collections::BTreeMap::new();
+    let mut measured = Vec::new();
+    for p in &probes {
+        if !worlds.contains_key(&p.world) {
+            let dir = work.path().join(format!("{:?}", p.world).to_ascii_lowercase());
+            std::fs::create_dir_all(&dir)?;
+            let cfg = shapekit_probe::node_config(TESTNET_PASSPHRASE, image.clone(), p.world.protocol());
+            worlds.insert(p.world, shapekit_probe::world::World::start(p.world, cfg, &dir)?);
+        }
+        let w = worlds.get_mut(&p.world).expect("inserted above");
+        let m = measure(w, &typer, p).with_context(|| format!("measuring {}", p.row))?;
+        println!(
+            "{:<36} {} = {} accepted, {} refused ({:?} {})",
+            m.row,
+            p.measure,
+            m.limit.max_accepted,
+            m.limit.first_rejected,
+            m.limit.rejection.stage,
+            m.limit.rejection.result_code.as_deref().unwrap_or("no result")
+        );
+        for (n, o) in &m.tried {
+            println!("    {n:>8}  {o}");
+        }
+        measured.push(m);
+    }
+    drop(worlds);
+
+    let mut open = 0;
+    for (id, rec) in &rows {
+        let check = &all_checks.iter().find(|(r, _)| r == id).expect("checked above").1;
+        let m = measured.iter().find(|m| m.row == id.as_str());
+        let verdict = match (check, m) {
+            (_, None) if !only.is_empty() => continue,
+            (Check::Unmeasured(why), None) => format!("unmeasured: {why}"),
+            (Check::Equal, Some(m)) => {
+                let a: u64 = m.limit.max_accepted.parse()?;
+                if a == *rec {
+                    format!("agrees, {a}")
+                } else {
+                    open += 1;
+                    format!("OPEN: measured {a}, the row recommends {rec}")
+                }
+            }
+            (Check::Size(f), Some(m)) => {
+                let (a, r) = f(m)?;
+                if a <= *rec && r > *rec {
+                    format!("agrees, {a} bytes accepted and {r} refused around {rec}")
+                } else {
+                    open += 1;
+                    format!("OPEN: {a} bytes accepted and {r} refused, the row recommends {rec}")
+                }
+            }
+            (Check::Below(why), Some(m)) => {
+                let a: u64 = m.limit.max_accepted.parse()?;
+                if a <= *rec {
+                    format!("agrees, measured {a} within {rec}: {why}")
+                } else {
+                    open += 1;
+                    format!("OPEN: measured {a} past {rec}")
+                }
+            }
+            (_, None) => bail!("{id} is measured but has no measurement"),
+            (Check::Unmeasured(_), Some(_)) => bail!("{id} is unmeasured but was measured"),
+        };
+        println!("{id:<36} {verdict}");
+    }
+    println!("{} limits measured, {open} open disagreements", measured.len());
+
+    let (out, candidate) = match (only.is_empty(), scratch) {
+        (true, None) => (out.to_owned(), candidate.to_owned()),
+        (false, Some(dir)) => {
+            std::fs::create_dir_all(dir)?;
+            (dir.join("limits.json"), dir.join("candidate"))
+        }
+        (false, None) => return Ok(open == 0),
+        (true, Some(_)) => bail!("--scratch is for runs with --only"),
+    };
+    let family = shapekit_probe::witness::LIMITS_FAMILY;
+    shapekit_probe::witness::clear(&candidate, family)?;
+    let mut limits = Vec::new();
+    for mut m in measured {
+        let mut w = shapekit_probe::witness::write_in(&candidate, family, &m.accepted)?;
+        w.extend(shapekit_probe::witness::write_in(&candidate, family, &m.refused)?);
+        m.limit.witnesses = w;
+        limits.push(m.limit);
+    }
+    limits.sort_by(|a, b| (&a.path, &a.measure).cmp(&(&b.path, &b.measure)));
+    let table = LimitsTable {
+        schema_version: LimitsTable::VERSION,
+        core: core_ref(pins, &image)?,
+        limits,
+    };
+    let problems = table.problems();
+    if !problems.is_empty() {
+        bail!("the limits table has problems: {problems:#?}");
+    }
+    if let Some(parent) = out.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&out, serde_json::to_string_pretty(&table)? + "\n")?;
+    println!("wrote {} with {} limits", out.display(), table.limits.len());
+    let version = match shapekit_manifest::build::load(&candidate.join("manifest.json")) {
+        Ok(m) => m.corpus_version,
+        Err(_) => env!("CARGO_PKG_VERSION").to_owned(),
+    };
+    let built = crate::manifest_cmd::build_file(&candidate, pins, &version)?;
+    Ok(built && open == 0)
 }

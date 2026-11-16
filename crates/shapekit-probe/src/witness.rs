@@ -21,9 +21,12 @@ use crate::engine::Evidence;
 
 pub const FAMILY: &str = "probe.envelope-fields";
 
+/// The family of the limit finder's entries.
+pub const LIMITS_FAMILY: &str = "probe.limits";
+
 /// The chain an attempt ran on, by protocol and world.
-fn chain(e: &Evidence) -> String {
-    format!("{FAMILY}.{}", e.chain)
+fn chain(family: &str, e: &Evidence) -> String {
+    format!("{family}.{}", e.chain)
 }
 
 fn testnet() -> Variants {
@@ -68,11 +71,11 @@ fn outcome(a: &ProbeAttempt) -> String {
     }
 }
 
-fn base_entry(e: &Evidence, id: String, xdr_type: &str) -> Entry {
+fn base_entry(family: &str, e: &Evidence, id: String, xdr_type: &str) -> Entry {
     Entry {
         id,
         kind: EntryKind::Xdr,
-        family: FAMILY.to_owned(),
+        family: family.to_owned(),
         caps: Vec::new(),
         protocol: protocol(e.protocol),
         xdr_type: Some(xdr_type.to_owned()),
@@ -80,8 +83,8 @@ fn base_entry(e: &Evidence, id: String, xdr_type: &str) -> Entry {
         tx_meta_version: None,
         source: Source {
             class: SourceClass::LocalCore,
-            recipe: Some(FAMILY.to_owned()),
-            chain: Some(chain(e)),
+            recipe: Some(family.to_owned()),
+            chain: Some(chain(family, e)),
             ledger_seq: None,
             tx_hash: None,
             tx_index: None,
@@ -104,7 +107,8 @@ fn base_entry(e: &Evidence, id: String, xdr_type: &str) -> Entry {
         fields_exercised: Vec::new(),
         linked_issues: Vec::new(),
         notes: Some(format!(
-            "probe of {}, attempt {:?}: {}",
+            "{} of {}, attempt {:?}: {}",
+            if family == FAMILY { "probe" } else { "limit" },
             e.field,
             e.variant,
             outcome(&e.attempt)
@@ -115,9 +119,14 @@ fn base_entry(e: &Evidence, id: String, xdr_type: &str) -> Entry {
 
 /// Writes the entries of one attempt and returns their witness references.
 pub fn write(candidate: &Path, e: &Evidence) -> Result<Vec<String>> {
-    let id = format!("{FAMILY}.{}", e.slug);
+    write_in(candidate, FAMILY, e)
+}
+
+/// [`write`] into `family`.
+pub fn write_in(candidate: &Path, family: &str, e: &Evidence) -> Result<Vec<String>> {
+    let id = format!("{family}.{}", e.slug);
     let a = &e.attempt;
-    let mut entry = base_entry(e, id.clone(), "TransactionEnvelope");
+    let mut entry = base_entry(family, e, id.clone(), "TransactionEnvelope");
     let mut out = vec![format!("candidate:{id}")];
     if a.submission == SubmitStatus::Undecodable {
         entry.source.class = SourceClass::Synthetic;
@@ -129,7 +138,7 @@ pub fn write(candidate: &Path, e: &Evidence) -> Result<Vec<String>> {
             decode: DecodeExpectation::MustReject,
             roundtrip: false,
         };
-        write_raw(candidate, entry, &e.envelope)?;
+        write_raw(candidate, family, entry, &e.envelope)?;
         return Ok(out);
     }
     let rejection = |stage| -> Result<CoreRejection> {
@@ -175,7 +184,7 @@ pub fn write(candidate: &Path, e: &Evidence) -> Result<Vec<String>> {
         let lid = format!("{id}-ledger");
         let mut meta = (**meta).clone();
         canonicalize_lcm(&mut meta)?;
-        let mut l = base_entry(e, lid.clone(), "LedgerCloseMeta");
+        let mut l = base_entry(family, e, lid.clone(), "LedgerCloseMeta");
         l.lcm_version = Some(match &meta {
             stellar_xdr::LedgerCloseMeta::V0(_) => 0,
             stellar_xdr::LedgerCloseMeta::V1(_) => 1,
@@ -192,8 +201,8 @@ pub fn write(candidate: &Path, e: &Evidence) -> Result<Vec<String>> {
 }
 
 /// An entry whose bytes no decoder reads, so it has no XDR-JSON beside it.
-fn write_raw(candidate: &Path, mut entry: Entry, bytes: &[u8]) -> Result<()> {
-    let rel = format!("{ENTRIES_DIR}/{FAMILY}/{}", entry.id);
+fn write_raw(candidate: &Path, family: &str, mut entry: Entry, bytes: &[u8]) -> Result<()> {
+    let rel = format!("{ENTRIES_DIR}/{family}/{}", entry.id);
     let dir = candidate.join(&rel);
     std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
     std::fs::write(dir.join("testnet.xdr"), bytes)?;
@@ -211,9 +220,9 @@ fn write_raw(candidate: &Path, mut entry: Entry, bytes: &[u8]) -> Result<()> {
     Ok(())
 }
 
-/// Removes every entry of the family, before a run writes them again.
-pub fn clear(candidate: &Path) -> Result<()> {
-    let dir = candidate.join(ENTRIES_DIR).join(FAMILY);
+/// Removes every entry of `family`, before a run writes them again.
+pub fn clear(candidate: &Path, family: &str) -> Result<()> {
+    let dir = candidate.join(ENTRIES_DIR).join(family);
     if dir.exists() {
         std::fs::remove_dir_all(&dir).with_context(|| format!("removing {}", dir.display()))?;
     }

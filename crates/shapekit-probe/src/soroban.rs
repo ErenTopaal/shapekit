@@ -113,6 +113,19 @@ fn invoke(w: &World, s: &Subject, hf: HostFunction, signers: Signers) -> Result<
     assemble(w, s, hf, spare(enforced.transaction_data), auth, plan)
 }
 
+/// [`invoke`] for a call that needs no address credentials.
+pub fn invoke_base(w: &World, s: &Subject, hf: HostFunction) -> Result<Base> {
+    invoke(w, s, hf, &[])
+}
+
+/// The simulated transaction data of a call from the subject, recording its auth.
+pub fn simulated(w: &World, s: &Subject, hf: HostFunction) -> Result<SorobanTransactionData> {
+    let source = account_id(&s.source.verifying_key());
+    Ok(simulator(w)?
+        .simulate_invoke(hf, RECORD, &source)?
+        .transaction_data)
+}
+
 fn assemble(
     w: &World,
     s: &Subject,

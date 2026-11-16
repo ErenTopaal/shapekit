@@ -12,6 +12,7 @@ pub mod compare;
 pub mod edit;
 pub mod engine;
 pub mod fields;
+pub mod limits;
 pub mod run;
 pub mod sign;
 pub mod soroban;

@@ -357,8 +357,6 @@ fn pay_base(w: &mut World, s: &Subject) -> Result<Base> {
     simple(w, s, payment(&s.peers[0]))
 }
 
-const V0_REFUSED: &str = "TransactionFrame::commonValidPreSeqNum answers txNOT_SUPPORTED for a v0 envelope from protocol 13 (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1257-1265)";
-
 fn muxed7(k: &SigningKey) -> MuxedAccount {
     MuxedAccount::MuxedEd25519(MuxedAccountMed25519 {
         id: 7,
@@ -660,10 +658,9 @@ pub fn classic() -> Vec<Carrier> {
         },
         Carrier {
             id: "p30",
-            outcome: BaseOutcome::Refused(V0_REFUSED),
             ..c(
                 "TransactionV0Envelope",
-                "a payment's v0 envelope at protocol 30",
+                "a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081)",
                 |w, s| v0(w, s, "/tx_v0"),
             )
         },
@@ -678,10 +675,9 @@ pub fn classic() -> Vec<Carrier> {
         },
         Carrier {
             id: "p30",
-            outcome: BaseOutcome::Refused(V0_REFUSED),
             ..c(
                 "TransactionV0",
-                "a payment in a v0 envelope at protocol 30",
+                "a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081)",
                 |w, s| v0(w, s, "/tx_v0/tx"),
             )
         },

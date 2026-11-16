@@ -112,6 +112,8 @@ pub struct Contracts {
     pub echo_code: Hash,
     pub echo: ContractId,
     pub auth_tree: ContractId,
+    /// A second auth_tree instance, the level below `auth_tree` (the host forbids re-entry).
+    pub auth_tree_child: ContractId,
     /// The only delegate the delegating account accepts.
     pub delegate: SigningKey,
     pub delegating: ContractId,
@@ -199,6 +201,7 @@ impl World {
         let echo = d.deploy(&deployer, &echo_code, &salt("echo"))?;
         let tree_code = d.upload(&deployer, AUTH_TREE_WASM)?;
         let auth_tree = d.deploy(&deployer, &tree_code, &salt("auth-tree"))?;
+        let auth_tree_child = d.deploy(&deployer, &tree_code, &salt("auth-tree-child"))?;
         let ref_code = d.upload(&deployer, EXEC_REF_WASM)?;
         let exec_ref = d.deploy(&deployer, &ref_code, &salt("exec-ref"))?;
         d.invoke(
@@ -270,6 +273,7 @@ impl World {
             echo_code,
             echo,
             auth_tree,
+            auth_tree_child,
             delegate,
             delegating,
             exec_ref,
