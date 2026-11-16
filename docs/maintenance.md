@@ -97,6 +97,25 @@ Repository administrators can bypass the ruleset.
 Private vulnerability reporting (Settings, Code security) is on, for the reports `SECURITY.md`
 describes.
 
+## Acceptance gate
+
+`scripts/acceptance.sh` runs the checks every change to `main` passes, in two modes. Run it
+from anywhere in the repository; it needs `cargo`, `go` and `node` on `PATH` and writes run
+outputs under `target/acceptance/`. It stops at the first failing check and names it.
+
+- Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
+  the workspace tests; the registry, the corpus and candidate manifests, the contract schemas,
+  coverage, the guide, golden agreement and the committed chains; the current version of each
+  SDK over the corpus; the findings record; and the em dash check.
+- Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
+  runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
+  sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on
+  wallet-backend at the pinned commit with its committed baseline, `findings check
+  --allow-draft` and every chain regenerated under both passphrases
+  (`gen verify-repro`). It also needs docker and network access. The last lines of its
+  reproduction step and of the findings step give the totals to compare with `STATUS.md`:
+  `harness reproduce: 20 of 20 rows hold` and `24 findings, 504 failures, 0 unmapped`.
+
 ## How SDKs pin a corpus release
 
 An SDK consumes a release, never a branch. Each release publishes `corpus-<version>.tar.zst`

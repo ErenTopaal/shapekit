@@ -180,6 +180,10 @@ jobs:
             echo "::error::committed oracle files differ from shapekit oracle run"
             exit 1
           fi
+      - name: candidate manifest validate (the lane's sdk runs are nightly only)
+        run: shapekit manifest validate --file candidate/manifest.json
+      - name: contract schemas are current
+        run: shapekit contracts schema --check
       - run: shapekit coverage --check
       - run: shapekit guide check
       - name: goldens agree (structural agreement with core's goldens)
