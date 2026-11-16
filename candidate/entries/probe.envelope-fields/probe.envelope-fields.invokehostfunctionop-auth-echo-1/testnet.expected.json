@@ -1,0 +1,91 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "45ee35be",
+        "signature": "cc350c7bdc1dfff6e34398bf66d921ec4f00ff6bf40215c798b3645ae1e2cafd41b5e01de713ff60429887ab06838fca87b6a61c3fb8cab6e519bba8d40ed408"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50015804",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": {
+                      "symbol": "last"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 10375229,
+            "write_bytes": 10076
+          }
+        }
+      },
+      "fee": 50015904,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": "source_account",
+                  "root_invocation": {
+                    "function": {
+                      "create_contract_host_fn": {
+                        "contract_id_preimage": {
+                          "asset": "native"
+                        },
+                        "executable": "stellar_asset"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "u32": 7
+                    }
+                  ],
+                  "contract_address": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                  "function_name": "echo"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "1924145348609",
+      "source_account": "GAXTMNTK2IPHYQU6KNAFQLSHDBT3UZFJDGHNPSV55ZXRNBSF5Y234NWS"
+    }
+  }
+}

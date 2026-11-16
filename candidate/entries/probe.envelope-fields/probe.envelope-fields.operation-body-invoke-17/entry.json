@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-invoke-17",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier invoke, attempt \"arm claim_claimable_balance, smallest: {\\\"claim_claimable_balance\\\":{\\\"balance_id\\\":\\\"BAAAAAAAAAAAAAAAAAAAAAAAAAA...\": refused at submission (error, tx_malformed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_malformed",
+      "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-17/testnet.expected.json",
+      "expected_json_sha256": "91887b9d22d8836ea7756f479aa66942b8ba0986c9ea2f05f10bb1e91eb08ede",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-17/testnet.xdr",
+      "xdr_sha256": "62e26dca434e38de2486dd5aa495b41f9d33e8fc40284f36bdb84b3c3fcdb511"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

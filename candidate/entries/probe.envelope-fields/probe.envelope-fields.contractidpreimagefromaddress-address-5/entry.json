@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.contractidpreimagefromaddress-address-5",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ContractIDPreimageFromAddress.address, attempt \"arm claimable_balance, smallest: \\\"BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAMcL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 255,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "af9aa546936ecee744d93abfba9ad82c23b5fb2574dc5db9df127d7cfde0f9ad"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.contractidpreimagefromaddress-address-5/testnet.expected.json",
+      "expected_json_sha256": "864abeb3ceeda95d493965a8cfdc6f89db437abe1fdda98b8f9ee5e5863de0c2",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.contractidpreimagefromaddress-address-5/testnet.xdr",
+      "xdr_sha256": "4bd2d95552011e5021fe4972b64ca180dc476525ba38dfe5c469819a5f066f8b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

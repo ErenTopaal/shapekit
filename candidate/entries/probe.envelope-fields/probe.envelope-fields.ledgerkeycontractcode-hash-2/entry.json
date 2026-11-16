@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.ledgerkeycontractcode-hash-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LedgerKeyContractCode.hash, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAMF//////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 523,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "c03422e3b2ff707d05471d29b972e6645c04ab2d960b852db17e27e9ebd01200"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeycontractcode-hash-2/testnet.expected.json",
+      "expected_json_sha256": "c985134b2665c22295ef6c1fa3756c990e3536d0879532b8305eece2b636ca4e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeycontractcode-hash-2/testnet.xdr",
+      "xdr_sha256": "d8ab5ec0590628630127a8eba935625bf8046e4528515d13c5ba0007437a48fa"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

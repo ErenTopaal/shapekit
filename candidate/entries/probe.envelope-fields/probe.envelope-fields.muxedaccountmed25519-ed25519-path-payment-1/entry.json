@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.muxedaccountmed25519-ed25519-path-payment-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of MuxedAccountMed25519.ed25519 in carrier path-payment, attempt \"first byte changed: \\\"0970a957259a09863976ab1b4dc2e686babe20b1690bb0fbc8bce26509e9122e\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAC////+wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 946,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "d333e018b62ee0975764a8bf57a8b3a09d4e714da624981564129b90705d42cc"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-path-payment-1/testnet.expected.json",
+      "expected_json_sha256": "a7746426ecc9677994015e2636b73b43806a8438dee1ab78e80f893c46c43fc6",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-path-payment-1/testnet.xdr",
+      "xdr_sha256": "09e69e26dec216866d7e32ab009a42f5d5cdc11642ae52f3a86db641494bf418"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

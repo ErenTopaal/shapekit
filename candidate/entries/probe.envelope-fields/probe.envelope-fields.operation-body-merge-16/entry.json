@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-merge-16",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier merge, attempt \"arm path_payment_strict_send, smallest: {\\\"path_payment_strict_send\\\":{\\\"dest_asset\\\":\\\"native\\\",\\\"dest_min\\\":\\\"0\\\",\\\"de...\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAN/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-merge-16/testnet.expected.json",
+      "expected_json_sha256": "c418862bdea04ce44d0bdfddb35898f926f16c0a73487a7fc47aa6a665bba540",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-merge-16/testnet.xdr",
+      "xdr_sha256": "46091a86337ee9368276bbfd0be16d0db3f55472385e4d3a95a8632f94401b5b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

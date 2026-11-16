@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobanaddresscredentials-nonce-3",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanAddressCredentials.nonce, attempt \"maximum 9223372036854775807: \\\"9223372036854775807\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1437,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "5aa0de522e3d5e0fe4debc293d11a2b464926c6c8bf8782256c2a00dd1e74d5e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-nonce-3/testnet.expected.json",
+      "expected_json_sha256": "61ae789d96b1c7ec47700d8d48fdfff5c12f683b22f8eb2ed253f9a3b9cbe878",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-nonce-3/testnet.xdr",
+      "xdr_sha256": "322a3621ff2167bbf9e235d2036d04f827573d199b60faa05825801106c2c853"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

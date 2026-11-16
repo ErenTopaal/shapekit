@@ -1,0 +1,76 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "a6cb794c",
+        "signature": "8dd7524f3482b51c6b71f40495162cade8b87c4bb91c5a416d8479db16e7a3c433a9681149e6934ccf51fabac1de5d5c137d6abb76bc2fd385117c321cadd601"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50016000",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": {
+                      "symbol": "last"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 10378074,
+            "write_bytes": 10088
+          }
+        }
+      },
+      "fee": 50016100,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "i128": "18446744073709551618"
+                    }
+                  ],
+                  "contract_address": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                  "function_name": "echo"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "1675037245441",
+      "source_account": "GCZHKD2K33JXXRNKTS7CA6FPQJYTFBA5CCXGP3UXUECTNL5GZN4UYJRN"
+    }
+  }
+}

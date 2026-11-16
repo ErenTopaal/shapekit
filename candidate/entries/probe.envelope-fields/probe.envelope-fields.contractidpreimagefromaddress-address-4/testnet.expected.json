@@ -1,0 +1,90 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "40c27315",
+        "signature": "f89c6ab9f38d0be7e7ae51b963c0b60f9678b1e14025a52a3c0b4915914a37dc5746702dbd22a1d312169f495e970216022e9411fddba5e4bbcd50803a951c0e"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50042470",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_code": {
+                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CB4CULJI4TZIDQ5XTWKWA4DZHPUINGOA3IQ26RGTR7DJCAD3W3B5JOSV",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                }
+              ]
+            },
+            "instructions": 10591471,
+            "write_bytes": 10104
+          }
+        }
+      },
+      "fee": 50042570,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": "source_account",
+                  "root_invocation": {
+                    "function": {
+                      "create_contract_v2_host_fn": {
+                        "constructor_args": [],
+                        "contract_id_preimage": {
+                          "address": {
+                            "address": "GBZQXU4EUMEEXUEKGATNTRU42GXB6C6J5ASQMKG4D2B746SAYJZRLEOC",
+                            "salt": "adfcb7c0115d1a1f52768db005484a32675f0255fa1dfbbd4449c05fc4921857"
+                          }
+                        },
+                        "executable": {
+                          "wasm": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                        }
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "create_contract": {
+                  "contract_id_preimage": {
+                    "address": {
+                      "address": "MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG",
+                      "salt": "adfcb7c0115d1a1f52768db005484a32675f0255fa1dfbbd4449c05fc4921857"
+                    }
+                  },
+                  "executable": {
+                    "wasm": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  }
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "1069446856705",
+      "source_account": "GBZQXU4EUMEEXUEKGATNTRU42GXB6C6J5ASQMKG4D2B746SAYJZRLEOC"
+    }
+  }
+}

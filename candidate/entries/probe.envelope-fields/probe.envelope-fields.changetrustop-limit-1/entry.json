@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.changetrustop-limit-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ChangeTrustOp.limit, attempt \"zero 0: \\\"0\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 128,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "29c38e99b27062a292dcdf0330c2ff209e1f7bbd1940510884a097a6530d9176"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.changetrustop-limit-1/testnet.expected.json",
+      "expected_json_sha256": "fa332122c06bee126928906026bcbe24f4d0e63bf8782a9484f938b18002b2f5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.changetrustop-limit-1/testnet.xdr",
+      "xdr_sha256": "a9bb6f9234f7e3af78d1a6d5ffeb8b77e79fb1b89960784ab6ba1db08dd7182a"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

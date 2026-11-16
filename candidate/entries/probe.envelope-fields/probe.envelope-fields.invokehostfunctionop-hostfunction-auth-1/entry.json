@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.invokehostfunctionop-hostfunction-auth-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier auth, attempt \"same arm, smallest value: {\\\"invoke_contract\\\":{\\\"args\\\":[],\\\"contract_address\\\":\\\"CAAAAAAAAAAAAAAAAAA...\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAOE7/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 478,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "ff224a9b7f99bff1a6709c716a7cf4d94f67a3fd4585237b9b5f4ff5dd3b18b8"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-1/testnet.expected.json",
+      "expected_json_sha256": "1d5e1717508ecee9e9c98059329681aad39bdafb973965c4807901f042a26ce4",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-1/testnet.xdr",
+      "xdr_sha256": "19c773638c9511113fdafb66a31d271a7c37f9f5a6fc9e60e6a21c9e47cc6c4e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

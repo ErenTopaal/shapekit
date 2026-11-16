@@ -1,0 +1,179 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "40c5f71e",
+        "signature": "bb5c7aa9c1803e0784e002d06080888ec7e218c7c60e96ff170eb73ab9248eec4f6b1bf93241744aacae6769552778c7ace19b3fbcb7de5a961793243849050a"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50022970",
+          "resources": {
+            "disk_read_bytes": 10144,
+            "footprint": {
+              "read_only": [
+                {
+                  "account": {
+                    "account_id": "GADBIZ23SN75USQ47OYE2I3WZUK63ONQV2Z5OGPFUHQ42ULL4IFVOFC4"
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "GADBIZ23SN75USQ47OYE2I3WZUK63ONQV2Z5OGPFUHQ42ULL4IFVOFC4",
+                    "durability": "temporary",
+                    "key": {
+                      "ledger_key_nonce": {
+                        "nonce": "4598685041475779676"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 11236154,
+            "write_bytes": 10076
+          }
+        }
+      },
+      "fee": 50023070,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": {
+                    "address": {
+                      "address": "GADBIZ23SN75USQ47OYE2I3WZUK63ONQV2Z5OGPFUHQ42ULL4IFVOFC4",
+                      "nonce": "4598685041475779676",
+                      "signature": {
+                        "vec": [
+                          {
+                            "map": [
+                              {
+                                "key": {
+                                  "symbol": "public_key"
+                                },
+                                "val": {
+                                  "bytes": "0614675b937fda4a1cfbb04d2376cd15edb9b0aeb3d719e5a1e1cd516be20b57"
+                                }
+                              },
+                              {
+                                "key": {
+                                  "symbol": "signature"
+                                },
+                                "val": {
+                                  "bytes": "1c67c68593231081ae529ac0ed63b01241930df46467ae00958733f7d9ae15cce377be9cd60fe20528377bfc3f32e572f608b64597a39d3c7ca639529834fb0e"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "signature_expiration_ledger": 1398
+                    }
+                  },
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "vec": []
+                          },
+                          {
+                            "vec": [
+                              {
+                                "map": [
+                                  {
+                                    "key": {
+                                      "symbol": "fanout"
+                                    },
+                                    "val": {
+                                      "u32": 0
+                                    }
+                                  },
+                                  {
+                                    "key": {
+                                      "symbol": "signer"
+                                    },
+                                    "val": {
+                                      "address": "GADBIZ23SN75USQ47OYE2I3WZUK63ONQV2Z5OGPFUHQ42ULL4IFVOFC4"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                        "function_name": "node"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "vec": []
+                    },
+                    {
+                      "vec": [
+                        {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "fanout"
+                              },
+                              "val": {
+                                "u32": 0
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "signer"
+                              },
+                              "val": {
+                                "address": "GADBIZ23SN75USQ47OYE2I3WZUK63ONQV2Z5OGPFUHQ42ULL4IFVOFC4"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                  "function_name": "node"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "5574867550209",
+      "source_account": "GBRQHWPSJ5LM2UMFWGKO735LFDU43RQREELDKISXUHBA5X2AYX3R4UB7"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-15",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LedgerKeyConfigSetting.configSettingID, attempt \"contract_ledger_cost_ext_v0: \\\"contract_ledger_cost_ext_v0\\\"\": refused at submission (error, tx_soroban_invalid)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAAL7LqD////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-15/testnet.expected.json",
+      "expected_json_sha256": "cf0963e996034b4324124f468fa89115a5470e6ba91c9ed64af11484f44d5a5c",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-15/testnet.xdr",
+      "xdr_sha256": "836f9a933d59ebdd818ef12f0e1cab70e4ba970af01c76f1204334f14ff99580"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

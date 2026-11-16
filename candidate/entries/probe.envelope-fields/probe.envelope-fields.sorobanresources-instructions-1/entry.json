@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobanresources-instructions-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanResources.instructions, attempt \"zero 0: 0\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAJDb/////AAAAAQAAAAAAAAAY/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1570,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "84bd67dfa250475d132ee27f6baaf0056928abc55ea91680c70bc062595ed652"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanresources-instructions-1/testnet.expected.json",
+      "expected_json_sha256": "14ba18635169067aab8fdc582df3393e6dd3dc8d8f58ee32e162d1e80e3017a7",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanresources-instructions-1/testnet.xdr",
+      "xdr_sha256": "a5fadd1d5b0eb0dc00e64f24d1041b4fd7b09b967ef24d71e35d0e71cf49aec3"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

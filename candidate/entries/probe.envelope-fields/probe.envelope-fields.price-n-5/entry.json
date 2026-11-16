@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.price-n-5",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Price.n, attempt \"one less, 0: 0\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAD/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.price-n-5/testnet.expected.json",
+      "expected_json_sha256": "9a1273f5909384791bd116363b50227f3ebb46ebc4a2c61e7998dcfff59f54a5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.price-n-5/testnet.xdr",
+      "xdr_sha256": "ab659be93d5535352713f8e80249bd4d6f1d012ff42baca702a1f5487dd6ac23"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

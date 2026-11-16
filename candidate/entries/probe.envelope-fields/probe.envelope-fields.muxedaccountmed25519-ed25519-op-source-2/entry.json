@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.muxedaccountmed25519-ed25519-op-source-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of MuxedAccountMed25519.ed25519 in carrier op-source, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAf////8AAAAA",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-op-source-2/testnet.expected.json",
+      "expected_json_sha256": "140f0ce66dd4a1db36262fc9fe8c3d9fd2894284e885d75b4152e61c20cbc3e0",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-op-source-2/testnet.xdr",
+      "xdr_sha256": "7d1751eae24503650771921c9f86f907996fab07455f5cce6bc4e8495899eec3"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.liquiditypoolconstantproductparameters-asseta-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LiquidityPoolConstantProductParameters.assetA, attempt \"arm credit_alphanum4, smallest: {\\\"credit_alphanum4\\\":{\\\"asset_code\\\":\\\"\\\",\\\"issuer\\\":\\\"GAAAAAAAAAAAAAAAAAAAAA...\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypoolconstantproductparameters-asseta-1/testnet.expected.json",
+      "expected_json_sha256": "9c20d78b2374b5999e69256127f37a9ceb17f343fd581462784181acd4c54133",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypoolconstantproductparameters-asseta-1/testnet.xdr",
+      "xdr_sha256": "daa30a9f980d7792d1c906c1d51a578390de953907c46a12516cb86706ffac79"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

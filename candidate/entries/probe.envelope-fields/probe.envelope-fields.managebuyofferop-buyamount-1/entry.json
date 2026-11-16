@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.managebuyofferop-buyamount-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ManageBuyOfferOp.buyAmount, attempt \"zero 0: \\\"0\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAM/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.managebuyofferop-buyamount-1/testnet.expected.json",
+      "expected_json_sha256": "f18fbe2c00c2ee10a3f7207ba9bd2ef3a811981ae5ad5db12303db74ca764036",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.managebuyofferop-buyamount-1/testnet.xdr",
+      "xdr_sha256": "ed7950f2d02695b4b01821536e4bc2c3be56446d519de02a4ff8f7bc07df316c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

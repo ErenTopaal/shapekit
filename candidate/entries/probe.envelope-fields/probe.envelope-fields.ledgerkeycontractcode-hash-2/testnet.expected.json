@@ -1,0 +1,76 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "de0268e2",
+        "signature": "6ab9d421a5de6ea6a09f80473b22cb0a39cd5599de58da262ea388ddc9cf9bd9fbc303145acd349177e99d3eff2dafac703c4a4d01217ccac75e505321019f07"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50015804",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": {
+                      "symbol": "last"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 10375229,
+            "write_bytes": 10076
+          }
+        }
+      },
+      "fee": 50015904,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "u32": 7
+                    }
+                  ],
+                  "contract_address": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                  "function_name": "echo"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "2233382993921",
+      "source_account": "GAMUM7SPM7HJVSIQKCRTAUWXXSKN467I4IVTEWWYXLP4V7G6AJUOEV5V"
+    }
+  }
+}

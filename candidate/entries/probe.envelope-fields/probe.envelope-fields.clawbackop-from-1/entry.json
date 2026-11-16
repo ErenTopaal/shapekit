@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.clawbackop-from-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ClawbackOp.from, attempt \"same arm, first byte changed: \\\"GAPDDCZ4TWVGPUZ23TF32BBJ3HXLYE4PG6WIRK5TBGIXEC25MNPULJUD\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAT/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 223,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "9f2d6964f36ce25de2ee3662cfff34f0b02dbce438996998a22eb64e13ed8c0e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.clawbackop-from-1/testnet.expected.json",
+      "expected_json_sha256": "96ffeda473b584216094029f2c4f10ece7791f0c2d3fe07eb47f57ef5b69da2b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.clawbackop-from-1/testnet.xdr",
+      "xdr_sha256": "2d375cd626c09c7f2957d10f5c1274062d5d2b2f1cda9f5019f04883cfdfad89"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.allowtrustop-authorize-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of AllowTrustOp.authorize, attempt \"maximum 4294967295: 4294967295\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAH/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.allowtrustop-authorize-2/testnet.expected.json",
+      "expected_json_sha256": "38ae9e9e8a770bebfaee8ef78b4481d134b446e79f70c3cbf06344c76bca4523",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.allowtrustop-authorize-2/testnet.xdr",
+      "xdr_sha256": "7cb371e232ee2d529b4a1d3e761eccb3e34a4c1fc38bb055f7fb438f5e2e37eb"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

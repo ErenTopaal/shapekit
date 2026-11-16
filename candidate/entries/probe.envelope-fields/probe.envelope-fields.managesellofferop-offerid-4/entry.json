@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.managesellofferop-offerid-4",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ManageSellOfferOp.offerID, attempt \"one less, -1: \\\"-1\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAD/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-offerid-4/testnet.expected.json",
+      "expected_json_sha256": "a2590498be24ee35640521eaf64c63cb139f58806bb45f18a3cf24466d30385d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-offerid-4/testnet.xdr",
+      "xdr_sha256": "61b6ded29dac9843daa82e8426203e6ed4c56d1456f08bdd1c554b2f7fabed8b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

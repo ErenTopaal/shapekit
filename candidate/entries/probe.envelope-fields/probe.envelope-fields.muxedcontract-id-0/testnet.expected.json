@@ -1,0 +1,113 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "2af91a91",
+        "signature": "4cefba4fc681117d16c8030d78a8aef5625c3d10cbf0e9fa65d134d1ecfc297d2e447b765b1985fdccd4822ed2ac75980dc160b00f4c3e6933c73eb27dde4103"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50022586",
+          "resources": {
+            "disk_read_bytes": 10144,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "account": {
+                    "account_id": "GBXEG3RAD4RMUJOLSLCSVMUPLZJCHEVBVRXJTGZGXVVVISJK7ENJD2CB"
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                    "durability": "persistent",
+                    "key": {
+                      "vec": [
+                        {
+                          "symbol": "Balance"
+                        },
+                        {
+                          "address": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 10277663,
+            "write_bytes": 10368
+          }
+        }
+      },
+      "fee": 50022686,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": "source_account",
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "address": "GBXEG3RAD4RMUJOLSLCSVMUPLZJCHEVBVRXJTGZGXVVVISJK7ENJD2CB"
+                          },
+                          {
+                            "address": "WCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTMAAAAAAAAAAABEOSE"
+                          },
+                          {
+                            "i128": "10000000"
+                          }
+                        ],
+                        "contract_address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                        "function_name": "transfer"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "address": "GBXEG3RAD4RMUJOLSLCSVMUPLZJCHEVBVRXJTGZGXVVVISJK7ENJD2CB"
+                    },
+                    {
+                      "address": "WCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTMAAAAAAAAAAABEOSE"
+                    },
+                    {
+                      "i128": "10000000"
+                    }
+                  ],
+                  "contract_address": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                  "function_name": "transfer"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "4410931412993",
+      "source_account": "GBXEG3RAD4RMUJOLSLCSVMUPLZJCHEVBVRXJTGZGXVVVISJK7ENJD2CB"
+    }
+  }
+}

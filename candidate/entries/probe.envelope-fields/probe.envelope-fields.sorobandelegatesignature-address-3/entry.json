@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobandelegatesignature-address-3",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanDelegateSignature.address, attempt \"arm contract, smallest: \\\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAO8D/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1520,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "587c8b95693313070a4cc2d8691cd05c6505efeeb0b66001eea220f41da5827e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-address-3/testnet.expected.json",
+      "expected_json_sha256": "c37214e3431dc01568154eb5eb4c2c2f7415c38b40496d64fc1c501b45050715",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-address-3/testnet.xdr",
+      "xdr_sha256": "0bb6b9960737e32f5b4d776400b950e2a93a5eeabda3d8e0824b2c109810f4bf"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

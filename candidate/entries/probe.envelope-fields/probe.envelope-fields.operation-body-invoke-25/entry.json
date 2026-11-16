@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-invoke-25",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier invoke, attempt \"arm liquidity_pool_withdraw, smallest: {\\\"liquidity_pool_withdraw\\\":{\\\"amount\\\":\\\"0\\\",\\\"liquidity_pool_id\\\":\\\"LAAAAAA...\": refused at submission (error, tx_malformed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_malformed",
+      "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-25/testnet.expected.json",
+      "expected_json_sha256": "ff4b173fa1b37596e8220efddcf0ec593d1020622956219b423b46b50cef764b",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-25/testnet.xdr",
+      "xdr_sha256": "670406caa7a22eca722e2056b2f9cfa646bf6d859750c33ba740ed4b1179ded5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

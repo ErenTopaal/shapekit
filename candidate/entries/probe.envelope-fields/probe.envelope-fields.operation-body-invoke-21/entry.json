@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-invoke-21",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier invoke, attempt \"arm clawback, smallest: {\\\"clawback\\\":{\\\"amount\\\":\\\"0\\\",\\\"asset\\\":\\\"native\\\",\\\"from\\\":\\\"GAAAAAAAAAAAAAAAAA...\": refused at submission (error, tx_malformed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_malformed",
+      "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-21/testnet.expected.json",
+      "expected_json_sha256": "f7125511bd764645a336e7a5a9f6f39991976ed4e7513b44cab041bef149a5c3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-invoke-21/testnet.xdr",
+      "xdr_sha256": "c1a0122e4b38fc14cebef11ab55485960f89a15a4abccbf63cd191ad59dd7edd"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

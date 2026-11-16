@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.setoptionsop-medthreshold-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SetOptionsOp.medThreshold, attempt \"present, maximum 4294967295: 4294967295\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAF////+QAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.setoptionsop-medthreshold-2/testnet.expected.json",
+      "expected_json_sha256": "b655d5c835f16bf83a4350101cf1237be0dd122adb71d5baaf9cadee7a226bf0",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.setoptionsop-medthreshold-2/testnet.xdr",
+      "xdr_sha256": "70c4fd6d2344e4a2f7243151351c2176ff90716c54eba8e3ed4bf2ef7ca24d16"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

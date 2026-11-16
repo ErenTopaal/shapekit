@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.scmapentry-val-20",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SCMapEntry.val, attempt \"arm vec, smallest: {\\\"vec\\\":null}\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAMKD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1291,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "4df33506d852bd75bea7a88d89278820b3cc0d4fd0c26076040118a67f4fc7a5"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.scmapentry-val-20/testnet.expected.json",
+      "expected_json_sha256": "a10aa23727de12ba7cffa9761041a228e6619bf51f3c98e3d3e1be4eb3921037",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.scmapentry-val-20/testnet.xdr",
+      "xdr_sha256": "415bd45c30d2fc9fa7491e3368889c2a9c4e136e64a7e0ef2fb053f2309c1224"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

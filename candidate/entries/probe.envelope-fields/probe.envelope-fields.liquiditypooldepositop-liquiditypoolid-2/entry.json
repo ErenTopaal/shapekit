@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.liquiditypooldepositop-liquiditypoolid-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LiquidityPoolDepositOp.liquidityPoolID, attempt \"all zero: \\\"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAW/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 666,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "36ea925529ae8d50e312c6e0e97eb3d96e360b0f798f30561b3221397c65e02d"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypooldepositop-liquiditypoolid-2/testnet.expected.json",
+      "expected_json_sha256": "a47d68450522c74585dd3c485cc49e5f1848ea0ddf633e79edcd365a269186f3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypooldepositop-liquiditypoolid-2/testnet.xdr",
+      "xdr_sha256": "7f189f8de04205a3d615091fb91c4c757565df05ee4cc8fd505d4668366303e3"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

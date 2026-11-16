@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.createcontractargs-executable-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of CreateContractArgs.executable, attempt \"same arm, all zero: {\\\"wasm\\\":\\\"000000000000000000000000000000000000000000000000000000000000...\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAMcL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 297,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "523d8cdc69cd0b87e106b82babae37c6978568d6a22e8333e9f9e20d1c95ef76"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-executable-2/testnet.expected.json",
+      "expected_json_sha256": "9ef57e9f264178ab0374da250531eba723fe541e1bae8be253b496e1121821a8",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-executable-2/testnet.xdr",
+      "xdr_sha256": "ebb19e174e54f6fb7914f4006674bb7005ebb76d423d1bc1bde684eb38aa5101"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

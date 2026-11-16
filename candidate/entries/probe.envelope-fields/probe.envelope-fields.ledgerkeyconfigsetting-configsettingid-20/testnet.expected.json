@@ -1,0 +1,81 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "e51ca1dd",
+        "signature": "c456f7774d9ec17bda8464ea9b3d04cd9875c84fbafd67d6a2137c3ba83d1b5789707019a570754b77cee8a1d23938e8f869f5e4386aed0f2e30d9a206cb1803"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50015804",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  }
+                },
+                {
+                  "config_setting": {
+                    "config_setting_id": "freeze_bypass_txs_delta"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                    "durability": "persistent",
+                    "key": {
+                      "symbol": "last"
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 10375229,
+            "write_bytes": 10076
+          }
+        }
+      },
+      "fee": 50015904,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "u32": 7
+                    }
+                  ],
+                  "contract_address": "CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O4OEKIKM2EQ6IQTNKHA",
+                  "function_name": "echo"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "2224793059329",
+      "source_account": "GABZ4DCG46GBQBRK5ZDOS6EVYO3X6R2HFGG6JOWH3WBRGX7FDSQ53DXG"
+    }
+  }
+}

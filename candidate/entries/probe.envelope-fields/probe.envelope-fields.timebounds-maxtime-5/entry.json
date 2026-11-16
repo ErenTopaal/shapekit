@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.timebounds-maxtime-5",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of TimeBounds.maxTime, attempt \"a close time already past, 1: \\\"1\\\"\": refused at submission (error, tx_too_late)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_too_late",
+      "result_xdr": "AAAAAAAAAGT////9AAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.timebounds-maxtime-5/testnet.expected.json",
+      "expected_json_sha256": "e784f785dd1d7d4e2eabfe084e72181d5e87344b8e6516679ac8cf46e106b163",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.timebounds-maxtime-5/testnet.xdr",
+      "xdr_sha256": "0483e5c5538dfccb575a22ae5fbb8c710d7475775d2374aaec7f56d0a2dcd8f2"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

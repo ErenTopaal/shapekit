@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.allowtrustop-trustor-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of AllowTrustOp.trustor, attempt \"same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAH/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 58,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "58e7c3eeeb88c5c068929f8a57fd317211ed88ec30e6c68e5f60057a37f6903e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.allowtrustop-trustor-2/testnet.expected.json",
+      "expected_json_sha256": "95abb4c5c2f81a5dad7456dad2f99ee9416c67c82d7c2417b490b1e52c72b50d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.allowtrustop-trustor-2/testnet.xdr",
+      "xdr_sha256": "61a944ea47adff54f2effbd6060470e7e25dbbb97a097b251fb5c013d4469bf0"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

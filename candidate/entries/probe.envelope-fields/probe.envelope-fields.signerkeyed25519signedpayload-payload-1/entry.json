@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.signerkeyed25519signedpayload-payload-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SignerKeyEd25519SignedPayload.payload, attempt \"empty: \\\"\\\", written as bytes, XDR-JSON cannot hold it\": refused at submission (error, tx_malformed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_malformed",
+      "result_xdr": "AAAAAAAAAGT////wAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.signerkeyed25519signedpayload-payload-1/testnet.expected.json",
+      "expected_json_sha256": "fa90f40f38148f6be70e257d8f74ae10f0b4cb001731c68461d91f48c7250772",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.signerkeyed25519signedpayload-payload-1/testnet.xdr",
+      "xdr_sha256": "e21f17f7a90cfdb2efb83d1be808c5b8e911e3acf8c36cb1fd1099c59fa6f37c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

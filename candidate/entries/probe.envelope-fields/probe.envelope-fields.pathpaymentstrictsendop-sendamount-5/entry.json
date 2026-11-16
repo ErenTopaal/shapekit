@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.pathpaymentstrictsendop-sendamount-5",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of PathPaymentStrictSendOp.sendAmount, attempt \"one less, 9999999: \\\"9999999\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAN////9AAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1138,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "87762460cd5bc358544b29d192ebfbc9532f5e59b37d8c26d95984f50c0fcda5"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictsendop-sendamount-5/testnet.expected.json",
+      "expected_json_sha256": "98ec9b31f006ad1a2b65fee285fb021850ac9abbb9448e44cbbcb64feab134b9",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictsendop-sendamount-5/testnet.xdr",
+      "xdr_sha256": "475beea3f9023dbec4bf271800793962445c77052d85824681106603f10b8173"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

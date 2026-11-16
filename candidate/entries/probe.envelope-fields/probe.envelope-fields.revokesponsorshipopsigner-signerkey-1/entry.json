@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.revokesponsorshipopsigner-signerkey-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of RevokeSponsorshipOpSigner.signerKey, attempt \"same arm, first byte changed: \\\"GBW7LDOGWUKJYA24NEFHRBGZFFCF7XVA22QEBZURXPSZCVJAUQ5FE4DG\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAS/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1220,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "4f1f7c4dc1362ac84841fcdd53a9b0478da268a3acebb8700ae5fa2d168af991"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.revokesponsorshipopsigner-signerkey-1/testnet.expected.json",
+      "expected_json_sha256": "7f32934eeb1e25206850efe44b428cadbd71b12c9a90b5ac4eb6b33f1d40b053",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.revokesponsorshipopsigner-signerkey-1/testnet.xdr",
+      "xdr_sha256": "88249ff9908595d933fdb7593b50936a6566f941eaa6eee9527d4205cf2066f5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.createclaimablebalanceop-amount-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of CreateClaimableBalanceOp.amount, attempt \"minimum -9223372036854775808: \\\"-9223372036854775808\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAO/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.createclaimablebalanceop-amount-2/testnet.expected.json",
+      "expected_json_sha256": "ee3d99816abcdb1db38422de9f3153bce0a80792e2f0476e6b885fde4fe30afa",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.createclaimablebalanceop-amount-2/testnet.xdr",
+      "xdr_sha256": "b27b508f77623649e2b4bf035babb8bc6f597d9114a28113cb22d7cb6c03ba0b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

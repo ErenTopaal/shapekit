@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.pathpaymentstrictreceiveop-destamount-3",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of PathPaymentStrictReceiveOp.destAmount, attempt \"maximum 9223372036854775807: \\\"9223372036854775807\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAC////+AAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1089,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "0818b9f7fed53a5464039e570cec8159032a9d9b2eda2d5d4635b01cb223fea3"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictreceiveop-destamount-3/testnet.expected.json",
+      "expected_json_sha256": "f8dfbd7395fbf49470fa8bdddf6434a7a68bf70b33c3580fa58113e02a9308f3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictreceiveop-destamount-3/testnet.xdr",
+      "xdr_sha256": "bcd584ad8b6ae73edbe90c7f78ea6e8db6a30c34dcb9b41886df110f15164968"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

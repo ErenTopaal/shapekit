@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-payment-18",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier payment, attempt \"arm end_sponsoring_future_reserves, smallest: \\\"end_sponsoring_future_reserves\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAR/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1056,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "5a4e10420fc2712fb96b5cef6ece53544ac7a41e0229562fabf5a7a217725668"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-payment-18/testnet.expected.json",
+      "expected_json_sha256": "e6ada754c86ac2152444822e04ce7511f020a90dd152cf8e6479a81b5f988314",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-payment-18/testnet.xdr",
+      "xdr_sha256": "ce596b292e6df654b1d71c995fe36d062509dc441f828990c1c55e8d7fbb9a6e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

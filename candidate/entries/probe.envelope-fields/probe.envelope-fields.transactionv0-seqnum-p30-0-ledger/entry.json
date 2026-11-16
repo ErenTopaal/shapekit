@@ -1,0 +1,41 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.transactionv0-seqnum-p30-0-ledger",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "probe of TransactionV0.seqNum in carrier p30, attempt \"base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \\\"7189775253505\\\"\": applied and succeeded",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "ledger_seq": 1676,
+    "normalization": "key-stable",
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "76b95fa9873f9e2a5e35d0f6871ee1c8f643486ca970e82759dfbf6c9d718977"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-seqnum-p30-0-ledger/testnet.expected.json",
+      "expected_json_sha256": "624f46d119d01992479ff0687843ba4d7563f309134a17eb24b412f2a0591185",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-seqnum-p30-0-ledger/testnet.xdr",
+      "xdr_sha256": "7876fe71595c6c25bd64dd4c248a938e43fe08c49e8304c7c880868ddb69e533"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

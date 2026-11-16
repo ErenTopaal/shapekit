@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.scnoncekey-nonce-3",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SCNonceKey.nonce, attempt \"maximum 9223372036854775807: \\\"9223372036854775807\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1303,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "0d791261de5653571329071e5783c687a6ecc6dd242c0b1eeeede3313f30ec23"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.scnoncekey-nonce-3/testnet.expected.json",
+      "expected_json_sha256": "7638e90a4f0b73c58d1ac9bb7dc80fca230ec062d69b2470bf5c0f9af84b4538",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.scnoncekey-nonce-3/testnet.xdr",
+      "xdr_sha256": "aac3766ac41f4f020e5b51670b95049b02053bedef9956de7f7b7e068e93aba4"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

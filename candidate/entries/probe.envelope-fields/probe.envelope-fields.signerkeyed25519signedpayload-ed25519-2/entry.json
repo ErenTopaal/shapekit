@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.signerkeyed25519signedpayload-ed25519-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SignerKeyEd25519SignedPayload.ed25519, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": refused at submission (error, tx_bad_auth)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_bad_auth",
+      "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.signerkeyed25519signedpayload-ed25519-2/testnet.expected.json",
+      "expected_json_sha256": "808b82fffdbe9bd554b032518eb2d0bf5b7f4747e1ff7ac2511718ef00b22b50",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.signerkeyed25519signedpayload-ed25519-2/testnet.xdr",
+      "xdr_sha256": "2bc25c2131bb25e3b68554d42cf2efa08be895cdfa5086ed3d90c09abe9ead9e"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

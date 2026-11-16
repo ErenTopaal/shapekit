@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.transaction-fee-invoke-4",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Transaction.fee in carrier invoke, attempt \"one less, 50015903: 50015903\": refused at submission (error, tx_insufficient_fee)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_insufficient_fee",
+      "result_xdr": "AAAAAAL7LqD////3AAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.transaction-fee-invoke-4/testnet.expected.json",
+      "expected_json_sha256": "72333e221e926a3a260511987569213ac72c1b58ad9f5690f58e04e47761c2b6",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.transaction-fee-invoke-4/testnet.xdr",
+      "xdr_sha256": "ff5aeb74860b78042513ba289c3f73cf98d3a85c6394adc7c472702cfdf83737"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

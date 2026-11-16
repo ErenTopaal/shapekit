@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LedgerKeyLiquidityPool.liquidityPoolID, attempt \"all zero: \\\"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAS////+wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-2/testnet.expected.json",
+      "expected_json_sha256": "19de8b8cb662408f60c858da9893d7183ef2369677f93a327a25118f044e2185",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-2/testnet.xdr",
+      "xdr_sha256": "b69b8cad1f93f9e0f00d21b91ba9458562b5adaa542c2d2e67ec2a6fe0f8d2fa"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

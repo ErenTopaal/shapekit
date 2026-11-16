@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.liquiditypoolconstantproductparameters-fee-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LiquidityPoolConstantProductParameters.fee, attempt \"zero 0: 0\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypoolconstantproductparameters-fee-1/testnet.expected.json",
+      "expected_json_sha256": "e8fb5cdf3df342e04cedc51f56a4d692e0b750fbc0b43f5da5ddcf8448334065",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.liquiditypoolconstantproductparameters-fee-1/testnet.xdr",
+      "xdr_sha256": "e2775c203c4d67d4643a6784c6510d3bd8dd836c361e8b08255929da41ad25a6"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

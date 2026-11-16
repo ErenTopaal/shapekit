@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.createaccountop-destination-4",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of CreateAccountOp.destination, attempt \"an account that exists, peer 0: \\\"GAOL6NSFPJJYZQPUPYBNJ63SSCH6S36AZBXQTMTXKTFFCEZQHG3BMG52\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////AAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 268,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "944d71c4159dbbdfdbc914f144733f22ccb1d257140a36be1892e2c90d4ee001"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.createaccountop-destination-4/testnet.expected.json",
+      "expected_json_sha256": "371fd5a14d1941a61a31ba96f7add4eb686913ebea162e52908cd0beb982eb52",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.createaccountop-destination-4/testnet.xdr",
+      "xdr_sha256": "a3a3a8020fcaf52bf82d7803bfcf36427f16934aefce613d2399b01d53ee7385"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.clawbackop-asset-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ClawbackOp.asset, attempt \"arm native, smallest: \\\"native\\\"\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAT/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.clawbackop-asset-2/testnet.expected.json",
+      "expected_json_sha256": "5c93fc4194a654ae60e01da3010240770a96055ab77b8e3fbfe3adbd847ae410",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.clawbackop-asset-2/testnet.xdr",
+      "xdr_sha256": "fc5b6d72b4a7472ddec3562903f0f97baf2e6d1ac7d3ebadae53f05a475455d2"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

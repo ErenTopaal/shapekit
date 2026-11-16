@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobantransactiondata-resourcefee-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanTransactionData.resourceFee, attempt \"minimum -9223372036854775808: \\\"-9223372036854775808\\\"\": refused at submission (error, tx_malformed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_malformed",
+      "result_xdr": "AAAAAAAAAAD////wAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobantransactiondata-resourcefee-2/testnet.expected.json",
+      "expected_json_sha256": "a2845efb5939e645e8f9166548ab909ca7438073a41e67ecf7cc7a89f99d0ed6",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobantransactiondata-resourcefee-2/testnet.xdr",
+      "xdr_sha256": "08e2036fe5125c68a22a85507896f5bb04274ef8ca33d063a7a159201993cb49"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

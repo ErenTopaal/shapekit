@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-payment-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier payment, attempt \"arm create_account, smallest: {\\\"create_account\\\":{\\\"destination\\\":\\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////AAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1050,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "d40abbaa2a2cca649df07bdb276ebfda5071e0c164ce2c0eb5433c0cc09a631e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-payment-2/testnet.expected.json",
+      "expected_json_sha256": "50a92fdcdee6985418f7ad7b93f0327d81bacd7e6d34bc2a7acc1d8d71fc11be",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-payment-2/testnet.xdr",
+      "xdr_sha256": "a553273ff424a0b6ade36de7cdf44af61cf84bc0b15982fbd04578de3040fb68"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.alphanum12-assetcode-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of AlphaNum12.assetCode, attempt \"first byte changed: \\\"QROBELONG\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 68,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "b867cb8ed69e4ba68253e3e3244f7824468b7ce92c68cd5aea8b6181f51e4cf8"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.alphanum12-assetcode-1/testnet.expected.json",
+      "expected_json_sha256": "e5cc75bef3df5ad252076ab2243d75a64ba51e65da9fff961aa5b94b9719f99e",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.alphanum12-assetcode-1/testnet.xdr",
+      "xdr_sha256": "170c78cb3a64570cabfb7b06f290c4c786f08dd9c9002b84e3c1460dd4eea6f4"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

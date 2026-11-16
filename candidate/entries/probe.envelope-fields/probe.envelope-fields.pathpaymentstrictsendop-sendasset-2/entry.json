@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.pathpaymentstrictsendop-sendasset-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of PathPaymentStrictSendOp.sendAsset, attempt \"arm credit_alphanum12, smallest: {\\\"credit_alphanum12\\\":{\\\"asset_code\\\":\\\"\\\\\\\\0\\\\\\\\0\\\\\\\\0\\\\\\\\0\\\\\\\\0\\\",\\\"issuer\\\":\\\"GAAAAA...\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAN/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictsendop-sendasset-2/testnet.expected.json",
+      "expected_json_sha256": "dc86ee435d6c1db1b7e02496be5f8cd82875bbf271f01c29d5900c6639bf8183",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.pathpaymentstrictsendop-sendasset-2/testnet.xdr",
+      "xdr_sha256": "c2f72f6009a45f340d74b32cfe8611082a158b952bdd8fabbe557ed859238dfd"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

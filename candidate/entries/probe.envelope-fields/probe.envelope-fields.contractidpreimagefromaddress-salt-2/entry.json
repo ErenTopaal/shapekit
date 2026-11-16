@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.contractidpreimagefromaddress-salt-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ContractIDPreimageFromAddress.salt, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAMcL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 262,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "a3efc8c65def3222abdafbff9cbb7c63ccde5651b0bf51c7d6e3d5f991353e1a"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.contractidpreimagefromaddress-salt-2/testnet.expected.json",
+      "expected_json_sha256": "9acf5393a7bea24347b7620e4426b720adaf91619e9c51b84aba58fd46da8fd7",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.contractidpreimagefromaddress-salt-2/testnet.xdr",
+      "xdr_sha256": "692320424044dec5bc9efc7d6efea94b128a047f4c526f751ed5ff276325cfc9"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

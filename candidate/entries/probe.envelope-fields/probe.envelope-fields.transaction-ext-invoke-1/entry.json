@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.transaction-ext-invoke-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Transaction.ext in carrier invoke, attempt \"same arm, smallest value: {\\\"v1\\\":{\\\"ext\\\":\\\"v0\\\",\\\"resource_fee\\\":\\\"0\\\",\\\"resources\\\":{\\\"disk_read_bytes\\\":0...\": refused at submission (error, tx_soroban_invalid)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAAAAAGT////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.transaction-ext-invoke-1/testnet.expected.json",
+      "expected_json_sha256": "29530fed03daf2304810328ac272d92376cfb6de4798de694f37408bda63030d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.transaction-ext-invoke-1/testnet.xdr",
+      "xdr_sha256": "07fac68100eb09ec709a38e9fd4458c4e481f7ecb4a6599927f367764e222e67"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

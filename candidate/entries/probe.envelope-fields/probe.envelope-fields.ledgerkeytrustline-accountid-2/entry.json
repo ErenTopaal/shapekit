@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.ledgerkeytrustline-accountid-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LedgerKeyTrustLine.accountID, attempt \"same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAS/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 619,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "815b073e9a682f1432ccff04389ec3729b44302c8ae4f882f7cfae524e86e79b"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeytrustline-accountid-2/testnet.expected.json",
+      "expected_json_sha256": "26535197d97c1012f30f37cc93a2683e5bdbe6b091e59895a374a3177b1a7732",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerkeytrustline-accountid-2/testnet.xdr",
+      "xdr_sha256": "88b5e60c3fee27642b66b28c02e745c2041ec0ed4c159c735546573d0b980e7f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of BeginSponsoringFutureReservesOp.sponsoredID, attempt \"same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAR/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 117,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "d2bebed344b753141ba7352671f5ae18952522bbef9956477183970985a0a920"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-2/testnet.expected.json",
+      "expected_json_sha256": "313026c13edc01c125809098096ac298f8a7be74f57acdee7da7e43c37e8d7c2",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-2/testnet.xdr",
+      "xdr_sha256": "07b3541e1b8255a6176f7698cd7a011872c888a19b17b7e1d853e6916ae870f1"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

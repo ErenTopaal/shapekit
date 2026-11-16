@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.alphanum4-issuer-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of AlphaNum4.issuer, attempt \"same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 112,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "aac7d35bcfabe3faa1e1e78c04049a9cf39d18ce25d5a18d2cce71fbff3118a0"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.alphanum4-issuer-2/testnet.expected.json",
+      "expected_json_sha256": "73eb7679461acfee601b7016d334f4755ea70a591fc69aa6c321a4d97a313a93",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.alphanum4-issuer-2/testnet.xdr",
+      "xdr_sha256": "d0ed3a42937ecbe95ae240bfbd799e359ee813ce440f2a9c18b4467cf7e39cbe"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

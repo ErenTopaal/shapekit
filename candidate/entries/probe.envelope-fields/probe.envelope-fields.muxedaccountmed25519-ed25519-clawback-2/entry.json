@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.muxedaccountmed25519-ed25519-clawback-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of MuxedAccountMed25519.ed25519 in carrier clawback, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAT/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 961,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "0c1e918eb297b518f2b3f8eb33ffd4046df2f2ac2df32b2e9e40786b25575033"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-clawback-2/testnet.expected.json",
+      "expected_json_sha256": "e01cdaa2de0291ce1aa450f29a156a573a0d07f7f17fc15ab2db55c4add27adb",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedaccountmed25519-ed25519-clawback-2/testnet.xdr",
+      "xdr_sha256": "629b88291a3c088c80d3ac7b45652b81030c9e9ece045ba30264fa9180d27e82"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

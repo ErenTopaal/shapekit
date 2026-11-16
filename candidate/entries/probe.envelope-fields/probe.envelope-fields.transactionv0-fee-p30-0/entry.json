@@ -1,0 +1,39 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.transactionv0-fee-p30-0",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of TransactionV0.fee in carrier p30, attempt \"base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): 100\": applied and succeeded",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "ledger_seq": 1661,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "c049ef5a82db8b333656950a10b60ebce7720581ec5943d13ca8a4f2eef75d6c"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-fee-p30-0/testnet.expected.json",
+      "expected_json_sha256": "22d3819948a14c2f4dfd7d7c3f48e0aa27f1bfd7b724b203db62bfa54d94e688",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-fee-p30-0/testnet.xdr",
+      "xdr_sha256": "7035f9a01d5d3a59fa8b87542ea298a8867d99ccde581b33fd322c8c41dc86ee"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

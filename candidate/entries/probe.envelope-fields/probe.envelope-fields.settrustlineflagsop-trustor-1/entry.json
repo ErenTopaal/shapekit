@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.settrustlineflagsop-trustor-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SetTrustLineFlagsOp.trustor, attempt \"same arm, first byte changed: \\\"GBR6MA2RESH2FLL2SHTIT2YDI3OWR343VZGTD7W4RDEVTQ3E2ZCR27ST\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAV/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1398,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "48e453ad1f44eb6803b0015fc03a8f87c10c07c0ebc162af77d6172a51e28d68"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.settrustlineflagsop-trustor-1/testnet.expected.json",
+      "expected_json_sha256": "b7999460018351b7eefbb73770e22e8496443b67cf91064224eeb137edbb35c0",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.settrustlineflagsop-trustor-1/testnet.xdr",
+      "xdr_sha256": "168aba3b3cc5134ca1acd8c75855e99f1d0b556d94b8eeddd75c1c6f51ffa883"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

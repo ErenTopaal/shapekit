@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.managesellofferop-selling-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ManageSellOfferOp.selling, attempt \"arm credit_alphanum4, smallest: {\\\"credit_alphanum4\\\":{\\\"asset_code\\\":\\\"\\\",\\\"issuer\\\":\\\"GAAAAAAAAAAAAAAAAAAAAA...\": refused at submission (error, tx_failed)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAD/////wAAAAA=",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-selling-1/testnet.expected.json",
+      "expected_json_sha256": "179910cee30996f354edbb60520306eaf189534c6571e07ef138611c183a544f",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-selling-1/testnet.xdr",
+      "xdr_sha256": "cc33b338c7e1a58f51d09c3f1c67118c846b8cfa590b2f46c9ee8937b29be7b4"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.ledgerfootprint-readonly-echo-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of LedgerFootprint.readOnly in carrier echo, attempt \"first element repeated: [{\\\"contract_data\\\":{\\\"contract\\\":\\\"CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O...\": refused at submission (error, tx_soroban_invalid)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAAL7LqD////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerfootprint-readonly-echo-2/testnet.expected.json",
+      "expected_json_sha256": "97c435620ac7bbddc3afd57dde766f10d7d5a18ad21f59409facfbc5b555ee22",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.ledgerfootprint-readonly-echo-2/testnet.xdr",
+      "xdr_sha256": "1b8b93e5f146ee13a2eddc97b3ff11c9d70a64b06a2604a1ce3bc6349f262fd8"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

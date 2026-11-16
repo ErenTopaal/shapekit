@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.operation-body-merge-20",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of Operation.body in carrier merge, attempt \"arm end_sponsoring_future_reserves, smallest: \\\"end_sponsoring_future_reserves\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAR/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1070,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "189387c05e1b15506822fc53f1fce7e0c8c31a7dff26a1eb709d16c393315774"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-merge-20/testnet.expected.json",
+      "expected_json_sha256": "8a14bcd9e96d671bba9d81fd4399e5094cb946119937bc790c922c9df7276f65",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.operation-body-merge-20/testnet.xdr",
+      "xdr_sha256": "6deee564d03be4974dc206ee18818a50b471eec045ef048f86b7641709af2fb0"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

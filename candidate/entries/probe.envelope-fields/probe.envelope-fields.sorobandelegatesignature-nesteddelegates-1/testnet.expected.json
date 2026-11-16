@@ -1,0 +1,222 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "0f4c9679",
+        "signature": "dfad1a5e5beefd3a192b445fbbac1f934874c3bc3261e7b86339ef6e7ee388fb9afab5f8cbed65043c7f020bf8fde80b2116a23dbcf81628fad2d6336148530c"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50024212",
+          "resources": {
+            "disk_read_bytes": 10144,
+            "footprint": {
+              "read_only": [
+                {
+                  "account": {
+                    "account_id": "GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4"
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7",
+                    "durability": "persistent",
+                    "key": {
+                      "vec": [
+                        {
+                          "symbol": "Signer"
+                        },
+                        {
+                          "address": "GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "11bea0afb03e87e2f9a7cd6cf28e7c0d39cff8bb7e52fc05b82e71db799e3fa5"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+                  }
+                }
+              ],
+              "read_write": [
+                {
+                  "contract_data": {
+                    "contract": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7",
+                    "durability": "temporary",
+                    "key": {
+                      "ledger_key_nonce": {
+                        "nonce": "477325824143268173"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "instructions": 11598993,
+            "write_bytes": 10072
+          }
+        }
+      },
+      "fee": 50024312,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": {
+                    "address_with_delegates": {
+                      "address_credentials": {
+                        "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7",
+                        "nonce": "477325824143268173",
+                        "signature": "void",
+                        "signature_expiration_ledger": 1627
+                      },
+                      "delegates": [
+                        {
+                          "address": "GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4",
+                          "nested_delegates": [
+                            {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                              "nested_delegates": [],
+                              "signature": "void"
+                            }
+                          ],
+                          "signature": {
+                            "vec": [
+                              {
+                                "map": [
+                                  {
+                                    "key": {
+                                      "symbol": "public_key"
+                                    },
+                                    "val": {
+                                      "bytes": "5956c5a3d1f8d7884edd637d74ab16f14b136bbc103f41ff9e6ab23010619524"
+                                    }
+                                  },
+                                  {
+                                    "key": {
+                                      "symbol": "signature"
+                                    },
+                                    "val": {
+                                      "bytes": "73e43d1b1f0a34ded52d32814c6086acebafea33b64f6b8d0328de759f80556a9841a29730ca94ad277271d8eb8f0340d76c783759711cf4fb767c1084991909"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "vec": []
+                          },
+                          {
+                            "vec": [
+                              {
+                                "map": [
+                                  {
+                                    "key": {
+                                      "symbol": "fanout"
+                                    },
+                                    "val": {
+                                      "u32": 0
+                                    }
+                                  },
+                                  {
+                                    "key": {
+                                      "symbol": "signer"
+                                    },
+                                    "val": {
+                                      "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                        "function_name": "node"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "vec": []
+                    },
+                    {
+                      "vec": [
+                        {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "fanout"
+                              },
+                              "val": {
+                                "u32": 0
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "signer"
+                              },
+                              "val": {
+                                "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                  "function_name": "node"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "6554120093697",
+      "source_account": "GDDA4N43NCSTIFDRF7EF3CHQFTFQ6HTCXQHBZSWQEFBNXLQPJSLHTL2C"
+    }
+  }
+}

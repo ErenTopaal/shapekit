@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.managesellofferop-offerid-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of ManageSellOfferOp.offerID, attempt \"maximum 9223372036854775807: \\\"9223372036854775807\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAD////9QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 917,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "04fceddf4bf0b76ffb8fa75692cd7e12756daaa7ef767e754ecbf09502943e43"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-offerid-2/testnet.expected.json",
+      "expected_json_sha256": "c47e45e7d64049f050947e1e1df25f9a034c8ee4524f31478233ed158622cc57",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.managesellofferop-offerid-2/testnet.xdr",
+      "xdr_sha256": "8d7ba740d002be38be12ec7ec8b9ff564977ab47e745087dd76f8c6d4555d01f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}
