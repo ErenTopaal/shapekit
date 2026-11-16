@@ -74,6 +74,15 @@ pub struct Check {
     pub source: String,
 }
 
+/// How sources name the manifest's directory: its own name, `corpus` or `candidate`, the
+/// way the repository lays both lanes out.
+pub fn root_label(corpus: &Path) -> String {
+    corpus
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "corpus".to_string())
+}
+
 /// All checks for one entry. `corpus` is the directory holding manifest.json.
 pub fn checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
     match entry.kind {
@@ -101,7 +110,7 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                 "len_limit": bytes.len(),
             }))
         };
-        let file_source = format!("corpus/{}", v.xdr_file);
+        let file_source = format!("{}/{}", root_label(corpus), v.xdr_file);
         match entry.expected.decode {
             DecodeExpectation::MustAccept => {
                 let source = format!(
@@ -129,7 +138,8 @@ fn xdr_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
                     let expected = parse_deep(&text)
                         .with_context(|| format!("{}: parsing {json_file}", entry.id))?;
                     let json_source = format!(
-                        "corpus/{json_file}: SEP-51 rendering by stellar-xdr {}",
+                        "{}/{json_file}: SEP-51 rendering by stellar-xdr {}",
+                        root_label(corpus),
                         shapekit_manifest::STELLAR_XDR_VERSION.pkg
                     );
                     // stellar-xdr writes "<INVALID:...>" where a value has no strkey form (an
@@ -281,7 +291,7 @@ fn vector_checks(entry: &Entry, corpus: &Path) -> Result<Vec<Check>> {
         .with_context(|| format!("{}: parsing {}", entry.id, file.path))?;
     let mut out = Vec::new();
     for (i, case) in vf.cases.iter().enumerate() {
-        let source = format!("corpus/{} case {i}", file.path);
+        let source = format!("{}/{} case {i}", root_label(corpus), file.path);
         out.extend(case_checks(i, case, &source));
     }
     Ok(out)

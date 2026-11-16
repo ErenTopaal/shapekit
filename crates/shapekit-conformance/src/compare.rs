@@ -85,6 +85,37 @@ pub enum Judged {
 const SHOW: usize = 512;
 
 pub fn short(v: &Value) -> Value {
+    let cut = cut_strings(v);
+    // a deeply nested value pretty-printed grows with the square of its depth, so a few deep
+    // entries made one matrix hundreds of megabytes; such a value is kept as its digest
+    let depth = nesting(&cut);
+    let text = serde_json::to_string(&cut).unwrap_or_default();
+    if depth <= KEEP_DEPTH && text.len() <= KEEP_BYTES {
+        return cut;
+    }
+    let mut preview = String::new();
+    for ch in text.chars() {
+        if preview.len() + ch.len_utf8() > SHOW {
+            break;
+        }
+        preview.push(ch);
+    }
+    json!({
+        "sha256": hex::encode(<sha2::Sha256 as sha2::Digest>::digest(
+            serde_json::to_string(v).unwrap_or_default().as_bytes()
+        )),
+        "json_bytes": text.len(),
+        "depth": depth,
+        "preview": preview,
+    })
+}
+
+/// Values nested deeper than this, or longer than `KEEP_BYTES` as compact json, are stored as
+/// a digest in the matrix.
+pub const KEEP_DEPTH: usize = 32;
+pub const KEEP_BYTES: usize = 64 * 1024;
+
+fn cut_strings(v: &Value) -> Value {
     match v {
         Value::String(s) if s.len() > SHOW => {
             let mut cut = SHOW;
@@ -93,10 +124,27 @@ pub fn short(v: &Value) -> Value {
             }
             Value::String(format!("{}... ({} chars)", &s[..cut], s.len()))
         }
-        Value::Array(items) => Value::Array(items.iter().map(short).collect()),
-        Value::Object(m) => Value::Object(m.iter().map(|(k, v)| (k.clone(), short(v))).collect()),
+        Value::Array(items) => Value::Array(items.iter().map(cut_strings).collect()),
+        Value::Object(m) => {
+            Value::Object(m.iter().map(|(k, v)| (k.clone(), cut_strings(v))).collect())
+        }
         other => other.clone(),
     }
+}
+
+/// Nesting depth of arrays and objects, iteratively: the values can be deeper than the stack.
+fn nesting(v: &Value) -> usize {
+    let mut max = 0;
+    let mut stack = vec![(v, 0usize)];
+    while let Some((x, d)) = stack.pop() {
+        max = max.max(d);
+        match x {
+            Value::Array(items) => stack.extend(items.iter().map(|i| (i, d + 1))),
+            Value::Object(m) => stack.extend(m.values().map(|i| (i, d + 1))),
+            _ => {}
+        }
+    }
+    max
 }
 
 fn verdict(result: ResultClass, detail: impl Into<Option<String>>, actual: Value) -> Judged {
@@ -401,4 +449,30 @@ pub fn judge_peers(outcomes: &[Option<Value>], voters: &[bool]) -> Vec<Option<Ve
             })
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deep_or_large_values_are_kept_as_a_digest() {
+        let shallow = json!({"xdr": "AAAA", "n": [1, 2, 3]});
+        assert_eq!(short(&shallow), shallow);
+
+        let mut deep = json!(0);
+        for _ in 0..(KEEP_DEPTH + 5) {
+            deep = json!([deep]);
+        }
+        let d = short(&deep);
+        assert_eq!(d["depth"], json!(KEEP_DEPTH + 5));
+        assert_eq!(d["sha256"].as_str().map(str::len), Some(64));
+        assert!(d["preview"].as_str().unwrap().len() <= SHOW);
+
+        let wide = Value::Array((0..20_000).map(|i| json!(i)).collect());
+        let w = short(&wide);
+        assert!(w["json_bytes"].as_u64().unwrap() > KEEP_BYTES as u64);
+        // the same value always gives the same digest, so multi-pass comparisons hold
+        assert_eq!(short(&wide), w);
+    }
 }
