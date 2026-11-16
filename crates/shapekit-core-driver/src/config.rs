@@ -99,15 +99,32 @@ pub enum ConfigError {
     MissingImage { path: String, name: String },
     #[error("image pin {name:?} has a malformed digest {digest:?}")]
     BadDigest { name: String, digest: String },
+    #[error(
+        "image pin {name:?} must have exactly one of digest (registry image) and image_id (local image), it has {}",
+        if *both { "both" } else { "neither" }
+    )]
+    DigestOrImageId { name: String, both: bool },
 }
 
-/// A container image pinned by manifest digest. The tag is kept only for
-/// humans; docker is always given the digest reference.
+/// A container image pinned by content.
+///
+/// A registry image is pinned by its manifest digest (`digest = ...` in the
+/// pins file) and handed to docker as `repository@digest`. A locally built
+/// image, such as the coverage twin (`twin/pins.toml`), has no manifest
+/// digest; it is pinned by its image ID (`image_id = ...`), the digest of its
+/// configuration, and handed to docker as that ID alone. Both forms name
+/// exactly one image content. The tag is kept only for humans.
+///
+/// For a local image `digest` holds the image ID, so a chain's `chain.json`
+/// records the ID in the same field a registry image's digest goes in.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 pub struct CoreImage {
     pub repository: String,
     pub tag: String,
     pub digest: String,
+    /// Pinned by local image ID rather than registry manifest digest.
+    #[serde(skip)]
+    pub local: bool,
 }
 
 #[derive(serde::Deserialize)]
@@ -121,7 +138,13 @@ struct ImageEntry {
     name: String,
     repository: String,
     tag: String,
-    digest: String,
+    digest: Option<String>,
+    image_id: Option<String>,
+}
+
+fn is_sha256_ref(s: &str) -> bool {
+    let hex_part = s.strip_prefix("sha256:").unwrap_or("");
+    hex_part.len() == 64 && hex_part.bytes().all(|b| b.is_ascii_hexdigit())
 }
 
 impl CoreImage {
@@ -144,23 +167,38 @@ impl CoreImage {
                 path: shown,
                 name: CORE_IMAGE_PIN.to_owned(),
             })?;
-        let hex_part = entry.digest.strip_prefix("sha256:").unwrap_or("");
-        if hex_part.len() != 64 || !hex_part.bytes().all(|b| b.is_ascii_hexdigit()) {
+        let (digest, local) = match (entry.digest, entry.image_id) {
+            (Some(d), None) => (d, false),
+            (None, Some(id)) => (id, true),
+            (d, id) => {
+                return Err(ConfigError::DigestOrImageId {
+                    name: entry.name,
+                    both: d.is_some() && id.is_some(),
+                });
+            }
+        };
+        if !is_sha256_ref(&digest) {
             return Err(ConfigError::BadDigest {
                 name: entry.name,
-                digest: entry.digest,
+                digest,
             });
         }
         Ok(Self {
             repository: entry.repository,
             tag: entry.tag,
-            digest: entry.digest,
+            digest,
+            local,
         })
     }
 
-    /// `repository@sha256:...`, the only form handed to docker.
+    /// What docker is given: `repository@sha256:...` for a registry image,
+    /// the bare `sha256:...` image ID for a local one.
     pub fn reference(&self) -> String {
-        format!("{}@{}", self.repository, self.digest)
+        if self.local {
+            self.digest.clone()
+        } else {
+            format!("{}@{}", self.repository, self.digest)
+        }
     }
 }
 
@@ -328,6 +366,7 @@ mod tests {
                 repository: "stellar/stellar-core".into(),
                 tag: "t".into(),
                 digest: format!("sha256:{}", "0".repeat(64)),
+                local: false,
             },
             protocol: 30,
             soroban_high_limits: true,
@@ -390,11 +429,61 @@ mod tests {
         assert!(max_seq > 60_000);
     }
 
+    fn pin_file(body: &str) -> tempfile::NamedTempFile {
+        use std::io::Write as _;
+        let mut f = tempfile::NamedTempFile::new().unwrap();
+        f.write_all(body.as_bytes()).unwrap();
+        f
+    }
+
+    #[test]
+    fn reads_a_local_image_pin() {
+        let id = format!("sha256:{}", "ab".repeat(32));
+        let f = pin_file(&format!(
+            "[[image]]\nname = \"stellar-core\"\nrepository = \"shapekit/core-twin\"\ntag = \"30.0.0-cov\"\nimage_id = \"{id}\"\n"
+        ));
+        let img = CoreImage::from_pins(f.path()).unwrap();
+        assert!(img.local);
+        assert_eq!(img.reference(), id);
+        // the flag is not part of what a chain records
+        let json = serde_json::to_value(&img).unwrap();
+        assert_eq!(
+            json,
+            serde_json::json!({"repository": "shapekit/core-twin", "tag": "30.0.0-cov", "digest": id})
+        );
+    }
+
+    #[test]
+    fn an_image_pin_needs_exactly_one_reference() {
+        let d = format!("sha256:{}", "cd".repeat(32));
+        let both = pin_file(&format!(
+            "[[image]]\nname = \"stellar-core\"\nrepository = \"r\"\ntag = \"t\"\ndigest = \"{d}\"\nimage_id = \"{d}\"\n"
+        ));
+        assert!(matches!(
+            CoreImage::from_pins(both.path()),
+            Err(ConfigError::DigestOrImageId { both: true, .. })
+        ));
+        let neither =
+            pin_file("[[image]]\nname = \"stellar-core\"\nrepository = \"r\"\ntag = \"t\"\n");
+        assert!(matches!(
+            CoreImage::from_pins(neither.path()),
+            Err(ConfigError::DigestOrImageId { both: false, .. })
+        ));
+        let short = pin_file(
+            "[[image]]\nname = \"stellar-core\"\nrepository = \"r\"\ntag = \"t\"\nimage_id = \"sha256:abc\"\n",
+        );
+        assert!(matches!(
+            CoreImage::from_pins(short.path()),
+            Err(ConfigError::BadDigest { .. })
+        ));
+    }
+
     #[test]
     fn reads_the_repo_pin() {
         let pins = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml");
         let img = CoreImage::from_pins(&pins).unwrap();
         assert_eq!(img.repository, "stellar/stellar-core");
         assert!(img.reference().starts_with("stellar/stellar-core@sha256:"));
+        assert!(!img.local);
     }
 }

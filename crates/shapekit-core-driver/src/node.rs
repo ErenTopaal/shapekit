@@ -53,6 +53,10 @@ pub enum NodeError {
     )]
     ImageMissing(String),
     #[error(
+        "local docker image {0} is not present; it is built on this host, not pulled (the coverage twin comes from twin/build.sh), and a rebuild gives a new image id to pin"
+    )]
+    LocalImageMissing(String),
+    #[error(
         "docker network {0} is not internal; refusing to start core on a network with a route off the host"
     )]
     NetworkNotInternal(String),
@@ -360,7 +364,11 @@ impl CoreNode {
         if !inspected.status.success() {
             let stderr = String::from_utf8_lossy(&inspected.stderr).trim().to_owned();
             if image_missing(&stderr) {
-                return Err(NodeError::ImageMissing(image));
+                return Err(if cfg.image.local {
+                    NodeError::LocalImageMissing(image)
+                } else {
+                    NodeError::ImageMissing(image)
+                });
             }
             return Err(NodeError::Docker {
                 args: args.join(" "),
