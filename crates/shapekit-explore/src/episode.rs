@@ -287,7 +287,17 @@ impl<'e, 'a> Live<'e, 'a> {
                     ..
                 }
             );
-            let result = if fee_bump {
+            // a successful Soroban operation's result is a hash over its return value and
+            // events, which name contract ids derived from the network id
+            let soroban_success = o.outcome == Outcome::Success
+                && matches!(
+                    &self.steps[o.step],
+                    Step::Invoke { .. }
+                        | Step::HostFunction { .. }
+                        | Step::ExtendTtl { .. }
+                        | Step::Restore { .. }
+                );
+            let result = if fee_bump || soroban_success {
                 // the inner result names the inner transaction's hash, which differs per
                 // network passphrase
                 None
