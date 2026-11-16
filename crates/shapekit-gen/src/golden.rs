@@ -531,6 +531,7 @@ fn golden_entry(
         format!(", section \"{}\"", file.section)
     };
     Ok(Entry {
+        obligations: Vec::new(),
         id: id.to_string(),
         kind: EntryKind::Xdr,
         family: family.id.clone(),
@@ -545,6 +546,7 @@ fn golden_entry(
         lcm_version: Some(rec.lcm_version),
         tx_meta_version: lcm.tx_meta_version,
         source: Source {
+            recipe_ir: None,
             class: SourceClass::CoreGolden,
             recipe: None,
             chain: None,
@@ -957,7 +959,7 @@ pub fn agree(
             | SourceClass::LocalCoreRefused
             | SourceClass::TestnetHistory
             | SourceClass::MainnetHistory => slot.1.push(e),
-            SourceClass::Synthetic => {}
+            SourceClass::Synthetic | SourceClass::CoreTestDump => {}
         }
     }
     let mut report = AgreeReport::default();

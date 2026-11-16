@@ -99,6 +99,7 @@ impl Checker<'_> {
         self.provenance();
         self.protocol();
         self.lists();
+        self.obligations();
         match self.entry.kind {
             EntryKind::Xdr => self.xdr_entry(),
             _ => self.vector_entry(),
@@ -164,6 +165,7 @@ impl Checker<'_> {
                 ("ledger_seq", s.ledger_seq.is_some()),
                 ("provenance_url", s.provenance_url.is_some()),
             ],
+            SourceClass::CoreTestDump => vec![("upstream", s.upstream.is_some())],
             SourceClass::Synthetic => vec![],
         }
         .into_iter()
@@ -184,6 +186,64 @@ impl Checker<'_> {
         }
         self.normalization();
         self.core_rejection();
+        self.recipe_ir();
+        self.core_test_dump();
+    }
+
+    fn recipe_ir(&mut self) {
+        let e = self.entry;
+        let Some(path) = &e.source.recipe_ir else {
+            return;
+        };
+        if !e.source.class.is_local() {
+            self.problem("source.recipe_ir is only recorded for local-core entries");
+        }
+        let well_formed = is_safe_relative(path)
+            && path.starts_with("corpus/recipes/")
+            && path.ends_with(".json");
+        if !well_formed {
+            self.problem(format!(
+                "source.recipe_ir {path} is not a corpus/recipes/<family>/<name>.json path"
+            ));
+        }
+    }
+
+    // core's tests run under their own passphrase and the dump holds transaction meta only
+    fn core_test_dump(&mut self) {
+        let e = self.entry;
+        if e.source.class != SourceClass::CoreTestDump {
+            return;
+        }
+        if e.kind != EntryKind::Xdr || e.xdr_type.as_deref() != Some("TransactionMeta") {
+            self.problem("a core-test-dump entry holds TransactionMeta xdr");
+        }
+        if e.variants.testnet.is_some() || e.variants.mainnet.is_some() {
+            self.problem("a core-test-dump entry has only an any variant, core's tests use their own passphrase");
+        }
+        if e.expected.validity != Validity::Valid {
+            self.problem("a core-test-dump entry is core output, so expected.validity is valid");
+        }
+    }
+
+    fn obligations(&mut self) {
+        let e = self.entry;
+        for id in &e.obligations {
+            let known = shapekit_contracts::ObligationKind::ALL.iter().any(|k| {
+                id.strip_prefix(k.as_str())
+                    .and_then(|r| r.strip_prefix(':'))
+                    .is_some_and(|r| !r.is_empty())
+            });
+            if !known {
+                self.problem(format!(
+                    "obligation {id} is not <kind>:<name> with a kind of the obligation ledger"
+                ));
+            }
+        }
+        for pair in e.obligations.windows(2) {
+            if pair[0] >= pair[1] {
+                self.problem("obligations are not sorted without repeats");
+            }
+        }
     }
 
     fn normalization(&mut self) {
@@ -431,7 +491,10 @@ impl Checker<'_> {
         }
         if e.variants.any.is_some()
             && e.passphrase_dependent
-            && e.source.class != SourceClass::CoreGolden
+            && !matches!(
+                e.source.class,
+                SourceClass::CoreGolden | SourceClass::CoreTestDump
+            )
         {
             self.problem("passphrase_dependent bytes need testnet or mainnet variants, not any");
         }

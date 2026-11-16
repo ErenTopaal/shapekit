@@ -100,6 +100,10 @@ pub struct Entry {
     pub linked_issues: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
+    /// Ids of the obligations in `corpus/coverage/obligations.json` this entry witnesses,
+    /// each `<kind>:<name>`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub obligations: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -147,6 +151,11 @@ pub struct Source {
     /// What core answered when the bytes were submitted, for envelopes core refused.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub core_rejection: Option<CoreRejection>,
+    /// The recipe IR file that recorded the bytes, relative to the repository root
+    /// (`corpus/recipes/<family>/<name>.json`). Only for local-core and local-core-refused
+    /// entries.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipe_ir: Option<String>,
 }
 
 /// Ordering rules applied to recorded meta before it is stored.
@@ -192,6 +201,7 @@ enum SourceClassSchema {
     TestnetHistory,
     MainnetHistory,
     Synthetic,
+    CoreTestDump,
 }
 
 /// A file taken from an upstream repository, such as a core golden.

@@ -259,6 +259,7 @@ fn schema_source_classes_match_the_registry() {
         "testnet-history",
         "mainnet-history",
         "synthetic",
+        "core-test-dump",
     ] {
         let parsed: shapekit_registry::SourceClass =
             serde_json::from_value(serde_json::Value::String(class.into())).unwrap();
@@ -360,4 +361,73 @@ fn refused_local_core_entries_carry_cores_result() {
         p.iter().any(|m| m.contains("not invalid-by-core")),
         "{p:#?}"
     );
+}
+
+#[test]
+fn recipe_ir_is_a_recipes_path_on_local_core_entries() {
+    use shapekit_registry::SourceClass;
+    let (dir, mut manifest) = sample();
+    manifest.entries[0].source.recipe_ir = Some("corpus/recipes/cap15.fee-bump/p30.json".into());
+    let p = problems(&manifest, dir.path());
+    assert_eq!(p.len(), 1, "{p:#?}");
+    assert!(p[0].contains("only recorded for local-core"), "{p:#?}");
+
+    manifest.entries[0].source.class = SourceClass::LocalCore;
+    manifest.entries[0].source.recipe = Some("cap15.fee-bump".into());
+    manifest.entries[0].source.chain = Some("cap15.fee-bump.p30".into());
+    for bad in [
+        "recipes/x.json",
+        "corpus/recipes/../x.json",
+        "corpus/recipes/x.toml",
+    ] {
+        manifest.entries[0].source.recipe_ir = Some(bad.into());
+        let p = problems(&manifest, dir.path());
+        assert!(
+            p.iter().any(|l| l.contains("is not a corpus/recipes/")),
+            "{bad}: {p:#?}"
+        );
+    }
+}
+
+#[test]
+fn obligation_ids_name_a_ledger_kind() {
+    let (dir, mut manifest) = sample();
+    manifest.entries[0].obligations = vec![
+        "field:TransactionEnvelope.v1.tx.memo".into(),
+        "format:ScVal.bool".into(),
+    ];
+    assert_eq!(problems(&manifest, dir.path()), Vec::<String>::new());
+    for bad in [
+        vec!["memo".to_string()],
+        vec!["branch:x".into()],
+        vec!["field:".into()],
+    ] {
+        manifest.entries[0].obligations = bad.clone();
+        let p = problems(&manifest, dir.path());
+        assert!(
+            p.iter().any(|l| l.contains("is not <kind>:<name>")),
+            "{bad:?}: {p:#?}"
+        );
+    }
+    manifest.entries[0].obligations = vec!["format:b".into(), "format:a".into()];
+    let p = problems(&manifest, dir.path());
+    assert!(p.iter().any(|l| l.contains("not sorted")), "{p:#?}");
+}
+
+#[test]
+fn core_test_dump_entries_are_any_variant_transaction_meta() {
+    use shapekit_registry::SourceClass;
+    let (dir, mut manifest) = sample();
+    let e = &mut manifest.entries[0];
+    e.source.class = SourceClass::CoreTestDump;
+    e.source.ledger_seq = None;
+    e.source.provenance_url = None;
+    let p = problems(&manifest, dir.path());
+    for want in [
+        "needs source.upstream",
+        "holds TransactionMeta xdr",
+        "has only an any variant",
+    ] {
+        assert!(p.iter().any(|l| l.contains(want)), "{want}: {p:#?}");
+    }
 }

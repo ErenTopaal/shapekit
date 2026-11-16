@@ -63,6 +63,7 @@ fn manifest(vector_sha: &str) -> Manifest {
         },
         protocol_tiers: vec![],
         entries: vec![Entry {
+            obligations: Vec::new(),
             id: "demo.synth-one".into(),
             kind: EntryKind::Strkey,
             family: "demo".into(),
@@ -77,6 +78,7 @@ fn manifest(vector_sha: &str) -> Manifest {
             lcm_version: None,
             tx_meta_version: None,
             source: Source {
+                recipe_ir: None,
                 class: SourceClass::Synthetic,
                 recipe: None,
                 chain: Some("demo.p30".into()),

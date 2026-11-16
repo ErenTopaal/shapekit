@@ -22,6 +22,7 @@ fn testnet_lcm(name: &str) -> Vec<u8> {
 
 fn entry(id: &str, xdr_type: &str, file: &str, bytes: &[u8], source: Source) -> Entry {
     Entry {
+        obligations: Vec::new(),
         id: id.into(),
         kind: EntryKind::Xdr,
         family: "test.family".into(),
@@ -66,6 +67,7 @@ fn entry(id: &str, xdr_type: &str, file: &str, bytes: &[u8], source: Source) -> 
 
 fn source(chain: Option<&str>, ledger: Option<u32>) -> Source {
     Source {
+        recipe_ir: None,
         class: shapekit_registry::SourceClass::TestnetHistory,
         recipe: None,
         chain: chain.map(str::to_string),

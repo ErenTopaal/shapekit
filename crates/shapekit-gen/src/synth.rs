@@ -147,6 +147,7 @@ impl Spec {
         links.sort();
         links.dedup();
         Ok(Entry {
+            obligations: Vec::new(),
             id: self.id(),
             kind: self.kind,
             family: self.family.to_string(),
@@ -161,6 +162,7 @@ impl Spec {
             lcm_version: None,
             tx_meta_version: None,
             source: Source {
+                recipe_ir: None,
                 class: SourceClass::Synthetic,
                 recipe: None,
                 chain: None,

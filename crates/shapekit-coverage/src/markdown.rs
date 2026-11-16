@@ -19,7 +19,7 @@ pub fn render(c: &Coverage) -> String {
         c.corpus_version, c.stellar_xdr
     );
     out.push_str(
-        "Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testnet-history` and `mainnet-history` entries whose bytes core wrote into a ledger. Synthetic entries and envelopes core refused at submission (`local-core-refused`) are listed next to a gap as evidence of the shape, never as coverage. Every gap carries a one-line reason from `registry/uncovered.toml`.\n\n",
+        "Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testnet-history` and `mainnet-history` entries whose bytes core wrote into a ledger, and `core-test-dump` entries, the transaction meta core's own tests wrote. Synthetic entries and envelopes core refused at submission (`local-core-refused`) are listed next to a gap as evidence of the shape, never as coverage. Every gap carries a one-line reason from `registry/uncovered.toml`.\n\n",
     );
 
     out.push_str("## Summary\n\n| Measure | Value |\n|---|---|\n");

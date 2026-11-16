@@ -483,6 +483,7 @@ pub fn write_capture(
         }
         let is_ledger = type_name == "LedgerCloseMeta";
         let entry = Entry {
+            obligations: Vec::new(),
             id: format!("{}.{}{suffix}", family.id, req.slug),
             kind: EntryKind::Xdr,
             family: family.id.clone(),
@@ -501,6 +502,7 @@ pub fn write_capture(
                 None
             },
             source: Source {
+                recipe_ir: None,
                 class: req.network.class(),
                 recipe: None,
                 chain: None,

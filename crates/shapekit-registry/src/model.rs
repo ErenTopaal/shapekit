@@ -186,6 +186,11 @@ pub enum SourceClass {
     TestnetHistory,
     MainnetHistory,
     Synthetic,
+    /// Transaction meta core's own test suite wrote (`--record-test-tx-meta`), converted back
+    /// to XDR. Core emitted the bytes, but under its test network passphrase and with change
+    /// lists in the order its test harness sorts them, so they are not a ledger an indexer
+    /// could have read.
+    CoreTestDump,
 }
 
 impl SourceClass {
@@ -197,6 +202,7 @@ impl SourceClass {
             SourceClass::TestnetHistory => "testnet-history",
             SourceClass::MainnetHistory => "mainnet-history",
             SourceClass::Synthetic => "synthetic",
+            SourceClass::CoreTestDump => "core-test-dump",
         }
     }
 

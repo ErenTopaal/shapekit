@@ -108,6 +108,13 @@
             "null"
           ]
         },
+        "obligations": {
+          "description": "Ids of the obligations in `corpus/coverage/obligations.json` this entry witnesses,\neach `<kind>:<name>`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "passphrase_dependent": {
           "type": "boolean"
         },
@@ -355,6 +362,13 @@
             "null"
           ]
         },
+        "recipe_ir": {
+          "description": "The recipe IR file that recorded the bytes, relative to the repository root\n(`corpus/recipes/<family>/<name>.json`). Only for local-core and local-core-refused\nentries.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "tx_hash": {
           "type": [
             "string",
@@ -392,7 +406,8 @@
         "local-core-refused",
         "testnet-history",
         "mainnet-history",
-        "synthetic"
+        "synthetic",
+        "core-test-dump"
       ],
       "type": "string"
     },

@@ -203,6 +203,7 @@ pub(crate) fn merge(
         }
         let s = &first.spec;
         let entry = Entry {
+            obligations: Vec::new(),
             id,
             kind: EntryKind::Xdr,
             family: family.id.clone(),
@@ -216,6 +217,7 @@ pub(crate) fn merge(
             lcm_version: first.selected.lcm_version,
             tx_meta_version: first.selected.tx_meta_version,
             source: Source {
+                recipe_ir: None,
                 // a refused envelope is the generator's bytes, never core output
                 class: if refused {
                     SourceClass::LocalCoreRefused
