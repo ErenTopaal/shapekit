@@ -18,7 +18,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | Arms covered by a core-emitted entry | 436 (87.4%) |
 | Arms uncovered | 63 |
 | Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
-| Family fragments covered | 310 of 320 in 37 families |
+| Family fragments covered | 312 of 322 in 39 families |
 | Fields core does not fully validate, exercised | 36 of 36 |
 
 ## Blockers
@@ -808,6 +808,24 @@ Expected source classes with no entry: synthetic.
 |---|---|---|
 | `LedgerCloseMeta:v2` | 354: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 351 more |  |
 
+### `probe.envelope-fields`
+
+One envelope field changed at a time, with core's answer to each value. CAPs: . Entries: none.
+Expected source classes with no entry: local-core, local-core-refused, synthetic.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `TransactionEnvelope:tx` | 444: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 441 more |  |
+
+### `probe.limits`
+
+The largest value core accepts for a bounded quantity, and the first it refuses. CAPs: . Entries: none.
+Expected source classes with no entry: local-core, local-core-refused, synthetic.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `TransactionEnvelope:tx` | 444: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 441 more |  |
+
 ## Obligations
 
 Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.
@@ -818,7 +836,7 @@ Every obligation the corpus owes a witness for, from `corpus/coverage/obligation
 | `gap` | 9 | 0 | 4 | 13 |
 | `core-test-section` | 0 | 0 | 29691 | 29691 |
 | `gate-side` | 0 | 0 | 690 | 690 |
-| `field` | 0 | 0 | 0 | 0 |
+| `field` | 203 | 0 | 0 | 203 |
 | `sdk-version` | 0 | 0 | 0 | 0 |
 | `seed` | 53 | 0 | 161 | 214 |
 
