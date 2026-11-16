@@ -176,8 +176,6 @@ struct Live<'e, 'a> {
     unsupported: BTreeSet<String>,
     /// What core answered each transaction, in order.
     answers: Vec<String>,
-    /// The last ledger holds a transaction, which an ordered close predicts its set from.
-    last_held_tx: bool,
     /// Ordered pairs drawn so far, for their labels.
     pairs: usize,
 }
@@ -594,7 +592,6 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         menu_credit: Vec::new(),
         unsupported: BTreeSet::new(),
         answers: Vec::new(),
-        last_held_tx: false,
         pairs: 0,
     };
     let prefix = if spec.prefix.is_empty() && spec.setup {
@@ -678,11 +675,8 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
                 action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);
             // the order of a ledger is predicted from the transaction set of the one before,
             // which only a v2 ledger close meta carries in the form the prediction reads
-            let orderable = live.last_held_tx
-                && matches!(
-                    live.ctx.driver().last_meta(),
-                    stellar_xdr::LedgerCloseMeta::V2(_)
-                );
+            let orderable =
+                shapekit_gen::recipe::ir_run::orderable_after(live.ctx.driver().last_meta());
             let pushed = if orderable && rng.chance(1, 8) {
                 let (b, more) = action::follower(
                     env.schema,
@@ -698,7 +692,6 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             } else {
                 (live.transaction(s)?, arms)
             };
-            live.last_held_tx = matches!(pushed.0, Pushed::Applied(_));
             match pushed {
                 (Pushed::Applied(new), arms) => live.menu_credit.push((arms, new as u64)),
                 (Pushed::Rejected | Pushed::Invalid, _) => {}

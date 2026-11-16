@@ -70,6 +70,13 @@ fn resources_of(r: &Option<ResourceOverride>) -> ir_soroban::Resources {
 }
 
 /// A recipe read from an IR file.
+/// Whether a close right after the ledger `lcm` can be ordered: its transaction set is
+/// predicted from this ledger's, which must be a v2 ledger close meta holding a classic
+/// transaction.
+pub fn orderable_after(lcm: &stellar_xdr::LedgerCloseMeta) -> bool {
+    super::order::template(lcm).is_ok()
+}
+
 /// Hashes of the transactions a ledger applied, in apply order.
 fn applied_hashes(lcm: &stellar_xdr::LedgerCloseMeta) -> Vec<[u8; 32]> {
     match lcm {
