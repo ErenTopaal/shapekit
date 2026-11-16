@@ -966,9 +966,9 @@ caps = []
 no_cap_reason = "the vectors exercise the XDR definitions themselves (union arms, enum members, optional flags, length bounds, padding, truncation and trailing bytes), which no CAP introduces"
 protocol_introduced = 0
 protocol_valid = { min = 0 }
-signature = ["LedgerCloseMeta"]
+signature = ["LedgerCloseMeta:v2"]
 source_classes = ["synthetic"]
 fields = []
 linked_issues = []
 priority = 15
-notes = "the vectors are hand-built from the definitions, so none is core-emitted; the one fragment is the root type every ledger close meta holds. an entry's own protocol fields carry the protocol of the definition it exercises"
+notes = "the vectors are hand-built from the definitions, so none is core-emitted; the one fragment is the first decision point of the root type, the current LedgerCloseMeta arm, which the format vectors exercise in both directions. an entry's own protocol fields carry the protocol of the definition it exercises"

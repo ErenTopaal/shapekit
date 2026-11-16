@@ -806,7 +806,7 @@ Expected source classes with no entry: synthetic.
 
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
-| `LedgerCloseMeta` | 412: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 409 more |  |
+| `LedgerCloseMeta:v2` | 354: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 351 more |  |
 
 ## Fields core does not fully validate
 
