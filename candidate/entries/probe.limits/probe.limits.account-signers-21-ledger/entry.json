@@ -1,0 +1,41 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.account-signers-21-ledger",
+  "kind": "xdr",
+  "lcm_version": 2,
+  "linked_issues": [],
+  "notes": "limit of SetOptionsOp.signer, attempt \"signers of the source after the operation = 21\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "ledger_seq": 60,
+    "normalization": "key-stable",
+    "recipe": "probe.limits",
+    "tx_hash": "b9a405310dfbf5914f258d954d2c75df7174dfa0cfe95064b6136cfbebe9ff0b"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.account-signers-21-ledger/testnet.expected.json",
+      "expected_json_sha256": "979f86159b16fb4ae356deab4afb2dd8de4f26c9056fa111d3d5eda56639e71d",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.account-signers-21-ledger/testnet.xdr",
+      "xdr_sha256": "b4cb1a0a66ae19929d5253f9f66dfd6a6f333b4b38197af9e097195d999575f0"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}

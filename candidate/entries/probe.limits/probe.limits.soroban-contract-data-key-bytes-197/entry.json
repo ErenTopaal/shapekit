@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.soroban-contract-data-key-bytes-197",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of LedgerKeyContractData.key, attempt \"bytes of an ScBytes key in a read-only footprint key = 197\": refused at submission (error, tx_soroban_invalid)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAHc1lGT////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.limits"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.soroban-contract-data-key-bytes-197/testnet.expected.json",
+      "expected_json_sha256": "281ce22502f845d416f49bd91a0ddef7663eb9e7c6a723808645057df56ebae8",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.soroban-contract-data-key-bytes-197/testnet.xdr",
+      "xdr_sha256": "68c3d23e0618f35dffa08d000d1d3b6a236742b42cee5799208c807c009951bd"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

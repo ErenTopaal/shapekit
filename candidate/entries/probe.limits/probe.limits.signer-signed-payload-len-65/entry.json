@@ -1,0 +1,33 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-reject",
+    "roundtrip": false,
+    "validity": "not-emittable"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.signer-signed-payload-len-65",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of SignerKeyEd25519SignedPayload.payload, attempt \"bytes of an extra signer's signed payload = 65\": core's tx endpoint could not decode the bytes",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "class": "synthetic"
+  },
+  "synthetic": true,
+  "variants": {
+    "testnet": {
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.signer-signed-payload-len-65/testnet.xdr",
+      "xdr_sha256": "cd750b7713723c24cf6f05715c35ee37945d8ac4a0678d98de32c496fd9ede15"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

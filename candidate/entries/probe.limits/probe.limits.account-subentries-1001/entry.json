@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.account-subentries-1001",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of ManageDataOp.dataName, attempt \"subentries of the source after the operation = 1001\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAf////wAAAAA",
+      "stage": "apply"
+    },
+    "ledger_seq": 91,
+    "recipe": "probe.limits",
+    "tx_hash": "6af00635adf92f072d72e5a43a84f5b10658299f4bcc194f70607d0d7a98fd97"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.account-subentries-1001/testnet.expected.json",
+      "expected_json_sha256": "043455e62b2a06ba700d597b3d0cca3305830b1ab7ea8b1aee3365c6766840b2",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.account-subentries-1001/testnet.xdr",
+      "xdr_sha256": "ff79e71f399cde107dc120c075f7b5fd4b216850e751c01982109e46f5339cc5"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

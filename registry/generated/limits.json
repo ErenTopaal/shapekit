@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "core": {
+    "version": "v30.0.0",
+    "commit": "0e49751aa9ddf892302cca02cea7f3f5d97df9f1",
+    "image": {
+      "repository": "stellar/stellar-core",
+      "tag": "30.0.0-3642.0e49751aa.noble",
+      "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51"
+    }
+  },
+  "limits": [
+    {
+      "path": "ClaimantV0.predicate",
+      "measure": "levels of a claimant's predicate",
+      "max_accepted": "4",
+      "first_rejected": "5",
+      "rejection": {
+        "stage": "submit",
+        "result_code": "create_claimable_balance.malformed"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.claim-predicate-depth-4",
+        "candidate:probe.limits.claim-predicate-depth-4-ledger",
+        "candidate:probe.limits.claim-predicate-depth-5"
+      ]
+    },
+    {
+      "path": "CreateClaimableBalanceOp.claimants",
+      "measure": "claimants of one balance",
+      "max_accepted": "10",
+      "first_rejected": "11",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.claimants-per-balance-10",
+        "candidate:probe.limits.claimants-per-balance-10-ledger",
+        "candidate:probe.limits.claimants-per-balance-11"
+      ]
+    },
+    {
+      "path": "InvokeContractArgs.args",
+      "measure": "bytes of a symbol echo receives",
+      "max_accepted": "32",
+      "first_rejected": "33",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.scval-symbol-len-32",
+        "candidate:probe.limits.scval-symbol-len-32-ledger",
+        "candidate:probe.limits.scval-symbol-len-33"
+      ]
+    },
+    {
+      "path": "InvokeContractArgs.args",
+      "measure": "bytes of the data of the one event emit sends",
+      "max_accepted": "16320",
+      "first_rejected": "16321",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "invoke_host_function.resource_limit_exceeded"
+      },
+      "network_settings": {
+        "contract_events_v0.tx_max_contract_events_size_bytes": "16384"
+      },
+      "witnesses": [
+        "candidate:probe.limits.events-contract-bytes-per-tx-16320",
+        "candidate:probe.limits.events-contract-bytes-per-tx-16320-ledger",
+        "candidate:probe.limits.events-contract-bytes-per-tx-16321",
+        "candidate:probe.limits.events-contract-bytes-per-tx-16321-ledger"
+      ]
+    },
+    {
+      "path": "InvokeContractArgs.args",
+      "measure": "bytes put_temp stores in one temporary entry",
+      "max_accepted": "65460",
+      "first_rejected": "65461",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "invoke_host_function.resource_limit_exceeded"
+      },
+      "network_settings": {
+        "contract_data_entry_size_bytes": "65536"
+      },
+      "witnesses": [
+        "candidate:probe.limits.soroban-contract-data-entry-bytes-65460",
+        "candidate:probe.limits.soroban-contract-data-entry-bytes-65460-ledger",
+        "candidate:probe.limits.soroban-contract-data-entry-bytes-65461",
+        "candidate:probe.limits.soroban-contract-data-entry-bytes-65461-ledger"
+      ]
+    },
+    {
+      "path": "InvokeContractArgs.args",
+      "measure": "nesting of a vec echo receives",
+      "max_accepted": "100",
+      "first_rejected": "101",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "invoke_host_function.trapped"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.scval-depth-100",
+        "candidate:probe.limits.scval-depth-100-ledger",
+        "candidate:probe.limits.scval-depth-101",
+        "candidate:probe.limits.scval-depth-101-ledger"
+      ]
+    },
+    {
+      "path": "InvokeHostFunctionOp.hostFunction",
+      "measure": "bytes of an uploaded wasm module",
+      "max_accepted": "130972",
+      "first_rejected": "130973",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "invoke_host_function.resource_limit_exceeded"
+      },
+      "network_settings": {
+        "contract_max_size_bytes": "131072"
+      },
+      "witnesses": [
+        "candidate:probe.limits.soroban-contract-code-bytes-130972",
+        "candidate:probe.limits.soroban-contract-code-bytes-130972-ledger",
+        "candidate:probe.limits.soroban-contract-code-bytes-130973",
+        "candidate:probe.limits.soroban-contract-code-bytes-130973-ledger"
+      ]
+    },
+    {
+      "path": "LedgerFootprint.readOnly",
+      "measure": "footprint keys of echo(7), read-only keys added",
+      "max_accepted": "400",
+      "first_rejected": "401",
+      "rejection": {
+        "stage": "submit",
+        "result_code": "tx_soroban_invalid"
+      },
+      "network_settings": {
+        "contract_ledger_cost_ext_v0.tx_max_footprint_entries": "400"
+      },
+      "witnesses": [
+        "candidate:probe.limits.soroban-footprint-entries-400",
+        "candidate:probe.limits.soroban-footprint-entries-400-ledger",
+        "candidate:probe.limits.soroban-footprint-entries-401"
+      ]
+    },
+    {
+      "path": "LedgerFootprint.readWrite",
+      "measure": "read-write keys of echo(7), keys added",
+      "max_accepted": "200",
+      "first_rejected": "201",
+      "rejection": {
+        "stage": "submit",
+        "result_code": "tx_soroban_invalid"
+      },
+      "network_settings": {
+        "contract_ledger_cost_v0.tx_max_write_ledger_entries": "200"
+      },
+      "witnesses": [
+        "candidate:probe.limits.soroban-footprint-write-entries-200",
+        "candidate:probe.limits.soroban-footprint-write-entries-200-ledger",
+        "candidate:probe.limits.soroban-footprint-write-entries-201"
+      ]
+    },
+    {
+      "path": "LedgerKeyContractData.key",
+      "measure": "bytes of an ScBytes key in a read-only footprint key",
+      "max_accepted": "196",
+      "first_rejected": "197",
+      "rejection": {
+        "stage": "submit",
+        "result_code": "tx_soroban_invalid"
+      },
+      "network_settings": {
+        "contract_data_key_size_bytes": "250"
+      },
+      "witnesses": [
+        "candidate:probe.limits.soroban-contract-data-key-bytes-196",
+        "candidate:probe.limits.soroban-contract-data-key-bytes-196-ledger",
+        "candidate:probe.limits.soroban-contract-data-key-bytes-197"
+      ]
+    },
+    {
+      "path": "ManageDataOp.dataName",
+      "measure": "subentries of the source after the operation",
+      "max_accepted": "1000",
+      "first_rejected": "1001",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "op_too_many_subentries"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.account-subentries-1000",
+        "candidate:probe.limits.account-subentries-1000-ledger",
+        "candidate:probe.limits.account-subentries-1001",
+        "candidate:probe.limits.account-subentries-1001-ledger"
+      ]
+    },
+    {
+      "path": "PathPaymentStrictReceiveOp.path",
+      "measure": "native hops of a native path payment",
+      "max_accepted": "5",
+      "first_rejected": "6",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.path-len-5",
+        "candidate:probe.limits.path-len-5-ledger",
+        "candidate:probe.limits.path-len-6"
+      ]
+    },
+    {
+      "path": "PreconditionsV2.extraSigners",
+      "measure": "extra signers, each signing",
+      "max_accepted": "2",
+      "first_rejected": "3",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.tx-extra-signers-2",
+        "candidate:probe.limits.tx-extra-signers-2-ledger",
+        "candidate:probe.limits.tx-extra-signers-3"
+      ]
+    },
+    {
+      "path": "SetOptionsOp.signer",
+      "measure": "signers of the source after the operation",
+      "max_accepted": "20",
+      "first_rejected": "21",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "set_options.too_many_signers"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.account-signers-20",
+        "candidate:probe.limits.account-signers-20-ledger",
+        "candidate:probe.limits.account-signers-21",
+        "candidate:probe.limits.account-signers-21-ledger"
+      ]
+    },
+    {
+      "path": "SignerKeyEd25519SignedPayload.payload",
+      "measure": "bytes of an extra signer's signed payload",
+      "max_accepted": "64",
+      "first_rejected": "65",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.signer-signed-payload-len-64",
+        "candidate:probe.limits.signer-signed-payload-len-64-ledger",
+        "candidate:probe.limits.signer-signed-payload-len-65"
+      ]
+    },
+    {
+      "path": "SorobanAuthorizationEntry.rootInvocation",
+      "measure": "bytes of an argument in a declared, unmatched auth entry",
+      "max_accepted": "131640",
+      "first_rejected": "131641",
+      "rejection": {
+        "stage": "submit",
+        "result_code": "tx_soroban_invalid"
+      },
+      "network_settings": {
+        "contract_bandwidth_v0.tx_max_size_bytes": "132096"
+      },
+      "witnesses": [
+        "candidate:probe.limits.xdr-envelope-len-131640",
+        "candidate:probe.limits.xdr-envelope-len-131640-ledger",
+        "candidate:probe.limits.xdr-envelope-len-131641"
+      ]
+    },
+    {
+      "path": "SorobanAuthorizedInvocation.subInvocations",
+      "measure": "matched sub-invocations under one root",
+      "max_accepted": "330",
+      "first_rejected": "331",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "invoke_host_function.resource_limit_exceeded"
+      },
+      "network_settings": {
+        "contract_compute_v0.tx_memory_limit": "41943040"
+      },
+      "witnesses": [
+        "candidate:probe.limits.auth-invocation-nodes-330",
+        "candidate:probe.limits.auth-invocation-nodes-330-ledger",
+        "candidate:probe.limits.auth-invocation-nodes-331",
+        "candidate:probe.limits.auth-invocation-nodes-331-ledger"
+      ]
+    },
+    {
+      "path": "Transaction.memo",
+      "measure": "bytes of a text memo",
+      "max_accepted": "28",
+      "first_rejected": "29",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.tx-memo-text-len-28",
+        "candidate:probe.limits.tx-memo-text-len-28-ledger",
+        "candidate:probe.limits.tx-memo-text-len-29"
+      ]
+    },
+    {
+      "path": "Transaction.operations",
+      "measure": "payments in one transaction",
+      "max_accepted": "100",
+      "first_rejected": "101",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.tx-operations-100",
+        "candidate:probe.limits.tx-operations-100-ledger",
+        "candidate:probe.limits.tx-operations-101"
+      ]
+    },
+    {
+      "path": "TransactionV1Envelope.signatures",
+      "measure": "signatures, each of a signer of the source",
+      "max_accepted": "20",
+      "first_rejected": "21",
+      "rejection": {
+        "stage": "decode"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.tx-signatures-20",
+        "candidate:probe.limits.tx-signatures-20-ledger",
+        "candidate:probe.limits.tx-signatures-21"
+      ]
+    }
+  ]
+}

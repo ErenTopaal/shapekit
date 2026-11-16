@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.auth-invocation-nodes-331",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of SorobanAuthorizedInvocation.subInvocations, attempt \"matched sub-invocations under one root = 331\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAFYJb/////AAAAAQAAAAAAAAAY/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 413,
+    "recipe": "probe.limits",
+    "tx_hash": "62896b5ce2e8902d66040100281cc63aeb4d1e194747a0d94e7cee4446706d23"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.auth-invocation-nodes-331/testnet.expected.json",
+      "expected_json_sha256": "1a1a6dd6ecdab6718a623fd2096fb4fe1525e0632ac1c31f51435afc177a81f3",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.auth-invocation-nodes-331/testnet.xdr",
+      "xdr_sha256": "87dbdee92109f6bf57573b4000a08d2fd6d4a6beb525d1afc34bb560322e4dc2"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

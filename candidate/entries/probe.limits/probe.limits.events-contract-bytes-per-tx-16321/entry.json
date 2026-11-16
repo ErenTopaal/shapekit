@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.events-contract-bytes-per-tx-16321",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of InvokeContractArgs.args, attempt \"bytes of the data of the one event emit sends = 16321\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAD8Rf/////AAAAAQAAAAAAAAAY/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 329,
+    "recipe": "probe.limits",
+    "tx_hash": "831711889ac33008b570a49590244be2796dd77f09409a5f24860a84a88e7897"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.events-contract-bytes-per-tx-16321/testnet.expected.json",
+      "expected_json_sha256": "ee094f091ff2f7caac57ee490429962d1749719cf651a2f4ba2ba5e7c1109d70",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.events-contract-bytes-per-tx-16321/testnet.xdr",
+      "xdr_sha256": "dd9f44de11e8077a064855243958a58f488ebb9ad1639d5a77671cb902a91d21"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.soroban-footprint-write-entries-201",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of LedgerFootprint.readWrite, attempt \"read-write keys of echo(7), keys added = 201\": refused at submission (error, tx_soroban_invalid)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_soroban_invalid",
+      "result_xdr": "AAAAAHc1lGT////vAAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.limits"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.soroban-footprint-write-entries-201/testnet.expected.json",
+      "expected_json_sha256": "a0c3ef3fa9a848e1cd190d7a63feb9046b9cc024d6e39f0697899f4f1f613dc5",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.soroban-footprint-write-entries-201/testnet.xdr",
+      "xdr_sha256": "85f02b3c7a3843b7c3d60cd8278b9ed9e876fbc723ff6d6672f4627e1dd0832f"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

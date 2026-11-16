@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.soroban-contract-code-bytes-130973",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of InvokeHostFunctionOp.hostFunction, attempt \"bytes of an uploaded wasm module = 130973\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAHv9n/////AAAAAQAAAAAAAAAY/////QAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 365,
+    "recipe": "probe.limits",
+    "tx_hash": "c6f54ddeb506f8c3c2c8865d8fee2b9c748a5181f3a12cfd856109a0b1cb528e"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.soroban-contract-code-bytes-130973/testnet.expected.json",
+      "expected_json_sha256": "683e87d0f533c134e041684393bdfdb12a9ed68172e479b80d53fba5bcc0e0e1",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.soroban-contract-code-bytes-130973/testnet.xdr",
+      "xdr_sha256": "e02bd83e312fd30adb7e7950e0e73d687f91b1ac927c583a3654b6d4c6fb8d3c"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}
