@@ -7,6 +7,42 @@ transaction and ledger code have a witness, and which have none.
 Core's C++ code and its Rust contract host are measured separately, because
 core's `--enable-codecoverage` build option instruments only C and C++.
 
+## Building the twin
+
+```sh
+TMPDIR=<a directory on disk> twin/build.sh [--jobs N] [--memory SIZE] [--cpus N] [--workdir DIR]
+```
+
+The script builds the stellar-core commit pinned in `pins.toml` (`[[git]]
+stellar-core`) the way core's own `docker/Dockerfile.testing` does, on Ubuntu
+24.04 with clang 20 and libc++, plus `--enable-codecoverage`, and packages the
+binary as the local image `shapekit/core-twin:<core version>-cov`.
+
+- The source and its submodules are fetched at the pinned commit into the work
+  directory (default `$TMPDIR/twin-build`). It holds the build tree, about
+  8 GB, so it must be on disk; a path under `/tmp` is refused.
+- The compile runs in a container with memory and cpu limits (defaults 6 GB
+  and 4 cpus, `make -j3`). A rerun continues where the last one stopped.
+- Rust is the version core pins in `rust-toolchain.toml`, installed with
+  core's `install-rust.sh`.
+- Core's release profile builds its Rust library, which links all ten contract
+  hosts, with fat LTO, one codegen unit and full debug info. That one compiler
+  invocation does not fit in 6 GB, so the twin builds it without LTO, in 16
+  codegen units and without debug info. This changes how the Rust code is
+  optimized, not what it computes; `shapekit twin verify` checks that the twin
+  writes the same ledgers as the release image.
+- Core's test suite is compiled in (configure's default), so the twin also runs
+  `stellar-core test`. The release image is built without it.
+- The version string is the full commit, so `docker run --rm <image> version`
+  prints it on its first line. The script checks this.
+
+The script ends with a table of wall time per phase, the compile container's
+peak memory (cgroup `memory.peak`), the work directory's size and the image
+size, also written to `<work dir>/measurements.txt`.
+
+The image is local: it has no registry digest. `twin/pins.toml` pins it by
+image ID, and a rebuild gives a new ID to write there.
+
 ## Contract host coverage
 
 `twin/host-cov.sh` measures the contract host, `soroban-env-host`, for one
