@@ -1,0 +1,109 @@
+# divergences that conformance runs over candidate entries found, each with the finding in
+# findings/triage.toml it belongs to, or `finding = "new"` with what a draft needs. no command
+# reads this file. an entry moves to corpus/ with `shapekit corpus promote` once the finding's
+# conformance matcher in findings/triage.toml takes its failures.
+#
+# runs, on the candidate manifest:
+#   shapekit conformance run --sdk rust --sdk go --all-versions \
+#     --manifest candidate/manifest.json --flag representation-gap
+#   shapekit conformance run --all-versions --manifest candidate/manifest.json \
+#     --entry <each format.xdr-grammar.*-depth-* entry>
+#
+# representation gap vectors (14 entries): rust 28.0.0, 28.0.1 and 30.0.0 each pass 4 entries,
+# diverge from the network on 2 and cannot run 8 (stellar-xdr has no textual muxed id input and
+# the testee no to_native). go v0.7.1 to v0.9.0 cannot run any: the go testee implements
+# neither id_parse nor to_native, so all 19 checks are unsupported.
+#
+# recursion-depth vectors (45 entries): every decoder that ran them read the 30 within the
+# limit, except js 16.x everywhere and js 17.x on four ledgers (below). the 15 past the limit
+# are implementation-defined and decided by the sdk vote: stellar-xdr refuses all 15; go and js
+# 17.x read the ones whose nesting they count as shallower, so on 11 of them rust is the
+# minority. that is the depth accounting the entries' notes describe, not a defect.
+
+schema = 1
+
+[[candidate]]
+finding = "RS-1"
+sdk = "rust"
+versions = ["28.0.0", "28.0.1", "30.0.0"]
+entries = [
+  "cap03.offer-liabilities.gap-js-negative-zero-offer",
+  "cap03.offer-liabilities.gap-rust-integer-text-sign-offer",
+]
+checks = "case 0/id_parse on the first; case 0/id_parse and case 1/id_parse on the second"
+observed = "the XDR-JSON reader reads the offer id text \"+16\" as 16 and \"-0\" as 0, where the canonical form refuses both"
+
+[[candidate]]
+finding = "RS-2"
+sdk = "rust"
+versions = ["28.0.0", "28.0.1", "30.0.0"]
+entries = ["format.xdr-grammar.*-depth-*-below", "format.xdr-grammar.*-depth-*-at"]
+checks = "any/encode_json on all 30 entries"
+observed = "the XDR-JSON reader stops at serde_json's recursion limit (\"recursion limit exceeded\") on JSON that stellar-xdr itself wrote for these values"
+
+[[candidate]]
+finding = "JS-16X"
+sdk = "js"
+versions = ["16.3.0", "16.3.1", "16.4.1"]
+entries = ["format.xdr-grammar.*-depth-*-below", "format.xdr-grammar.*-depth-*-at"]
+checks = "any/decode_encode and any/decode_json on all 30 entries"
+observed = "js-xdr 4.0.0 stops at 200 nested types: \"XDR Read Error: exceeded max decoding depth\""
+
+[[candidate]]
+finding = "new"
+sdk = "js"
+versions = ["17.2.0", "17.2.1", "17.3.0", "17.4.0"]
+entries = [
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-at",
+]
+checks = "any/decode_encode, any/decode_json and any/encode_json on all 8 entries"
+observed = "fromXdr refuses ledgers stellar-xdr reads at the ledger limit of 1012: js-xdr 5 counts three levels for each turn of these nestings (the struct or union, its array and the type reference), where stellar-xdr counts two, so it passes its own limit of 1500 first. the same nestings inside a TransactionEnvelope at the envelope limit of 1000 decode"
+open = "the shortest path from LedgerCloseMeta to each group puts the nesting fewer than 12 levels below the ledger, so these ledgers hold envelopes, entries or quorum sets nested deeper than stellar-core accepts in an envelope. whether stellar-core can close a ledger like this is not checked; related to JS-DEPTH (the sdk's limit is not core's)"
+
+[[candidate]]
+finding = "new"
+sdk = "js"
+versions = ["17.2.0", "17.2.1", "17.3.0", "17.4.0"]
+entries = [
+  "format.xdr-grammar.claimpredicate-depth-claimpredicate-below",
+  "format.xdr-grammar.claimpredicate-depth-claimpredicate-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at",
+]
+checks = "any/encode_json"
+observed = "fromJson on a ClaimPredicate nested about 500 times throws \"RangeError: Maximum call stack size exceeded\" instead of an XdrError, so the testee reports a crash; fromXdr reads the same values"
+open = "stellar-core refuses a claim predicate nested deeper than 4 levels (validatePredicate in CreateClaimableBalanceOpFrame.cpp), so no ledger holds one like this; only JSON from outside the network reaches it. where in fromJson the recursion overflows is not checked yet"
+
+[[candidate]]
+finding = "GO-4"
+sdk = "go"
+versions = ["v0.7.1", "v0.7.2", "v0.7.3", "v0.8.0", "v0.9.0"]
+entries = [
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-above",
+  "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-above",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobanauthorizedinvocation-above",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-above",
+]
+checks = "any/decode_encode and any/decode_json"
+observed = "implementation-defined entries the sdk vote decides against go: go reads them under MaxDepth 1012 because it counts one level per named type, where stellar-xdr and js refuse them"
+
+[[candidate]]
+finding = "JS-DEPTH"
+sdk = "js"
+versions = ["17.2.0", "17.2.1", "17.3.0", "17.4.0"]
+entries = [
+  "format.xdr-grammar.claimpredicate-depth-claimpredicate-above",
+  "format.xdr-grammar.scpquorumset-depth-scpquorumset-above",
+  "format.xdr-grammar.scspectypedef-depth-scspectypedef-above",
+  "format.xdr-grammar.sorobanauthorizedinvocation-depth-sorobanauthorizedinvocation-above",
+  "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-above",
+]
+checks = "any/decode_encode and any/decode_json"
+observed = "implementation-defined entries with a tied vote (go has no type for them): js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
