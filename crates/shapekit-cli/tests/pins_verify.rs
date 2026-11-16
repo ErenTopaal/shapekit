@@ -62,6 +62,7 @@ fn registered_commands() {
             "harness",
             "findings",
             "fuzz",
+            "native-fuzz",
             "coverage",
             "site",
             "twin",
