@@ -114,6 +114,30 @@ pub fn markdown(c: &Collection) -> String {
         if let Some(r) = &f.reproduce {
             let _ = writeln!(s, "- reproduce: `{r}`");
         }
+        if let Some(r) = &f.recipe {
+            let _ = writeln!(s, "- recipe: `{r}`");
+        }
+        for a in &f.affected {
+            let _ = writeln!(
+                s,
+                "- affected {}: fails on {} ({} of {} tested){}",
+                a.on,
+                a.failing.join(", "),
+                a.failing.len(),
+                a.tested.len(),
+                a.passes_from
+                    .as_deref()
+                    .map(|v| format!(", passes from {v}"))
+                    .unwrap_or_default()
+            );
+        }
+        if !f.other_sdks.is_empty() {
+            let _ = writeln!(
+                s,
+                "- other SDKs failing the same entries: {}",
+                f.other_sdks.join(", ")
+            );
+        }
         if !f.siblings.is_empty() {
             let _ = writeln!(
                 s,

@@ -68,7 +68,34 @@ pub struct FindingRecord {
     pub related: Vec<String>,
     /// Distinct corpus entries the finding was observed on.
     pub entries: Vec<String>,
+    /// How to produce the minimal entry's input again on a local core: `recipe:<file>` for an
+    /// entry recorded from a recipe IR file, `chain:<chain id>` for one recorded by a recipe
+    /// program (`shapekit gen chains --family <family>`). Absent when the input is
+    /// hand-built, a core golden or a capture from a public network.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub recipe: Option<String>,
+    /// Per SDK or target, the versions the inputs ran and the ones that fail.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub affected: Vec<Affected>,
+    /// SDK versions of other SDKs that also fail one of the finding's entries, whichever
+    /// finding takes them, `<sdk>@<version>`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub other_sdks: Vec<String>,
     pub occurrences: Vec<Occurrence>,
+}
+
+/// The versions of one SDK or target a finding's inputs ran, in the order the inputs list
+/// them (oldest first for SDKs), and which of them fail.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Affected {
+    /// The SDK (`go`) or target (`wallet-backend`).
+    pub on: String,
+    pub tested: Vec<String>,
+    pub failing: Vec<String>,
+    /// The first tested version after the last failing one, when there is one: every later
+    /// tested version passes.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub passes_from: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -215,6 +242,18 @@ struct Matched<'a> {
     lint_runs: Vec<String>,
 }
 
+/// Splits an occurrence's `on`, `go@v0.7.1` or `wallet-backend@3e22...`, at its first `@`.
+fn split_on(on: &str) -> (&str, &str) {
+    on.split_once('@').unwrap_or((on, ""))
+}
+
+fn push_tested(tested: &mut BTreeMap<String, Vec<String>>, on: &str, version: &str) {
+    let list = tested.entry(on.to_owned()).or_default();
+    if !list.iter().any(|v| v == version) {
+        list.push(version.to_owned());
+    }
+}
+
 pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     let mut input_refs = Vec::new();
     let mut input_problems = Vec::new();
@@ -242,6 +281,8 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         .collect();
     let mut unmapped = Vec::new();
     let mut failures = 0usize;
+    // every version each sdk or target ran, failing or not
+    let mut tested: BTreeMap<String, Vec<String>> = BTreeMap::new();
 
     for rel in &triage.inputs.harness {
         let path = root.join(rel);
@@ -281,6 +322,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                 ));
             }
         }
+        push_tested(&mut tested, &target, &version);
         let on = format!("{target}@{version}");
         for row in &report.entries {
             if !harness_failure(row.result.verdict.name()) {
@@ -366,6 +408,9 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         }
         for p in &m.known_failure_problems {
             input_problems.push(format!("{rel}: known-failures: {p}"));
+        }
+        for t in &m.testees {
+            push_tested(&mut tested, &t.sdk, &t.version);
         }
         let testees: BTreeMap<&str, (&str, &str)> = m
             .testees
@@ -455,6 +500,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                 r.suppressed.len()
             ),
         });
+        push_tested(&mut tested, &li.target, &li.version);
         for f in &r.findings {
             failures += 1;
             let occ = Occurrence {
@@ -491,6 +537,18 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         .map(|m| record(m, triage, &by_id, corpus_dir, &mut input_problems))
         .collect();
     link_siblings(&mut records, triage);
+    for r in &mut records {
+        r.affected = affected(&r.occurrences, &tested);
+    }
+    let sdk_failures: Vec<&Occurrence> = records
+        .iter()
+        .flat_map(|r| &r.occurrences)
+        .chain(&unmapped)
+        .filter(|o| o.source == "conformance")
+        .collect();
+    for r in &mut records {
+        r.other_sdks = other_sdks(r, &sdk_failures);
+    }
 
     let mut summary = Summary {
         findings: records.len(),
@@ -623,9 +681,69 @@ fn record(
         cause: def.cause.clone(),
         siblings: Vec::new(),
         related: def.related.clone(),
+        recipe: minimal
+            .as_deref()
+            .and_then(|e| manifest.get(e))
+            .and_then(|e| recipe_of(e)),
         entries: entries.into_iter().collect(),
+        affected: Vec::new(),
+        other_sdks: Vec::new(),
         occurrences,
     }
+}
+
+/// The recipe that produces an entry on a local core, if one does.
+fn recipe_of(e: &shapekit_manifest::Entry) -> Option<String> {
+    if let Some(ir) = &e.source.recipe_ir {
+        return Some(format!("recipe:{ir}"));
+    }
+    if e.source.class.is_local() {
+        return e.source.chain.as_ref().map(|c| format!("chain:{c}"));
+    }
+    None
+}
+
+fn affected(occurrences: &[Occurrence], tested: &BTreeMap<String, Vec<String>>) -> Vec<Affected> {
+    let mut failing: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
+    for o in occurrences {
+        let (on, version) = split_on(&o.on);
+        failing.entry(on).or_default().insert(version);
+    }
+    failing
+        .into_iter()
+        .map(|(on, versions)| {
+            let tried = tested.get(on).cloned().unwrap_or_default();
+            let failing: Vec<String> = tried
+                .iter()
+                .filter(|v| versions.contains(v.as_str()))
+                .cloned()
+                .collect();
+            let last = tried.iter().rposition(|v| versions.contains(v.as_str()));
+            let passes_from = last.and_then(|i| tried.get(i + 1)).cloned();
+            Affected {
+                on: on.to_owned(),
+                tested: tried,
+                failing,
+                passes_from,
+            }
+        })
+        .collect()
+}
+
+fn other_sdks(r: &FindingRecord, sdk_failures: &[&Occurrence]) -> Vec<String> {
+    let own: BTreeSet<&str> = r
+        .occurrences
+        .iter()
+        .filter(|o| o.source == "conformance")
+        .map(|o| split_on(&o.on).0)
+        .collect();
+    let others: BTreeSet<String> = sdk_failures
+        .iter()
+        .filter(|o| o.entry.as_ref().is_some_and(|e| r.entries.contains(e)))
+        .filter(|o| !own.contains(split_on(&o.on).0))
+        .map(|o| o.on.clone())
+        .collect();
+    others.into_iter().collect()
 }
 
 /// Findings in different components that fail on the same corpus entry are siblings, as
