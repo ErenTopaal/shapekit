@@ -13,11 +13,12 @@
 //! request frees what it allocated, so warm rounds end with the same live bytes, and a leak
 //! is a rise of exactly what was not freed.
 //!
-//! What still varies is timing within a round: how much of a response the server holds
-//! while the client already holds its copy (the peak), and how many buffers the connection
-//! keeps when a round ends (a few hundred KiB on the small fixture, coming and going between
-//! rounds). So the peak is checked only against a bound, and a leak is read from the lowest
-//! round ends: what a round keeps after its requests can only go back down if nothing leaks.
+//! Each round uses its own connection and is read once the count stops moving, so a round
+//! ends with only what the server keeps between requests: the cached lake and the ledger
+//! state. A connection kept across rounds holds buffers sized by its last bodies, which made
+//! round ends swing by up to 350 KiB. What still varies is timing within a round, how much of
+//! a response the server holds while the client already holds its copy, so the peak is
+//! checked against a bound and leaks are read from the round ends.
 
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::path::{Path, PathBuf};
@@ -87,17 +88,17 @@ static SERIAL: Mutex<()> = Mutex::new(());
 /// response and the client's copy of the body. Measured over ten rounds, five runs in debug
 /// and release on a host at load average 28: 3.3 to 3.8 on classic.failed-tx.p30 (3,756,669
 /// bytes of getTransactions json) and 4.4 to 4.9 on the checkpoints fixture (395,811 bytes),
-/// where the runtime's fixed allocations weigh more. 8 is above both.
+/// where the runtime's fixed allocations weigh more; with a connection per round, 2.9 to 4.1
+/// and 3.7 to 5.3. 8 is above all of them.
 const LIVE_PER_RESPONSE_BYTE: u64 = 8;
 
 /// Live bytes of the ledger state per decompressed lake byte.
 const STATE_PER_LAKE_BYTE: u64 = 3;
 
-/// How far the lowest end of the last three rounds may sit above the lowest end of rounds two
-/// to four. Measured in the same runs: 9 to 10 KiB on both, while single round ends move by up
-/// to 18 KiB on classic.failed-tx.p30 and 165 KiB on the fixture. A leak of 8 KiB a round
-/// adds 48 KiB over the six rounds between the two windows.
-const WARM_SLACK: u64 = 32 * 1024;
+/// How far any warm round's end may sit above the first round's end. Measured over eight runs
+/// in debug and release at load average 24: at most 475 bytes on classic.failed-tx.p30 and
+/// 434 bytes on the fixture. A leak of 512 bytes a round passes it by the ninth round.
+const WARM_SLACK: u64 = 4 * 1024;
 
 const ROUNDS: usize = 10;
 
@@ -238,19 +239,21 @@ struct Inputs {
 }
 
 /// The peak may hold what was live at startup, the cached lake, the ledger state and the
-/// working set of the largest response. The first round fills the cache and the state; from
-/// then on, the lowest of three round ends must not climb. Growth is reported before the
-/// bound, so a leak reads as a leak even once it also pushes the peak over.
+/// working set of the largest response. The first round fills the cache and the state; no
+/// later round may end above it. Growth is reported before the bound, so a leak reads as a
+/// leak even once it also pushes the peak over.
 fn check(samples: &[Sample], i: &Inputs) -> Result<(), String> {
-    if samples.len() < 7 {
-        return Err(format!("{} rounds, the check needs 7", samples.len()));
+    if samples.len() < 2 {
+        return Err(format!("{} rounds, the check needs 2", samples.len()));
     }
-    let low = |w: &[Sample]| w.iter().map(|s| s.end).min().unwrap_or(0);
-    let early = low(&samples[1..4]);
-    let late = low(&samples[samples.len() - 3..]);
-    if late > early + WARM_SLACK {
+    let first = samples[0].end;
+    let rises: Vec<u64> = samples[1..]
+        .iter()
+        .map(|s| s.end.saturating_sub(first))
+        .collect();
+    if rises.iter().any(|r| *r > WARM_SLACK) {
         return Err(format!(
-            "live bytes grew across warm rounds: the lowest end of the last three rounds is {late}, of rounds two to four {early} (allowed {WARM_SLACK} more): {samples:?}"
+            "live bytes grew across warm rounds: round ends above the first round's by {rises:?} (allowed {WARM_SLACK}): {samples:?}"
         ));
     }
     let bound = i.start
@@ -267,6 +270,27 @@ fn check(samples: &[Sample], i: &Inputs) -> Result<(), String> {
     Ok(())
 }
 
+/// Live bytes once nothing allocates or frees any more: the server's request threads can
+/// still be dropping a response or building the ledger state for the new head after the
+/// client has its answer, so a round's end is read only when the count has stayed the same
+/// for 100 ms (at most 10 s).
+fn settled() -> usize {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let mut last = LIVE.load(Ordering::Relaxed);
+    let mut same = 0;
+    while same < 10 && std::time::Instant::now() < deadline {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        let now = LIVE.load(Ordering::Relaxed);
+        if now == last {
+            same += 1;
+        } else {
+            same = 0;
+            last = now;
+        }
+    }
+    last
+}
+
 /// Serves `dir` in this process for [`ROUNDS`] rounds; `leak` runs at the end of each round.
 fn measure(dir: &Path, leak: &mut dyn FnMut()) -> (Vec<Sample>, Inputs) {
     let server = shapekit_serve::start(ServeConfig {
@@ -278,14 +302,22 @@ fn measure(dir: &Path, leak: &mut dyn FnMut()) -> (Vec<Sample>, Inputs) {
     })
     .unwrap();
     let url = format!("{}/rpc", server.url());
-    let client = reqwest::blocking::Client::new();
     let mut seen = Seen::default();
-    let (health, _) = call(&client, &url, "getHealth", json!(null), &mut seen);
+    let (health, _) = call(
+        &reqwest::blocking::Client::new(),
+        &url,
+        "getHealth",
+        json!(null),
+        &mut seen,
+    );
     let (first, last) = (health.oldest.unwrap(), health.latest.unwrap());
-    let start = LIVE.load(Ordering::Relaxed) as u64;
+    let start = settled() as u64;
     PEAK.store(start as usize, Ordering::Relaxed);
     let mut samples = Vec::with_capacity(ROUNDS);
     for _ in 0..ROUNDS {
+        // a client, and so a connection, per round: the connection's buffers on both sides
+        // keep whatever size the last bodies gave them, which is not what this test measures
+        let client = reqwest::blocking::Client::new();
         sweep(&client, &url, first, last, &mut seen);
         // move the head back and forward so the ledger state is rebuilt
         for head in [first + (last - first) / 2, last] {
@@ -302,25 +334,23 @@ fn measure(dir: &Path, leak: &mut dyn FnMut()) -> (Vec<Sample>, Inputs) {
                 &mut seen,
             );
         }
+        drop(client);
         leak();
-        let end = LIVE.load(Ordering::Relaxed);
+        let end = settled();
         samples.push(Sample {
             end: end as u64,
             peak: PEAK.swap(end, Ordering::Relaxed) as u64,
         });
     }
-    drop(client);
     server.stop().unwrap();
     let peak = samples.iter().map(|s| s.peak).max().unwrap();
     let cached = seen.lake_bytes.min(DEFAULT_CACHE_BYTES as u64);
     eprintln!(
-        "{}: ledgers {first} to {last}, lake {} bytes, largest response {} bytes, live at startup {start}, per round {samples:?}, beyond startup and cache per largest response byte {:.2}, lowest end of rounds 2 to 4 {} and of the last 3 {}",
+        "{}: ledgers {first} to {last}, lake {} bytes, largest response {} bytes, live at startup {start}, per round {samples:?}, beyond startup and cache per largest response byte {:.2}",
         dir.display(),
         seen.lake_bytes,
         seen.largest_response,
-        peak.saturating_sub(start + cached) as f64 / seen.largest_response as f64,
-        samples[1..4].iter().map(|s| s.end).min().unwrap(),
-        samples[ROUNDS - 3..].iter().map(|s| s.end).min().unwrap()
+        peak.saturating_sub(start + cached) as f64 / seen.largest_response as f64
     );
     (
         samples,
@@ -372,14 +402,14 @@ fn the_check_catches_growth_and_excess() {
     let base = 4 << 20;
     let flat: Vec<Sample> = (0..10).map(|_| at(base, base + (8 << 20))).collect();
     assert_eq!(check(&flat, &inputs), Ok(()));
-    // round ends that come and go by buffers, as on the fixture, are no growth
-    let noisy: Vec<Sample> = (0..10u64)
-        .map(|r| at(base + (r % 3) * 160 * 1024, base + (8 << 20)))
+    // ends that move by a few hundred bytes, as measured, are no growth
+    let jitter: Vec<Sample> = (0..10u64)
+        .map(|r| at(base + (r % 2) * 475, base + (8 << 20)))
         .collect();
-    assert_eq!(check(&noisy, &inputs), Ok(()));
-    // a leak of 8 KiB a round under the same noise
+    assert_eq!(check(&jitter, &inputs), Ok(()));
+    // a leak of 512 bytes a round
     let leak: Vec<Sample> = (0..10u64)
-        .map(|r| at(base + (r % 3) * 160 * 1024 + r * 8192, base + (8 << 20)))
+        .map(|r| at(base + r * 512, base + (8 << 20)))
         .collect();
     assert!(check(&leak, &inputs).unwrap_err().contains("grew"));
     // a peak over the bound
