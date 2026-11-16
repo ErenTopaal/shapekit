@@ -619,6 +619,8 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
     for r in RICH_ROLES.iter().take(2) {
         live.world.issuers.push((*r).to_owned());
     }
+    // transactions a prefix close orders are held until that close
+    live.session.plan(&prefix);
     let outcome = (|| -> Result<()> {
         for step in prefix {
             live.exact(step)?;
@@ -674,7 +676,14 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             }
             let (s, arms) =
                 action::transaction(env.schema, &live.world, &mut rng, menu, &live.unsupported);
-            let pushed = if live.last_held_tx && rng.chance(1, 8) {
+            // the order of a ledger is predicted from the transaction set of the one before,
+            // which only a v2 ledger close meta carries in the form the prediction reads
+            let orderable = live.last_held_tx
+                && matches!(
+                    live.ctx.driver().last_meta(),
+                    stellar_xdr::LedgerCloseMeta::V2(_)
+                );
+            let pushed = if orderable && rng.chance(1, 8) {
                 let (b, more) = action::follower(
                     env.schema,
                     &live.world,
