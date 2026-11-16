@@ -491,6 +491,38 @@ Each chain is reported `same` or `DIFFERENT` with, per table, the rows found on 
 only and the columns whose values differ. The command exits non-zero when any chain
 differs; `--out` writes the reports as JSON.
 
+## State comparison
+
+The verdicts compare what the target stored per transaction with the oracle's vocabulary.
+The state comparison looks at what the target holds at the end: its accounts, trustlines,
+Stellar Asset Contract balances and liquidity pools next to core's own final entries, which
+the harness rebuilds by applying the meta of every ingested ledger to genesis. It needs dumps.
+
+Which table and column holds which entry and field is inferred, not written by hand:
+
+```sh
+shapekit harness state infer --run <run out> [--run ...] --network testnet --write mapping.toml
+shapekit harness state check --run <run out> [--run ...] --mapping mapping.toml
+```
+
+- `infer` reads the ordinary chains of the runs: chains that ran without an error, whose
+  carry check is clean, and where no entry is `mishandled` or `dropped`. For each table it
+  takes the entry kind and key columns that match the most rows: a column whose cells are
+  account, contract or pool addresses in a known encoding, or ids of another table's rows
+  that render as an asset (`{code}:{issuer}`) or a contract. A column is mapped to an entry
+  field when it equals that field on every keyed row of every ordinary chain. A column that
+  equals several fields everywhere is kept as ambiguous, unless one of them has the column's
+  name. Tables with no such column (history tables that only name an account) are left out.
+- `check` applies the mapping to every chain and lists stored values that differ from core's
+  (`mismatched`), rows for entries core no longer has (`stale`) and core entries with no row
+  (`missing`). It also lists every chain where this disagrees with the oracle's verdicts:
+  a differing state where every entry passed, or an equal state where entries were
+  `mishandled` or `dropped`. It exits non-zero when the mapping does not hold on an
+  ordinary chain.
+
+The wallet-backend mapping inferred this way is
+`adapters/walletbackend/state-mapping.toml`; its header names the chains it came from.
+
 ## Output
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):
