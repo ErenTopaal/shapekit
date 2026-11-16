@@ -1,5 +1,6 @@
 //! The `shapekit` command line tool.
 
+mod audit_cmd;
 mod capture_cmd;
 mod conformance_cmd;
 mod contracts_cmd;
@@ -143,6 +144,12 @@ enum Command {
     Vectors {
         #[command(subcommand)]
         command: vectors_cmd::VectorsCommand,
+    },
+    /// The law book over the public ledger lake: random audits of the history and a watch
+    /// over every new ledger.
+    Audit {
+        #[command(subcommand)]
+        command: audit_cmd::AuditCommand,
     },
     /// The stellar-xdr definitions in schema/xdr/ as data.
     Schema {
@@ -625,6 +632,7 @@ fn main() -> ExitCode {
         Command::Laws { command } => laws_cmd::run(command),
         Command::Twin { command } => twin_cmd::run(command),
         Command::Vectors { command } => vectors_cmd::run(command),
+        Command::Audit { command } => audit_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

@@ -1,0 +1,23 @@
+[package]
+name = "shapekit-sentinel"
+description = "Reads the public SEP-54 ledger lake and checks the law book on random samples and on every new ledger."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+hex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+shapekit-contracts.workspace = true
+shapekit-laws.workspace = true
+shapekit-pack.workspace = true
+stellar-xdr.workspace = true
+zstd.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
