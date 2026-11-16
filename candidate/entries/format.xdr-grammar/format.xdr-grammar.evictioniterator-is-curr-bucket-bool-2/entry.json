@@ -16,7 +16,7 @@
     "https://github.com/stellar/rs-stellar-xdr/issues/629",
     "https://github.com/stellar/stellar-core/issues/5509"
   ],
-  "notes": "bool word 2, which RFC 4506 does not define. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+  "notes": "bool word 2, which RFC 4506 does not define. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk v0.9.0 and @stellar/stellar-sdk 17.4.0 refuse it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
   "obligations": [
     "format:EvictionIterator.is_curr_bucket:#bool-2"
   ],

@@ -415,7 +415,7 @@ fn gen_format(out: &Path, history_dir: &Path, check: bool) -> Result<bool> {
             let bool_word = v.expect == Expect::ImplementationDefined;
             let notes = if bool_word {
                 format!(
-                    "{}. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk refuses it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
+                    "{}. Decoders differ on this word: stellar-xdr reads it as false, go-stellar-sdk v0.9.0 and @stellar/stellar-sdk 17.4.0 refuse it, and stellar-core's xdrpp reads it as true and re-encodes it as 1",
                     v.note
                 )
             } else {
