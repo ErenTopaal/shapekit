@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/stellar/go-stellar-sdk/amount"
 	"github.com/stellar/go-stellar-sdk/strkey"
@@ -189,6 +190,11 @@ func tokenChange(row map[string]any) (*wire.Change, string) {
 	case "transfer", "mint", "burn", "clawback", "fee":
 	default:
 		return nil, "token transfer event with no claimed vocabulary event"
+	}
+	if amt, _ := str(row, "amount_raw"); topic == "fee" && strings.HasPrefix(amt, "-") {
+		// go-stellar-sdk's token transfer processor writes a transaction's refund as a
+		// second fee event with a negative amount (CAP-67); the claims cover the charge
+		return nil, "a fee refund, written as a fee with a negative amount; only the charge is claimed"
 	}
 	f := map[string]any{"event": topic}
 	if c, ok := str(row, "contract_id"); ok {

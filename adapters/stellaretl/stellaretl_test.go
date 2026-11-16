@@ -95,3 +95,12 @@ func values(m map[string]string) []string {
 	}
 	return out
 }
+
+func TestAFeeRefundIsNotTheClaimedCharge(t *testing.T) {
+	if c, _ := tokenChange(decode(t, `{"event_topic":"fee","amount_raw":"-4839","from":"G"}`)); c != nil {
+		t.Fatalf("a refund mapped to %v", c)
+	}
+	if c, _ := tokenChange(decode(t, `{"event_topic":"fee","amount_raw":"11951","from":"G"}`)); c == nil {
+		t.Fatal("the charge did not map")
+	}
+}

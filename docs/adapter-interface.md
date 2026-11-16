@@ -747,6 +747,50 @@ these losses into `out-of-scope` and hide them. The verdict detail and the findi
 name the cause, so a reader can see that the difference is a design choice in wallet-backend
 and decide whether it matters for their use.
 
+## The stellar-etl adapter
+
+`adapters/stellaretl` (Go), command `adapters/stellaretl/cmd/etl-adapter`:
+
+```sh
+(cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
+shapekit harness run --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+```
+
+That commit is stellar-etl v2.8.34, pinned in `pins.toml`. `--repo` names a clone (default:
+`<user cache dir>/shapekit/stellar-etl`), `--cpus` passes docker's `--cpus` to every container
+and `--builder` names the buildx builder the image is built with.
+
+- **Build.** `git archive <commit> | docker buildx build -f docker/Dockerfile -` with each
+  `FROM` replaced by its pinned digest (`BaseImages` in `build.go`, the same digests as
+  `pins.toml`), image `shapekit-stellar-etl:<commit>`.
+- **Delivery.** stellar-etl reads ledgers only from Google Cloud Storage, so the adapter offers
+  one delivery mode, `sep54-gcs`: it runs `fsouza/fake-gcs-server` (pinned by digest) on
+  `docker_network`, uploads the lake's `.config.json` and every batch up to the released
+  head from `delivery.lake.path`, and points stellar-etl at it through `STORAGE_EMULATOR_HOST`.
+  stellar-etl knows two passphrases, testnet (`--testnet`) and pubnet, so both chain variants
+  run.
+- **Running.** stellar-etl is a batch exporter. The adapter plays the orchestrator: after
+  each `advance` it runs `export_transactions`, `export_operations`, `export_effects`,
+  `export_token_transfer` and `export_contract_events` for the new ledger inside one
+  container limited to `limits.memory_bytes`. `last_ingested_ledger` is the last ledger all
+  five exports finished for. A failed export is retried every two seconds with its error as
+  `last_error`, so a ledger that never exports is a halt. `bootstrap` is `ledger`.
+- **Claims.** Changes from `export_effects`: `account-created` (`account`,
+  `starting_balance`), `account-removed`, `signer-added`, `signer-removed` (no weight is
+  exported), `signer-weight` (`after`; a master key whose weight changes, and a master key set
+  to 0, which stellar-etl writes as a removed signer), `trustline-created`,
+  `trustline-removed`, `trustline-limit` (`after`), `home-domain` (`after`) and `data-entry`.
+  Token events from `export_token_transfer`: transfers, mints, burns and clawbacks with
+  `contract`, `from`, `to`, `amount`, and fee charges (`before-all-txs`) with `contract`
+  and `from`. A refund, which the export writes as a second fee row with a negative amount,
+  is `unmapped`. Amounts written with seven decimals are converted to stroops. No participants are
+  claimed: no export lists a transaction's participants. The created master key signer that
+  stellar-etl adds to every new account, and every effect type outside the claims, are
+  `unmapped` rows.
+- **Dump.** One table per export, the union of the rows' JSON members as columns; cells are
+  strings as written, numbers as written, booleans as `true` and `false`, objects and arrays
+  as compact JSON.
+
 ## Oracle vocabulary
 
 What the oracle says each transaction changed, read only from `LedgerCloseMeta`, in
