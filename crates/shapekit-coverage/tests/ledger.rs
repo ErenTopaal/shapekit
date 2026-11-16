@@ -120,3 +120,26 @@ fn every_fragment_must_be_listed_and_entry_ids_need_a_ledger_kind() {
         "{text:#?}"
     );
 }
+
+#[test]
+fn every_gate_contributes_both_sides() {
+    let dir = layout(&[], LISTED);
+    let root = dir.path();
+    fs::create_dir_all(root.join("registry/generated")).unwrap();
+    fs::write(
+        root.join("registry/generated/gates.json"),
+        r#"{"schema_version":1,"core":{"version":"v30.0.0","commit":"0e49751aa9ddf892302cca02cea7f3f5d97df9f1"},"gates":[
+{"file":"src/transactions/SetOptionsOpFrame.cpp","line":308,"column":9,"function":"f","comparison":"is-before","version":19,
+ "sides":[{"branch":"true","status":"met","witnesses":["chain:cap40.signed-payload-signer.p18"]},{"branch":"false","status":"open"}]}]}"#,
+    )
+    .unwrap();
+    let (l, problems) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    assert!(problems.is_empty(), "{problems:#?}");
+    assert_eq!(l.count(ObligationKind::GateSide, ObligationStatus::Met), 1);
+    assert_eq!(l.count(ObligationKind::GateSide, ObligationStatus::Open), 1);
+    assert!(
+        l.obligations
+            .iter()
+            .any(|o| o.id == "gate-side:src/transactions/SetOptionsOpFrame.cpp:308:9:false")
+    );
+}

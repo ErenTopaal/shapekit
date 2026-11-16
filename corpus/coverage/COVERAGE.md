@@ -810,14 +810,14 @@ Expected source classes with no entry: synthetic.
 
 ## Obligations
 
-Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.
+Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.
 
 | Kind | Met | Unmeetable | Open | Total |
 |---|---|---|---|---|
 | `format` | 3869 | 0 | 0 | 3869 |
 | `gap` | 9 | 0 | 4 | 13 |
 | `core-test-section` | 0 | 0 | 29691 | 29691 |
-| `gate-side` | 0 | 0 | 0 | 0 |
+| `gate-side` | 0 | 0 | 690 | 690 |
 | `field` | 0 | 0 | 0 | 0 |
 | `sdk-version` | 0 | 0 | 0 | 0 |
 | `seed` | 53 | 0 | 161 | 214 |

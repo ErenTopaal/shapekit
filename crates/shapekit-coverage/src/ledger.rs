@@ -6,6 +6,8 @@
 //!   producer wrote (core test sections, seeded faults, and so on). Every `*.obligations.json`
 //!   under `conformance/`, `registry/`, `corpus/` and `candidate/` must be listed there;
 //! - one `gap` obligation per row of `registry/gaps/*.toml`, `gap:<language>:<row id>`;
+//! - two `gate-side` obligations per gate of `registry/generated/gates.json`, one per branch,
+//!   carrying the side's status, witnesses and evidence;
 //! - the `obligations` of every entry of `corpus/manifest.json` (witness `entry:<id>`) and
 //!   `candidate/manifest.json` (witness `candidate:<id>`).
 //!
@@ -19,13 +21,15 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use shapekit_contracts::obligations::Obligation;
 use shapekit_contracts::{
-    Contract, ObligationKind, ObligationLedger, ObligationStatus, WitnessRef,
+    Contract, GateList, ObligationKind, ObligationLedger, ObligationStatus, WitnessRef,
 };
 use shapekit_manifest::Problem;
 
 use crate::CoverageError;
 
 pub const SOURCES_FILE: &str = "obligation-sources.toml";
+/// The protocol gate list, relative to the registry directory.
+pub const GATES_FILE: &str = "generated/gates.json";
 pub const LEDGER_JSON: &str = "obligations.json";
 const FRAGMENT_SUFFIX: &str = ".obligations.json";
 const FRAGMENT_DIRS: [&str; 4] = ["conformance", "registry", "corpus", "candidate"];
@@ -194,6 +198,34 @@ pub fn build(
                     "{rel} is an obligation fragment that registry/{SOURCES_FILE} does not list"
                 ),
             ));
+        }
+    }
+
+    let gates_path = registry.join(GATES_FILE);
+    if gates_path.is_file() {
+        let gates =
+            shapekit_contracts::load::<GateList>(&gates_path).map_err(|e| parse(&gates_path, e))?;
+        for g in &gates.gates {
+            for side in &g.sides {
+                let oid = g.side_obligation_id(side.branch);
+                if map.contains_key(&oid) {
+                    problems.push(Problem::new(
+                        at(GATES_FILE),
+                        format!("{oid} is also listed by a fragment"),
+                    ));
+                    continue;
+                }
+                map.insert(
+                    oid.clone(),
+                    Obligation {
+                        id: oid,
+                        kind: ObligationKind::GateSide,
+                        status: side.status,
+                        witnesses: side.witnesses.clone(),
+                        evidence: side.evidence.clone(),
+                    },
+                );
+            }
         }
     }
 

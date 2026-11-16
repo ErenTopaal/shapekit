@@ -227,7 +227,7 @@ fn fields(out: &mut String, c: &Coverage) {
     if !c.obligations.is_empty() {
         out.push_str("\n## Obligations\n\n");
         out.push_str(
-            "Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.\n\n| Kind | Met | Unmeetable | Open | Total |\n|---|---|---|---|---|\n",
+            "Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.\n\n| Kind | Met | Unmeetable | Open | Total |\n|---|---|---|---|---|\n",
         );
         for r in &c.obligations {
             let _ = writeln!(
