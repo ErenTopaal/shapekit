@@ -44,6 +44,11 @@ url=$(python3 -I -c 'import sys,tomllib; print(next(e["url"] for e in tomllib.lo
 image="shapekit/core-twin:${version}-cov"
 toolchain="shapekit/core-twin-toolchain:${version}"
 
+# core's release profile links its rust library with lto, one codegen unit and
+# full debug info; the debug info alone pushes that single rustc past 6 GB, so
+# it is turned off (CARGO_PROFILE_RELEASE_DEBUG=0). debug info does not change
+# the generated code.
+#
 # flags of core's own docker/Dockerfile.testing build stage, minus -g1 (debug
 # info is not needed for coverage and costs memory) and minus tracy and the
 # next protocol, which the release build does not enable either
@@ -90,7 +95,7 @@ cleanup() { docker rm -f "$name" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 docker run -d --name "$name" --memory "$memory" --memory-swap "$memory" --cpus "$cpus" \
     --user "$(id -u):$(id -g)" -e HOME=/work -e CARGO_HOME=/work/cargo-home \
-    -e CARGO_BUILD_JOBS="$jobs" -e CARGO_INCREMENTAL=0 \
+    -e CARGO_BUILD_JOBS="$jobs" -e CARGO_INCREMENTAL=0 -e CARGO_PROFILE_RELEASE_DEBUG=0 \
     -e CC="$cc" -e CXX="$cxx" -e CFLAGS="$cflags" -e CXXFLAGS="$cxxflags" \
     -e CONFIGURE_FLAGS="$configure_flags" -e JOBS="$jobs" \
     -v "$workdir:/work" -w /work/src "$toolchain" bash -c '
