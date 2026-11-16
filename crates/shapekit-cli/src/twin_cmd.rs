@@ -124,11 +124,10 @@ pub enum TwinCommand {
     /// transaction and ledger code it reaches: the core coverage summary
     /// (`core-coverage.json`) and the merged profile, written into `--out`.
     Coverage {
-        /// `smoke` or a corpus chain id.
+        /// `smoke` or a corpus chain id. The chain is recorded under both passphrases, as
+        /// the corpus holds it, and the coverage is over both runs.
         #[arg(long)]
         chain: String,
-        #[arg(long, default_value = "testnet")]
-        network: String,
         /// Pins naming the release image; their stack is recorded with recipe chains.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
@@ -194,7 +193,6 @@ pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
         TwinCommand::Coverage {
             chain,
-            network,
             pins,
             twin_pins,
             corpus,
@@ -203,7 +201,6 @@ pub fn run(command: TwinCommand) -> Result<bool> {
             out,
         } => coverage(CoverageArgs {
             chain,
-            network,
             pins,
             twin_pins,
             corpus,
@@ -340,7 +337,6 @@ fn gates(core_src: &Path, out: &Path, pins_path: &Path) -> Result<bool> {
 
 struct CoverageArgs {
     chain: String,
-    network: String,
     pins: PathBuf,
     twin_pins: PathBuf,
     corpus: PathBuf,
@@ -369,11 +365,6 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         .iter()
         .map(|s| parse_show(s))
         .collect::<Result<Vec<_>>>()?;
-    let network = match a.network.as_str() {
-        "testnet" => Network::Testnet,
-        "mainnet" => Network::Mainnet,
-        other => bail!("unknown network {other:?}, expected testnet or mainnet"),
-    };
     if a.out.exists() {
         bail!("{} already exists", a.out.display());
     }
@@ -397,7 +388,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         registry: &registry,
         generated_with: manifest_cmd::generated_with(&pins::load(&a.pins)?)?,
         jobs: 1,
-        networks: vec![network],
+        networks: Network::BOTH.to_vec(),
     };
     let all = recipe::all();
     let recipes: Vec<&dyn recipe::Recipe> = if a.chain == SMOKE {
@@ -417,37 +408,39 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
         &a.out.join("chain"),
         &setup,
     )?;
-    let run = recorded
-        .get(&(a.chain.clone(), network.name()))
-        .with_context(|| format!("chain {} was not recorded", a.chain))?;
-    println!(
-        "{} ({}) on the twin: ledgers {} to {} in {:.1}s, canonical stream {}",
-        a.chain,
-        network.name(),
-        run.first_ledger,
-        run.last_ledger,
-        run.seconds,
-        run.canonical_stream_sha256
-    );
-    if a.chain != SMOKE {
-        let committed = a
-            .corpus
-            .join("chains")
-            .join(&a.chain)
-            .join(network.name())
-            .join("chain.json");
-        let v: serde_json::Value = serde_json::from_slice(
-            &std::fs::read(&committed)
-                .with_context(|| format!("reading {}", committed.display()))?,
-        )?;
-        if v["canonical_stream_sha256"].as_str() != Some(run.canonical_stream_sha256.as_str()) {
-            bail!(
-                "the twin's chain differs from {} ({}); its coverage would not describe the corpus chain",
-                committed.display(),
-                v["canonical_stream_sha256"]
-            );
+    for network in Network::BOTH {
+        let run = recorded
+            .get(&(a.chain.clone(), network.name()))
+            .with_context(|| format!("chain {} was not recorded", a.chain))?;
+        println!(
+            "{} ({}) on the twin: ledgers {} to {} in {:.1}s, canonical stream {}",
+            a.chain,
+            network.name(),
+            run.first_ledger,
+            run.last_ledger,
+            run.seconds,
+            run.canonical_stream_sha256
+        );
+        if a.chain != SMOKE {
+            let committed = a
+                .corpus
+                .join("chains")
+                .join(&a.chain)
+                .join(network.name())
+                .join("chain.json");
+            let v: serde_json::Value = serde_json::from_slice(
+                &std::fs::read(&committed)
+                    .with_context(|| format!("reading {}", committed.display()))?,
+            )?;
+            if v["canonical_stream_sha256"].as_str() != Some(run.canonical_stream_sha256.as_str()) {
+                bail!(
+                    "the twin's chain differs from {} ({}); its coverage would not describe the corpus chain",
+                    committed.display(),
+                    v["canonical_stream_sha256"]
+                );
+            }
+            println!("equal to the committed chain");
         }
-        println!("equal to the committed chain");
     }
 
     let export = cov::merge_and_export(&twin, &profiles)?;
