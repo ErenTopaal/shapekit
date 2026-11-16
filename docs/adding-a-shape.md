@@ -303,3 +303,58 @@ again with `shapekit gen chains --corpus <copy>`. On 2026-11-13, two independent
 every chain (88 recordings: 44 chains under both passphrases) gave 0 per-key order differences
 over 10968 keys with two or more changes in one list. 580 lists differed, all only in the
 order between keys.
+
+## 5. The candidate lane
+
+New entries from a generator that does not hand-check its output, such as a search or a
+dump of core's own tests, go to `candidate/` first. It has the corpus layout
+(`candidate/manifest.json`, `candidate/entries/`, `candidate/vectors/`) and the same
+manifest rules:
+
+```sh
+shapekit manifest build --corpus candidate
+shapekit manifest validate --file candidate/manifest.json
+```
+
+Pull request checks never run the candidate lane. The `candidate` job of the nightly
+workflow runs it through the current version of each SDK and writes, per entry, whether it
+can be promoted. A divergence there is a finding to triage, so it is listed in the job
+summary and does not turn the nightly run red.
+
+An entry moves into the corpus with `shapekit corpus promote`:
+
+```sh
+for sdk in rust go js; do
+  shapekit conformance run --sdk $sdk --manifest candidate/manifest.json \
+    --entry <entry-id> --out target/candidate/$sdk
+done
+shapekit corpus promote <entry-id> \
+  --matrix target/candidate/rust/divergence-matrix.json \
+  --matrix target/candidate/go/divergence-matrix.json \
+  --matrix target/candidate/js/divergence-matrix.json
+```
+
+The command promotes the entry when the current version of every SDK in
+`conformance/versions.toml` passes it, or when every SDK that fails it has a finding in
+`findings/triage.toml` whose conformance matcher takes the failure and whose `draft` is a file
+under `findings/issues/`. Otherwise it lists each reason and leaves the entry where it is.
+`--dry-run` prints the decision without moving anything.
+
+On promotion the entry's files move from `candidate/` to `corpus/`, both manifests are
+rebuilt, and the corpus manifest must validate or nothing moves. Each accepted failure gets
+a line in `conformance/known-failures/<sdk>.txt` for the SDK's current version, pointing at
+the finding's issue link when it is filed and at its draft otherwise. The run you pass may
+cover more versions; failures on older versions still need their own lines. Then run
+`shapekit oracle run`, `shapekit coverage` and the conformance run for the corpus.
+
+### Source classes and fields beyond recipes
+
+- `core-test-dump`: `TransactionMeta` that core's own transaction tests wrote, converted back
+  to XDR. The bytes are core output but come from core's test passphrase, so the entry has
+  only an `any` variant, and `source.upstream` names the core test source file at the pinned
+  tag. Coverage counts these entries as core-emitted.
+- `source.recipe_ir`: the recipe IR file that recorded a `local-core` or
+  `local-core-refused` entry, a `corpus/recipes/<family>/<name>.json` path. The format is
+  `schema/recipe-ir.schema.json`.
+- `obligations`: the ids of the obligations in `corpus/coverage/obligations.json` the entry
+  witnesses, each `<kind>:<name>` with a kind of `schema/obligations.schema.json`.

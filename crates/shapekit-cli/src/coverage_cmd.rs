@@ -29,6 +29,9 @@ pub enum CorpusCommand {
         #[arg(long, default_value = "dist")]
         out: PathBuf,
     },
+    /// Move an entry from the candidate lane into the corpus: every SDK's current version
+    /// passes it, or each failure is a triaged finding with a drafted issue.
+    Promote(crate::promote_cmd::PromoteArgs),
 }
 
 pub fn coverage(args: CoverageArgs) -> Result<bool> {
@@ -75,6 +78,7 @@ pub fn corpus(command: CorpusCommand) -> Result<bool> {
             registry,
             out,
         } => pack(&corpus, &registry, &out),
+        CorpusCommand::Promote(args) => crate::promote_cmd::run(args),
     }
 }
 

@@ -201,6 +201,74 @@ jobs:
           path: target/conformance/
           retention-days: 30
 
+  candidate:
+    # the candidate lane: entries waiting for promotion run through the current version of each
+    # sdk. a divergence here is a finding to triage, not a broken build, so it is reported in
+    # the job summary and the job stays green; a malformed candidate manifest, a testee that
+    # does not start or a run without a matrix fails it
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: testees/js/**/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: candidate manifest validates
+        run: |
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" manifest validate --file candidate/manifest.json
+      - name: candidates through the current sdks, and which can be promoted
+        run: |
+          set -uo pipefail
+          shapekit="$RUNNER_TEMP/bin/shapekit"
+          ids=$(jq -r '.entries[].id' candidate/manifest.json)
+          if [ -z "$ids" ]; then
+            echo "the candidate lane is empty" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # candidate entries are in no known-failures list, so every failure is reported
+          known="$RUNNER_TEMP/known-failures"
+          mkdir -p "$known"
+          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"
+          matrices=()
+          for sdk in rust go js; do
+            out="target/candidate/$sdk"
+            "$shapekit" conformance run --sdk "$sdk" --manifest candidate/manifest.json \
+              --known-failures "$known" --out "$out"
+            code=$?
+            # 1 is a divergence, anything else is the run itself failing
+            if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then exit "$code"; fi
+            test -f "$out/divergence-matrix.json" || { echo "::error::no matrix for $sdk"; exit 1; }
+            cat "$out/MATRIX.md" >>"$GITHUB_STEP_SUMMARY"
+            matrices+=(--matrix "$out/divergence-matrix.json")
+          done
+          echo "## promotion" >>"$GITHUB_STEP_SUMMARY"
+          for id in $ids; do
+            "$shapekit" corpus promote "$id" --dry-run "${matrices[@]}" >"target/candidate/$id.txt"
+            code=$?
+            if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then cat "target/candidate/$id.txt"; exit "$code"; fi
+            { echo '```'; cat "target/candidate/$id.txt"; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: candidate
+          path: target/candidate/
+          if-no-files-found: ignore
+          retention-days: 30
+
   harness:
     # every chain through the wallet-backend adapter at the current pin, once per delivery mode;
     # the rpc run goes twice in one process and fails if the second round's peak memory grows

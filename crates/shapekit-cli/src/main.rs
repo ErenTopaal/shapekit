@@ -14,6 +14,7 @@ mod manifest_cmd;
 mod oracle_cmd;
 mod pack_cmd;
 mod pins;
+mod promote_cmd;
 mod registry_cmd;
 mod schema_cmd;
 mod serve_cmd;

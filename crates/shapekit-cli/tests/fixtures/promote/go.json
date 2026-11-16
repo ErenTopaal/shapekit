@@ -1,0 +1,121 @@
+{
+  "check_summary": {
+    "go@v0.9.0": {
+      "diverges-from-network": 2,
+      "pass": 14
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "go@v0.9.0": {
+          "checks": [
+            {
+              "actual": {
+                "kind": "claimable_balance",
+                "payload": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+              },
+              "check": "case 13/strkey_decode",
+              "detail": "the sdk accepted a value the network refuses",
+              "expected": "rejected",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "source": "corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json case 13"
+            },
+            {
+              "actual": {
+                "kind": "claimable_balance",
+                "payload": "AT8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+ia"
+              },
+              "check": "case 15/strkey_decode",
+              "detail": "the sdk accepted a value the network refuses",
+              "expected": "rejected",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "source": "corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json case 15"
+            }
+          ],
+          "counts": {
+            "diverges-from-network": 2,
+            "pass": 14
+          },
+          "result": "diverges-from-network"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [
+    "conformance/known-failures/go.txt: line 10: cap27.muxed-accounts.synth-strkey-g-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 11: cap27.muxed-accounts.synth-strkey-m-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 12: cap27.muxed-accounts.synth-strkey-s-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 13: cap38.liquidity-pools.synth-strkey-l-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 14: cap40.signed-payload-signer.synth-strkey-p-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 15: cap40.signed-payload-signer.synth-strkey-t-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 16: cap40.signed-payload-signer.synth-strkey-x-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 17: soroban.invoke-basics.synth-strkey-c-invalid is not in the manifest",
+    "conformance/known-failures/go.txt: line 20: cap38.liquidity-pools.synth-assets-dotnet257 is not in the manifest",
+    "conformance/known-failures/go.txt: line 21: cap38.liquidity-pools.synth-assets-equal is not in the manifest",
+    "conformance/known-failures/go.txt: line 22: cap38.liquidity-pools.synth-assets-js1766-issuers is not in the manifest",
+    "conformance/known-failures/go.txt: line 23: cap38.liquidity-pools.synth-assets-py1246-testnet-pool is not in the manifest",
+    "conformance/known-failures/go.txt: line 27: soroban.auth-trees.synth-auth-depth-494-over-cap is not in the manifest",
+    "conformance/known-failures/go.txt: line 28: soroban.auth-trees.p30-declared-depth-493 is not in the manifest",
+    "conformance/known-failures/go.txt: line 29: soroban.auth-trees.p30-declared-depth-493 is not in the manifest",
+    "conformance/known-failures/go.txt: line 30: soroban.scval-shapes.synth-scmap-depth-198-over-cap is not in the manifest",
+    "conformance/known-failures/go.txt: line 31: soroban.scval-shapes.synth-scvec-depth-247-over-cap is not in the manifest",
+    "conformance/known-failures/go.txt: line 36: cap27.muxed-accounts.synth-strkey-g-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 37: cap27.muxed-accounts.synth-strkey-g-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 38: cap27.muxed-accounts.synth-strkey-g-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 39: cap27.muxed-accounts.synth-strkey-g-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 40: cap27.muxed-accounts.synth-strkey-m-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 41: cap27.muxed-accounts.synth-strkey-m-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 42: cap27.muxed-accounts.synth-strkey-m-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 43: cap27.muxed-accounts.synth-strkey-m-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 44: cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 45: cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 46: cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: line 47: cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars is not in the manifest",
+    "conformance/known-failures/go.txt: cap23.claimable-balances.synth-strkey-b-invalid on v0.9.0: `case 13/strkey_decode` is diverges-from-network and not in the known-failures list",
+    "conformance/known-failures/go.txt: cap23.claimable-balances.synth-strkey-b-invalid on v0.9.0: `case 15/strkey_decode` is diverges-from-network and not in the known-failures list"
+  ],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "go@v0.9.0": {
+      "strkey_decode": {
+        "diverges-from-network": 2,
+        "pass": 14
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "go@v0.9.0": {
+      "diverges-from-network": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "github.com/stellar/go-xdr": "v0.0.0-20260806060815-dc590f17552a"
+      },
+      "decode_limits": "honoured",
+      "key": "go@v0.9.0",
+      "ops": [
+        "decode_encode",
+        "decode_json",
+        "strkey_decode",
+        "strkey_encode",
+        "asset_order",
+        "pool_id"
+      ],
+      "package": "github.com/stellar/go-stellar-sdk",
+      "sdk": "go",
+      "version": "v0.9.0"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "check_summary": {
+    "rust@30.0.0": {
+      "pass": 16
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "rust@30.0.0": {
+          "counts": {
+            "pass": 16
+          },
+          "result": "pass"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [
+    "conformance/known-failures/rust.txt: line 9: cap03.offer-liabilities.synth-textual-offer-id-noncanonical is not in the manifest",
+    "conformance/known-failures/rust.txt: line 12: soroban.auth-trees.synth-auth-depth-493-deepest-accepted is not in the manifest",
+    "conformance/known-failures/rust.txt: line 13: soroban.scval-shapes.synth-event-vec-depth-101 is not in the manifest",
+    "conformance/known-failures/rust.txt: line 14: soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted is not in the manifest",
+    "conformance/known-failures/rust.txt: line 15: soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted is not in the manifest",
+    "conformance/known-failures/rust.txt: line 17: soroban.auth-trees.p30-declared-depth-245 is not in the manifest",
+    "conformance/known-failures/rust.txt: line 18: soroban.auth-trees.p30-declared-depth-246 is not in the manifest",
+    "conformance/known-failures/rust.txt: line 19: soroban.auth-trees.p30-declared-depth-492 is not in the manifest",
+    "conformance/known-failures/rust.txt: line 20: soroban.scval-shapes.p30-map-depth-max-envelope is not in the manifest",
+    "conformance/known-failures/rust.txt: line 21: soroban.scval-shapes.p30-map-depth-max-meta is not in the manifest",
+    "conformance/known-failures/rust.txt: line 22: soroban.scval-shapes.p30-map-depth-over is not in the manifest",
+    "conformance/known-failures/rust.txt: line 23: soroban.scval-shapes.p30-map-mixed-keys-sorted-meta is not in the manifest",
+    "conformance/known-failures/rust.txt: line 24: soroban.scval-shapes.p30-vec-depth-max-envelope is not in the manifest",
+    "conformance/known-failures/rust.txt: line 25: soroban.scval-shapes.p30-vec-depth-max-meta is not in the manifest",
+    "conformance/known-failures/rust.txt: line 26: soroban.scval-shapes.p30-vec-depth-over is not in the manifest",
+    "conformance/known-failures/rust.txt: line 32: soroban.scval-shapes.synth-bool-value-2 is not in the manifest",
+    "conformance/known-failures/rust.txt: line 33: soroban.invoke-basics.synth-invoke-arg-bool-2 is not in the manifest"
+  ],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "rust@30.0.0": {
+      "strkey_decode": {
+        "pass": 16
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "rust@30.0.0": {
+      "pass": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "stellar-strkey": "1.0.0"
+      },
+      "decode_limits": "honoured",
+      "key": "rust@30.0.0",
+      "ops": [
+        "decode_encode",
+        "decode_json",
+        "encode_json",
+        "strkey_decode",
+        "strkey_encode",
+        "asset_order",
+        "pool_id",
+        "map_sort",
+        "map_validate",
+        "id_parse"
+      ],
+      "package": "stellar-xdr",
+      "reference_for": "expected_json",
+      "sdk": "rust",
+      "version": "30.0.0"
+    }
+  ]
+}
