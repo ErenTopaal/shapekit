@@ -986,3 +986,17 @@ fields = []
 linked_issues = []
 priority = 15
 notes = "written by shapekit probe all into the candidate lane, beside registry/generated/validation.json, whose attempts name these entries as witnesses. an applied attempt has two entries, the envelope and the ledger it closed in; an attempt core refused has the envelope; an attempt core could not decode has the raw bytes as a synthetic must-reject entry. every attempt runs on its own funded accounts, so two attempts of one field differ in their keys as well as in the field"
+
+[[family]]
+id = "probe.limits"
+title = "The largest value core accepts for a bounded quantity, and the first it refuses"
+caps = []
+no_cap_reason = "the entries measure bounds that the XDR definitions, network settings and core's own constants set, whichever CAP introduced each; every limit has two entries, the value core applied and the next one, which core refused, failed or could not decode"
+protocol_introduced = 0
+protocol_valid = { min = 0 }
+signature = ["TransactionEnvelope:tx"]
+source_classes = ["local-core", "local-core-refused", "synthetic"]
+fields = []
+linked_issues = []
+priority = 15
+notes = "written by shapekit probe limits into the candidate lane, beside registry/generated/limits.json, whose limits name these entries as witnesses. a value past an XDR bound is written as raw bytes, a synthetic must-reject entry, because no XDR type holds it"
