@@ -248,6 +248,43 @@ pub struct NodeConfig {
     /// applied passed all of them. Off for recorded chains, which never needed it; the probe
     /// turns it on.
     pub invariant_checks: bool,
+    /// Docker resource limits of the node's containers. They bound how much of the host a
+    /// node may take and never change what it writes.
+    pub limits: ContainerLimits,
+}
+
+/// `docker run --memory` and `--cpus` for every container a node starts.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ContainerLimits {
+    /// Bytes; also the memory plus swap limit, so the node cannot swap past it.
+    pub memory_bytes: u64,
+    /// Thousandths of a cpu, so `2000` is `--cpus 2`.
+    pub millicpus: u32,
+}
+
+impl Default for ContainerLimits {
+    /// 2 GiB and 2 cpus. A standalone node closing test ledgers stays far below that, and
+    /// several explorer nodes side by side still leave the host room.
+    fn default() -> Self {
+        Self {
+            memory_bytes: 2 << 30,
+            millicpus: 2000,
+        }
+    }
+}
+
+impl ContainerLimits {
+    /// The `docker run` arguments.
+    pub fn docker_args(&self) -> Vec<String> {
+        vec![
+            "--memory".into(),
+            self.memory_bytes.to_string(),
+            "--memory-swap".into(),
+            self.memory_bytes.to_string(),
+            "--cpus".into(),
+            format!("{}.{:03}", self.millicpus / 1000, self.millicpus % 1000),
+        ]
+    }
 }
 
 /// Node seed for a passphrase, see the module docs for the layout.
@@ -381,6 +418,19 @@ pub fn describe(cfg: &NodeConfig) -> String {
 mod tests {
     use super::*;
 
+    #[test]
+    fn default_limits_are_two_gib_and_two_cpus() {
+        assert_eq!(
+            ContainerLimits::default().docker_args(),
+            ["--memory", "2147483648", "--memory-swap", "2147483648", "--cpus", "2.000"]
+        );
+        let half = ContainerLimits {
+            memory_bytes: 1,
+            millicpus: 500,
+        };
+        assert_eq!(half.docker_args()[5], "0.500");
+    }
+
     fn sample(passphrase: &str) -> NodeConfig {
         NodeConfig {
             passphrase: passphrase.to_owned(),
@@ -398,6 +448,7 @@ mod tests {
             diagnostic_events: true,
             min_persistent_ttl: None,
             invariant_checks: false,
+            limits: ContainerLimits::default(),
         }
     }
 

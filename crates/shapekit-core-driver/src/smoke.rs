@@ -64,6 +64,7 @@ pub fn node_config(passphrase: &str, image: CoreImage) -> NodeConfig {
         diagnostic_events: false,
         min_persistent_ttl: None,
         invariant_checks: false,
+        limits: Default::default(),
     }
 }
 

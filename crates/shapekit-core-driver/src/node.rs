@@ -407,9 +407,11 @@ impl CoreNode {
             ],
             None => Vec::new(),
         };
+        let limits = cfg.limits.docker_args();
         let base = |extra: &[&str]| -> Vec<String> {
             let mut v: Vec<String> = vec!["run".into()];
             v.extend(extra.iter().map(|s| s.to_string()));
+            v.extend(limits.iter().cloned());
             v.extend(profile_args.iter().cloned());
             for a in [
                 "--network",

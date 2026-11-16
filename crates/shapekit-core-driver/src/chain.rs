@@ -614,6 +614,12 @@ impl ChainDriver {
             .collect()
     }
 
+    /// Stops the node without writing the chain.
+    pub fn stop(self) -> Result<(), ChainError> {
+        self.node.stop()?;
+        Ok(())
+    }
+
     /// Writes the recorded chain into `target` and stops the node.
     pub fn finish(self, target: &Path) -> Result<ChainSummary, ChainError> {
         let summary = self.recorder.finish(&self.node, target)?;
