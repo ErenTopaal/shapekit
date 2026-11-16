@@ -407,6 +407,9 @@ pub struct RunOptions {
     pub out: Option<PathBuf>,
     /// How many times the selection is run in one invocation; results must not change.
     pub passes: u32,
+    /// Starts the one selected version with this command line instead of its own, so a build
+    /// of the sdk with a seeded fault runs under the version's settings and known failures.
+    pub command: Option<Vec<String>>,
 }
 
 pub struct RunOutcome {
@@ -418,6 +421,18 @@ pub struct RunOutcome {
 
 /// Resolves the targets a run covers.
 pub fn targets(file: &VersionsFile, opts: &RunOptions) -> Result<Vec<Target>> {
+    let mut targets = select_targets(file, opts)?;
+    if let Some(command) = &opts.command {
+        ensure!(
+            targets.len() == 1 && !command.is_empty(),
+            "a replacement command needs exactly one selected version"
+        );
+        targets[0].command = command.clone();
+    }
+    Ok(targets)
+}
+
+fn select_targets(file: &VersionsFile, opts: &RunOptions) -> Result<Vec<Target>> {
     if opts.only_versions.is_empty() {
         return file.select(&opts.sdks, opts.all_versions);
     }

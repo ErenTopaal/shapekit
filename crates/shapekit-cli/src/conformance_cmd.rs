@@ -1,10 +1,10 @@
-//! `shapekit conformance run|crosscheck|reproduce|sync-versions|draft-issues|file-issues`.
+//! `shapekit conformance run|crosscheck|reproduce|sync-versions|seed-check|draft-issues|file-issues`.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::Subcommand;
-use shapekit_conformance::{crosscheck, issues, reproduce, runner, sync};
+use shapekit_conformance::{crosscheck, issues, reproduce, runner, seed, sync};
 use shapekit_manifest::EntryKind;
 
 // requests and responses with deep XDR-JSON are parsed and dropped recursively
@@ -101,6 +101,84 @@ pub enum ConformanceCommand {
         #[arg(long, default_value = "conformance/known-failures")]
         known_failures: PathBuf,
     },
+    /// Seed faults into an SDK with its language's mutation tool and count how many the
+    /// corpus catches.
+    SeedCheck {
+        /// SDK to seed: rust, go or js.
+        #[arg(long)]
+        sdk: String,
+        /// SDK version; the current one in versions.toml when absent.
+        #[arg(long)]
+        version: Option<String>,
+        /// How many of the generated faults to run.
+        #[arg(long, default_value_t = 100)]
+        sample: usize,
+        /// Seed of the sample.
+        #[arg(long, default_value_t = 20261116)]
+        seed: u64,
+        /// Faults run at the same time, where the tool can run several.
+        #[arg(long, default_value_t = 2)]
+        jobs: usize,
+        /// Skip the testee build steps in versions.toml.
+        #[arg(long)]
+        no_build: bool,
+        /// Scratch directory for sdk copies, tools and builds.
+        #[arg(long, default_value = "target/seed-check")]
+        work: PathBuf,
+        /// Where <sdk>.json, <sdk>.obligations.json and SEED-CHECK.md go.
+        #[arg(long, default_value = "conformance/seed-check")]
+        out: PathBuf,
+        #[arg(long, default_value = "corpus/manifest.json")]
+        manifest: PathBuf,
+        #[arg(long, default_value = "conformance/versions.toml")]
+        versions_file: PathBuf,
+        #[arg(long, default_value = "conformance/known-failures")]
+        known_failures: PathBuf,
+    },
+    /// One seeded fault: run the corpus on a build and compare it with the unmodified one.
+    /// Called back by the mutation tools during seed-check; exits 0 when nothing changed.
+    #[command(hide = true)]
+    SeedProbe {
+        #[arg(long)]
+        root: PathBuf,
+        #[arg(long)]
+        manifest: PathBuf,
+        #[arg(long)]
+        versions_file: PathBuf,
+        #[arg(long)]
+        known_failures: PathBuf,
+        #[arg(long)]
+        sdk: String,
+        #[arg(long)]
+        version: String,
+        /// The testee command line, one argument per flag.
+        #[arg(long = "command", required = true)]
+        command: Vec<String>,
+        #[arg(long)]
+        baseline: PathBuf,
+        /// Record file.
+        #[arg(long, conflicts_with = "record_dir")]
+        record: Option<PathBuf>,
+        /// Record directory; the file is named by the environment variable --label-env.
+        #[arg(long, requires = "label_env")]
+        record_dir: Option<PathBuf>,
+        #[arg(long)]
+        label_env: Option<String>,
+    },
+    /// go-mutesting's exec command during seed-check.
+    #[command(hide = true)]
+    SeedGoExec {
+        #[arg(long)]
+        root: PathBuf,
+        #[arg(long)]
+        manifest: PathBuf,
+        #[arg(long)]
+        versions_file: PathBuf,
+        #[arg(long)]
+        known_failures: PathBuf,
+        #[arg(long)]
+        setup: PathBuf,
+    },
     /// Write one issue body per SDK and diverging entry from a divergence matrix.
     DraftIssues {
         #[arg(long, default_value = "target/conformance/divergence-matrix.json")]
@@ -176,6 +254,7 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 build: !no_build,
                 out: Some(out.clone()),
                 passes,
+                command: None,
             })?;
             // entries count as their worst check, so the check totals go next to them
             let line = |counts: &std::collections::BTreeMap<_, usize>| {
@@ -312,6 +391,105 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 println!("{line}");
             }
             Ok(true)
+        }
+        ConformanceCommand::SeedCheck {
+            sdk,
+            version,
+            sample,
+            seed,
+            jobs,
+            no_build,
+            work,
+            out,
+            manifest,
+            versions_file,
+            known_failures,
+        } => {
+            let paths = seed::Paths::new(&root, &manifest, &versions_file, &known_failures)?;
+            let ctx = seed::Context::new(
+                paths,
+                &sdk,
+                version.as_deref(),
+                &work,
+                sample,
+                seed,
+                !no_build,
+                jobs,
+            )?;
+            let report = seed::check(&ctx)?;
+            let out = root.join(out);
+            seed::write_json(&out.join(format!("{sdk}.json")), &report)?;
+            seed::write_json(
+                &out.join(format!("{sdk}.obligations.json")),
+                &seed::obligations(&report),
+            )?;
+            let mut reports = Vec::new();
+            for s in ["rust", "go", "js"] {
+                let p = out.join(format!("{s}.json"));
+                if p.is_file() {
+                    reports.push(seed::read_json::<seed::Report>(&p)?);
+                }
+            }
+            std::fs::write(out.join("SEED-CHECK.md"), seed::render_md(&reports))
+                .context("writing SEED-CHECK.md")?;
+            let (caught, built) = report.rate();
+            println!(
+                "{sdk} {}: {} faults generated by {} {}, {} sampled, {caught} of {built} that built caught",
+                report.version,
+                report.population,
+                report.tool.name,
+                report.tool.version,
+                report.sample
+            );
+            for (s, n) in &report.counts {
+                println!("  {s:?}: {n}");
+            }
+            for f in &report.real_faults {
+                println!(
+                    "  released fault {}: {}",
+                    f.issue,
+                    if f.caught { "caught" } else { "not caught" }
+                );
+            }
+            println!("wrote {}", out.display());
+            Ok(true)
+        }
+        ConformanceCommand::SeedProbe {
+            root: probe_root,
+            manifest,
+            versions_file,
+            known_failures,
+            sdk,
+            version,
+            command,
+            baseline,
+            record,
+            record_dir,
+            label_env,
+        } => {
+            let paths = seed::Paths::new(&probe_root, &manifest, &versions_file, &known_failures)?;
+            let record = match (record, record_dir, label_env) {
+                (Some(r), _, _) => r,
+                (None, Some(dir), Some(var)) => {
+                    // stryker's dry run sets no mutant; it must find the build unchanged
+                    let label = std::env::var(&var).ok().filter(|v| !v.is_empty());
+                    dir.join(format!("{}.json", label.as_deref().unwrap_or("unmodified")))
+                }
+                _ => anyhow::bail!("seed-probe needs --record or --record-dir with --label-env"),
+            };
+            let outcome = seed::probe(&paths, &sdk, &version, &command, &baseline, &record)?;
+            Ok(!outcome.caught())
+        }
+        ConformanceCommand::SeedGoExec {
+            root: exec_root,
+            manifest,
+            versions_file,
+            known_failures,
+            setup,
+        } => {
+            let paths = seed::Paths::new(&exec_root, &manifest, &versions_file, &known_failures)?;
+            let code = seed::go::exec(&paths, &setup)?;
+            std::process::exit(code);
         }
         ConformanceCommand::DraftIssues {
             matrix,
