@@ -411,7 +411,11 @@ fn call(contract: &ContractId, f: &str, args: Vec<ScVal>) -> Result<HostFunction
 /// calls whose own simulation fails past the limit.
 fn max_resources(w: &World, s: &Subject) -> Result<SorobanTransactionData> {
     let hf = call(&echo(w)?, "echo", vec![ScVal::U32(7)])?;
-    let mut d = crate::soroban::simulated(w, s, hf)?;
+    raised(w, crate::soroban::simulated(w, s, hf)?)
+}
+
+/// Simulated data with every per-transaction resource raised to the network's maximum.
+fn raised(w: &World, mut d: SorobanTransactionData) -> Result<SorobanTransactionData> {
     d.resources.instructions =
         u32::try_from(setting(w, "contract_compute_v0.tx_max_instructions")?)?;
     d.resources.disk_read_bytes = u32::try_from(setting(
@@ -1044,13 +1048,17 @@ pub fn probes() -> Vec<LimitProbe> {
             ..p(
                 "soroban.contract_data.entry_bytes",
                 "InvokeContractArgs.args",
-                "bytes echo stores in one entry",
+                "bytes put_temp stores in one temporary entry",
                 1,
                 70000,
                 |w, _, s, n| {
-                    let hf = call(&echo(w)?, "echo", vec![bytes(n)?])?;
-                    let d = max_resources(w, s)?;
-                    soroban(w, s, hf, d, Vec::new())
+                    // put_temp stores without an event or a return value, so only the entry
+                    // size bounds it; echo would also emit the value and return it
+                    let put = |v: ScVal| -> Result<HostFunction> {
+                        call(&echo(w)?, "put_temp", vec![ScVal::Symbol(ScSymbol("k".try_into()?)), v])
+                    };
+                    let d = raised(w, crate::soroban::simulated(w, s, put(bytes(1)?)?)?)?;
+                    soroban(w, s, put(bytes(n)?)?, d, Vec::new())
                 },
             )
         },
@@ -1184,8 +1192,8 @@ fn entry_sizes(m: &Measured) -> Result<(u64, u64)> {
             data: stellar_xdr::LedgerEntryData::ContractData(stellar_xdr::ContractDataEntry {
                 ext: stellar_xdr::ExtensionPoint::V0,
                 contract: ScAddress::Contract(ContractId(stellar_xdr::Hash([0; 32]))),
-                key: ScVal::Symbol(ScSymbol("last".try_into()?)),
-                durability: ContractDataDurability::Persistent,
+                key: ScVal::Symbol(ScSymbol("k".try_into()?)),
+                durability: ContractDataDurability::Temporary,
                 val: bytes(n)?,
             }),
             ext: stellar_xdr::LedgerEntryExt::V0,
@@ -1296,7 +1304,7 @@ pub fn checks() -> Vec<(&'static str, Check)> {
         ("soroban.footprint.write_entries", Equal),
         ("soroban.contract_data.entry_bytes", Size(entry_sizes)),
         ("soroban.contract_data.key_bytes", Size(key_sizes)),
-        ("soroban.contract_code.bytes", Equal),
+        ("soroban.contract_code.bytes", Below("core refuses at submission only wasm longer than contractMaxSizeBytes (stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp 1446-1456), but at apply it holds the whole encoded CONTRACT_CODE ledger entry, about a hundred bytes more than the wasm, to the same bound (InvokeHostFunctionOpFrame.cpp 778-789, TransactionUtils.cpp 2018-2027) and fails the upload with resource_limit_exceeded. so the largest wasm that applies is a little below the setting, while envelopes carrying up to contractMaxSizeBytes of wasm are still included, failed, and are what the row's cap has to admit")),
         (
             "soroban.txs.per_ledger",
             Unmeasured(
