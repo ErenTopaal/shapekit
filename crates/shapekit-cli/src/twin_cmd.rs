@@ -120,6 +120,39 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Run core's own test cases on the twin, one at a time at every protocol version, and
+    /// keep the region counts of each (`<out>/tests/<n>/counts.json`, listed in
+    /// `<out>/tests.tsv`).
+    CoreTests {
+        /// Catch2 test spec selecting the test cases.
+        #[arg(long, default_value = "[tx]")]
+        spec: String,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        /// Test cases run at once, each in a container of one cpu.
+        #[arg(long, default_value_t = 3)]
+        jobs: usize,
+        /// Output directory; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
+    /// The core coverage summary over several `twin coverage` outputs, with every region no
+    /// chain reaches classified by the core tests that reach it (`twin core-tests` output).
+    RList {
+        /// `twin coverage` output directories.
+        #[arg(long = "chain-dir", num_args = 1.., required = true)]
+        chain_dirs: Vec<PathBuf>,
+        /// A `twin core-tests` output directory.
+        #[arg(long)]
+        tests: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        /// Where to write the summary (corpus/coverage/core-coverage.json).
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// Record one chain on the coverage twin and read which regions of core's
     /// transaction and ledger code it reaches: the core coverage summary
     /// (`core-coverage.json`) and the merged profile, written into `--out`.
@@ -191,6 +224,19 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::CoreTests {
+            spec,
+            twin_pins,
+            jobs,
+            out,
+        } => core_tests(&spec, &twin_pins, jobs, &out),
+        TwinCommand::RList {
+            chain_dirs,
+            tests,
+            pins,
+            twin_pins,
+            out,
+        } => r_list(&chain_dirs, &tests, &pins, &twin_pins, &out),
         TwinCommand::Coverage {
             chain,
             pins,
@@ -482,5 +528,152 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
             );
         }
     }
+    Ok(true)
+}
+
+fn twin_image(path: &Path) -> Result<CoreImage> {
+    let twin = CoreImage::from_pins(path)
+        .with_context(|| format!("reading the twin image pin from {}", path.display()))?;
+    if !twin.local {
+        bail!(
+            "{} pins a registry image; the twin is a local build pinned by image_id",
+            path.display()
+        );
+    }
+    Ok(twin)
+}
+
+fn core_tests(spec: &str, twin_pins: &Path, jobs: usize, out: &Path) -> Result<bool> {
+    use shapekit_twin::coverage as cov;
+    use std::sync::Mutex;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let twin = twin_image(twin_pins)?;
+    let names = cov::list_core_tests(&twin, spec)?;
+    std::fs::create_dir_all(out.join("tests"))?;
+    println!("{} test cases match {spec}", names.len());
+    let next = AtomicUsize::new(0);
+    let results: Mutex<Vec<(usize, Result<cov::TestRun>)>> = Mutex::new(Vec::new());
+    std::thread::scope(|s| {
+        for _ in 0..jobs.max(1) {
+            s.spawn(|| {
+                loop {
+                    let i = next.fetch_add(1, Ordering::SeqCst);
+                    let Some(name) = names.get(i) else { break };
+                    let r = cov::run_core_test(&twin, name, &out.join("tests").join(i.to_string()));
+                    if let Ok(t) = &r {
+                        println!("{i}: {name}: exit {:?}, {:.0}s", t.exit_code, t.seconds);
+                    }
+                    results
+                        .lock()
+                        .expect("no panics hold the lock")
+                        .push((i, r));
+                }
+            });
+        }
+    });
+    let mut results = results.into_inner().expect("threads joined");
+    results.sort_by_key(|(i, _)| *i);
+    let mut tsv = String::from("index\texit\tseconds\tname\n");
+    let mut ok = true;
+    for (i, r) in &results {
+        match r {
+            Ok(t) => {
+                ok &= t.exit_code == Some(0);
+                tsv.push_str(&format!(
+                    "{i}\t{}\t{:.1}\t{}\n",
+                    t.exit_code.map_or("signal".into(), |c| c.to_string()),
+                    t.seconds,
+                    t.name
+                ));
+            }
+            Err(e) => {
+                ok = false;
+                println!("{i}: {}: {e:#}", names[*i]);
+                tsv.push_str(&format!("{i}\terror\t0\t{}\n", names[*i]));
+            }
+        }
+    }
+    std::fs::write(out.join("tests.tsv"), tsv)?;
+    let failed = results
+        .iter()
+        .filter(|(_, r)| !matches!(r, Ok(t) if t.exit_code == Some(0)))
+        .count();
+    println!(
+        "{} test cases run, {failed} did not exit 0; counts in {}",
+        results.len(),
+        out.join("tests").display()
+    );
+    Ok(ok)
+}
+
+fn r_list(
+    chain_dirs: &[PathBuf],
+    tests: &Path,
+    pins_path: &Path,
+    twin_pins: &Path,
+    out: &Path,
+) -> Result<bool> {
+    use shapekit_twin::coverage as cov;
+
+    let twin = twin_image(twin_pins)?;
+    let mut chains = Vec::new();
+    let mut chain_counts = Vec::new();
+    for d in chain_dirs {
+        let summary: shapekit_contracts::CoreCoverage =
+            shapekit_contracts::load(&d.join("core-coverage.json"))?;
+        if summary.core.image.as_ref().map(|i| &i.digest) != Some(&twin.digest) {
+            bail!(
+                "{} was measured on another image than {}",
+                d.display(),
+                twin.digest
+            );
+        }
+        chains.extend(summary.chains);
+        chain_counts.push(cov::read_counts(&d.join("counts.json"))?);
+    }
+    chains.sort();
+    chains.dedup();
+    let merged = cov::merge_counts(&chain_counts);
+
+    let tsv = std::fs::read_to_string(tests.join("tests.tsv"))
+        .with_context(|| format!("reading {}", tests.join("tests.tsv").display()))?;
+    let mut test_counts = Vec::new();
+    for line in tsv.lines().skip(1) {
+        let cols: Vec<&str> = line.splitn(4, '\t').collect();
+        let [i, exit, _, name] = cols.as_slice() else {
+            bail!("malformed tests.tsv line {line:?}");
+        };
+        if *exit != "0" {
+            bail!("core test {name} did not exit 0 ({exit}); its counts are not used");
+        }
+        test_counts.push((
+            name.to_string(),
+            cov::read_counts(&tests.join("tests").join(i).join("counts.json"))?,
+        ));
+    }
+    let mut core = pinned_core(pins_path)?;
+    core.image = Some(cov::image_ref(&twin));
+    let summary = cov::summary(&merged, core, chains, &test_counts);
+    shapekit_contracts::write(out, &summary)?;
+    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+    let by_tests = summary
+        .unreached
+        .iter()
+        .filter(|r| !r.core_tests.is_empty())
+        .count();
+    println!(
+        "{} chains, {} core tests: {reached} of {} regions reached by a chain; {} unreached line ranges, {by_tests} of them reached by a core test, {} unknown; written to {}",
+        summary.chains.len(),
+        test_counts.len(),
+        reached + missed,
+        summary.unreached.len(),
+        summary.unreached.len() - by_tests,
+        out.display()
+    );
     Ok(true)
 }

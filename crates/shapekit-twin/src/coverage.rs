@@ -277,11 +277,7 @@ pub fn merge_and_export(image: &CoreImage, dir: &Path) -> Result<PathBuf> {
             dir.display()
         );
     }
-    let user = {
-        use std::os::unix::fs::MetadataExt;
-        let m = std::fs::metadata(dir)?;
-        format!("{}:{}", m.uid(), m.gid())
-    };
+    let user = host_user(dir)?;
     let script = format!(
         "set -e; llvm-profdata-20 merge -sparse -o /profiles/merged.profdata /profiles/*.profraw; \
          llvm-cov-20 export -format=text -skip-expansions -instr-profile=/profiles/merged.profdata {TWIN_BINARY} > /profiles/export.json"
@@ -313,6 +309,115 @@ pub fn merge_and_export(image: &CoreImage, dir: &Path) -> Result<PathBuf> {
         );
     }
     Ok(dir.join("export.json"))
+}
+
+fn host_user(dir: &Path) -> Result<String> {
+    use std::os::unix::fs::MetadataExt;
+    let m = std::fs::metadata(dir).with_context(|| format!("reading {}", dir.display()))?;
+    Ok(format!("{}:{}", m.uid(), m.gid()))
+}
+
+/// Names of core's test cases matching a Catch2 test spec, from the twin.
+pub fn list_core_tests(image: &CoreImage, spec: &str) -> Result<Vec<String>> {
+    let out = Command::new("docker")
+        .args([
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "1g",
+            "--cpus",
+            "1",
+        ])
+        .arg(image.reference())
+        .args(["test", "--list-test-names-only", spec])
+        .output()
+        .context("running docker")?;
+    if !out.status.success() {
+        bail!(
+            "listing core tests failed: {}",
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+    }
+    let names: Vec<String> = String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .map(str::trim_end)
+        .filter(|l| !l.is_empty())
+        .map(str::to_owned)
+        .collect();
+    if names.is_empty() {
+        bail!("no core test matches {spec}");
+    }
+    Ok(names)
+}
+
+/// How one core test ran on the twin.
+#[derive(Debug, Clone)]
+pub struct TestRun {
+    pub name: String,
+    pub exit_code: Option<i32>,
+    pub seconds: f64,
+    pub counts: Counts,
+}
+
+/// Runs one core test case at every protocol version on the twin, in `dir`
+/// (created, emptied of everything but `counts.json` afterwards), and reads
+/// its region counts. The arguments are those core's own test dumps use.
+pub fn run_core_test(image: &CoreImage, name: &str, dir: &Path) -> Result<TestRun> {
+    let work = dir.join("work");
+    let profiles = dir.join("profiles");
+    std::fs::create_dir_all(&work)?;
+    std::fs::create_dir_all(&profiles)?;
+    let (work, profiles) = (work.canonicalize()?, profiles.canonicalize()?);
+    let started = std::time::Instant::now();
+    let out = Command::new("docker")
+        .args([
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "1536m",
+            "--cpus",
+            "1",
+            "--user",
+        ])
+        .arg(host_user(dir)?)
+        .arg("-v")
+        .arg(format!("{}:/data", work.display()))
+        .args(["-w", "/data"])
+        .arg("-v")
+        .arg(format!("{}:/profiles", profiles.display()))
+        .args(["-e", "LLVM_PROFILE_FILE=/profiles/test-%p.profraw"])
+        .arg(image.reference())
+        .args([
+            "test",
+            name,
+            "--all-versions",
+            "--rng-seed",
+            "12345",
+            "--ll",
+            "fatal",
+            "-r",
+            "simple",
+            "--disable-dots",
+        ])
+        .output()
+        .context("running docker")?;
+    let seconds = started.elapsed().as_secs_f64();
+    std::fs::write(dir.join("test.log"), [out.stdout, out.stderr].concat())?;
+    std::fs::remove_dir_all(&work)?;
+    let export = merge_and_export(image, &profiles)?;
+    let counts = read_export(&export)?;
+    write_counts(&dir.join("counts.json"), &counts)?;
+    std::fs::remove_dir_all(&profiles)?;
+    Ok(TestRun {
+        name: name.to_owned(),
+        exit_code: out.status.code(),
+        seconds,
+        counts,
+    })
 }
 
 /// The image reference the contract records for a twin image.
