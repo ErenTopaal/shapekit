@@ -23,8 +23,31 @@ use super::{
 };
 use crate::versions::VersionsFile;
 
-/// The packages of the module that encode, decode and convert: xdr and strkey.
+/// The packages of the module that encode, decode and convert: xdr and strkey, without their
+/// tests and without the two generated files of xdr (`xdr_generated.go`,
+/// `xdr_views_generated.go`, 1.9 and 2.6 MB). go-mutesting writes the whole file out for every
+/// mutation, so listing the mutations of those two files alone takes hours; the hand-written
+/// encoding helpers around them are in scope.
 pub const SCOPE: [&str; 2] = ["xdr", "strkey"];
+const GENERATED: [&str; 2] = ["xdr_generated.go", "xdr_views_generated.go"];
+
+/// The files go-mutesting is given, relative to the module root, sorted.
+fn scope_files(sdk_dir: &Path) -> Result<Vec<String>> {
+    let mut out = Vec::new();
+    for dir in SCOPE {
+        let rd = std::fs::read_dir(sdk_dir.join(dir))
+            .with_context(|| format!("reading {}/{dir}", sdk_dir.display()))?;
+        for e in rd {
+            let name = e?.file_name().to_string_lossy().into_owned();
+            if name.ends_with(".go") && !name.ends_with("_test.go") && !GENERATED.contains(&name.as_str()) {
+                out.push(format!("./{dir}/{name}"));
+            }
+        }
+    }
+    out.sort();
+    ensure!(!out.is_empty(), "no go files in the scope");
+    Ok(out)
+}
 
 /// go-mutesting v2.3.1. The tag has no /v2 module path, so the module proxy serves it only as
 /// this pseudo-version of the tagged commit.
@@ -283,6 +306,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
         ),
     )?;
     run(&args(&["chmod", "+x", "exec.sh"]), work, &[])?;
+    let files = scope_files(&sdk_dir)?;
     let mutesting_argv = |timeout: &str| -> Vec<String> {
         let mut v = vec![
             mutesting.display().to_string(),
@@ -291,7 +315,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
             "--exec-timeout".to_string(),
             timeout.to_string(),
         ];
-        v.extend(SCOPE.iter().map(|p| format!("./{p}/...")));
+        v.extend(files.iter().cloned());
         v
     };
 
@@ -359,7 +383,10 @@ pub fn check(ctx: &Context) -> Result<Report> {
             name: "go-mutesting".to_string(),
             version: TOOL_RELEASE.to_string(),
         },
-        scope: SCOPE.iter().map(|p| format!("{p}/*.go")).collect(),
+        scope: vec![
+            format!("xdr/*.go, without tests, {}", GENERATED.join(" and ")),
+            "strkey/*.go, without tests".to_string(),
+        ],
         population: population.len(),
         seed: ctx.seed,
         sample: faults.len(),
