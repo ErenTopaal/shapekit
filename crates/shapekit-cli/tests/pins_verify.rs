@@ -64,6 +64,7 @@ fn registered_commands() {
             "fuzz",
             "coverage",
             "site",
+            "schema",
             "corpus",
             "help",
         ]
