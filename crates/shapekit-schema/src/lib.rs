@@ -6,6 +6,7 @@
 //! `schema/xdr/<tag>/xdr.json`; the pinned tag is embedded here as [`Schema::pinned`].
 
 pub mod fragment;
+pub mod gaps;
 pub mod graph;
 pub mod history;
 pub mod names;

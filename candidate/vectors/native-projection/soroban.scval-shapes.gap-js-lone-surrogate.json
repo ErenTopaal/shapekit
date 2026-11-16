@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "237,160,128",
+        "entry_count": 2,
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "string": "237,160,128"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "string": "\\xed\\xa0\\x80"
+              },
+              "val": {
+                "u32": 2
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAACAAAADgAAAAsyMzcsMTYwLDEyOAAAAAADAAAAAQAAAA4AAAAD7aCAAAAAAAMAAAAC"
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "soroban.scval-shapes.gap-js-lone-surrogate",
+    "kind": "native-projection",
+    "linked_issues": [],
+    "notes": "representation gap lone-surrogate of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr string<> as string (UTF-16 code units) or Uint8Array. a javascript string can hold a lone surrogate that UTF-8 cannot encode, and the bytes ED A0 80 (U+D800 in CESU-8) are not UTF-8. reading them gives a Uint8Array whose property key is \"237,160,128\"; writing a lone surrogate gives the bytes of U+FFFD with no error. nativeToScVal(\"\\uD800\") writes the string bytes EF BF BD in 17.2.1 and 17.4.0 without an error, which 17.4.0 documents on XdrString. as a map key, 17.2.1 merges the bytes ED A0 80 with the string \"237,160,128\"; 17.3.0 and 17.4.0 throw",
+    "obligations": [
+      "gap:js:lone-surrogate"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

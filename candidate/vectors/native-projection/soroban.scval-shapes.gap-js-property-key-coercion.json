@@ -1,0 +1,109 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "1",
+        "entry_count": 2,
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAACAAAAAwAAAAEAAAADAAAACgAAAA8AAAABMQAAAAAAAAMAAAAU"
+      }
+    },
+    {
+      "expected": {
+        "collides_as": "1",
+        "entry_count": 3,
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "u32": 1
+              },
+              "val": {
+                "u32": 10
+              }
+            },
+            {
+              "key": {
+                "string": "1"
+              },
+              "val": {
+                "u32": 20
+              }
+            },
+            {
+              "key": {
+                "symbol": "1"
+              },
+              "val": {
+                "u32": 30
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAADAAAAAwAAAAEAAAADAAAACgAAAA4AAAABMQAAAAAAAAMAAAAUAAAADwAAAAExAAAAAAAAAwAAAB4="
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "soroban.scval-shapes.gap-js-property-key-coercion",
+    "kind": "native-projection",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1789"
+    ],
+    "notes": "representation gap property-key-coercion of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr SCMap keys of any SCVal type as object property keys (strings). a plain object keys its properties by string, so map keys of different types that print alike (u32 1, symbol \"1\", string \"1\") land on one property and all but one entry is lost. 17.2.1 scValToNative returned { \"1\": 20 } for {u32 1: 10, symbol \"1\": 20}; 17.3.0 and later throw",
+    "obligations": [
+      "gap:js:property-key-coercion"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

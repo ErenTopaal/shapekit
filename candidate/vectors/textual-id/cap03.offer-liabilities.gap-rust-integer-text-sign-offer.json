@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "sign"
+      },
+      "input": {
+        "text": "+16"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "reject": "negative-zero"
+      },
+      "input": {
+        "text": "-0"
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap03.offer-liabilities.gap-rust-integer-text-sign-offer",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/rs-stellar-xdr/issues/627"
+    ],
+    "notes": "representation gap integer-text-sign of the rust table (registry/gaps/rust.toml): stellar-xdr xdr hyper, unsigned hyper as i64, u64 (str::parse). rust's integer FromStr accepts an optional leading + for every integer type and reads -0 as 0 for the signed ones, so text that is not the canonical spelling of an id is read as one; XDR-JSON's string form of a 64-bit integer goes through it. NumberOrString in stellar-xdr 30.0.0 parses the string form with str::parse",
+    "obligations": [
+      "gap:rust:integer-text-sign"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

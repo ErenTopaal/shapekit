@@ -1,0 +1,54 @@
+# representation gaps between xdr and rust, in the form of registry/gaps/js.toml. stellar-xdr
+# generates one rust type per xdr type: i32, u32, i64 and u64 for the integers, StringM<N> and
+# BytesM<N> (byte vectors) for string<> and opaque<>, so decoding and encoding lose nothing.
+# its XDR-JSON writes 64-bit integers as strings and escapes string bytes, which keeps them too.
+# the loss points are conversions to std types.
+#
+# notes were checked against the stellar-xdr crate 30.0.0 (src/generated.rs,
+# src/scval_conversions.rs).
+
+schema = 1
+language = "rust"
+sdk = "stellar-xdr"
+
+[[gap]]
+id = "lossy-utf8"
+xdr = ["string<>"]
+native = "String (valid UTF-8 only)"
+loss = "a rust String must be UTF-8; StringM::to_utf8_string_lossy replaces invalid sequences with U+FFFD. the checked conversions (to_utf8_string, TryFrom<StringM> for String) return an error instead"
+sources = [
+  "https://doc.rust-lang.org/std/string/struct.String.html#method.from_utf8_lossy",
+  "https://docs.rs/stellar-xdr/30.0.0/stellar_xdr/struct.StringM.html",
+]
+sdk_note = "Display for StringM escapes bytes with escape-bytes, so printing loses nothing; only the method named lossy loses"
+no_vector = "the rust testee has no op that converts a string to a rust String: decode_json and decode_encode keep the bytes"
+
+[[gap]]
+id = "json-number-f64"
+xdr = ["hyper", "unsigned hyper"]
+native = "f64 (serde_json::Value::as_f64, or a struct field typed f64)"
+loss = "a JSON number read into f64 holds integers exactly only up to 2^53-1"
+sources = [
+  "https://docs.rs/serde_json/latest/serde_json/struct.Number.html#method.as_f64",
+  "https://www.rfc-editor.org/rfc/rfc8259#section-6",
+]
+sdk_note = "stellar-xdr reads 64-bit integers from XDR-JSON as a number or a decimal string straight into i64 or u64, never through f64"
+vector = [
+  { op = "id_parse", id_kind = "muxed", input = { number = 9007199254740993 }, expect = "id-or-reject", id = "9007199254740993", reason = "unsafe-integer" },
+  { op = "id_parse", id_kind = "offer", input = { number = 9007199254740993 }, expect = "id-or-reject", id = "9007199254740993", reason = "unsafe-integer" },
+]
+
+[[gap]]
+id = "integer-text-sign"
+xdr = ["hyper", "unsigned hyper"]
+native = "i64, u64 (str::parse)"
+loss = "rust's integer FromStr accepts an optional leading + for every integer type and reads -0 as 0 for the signed ones, so text that is not the canonical spelling of an id is read as one; XDR-JSON's string form of a 64-bit integer goes through it"
+sources = [
+  "https://doc.rust-lang.org/std/primitive.i64.html#method.from_str_radix",
+  "https://github.com/stellar/rs-stellar-xdr/issues/627",
+]
+sdk_note = "NumberOrString in stellar-xdr 30.0.0 parses the string form with str::parse"
+vector = [
+  { op = "id_parse", id_kind = "offer", input = { text = "+16" }, expect = "reject", reason = "sign" },
+  { op = "id_parse", id_kind = "offer", input = { text = "-0" }, expect = "reject", reason = "negative-zero" },
+]

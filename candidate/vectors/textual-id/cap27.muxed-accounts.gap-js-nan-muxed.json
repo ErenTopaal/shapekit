@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "not-a-number"
+      },
+      "input": {
+        "text": "NaN"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap27.muxed-accounts.gap-js-nan-muxed",
+    "kind": "textual-id",
+    "linked_issues": [],
+    "notes": "representation gap nan of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). NaN is a number but no integer; JSON has no NaN, so a caller meets it as the text a number prints as. BigInt(\"NaN\") throws a SyntaxError in both versions",
+    "obligations": [
+      "gap:js:nan"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740993"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740993
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9223372036854775807"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9223372036854775807
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "valid"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap03.offer-liabilities.gap-js-unsafe-integer-offer",
+    "kind": "textual-id",
+    "linked_issues": [
+      "https://github.com/stellar/js-stellar-sdk/issues/1785"
+    ],
+    "notes": "representation gap unsafe-integer of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr hyper, unsigned hyper as number (IEEE-754 binary64). a number holds every integer only up to 2^53-1; 9007199254740993 written as a number literal is already 9007199254740992 before any sdk code runs, so a 64-bit id or amount given as a number can name a different value than the caller wrote. 17.2.1 MuxedAccount takes the id as text only; Operation offer ids take numbers. 17.4.0 refuses offer id numbers above 2^53-1 (offerId must be a non-negative safe integer)",
+    "obligations": [
+      "gap:js:unsafe-integer"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

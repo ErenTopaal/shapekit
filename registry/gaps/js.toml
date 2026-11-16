@@ -1,0 +1,135 @@
+# representation gaps between xdr and javascript: every point where a value can change or be
+# lost when it crosses from the xdr type to the javascript value an sdk hands out, or back.
+# each row names the xdr type, the javascript type, what is lost, and the documents that define
+# the behaviour. `vector` rows are turned into conformance vectors by `shapekit vectors gaps`;
+# a row whose loss no current vector kind can carry says so in `no_vector`.
+#
+# sdk notes were checked against @stellar/stellar-sdk 17.2.1 and 17.4.0 as installed by the
+# conformance runner (testees/js/versions/), on node 26.13.1.
+
+schema = 1
+language = "js"
+sdk = "@stellar/stellar-sdk"
+
+[[gap]]
+id = "unsafe-integer"
+xdr = ["hyper", "unsigned hyper"]
+native = "number (IEEE-754 binary64)"
+loss = "a number holds every integer only up to 2^53-1; 9007199254740993 written as a number literal is already 9007199254740992 before any sdk code runs, so a 64-bit id or amount given as a number can name a different value than the caller wrote"
+sources = [
+  "https://tc39.es/ecma262/#sec-number.max_safe_integer",
+  "https://www.rfc-editor.org/rfc/rfc8259#section-6",
+  "https://github.com/stellar/js-stellar-sdk/issues/1785",
+]
+sdk_note = "17.2.1 MuxedAccount takes the id as text only; Operation offer ids take numbers. 17.4.0 refuses offer id numbers above 2^53-1 (offerId must be a non-negative safe integer)"
+vector = [
+  { op = "id_parse", id_kind = "muxed", input = { number = 9007199254740993 }, expect = "id-or-reject", id = "9007199254740993", reason = "unsafe-integer" },
+  { op = "id_parse", id_kind = "offer", input = { number = 9007199254740993 }, expect = "id-or-reject", id = "9007199254740993", reason = "unsafe-integer" },
+  { op = "id_parse", id_kind = "offer", input = { number = 9223372036854775807 }, expect = "id-or-reject", id = "9223372036854775807", reason = "unsafe-integer" },
+]
+
+[[gap]]
+id = "fractional-number"
+xdr = ["int", "unsigned int", "hyper", "unsigned hyper"]
+native = "number (IEEE-754 binary64)"
+loss = "a number can carry a fraction no xdr integer has; truncating or rounding it writes a different id than the caller passed"
+sources = [
+  "https://tc39.es/ecma262/#sec-ecmascript-language-types-number-type",
+  "https://tc39.es/ecma262/#sec-numbertobigint",
+]
+sdk_note = "BigInt(16.5) throws a RangeError, which both 17.2.1 and 17.4.0 surface as a refusal"
+vector = [
+  { op = "id_parse", id_kind = "muxed", input = { number = 16.5 }, expect = "reject", reason = "non-integral" },
+  { op = "id_parse", id_kind = "offer", input = { number = 16.5 }, expect = "reject", reason = "non-integral" },
+  { op = "id_parse", id_kind = "offer", input = { text = "16.5" }, expect = "reject", reason = "non-integral" },
+]
+
+[[gap]]
+id = "nan"
+xdr = ["int", "unsigned int", "hyper", "unsigned hyper"]
+native = "number (IEEE-754 binary64)"
+loss = "NaN is a number but no integer; JSON has no NaN, so a caller meets it as the text a number prints as"
+sources = [
+  "https://tc39.es/ecma262/#sec-ecmascript-language-types-number-type",
+  "https://www.rfc-editor.org/rfc/rfc8259#section-6",
+]
+sdk_note = "BigInt(\"NaN\") throws a SyntaxError in both versions"
+vector = [
+  { op = "id_parse", id_kind = "muxed", input = { text = "NaN" }, expect = "reject", reason = "not-a-number" },
+  { op = "id_parse", id_kind = "offer", input = { text = "NaN" }, expect = "reject", reason = "not-a-number" },
+]
+
+[[gap]]
+id = "negative-zero"
+xdr = ["int", "unsigned int", "hyper", "unsigned hyper"]
+native = "number (IEEE-754 binary64)"
+loss = "-0 and +0 are two numbers (Object.is tells them apart) but one xdr integer; -0 as text is not the canonical spelling of any id"
+sources = [
+  "https://tc39.es/ecma262/#sec-numeric-types-number-sameValue",
+  "https://tc39.es/ecma262/#sec-numbertobigint",
+]
+sdk_note = "17.2.1 MuxedAccount reads the text -0 through BigInt and returns the id text \"-0\"; 17.4.0 refuses it. BigInt(-0) is 0n"
+vector = [
+  { op = "id_parse", id_kind = "muxed", input = { text = "-0" }, expect = "reject", reason = "negative-zero" },
+  { op = "id_parse", id_kind = "offer", input = { text = "-0" }, expect = "reject", reason = "negative-zero" },
+  { op = "id_parse", id_kind = "offer", input = { number = -0.0 }, expect = "id-or-reject", id = "0", reason = "negative-zero" },
+]
+
+[[gap]]
+id = "invalid-utf8"
+xdr = ["string<>"]
+native = "string (UTF-16 code units) or Uint8Array"
+loss = "an xdr string is bytes and need not be UTF-8. scValToNative returns such a string as a Uint8Array, and a Uint8Array used as an object property key turns into its comma-joined decimal bytes, so the string 0xff and the string \"255\" land on one key"
+sources = [
+  "https://www.rfc-editor.org/rfc/rfc4506#section-4.11",
+  "https://encoding.spec.whatwg.org/#utf-8-decoder",
+  "https://tc39.es/ecma262/#sec-topropertykey",
+]
+sdk_note = "17.2.1 scValToNative returns { \"255\": 2 } for {string 0x323535: 1, string 0xff: 2}, one entry lost; 17.3.0 and 17.4.0 throw (scvMap has more than one key that converts to \"255\")"
+vector = [
+  { op = "to_native", map = [
+    { key = { string_hex = "323535" }, val = { u32 = 1 } },
+    { key = { string_hex = "ff" }, val = { u32 = 2 } },
+  ], collides_as = "255" },
+]
+
+[[gap]]
+id = "lone-surrogate"
+xdr = ["string<>"]
+native = "string (UTF-16 code units) or Uint8Array"
+loss = "a javascript string can hold a lone surrogate that UTF-8 cannot encode, and the bytes ED A0 80 (U+D800 in CESU-8) are not UTF-8. reading them gives a Uint8Array whose property key is \"237,160,128\"; writing a lone surrogate gives the bytes of U+FFFD with no error"
+sources = [
+  "https://tc39.es/ecma262/#sec-ecmascript-language-types-string-type",
+  "https://encoding.spec.whatwg.org/#dom-textencoder-encode",
+  "https://tc39.es/ecma262/#sec-topropertykey",
+]
+sdk_note = "nativeToScVal(\"\\uD800\") writes the string bytes EF BF BD in 17.2.1 and 17.4.0 without an error, which 17.4.0 documents on XdrString. as a map key, 17.2.1 merges the bytes ED A0 80 with the string \"237,160,128\"; 17.3.0 and 17.4.0 throw"
+no_vector = "the write direction (a native string with a lone surrogate written as an ScVal string) has no op in the testee protocol: id_parse reads only ids, and JSON text cannot carry a lone surrogate to a testee. the read direction is covered by the vector below"
+vector = [
+  { op = "to_native", map = [
+    { key = { string_hex = "3233372c3136302c313238" }, val = { u32 = 1 } },
+    { key = { string_hex = "eda080" }, val = { u32 = 2 } },
+  ], collides_as = "237,160,128" },
+]
+
+[[gap]]
+id = "property-key-coercion"
+xdr = ["SCMap keys of any SCVal type"]
+native = "object property keys (strings)"
+loss = "a plain object keys its properties by string, so map keys of different types that print alike (u32 1, symbol \"1\", string \"1\") land on one property and all but one entry is lost"
+sources = [
+  "https://tc39.es/ecma262/#sec-object-type",
+  "https://github.com/stellar/js-stellar-sdk/issues/1789",
+]
+sdk_note = "17.2.1 scValToNative returned { \"1\": 20 } for {u32 1: 10, symbol \"1\": 20}; 17.3.0 and later throw"
+vector = [
+  { op = "to_native", map = [
+    { key = { u32 = 1 }, val = { u32 = 10 } },
+    { key = { symbol = "1" }, val = { u32 = 20 } },
+  ], collides_as = "1" },
+  { op = "to_native", map = [
+    { key = { u32 = 1 }, val = { u32 = 10 } },
+    { key = { string_hex = "31" }, val = { u32 = 20 } },
+    { key = { symbol = "1" }, val = { u32 = 30 } },
+  ], collides_as = "1" },
+]

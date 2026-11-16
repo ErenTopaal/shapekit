@@ -66,6 +66,7 @@ fn registered_commands() {
             "site",
             "twin",
             "laws",
+            "vectors",
             "schema",
             "contracts",
             "corpus",

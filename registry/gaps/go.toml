@@ -1,0 +1,46 @@
+# representation gaps between xdr and go, in the form of registry/gaps/js.toml. go-stellar-sdk
+# generates one go type per xdr type: int32, uint32, int64 and uint64 for the integers, string
+# for string<>, []byte and fixed arrays for opaque, so decoding and encoding lose nothing. the
+# loss points are where those values leave the typed api: text renderings and JSON.
+#
+# sdk notes were checked against github.com/stellar/go-stellar-sdk v0.9.0 (xdr/scval.go,
+# xdr/xdr_generated.go) on go 1.27.4.
+
+schema = 1
+language = "go"
+sdk = "github.com/stellar/go-stellar-sdk"
+
+[[gap]]
+id = "json-invalid-utf8"
+xdr = ["string<>"]
+native = "string (arbitrary bytes)"
+loss = "a go string keeps any bytes, but encoding/json writes strings coerced to valid UTF-8, replacing invalid bytes with U+FFFD, so an xdr value marshalled to JSON can carry a different string than the ledger"
+sources = [
+  "https://pkg.go.dev/encoding/json#Marshal",
+  "https://www.rfc-editor.org/rfc/rfc4506#section-4.11",
+]
+sdk_note = "the generated xdr types (ScString, ScSymbol, String32, String64) are plain string types with no MarshalJSON, so json.Marshal applies the replacement"
+no_vector = "no testee op marshals an xdr value with encoding/json; decode_json renders SEP-51 through the sdk's xdr-json path, which escapes bytes instead"
+
+[[gap]]
+id = "json-number-float64"
+xdr = ["hyper", "unsigned hyper"]
+native = "float64 (json.Unmarshal into interface{})"
+loss = "encoding/json decodes a JSON number into float64 when the target is an interface value, so a 64-bit integer above 2^53-1 read that way changes"
+sources = [
+  "https://pkg.go.dev/encoding/json#Unmarshal",
+  "https://www.rfc-editor.org/rfc/rfc8259#section-6",
+]
+sdk_note = "go-stellar-sdk's id paths take uint64 (xdr.MuxedAccountFromAccountId), so the loss is in caller code that reads ids from JSON into interface values"
+no_vector = "id_parse in the go testee answers unsupported: the sdk has no textual or JSON id api to hand the input to"
+
+[[gap]]
+id = "scval-string-collision"
+xdr = ["SCVal"]
+native = "string (ScVal.String)"
+loss = "ScVal.String prints u32 1, i32 1, u64 1, string \"1\" and symbol \"1\" all as 1, and bytes as hex, so the bytes 0x31 and the string \"31\" print alike; code that keys a go map by it merges entries"
+sources = [
+  "https://pkg.go.dev/github.com/stellar/go-stellar-sdk/xdr#ScVal.String",
+]
+sdk_note = "xdr/scval.go, func (s ScVal) String, in v0.9.0"
+no_vector = "the go testee does not implement to_native: go-stellar-sdk has no native projection of an ScVal, callers read the typed union"

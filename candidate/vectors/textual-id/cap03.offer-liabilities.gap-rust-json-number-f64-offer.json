@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "either": [
+          {
+            "id": "9007199254740993"
+          },
+          {
+            "reject": "unsafe-integer"
+          }
+        ]
+      },
+      "input": {
+        "number": 9007199254740993
+      },
+      "kind": "offer",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0003",
+      "CAP-0006"
+    ],
+    "expected": {
+      "decode": "implementation-defined",
+      "roundtrip": false,
+      "validity": "valid"
+    },
+    "family": "cap03.offer-liabilities",
+    "fields_exercised": [
+      "op.manage_offer.offer_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap03.offer-liabilities.gap-rust-json-number-f64-offer",
+    "kind": "textual-id",
+    "linked_issues": [],
+    "notes": "representation gap json-number-f64 of the rust table (registry/gaps/rust.toml): stellar-xdr xdr hyper, unsigned hyper as f64 (serde_json::Value::as_f64, or a struct field typed f64). a JSON number read into f64 holds integers exactly only up to 2^53-1. stellar-xdr reads 64-bit integers from XDR-JSON as a number or a decimal string straight into i64 or u64, never through f64",
+    "obligations": [
+      "gap:rust:json-number-f64"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 11,
+      "valid_min": 11
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

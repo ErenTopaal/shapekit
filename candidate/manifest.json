@@ -1,6 +1,544 @@
 {
   "corpus_version": "0.1.0",
-  "entries": [],
+  "entries": [
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-js-fractional-number-offer",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap fractional-number of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). a number can carry a fraction no xdr integer has; truncating or rounding it writes a different id than the caller passed. BigInt(16.5) throws a RangeError, which both 17.2.1 and 17.4.0 surface as a refusal",
+      "obligations": [
+        "gap:js:fractional-number"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-js-fractional-number-offer.json",
+        "sha256": "af75c29bb74b23f8c69fadd4541e6b114de983ec0c1755eb400e51617765345c"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-js-nan-offer",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap nan of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). NaN is a number but no integer; JSON has no NaN, so a caller meets it as the text a number prints as. BigInt(\"NaN\") throws a SyntaxError in both versions",
+      "obligations": [
+        "gap:js:nan"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-js-nan-offer.json",
+        "sha256": "b9a5562d214b83b2fbf229172836d935ab042254de821b44ecf4538de5d97db0"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "valid"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-js-negative-zero-offer",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap negative-zero of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). -0 and +0 are two numbers (Object.is tells them apart) but one xdr integer; -0 as text is not the canonical spelling of any id. 17.2.1 MuxedAccount reads the text -0 through BigInt and returns the id text \"-0\"; 17.4.0 refuses it. BigInt(-0) is 0n",
+      "obligations": [
+        "gap:js:negative-zero"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-js-negative-zero-offer.json",
+        "sha256": "31c1f870a856e88d77c55af5714ba8e8654b0625704c0e208c5c9122ac281f24"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "valid"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-js-unsafe-integer-offer",
+      "kind": "textual-id",
+      "linked_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "notes": "representation gap unsafe-integer of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr hyper, unsigned hyper as number (IEEE-754 binary64). a number holds every integer only up to 2^53-1; 9007199254740993 written as a number literal is already 9007199254740992 before any sdk code runs, so a 64-bit id or amount given as a number can name a different value than the caller wrote. 17.2.1 MuxedAccount takes the id as text only; Operation offer ids take numbers. 17.4.0 refuses offer id numbers above 2^53-1 (offerId must be a non-negative safe integer)",
+      "obligations": [
+        "gap:js:unsafe-integer"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-js-unsafe-integer-offer.json",
+        "sha256": "7b7a0c26224b2e37068d7f6e1ac3c3af6b4717b4f82a9e4fa281ad6b10b335f3"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-rust-integer-text-sign-offer",
+      "kind": "textual-id",
+      "linked_issues": [
+        "https://github.com/stellar/rs-stellar-xdr/issues/627"
+      ],
+      "notes": "representation gap integer-text-sign of the rust table (registry/gaps/rust.toml): stellar-xdr xdr hyper, unsigned hyper as i64, u64 (str::parse). rust's integer FromStr accepts an optional leading + for every integer type and reads -0 as 0 for the signed ones, so text that is not the canonical spelling of an id is read as one; XDR-JSON's string form of a 64-bit integer goes through it. NumberOrString in stellar-xdr 30.0.0 parses the string form with str::parse",
+      "obligations": [
+        "gap:rust:integer-text-sign"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-rust-integer-text-sign-offer.json",
+        "sha256": "aae91464b04dc6ac2edfb0cc9074f9e9664b350cd9b95dce86ea27c439000f0e"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "valid"
+      },
+      "family": "cap03.offer-liabilities",
+      "fields_exercised": [
+        "op.manage_offer.offer_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap03.offer-liabilities.gap-rust-json-number-f64-offer",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap json-number-f64 of the rust table (registry/gaps/rust.toml): stellar-xdr xdr hyper, unsigned hyper as f64 (serde_json::Value::as_f64, or a struct field typed f64). a JSON number read into f64 holds integers exactly only up to 2^53-1. stellar-xdr reads 64-bit integers from XDR-JSON as a number or a decimal string straight into i64 or u64, never through f64",
+      "obligations": [
+        "gap:rust:json-number-f64"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 11,
+        "valid_min": 11
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap03.offer-liabilities.gap-rust-json-number-f64-offer.json",
+        "sha256": "fb28bad3281f1ab347f07438a38ea1b2e4f2e0f29d1c42c025d9d1972965f85c"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [
+        "op.payment.destination.mux_id",
+        "tx.source_account.mux_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap27.muxed-accounts.gap-js-fractional-number-muxed",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap fractional-number of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). a number can carry a fraction no xdr integer has; truncating or rounding it writes a different id than the caller passed. BigInt(16.5) throws a RangeError, which both 17.2.1 and 17.4.0 surface as a refusal",
+      "obligations": [
+        "gap:js:fractional-number"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap27.muxed-accounts.gap-js-fractional-number-muxed.json",
+        "sha256": "68b8c49637fb863e461b859bdd74db8a9b1cc973b4acf8c694d7b805101a06d4"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [
+        "op.payment.destination.mux_id",
+        "tx.source_account.mux_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap27.muxed-accounts.gap-js-nan-muxed",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap nan of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). NaN is a number but no integer; JSON has no NaN, so a caller meets it as the text a number prints as. BigInt(\"NaN\") throws a SyntaxError in both versions",
+      "obligations": [
+        "gap:js:nan"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap27.muxed-accounts.gap-js-nan-muxed.json",
+        "sha256": "0b42cd4b6fd39e5fbc9b795a6b1fb4cf68334cb7b0c14e9a6d7ed196e6f58240"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "must-reject",
+        "roundtrip": false,
+        "validity": "not-emittable"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [
+        "op.payment.destination.mux_id",
+        "tx.source_account.mux_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap27.muxed-accounts.gap-js-negative-zero-muxed",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap negative-zero of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). -0 and +0 are two numbers (Object.is tells them apart) but one xdr integer; -0 as text is not the canonical spelling of any id. 17.2.1 MuxedAccount reads the text -0 through BigInt and returns the id text \"-0\"; 17.4.0 refuses it. BigInt(-0) is 0n",
+      "obligations": [
+        "gap:js:negative-zero"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap27.muxed-accounts.gap-js-negative-zero-muxed.json",
+        "sha256": "5ff3f642d736160738a9509125c9be71a9e096e209b916405dca8a0c048f66fd"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "valid"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [
+        "op.payment.destination.mux_id",
+        "tx.source_account.mux_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap27.muxed-accounts.gap-js-unsafe-integer-muxed",
+      "kind": "textual-id",
+      "linked_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1785"
+      ],
+      "notes": "representation gap unsafe-integer of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr hyper, unsigned hyper as number (IEEE-754 binary64). a number holds every integer only up to 2^53-1; 9007199254740993 written as a number literal is already 9007199254740992 before any sdk code runs, so a 64-bit id or amount given as a number can name a different value than the caller wrote. 17.2.1 MuxedAccount takes the id as text only; Operation offer ids take numbers. 17.4.0 refuses offer id numbers above 2^53-1 (offerId must be a non-negative safe integer)",
+      "obligations": [
+        "gap:js:unsafe-integer"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap27.muxed-accounts.gap-js-unsafe-integer-muxed.json",
+        "sha256": "532ec8e360cc14f883f53a7f7de4309d947e20cf8fc5c1d1fa31e63e5c239954"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0027"
+      ],
+      "expected": {
+        "decode": "implementation-defined",
+        "roundtrip": false,
+        "validity": "valid"
+      },
+      "family": "cap27.muxed-accounts",
+      "fields_exercised": [
+        "op.payment.destination.mux_id",
+        "tx.source_account.mux_id"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "cap27.muxed-accounts.gap-rust-json-number-f64-muxed",
+      "kind": "textual-id",
+      "linked_issues": [],
+      "notes": "representation gap json-number-f64 of the rust table (registry/gaps/rust.toml): stellar-xdr xdr hyper, unsigned hyper as f64 (serde_json::Value::as_f64, or a struct field typed f64). a JSON number read into f64 holds integers exactly only up to 2^53-1. stellar-xdr reads 64-bit integers from XDR-JSON as a number or a decimal string straight into i64 or u64, never through f64",
+      "obligations": [
+        "gap:rust:json-number-f64"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 13,
+        "valid_min": 13
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/textual-id/cap27.muxed-accounts.gap-rust-json-number-f64-muxed.json",
+        "sha256": "8707f625a2d84e288f4bb4cb4a35bf6f607414f6229520aad956bab0affb7a47"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [
+        "op.invoke_host_function.invoke_contract.args"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "soroban.scval-shapes.gap-js-invalid-utf8",
+      "kind": "native-projection",
+      "linked_issues": [],
+      "notes": "representation gap invalid-utf8 of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr string<> as string (UTF-16 code units) or Uint8Array. an xdr string is bytes and need not be UTF-8. scValToNative returns such a string as a Uint8Array, and a Uint8Array used as an object property key turns into its comma-joined decimal bytes, so the string 0xff and the string \"255\" land on one key. 17.2.1 scValToNative returns { \"255\": 2 } for {string 0x323535: 1, string 0xff: 2}, one entry lost; 17.3.0 and 17.4.0 throw (scvMap has more than one key that converts to \"255\")",
+      "obligations": [
+        "gap:js:invalid-utf8"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/native-projection/soroban.scval-shapes.gap-js-invalid-utf8.json",
+        "sha256": "27c6f39d8bdd78997abd860f3f5f93b58746ee10562744f32d6a7c279a8e11f9"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [
+        "op.invoke_host_function.invoke_contract.args"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "soroban.scval-shapes.gap-js-lone-surrogate",
+      "kind": "native-projection",
+      "linked_issues": [],
+      "notes": "representation gap lone-surrogate of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr string<> as string (UTF-16 code units) or Uint8Array. a javascript string can hold a lone surrogate that UTF-8 cannot encode, and the bytes ED A0 80 (U+D800 in CESU-8) are not UTF-8. reading them gives a Uint8Array whose property key is \"237,160,128\"; writing a lone surrogate gives the bytes of U+FFFD with no error. nativeToScVal(\"\\uD800\") writes the string bytes EF BF BD in 17.2.1 and 17.4.0 without an error, which 17.4.0 documents on XdrString. as a map key, 17.2.1 merges the bytes ED A0 80 with the string \"237,160,128\"; 17.3.0 and 17.4.0 throw",
+      "obligations": [
+        "gap:js:lone-surrogate"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/native-projection/soroban.scval-shapes.gap-js-lone-surrogate.json",
+        "sha256": "4e87ee62db91ec19b2f80bb0b6f1e773d22b130b81c15f197ad94fb7929cabb7"
+      }
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [
+        "op.invoke_host_function.invoke_contract.args"
+      ],
+      "flags": [
+        "representation-gap"
+      ],
+      "id": "soroban.scval-shapes.gap-js-property-key-coercion",
+      "kind": "native-projection",
+      "linked_issues": [
+        "https://github.com/stellar/js-stellar-sdk/issues/1789"
+      ],
+      "notes": "representation gap property-key-coercion of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr SCMap keys of any SCVal type as object property keys (strings). a plain object keys its properties by string, so map keys of different types that print alike (u32 1, symbol \"1\", string \"1\") land on one property and all but one entry is lost. 17.2.1 scValToNative returned { \"1\": 20 } for {u32 1: 10, symbol \"1\": 20}; 17.3.0 and later throw",
+      "obligations": [
+        "gap:js:property-key-coercion"
+      ],
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 20
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/native-projection/soroban.scval-shapes.gap-js-property-key-coercion.json",
+        "sha256": "482e87f4eb7e24e217c3a039ffaaafdcbe0b19574747d03521f537c9d35cc1c4"
+      }
+    }
+  ],
   "generated_with": {
     "core_image": {
       "digest": "sha256:eb7a7c81a29b8665c8878d55e1b3979f0d7527426350c4ff258a9c7647ae5c51",

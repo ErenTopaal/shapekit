@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "collides_as": "255",
+        "entry_count": 2,
+        "rule": "no-entry-lost"
+      },
+      "op": "to_native",
+      "value": {
+        "json": {
+          "map": [
+            {
+              "key": {
+                "string": "255"
+              },
+              "val": {
+                "u32": 1
+              }
+            },
+            {
+              "key": {
+                "string": "\\xff"
+              },
+              "val": {
+                "u32": 2
+              }
+            }
+          ]
+        },
+        "xdr": "AAAAEQAAAAEAAAACAAAADgAAAAMyNTUAAAAAAwAAAAEAAAAOAAAAAf8AAAAAAAADAAAAAg=="
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "soroban.scval-shapes.gap-js-invalid-utf8",
+    "kind": "native-projection",
+    "linked_issues": [],
+    "notes": "representation gap invalid-utf8 of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr string<> as string (UTF-16 code units) or Uint8Array. an xdr string is bytes and need not be UTF-8. scValToNative returns such a string as a Uint8Array, and a Uint8Array used as an object property key turns into its comma-joined decimal bytes, so the string 0xff and the string \"255\" land on one key. 17.2.1 scValToNative returns { \"255\": 2 } for {string 0x323535: 1, string 0xff: 2}, one entry lost; 17.3.0 and 17.4.0 throw (scvMap has more than one key that converts to \"255\")",
+    "obligations": [
+      "gap:js:invalid-utf8"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 20
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

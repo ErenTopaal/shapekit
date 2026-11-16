@@ -22,6 +22,7 @@ mod serve_cmd;
 mod site_cmd;
 mod synth_cmd;
 mod twin_cmd;
+mod vectors_cmd;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -137,6 +138,11 @@ enum Command {
     Laws {
         #[command(subcommand)]
         command: laws_cmd::LawsCommand,
+    },
+    /// Conformance vectors derived from the schema and the representation gap tables.
+    Vectors {
+        #[command(subcommand)]
+        command: vectors_cmd::VectorsCommand,
     },
     /// The stellar-xdr definitions in schema/xdr/ as data.
     Schema {
@@ -618,6 +624,7 @@ fn main() -> ExitCode {
         Command::Schema { command } => schema_cmd::run(command),
         Command::Laws { command } => laws_cmd::run(command),
         Command::Twin { command } => twin_cmd::run(command),
+        Command::Vectors { command } => vectors_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

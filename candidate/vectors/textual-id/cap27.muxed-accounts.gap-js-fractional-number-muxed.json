@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "non-integral"
+      },
+      "input": {
+        "number": 16.5
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap27.muxed-accounts.gap-js-fractional-number-muxed",
+    "kind": "textual-id",
+    "linked_issues": [],
+    "notes": "representation gap fractional-number of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). a number can carry a fraction no xdr integer has; truncating or rounding it writes a different id than the caller passed. BigInt(16.5) throws a RangeError, which both 17.2.1 and 17.4.0 surface as a refusal",
+    "obligations": [
+      "gap:js:fractional-number"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

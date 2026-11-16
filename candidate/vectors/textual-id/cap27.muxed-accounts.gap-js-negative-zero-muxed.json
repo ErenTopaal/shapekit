@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "negative-zero"
+      },
+      "input": {
+        "text": "-0"
+      },
+      "kind": "muxed",
+      "op": "id_parse"
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0027"
+    ],
+    "expected": {
+      "decode": "must-reject",
+      "roundtrip": false,
+      "validity": "not-emittable"
+    },
+    "family": "cap27.muxed-accounts",
+    "fields_exercised": [
+      "op.payment.destination.mux_id",
+      "tx.source_account.mux_id"
+    ],
+    "flags": [
+      "representation-gap"
+    ],
+    "id": "cap27.muxed-accounts.gap-js-negative-zero-muxed",
+    "kind": "textual-id",
+    "linked_issues": [],
+    "notes": "representation gap negative-zero of the js table (registry/gaps/js.toml): @stellar/stellar-sdk xdr int, unsigned int, hyper, unsigned hyper as number (IEEE-754 binary64). -0 and +0 are two numbers (Object.is tells them apart) but one xdr integer; -0 as text is not the canonical spelling of any id. 17.2.1 MuxedAccount reads the text -0 through BigInt and returns the id text \"-0\"; 17.4.0 refuses it. BigInt(-0) is 0n",
+    "obligations": [
+      "gap:js:negative-zero"
+    ],
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 13,
+      "valid_min": 13
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}
