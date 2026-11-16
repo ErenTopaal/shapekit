@@ -157,6 +157,7 @@ pub(crate) fn submit(
                         ApplyStatus::Failed
                     },
                     witnesses: Vec::new(),
+                    carrier: None,
                 },
                 Some((applied.ledger, meta, hash)),
             ))
@@ -178,6 +179,7 @@ pub(crate) fn submit(
                     .transpose()?,
                 applied: ApplyStatus::NotApplied,
                 witnesses: Vec::new(),
+                carrier: None,
             },
             None,
         )),
@@ -196,15 +198,6 @@ fn slug(field: &Field, carrier: &Carrier, n: usize) -> String {
         s.push_str(carrier.id);
     }
     format!("{s}-{n}")
-}
-
-/// A variant name, prefixed with the carrier when the struct has several.
-fn named(carrier: &Carrier, name: String) -> String {
-    if carrier.id.is_empty() {
-        name
-    } else {
-        format!("[{}] {name}", carrier.id)
-    }
 }
 
 fn subject_tag(field: &Field, carrier: &Carrier, n: usize) -> String {
@@ -248,10 +241,7 @@ pub fn probe_field(
     w.fund(&keys)?;
 
     let mut evidence = Vec::new();
-    let base_name = named(
-        carrier,
-        format!("base, {}: {}", carrier.context, short(&p0.value)),
-    );
+    let base_name = format!("base, {}: {}", carrier.context, short(&p0.value));
     let env: TransactionEnvelope = serde_json::from_value(p0.json.clone())?;
     let (a, ledger) = submit(w, &env, &base_name)?;
     let expected = match carrier.outcome {
@@ -296,17 +286,14 @@ pub fn probe_field(
             Some(x) => Some(x.clone()),
             None => string_shaped_raw(typer, carrier, field, &p, &rep.value)?,
         };
-        let name = named(
-            carrier,
-            match &raw {
-                None => format!("{}: {}", rep.name, short(&rep.value)),
-                Some(_) => format!(
-                    "{}: {}, written as bytes, XDR-JSON cannot hold it",
-                    rep.name,
-                    short(&rep.value)
-                ),
-            },
-        );
+        let name = match &raw {
+            None => format!("{}: {}", rep.name, short(&rep.value)),
+            Some(_) => format!(
+                "{}: {}, written as bytes, XDR-JSON cannot hold it",
+                rep.name,
+                short(&rep.value)
+            ),
+        };
         let plan = p.base.plan.clone();
         let env = match &raw {
             Some(target) => spliced(w, typer, carrier, field, &p, target)?,
@@ -327,6 +314,11 @@ pub fn probe_field(
             attempt: a,
             ledger,
         });
+    }
+    if !carrier.id.is_empty() {
+        for e in &mut evidence {
+            e.attempt.carrier = Some(carrier.id.to_owned());
+        }
     }
     let attempts: Vec<ProbeAttempt> = evidence.iter().map(|e| e.attempt.clone()).collect();
     Ok(FieldRun {
@@ -364,10 +356,7 @@ fn single_valued(
     let outside = u.case_values().max().unwrap_or(0) + 1;
 
     let mut evidence = Vec::new();
-    let base_name = named(
-        carrier,
-        format!("base, {}: {}", carrier.context, short(&p0.value)),
-    );
+    let base_name = format!("base, {}: {}", carrier.context, short(&p0.value));
     let env: TransactionEnvelope = serde_json::from_value(p0.json.clone())?;
     let (a, ledger) = submit(w, &env, &base_name)?;
     ensure!(
@@ -400,10 +389,8 @@ fn single_valued(
         field.path
     );
     bytes[offset..offset + 4].copy_from_slice(&(outside as u32).to_be_bytes());
-    let name = named(
-        carrier,
-        format!("discriminant {outside}, outside {name}: bytes edited, no XDR-JSON holds it"),
-    );
+    let name =
+        format!("discriminant {outside}, outside {name}: bytes edited, no XDR-JSON holds it");
     let attempt = submit_raw(w, &bytes, &name)?;
     evidence.push(Evidence {
         slug: slug(field, carrier, 1),
@@ -415,6 +402,11 @@ fn single_valued(
         attempt,
         ledger: None,
     });
+    if !carrier.id.is_empty() {
+        for e in &mut evidence {
+            e.attempt.carrier = Some(carrier.id.to_owned());
+        }
+    }
     let attempts: Vec<ProbeAttempt> = evidence.iter().map(|e| e.attempt.clone()).collect();
     Ok(FieldRun {
         verdict: FieldVerdict {
@@ -470,7 +462,9 @@ pub(crate) fn submit_raw(w: &mut World, bytes: &[u8], variant: &str) -> Result<P
     match w.driver.node().submit_base64(&b64) {
         Err(shapekit_core_driver::node::NodeError::Rejected { message, .. }) => {
             ensure!(
-                message.starts_with("bad value of ") || message == "xstring overflow" || message == "xvector overflow",
+                message.starts_with("bad value of ")
+                    || message == "xstring overflow"
+                    || message == "xvector overflow",
                 "core's tx endpoint threw something other than a decode error: {message}"
             );
             Ok(ProbeAttempt {
@@ -480,6 +474,7 @@ pub(crate) fn submit_raw(w: &mut World, bytes: &[u8], variant: &str) -> Result<P
                 result_xdr: None,
                 applied: ApplyStatus::NotApplied,
                 witnesses: Vec::new(),
+                carrier: None,
             })
         }
         Err(e) => Err(e.into()),

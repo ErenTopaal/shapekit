@@ -363,7 +363,10 @@ fn probe_limits(
         .context("caps-limits.toml has no [[limit]] rows")?
         .iter()
         .map(|r| {
-            let id = r.get("id").and_then(|v| v.as_str()).context("a row without id")?;
+            let id = r
+                .get("id")
+                .and_then(|v| v.as_str())
+                .context("a row without id")?;
             let rec = r
                 .get("recommended")
                 .and_then(|v| v.as_integer())
@@ -400,10 +403,16 @@ fn probe_limits(
     let mut measured = Vec::new();
     for p in &probes {
         if !worlds.contains_key(&p.world) {
-            let dir = work.path().join(format!("{:?}", p.world).to_ascii_lowercase());
+            let dir = work
+                .path()
+                .join(format!("{:?}", p.world).to_ascii_lowercase());
             std::fs::create_dir_all(&dir)?;
-            let cfg = shapekit_probe::node_config(TESTNET_PASSPHRASE, image.clone(), p.world.protocol());
-            worlds.insert(p.world, shapekit_probe::world::World::start(p.world, cfg, &dir)?);
+            let cfg =
+                shapekit_probe::node_config(TESTNET_PASSPHRASE, image.clone(), p.world.protocol());
+            worlds.insert(
+                p.world,
+                shapekit_probe::world::World::start(p.world, cfg, &dir)?,
+            );
         }
         let w = worlds.get_mut(&p.world).expect("inserted above");
         let m = measure(w, &typer, p).with_context(|| format!("measuring {}", p.row))?;
@@ -414,7 +423,11 @@ fn probe_limits(
             m.limit.max_accepted,
             m.limit.first_rejected,
             m.limit.rejection.stage,
-            m.limit.rejection.result_code.as_deref().unwrap_or("no result")
+            m.limit
+                .rejection
+                .result_code
+                .as_deref()
+                .unwrap_or("no result")
         );
         for (n, o) in &m.tried {
             println!("    {n:>8}  {o}");
@@ -425,7 +438,11 @@ fn probe_limits(
 
     let mut open = 0;
     for (id, rec) in &rows {
-        let check = &all_checks.iter().find(|(r, _)| r == id).expect("checked above").1;
+        let check = &all_checks
+            .iter()
+            .find(|(r, _)| r == id)
+            .expect("checked above")
+            .1;
         let m = measured.iter().find(|m| m.row == id.as_str());
         let verdict = match (check, m) {
             (_, None) if !only.is_empty() => continue,
@@ -462,7 +479,10 @@ fn probe_limits(
         };
         println!("{id:<36} {verdict}");
     }
-    println!("{} limits measured, {open} open disagreements", measured.len());
+    println!(
+        "{} limits measured, {open} open disagreements",
+        measured.len()
+    );
 
     let (out, candidate) = match (only.is_empty(), scratch) {
         (true, None) => (out.to_owned(), candidate.to_owned()),
@@ -478,7 +498,9 @@ fn probe_limits(
     let mut limits = Vec::new();
     for mut m in measured {
         let mut w = shapekit_probe::witness::write_in(&candidate, family, &m.accepted)?;
-        w.extend(shapekit_probe::witness::write_in(&candidate, family, &m.refused)?);
+        w.extend(shapekit_probe::witness::write_in(
+            &candidate, family, &m.refused,
+        )?);
         m.limit.witnesses = w;
         limits.push(m.limit);
     }

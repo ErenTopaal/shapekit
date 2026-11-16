@@ -11,7 +11,9 @@ use serde_json::Value;
 use shapekit_contracts::Stage;
 use shapekit_contracts::limits::{Limit, LimitRejection};
 use shapekit_contracts::validation::{ApplyStatus, ProbeAttempt, SubmitStatus};
-use shapekit_core_driver::keys::{account_id, ed25519_signer, muxed_account, signed_payload_signer};
+use shapekit_core_driver::keys::{
+    account_id, ed25519_signer, muxed_account, signed_payload_signer,
+};
 use shapekit_core_driver::tx::BASE_FEE;
 use shapekit_schema::interp::Value as IValue;
 use stellar_xdr::{
@@ -87,7 +89,10 @@ fn rejection(a: &ProbeAttempt) -> Result<LimitRejection> {
     } else {
         Stage::Submit
     };
-    let code = a.result_code.clone().context("a refusal without a result")?;
+    let code = a
+        .result_code
+        .clone()
+        .context("a refusal without a result")?;
     let detail = match (&a.result_xdr, code.as_str()) {
         (Some(x), "tx_failed") => {
             use stellar_xdr::ReadXdr;
@@ -171,27 +176,21 @@ fn setting(w: &World, name: &str) -> Result<u64> {
     Ok(settings(w, &[name])?[name].parse()?)
 }
 
-fn attempt(
-    w: &mut World,
-    typer: &Typer,
-    p: &LimitProbe,
-    n: u64,
-) -> Result<Evidence> {
+fn attempt(w: &mut World, typer: &Typer, p: &LimitProbe, n: u64) -> Result<Evidence> {
     let s = Subject::new(format!("limit:{}#{n}", p.row));
     w.fund(&s.funded())?;
     let variant = format!("{} = {n}", p.measure);
     let slug = format!("{}-{n}", p.row.replace(['.', '_'], "-"));
-    let (attempt, ledger, envelope) = match (p.build)(w, typer, &s, n)
-        .with_context(|| format!("{}: building {n}", p.row))?
-    {
-        Built::Env(b) => {
-            let mut json = serde_json::to_value(&b.env)?;
-            let env = sign(&mut json, &b.plan, &w.network_id(), None)?;
-            let (a, l) = submit(w, &env, &variant)?;
-            (a, l, env.to_xdr(Limits::none())?)
-        }
-        Built::Raw(bytes) => (submit_raw(w, &bytes, &variant)?, None, bytes),
-    };
+    let (attempt, ledger, envelope) =
+        match (p.build)(w, typer, &s, n).with_context(|| format!("{}: building {n}", p.row))? {
+            Built::Env(b) => {
+                let mut json = serde_json::to_value(&b.env)?;
+                let env = sign(&mut json, &b.plan, &w.network_id(), None)?;
+                let (a, l) = submit(w, &env, &variant)?;
+                (a, l, env.to_xdr(Limits::none())?)
+            }
+            Built::Raw(bytes) => (submit_raw(w, &bytes, &variant)?, None, bytes),
+        };
     Ok(Evidence {
         slug,
         field: p.path.to_owned(),
@@ -357,7 +356,10 @@ fn xdr_bounded(
     pointer: &str,
     make: fn(&mut World, &Subject, u64) -> Result<Base>,
 ) -> Result<Built> {
-    ensure!(n <= bound + 1, "only one value past an XDR bound can be sent");
+    ensure!(
+        n <= bound + 1,
+        "only one value past an XDR bound can be sent"
+    );
     if n <= bound {
         return Ok(Built::Env(make(w, s, n)?));
     }
@@ -410,14 +412,25 @@ fn call(contract: &ContractId, f: &str, args: Vec<ScVal>) -> Result<HostFunction
 fn max_resources(w: &World, s: &Subject) -> Result<SorobanTransactionData> {
     let hf = call(&echo(w)?, "echo", vec![ScVal::U32(7)])?;
     let mut d = crate::soroban::simulated(w, s, hf)?;
-    d.resources.instructions = u32::try_from(setting(w, "contract_compute_v0.tx_max_instructions")?)?;
-    d.resources.disk_read_bytes = u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_disk_read_bytes")?)?;
-    d.resources.write_bytes = u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_write_bytes")?)?;
+    d.resources.instructions =
+        u32::try_from(setting(w, "contract_compute_v0.tx_max_instructions")?)?;
+    d.resources.disk_read_bytes = u32::try_from(setting(
+        w,
+        "contract_ledger_cost_v0.tx_max_disk_read_bytes",
+    )?)?;
+    d.resources.write_bytes =
+        u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_write_bytes")?)?;
     d.resource_fee = 2_000_000_000;
     Ok(d)
 }
 
-fn soroban(w: &World, s: &Subject, hf: HostFunction, data: SorobanTransactionData, auth: Vec<SorobanAuthorizationEntry>) -> Result<Built> {
+fn soroban(
+    w: &World,
+    s: &Subject,
+    hf: HostFunction,
+    data: SorobanTransactionData,
+    auth: Vec<SorobanAuthorizationEntry>,
+) -> Result<Built> {
     let tx = w
         .builder(&s.source)?
         .fee(BASE_FEE)
@@ -500,7 +513,11 @@ pub fn padded_wasm(n: u64) -> Result<Vec<u8>> {
         out.push(name.len() as u8);
         out.extend(name);
         out.extend(std::iter::repeat_n(0u8, payload));
-        ensure!(out.len() == n, "padded wasm has {} bytes, wanted {n}", out.len());
+        ensure!(
+            out.len() == n,
+            "padded wasm has {} bytes, wanted {n}",
+            out.len()
+        );
         return Ok(out);
     }
     bail!("no custom section pads echo to {n} bytes")
@@ -540,7 +557,11 @@ fn memo_text(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     let mut tx = w.tx(&s.source, vec![(None, payment(&s.peers[0], XLM))])?;
     let text: StringM<28> = vec![b'a'; n as usize].try_into()?;
     tx.memo = Memo::Text(text);
-    Ok(Base { env: World::unsigned(tx), plan: plan(&[&s.source]), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&[&s.source]),
+        at: None,
+    })
 }
 
 fn signatures(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
@@ -549,7 +570,11 @@ fn signatures(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     let tx = w.tx(&s.source, vec![(None, payment(&s.peers[0], XLM))])?;
     let mut all = vec![&s.source];
     all.extend(keys.iter());
-    Ok(Base { env: World::unsigned(tx), plan: plan(&all), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&all),
+        at: None,
+    })
 }
 
 fn extra_signers(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
@@ -565,13 +590,21 @@ fn extra_signers(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     });
     let mut all = vec![&s.source];
     all.extend(keys.iter());
-    Ok(Base { env: World::unsigned(tx), plan: plan(&all), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&all),
+        at: None,
+    })
 }
 
 fn operations(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     let ops = (0..n).map(|_| (None, payment(&s.peers[0], 1))).collect();
     let tx = w.tx(&s.source, ops)?;
-    Ok(Base { env: World::unsigned(tx), plan: plan(&[&s.source]), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&[&s.source]),
+        at: None,
+    })
 }
 
 fn path(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
@@ -589,7 +622,11 @@ fn path(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
             }),
         )],
     )?;
-    Ok(Base { env: World::unsigned(tx), plan: plan(&[&s.source]), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&[&s.source]),
+        at: None,
+    })
 }
 
 fn claimants(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
@@ -614,18 +651,29 @@ fn claimants(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
             }),
         )],
     )?;
-    Ok(Base { env: World::unsigned(tx), plan: plan(&[&s.source]), at: None })
+    Ok(Base {
+        env: World::unsigned(tx),
+        plan: plan(&[&s.source]),
+        at: None,
+    })
 }
 
 fn signed_payload(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     let payload = vec![0x5a; n as usize];
     let mut tx = w.tx(&s.source, vec![(None, payment(&s.peers[0], XLM))])?;
     tx.cond = Preconditions::V2(PreconditionsV2 {
-        extra_signers: vec![signed_payload_signer(&s.peers[1].verifying_key(), &payload)?]
-            .try_into()?,
+        extra_signers: vec![signed_payload_signer(
+            &s.peers[1].verifying_key(),
+            &payload,
+        )?]
+        .try_into()?,
         ..Default::default()
     });
-    let mut b = Base { env: World::unsigned(tx), plan: plan(&[&s.source]), at: None };
+    let mut b = Base {
+        env: World::unsigned(tx),
+        plan: plan(&[&s.source]),
+        at: None,
+    };
     b.plan
         .payloads
         .push((s.peers[1].clone(), "/tx/tx/cond/v2/extra_signers/0".into()));
@@ -640,7 +688,8 @@ fn symbol_arg(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
 
 const PP: &str = "/tx/tx/operations/0/body/path_payment_strict_receive/path";
 const CB: &str = "/tx/tx/operations/0/body/create_claimable_balance/claimants";
-const ARG0: &str = "/tx/tx/operations/0/body/invoke_host_function/host_function/invoke_contract/args/0/symbol";
+const ARG0: &str =
+    "/tx/tx/operations/0/body/invoke_host_function/host_function/invoke_contract/args/0/symbol";
 
 fn level(signer: &ScAddress, fanout: u32) -> Result<ScVal> {
     Ok(ScVal::Map(Some(stellar_xdr::ScMap(
@@ -671,7 +720,9 @@ fn fanout(w: &mut World, s: &Subject, n: u64) -> Result<Built> {
             &root,
             "node",
             vec![
-                ScVal::Vec(Some(ScVec(vec![ScVal::Address(ScAddress::Contract(child.clone()))].try_into()?))),
+                ScVal::Vec(Some(ScVec(
+                    vec![ScVal::Address(ScAddress::Contract(child.clone()))].try_into()?,
+                ))),
                 ScVal::Vec(Some(ScVec(
                     vec![level(&peer, u32::try_from(k)?)?, level(&peer, 0)?].try_into()?,
                 ))),
@@ -681,7 +732,10 @@ fn fanout(w: &mut World, s: &Subject, n: u64) -> Result<Built> {
     let m = n.min(SIMULATED_FANOUT);
     let source = account_id(&s.source.verifying_key());
     let node = w.driver.node();
-    let sim = shapekit_core_driver::sim_legacy::AnySimulator::new(node.snapshot()?, &node.ledger_context()?)?;
+    let sim = shapekit_core_driver::sim_legacy::AnySimulator::new(
+        node.snapshot()?,
+        &node.ledger_context()?,
+    )?;
     let rec = sim.simulate_invoke(
         hf_for(m)?,
         shapekit_core_driver::sim::AuthMode::Record {
@@ -713,9 +767,14 @@ fn fanout(w: &mut World, s: &Subject, n: u64) -> Result<Built> {
         &[&s.peers[0]],
     )?;
     let mut d = rec.transaction_data;
-    d.resources.instructions = u32::try_from(setting(w, "contract_compute_v0.tx_max_instructions")?)?;
-    d.resources.disk_read_bytes = u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_disk_read_bytes")?)?;
-    d.resources.write_bytes = u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_write_bytes")?)?;
+    d.resources.instructions =
+        u32::try_from(setting(w, "contract_compute_v0.tx_max_instructions")?)?;
+    d.resources.disk_read_bytes = u32::try_from(setting(
+        w,
+        "contract_ledger_cost_v0.tx_max_disk_read_bytes",
+    )?)?;
+    d.resources.write_bytes =
+        u32::try_from(setting(w, "contract_ledger_cost_v0.tx_max_write_bytes")?)?;
     d.resource_fee = 2_000_000_000;
     soroban(w, s, hf, d, vec![entry])
 }
@@ -736,184 +795,324 @@ pub fn probes() -> Vec<LimitProbe> {
         settings: &[],
     };
     vec![
-        p("tx.memo_text.len", "Transaction.memo", "bytes of a text memo", 28, 29, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 28, "/tx/tx/memo/text", memo_text)
-        }),
-        p("tx.signatures", "TransactionV1Envelope.signatures", "signatures, each of a signer of the source", 20, 21, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 20, "/tx/signatures", signatures)
-        }),
-        p("tx.extra_signers", "PreconditionsV2.extraSigners", "extra signers, each signing", 2, 3, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 2, "/tx/tx/cond/v2/extra_signers", extra_signers)
-        }),
-        p("tx.operations", "Transaction.operations", "payments in one transaction", 100, 101, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 100, "/tx/tx/operations", operations)
-        }),
-        p("path.len", "PathPaymentStrictReceiveOp.path", "native hops of a native path payment", 5, 6, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 5, PP, path)
-        }),
-        p("claimants.per_balance", "CreateClaimableBalanceOp.claimants", "claimants of one balance", 10, 11, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 10, CB, claimants)
-        }),
-        p("signer.signed_payload.len", "SignerKeyEd25519SignedPayload.payload", "bytes of an extra signer's signed payload", 64, 65, |w, t, s, n| {
-            if n <= 64 {
-                return Ok(Built::Env(signed_payload(w, s, n)?));
-            }
-            let b = signed_payload(w, s, 64)?;
-            let bytes = signed_bytes(w, &b)?;
-            // the signer key is one P strkey in XDR-JSON: the payload follows its arm word and
-            // the 32 key bytes
-            let (off, _, v) = t.envelope_offset(&bytes, "/tx/tx/cond/v2/extra_signers/0")?;
-            let IValue::Union { arm: Some(inner), .. } = v else {
-                bail!("the extra signer is no union value");
-            };
-            let IValue::Struct(fields) = *inner else {
-                bail!("the signed payload is no struct");
-            };
-            let ty = shapekit_schema::Type::OpaqueVar { max_size: Some(64) };
-            Ok(Built::Raw(grow_at(t, &bytes, off + 4 + 32, &ty, &fields[1], 0x5a)?))
-        }),
-        p("scval.symbol.len", "InvokeContractArgs.args", "bytes of a symbol echo receives", 32, 33, |w, t, s, n| {
-            xdr_bounded(w, t, s, n, 32, ARG0, symbol_arg)
-        }),
-        p("claim_predicate.depth", "ClaimantV0.predicate", "levels of a claimant's predicate", 1, 8, |w, _, s, n| {
-            let mut pred = ClaimPredicate::Unconditional;
-            for _ in 1..n {
-                pred = ClaimPredicate::Not(Some(Box::new(pred)));
-            }
-            classic(
-                w,
-                s,
-                vec![OperationBody::CreateClaimableBalance(CreateClaimableBalanceOp {
-                    asset: Asset::Native,
-                    amount: XLM,
-                    claimants: vec![Claimant::ClaimantTypeV0(ClaimantV0 {
-                        destination: account_id(&s.peers[0].verifying_key()),
-                        predicate: pred,
-                    })]
-                    .try_into()?,
-                })],
-                &[&s.source],
-            )
-        }),
-        p("account.signers", "SetOptionsOp.signer", "signers of the source after the operation", 1, 32, |w, _, s, n| {
-            let keys = fresh_keys(s, n);
-            add_signers(w, s, &keys[..n as usize - 1])?;
-            classic(
-                w,
-                s,
-                vec![OperationBody::SetOptions(SetOptionsOp {
-                    signer: Some(Signer {
-                        key: ed25519_signer(&keys[n as usize - 1].verifying_key()),
-                        weight: 1,
-                    }),
-                    ..Default::default()
-                })],
-                &[&s.source],
-            )
-        }),
-        p("account.subentries", "ManageDataOp.dataName", "subentries of the source after the operation", 1, 1100, |w, _, s, n| {
-            let name = |i: u64| -> Result<stellar_xdr::String64> {
-                Ok(stellar_xdr::String64(format!("d{i}").try_into()?))
-            };
-            let mut i = 0;
-            while i + 1 < n {
-                let end = (i + 100).min(n - 1);
-                let ops = (i..end)
-                    .map(|k| {
-                        Ok(OperationBody::ManageData(ManageDataOp {
-                            data_name: name(k)?,
-                            data_value: Some(vec![1u8].try_into()?),
-                        }))
-                    })
-                    .collect::<Result<Vec<_>>>()?;
-                let src = s.source.clone();
-                w.classic_ok(&src, ops, &[])?;
-                i = end;
-            }
-            classic(
-                w,
-                s,
-                vec![OperationBody::ManageData(ManageDataOp {
-                    data_name: name(n)?,
-                    data_value: Some(vec![1u8].try_into()?),
-                })],
-                &[&s.source],
-            )
-        }),
+        p(
+            "tx.memo_text.len",
+            "Transaction.memo",
+            "bytes of a text memo",
+            28,
+            29,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 28, "/tx/tx/memo/text", memo_text),
+        ),
+        p(
+            "tx.signatures",
+            "TransactionV1Envelope.signatures",
+            "signatures, each of a signer of the source",
+            20,
+            21,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 20, "/tx/signatures", signatures),
+        ),
+        p(
+            "tx.extra_signers",
+            "PreconditionsV2.extraSigners",
+            "extra signers, each signing",
+            2,
+            3,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 2, "/tx/tx/cond/v2/extra_signers", extra_signers),
+        ),
+        p(
+            "tx.operations",
+            "Transaction.operations",
+            "payments in one transaction",
+            100,
+            101,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 100, "/tx/tx/operations", operations),
+        ),
+        p(
+            "path.len",
+            "PathPaymentStrictReceiveOp.path",
+            "native hops of a native path payment",
+            5,
+            6,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 5, PP, path),
+        ),
+        p(
+            "claimants.per_balance",
+            "CreateClaimableBalanceOp.claimants",
+            "claimants of one balance",
+            10,
+            11,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 10, CB, claimants),
+        ),
+        p(
+            "signer.signed_payload.len",
+            "SignerKeyEd25519SignedPayload.payload",
+            "bytes of an extra signer's signed payload",
+            64,
+            65,
+            |w, t, s, n| {
+                if n <= 64 {
+                    return Ok(Built::Env(signed_payload(w, s, n)?));
+                }
+                let b = signed_payload(w, s, 64)?;
+                let bytes = signed_bytes(w, &b)?;
+                // the signer key is one P strkey in XDR-JSON: the payload follows its arm word and
+                // the 32 key bytes
+                let (off, _, v) = t.envelope_offset(&bytes, "/tx/tx/cond/v2/extra_signers/0")?;
+                let IValue::Union {
+                    arm: Some(inner), ..
+                } = v
+                else {
+                    bail!("the extra signer is no union value");
+                };
+                let IValue::Struct(fields) = *inner else {
+                    bail!("the signed payload is no struct");
+                };
+                let ty = shapekit_schema::Type::OpaqueVar { max_size: Some(64) };
+                Ok(Built::Raw(grow_at(
+                    t,
+                    &bytes,
+                    off + 4 + 32,
+                    &ty,
+                    &fields[1],
+                    0x5a,
+                )?))
+            },
+        ),
+        p(
+            "scval.symbol.len",
+            "InvokeContractArgs.args",
+            "bytes of a symbol echo receives",
+            32,
+            33,
+            |w, t, s, n| xdr_bounded(w, t, s, n, 32, ARG0, symbol_arg),
+        ),
+        p(
+            "claim_predicate.depth",
+            "ClaimantV0.predicate",
+            "levels of a claimant's predicate",
+            1,
+            8,
+            |w, _, s, n| {
+                let mut pred = ClaimPredicate::Unconditional;
+                for _ in 1..n {
+                    pred = ClaimPredicate::Not(Some(Box::new(pred)));
+                }
+                classic(
+                    w,
+                    s,
+                    vec![OperationBody::CreateClaimableBalance(
+                        CreateClaimableBalanceOp {
+                            asset: Asset::Native,
+                            amount: XLM,
+                            claimants: vec![Claimant::ClaimantTypeV0(ClaimantV0 {
+                                destination: account_id(&s.peers[0].verifying_key()),
+                                predicate: pred,
+                            })]
+                            .try_into()?,
+                        },
+                    )],
+                    &[&s.source],
+                )
+            },
+        ),
+        p(
+            "account.signers",
+            "SetOptionsOp.signer",
+            "signers of the source after the operation",
+            1,
+            32,
+            |w, _, s, n| {
+                let keys = fresh_keys(s, n);
+                add_signers(w, s, &keys[..n as usize - 1])?;
+                classic(
+                    w,
+                    s,
+                    vec![OperationBody::SetOptions(SetOptionsOp {
+                        signer: Some(Signer {
+                            key: ed25519_signer(&keys[n as usize - 1].verifying_key()),
+                            weight: 1,
+                        }),
+                        ..Default::default()
+                    })],
+                    &[&s.source],
+                )
+            },
+        ),
+        p(
+            "account.subentries",
+            "ManageDataOp.dataName",
+            "subentries of the source after the operation",
+            1,
+            1100,
+            |w, _, s, n| {
+                let name = |i: u64| -> Result<stellar_xdr::String64> {
+                    Ok(stellar_xdr::String64(format!("d{i}").try_into()?))
+                };
+                let mut i = 0;
+                while i + 1 < n {
+                    let end = (i + 100).min(n - 1);
+                    let ops = (i..end)
+                        .map(|k| {
+                            Ok(OperationBody::ManageData(ManageDataOp {
+                                data_name: name(k)?,
+                                data_value: Some(vec![1u8].try_into()?),
+                            }))
+                        })
+                        .collect::<Result<Vec<_>>>()?;
+                    let src = s.source.clone();
+                    w.classic_ok(&src, ops, &[])?;
+                    i = end;
+                }
+                classic(
+                    w,
+                    s,
+                    vec![OperationBody::ManageData(ManageDataOp {
+                        data_name: name(n)?,
+                        data_value: Some(vec![1u8].try_into()?),
+                    })],
+                    &[&s.source],
+                )
+            },
+        ),
         LimitProbe {
             settings: &["contract_ledger_cost_ext_v0.tx_max_footprint_entries"],
-            ..p("soroban.footprint.entries", "LedgerFootprint.readOnly", "footprint keys of echo(7), read-only keys added", 3, 1000, |w, _, s, n| {
-                let e = echo(w)?;
-                let extra = (3..n)
-                    .map(|i| Ok(data_key(&e, ScVal::U32(i as u32 + 1000))))
-                    .collect::<Result<Vec<_>>>()?;
-                echo_with_keys(w, s, extra, false)
-            })
+            ..p(
+                "soroban.footprint.entries",
+                "LedgerFootprint.readOnly",
+                "footprint keys of echo(7), read-only keys added",
+                3,
+                1000,
+                |w, _, s, n| {
+                    let e = echo(w)?;
+                    let extra = (3..n)
+                        .map(|i| Ok(data_key(&e, ScVal::U32(i as u32 + 1000))))
+                        .collect::<Result<Vec<_>>>()?;
+                    echo_with_keys(w, s, extra, false)
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_ledger_cost_v0.tx_max_write_ledger_entries"],
-            ..p("soroban.footprint.write_entries", "LedgerFootprint.readWrite", "read-write keys of echo(7), keys added", 1, 400, |w, _, s, n| {
-                let e = echo(w)?;
-                let extra = (1..n)
-                    .map(|i| Ok(data_key(&e, ScVal::U32(i as u32 + 1000))))
-                    .collect::<Result<Vec<_>>>()?;
-                echo_with_keys(w, s, extra, true)
-            })
+            ..p(
+                "soroban.footprint.write_entries",
+                "LedgerFootprint.readWrite",
+                "read-write keys of echo(7), keys added",
+                1,
+                400,
+                |w, _, s, n| {
+                    let e = echo(w)?;
+                    let extra = (1..n)
+                        .map(|i| Ok(data_key(&e, ScVal::U32(i as u32 + 1000))))
+                        .collect::<Result<Vec<_>>>()?;
+                    echo_with_keys(w, s, extra, true)
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_data_key_size_bytes"],
-            ..p("soroban.contract_data.key_bytes", "LedgerKeyContractData.key", "bytes of an ScBytes key in a read-only footprint key", 0, 400, |w, _, s, n| {
-                let e = echo(w)?;
-                echo_with_keys(w, s, vec![data_key(&e, bytes(n)?)], false)
-            })
+            ..p(
+                "soroban.contract_data.key_bytes",
+                "LedgerKeyContractData.key",
+                "bytes of an ScBytes key in a read-only footprint key",
+                0,
+                400,
+                |w, _, s, n| {
+                    let e = echo(w)?;
+                    echo_with_keys(w, s, vec![data_key(&e, bytes(n)?)], false)
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_data_entry_size_bytes"],
-            ..p("soroban.contract_data.entry_bytes", "InvokeContractArgs.args", "bytes echo stores in one entry", 1, 70000, |w, _, s, n| {
-                let hf = call(&echo(w)?, "echo", vec![bytes(n)?])?;
-                let d = max_resources(w, s)?;
-                soroban(w, s, hf, d, Vec::new())
-            })
+            ..p(
+                "soroban.contract_data.entry_bytes",
+                "InvokeContractArgs.args",
+                "bytes echo stores in one entry",
+                1,
+                70000,
+                |w, _, s, n| {
+                    let hf = call(&echo(w)?, "echo", vec![bytes(n)?])?;
+                    let d = max_resources(w, s)?;
+                    soroban(w, s, hf, d, Vec::new())
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_events_v0.tx_max_contract_events_size_bytes"],
-            ..p("events.contract.bytes_per_tx", "InvokeContractArgs.args", "bytes of the data of the one event emit sends", 1, 20000, |w, _, s, n| {
-                let hf = call(
-                    &echo(w)?,
-                    "emit",
-                    vec![ScVal::Vec(Some(ScVec(Default::default()))), bytes(n)?],
-                )?;
-                let d = max_resources(w, s)?;
-                soroban(w, s, hf, d, Vec::new())
-            })
+            ..p(
+                "events.contract.bytes_per_tx",
+                "InvokeContractArgs.args",
+                "bytes of the data of the one event emit sends",
+                1,
+                20000,
+                |w, _, s, n| {
+                    let hf = call(
+                        &echo(w)?,
+                        "emit",
+                        vec![ScVal::Vec(Some(ScVec(Default::default()))), bytes(n)?],
+                    )?;
+                    let d = max_resources(w, s)?;
+                    soroban(w, s, hf, d, Vec::new())
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_max_size_bytes"],
-            ..p("soroban.contract_code.bytes", "InvokeHostFunctionOp.hostFunction", "bytes of an uploaded wasm module", 5000, 140000, |w, _, s, n| {
-                let hf = HostFunction::UploadContractWasm(padded_wasm(n)?.try_into()?);
-                let mut d = max_resources(w, s)?;
-                d.resources.footprint = Default::default();
-                let hash = stellar_xdr::Hash(<sha2::Sha256 as sha2::Digest>::digest(padded_wasm(n)?).into());
-                d.resources.footprint.read_write =
-                    vec![LedgerKey::ContractCode(stellar_xdr::LedgerKeyContractCode { hash })].try_into()?;
-                soroban(w, s, hf, d, Vec::new())
-            })
+            ..p(
+                "soroban.contract_code.bytes",
+                "InvokeHostFunctionOp.hostFunction",
+                "bytes of an uploaded wasm module",
+                5000,
+                140000,
+                |w, _, s, n| {
+                    let hf = HostFunction::UploadContractWasm(padded_wasm(n)?.try_into()?);
+                    let mut d = max_resources(w, s)?;
+                    d.resources.footprint = Default::default();
+                    let hash = stellar_xdr::Hash(
+                        <sha2::Sha256 as sha2::Digest>::digest(padded_wasm(n)?).into(),
+                    );
+                    d.resources.footprint.read_write = vec![LedgerKey::ContractCode(
+                        stellar_xdr::LedgerKeyContractCode { hash },
+                    )]
+                    .try_into()?;
+                    soroban(w, s, hf, d, Vec::new())
+                },
+            )
         },
         LimitProbe {
             settings: &["contract_bandwidth_v0.tx_max_size_bytes"],
-            ..p("xdr.envelope.len", "SorobanAuthorizationEntry.rootInvocation", "bytes of an argument in a declared, unmatched auth entry", 1, 140000, |w, _, s, n| {
-                declared_bytes(w, s, n)
-            })
+            ..p(
+                "xdr.envelope.len",
+                "SorobanAuthorizationEntry.rootInvocation",
+                "bytes of an argument in a declared, unmatched auth entry",
+                1,
+                140000,
+                |w, _, s, n| declared_bytes(w, s, n),
+            )
         },
         LimitProbe {
             settings: &["contract_compute_v0.tx_memory_limit"],
-            ..p("auth.invocation.nodes", "SorobanAuthorizedInvocation.subInvocations", "matched sub-invocations under one root", 1, 400, |w, _, s, n| fanout(w, s, n))
+            ..p(
+                "auth.invocation.nodes",
+                "SorobanAuthorizedInvocation.subInvocations",
+                "matched sub-invocations under one root",
+                1,
+                400,
+                |w, _, s, n| fanout(w, s, n),
+            )
         },
-        p("scval.depth", "InvokeContractArgs.args", "nesting of a vec echo receives", 1, 300, |w, _, s, n| {
-            let hf = call(&echo(w)?, "echo", vec![nested(n)?])?;
-            let d = max_resources(w, s)?;
-            soroban(w, s, hf, d, Vec::new())
-        }),
+        p(
+            "scval.depth",
+            "InvokeContractArgs.args",
+            "nesting of a vec echo receives",
+            1,
+            300,
+            |w, _, s, n| {
+                let hf = call(&echo(w)?, "echo", vec![nested(n)?])?;
+                let d = max_resources(w, s)?;
+                soroban(w, s, hf, d, Vec::new())
+            },
+        ),
     ]
 }
 
@@ -946,7 +1145,10 @@ pub enum Check {
 }
 
 fn envelope_sizes(m: &Measured) -> Result<(u64, u64)> {
-    Ok((m.accepted.envelope.len() as u64, m.refused.envelope.len() as u64))
+    Ok((
+        m.accepted.envelope.len() as u64,
+        m.refused.envelope.len() as u64,
+    ))
 }
 
 fn key_sizes(m: &Measured) -> Result<(u64, u64)> {
@@ -999,33 +1201,104 @@ fn event_sizes(m: &Measured) -> Result<(u64, u64)> {
 pub fn checks() -> Vec<(&'static str, Check)> {
     use Check::*;
     vec![
-        ("xdr.envelope.depth", Unmeasured("an envelope deeper than the bound is refused at submission (validateXDRForProtocol, stellar-core v30.0.0 src/transactions/TransactionUtils.cpp 1349-1380) but every envelope that deep still fails at apply, so no depth is applied successfully at the bound: the host decodes declared auth only to depth 500 (soroban-env-host 30.0.0 DEFAULT_XDR_RW_LIMITS). The submission bound is witnessed by the corpus entries of soroban.auth-trees, 492 declared levels included and 493 refused tx_malformed")),
+        (
+            "xdr.envelope.depth",
+            Unmeasured(
+                "an envelope deeper than the bound is refused at submission (validateXDRForProtocol, stellar-core v30.0.0 src/transactions/TransactionUtils.cpp 1349-1380) but every envelope that deep still fails at apply, so no depth is applied successfully at the bound: the host decodes declared auth only to depth 500 (soroban-env-host 30.0.0 DEFAULT_XDR_RW_LIMITS). The submission bound is witnessed by the corpus entries of soroban.auth-trees, 492 declared levels included and 493 refused tx_malformed",
+            ),
+        ),
         ("xdr.envelope.len", Size(envelope_sizes)),
-        ("xdr.meta.depth", Unmeasured("meta is written by core and never submitted; the row adds the measured 12 levels of a LedgerCloseMeta V2 above an envelope to the envelope bound")),
-        ("xdr.meta.len", Unmeasured("no network setting bounds a whole LedgerCloseMeta and it is never submitted; the row takes the host's last-resort XDR length (soroban-env-host 30.0.0)")),
+        (
+            "xdr.meta.depth",
+            Unmeasured(
+                "meta is written by core and never submitted; the row adds the measured 12 levels of a LedgerCloseMeta V2 above an envelope to the envelope bound",
+            ),
+        ),
+        (
+            "xdr.meta.len",
+            Unmeasured(
+                "no network setting bounds a whole LedgerCloseMeta and it is never submitted; the row takes the host's last-resort XDR length (soroban-env-host 30.0.0)",
+            ),
+        ),
         ("scval.depth", Equal),
-        ("scval.depth.envelope", Unmeasured("values that deep are included but fail at apply, because the host converts arguments only to DEFAULT_HOST_DEPTH_LIMIT = 100 (measured as scval.depth); the row's bound is the envelope decode depth, which the corpus entries of soroban.scval-shapes witness")),
-        ("scval.vec.len", Unmeasured("derived from the envelope size (measured as xdr.envelope.len) divided by the 4 byte size of the smallest element")),
-        ("scval.map.len", Unmeasured("derived from the envelope size (measured as xdr.envelope.len) divided by the 8 byte size of the smallest entry")),
-        ("scval.bytes.len", Unmeasured("derived from the envelope size, measured as xdr.envelope.len with an ScBytes value as the growing part")),
+        (
+            "scval.depth.envelope",
+            Unmeasured(
+                "values that deep are included but fail at apply, because the host converts arguments only to DEFAULT_HOST_DEPTH_LIMIT = 100 (measured as scval.depth); the row's bound is the envelope decode depth, which the corpus entries of soroban.scval-shapes witness",
+            ),
+        ),
+        (
+            "scval.vec.len",
+            Unmeasured(
+                "derived from the envelope size (measured as xdr.envelope.len) divided by the 4 byte size of the smallest element",
+            ),
+        ),
+        (
+            "scval.map.len",
+            Unmeasured(
+                "derived from the envelope size (measured as xdr.envelope.len) divided by the 8 byte size of the smallest entry",
+            ),
+        ),
+        (
+            "scval.bytes.len",
+            Unmeasured(
+                "derived from the envelope size, measured as xdr.envelope.len with an ScBytes value as the growing part",
+            ),
+        ),
         ("scval.symbol.len", Equal),
-        ("auth.invocation.depth", Unmeasured("the declared chain is bounded by the envelope depth check at submission (see xdr.envelope.depth); deeper than the host's decode depth the transaction is included and fails, so no applied chain reaches the row's 493")),
-        ("auth.invocation.nodes", Below("the row bounds declared nodes by the envelope size; matched nodes are bounded lower, by the transaction memory limit (contract_compute_v0.tx_memory_limit), because each matched call instantiates the contract again (soroban-env-host 30.0.0 budget); declared nodes the host never matches cost no instantiation")),
+        (
+            "auth.invocation.depth",
+            Unmeasured(
+                "the declared chain is bounded by the envelope depth check at submission (see xdr.envelope.depth); deeper than the host's decode depth the transaction is included and fails, so no applied chain reaches the row's 493",
+            ),
+        ),
+        (
+            "auth.invocation.nodes",
+            Below(
+                "the row bounds declared nodes by the envelope size; matched nodes are bounded lower, by the transaction memory limit (contract_compute_v0.tx_memory_limit), because each matched call instantiates the contract again (soroban-env-host 30.0.0 budget); declared nodes the host never matches cost no instantiation",
+            ),
+        ),
         ("events.contract.bytes_per_tx", Size(event_sizes)),
-        ("events.contract.per_tx", Unmeasured("derived from events.contract.bytes_per_tx (measured) divided by the 24 byte smallest event; the test contracts emit one event per call")),
-        ("events.contract.per_ledger", Unmeasured("a ledger-wide product of two settings (ledgerMaxTxCount and the per-transaction events bound); no single transaction measures it")),
-        ("events.contract.bytes_per_ledger", Unmeasured("a ledger-wide product of two settings; no single transaction measures it")),
+        (
+            "events.contract.per_tx",
+            Unmeasured(
+                "derived from events.contract.bytes_per_tx (measured) divided by the 24 byte smallest event; the test contracts emit one event per call",
+            ),
+        ),
+        (
+            "events.contract.per_ledger",
+            Unmeasured(
+                "a ledger-wide product of two settings (ledgerMaxTxCount and the per-transaction events bound); no single transaction measures it",
+            ),
+        ),
+        (
+            "events.contract.bytes_per_ledger",
+            Unmeasured("a ledger-wide product of two settings; no single transaction measures it"),
+        ),
         ("soroban.footprint.entries", Equal),
         ("soroban.footprint.write_entries", Equal),
         ("soroban.contract_data.entry_bytes", Size(entry_sizes)),
         ("soroban.contract_data.key_bytes", Size(key_sizes)),
         ("soroban.contract_code.bytes", Equal),
-        ("soroban.txs.per_ledger", Unmeasured("a ledger-wide setting (ledgerMaxTxCount); the probe closes one transaction per ledger")),
-        ("state_changes.per_tx.query", Unmeasured("an indexer's query-time bound in wallet-backend, not a core limit")),
+        (
+            "soroban.txs.per_ledger",
+            Unmeasured(
+                "a ledger-wide setting (ledgerMaxTxCount); the probe closes one transaction per ledger",
+            ),
+        ),
+        (
+            "state_changes.per_tx.query",
+            Unmeasured("an indexer's query-time bound in wallet-backend, not a core limit"),
+        ),
         ("claim_predicate.depth", Equal),
         ("claimants.per_balance", Equal),
         ("path.len", Equal),
-        ("offers.crossed.per_op", Unmeasured("crossing 1001 offers needs an order book of 1001 offers from several accounts (each account holds at most 1000 subentries); the bound is MAX_OFFERS_TO_CROSS = 1000 in stellar-core v30.0.0 src/transactions/TransactionUtils.cpp 37, not measured by this probe")),
+        (
+            "offers.crossed.per_op",
+            Unmeasured(
+                "crossing 1001 offers needs an order book of 1001 offers from several accounts (each account holds at most 1000 subentries); the bound is MAX_OFFERS_TO_CROSS = 1000 in stellar-core v30.0.0 src/transactions/TransactionUtils.cpp 37, not measured by this probe",
+            ),
+        ),
         ("tx.operations", Equal),
         ("tx.signatures", Equal),
         ("tx.extra_signers", Equal),
@@ -1033,6 +1306,11 @@ pub fn checks() -> Vec<(&'static str, Check)> {
         ("signer.signed_payload.len", Equal),
         ("account.signers", Equal),
         ("account.subentries", Equal),
-        ("ledger.upgrades", Unmeasured("StellarValue.upgrades is written by validators in the ledger header, never by a transaction")),
+        (
+            "ledger.upgrades",
+            Unmeasured(
+                "StellarValue.upgrades is written by validators in the ledger header, never by a transaction",
+            ),
+        ),
     ]
 }

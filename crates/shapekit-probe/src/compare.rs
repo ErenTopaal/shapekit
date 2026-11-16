@@ -489,14 +489,12 @@ pub fn resolutions() -> Vec<Resolution> {
 
 /// The measured verdict of one site: whether its attempts end in more than one way.
 fn site_validated(v: &FieldVerdict, s: &Site) -> Result<(bool, usize)> {
-    let prefix = format!("[{}] ", s.carrier);
-    let mine = |a: &&ProbeAttempt| s.carrier.is_empty() || a.variant.starts_with(&prefix);
     let picked: Vec<&ProbeAttempt> = v
         .attempts
         .iter()
-        .filter(mine)
+        .filter(|a| s.carrier.is_empty() || a.carrier.as_deref() == Some(s.carrier))
         .filter(|a| {
-            let name = a.variant.strip_prefix(&prefix).unwrap_or(&a.variant);
+            let name = a.variant.as_str();
             if name.starts_with("base, ") {
                 return true;
             }

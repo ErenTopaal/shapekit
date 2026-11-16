@@ -107,9 +107,13 @@ fn base_entry(family: &str, e: &Evidence, id: String, xdr_type: &str) -> Entry {
         fields_exercised: Vec::new(),
         linked_issues: Vec::new(),
         notes: Some(format!(
-            "{} of {}, attempt {:?}: {}",
+            "{} of {}{}, attempt {:?}: {}",
             if family == FAMILY { "probe" } else { "limit" },
             e.field,
+            match &e.attempt.carrier {
+                Some(c) => format!(" in carrier {c}"),
+                None => String::new(),
+            },
             e.variant,
             outcome(&e.attempt)
         )),
