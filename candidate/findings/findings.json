@@ -12,22 +12,32 @@
       "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
       "sha256": "cedd23e8f6442c1890b4af15dc43d775b9063964a6e8bf831040ab5a9de8fe12",
       "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 34 entries, manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-go-textual-offer-id.json",
+      "sha256": "4da67c01027fef119a5180e776a27eaa595a47fee383734b3fdf0dc0769f81b1",
+      "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
     }
   ],
   "summary": {
-    "findings": 2,
-    "failures": 4,
+    "findings": 3,
+    "failures": 9,
     "unmapped": 0,
     "by_component": {
+      "go-stellar-sdk": {
+        "divergence": 1
+      },
       "stellar-etl": {
         "data-loss": 2
       }
     },
     "by_severity": {
-      "data-loss": 2
+      "data-loss": 2,
+      "divergence": 1
     },
     "by_status": {
-      "draft": 2
+      "draft": 3
     }
   },
   "findings": [
@@ -126,6 +136,84 @@
           "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
           "at": "testnet",
           "what": "dropped account-created: account-created is missing"
+        }
+      ]
+    },
+    {
+      "id": "GO-TEXTID",
+      "title": "question: horizon.Offer reads an offer id given as \"+16\" or \"-0\"",
+      "component": "go-stellar-sdk",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0003",
+        "CAP-0006"
+      ],
+      "minimal_entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+      "reproduce": "shapekit conformance run --sdk go --version v0.9.0 --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+      "status": "draft",
+      "draft": "candidate/findings/issues/go-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+      "cause": "horizon.Offer.ID is an int64 tagged `json:\"id,string\"`, so encoding/json unquotes the text and passes it to strconv.ParseInt, which takes an optional sign: \"+16\" reads as 16 and \"-0\" as 0, on every tested version (v0.7.1 to v0.9.0). The field reads horizon's own responses, which carry the canonical text, so the draft is a question. rs-stellar-xdr reads the same two strings the same way (RS-1, rs-stellar-xdr#627); the code is separate, so this is its own finding with RS-1 related.",
+      "siblings": [],
+      "related": [
+        "https://github.com/stellar/rs-stellar-xdr/issues/627"
+      ],
+      "entries": [
+        "cap03.offer-liabilities.synth-textual-offer-id-noncanonical"
+      ],
+      "affected": [
+        {
+          "on": "go",
+          "tested": [
+            "v0.7.1",
+            "v0.7.2",
+            "v0.7.3",
+            "v0.8.0",
+            "v0.9.0"
+          ],
+          "failing": [
+            "v0.7.1",
+            "v0.7.2",
+            "v0.7.3",
+            "v0.8.0",
+            "v0.9.0"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "go@v0.7.1",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "go@v0.7.1",
+          "what": "diverges-from-network (4 check(s): case 12/id_parse, case 13/id_parse, case 19/id_parse, case 20/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.2",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "go@v0.7.2",
+          "what": "diverges-from-network (4 check(s): case 12/id_parse, case 13/id_parse, case 19/id_parse, case 20/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.7.3",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "go@v0.7.3",
+          "what": "diverges-from-network (4 check(s): case 12/id_parse, case 13/id_parse, case 19/id_parse, case 20/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.8.0",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "go@v0.8.0",
+          "what": "diverges-from-network (4 check(s): case 12/id_parse, case 13/id_parse, case 19/id_parse, case 20/id_parse)"
+        },
+        {
+          "source": "conformance",
+          "on": "go@v0.9.0",
+          "entry": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+          "at": "go@v0.9.0",
+          "what": "diverges-from-network (4 check(s): case 12/id_parse, case 13/id_parse, case 19/id_parse, case 20/id_parse)"
         }
       ]
     }

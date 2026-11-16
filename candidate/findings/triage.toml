@@ -9,12 +9,19 @@ schema = 1
 manifest = "corpus/manifest.json"
 dir = "candidate/findings/inputs"
 harness = ["candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"]
+matrices = ["candidate/findings/inputs/conformance-go-textual-offer-id.json"]
 
 [[inputs.import]]
 kind = "harness"
 from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
 to = "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"
 command = "shapekit harness run --chain cap27.muxed-accounts.p30 --chain cap40.signed-payload-signer.p30 --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
+
+[[inputs.import]]
+kind = "conformance"
+from = "target/conformance/go-textual-offer-id/divergence-matrix.json"
+to = "candidate/findings/inputs/conformance-go-textual-offer-id.json"
+command = "shapekit conformance run --sdk go --all-versions --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical --out target/conformance/go-textual-offer-id"
 
 [targets.stellar-etl]
 repo = "stellar/stellar-etl"
@@ -47,3 +54,17 @@ cause = "An XLM transfer through the native asset contract to an account that do
 target = "stellar-etl"
 facts = ["account-created"]
 problems = ["dropped"]
+
+[[finding]]
+id = "GO-TEXTID"
+title = "question: horizon.Offer reads an offer id given as \"+16\" or \"-0\""
+component = "go-stellar-sdk"
+severity = "divergence"
+status = "draft"
+draft = "candidate/findings/issues/go-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md"
+related = ["https://github.com/stellar/rs-stellar-xdr/issues/627"]
+cause = "horizon.Offer.ID is an int64 tagged `json:\"id,string\"`, so encoding/json unquotes the text and passes it to strconv.ParseInt, which takes an optional sign: \"+16\" reads as 16 and \"-0\" as 0, on every tested version (v0.7.1 to v0.9.0). The field reads horizon's own responses, which carry the canonical text, so the draft is a question. rs-stellar-xdr reads the same two strings the same way (RS-1, rs-stellar-xdr#627); the code is separate, so this is its own finding with RS-1 related."
+
+[[finding.conformance]]
+sdk = "go"
+entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical"]

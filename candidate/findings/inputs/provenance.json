@@ -2,6 +2,16 @@
   "schema": 1,
   "inputs": [
     {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-go-textual-offer-id.json",
+      "sha256": "4da67c01027fef119a5180e776a27eaa595a47fee383734b3fdf0dc0769f81b1",
+      "from": "target/conformance/go-textual-offer-id/divergence-matrix.json",
+      "from_sha256": "25c99d1f600329ffa58d69a89061c31e7af02d4c4643ee658e3a0375845a02a1",
+      "command": "shapekit conformance run --sdk go --all-versions --entry cap03.offer-liabilities.synth-textual-offer-id-noncanonical --out target/conformance/go-textual-offer-id",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
+    },
+    {
       "kind": "harness",
       "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
       "sha256": "cedd23e8f6442c1890b4af15dc43d775b9063964a6e8bf831040ab5a9de8fe12",

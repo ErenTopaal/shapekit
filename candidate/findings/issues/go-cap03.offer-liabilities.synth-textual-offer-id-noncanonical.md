@@ -3,7 +3,7 @@
 
 ## What happens
 
-On the input below, `github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 answers differently from the Stellar network in 10 checks.
+On the input below, `github.com/stellar/go-stellar-sdk` v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 answers differently from the Stellar network in 2 checks.
 
 A check is one call into the SDK with a known right answer. Each check below shows the call as a JSON request of the [shapekit testee protocol](https://github.com/ErenTopaal/shapekit/blob/v0.1.0/docs/testee-protocol.md) (`op` names the SDK operation), the expected answer and the answer the SDK gave.
 
@@ -61,8 +61,12 @@ How the corpus entry was built and checked: non-canonical or out-of-range offer 
 
 Related: https://github.com/stellar/js-stellar-sdk/issues/1785
 
+## Why
+
+`horizon.Offer.ID` is an `int64` tagged `json:"id,string"`. `encoding/json` unquotes the string and reads it with `strconv.ParseInt`, which accepts an optional `+` or `-` sign, so `"+16"` reads as 16 and `"-0"` as 0. The field reads Horizon's own responses, which always carry the canonical text, so this is a question: is reading a non-canonical id here intended?
+
 ## Sibling issues
 
-None: of the SDKs tested, only this one diverges on this entry.
+- rs-stellar-xdr reads the same two strings the same way: https://github.com/stellar/rs-stellar-xdr/issues/627
 
 shapekit vector: `cap03.offer-liabilities.synth-textual-offer-id-noncanonical`
