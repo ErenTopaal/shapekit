@@ -136,6 +136,12 @@ pub enum Step {
     Close {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         label: Option<String>,
+        /// Labels of transaction steps queued since the previous close, in the order they
+        /// must apply; no constraint when empty. Core orders a ledger's transactions by
+        /// envelope hash, which differs per passphrase, so the interpreter fixes the order
+        /// through the memo id of each named transaction, which therefore carries no memo.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        order: Vec<String>,
     },
     /// Arms ledger upgrades, then closes the ledger that applies them.
     Upgrade {
@@ -493,6 +499,8 @@ struct Checker<'a> {
     labels: BTreeMap<String, (usize, LabelKind)>,
     /// Index of the last close (`close` or `upgrade`) seen so far.
     last_close: Option<usize>,
+    /// Labels of `tx` steps that set a memo.
+    with_memo: BTreeSet<String>,
 }
 
 impl Checker<'_> {
@@ -630,6 +638,7 @@ impl Contract for RecipeIr {
             roles: BTreeSet::new(),
             labels: BTreeMap::new(),
             last_close: None,
+            with_memo: BTreeSet::new(),
         };
         let mut slugs = BTreeSet::new();
         for (i, step) in self.steps.iter().enumerate() {
@@ -694,6 +703,9 @@ impl Contract for RecipeIr {
                             .push(format!("{at}: a transaction needs an operation"));
                     }
                     c.values(&at, operations.iter().chain(memo).chain(cond));
+                    if let (Some(l), Some(_)) = (label, memo) {
+                        c.with_memo.insert(l.clone());
+                    }
                     c.define(
                         &at,
                         i,
@@ -703,7 +715,36 @@ impl Contract for RecipeIr {
                         },
                     );
                 }
-                Step::Close { label } => {
+                Step::Close { label, order } => {
+                    let mut seen = BTreeSet::new();
+                    for l in order {
+                        if !seen.insert(l) {
+                            c.out.push(format!("{at}: order names {l} twice"));
+                            continue;
+                        }
+                        match c.labels.get(l).copied() {
+                            Some((j, LabelKind::Submitted { rejected: false }))
+                                if c.last_close.is_none_or(|lc| lc < j) =>
+                            {
+                                if c.with_memo.contains(l) {
+                                    c.out.push(format!(
+                                        "{at}: {l} is in the order, so it cannot carry a memo; the interpreter sets its memo id"
+                                    ));
+                                }
+                            }
+                            Some((_, LabelKind::Submitted { rejected: false })) => {
+                                c.out.push(format!(
+                                    "{at}: {l} was queued before the previous close, so this close does not apply it"
+                                ))
+                            }
+                            Some(_) => c.out.push(format!(
+                                "{at}: {l} is not a transaction step this close applies"
+                            )),
+                            None => c
+                                .out
+                                .push(format!("{at}: no earlier step is labelled {l}")),
+                        }
+                    }
                     c.define(&at, i, label.as_ref(), LabelKind::Closed);
                     c.last_close = Some(i);
                 }

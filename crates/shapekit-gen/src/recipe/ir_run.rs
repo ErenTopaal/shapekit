@@ -541,7 +541,12 @@ impl<'a> Session<'a> {
                 }
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
-            Step::Close { label } => {
+            Step::Close { label, order } => {
+                // the contract has ordered closes; this interpreter does not order them yet
+                ensure!(
+                    order.is_empty(),
+                    "a close step with an order: this interpreter does not order transactions yet"
+                );
                 let seq = ctx.driver().close_empty()?;
                 self.settle(ctx)?;
                 if let Some(label) = label {

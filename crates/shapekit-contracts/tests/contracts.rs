@@ -424,7 +424,10 @@ fn recipe() -> RecipeIr {
                 roles: vec!["alice".into(), "bob".into()],
                 balance: "100000000000".into(),
             },
-            Step::Close { label: None },
+            Step::Close {
+                label: None,
+                order: vec![],
+            },
             Step::Tx {
                 label: Some("bump-forward".into()),
                 source: "alice".into(),
@@ -440,7 +443,10 @@ fn recipe() -> RecipeIr {
                 expect: TxExpect::default(),
                 fee_bump: None,
             },
-            Step::Close { label: None },
+            Step::Close {
+                label: None,
+                order: vec![],
+            },
             Step::Capture {
                 slug: "bump-forward".into(),
                 select: Selection::Ledger {
@@ -516,7 +522,10 @@ fn recipe() -> RecipeIr {
                 resources: None,
                 expect: TxExpect::default(),
             },
-            Step::Close { label: None },
+            Step::Close {
+                label: None,
+                order: vec![],
+            },
             Step::Capture {
                 slug: "call".into(),
                 select: Selection::Transaction { of: "call".into() },
@@ -958,4 +967,58 @@ fn soroban_auth_modes_and_footprint_steps() {
     }
     has_problem(&bad, "auth mode entries lists no entry");
     has_problem(&bad, "role dave is used before a fund step");
+}
+
+#[test]
+fn a_close_can_fix_the_order_of_what_it_applies() {
+    let set_order = |r: &mut RecipeIr, order: &[&str]| {
+        let Step::Close { order: o, .. } = &mut r.steps[11] else {
+            panic!("step 11 is the last close");
+        };
+        *o = order.iter().map(|s| s.to_string()).collect();
+    };
+    let second = |memo: Option<serde_json::Value>| Step::Tx {
+        label: Some("second".into()),
+        source: "bob".into(),
+        source_mux_id: None,
+        operations: vec![
+            json!({"source_account": null, "body": {"bump_sequence": {"bump_to": "1"}}}),
+        ],
+        signers: vec![],
+        memo,
+        fee: None,
+        cond: None,
+        expect: TxExpect::default(),
+        fee_bump: None,
+    };
+    let mut r = recipe();
+    r.steps.insert(11, second(None));
+    // the close moved to 12
+    let Step::Close { order, .. } = &mut r.steps[12] else {
+        panic!("step 12 is the last close");
+    };
+    *order = vec!["second".into(), "call".into()];
+    holds(&r);
+    assert!(render(&r).contains("\"order\""));
+    assert!(!render(&recipe()).contains("\"order\""));
+
+    let mut bad = recipe();
+    set_order(&mut bad, &["nope"]);
+    has_problem(&bad, "no earlier step is labelled nope");
+    let mut bad = recipe();
+    set_order(&mut bad, &["bump-forward"]);
+    has_problem(&bad, "was queued before the previous close");
+    let mut bad = recipe();
+    set_order(&mut bad, &["call", "call"]);
+    has_problem(&bad, "order names call twice");
+    let mut bad = recipe();
+    set_order(&mut bad, &["negative"]);
+    has_problem(&bad, "is not a transaction step this close applies");
+    let mut bad = recipe();
+    bad.steps.insert(11, second(Some(json!({"text": "hi"}))));
+    let Step::Close { order, .. } = &mut bad.steps[12] else {
+        panic!("step 12 is the last close");
+    };
+    *order = vec!["second".into()];
+    has_problem(&bad, "cannot carry a memo");
 }

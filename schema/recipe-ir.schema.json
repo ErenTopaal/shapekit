@@ -407,6 +407,13 @@
                 "null"
               ]
             },
+            "order": {
+              "description": "Labels of transaction steps queued since the previous close, in the order they\nmust apply; no constraint when empty. Core orders a ledger's transactions by\nenvelope hash, which differs per passphrase, so the interpreter fixes the order\nthrough the memo id of each named transaction, which therefore carries no memo.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "step": {
               "const": "close",
               "type": "string"
