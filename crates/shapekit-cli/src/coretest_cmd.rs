@@ -1,9 +1,10 @@
 //! `shapekit coretest`: stellar-core's own `[tx]` tests at every protocol version, and the
 //! transaction metas they apply.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, ensure};
 use clap::Subcommand;
 use shapekit_coretest::pins::Image;
 use shapekit_coretest::run::{self, Limits, Options, TestRun};
@@ -38,6 +39,26 @@ pub enum CoretestCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Convert the meta dump of a run back to XDR and check every meta against the short hash
+    /// in core's committed baseline. Writes each distinct meta once under --out/meta and one
+    /// index line per dumped meta.
+    Convert {
+        /// Directory written by `coretest run`.
+        #[arg(long)]
+        run: PathBuf,
+        /// A git checkout of stellar-core at the pinned commit, holding
+        /// test-tx-meta-baseline-current.
+        #[arg(long)]
+        core_src: PathBuf,
+        /// Output directory, absent or empty.
+        #[arg(long)]
+        out: PathBuf,
+        /// Dumps converted at once.
+        #[arg(long, default_value_t = 2)]
+        jobs: usize,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
 }
 
 pub fn run(command: CoretestCommand) -> Result<bool> {
@@ -69,7 +90,106 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
             };
             run_tests(&opts)
         }
+        CoretestCommand::Convert {
+            run,
+            core_src,
+            out,
+            jobs,
+            pins,
+        } => convert(&run, &core_src, &out, jobs, &pins),
     }
+}
+
+/// The baseline directory of a core checkout, required to be the pinned commit with no local
+/// change to the baseline.
+fn pinned_baseline(core_src: &Path, pins_path: &Path) -> Result<PathBuf> {
+    let text = std::fs::read_to_string(pins_path)
+        .with_context(|| format!("reading {}", pins_path.display()))?;
+    let pins = crate::pins::parse(&text)?;
+    let want = pins
+        .git
+        .iter()
+        .find(|g| g.name == "stellar-core")
+        .and_then(|g| g.sha.clone())
+        .context("pins.toml has no stellar-core commit")?;
+    let git = |args: &[&str]| -> Result<String> {
+        let out = Command::new("git")
+            .arg("-C")
+            .arg(core_src)
+            .args(args)
+            .output()
+            .context("running git")?;
+        ensure!(
+            out.status.success(),
+            "git {} in {} failed: {}",
+            args.join(" "),
+            core_src.display(),
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+        Ok(String::from_utf8(out.stdout)?.trim().to_owned())
+    };
+    let head = git(&["rev-parse", "--verify", "HEAD^{commit}"])?;
+    ensure!(
+        head == want,
+        "{} is checked out at {head}, pins.toml pins stellar-core {want}",
+        core_src.display()
+    );
+    ensure!(
+        git(&["status", "--porcelain", "--", BASELINE_DIR])?.is_empty(),
+        "{BASELINE_DIR} in {} has local changes",
+        core_src.display()
+    );
+    Ok(core_src.join(BASELINE_DIR))
+}
+
+const BASELINE_DIR: &str = "test-tx-meta-baseline-current";
+
+fn convert(run: &Path, core_src: &Path, out: &Path, jobs: usize, pins: &Path) -> Result<bool> {
+    let baseline = pinned_baseline(core_src, pins)?;
+    let progress = |name: &str, done: usize, total: usize| {
+        eprintln!("[{done}/{total}] {name}");
+    };
+    let report = shapekit_coretest::convert::convert(run, &baseline, out, jobs, &progress)
+        .context("converting the dump")?;
+    let t = &report.totals;
+    println!("dump of {}", report.run_image);
+    println!(
+        "{} metas, {} converted, {} conversion errors",
+        t.metas, t.converted, t.conversion_errors
+    );
+    println!(
+        "short hashes: {} of {} match core's baseline, {} differ, {} have no baseline entry",
+        t.matched, t.metas, t.mismatched, t.not_in_baseline
+    );
+    println!(
+        "baseline: {} hashes, {} not reached by the dump",
+        t.baseline_hashes, t.baseline_unreached
+    );
+    println!(
+        "{} distinct metas, {:.1} MB of XDR",
+        t.distinct_metas,
+        t.distinct_bytes as f64 / 1e6
+    );
+    let arms: Vec<String> = t
+        .meta_versions
+        .iter()
+        .map(|(v, n)| format!("v{v} {n}"))
+        .collect();
+    println!("TransactionMeta arms: {}", arms.join(", "));
+    println!(
+        "{} protocol versions; address hex read as claimable balance {}, as pool {}",
+        t.protocols.len(),
+        t.address_claimable_balance,
+        t.address_liquidity_pool
+    );
+    for p in &report.problems {
+        eprintln!(
+            "{}:{} {} | {} #{}: {}",
+            p.dump, p.line, p.file, p.section, p.ordinal, p.message
+        );
+    }
+    println!("report {}", out.join("convert.json").display());
+    Ok(report.passed())
 }
 
 fn run_tests(opts: &Options) -> Result<bool> {

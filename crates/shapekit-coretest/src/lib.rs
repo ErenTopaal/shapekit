@@ -9,6 +9,8 @@
 //! [`run`] drives the containers and summarises what they wrote, [`dump`] reads the dump
 //! format back.
 
+pub mod cereal;
+pub mod convert;
 pub mod dump;
 pub mod pins;
 pub mod run;
