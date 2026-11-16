@@ -1022,3 +1022,19 @@ fn a_close_can_fix_the_order_of_what_it_applies() {
     *order = vec!["second".into()];
     has_problem(&bad, "cannot carry a memo");
 }
+
+#[test]
+fn an_untagged_core_names_its_commit_as_its_version() {
+    let mut g = GateList {
+        schema_version: 1,
+        core: CoreRef {
+            version: "362dbc5184c5fdc0d6e898f3046639dc5e2a4f32".into(),
+            commit: "362dbc5184c5fdc0d6e898f3046639dc5e2a4f32".into(),
+            image: None,
+        },
+        gates: vec![],
+    };
+    holds(&g);
+    g.core.version = "30.0.1".into();
+    has_problem(&g, "neither a release tag like v30.0.0 nor the commit");
+}

@@ -241,9 +241,9 @@ pub fn sync_schemas(schema_dir: &Path, write: bool) -> Result<Vec<PathBuf>, Cont
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct CoreRef {
-    /// The release tag, `v30.0.0`.
+    /// The release tag, `v30.0.0`, or for an untagged commit the commit sha itself.
     pub version: String,
-    /// The full commit sha the tag names.
+    /// The full commit sha the tag names, or the untagged commit.
     pub commit: String,
     /// The image that ran, absent for tables read from source.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -263,9 +263,9 @@ pub struct ImageRef {
 
 impl CoreRef {
     fn problems(&self, out: &mut Vec<String>) {
-        if !self.version.starts_with('v') {
+        if !self.version.starts_with('v') && self.version != self.commit {
             out.push(format!(
-                "core version {:?} is not a release tag like v30.0.0",
+                "core version {:?} is neither a release tag like v30.0.0 nor the commit",
                 self.version
             ));
         }

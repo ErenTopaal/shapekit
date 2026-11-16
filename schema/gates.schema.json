@@ -32,7 +32,7 @@
       "description": "The stellar-core a table was measured on or read from.",
       "properties": {
         "commit": {
-          "description": "The full commit sha the tag names.",
+          "description": "The full commit sha the tag names, or the untagged commit.",
           "type": "string"
         },
         "image": {
@@ -47,7 +47,7 @@
           "description": "The image that ran, absent for tables read from source."
         },
         "version": {
-          "description": "The release tag, `v30.0.0`.",
+          "description": "The release tag, `v30.0.0`, or for an untagged commit the commit sha itself.",
           "type": "string"
         }
       },
