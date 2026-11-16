@@ -396,8 +396,7 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
                 target,
                 sha,
                 &small,
-                *class,
-                detail.as_deref(),
+                (*class, detail.as_deref()),
                 recs[0],
                 data.current_protocol(),
             )?;
@@ -505,8 +504,7 @@ fn write_candidate(
     target: &Target,
     sha: &str,
     bytes: &[u8],
-    class: ResultClass,
-    detail: Option<&str>,
+    (class, detail): (ResultClass, Option<&str>),
     first: &IndexRecord,
     current: u32,
 ) -> Result<Option<String>> {
