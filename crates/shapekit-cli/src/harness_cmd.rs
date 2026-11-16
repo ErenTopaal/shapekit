@@ -612,9 +612,13 @@ fn state(c: StateCommand) -> Result<bool> {
                 .iter()
                 .map(|c| format!("{} ({})", c.chain, c.network))
                 .collect();
+            let mut targets: Vec<&str> = ordinary.iter().map(|c| c.target.as_str()).collect();
+            targets.sort();
+            targets.dedup();
             let header = format!(
                 "which stored table and column holds which core entry field, inferred by\n\
-                 `shapekit harness state infer` from {} ordinary chains of {} chains with a dump:\n{}",
+                 `shapekit harness state infer` on {} from {} ordinary chains of {} chains with a dump:\n{}",
+                targets.join(", "),
                 ordinary.len(),
                 chains.len(),
                 names.join("\n")

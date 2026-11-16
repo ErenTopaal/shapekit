@@ -1,0 +1,129 @@
+# which stored table and column holds which core entry field, inferred by
+# `shapekit harness state infer` on wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef from 18 ordinary chains of 42 chains with a dump:
+# cap01.bump-sequence.p30 (testnet)
+# cap03.offer-liabilities.p30 (testnet)
+# cap18.maintain-liabilities.p30 (testnet)
+# cap21.preconditions.p30 (testnet)
+# cap40.signed-payload-signer.p28 (testnet)
+# cap40.signed-payload-signer.p30 (testnet)
+# cap63.parallel-txset.p30 (testnet)
+# cap66.archival.p30 (testnet)
+# cap71.credentials.p30 (testnet)
+# cap77.frozen-keys.p30 (testnet)
+# cap84.muxed-contract.p30 (testnet)
+# sep41.muxed-addresses.p28 (testnet)
+# sep41.muxed-addresses.p30 (testnet)
+# soroban.auth-trees.p30 (testnet)
+# soroban.events-max.p30 (testnet)
+# soroban.muxed-source.p28 (testnet)
+# soroban.muxed-source.p30 (testnet)
+# soroban.scval-shapes.p30 (testnet)
+
+[[table]]
+name = "liquidity_pool_balances"
+entry = "trustline"
+key_forms = [["G"], ["pool-share"]]
+chains = 1
+rows = 1
+
+[[table.keys]]
+field = "account"
+column = "account_id"
+
+[[table.keys]]
+field = "asset"
+column = "pool_id"
+prefix = "pool-share:"
+
+[table.fields]
+last_modified_ledger = "last_modified_ledger"
+shares = "balance"
+
+[[table]]
+name = "liquidity_pools"
+entry = "liquidity-pool"
+key_forms = [["L"]]
+chains = 1
+rows = 1
+
+[[table.keys]]
+field = "pool"
+column = "pool_id"
+
+[table.fields]
+last_modified_ledger = "last_modified_ledger"
+
+[table.ambiguous]
+amount_a = ["reserve_a", "reserve_b", "total_pool_shares"]
+amount_b = ["reserve_a", "reserve_b", "total_pool_shares"]
+
+[[table]]
+name = "native_balances"
+entry = "account"
+key_forms = [["G"]]
+chains = 12
+rows = 52
+
+[[table.keys]]
+field = "account"
+column = "account_id"
+
+[table.fields]
+balance = "balance"
+buying_liabilities = "buying_liabilities"
+last_modified_ledger = "last_modified_ledger"
+num_subentries = "num_sub_entries"
+selling_liabilities = "selling_liabilities"
+
+[[table]]
+name = "sac_balances"
+entry = "sac-balance"
+key_forms = [["C"], ["C"]]
+chains = 1
+rows = 1
+
+[[table.keys]]
+field = "holder"
+column = "account_id"
+
+[[table.keys]]
+field = "contract"
+column = "contract_id"
+
+[table.keys.via]
+table = "contract_tokens"
+id = "id"
+format = "{contract_id}"
+
+[table.fields]
+is_authorized = "authorized"
+is_clawback_enabled = "clawback"
+last_modified_ledger = "last_modified_ledger"
+
+[[table]]
+name = "trustline_balances"
+entry = "trustline"
+key_forms = [["G"], ["asset"]]
+chains = 5
+rows = 16
+
+[[table.keys]]
+field = "account"
+column = "account_id"
+
+[[table.keys]]
+field = "asset"
+column = "asset_id"
+
+[table.keys.via]
+table = "trustline_assets"
+id = "id"
+format = "{code}:{issuer}"
+
+[table.fields]
+balance = "balance"
+buying_liabilities = "buying_liabilities"
+flags = "flags"
+last_modified_ledger = "last_modified_ledger"
+selling_liabilities = "selling_liabilities"
+trust_limit = "limit"

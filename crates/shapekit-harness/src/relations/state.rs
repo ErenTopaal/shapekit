@@ -297,6 +297,10 @@ pub struct KeyColumn {
     pub column: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub via: Option<Via>,
+    /// Text put before the resolved value: `pool-share:` for a pool id column standing for
+    /// a pool-share trustline's asset.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub prefix: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -310,6 +314,11 @@ pub struct TableMapping {
     /// candidates. Not compared.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub ambiguous: BTreeMap<String, Vec<String>>,
+    /// Per key column, the forms of the key values the table held (see [`key_form`]): the
+    /// table covers only core entries whose keys have these forms, for example only `G`
+    /// holders or only `pool-share` assets.
+    #[serde(default)]
+    pub key_forms: Vec<Vec<String>>,
     /// Chains the mapping was inferred from, and keyed rows it held on.
     pub chains: u64,
     pub rows: u64,
@@ -370,16 +379,37 @@ pub(crate) fn row_key(
         .map(|k| {
             let cell = row[table.column(&k.column)?].as_deref()?;
             match &k.via {
-                None => Some(resolve_cell(cell, known)),
+                None => Some(format!("{}{}", k.prefix, resolve_cell(cell, known))),
                 Some(v) => {
                     let t = dump.tables.get(&v.table)?;
                     let id = t.column(&v.id)?;
                     let r = t.rows.iter().find(|r| r[id].as_deref() == Some(cell))?;
-                    render(&v.format, t, r, known)
+                    render(&v.format, t, r, known).map(|x| format!("{}{x}", k.prefix))
                 }
             }
         })
         .collect()
+}
+
+/// The form of a key value: the strkey's first letter, `pool-share`, `native` or `asset`.
+pub fn key_form(v: &str) -> String {
+    if v.starts_with("pool-share:") {
+        "pool-share".into()
+    } else if v == "native" {
+        "native".into()
+    } else if v.contains(':') {
+        "asset".into()
+    } else {
+        v.chars().next().map(String::from).unwrap_or_default()
+    }
+}
+
+fn covers(t: &TableMapping, key: &[String]) -> bool {
+    t.key_forms.is_empty()
+        || key
+            .iter()
+            .zip(&t.key_forms)
+            .all(|(v, forms)| forms.contains(&key_form(v)))
 }
 
 /// One table's inferred mapping on one chain.
@@ -388,6 +418,7 @@ struct Inferred {
     entry: EntryKind,
     keys: Vec<KeyColumn>,
     rows: u64,
+    forms: Vec<BTreeSet<String>>,
     /// Column to the fields it equals on every keyed row.
     candidates: BTreeMap<String, BTreeSet<String>>,
 }
@@ -415,18 +446,21 @@ fn key_options(
     ci: usize,
     known: &Known,
     values: &BTreeSet<String>,
-) -> Vec<(Option<Via>, u64)> {
+) -> Vec<(Option<Via>, &'static str, u64)> {
     let mut out = Vec::new();
     let cells: Vec<&str> = table.rows.iter().filter_map(|r| r[ci].as_deref()).collect();
     if cells.is_empty() {
         return out;
     }
-    let direct = cells
-        .iter()
-        .filter(|c| values.contains(&resolve_cell(c, known)))
-        .count() as u64;
-    if direct > 0 {
-        out.push((None, direct));
+    // the vocabulary names a pool-share trustline's asset `pool-share:<pool>`
+    for prefix in ["", "pool-share:"] {
+        let direct = cells
+            .iter()
+            .filter(|c| values.contains(&format!("{prefix}{}", resolve_cell(c, known))))
+            .count() as u64;
+        if direct > 0 {
+            out.push((None, prefix, direct));
+        }
     }
     for (vname, vt) in &dump.tables {
         for (idi, idc) in vt.columns.iter().enumerate() {
@@ -450,6 +484,7 @@ fn key_options(
                             id: idc.name.clone(),
                             format: f,
                         }),
+                        "",
                         hits,
                     ));
                 }
@@ -485,13 +520,14 @@ fn infer_table(dump: &Dump, table: &Table, core: &CoreState, known: &Known) -> O
                 if used.contains(&ci) {
                     continue;
                 }
-                for (via, hits) in key_options(dump, table, ci, known, &per_field[fi]) {
+                for (via, prefix, hits) in key_options(dump, table, ci, known, &per_field[fi]) {
                     if choice.as_ref().is_none_or(|(_, h)| hits > *h) {
                         choice = Some((
                             KeyColumn {
                                 field: (*field).to_owned(),
                                 column: c.name.clone(),
                                 via,
+                                prefix: prefix.to_owned(),
                             },
                             hits,
                         ));
@@ -503,15 +539,19 @@ fn infer_table(dump: &Dump, table: &Table, core: &CoreState, known: &Known) -> O
             keys.push(k);
         }
         let mut rows = 0u64;
+        let mut forms: Vec<BTreeSet<String>> = vec![BTreeSet::new(); keys.len()];
         let mut candidates: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         let key_cols: BTreeSet<&str> = keys.iter().map(|k| k.column.as_str()).collect();
         for row in &table.rows {
             let Some(key) = row_key(dump, table, row, &keys, known) else {
                 continue;
             };
-            let Some(f) = core.entries.get(&(kind, key)) else {
+            let Some(f) = core.entries.get(&(kind, key.clone())) else {
                 continue;
             };
+            for (set, v) in forms.iter_mut().zip(&key) {
+                set.insert(key_form(v));
+            }
             for (ci, c) in table.columns.iter().enumerate() {
                 if key_cols.contains(c.name.as_str()) {
                     continue;
@@ -538,16 +578,19 @@ fn infer_table(dump: &Dump, table: &Table, core: &CoreState, known: &Known) -> O
             continue;
         }
         candidates.retain(|_, s| !s.is_empty());
-        // a table that only refers to entries (history rows naming an account) holds no
-        // state to compare
-        if candidates.is_empty() {
-            continue;
-        }
-        if best.as_ref().is_none_or(|b| rows > b.rows) {
+        // most rows keyed wins; on a tie the reading under which more columns equal an
+        // entry field, then the one with more key columns (a trustline row also names an
+        // existing account)
+        let score = (rows, candidates.len(), keys.len());
+        if best
+            .as_ref()
+            .is_none_or(|b| score > (b.rows, b.candidates.len(), b.keys.len()))
+        {
             best = Some(Inferred {
                 entry: kind,
                 keys,
                 rows,
+                forms,
                 candidates,
             });
         }
@@ -570,6 +613,11 @@ pub fn infer(dump: &Dump, core: &CoreState, known: &Known) -> Mapping {
                     .candidates
                     .into_iter()
                     .map(|(c, s)| (c, s.into_iter().collect()))
+                    .collect(),
+                key_forms: i
+                    .forms
+                    .into_iter()
+                    .map(|s| s.into_iter().collect())
                     .collect(),
                 chains: 1,
                 rows: i.rows,
@@ -640,10 +688,20 @@ pub fn merge(per_chain: &[Mapping]) -> (Mapping, Vec<String>) {
             ));
             continue;
         }
+        let mut key_forms: Vec<BTreeSet<String>> = vec![BTreeSet::new(); first.keys.len()];
+        for t in &ts {
+            for (set, f) in key_forms.iter_mut().zip(&t.key_forms) {
+                set.extend(f.iter().cloned());
+            }
+        }
         out.table.push(TableMapping {
             name,
             entry: first.entry,
             keys: first.keys.clone(),
+            key_forms: key_forms
+                .into_iter()
+                .map(|s| s.into_iter().collect())
+                .collect(),
             fields,
             ambiguous,
             chains: ts.len() as u64,
@@ -681,6 +739,10 @@ pub struct StateReport {
     pub stale: Vec<String>,
     /// Core entries of a mapped table's kind with no row: `table: key`.
     pub missing: Vec<String>,
+    /// Core entries of a mapped table's kind whose keys have a form the table never held
+    /// on the chains it was inferred from (for example contract holders in a table of
+    /// account balances); counted, not listed as missing.
+    pub outside: u64,
     /// Rows whose key columns do not resolve.
     pub unresolved: u64,
     pub ok: bool,
@@ -727,7 +789,11 @@ pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) ->
         }
         for (kind, key) in core.entries.keys() {
             if *kind == t.entry && !seen.contains(key) {
-                r.missing.push(format!("{}: {}", t.name, key.join(" ")));
+                if covers(t, key) {
+                    r.missing.push(format!("{}: {}", t.name, key.join(" ")));
+                } else {
+                    r.outside += 1;
+                }
             }
         }
     }
@@ -737,6 +803,8 @@ pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) ->
 
 /// One chain of a harness run, with what the state comparison needs.
 pub struct RunChain {
+    /// The target and its exact build, from the run's `describe`.
+    pub target: String,
     pub chain: String,
     pub network: String,
     pub dump: Dump,
@@ -784,6 +852,11 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
             && !verdicts.contains_key("dropped")
             && verdicts.contains_key("pass");
         chains.push(RunChain {
+            target: rep
+                .describe
+                .as_ref()
+                .map(|d| format!("{} {}", d.target, d.target_version))
+                .unwrap_or_default(),
             chain: c.chain.clone(),
             network: c.network.clone(),
             dump: Dump::read(&logs.join(&d.file))?,
@@ -894,7 +967,10 @@ mod tests {
     fn a_balance_column_is_inferred_and_history_tables_are_left_out() {
         let (dump, core, known) = setup("500");
         let (m, notes) = merge(&[infer(&dump, &core, &known)]);
-        assert!(notes.is_empty(), "{notes:?}");
+        assert!(
+            notes.len() == 1 && notes[0].starts_with("history:"),
+            "{notes:?}"
+        );
         assert_eq!(m.table.len(), 1, "{m:?}");
         let t = &m.table[0];
         assert_eq!((t.name.as_str(), t.entry), ("balances", EntryKind::Account));
