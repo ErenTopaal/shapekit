@@ -208,6 +208,7 @@ impl Audit {
             Some(s) => (s.law_results(), Some(s.sdk_ref())),
             None => (laws, None),
         };
+        let coverage = self.sdk.as_ref().and_then(SdkAudit::coverage_delta);
         let count = |k: &str| r.envelopes.get(k).copied().unwrap_or(0);
         let envelopes = EnvelopeCounts {
             v0: count("v0"),
@@ -227,7 +228,7 @@ impl Audit {
                 .then_some(envelopes),
             sdk,
             laws,
-            coverage: None,
+            coverage,
         }
     }
 

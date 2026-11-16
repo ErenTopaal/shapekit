@@ -55,6 +55,22 @@ pub struct SdkArgs {
     /// Use the testee as already built instead of running its build steps first.
     #[arg(long)]
     no_build: bool,
+    /// Measure which SDK code the ledgers reach beyond what the committed corpus reaches.
+    /// The SDK's coverage variant runs every corpus check first, its coverage at that point
+    /// is the baseline, and every range a ledger reaches beyond it is reported with the first
+    /// ledger that reached it.
+    #[arg(long, value_enum, requires = "sdk")]
+    coverage_baseline: Option<BaselineArg>,
+    /// The manifests the baseline is measured over; repeat it to add the candidate lane
+    /// (`candidate/manifest.json`) to the committed corpus.
+    #[arg(long, default_value = "corpus/manifest.json")]
+    manifest: Vec<PathBuf>,
+}
+
+#[derive(Clone, Copy, Debug, clap::ValueEnum)]
+pub enum BaselineArg {
+    /// The committed corpus.
+    Corpus,
 }
 
 #[derive(clap::Subcommand)]
@@ -159,10 +175,19 @@ pub fn run(command: AuditCommand) -> Result<bool> {
                         &sdk.versions,
                         name,
                         version,
+                        sdk.coverage_baseline.is_some(),
                         !sdk.no_build,
                     )?;
-                    let t = SdkAudit::new(&root, &target, l.network.passphrase())?;
+                    let mut t = SdkAudit::new(&root, &target, l.network.passphrase())?;
                     println!("checking through the {} testee", target.key());
+                    if let Some(BaselineArg::Corpus) = sdk.coverage_baseline {
+                        let sent = t.corpus_baseline(&sdk.manifest)?;
+                        let c = t.coverage_delta().context("the baseline was not taken")?;
+                        println!(
+                            "baseline {}: {} checks reach {} ranges",
+                            c.baseline, sent, c.baseline_ranges
+                        );
+                    }
                     Some(t)
                 }
                 _ => None,
@@ -343,6 +368,17 @@ fn finish(
         }
         if errors > 0 {
             println!("{errors} checks ended in an error; none is counted as a pass");
+        }
+        if let Some(c) = &report.coverage {
+            println!(
+                "coverage: baseline {} ranges, with the ledgers {}, {} new",
+                c.baseline_ranges,
+                c.ranges,
+                c.new.len()
+            );
+            for b in &c.new {
+                println!("  new {} first reached by ledger {}", b.location, b.ledger);
+            }
         }
     }
     let total = report.total_violations();

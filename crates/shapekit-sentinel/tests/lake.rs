@@ -106,6 +106,7 @@ fn random_audit_through_the_rust_testee() {
         &root.join("conformance/versions.toml"),
         "rust",
         "30.0.0",
+        false,
         true,
     )
     .unwrap();

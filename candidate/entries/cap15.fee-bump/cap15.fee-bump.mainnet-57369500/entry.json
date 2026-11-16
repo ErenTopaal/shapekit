@@ -1,0 +1,41 @@
+{
+  "caps": [
+    "CAP-0015"
+  ],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "valid"
+  },
+  "family": "cap15.fee-bump",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "cap15.fee-bump.mainnet-57369500",
+  "kind": "xdr",
+  "lcm_version": 1,
+  "linked_issues": [],
+  "notes": "captured 2026-11-16 through the sep-54 public data lake from https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC94FFFF--57344000-57407999/FC949C63--57369500.xdr.zst. ledger 57369500 hash 0f74301d31d6cfd2aabfea28c7c7516eca73732885d3498ec91174e84f878c62, protocol 22, LedgerCloseMeta v1. the public lake holds history as re-emitted by a current core (TransactionMeta v4 for every protocol). a LedgerCloseMetaV1 at protocol 22 with 240 evicted keys; the random audit found it reaches sdk code no other corpus entry reaches (the map callbacks over the evicted key list)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 22,
+    "introduced": 13,
+    "valid_min": 13
+  },
+  "source": {
+    "class": "mainnet-history",
+    "ledger_seq": 57369500,
+    "provenance_url": "https://aws-public-blockchain.s3.us-east-2.amazonaws.com/v1.1/stellar/ledgers/pubnet/FC94FFFF--57344000-57407999/FC949C63--57369500.xdr.zst"
+  },
+  "synthetic": false,
+  "tx_meta_version": 4,
+  "variants": {
+    "mainnet": {
+      "expected_json_file": "entries/cap15.fee-bump/cap15.fee-bump.mainnet-57369500/mainnet.expected.json",
+      "expected_json_sha256": "5252b07e9051ffc34e1c2eb3e54c3d5868f8f1d3f180a54565186dbbe10cd680",
+      "network_passphrase": "Public Global Stellar Network ; September 2015",
+      "xdr_file": "entries/cap15.fee-bump/cap15.fee-bump.mainnet-57369500/mainnet.xdr",
+      "xdr_sha256": "50cef09f57c5332dfb6569674ca3e05bb0c7a428fd906254b7786e6b545a810f"
+    }
+  },
+  "xdr_type": "LedgerCloseMeta"
+}
