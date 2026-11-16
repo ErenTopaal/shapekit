@@ -19,6 +19,9 @@ use crate::result_code;
 use crate::sign::sign;
 use crate::world::{Subject, World};
 
+/// The ledger an attempt was applied in: its sequence, its meta and the transaction hash.
+pub type AppliedIn = (u32, Box<LedgerCloseMeta>, [u8; 32]);
+
 /// What one attempt left behind for its witness entries.
 pub struct Evidence {
     /// `<struct>-<field>-<n>`, lowercase.
@@ -31,7 +34,7 @@ pub struct Evidence {
     pub envelope: Vec<u8>,
     pub attempt: ProbeAttempt,
     /// The ledger the attempt was applied in: sequence, meta and the transaction hash.
-    pub ledger: Option<(u32, Box<LedgerCloseMeta>, [u8; 32])>,
+    pub ledger: Option<AppliedIn>,
 }
 
 pub struct FieldRun {
@@ -140,7 +143,7 @@ pub(crate) fn submit(
     w: &mut World,
     env: &TransactionEnvelope,
     variant: &str,
-) -> Result<(ProbeAttempt, Option<(u32, Box<LedgerCloseMeta>, [u8; 32])>)> {
+) -> Result<(ProbeAttempt, Option<AppliedIn>)> {
     match w.apply(env) {
         Ok(applied) => {
             let meta = Box::new(w.driver.last_meta().clone());

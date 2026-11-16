@@ -160,20 +160,6 @@ fn sign_auth(
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a_slot_is_kept_only_when_the_edit_wrote_inside_it() {
-        assert!(edited(Some("/tx/signatures/0/hint"), "/tx/signatures"));
-        assert!(edited(Some("/tx/signatures"), "/tx/signatures"));
-        assert!(!edited(Some("/tx/tx/fee"), "/tx/signatures"));
-        assert!(!edited(Some("/tx/signatures_x"), "/tx/signatures"));
-        assert!(!edited(None, "/tx/signatures"));
-    }
-}
-
 /// Signs a typed envelope by a plan of transaction and fee bump signers only, for envelopes
 /// XDR-JSON cannot hold.
 pub fn sign_typed(
@@ -224,4 +210,18 @@ pub fn sign_typed(
         }
     }
     Ok(env)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_slot_is_kept_only_when_the_edit_wrote_inside_it() {
+        assert!(edited(Some("/tx/signatures/0/hint"), "/tx/signatures"));
+        assert!(edited(Some("/tx/signatures"), "/tx/signatures"));
+        assert!(!edited(Some("/tx/tx/fee"), "/tx/signatures"));
+        assert!(!edited(Some("/tx/signatures_x"), "/tx/signatures"));
+        assert!(!edited(None, "/tx/signatures"));
+    }
 }

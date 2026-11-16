@@ -33,7 +33,7 @@ use crate::world::{Subject, World, WorldKind};
 
 /// What one value turns into.
 pub enum Built {
-    Env(Base),
+    Env(Box<Base>),
     /// Bytes no XDR type holds: the envelope with one element past an XDR bound.
     Raw(Vec<u8>),
 }
@@ -184,6 +184,7 @@ fn attempt(w: &mut World, typer: &Typer, p: &LimitProbe, n: u64) -> Result<Evide
     let (attempt, ledger, envelope) =
         match (p.build)(w, typer, &s, n).with_context(|| format!("{}: building {n}", p.row))? {
             Built::Env(b) => {
+                let b = *b;
                 let mut json = serde_json::to_value(&b.env)?;
                 let env = sign(&mut json, &b.plan, &w.network_id(), None)?;
                 let (a, l) = submit(w, &env, &variant)?;
@@ -279,11 +280,11 @@ fn payment(to: &SigningKey, amount: i64) -> OperationBody {
 
 fn classic(w: &World, s: &Subject, ops: Vec<OperationBody>, keys: &[&SigningKey]) -> Result<Built> {
     let tx = w.tx(&s.source, ops.into_iter().map(|o| (None, o)).collect())?;
-    Ok(Built::Env(Base {
+    Ok(Built::Env(Box::new(Base {
         env: World::unsigned(tx),
         plan: plan(keys),
         at: None,
-    }))
+    })))
 }
 
 /// The signed envelope of `base`, encoded.
@@ -328,7 +329,7 @@ fn grow_at(
             data.push(fill);
             let mut out = (data.len() as u32).to_be_bytes().to_vec();
             out.extend(&data);
-            while out.len() % 4 != 0 {
+            while !out.len().is_multiple_of(4) {
                 out.push(0);
             }
             out
@@ -361,7 +362,7 @@ fn xdr_bounded(
         "only one value past an XDR bound can be sent"
     );
     if n <= bound {
-        return Ok(Built::Env(make(w, s, n)?));
+        return Ok(Built::Env(Box::new(make(w, s, n)?)));
     }
     let b = make(w, s, bound)?;
     let bytes = signed_bytes(w, &b)?;
@@ -447,11 +448,11 @@ fn soroban(
         )
         .build()?;
     let tx = shapekit_core_driver::tx::assemble_soroban(tx, data, Some(auth))?;
-    Ok(Built::Env(Base {
+    Ok(Built::Env(Box::new(Base {
         env: World::unsigned(tx),
         plan: plan(&[&s.source]),
         at: None,
-    }))
+    })))
 }
 
 fn data_key(contract: &ContractId, key: ScVal) -> LedgerKey {
@@ -869,7 +870,7 @@ pub fn probes() -> Vec<LimitProbe> {
             65,
             |w, t, s, n| {
                 if n <= 64 {
-                    return Ok(Built::Env(signed_payload(w, s, n)?));
+                    return Ok(Built::Env(Box::new(signed_payload(w, s, n)?)));
                 }
                 let b = signed_payload(w, s, 64)?;
                 let bytes = signed_bytes(w, &b)?;
@@ -1145,20 +1146,6 @@ pub fn probes() -> Vec<LimitProbe> {
     ]
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn padded_wasm_has_the_asked_length_and_parses() {
-        for n in [5000u64, 5001, 5127, 5128, 20000, 131072] {
-            let w = padded_wasm(n).unwrap();
-            assert_eq!(w.len() as u64, n);
-            assert!(w.starts_with(b"\0asm"));
-        }
-    }
-}
-
 /// How a measured limit answers a row of `registry/caps-limits.toml`.
 pub enum Check {
     /// The row's recommended value is the largest value core accepted.
@@ -1347,4 +1334,18 @@ pub fn checks() -> Vec<(&'static str, Check)> {
             ),
         ),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn padded_wasm_has_the_asked_length_and_parses() {
+        for n in [5000u64, 5001, 5127, 5128, 20000, 131072] {
+            let w = padded_wasm(n).unwrap();
+            assert_eq!(w.len() as u64, n);
+            assert!(w.starts_with(b"\0asm"));
+        }
+    }
 }

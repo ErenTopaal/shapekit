@@ -402,19 +402,21 @@ fn probe_limits(
     let mut worlds = std::collections::BTreeMap::new();
     let mut measured = Vec::new();
     for p in &probes {
-        if !worlds.contains_key(&p.world) {
-            let dir = work
-                .path()
-                .join(format!("{:?}", p.world).to_ascii_lowercase());
-            std::fs::create_dir_all(&dir)?;
-            let cfg =
-                shapekit_probe::node_config(TESTNET_PASSPHRASE, image.clone(), p.world.protocol());
-            worlds.insert(
-                p.world,
-                shapekit_probe::world::World::start(p.world, cfg, &dir)?,
-            );
-        }
-        let w = worlds.get_mut(&p.world).expect("inserted above");
+        let w = match worlds.entry(p.world) {
+            std::collections::btree_map::Entry::Occupied(e) => e.into_mut(),
+            std::collections::btree_map::Entry::Vacant(e) => {
+                let dir = work
+                    .path()
+                    .join(format!("{:?}", p.world).to_ascii_lowercase());
+                std::fs::create_dir_all(&dir)?;
+                let cfg = shapekit_probe::node_config(
+                    TESTNET_PASSPHRASE,
+                    image.clone(),
+                    p.world.protocol(),
+                );
+                e.insert(shapekit_probe::world::World::start(p.world, cfg, &dir)?)
+            }
+        };
         let m = measure(w, &typer, p).with_context(|| format!("measuring {}", p.row))?;
         println!(
             "{:<36} {} = {} accepted, {} refused ({:?} {})",
