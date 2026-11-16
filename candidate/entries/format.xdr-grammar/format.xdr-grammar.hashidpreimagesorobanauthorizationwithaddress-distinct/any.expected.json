@@ -1,0 +1,66 @@
+{
+  "address": "LACAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIUI3",
+  "invocation": {
+    "function": {
+      "create_contract_v2_host_fn": {
+        "constructor_args": [
+          {
+            "timepoint": "0"
+          }
+        ],
+        "contract_id_preimage": {
+          "asset": {
+            "credit_alphanum12": {
+              "asset_code": "\\0\\0\\0\\0\\0",
+              "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+            }
+          }
+        },
+        "executable": {
+          "wasm": "0606060606060606060606060606060606060606060606060606060606060606"
+        }
+      }
+    },
+    "sub_invocations": [
+      {
+        "function": {
+          "contract_fn": {
+            "args": [
+              "void"
+            ],
+            "contract_address": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+            "function_name": ""
+          }
+        },
+        "sub_invocations": [
+          {
+            "function": {
+              "create_contract_host_fn": {
+                "contract_id_preimage": {
+                  "asset": "native"
+                },
+                "executable": "stellar_asset"
+              }
+            },
+            "sub_invocations": [
+              {
+                "function": {
+                  "create_contract_host_fn": {
+                    "contract_id_preimage": {
+                      "asset": "native"
+                    },
+                    "executable": "stellar_asset"
+                  }
+                },
+                "sub_invocations": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "network_id": "0101010101010101010101010101010101010101010101010101010101010101",
+  "nonce": "2",
+  "signature_expiration_ledger": 3
+}

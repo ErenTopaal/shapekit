@@ -1,0 +1,208 @@
+{
+  "evicted_keys": [
+    {
+      "config_setting": {
+        "config_setting_id": "contract_data_key_size_bytes"
+      }
+    }
+  ],
+  "ext": {
+    "v1": {
+      "ext": "v0",
+      "soroban_fee_write1_kb": "2"
+    }
+  },
+  "ledger_header": {
+    "ext": "v0",
+    "hash": "0202020202020202020202020202020202020202020202020202020202020202",
+    "header": {
+      "base_fee": 13,
+      "base_reserve": 14,
+      "bucket_list_hash": "0707070707070707070707070707070707070707070707070707070707070707",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "flags": 17
+        }
+      },
+      "fee_pool": "10",
+      "id_pool": "12",
+      "inflation_seq": 11,
+      "ledger_seq": 8,
+      "ledger_version": 3,
+      "max_tx_set_size": 15,
+      "previous_ledger_hash": "0404040404040404040404040404040404040404040404040404040404040404",
+      "scp_value": {
+        "close_time": "6",
+        "ext": {
+          "signed_ms": {
+            "close_time_ms": "0",
+            "lc_value_signature": {
+              "node_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+              "signature": ""
+            }
+          }
+        },
+        "tx_set_hash": "0505050505050505050505050505050505050505050505050505050505050505",
+        "upgrades": [
+          "07"
+        ]
+      },
+      "skip_list": [
+        "1010101010101010101010101010101010101010101010101010101010101010",
+        "1111111111111111111111111111111111111111111111111111111111111111",
+        "1212121212121212121212121212121212121212121212121212121212121212",
+        "1313131313131313131313131313131313131313131313131313131313131313"
+      ],
+      "total_coins": "9",
+      "tx_set_result_hash": "0606060606060606060606060606060606060606060606060606060606060606"
+    }
+  },
+  "scp_info": [
+    {
+      "v0": {
+        "ledger_messages": {
+          "ledger_seq": 7,
+          "messages": [
+            {
+              "signature": "",
+              "statement": {
+                "node_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+                "pledges": {
+                  "nominate": {
+                    "accepted": [],
+                    "quorum_set_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                    "votes": []
+                  }
+                },
+                "slot_index": "0"
+              }
+            }
+          ]
+        },
+        "quorum_sets": [
+          {
+            "inner_sets": [
+              {
+                "inner_sets": [],
+                "threshold": 0,
+                "validators": []
+              }
+            ],
+            "threshold": 0,
+            "validators": [
+              "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "total_byte_size_of_live_soroban_state": "7",
+  "tx_processing": [
+    {
+      "ext": "v0",
+      "fee_processing": [
+        {
+          "updated": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ],
+      "post_tx_apply_fee_processing": [
+        {
+          "state": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ],
+      "result": {
+        "result": {
+          "ext": "v0",
+          "fee_charged": "6",
+          "result": "tx_bad_seq"
+        },
+        "transaction_hash": "0505050505050505050505050505050505050505050505050505050505050505"
+      },
+      "tx_apply_processing": {
+        "v2": {
+          "operations": [
+            {
+              "changes": []
+            }
+          ],
+          "tx_changes_after": [
+            {
+              "removed": {
+                "config_setting": {
+                  "config_setting_id": "contract_max_size_bytes"
+                }
+              }
+            }
+          ],
+          "tx_changes_before": [
+            {
+              "removed": {
+                "config_setting": {
+                  "config_setting_id": "contract_max_size_bytes"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "tx_set": {
+    "v1": {
+      "phases": [
+        {
+          "v0": [
+            {
+              "txset_comp_txs_maybe_discounted_fee": {
+                "base_fee": null,
+                "txs": []
+              }
+            }
+          ]
+        }
+      ],
+      "previous_ledger_hash": "0303030303030303030303030303030303030303030303030303030303030303"
+    }
+  },
+  "upgrades_processing": [
+    {
+      "changes": [
+        {
+          "updated": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ],
+      "upgrade": {
+        "config": {
+          "content_hash": "0606060606060606060606060606060606060606060606060606060606060606",
+          "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4"
+        }
+      }
+    }
+  ]
+}

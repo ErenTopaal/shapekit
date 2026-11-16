@@ -1,0 +1,110 @@
+{
+  "fee_processing": [
+    {
+      "removed": {
+        "offer": {
+          "offer_id": "0",
+          "seller_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+        }
+      }
+    }
+  ],
+  "result": {
+    "result": {
+      "ext": "v0",
+      "fee_charged": "2",
+      "result": {
+        "tx_failed": [
+          "op_not_supported"
+        ]
+      }
+    },
+    "transaction_hash": "0101010101010101010101010101010101010101010101010101010101010101"
+  },
+  "tx_apply_processing": {
+    "v3": {
+      "ext": "v0",
+      "operations": [
+        {
+          "changes": [
+            {
+              "removed": {
+                "config_setting": {
+                  "config_setting_id": "contract_max_size_bytes"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "soroban_meta": {
+        "diagnostic_events": [
+          {
+            "event": {
+              "body": {
+                "v0": {
+                  "data": "void",
+                  "topics": []
+                }
+              },
+              "contract_id": null,
+              "ext": "v0",
+              "type": "system"
+            },
+            "in_successful_contract_call": false
+          }
+        ],
+        "events": [
+          {
+            "body": {
+              "v0": {
+                "data": "void",
+                "topics": []
+              }
+            },
+            "contract_id": null,
+            "ext": "v0",
+            "type": "system"
+          }
+        ],
+        "ext": {
+          "v1": {
+            "ext": "v0",
+            "rent_fee_charged": "0",
+            "total_non_refundable_resource_fee_charged": "0",
+            "total_refundable_resource_fee_charged": "0"
+          }
+        },
+        "return_value": {
+          "u128": "0"
+        }
+      },
+      "tx_changes_after": [
+        {
+          "updated": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ],
+      "tx_changes_before": [
+        {
+          "restored": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ]
+    }
+  }
+}

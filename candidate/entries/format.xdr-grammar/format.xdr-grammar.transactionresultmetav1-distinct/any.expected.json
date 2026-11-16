@@ -1,0 +1,147 @@
+{
+  "ext": "v0",
+  "fee_processing": [
+    {
+      "state": {
+        "data": {
+          "claimable_balance": {
+            "amount": "0",
+            "asset": "native",
+            "balance_id": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE",
+            "claimants": [],
+            "ext": "v0"
+          }
+        },
+        "ext": {
+          "v1": {
+            "ext": "v0",
+            "sponsoring_id": null
+          }
+        },
+        "last_modified_ledger_seq": 3
+      }
+    }
+  ],
+  "post_tx_apply_fee_processing": [
+    {
+      "created": {
+        "data": {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+            "durability": "temporary",
+            "ext": "v0",
+            "key": "void",
+            "val": "void"
+          }
+        },
+        "ext": {
+          "v1": {
+            "ext": "v0",
+            "sponsoring_id": null
+          }
+        },
+        "last_modified_ledger_seq": 5
+      }
+    }
+  ],
+  "result": {
+    "result": {
+      "ext": "v0",
+      "fee_charged": "3",
+      "result": "tx_too_early"
+    },
+    "transaction_hash": "0202020202020202020202020202020202020202020202020202020202020202"
+  },
+  "tx_apply_processing": {
+    "v4": {
+      "diagnostic_events": [
+        {
+          "event": {
+            "body": {
+              "v0": {
+                "data": "void",
+                "topics": []
+              }
+            },
+            "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+            "ext": "v0",
+            "type": "contract"
+          },
+          "in_successful_contract_call": false
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "body": {
+              "v0": {
+                "data": "void",
+                "topics": []
+              }
+            },
+            "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+            "ext": "v0",
+            "type": "system"
+          },
+          "stage": "before_all_txs"
+        }
+      ],
+      "ext": "v0",
+      "operations": [
+        {
+          "changes": [
+            {
+              "removed": {
+                "config_setting": {
+                  "config_setting_id": "contract_max_size_bytes"
+                }
+              }
+            }
+          ],
+          "events": [
+            {
+              "body": {
+                "v0": {
+                  "data": "void",
+                  "topics": []
+                }
+              },
+              "contract_id": null,
+              "ext": "v0",
+              "type": "system"
+            }
+          ],
+          "ext": "v0"
+        }
+      ],
+      "soroban_meta": {
+        "ext": "v0",
+        "return_value": {
+          "u128": "0"
+        }
+      },
+      "tx_changes_after": [
+        {
+          "removed": {
+            "contract_code": {
+              "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          }
+        }
+      ],
+      "tx_changes_before": [
+        {
+          "created": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ]
+    }
+  }
+}

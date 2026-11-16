@@ -10,6 +10,7 @@ pub mod gaps;
 pub mod graph;
 pub mod history;
 pub mod interp;
+pub mod mutate;
 pub mod names;
 pub mod vectors;
 
@@ -401,6 +402,16 @@ impl Schema {
             Some(Definition::Const(c)) => Some(c.value),
             _ => None,
         }
+    }
+
+    /// A copy with one definition replaced by `def`, matched by name. References are not
+    /// checked again, so a mutated copy may hold shapes the generator would never write.
+    pub fn with_definition(&self, def: Definition) -> Schema {
+        let mut out = self.clone();
+        if let Some(&i) = out.index.get(def.name()) {
+            out.definitions[i] = def;
+        }
+        out
     }
 
     pub fn graph(&self) -> Graph<'_> {

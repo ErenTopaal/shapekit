@@ -13,6 +13,16 @@ use stellar_xdr::{Limits, ScMap, ScMapEntry, ScString, ScSymbol, ScVal, WriteXdr
 
 #[derive(clap::Subcommand)]
 pub enum VectorsCommand {
+    /// Measure the format vectors with schema mutants: copies of the schema with one change
+    /// each (adjacent fields swapped, a bound or size moved by one, an arm or member dropped or
+    /// added, a field made optional or required). A vector kills a mutant when the reference
+    /// interpreter over the mutant gives it another verdict or another value. Exits 1 when a
+    /// mutant survives.
+    MutateCheck {
+        /// Also print every mutant with the vector that killed it.
+        #[arg(long)]
+        verbose: bool,
+    },
     /// Write the format vectors of every schema definition as xdr entries of the
     /// format.xdr-grammar family under <out>/entries/format.xdr-grammar/: for each decision a
     /// decoder makes, an input it must accept per allowed choice and one it must refuse per
@@ -46,6 +56,7 @@ pub enum VectorsCommand {
 
 pub fn run(command: VectorsCommand) -> Result<bool> {
     match command {
+        VectorsCommand::MutateCheck { verbose } => mutate_check(verbose),
         VectorsCommand::Gen {
             out,
             history,
@@ -497,4 +508,49 @@ fn walk(dir: &Path) -> Result<std::collections::BTreeSet<PathBuf>> {
         }
     }
     Ok(out)
+}
+
+fn mutate_check(verbose: bool) -> Result<bool> {
+    use shapekit_schema::Definition;
+    use shapekit_schema::vectors::Builder;
+
+    let schema = shapekit_schema::Schema::pinned();
+    let builder = Builder::new(&schema);
+    let names: Vec<&str> = schema
+        .definitions()
+        .iter()
+        .filter(|d| !matches!(d, Definition::Const(_)))
+        .map(|d| d.name())
+        .collect();
+    let mut vectors = BTreeMap::new();
+    for n in &names {
+        vectors.insert(n.to_string(), builder.vectors(n)?);
+    }
+    let mutants = shapekit_schema::mutate::mutants(&schema, &names);
+    let outcomes = shapekit_schema::mutate::check(&schema, &mutants, &vectors);
+    let mut by_op: BTreeMap<&str, (usize, usize)> = BTreeMap::new();
+    for o in &outcomes {
+        let e = by_op.entry(o.operator).or_default();
+        e.0 += 1;
+        if o.killed_by.is_some() {
+            e.1 += 1;
+        }
+    }
+    let killed = outcomes.iter().filter(|o| o.killed_by.is_some()).count();
+    println!(
+        "{} mutants, {killed} killed, {} survive",
+        outcomes.len(),
+        outcomes.len() - killed
+    );
+    for (op, (n, k)) in &by_op {
+        println!("  {op:<14} {n} mutants, {k} killed");
+    }
+    for o in &outcomes {
+        match &o.killed_by {
+            None => println!("survives: {}", o.description),
+            Some(v) if verbose => println!("killed: {} by {v}", o.description),
+            Some(_) => {}
+        }
+    }
+    Ok(killed == outcomes.len())
 }

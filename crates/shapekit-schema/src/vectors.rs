@@ -192,6 +192,27 @@ impl<'a> Builder<'a> {
                 });
             };
         let base_bytes = self.encode(name, &base)?;
+        push(
+            String::new(),
+            "#smallest".into(),
+            base_bytes.clone(),
+            Expect::MustAccept,
+            "the smallest value".into(),
+        );
+        // every field, element and arm set to a value that differs from its neighbours, so a
+        // decoder that reads two same-typed fields in the wrong order gets a different value
+        if let Some(d) = self.distinct_definition(def, 1, 6) {
+            let bytes = self.encode(name, &d)?;
+            if bytes != base_bytes {
+                push(
+                    String::new(),
+                    "#distinct".into(),
+                    bytes,
+                    Expect::MustAccept,
+                    "neighbouring components hold different values".into(),
+                );
+            }
+        }
         match def {
             Definition::Enum(e) => {
                 for m in &e.members {
@@ -363,6 +384,92 @@ impl<'a> Builder<'a> {
         Ok(out)
     }
 
+    /// A value of `ty` that depends on `k`, so components built with different `k` differ
+    /// where their type allows more than one value. Falls back to the smallest value when
+    /// `depth` runs out, which keeps recursive types finite.
+    fn distinct_type(&self, ty: &Type, k: u64, depth: u32) -> Option<Value> {
+        if depth == 0 {
+            return self.smallest_type(ty);
+        }
+        Some(match ty {
+            Type::Int => Value::Int(k as i32),
+            Type::UnsignedInt => Value::UnsignedInt(k as u32),
+            Type::Hyper => Value::Hyper(k as i64),
+            Type::UnsignedHyper => Value::UnsignedHyper(k),
+            Type::Float => Value::Float(k as u32),
+            Type::Double => Value::Double(k),
+            Type::Bool => Value::Bool(k % 2 == 1),
+            Type::OpaqueFixed { size } => Value::Opaque(vec![k as u8; *size as usize]),
+            Type::OpaqueVar { max_size } => Value::Opaque(if max_size == &Some(0) {
+                Vec::new()
+            } else {
+                vec![k as u8]
+            }),
+            Type::String { max_size } => Value::String(if max_size == &Some(0) {
+                Vec::new()
+            } else {
+                vec![b'a' + (k % 26) as u8]
+            }),
+            Type::Array { element, count } => Value::Array(
+                (0..*count)
+                    .map(|i| self.distinct_type(element, k + i, depth - 1))
+                    .collect::<Option<Vec<_>>>()?,
+            ),
+            Type::VarArray { element, max_count } => {
+                if max_count == &Some(0) {
+                    Value::Array(Vec::new())
+                } else {
+                    Value::Array(vec![self.distinct_type(element, k, depth - 1)?])
+                }
+            }
+            Type::Optional { element } => {
+                Value::Optional(Some(Box::new(self.distinct_type(element, k, depth - 1)?)))
+            }
+            Type::Ref { name } => {
+                let def = self.schema.get(name)?;
+                self.distinct_definition(def, k, depth - 1)
+                    .or_else(|| self.smallest.get(name).cloned())?
+            }
+        })
+    }
+
+    fn distinct_definition(&self, def: &Definition, k: u64, depth: u32) -> Option<Value> {
+        match def {
+            Definition::Typedef(t) => self.distinct_type(&t.ty, k, depth),
+            Definition::Struct(s) => s
+                .fields
+                .iter()
+                .enumerate()
+                .map(|(i, f)| self.distinct_type(&f.ty, k + i as u64, depth))
+                .collect::<Option<Vec<_>>>()
+                .map(Value::Struct),
+            Definition::Enum(e) => {
+                let m = &e.members[(k as usize) % e.members.len()];
+                Some(Value::Enum(m.value as i32))
+            }
+            Definition::Union(u) => {
+                // arms in turn, skipping those whose value cannot be built
+                let cases: Vec<(i64, &Option<Type>)> = u
+                    .arms
+                    .iter()
+                    .flat_map(|a| a.cases.iter().map(move |c| (c.value, &a.ty)))
+                    .collect();
+                (0..cases.len()).find_map(|i| {
+                    let (value, ty) = cases[(k as usize + i) % cases.len()];
+                    let arm = match ty {
+                        None => None,
+                        Some(t) => Some(Box::new(self.distinct_type(t, k, depth)?)),
+                    };
+                    Some(Value::Union {
+                        discriminant: value,
+                        arm,
+                    })
+                })
+            }
+            Definition::Const(_) => None,
+        }
+    }
+
     fn encode_type(&self, ty: &Type, v: &Value) -> Result<Vec<u8>, VectorError> {
         self.interp
             .encode_as(ty, v)
@@ -438,7 +545,8 @@ impl<'a> Builder<'a> {
                         format!("length {max}, the bound"),
                     ));
                     let mut p = (*max as u32 + 1).to_be_bytes().to_vec();
-                    p.extend(vec![0x61; (*max as usize + 1).div_ceil(4) * 4]);
+                    p.extend(vec![0x61; *max as usize + 1]);
+                    p.resize(4 + (*max as usize + 1).div_ceil(4) * 4, 0);
                     out.push((
                         "#over-max".into(),
                         Choice::Patch(p),
@@ -469,8 +577,13 @@ impl<'a> Builder<'a> {
                         Expect::MustAccept,
                         "one element".into(),
                     ));
+                    // a bound vector stays under a mebibyte; no bounded array in the
+                    // schema comes near it, and a bigger one would be reported as missing
+                    let fits = self.encode_type(element, &e).is_ok_and(|eb| {
+                        (eb.len() as u64).saturating_mul(max_count.unwrap_or(0) + 1) <= 1 << 20
+                    });
                     if let Some(max) = max_count
-                        && *max <= 256
+                        && fits
                     {
                         out.push((
                             "#max".into(),

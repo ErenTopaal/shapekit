@@ -1,0 +1,123 @@
+{
+  "diagnostic_events": [
+    {
+      "event": {
+        "body": {
+          "v0": {
+            "data": {
+              "i256": "0"
+            },
+            "topics": [
+              "void"
+            ]
+          }
+        },
+        "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+        "ext": "v0",
+        "type": "contract"
+      },
+      "in_successful_contract_call": true
+    }
+  ],
+  "events": [
+    {
+      "event": {
+        "body": {
+          "v0": {
+            "data": {
+              "u256": "0"
+            },
+            "topics": [
+              "void"
+            ]
+          }
+        },
+        "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+        "ext": "v0",
+        "type": "system"
+      },
+      "stage": "before_all_txs"
+    }
+  ],
+  "ext": "v0",
+  "operations": [
+    {
+      "changes": [
+        {
+          "restored": {
+            "data": {
+              "config_setting": {
+                "contract_cost_params_cpu_instructions": []
+              }
+            },
+            "ext": "v0",
+            "last_modified_ledger_seq": 0
+          }
+        }
+      ],
+      "events": [
+        {
+          "body": {
+            "v0": {
+              "data": "void",
+              "topics": []
+            }
+          },
+          "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+          "ext": "v0",
+          "type": "contract"
+        }
+      ],
+      "ext": "v0"
+    }
+  ],
+  "soroban_meta": {
+    "ext": {
+      "v1": {
+        "ext": "v0",
+        "rent_fee_charged": "8",
+        "total_non_refundable_resource_fee_charged": "6",
+        "total_refundable_resource_fee_charged": "7"
+      }
+    },
+    "return_value": {
+      "i64": "6"
+    }
+  },
+  "tx_changes_after": [
+    {
+      "restored": {
+        "data": {
+          "liquidity_pool": {
+            "body": {
+              "liquidity_pool_constant_product": {
+                "params": {
+                  "asset_a": "native",
+                  "asset_b": "native",
+                  "fee": 0
+                },
+                "pool_shares_trust_line_count": "0",
+                "reserve_a": "0",
+                "reserve_b": "0",
+                "total_pool_shares": "0"
+              }
+            },
+            "liquidity_pool_id": "LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR"
+          }
+        },
+        "ext": "v0",
+        "last_modified_ledger_seq": 4
+      }
+    }
+  ],
+  "tx_changes_before": [
+    {
+      "removed": {
+        "offer": {
+          "offer_id": "0",
+          "seller_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+        }
+      }
+    }
+  ]
+}

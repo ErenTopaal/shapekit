@@ -1,0 +1,66 @@
+{
+  "function": {
+    "create_contract_host_fn": {
+      "contract_id_preimage": {
+        "asset": {
+          "credit_alphanum4": {
+            "asset_code": "",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        }
+      },
+      "executable": {
+        "external_ref": {
+          "executable_owner": "MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG",
+          "tag": "d"
+        }
+      }
+    }
+  },
+  "sub_invocations": [
+    {
+      "function": {
+        "create_contract_v2_host_fn": {
+          "constructor_args": [
+            {
+              "i32": 0
+            }
+          ],
+          "contract_id_preimage": {
+            "address": {
+              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+              "salt": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          },
+          "executable": {
+            "wasm": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      },
+      "sub_invocations": [
+        {
+          "function": {
+            "contract_fn": {
+              "args": [],
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+              "function_name": ""
+            }
+          },
+          "sub_invocations": [
+            {
+              "function": {
+                "create_contract_host_fn": {
+                  "contract_id_preimage": {
+                    "asset": "native"
+                  },
+                  "executable": "stellar_asset"
+                }
+              },
+              "sub_invocations": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

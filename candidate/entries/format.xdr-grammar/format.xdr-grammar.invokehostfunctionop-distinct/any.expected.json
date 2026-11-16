@@ -1,0 +1,70 @@
+{
+  "auth": [
+    {
+      "credentials": {
+        "address_v2": {
+          "address": "MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG",
+          "nonce": "3",
+          "signature": {
+            "u64": "0"
+          },
+          "signature_expiration_ledger": 4
+        }
+      },
+      "root_invocation": {
+        "function": {
+          "contract_fn": {
+            "args": [
+              "void"
+            ],
+            "contract_address": "BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE",
+            "function_name": ""
+          }
+        },
+        "sub_invocations": [
+          {
+            "function": {
+              "create_contract_host_fn": {
+                "contract_id_preimage": {
+                  "asset": "native"
+                },
+                "executable": "stellar_asset"
+              }
+            },
+            "sub_invocations": [
+              {
+                "function": {
+                  "create_contract_host_fn": {
+                    "contract_id_preimage": {
+                      "asset": "native"
+                    },
+                    "executable": "stellar_asset"
+                  }
+                },
+                "sub_invocations": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "host_function": {
+    "create_contract": {
+      "contract_id_preimage": {
+        "asset": {
+          "credit_alphanum4": {
+            "asset_code": "",
+            "issuer": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+          }
+        }
+      },
+      "executable": {
+        "external_ref": {
+          "executable_owner": "MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG",
+          "tag": "d"
+        }
+      }
+    }
+  }
+}
