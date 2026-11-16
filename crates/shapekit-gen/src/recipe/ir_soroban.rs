@@ -94,8 +94,7 @@ fn sign_all(
                 out.push(sign_authorization_entry(e, &network, expiration, &refs)?);
             }
             None => {
-                if !matches!(e.credentials, SorobanCredentials::SourceAccount)
-                    && signers.is_empty()
+                if !matches!(e.credentials, SorobanCredentials::SourceAccount) && signers.is_empty()
                 {
                     bail!(
                         "the invocation needs address authorization, and the step names no signer"
@@ -153,14 +152,22 @@ pub fn invoke(
             let signed = sign_all(ctx, r.auth, &signers)?;
             // signature checks cost instructions the recording run did not spend
             let r = sim
-                .simulate_invoke(function.clone(), AuthMode::Enforce(signed.clone()), &source_id)
+                .simulate_invoke(
+                    function.clone(),
+                    AuthMode::Enforce(signed.clone()),
+                    &source_id,
+                )
                 .context("simulating with the signed entries")?;
             (signed, r.transaction_data)
         }
         Auth::Entries { entries, signers } => {
             let signed = sign_all(ctx, entries, &signers)?;
             let r = sim
-                .simulate_invoke(function.clone(), AuthMode::Enforce(signed.clone()), &source_id)
+                .simulate_invoke(
+                    function.clone(),
+                    AuthMode::Enforce(signed.clone()),
+                    &source_id,
+                )
                 .context("simulating with the given entries")?;
             (signed, r.transaction_data)
         }

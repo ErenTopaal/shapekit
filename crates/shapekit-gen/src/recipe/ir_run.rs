@@ -33,7 +33,9 @@ use ed25519_dalek::SigningKey;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use shapekit_contracts::RecipeIr;
-use shapekit_contracts::recipe_ir::{FeeBump, Outcome, Selection, Step, SymRef, TxExpect};
+use shapekit_contracts::recipe_ir::{
+    AuthSpec, FeeBump, Outcome, ResourceOverride, Selection, Step, SymRef, TxExpect,
+};
 use shapekit_core_driver::chain::{Applied, ChainError, SETTINGS_WRITER_SALT_DOMAIN, upgrades};
 use shapekit_core_driver::contracts::echo_wasm_for;
 use shapekit_core_driver::keys::{
@@ -49,11 +51,23 @@ use shapekit_core_driver::tx::{
 use stellar_xdr::{
     ConfigSettingEntry, ConfigUpgradeSet, ContractExecutable, ContractId, CreateAccountOp,
     CreateContractArgsV2, Hash, HostFunction, InvokeContractArgs, LedgerKey, LedgerUpgrade, Memo,
-    Operation, OperationBody, Preconditions, ScAddress, ScSymbol, ScVal, TransactionEnvelope,
-    TransactionResult, TransactionResultResult,
+    Operation, OperationBody, Preconditions, ScAddress, ScSymbol, ScVal, SorobanAuthorizationEntry,
+    TransactionEnvelope, TransactionResult, TransactionResultResult,
 };
 
-use super::{ChainCtx, Recipe, Selector, Spec};
+use super::{ChainCtx, Recipe, Selector, Spec, ir_soroban};
+
+fn resources_of(r: &Option<ResourceOverride>) -> ir_soroban::Resources {
+    match r {
+        None => ir_soroban::Resources::default(),
+        Some(r) => ir_soroban::Resources {
+            instructions: r.instructions,
+            disk_read_bytes: r.disk_read_bytes,
+            write_bytes: r.write_bytes,
+            resource_fee: r.resource_fee,
+        },
+    }
+}
 
 /// A recipe read from an IR file.
 pub struct IrRecipe {
@@ -564,11 +578,6 @@ impl<'a> Session<'a> {
                 flags,
                 config,
             } => {
-                // the contract has this upgrade; this interpreter does not arm it yet
-                ensure!(
-                    max_soroban_tx_set_size.is_none(),
-                    "an upgrade step with max_soroban_tx_set_size: this interpreter does not arm it yet"
-                );
                 let mut params: Vec<(&str, String)> = Vec::new();
                 let mut want = Vec::new();
                 if let Some(v) = protocol_version {
@@ -582,6 +591,10 @@ impl<'a> Session<'a> {
                 if let Some(v) = base_reserve {
                     params.push(("basereserve", v.to_string()));
                     want.push(LedgerUpgrade::BaseReserve(*v));
+                }
+                if let Some(v) = max_soroban_tx_set_size {
+                    params.push(("maxsorobantxsetsize", v.to_string()));
+                    want.push(LedgerUpgrade::MaxSorobanTxSetSize(*v));
                 }
                 if let Some(v) = max_tx_set_size {
                     params.push(("maxtxsetsize", v.to_string()));
@@ -696,12 +709,6 @@ impl<'a> Session<'a> {
                 resources,
                 expect,
             } => {
-                // the contract has auth modes and resource overrides; this interpreter does not
-                // build them yet
-                ensure!(
-                    auth.is_source() && resources.is_none(),
-                    "an invoke step with auth or resources: this interpreter does not build them yet"
-                );
                 let key = key_of(ctx, source);
                 let deployed = match SymRef::parse(contract) {
                     None => contract.clone(),
@@ -724,13 +731,65 @@ impl<'a> Session<'a> {
                     args: xdr_args.try_into()?,
                 });
                 let seq = self.next_seq(ctx, source)?;
-                let env = ctx.driver().soroban_at(&key, hf, seq)?;
+                let plan = self.auth(ctx, auth)?;
+                let env = ir_soroban::invoke(ctx, &key, seq, hf, plan, &resources_of(resources))?;
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
-            Step::HostFunction { .. } | Step::ExtendTtl { .. } | Step::Restore { .. } => {
-                bail!(
-                    "host-function, extend-ttl and restore steps: this interpreter does not run them yet"
-                )
+            Step::HostFunction {
+                label,
+                source,
+                function,
+                auth,
+                resources,
+                expect,
+            } => {
+                let key = key_of(ctx, source);
+                let hf: HostFunction = self.typed(ctx, function, "function")?;
+                let seq = self.next_seq(ctx, source)?;
+                let plan = self.auth(ctx, auth)?;
+                let env = ir_soroban::invoke(ctx, &key, seq, hf, plan, &resources_of(resources))?;
+                self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
+            }
+            Step::ExtendTtl {
+                label,
+                source,
+                keys,
+                extend_to,
+                expect,
+            } => {
+                let key = key_of(ctx, source);
+                let keys = self.keys(ctx, keys)?;
+                let seq = self.next_seq(ctx, source)?;
+                let env = ir_soroban::footprint(
+                    ctx,
+                    &key,
+                    seq,
+                    &keys,
+                    ir_soroban::Footprint::Extend {
+                        extend_to: *extend_to,
+                    },
+                    &ir_soroban::Resources::default(),
+                )?;
+                self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
+            }
+            Step::Restore {
+                label,
+                source,
+                keys,
+                expect,
+            } => {
+                let key = key_of(ctx, source);
+                let keys = self.keys(ctx, keys)?;
+                let seq = self.next_seq(ctx, source)?;
+                let env = ir_soroban::footprint(
+                    ctx,
+                    &key,
+                    seq,
+                    &keys,
+                    ir_soroban::Footprint::Restore,
+                    &ir_soroban::Resources::default(),
+                )?;
+                self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
             Step::Capture {
                 slug,
@@ -786,6 +845,62 @@ impl<'a> Session<'a> {
                 }
             }
         }
+    }
+
+    fn keys(&self, ctx: &mut ChainCtx, keys: &[Value]) -> Result<Vec<LedgerKey>> {
+        keys.iter()
+            .enumerate()
+            .map(|(i, k)| self.typed(ctx, k, &format!("key {i}")))
+            .collect()
+    }
+
+    /// An auth mode with its roles turned into keys and its entries into XDR.
+    fn auth(&self, ctx: &mut ChainCtx, spec: &AuthSpec) -> Result<ir_soroban::Auth> {
+        let signers_of = |ctx: &ChainCtx, pairs: Vec<(String, Vec<String>)>| {
+            pairs
+                .into_iter()
+                .map(|(role, by)| {
+                    let id = account_id(&key_of(ctx, &role).verifying_key());
+                    let by = if by.is_empty() { vec![role] } else { by };
+                    (id, by.iter().map(|r| key_of(ctx, r)).collect())
+                })
+                .collect()
+        };
+        Ok(match spec {
+            AuthSpec::Source => ir_soroban::Auth::Source,
+            AuthSpec::Record {
+                allow_non_root,
+                address_v2,
+                signers,
+            } => ir_soroban::Auth::Record {
+                allow_non_root: *allow_non_root,
+                address_v2: *address_v2,
+                signers: signers_of(
+                    ctx,
+                    signers
+                        .iter()
+                        .map(|(k, v)| (k.clone(), v.clone()))
+                        .collect(),
+                ),
+            },
+            AuthSpec::Entries { entries, sign } => {
+                let mut xdr = Vec::with_capacity(entries.len());
+                for (i, e) in entries.iter().enumerate() {
+                    xdr.push(self.typed::<SorobanAuthorizationEntry>(
+                        ctx,
+                        e,
+                        &format!("auth entry {i}"),
+                    )?);
+                }
+                ir_soroban::Auth::Entries {
+                    entries: xdr,
+                    signers: signers_of(
+                        ctx,
+                        sign.iter().map(|r| (r.clone(), Vec::new())).collect(),
+                    ),
+                }
+            }
+        })
     }
 
     /// Wraps a signed transaction in a fee bump. The outer fee defaults to the base fee for

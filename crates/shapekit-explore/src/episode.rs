@@ -300,7 +300,11 @@ impl<'e, 'a> Live<'e, 'a> {
                 Outcome::Failed => self.stats.failed += 1,
             }
             match &mut self.steps[o.step] {
-                Step::Tx { expect, .. } | Step::Invoke { expect, .. } => {
+                Step::Tx { expect, .. }
+                | Step::Invoke { expect, .. }
+                | Step::HostFunction { expect, .. }
+                | Step::ExtendTtl { expect, .. }
+                | Step::Restore { expect, .. } => {
                     *expect = TxExpect {
                         outcome: o.outcome,
                         result,

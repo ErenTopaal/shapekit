@@ -209,6 +209,7 @@ pub fn upgrade(world: &World, rng: &mut Rng, max_protocol: u32) -> Step {
         base_fee: None,
         base_reserve: None,
         max_tx_set_size: None,
+        max_soroban_tx_set_size: None,
         flags: None,
         config: Vec::new(),
     };
