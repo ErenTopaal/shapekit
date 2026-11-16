@@ -934,7 +934,7 @@ pub fn probes() -> Vec<LimitProbe> {
             "SetOptionsOp.signer",
             "signers of the source after the operation",
             1,
-            32,
+            21,
             |w, _, s, n| {
                 let keys = fresh_keys(s, n);
                 add_signers(w, s, &keys[..n as usize - 1])?;
@@ -957,7 +957,7 @@ pub fn probes() -> Vec<LimitProbe> {
             "ManageDataOp.dataName",
             "subentries of the source after the operation",
             1,
-            1100,
+            1001,
             |w, _, s, n| {
                 let name = |i: u64| -> Result<stellar_xdr::String64> {
                     Ok(stellar_xdr::String64(format!("d{i}").try_into()?))

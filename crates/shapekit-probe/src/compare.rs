@@ -484,7 +484,16 @@ pub struct Resolution {
 /// Every disagreement the source explains. A resolution for a row that agrees is stale and
 /// fails the comparison.
 pub fn resolutions() -> Vec<Resolution> {
-    vec![]
+    vec![
+        Resolution {
+            row: "tx.envelope.type",
+            reading: "core refuses a v0 envelope from protocol 13 in TransactionFrame::commonValidPreSeqNum (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1257-1265), which envelopes from peers reach unchanged (src/overlay/Peer.cpp 183-185). the probe submits through core's tx endpoint, which first turns a v0 envelope into the equivalent v1 envelope (src/main/CommandHandler.cpp 1074-1084, src/transactions/TransactionBridge.cpp 18-47), so the v0 base applies at protocol 30 too and the ledger holds its v1 form. the refusal is out of the endpoint's reach, not absent; the row now says so",
+        },
+        Resolution {
+            row: "tx.cond.type",
+            reading: "the only check of the precondition type is the protocol 19 gate: PRECOND_V2 before protocol 19 is txNOT_SUPPORTED (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1266-1272). at protocol 30, where the probe runs, every arm is accepted; the values inside an arm are checked under their own rows (time bounds, ledger bounds, minimum sequence fields, extra signers)",
+        },
+    ]
 }
 
 /// The measured verdict of one site: whether its attempts end in more than one way.
