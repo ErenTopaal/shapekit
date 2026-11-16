@@ -35,6 +35,11 @@ pub struct Coverage {
     pub arms: Arms,
     pub families: Vec<FamilyRow>,
     pub fields: Vec<FieldRow>,
+    /// The obligation ledger by kind and status; empty until `run` merges the ledger.
+    pub obligations: Vec<crate::ledger::KindRow>,
+    /// The merged ledger itself, written to its own file.
+    #[serde(skip)]
+    pub ledger: Option<shapekit_contracts::ObligationLedger>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -328,6 +333,8 @@ pub fn compute(
             arms,
             families: family_rows,
             fields,
+            obligations: Vec::new(),
+            ledger: None,
         },
         problems,
     ))

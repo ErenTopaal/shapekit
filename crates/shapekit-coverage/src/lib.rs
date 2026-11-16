@@ -6,6 +6,7 @@
 //! refused. Every gap must carry a one-line reason in `registry/uncovered.toml`.
 
 pub mod compute;
+pub mod ledger;
 mod markdown;
 pub mod pack;
 pub mod uncovered;
@@ -42,6 +43,8 @@ pub enum CoverageError {
 pub struct Rendered {
     pub json: String,
     pub markdown: String,
+    /// `obligations.json`, when the report carries the merged ledger.
+    pub ledger: Option<String>,
 }
 
 /// The report over the corpus and registry on disk, and every problem `--check` reports
@@ -54,7 +57,22 @@ pub fn run(corpus: &Path, registry_dir: &Path) -> Result<(Coverage, Vec<Problem>
     })?;
     let uncovered = UncoveredFile::load(registry_dir)?;
     let shapes = entry_shapes(&manifest, corpus)?;
-    compute(&manifest, &registry, &uncovered, &shapes)
+    let (mut report, mut problems) = compute(&manifest, &registry, &uncovered, &shapes)?;
+    // the ledger's other sources sit next to the corpus directory, at the repository root
+    let root = corpus
+        .canonicalize()
+        .map_err(|source| CoverageError::Io {
+            path: corpus.to_path_buf(),
+            source,
+        })?
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_default();
+    let (ledger, ledger_problems) = ledger::build(&root, corpus, registry_dir)?;
+    report.obligations = ledger::rows(&ledger);
+    report.ledger = Some(ledger);
+    problems.extend(ledger_problems);
+    Ok((report, problems))
 }
 
 pub fn load_manifest(corpus: &Path) -> Result<Manifest, CoverageError> {
@@ -70,6 +88,7 @@ pub fn render(coverage: &Coverage) -> Rendered {
     Rendered {
         json: shapekit_manifest::xdr::render_json(&value),
         markdown: markdown::render(coverage),
+        ledger: coverage.ledger.as_ref().map(ledger::render),
     }
 }
 
@@ -80,10 +99,12 @@ pub fn write(corpus: &Path, rendered: &Rendered) -> Result<(), CoverageError> {
         path: dir.clone(),
         source,
     })?;
-    for (name, text) in [
-        (COVERAGE_JSON, &rendered.json),
-        (COVERAGE_MD, &rendered.markdown),
-    ] {
+    let files = [
+        Some((COVERAGE_JSON, &rendered.json)),
+        Some((COVERAGE_MD, &rendered.markdown)),
+        rendered.ledger.as_ref().map(|l| (ledger::LEDGER_JSON, l)),
+    ];
+    for (name, text) in files.into_iter().flatten() {
         let path = dir.join(name);
         std::fs::write(&path, text).map_err(|source| CoverageError::Io { path, source })?;
     }
@@ -94,10 +115,12 @@ pub fn write(corpus: &Path, rendered: &Rendered) -> Result<(), CoverageError> {
 pub fn stale(corpus: &Path, rendered: &Rendered) -> Vec<Problem> {
     let dir = corpus.join(COVERAGE_DIR);
     let mut out = Vec::new();
-    for (name, text) in [
-        (COVERAGE_JSON, &rendered.json),
-        (COVERAGE_MD, &rendered.markdown),
-    ] {
+    let files = [
+        Some((COVERAGE_JSON, &rendered.json)),
+        Some((COVERAGE_MD, &rendered.markdown)),
+        rendered.ledger.as_ref().map(|l| (ledger::LEDGER_JSON, l)),
+    ];
+    for (name, text) in files.into_iter().flatten() {
         let path = dir.join(name);
         match std::fs::read_to_string(&path) {
             Ok(current) if &current == text => {}

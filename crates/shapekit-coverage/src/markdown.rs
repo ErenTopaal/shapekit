@@ -224,6 +224,23 @@ fn families(out: &mut String, c: &Coverage) {
 }
 
 fn fields(out: &mut String, c: &Coverage) {
+    if !c.obligations.is_empty() {
+        out.push_str("\n## Obligations\n\n");
+        out.push_str(
+            "Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.\n\n| Kind | Met | Unmeetable | Open | Total |\n|---|---|---|---|---|\n",
+        );
+        for r in &c.obligations {
+            let _ = writeln!(
+                out,
+                "| `{}` | {} | {} | {} | {} |",
+                r.kind,
+                r.met,
+                r.unmeetable,
+                r.open,
+                r.met + r.unmeetable + r.open
+            );
+        }
+    }
     out.push_str("\n## Fields core does not fully validate\n\n| Field | XDR path | Core validates | Entries | Core-emitted | By source class |\n|---|---|---|---|---|---|\n");
     for f in &c.fields {
         let v = match f.validated_by_core {
