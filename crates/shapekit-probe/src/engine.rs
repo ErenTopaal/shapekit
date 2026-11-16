@@ -200,7 +200,7 @@ fn slug(field: &Field, carrier: &Carrier, n: usize) -> String {
         s.push('-');
         s.push_str(carrier.id);
     }
-    format!("{s}-{n}")
+    format!("{s}-{n}").replace('_', "-")
 }
 
 fn subject_tag(field: &Field, carrier: &Carrier, n: usize) -> String {
