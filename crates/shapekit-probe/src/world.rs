@@ -320,6 +320,22 @@ impl World {
         Ok(())
     }
 
+    /// Pays `amount` stroops from the bank to `to`.
+    pub fn top_up(&mut self, to: &SigningKey, amount: i64) -> Result<()> {
+        let bank = self.banks[0].clone();
+        self.classic_ok(
+            &bank,
+            vec![OperationBody::Payment(stellar_xdr::PaymentOp {
+                destination: muxed_account(&to.verifying_key()),
+                asset: Asset::Native,
+                amount,
+            })],
+            &[],
+        )
+        .context("topping up a probe account")?;
+        Ok(())
+    }
+
     /// The source's next sequence number.
     pub fn next_seq(&self, source: &SigningKey) -> Result<i64> {
         Ok(self
