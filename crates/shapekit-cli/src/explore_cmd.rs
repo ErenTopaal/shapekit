@@ -524,6 +524,7 @@ fn gates_cmd(
         );
         recipes.push((name, ir));
     }
+    let root = std::env::current_dir()?;
     let runs_dir = out.join("runs");
     std::fs::create_dir_all(&runs_dir)?;
     let done: BTreeSet<String> = gates::load_all(&runs_dir)?
@@ -535,8 +536,11 @@ fn gates_cmd(
     for &p in &protocols {
         todo.push((RunKind::Genesis, None, p));
         todo.push((RunKind::Padded, None, p));
-        for i in 0..recipes.len() {
-            todo.push((RunKind::Recipe, Some(i), p));
+        for (i, (_, ir)) in recipes.iter().enumerate() {
+            // a recipe that uploads code runs only where the host accepts that code
+            if p >= gates::lowest_protocol(ir, &root)? {
+                todo.push((RunKind::Recipe, Some(i), p));
+            }
         }
     }
     let name_of = |(k, i, p): &(RunKind, Option<usize>, u32)| match (k, i) {
@@ -555,7 +559,6 @@ fn gates_cmd(
     );
     let schema = Schema::pinned();
     let reachable = arms::reachable()?;
-    let root = std::env::current_dir()?;
     let wasms = shapekit_explore::contract::load_all(&root)?;
     let work = scratch()?;
     let seen = Seen::default();

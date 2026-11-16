@@ -271,13 +271,13 @@ pub fn follower(
     (b, arms)
 }
 
-/// A config upgrade freezing ledger keys the ledgers showed (CAP-77, protocol 26): an account
-/// or a trustline, the kinds core accepts in a frozen keys delta.
+/// A config upgrade freezing a trustline the ledgers showed (CAP-77, protocol 26).
 pub fn freeze(world: &World, rng: &mut Rng) -> Option<Step> {
     let keys: Vec<String> = world
         .keys
         .values()
-        .filter(|k| k.get("account").is_some() || k.get("trustline").is_some())
+        // a frozen account stops every transaction it sources, so only trustlines are frozen
+        .filter(|k| k.get("trustline").is_some())
         .filter_map(|k| world.key_xdr(k))
         .collect();
     if keys.is_empty() {

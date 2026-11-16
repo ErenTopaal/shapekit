@@ -62,6 +62,11 @@ impl GateRun {
 pub fn at_protocol(ir: &RecipeIr, protocol: u32) -> RecipeIr {
     let mut out = ir.clone();
     out.protocol = protocol;
+    if out.node.soroban_settings && protocol != 30 {
+        // the captured settings only validate at 30; the limit override stands in
+        out.node.soroban_settings = false;
+        out.node.soroban_limits = true;
+    }
     out.steps = ir
         .steps
         .iter()
@@ -92,6 +97,30 @@ pub fn at_protocol(ir: &RecipeIr, protocol: u32) -> RecipeIr {
         })
         .collect();
     out
+}
+
+/// The lowest protocol `ir` can run at: the highest interface protocol of the code its
+/// upload steps carry (a host refuses code declaring a newer protocol), 1 without uploads.
+pub fn lowest_protocol(ir: &RecipeIr, root: &Path) -> Result<u32> {
+    let mut lowest = 1;
+    for s in &ir.steps {
+        if let Step::Upload { wasm, .. } = s {
+            let bytes =
+                std::fs::read(root.join(wasm)).with_context(|| format!("reading {wasm}"))?;
+            let p = shapekit_core_driver::contracts::interface_protocol(&bytes)
+                .with_context(|| format!("{wasm} declares no interface protocol"))?;
+            lowest = lowest.max(p);
+        }
+        if let Step::Invoke { .. }
+        | Step::HostFunction { .. }
+        | Step::ExtendTtl { .. }
+        | Step::Restore { .. } = s
+        {
+            // Soroban arrived with protocol 20, and the first host core links is 21's
+            lowest = lowest.max(21);
+        }
+    }
+    Ok(lowest)
 }
 
 /// Records a node that closes only ledger 2 on the twin and reads its counts.

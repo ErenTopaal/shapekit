@@ -65,8 +65,64 @@ impl<'a> Filler<'a> {
         self.typed(&Type::Ref { name: name.into() }, None)
     }
 
-    /// One arm of union `union`, chosen by its XDR-JSON name.
+    /// One arm of union `union`, chosen by its XDR-JSON name. Offer and path payment arms
+    /// are drawn against the book a third of the time, when it holds offers: the other side
+    /// of an offer there, at the inverse price, so the two can cross.
     pub fn union_arm(&mut self, union: &str, arm: &str) -> Option<Value> {
+        if union == "OperationBody" && !self.world.books.is_empty() && self.rng.chance(1, 3) {
+            let offers: Vec<&crate::world::BookOffer> = self.world.books.values().collect();
+            let o = (*self.rng.pick(&offers)).clone();
+            let amount = self.int64(Some("amount"));
+            match arm {
+                "manage_sell_offer" | "create_passive_sell_offer" | "manage_buy_offer" => {
+                    let (n, d) = o.price;
+                    let price = serde_json::json!({ "n": d, "d": n });
+                    let mut body = serde_json::json!({
+                        "selling": o.buying, "buying": o.selling, "price": price,
+                    });
+                    let key = if arm == "manage_buy_offer" {
+                        "buy_amount"
+                    } else {
+                        "amount"
+                    };
+                    body[key] = amount;
+                    if arm != "create_passive_sell_offer" {
+                        body["offer_id"] = Value::String("0".into());
+                    }
+                    return Some(serde_json::json!({ arm: body }));
+                }
+                "path_payment_strict_send" | "path_payment_strict_receive" => {
+                    let dest = self.muxed();
+                    let (send, dest_amount_key, send_key, bound_key) = if arm.ends_with("send") {
+                        ("send_asset", "dest_min", "send_amount", "dest_min")
+                    } else {
+                        ("send_asset", "dest_amount", "send_max", "send_max")
+                    };
+                    let _ = bound_key;
+                    let small =
+                        Value::String((*self.rng.pick(&[1i64, 7, 100, 10_000_000])).to_string());
+                    let large = Value::String(
+                        (*self
+                            .rng
+                            .pick(&[1_000_000_000i64, 100_000_000_000, i64::MAX]))
+                        .to_string(),
+                    );
+                    let mut body = serde_json::json!({
+                        "destination": dest, "dest_asset": o.selling, "path": [],
+                    });
+                    body[send] = o.buying;
+                    if arm.ends_with("send") {
+                        body[send_key] = small;
+                        body[dest_amount_key] = Value::String("1".into());
+                    } else {
+                        body[dest_amount_key] = small;
+                        body[send_key] = large;
+                    }
+                    return Some(serde_json::json!({ arm: body }));
+                }
+                _ => {}
+            }
+        }
         let Some(Definition::Union(u)) = self.schema.get(union) else {
             return None;
         };
@@ -536,7 +592,13 @@ impl<'a> Filler<'a> {
             Type::Optional { element } => {
                 // most optional fields stay out: a struct of many (set_options) filled at
                 // once mostly locks the account out instead of trying one change
-                if self.depth >= MAX_DEPTH || self.rng.chance(7, 10) {
+                // account flags are what most authorization results hinge on, so they are
+                // set as often as left out
+                let absent = match field {
+                    Some("setFlags" | "clearFlags") => self.rng.chance(1, 2),
+                    _ => self.rng.chance(7, 10),
+                };
+                if self.depth >= MAX_DEPTH || absent {
                     Value::Null
                 } else {
                     self.nested(element, field)

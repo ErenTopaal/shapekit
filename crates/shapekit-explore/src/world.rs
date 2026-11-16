@@ -59,6 +59,16 @@ impl AssetRef {
     }
 }
 
+/// An offer on the book.
+#[derive(Debug, Clone)]
+pub struct BookOffer {
+    pub seller: String,
+    pub selling: Value,
+    pub buying: Value,
+    pub amount: i64,
+    pub price: (i32, i32),
+}
+
 #[derive(Debug, Clone)]
 pub struct World {
     pub recipe_id: String,
@@ -72,6 +82,9 @@ pub struct World {
     pub roles_by_strkey: BTreeMap<String, String>,
     /// (seller reference, offer id) of every live offer.
     pub offers: BTreeSet<(String, i64)>,
+    /// Live offers as the book holds them: seller, selling, buying (XDR-JSON in recipe form),
+    /// amount and price, by offer id.
+    pub books: BTreeMap<i64, BookOffer>,
     /// Live claimable balance ids, XDR-JSON.
     pub balances: BTreeSet<String>,
     /// Live liquidity pools by hex id, with their two assets as XDR-JSON.
@@ -113,6 +126,7 @@ impl World {
             ghosts,
             roles_by_strkey,
             offers: BTreeSet::new(),
+            books: BTreeMap::new(),
             balances: BTreeSet::new(),
             pools: BTreeMap::new(),
             amounts: Vec::new(),
@@ -326,6 +340,7 @@ impl World {
                                 }
                             }
                             LedgerKey::Offer(o) => {
+                                self.books.remove(&o.offer_id);
                                 let seller = self.recipe_form(serde_json::to_value(&o.seller_id)?);
                                 if let Value::String(s) = seller {
                                     self.offers.remove(&(s, o.offer_id));
@@ -369,7 +384,19 @@ impl World {
                             LedgerEntryData::Offer(o) => {
                                 let seller = self.recipe_form(serde_json::to_value(&o.seller_id)?);
                                 if let Value::String(s) = seller {
-                                    self.offers.insert((s, o.offer_id));
+                                    self.offers.insert((s.clone(), o.offer_id));
+                                    self.books.insert(
+                                        o.offer_id,
+                                        BookOffer {
+                                            seller: s,
+                                            selling: self
+                                                .recipe_form(serde_json::to_value(&o.selling)?),
+                                            buying: self
+                                                .recipe_form(serde_json::to_value(&o.buying)?),
+                                            amount: o.amount,
+                                            price: (o.price.n, o.price.d),
+                                        },
+                                    );
                                 }
                             }
                             LedgerEntryData::ClaimableBalance(b) => {

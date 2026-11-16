@@ -1047,8 +1047,20 @@ impl<'a> Session<'a> {
                 .collect()
         };
         let last = ctx.driver().last_meta().clone();
-        let t = super::order::template(&last)
-            .context("an ordered close needs the ledger before it to hold a classic transaction")?;
+        let t = match super::order::template(&last) {
+            Ok(t) => t,
+            // learning: the order cannot be predicted here, so the held transactions never
+            // reach this ledger
+            Err(_) if self.learn => {
+                self.left_out.extend(held.iter().map(|h| h.step));
+                return Ok(Vec::new());
+            }
+            Err(e) => {
+                return Err(e.context(
+                    "an ordered close needs the ledger before it to hold a classic transaction",
+                ));
+            }
+        };
         let stellar_xdr::LedgerCloseMeta::V2(m) = &last else {
             bail!("an ordered close needs a v2 ledger close meta");
         };

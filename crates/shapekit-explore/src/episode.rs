@@ -356,8 +356,26 @@ impl<'e, 'a> Live<'e, 'a> {
             }
         }
         drop.sort_unstable();
+        drop.dedup();
+        let dropped = !drop.is_empty();
         for i in drop.into_iter().rev() {
             self.steps.remove(i);
+        }
+        if dropped {
+            // an ordered close only names transactions the recipe still holds
+            let labels: BTreeSet<String> = self
+                .steps
+                .iter()
+                .filter_map(|s| match s {
+                    Step::Tx { label: Some(l), .. } => Some(l.clone()),
+                    _ => None,
+                })
+                .collect();
+            for s in &mut self.steps {
+                if let Step::Close { order, .. } = s {
+                    order.retain(|l| labels.contains(l));
+                }
+            }
         }
         Ok(())
     }
