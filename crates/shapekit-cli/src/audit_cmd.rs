@@ -7,6 +7,7 @@ use std::time::Instant;
 use anyhow::{Context, Result, bail, ensure};
 use serde::{Deserialize, Serialize};
 use shapekit_contracts::AuditReport;
+use shapekit_sentinel::sdk::SdkAudit;
 use shapekit_sentinel::{Audit, Lake, Network, Tip};
 
 #[derive(Clone, Copy, Debug, clap::ValueEnum)]
@@ -37,6 +38,25 @@ pub struct LakeArgs {
     jobs: usize,
 }
 
+#[derive(clap::Args)]
+pub struct SdkArgs {
+    /// Send every ledger through this SDK's testee (`rust`, `go` or `js`) instead of the
+    /// in-process law book: `decode_encode` on the ledger and `tx_hash`, `balance_id` and
+    /// `contract_id` on what it holds, each compared with the network's answer.
+    #[arg(long, requires = "version")]
+    sdk: Option<String>,
+    /// The SDK version, as conformance/versions.toml lists it, or `current` for the version
+    /// that file marks current.
+    #[arg(long, requires = "sdk")]
+    version: Option<String>,
+    /// The versions file naming each testee's build and command.
+    #[arg(long, default_value = "conformance/versions.toml")]
+    versions: PathBuf,
+    /// Use the testee as already built instead of running its build steps first.
+    #[arg(long)]
+    no_build: bool,
+}
+
 #[derive(clap::Subcommand)]
 pub enum AuditCommand {
     /// Check every law on ledgers drawn at random from the whole history. The same seed and
@@ -53,6 +73,8 @@ pub enum AuditCommand {
         /// Draw ledgers below this one (default: one past the newest ledger in the lake).
         #[arg(long)]
         below: Option<u32>,
+        #[command(flatten)]
+        sdk: SdkArgs,
         /// Where to write the audit report.
         #[arg(long)]
         out: PathBuf,
@@ -112,6 +134,7 @@ pub fn run(command: AuditCommand) -> Result<bool> {
             n,
             seed,
             below,
+            sdk,
             out,
         } => {
             ensure!(n > 0, "--n has to be at least 1");
@@ -128,7 +151,23 @@ pub fn run(command: AuditCommand) -> Result<bool> {
                 "drawing {n} ledgers below {below} with seed {seed} from {}",
                 l.location()
             );
-            let audit = shapekit_sentinel::random_audit(&l, n, seed, below, lake.jobs)?;
+            let testee = match (&sdk.sdk, &sdk.version) {
+                (Some(name), Some(version)) => {
+                    let root = std::env::current_dir().context("reading the current directory")?;
+                    let target = shapekit_sentinel::sdk::start(
+                        &root,
+                        &sdk.versions,
+                        name,
+                        version,
+                        !sdk.no_build,
+                    )?;
+                    let t = SdkAudit::new(&root, &target, l.network.passphrase())?;
+                    println!("checking through the {} testee", target.key());
+                    Some(t)
+                }
+                _ => None,
+            };
+            let audit = shapekit_sentinel::random_audit(&l, n, seed, below, lake.jobs, testee)?;
             finish(&audit, &l, Some(u64::from(seed)), &out, started)
         }
         AuditCommand::Watch {
@@ -247,7 +286,7 @@ fn finish(
     out: &Path,
     started: Instant,
 ) -> Result<bool> {
-    let report = audit.report(seed, None);
+    let report = audit.report(seed);
     if let Some(dir) = out.parent().filter(|d| !d.as_os_str().is_empty()) {
         std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
     }
@@ -282,10 +321,31 @@ fn finish(
             l.law, l.checked, l.violations
         );
     }
-    for (law, n) in audit.undecided() {
-        println!("  {:<22} {n:>10} undecided", law.as_str());
+    if audit.sdk().is_none() {
+        for (law, n) in audit.undecided() {
+            println!("  {:<22} {n:>10} undecided", law.as_str());
+        }
+    }
+    let mut errors = 0;
+    if let Some(sdk) = audit.sdk() {
+        println!(
+            "through {} {}, testee started {} times",
+            sdk.sdk_ref().sdk,
+            sdk.sdk_ref().version,
+            sdk.starts()
+        );
+        for (op, n) in &sdk.unsupported {
+            println!("  {op:<22} {n:>10} unsupported");
+        }
+        errors = sdk.errors.len();
+        for (ledger, e) in sdk.errors.iter().take(20) {
+            println!("  error, ledger {ledger}: {e}");
+        }
+        if errors > 0 {
+            println!("{errors} checks ended in an error; none is counted as a pass");
+        }
     }
     let total = report.total_violations();
     println!("{total} violations; report written to {}", out.display());
-    Ok(total == 0)
+    Ok(total == 0 && errors == 0)
 }

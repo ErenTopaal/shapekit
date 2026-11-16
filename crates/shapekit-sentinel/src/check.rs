@@ -5,11 +5,12 @@ use std::collections::BTreeMap;
 
 use anyhow::{Context, Result, ensure};
 use shapekit_contracts::AuditReport;
-use shapekit_contracts::audit::{EnvelopeCounts, LawResult, SdkRef, Violation};
+use shapekit_contracts::audit::{EnvelopeCounts, LawResult, Violation};
 use shapekit_laws::{Checker, Law, check_encoding};
 use stellar_xdr::{LedgerCloseMeta, LedgerCloseMetaBatch, LedgerHeaderHistoryEntry};
 
 use crate::lake::{Network, Object, decompress};
+use crate::sdk::SdkAudit;
 
 /// Violations kept as examples per law; the counts are always complete.
 pub const EXAMPLES_PER_LAW: usize = 20;
@@ -33,6 +34,9 @@ pub struct Audit {
     pub compressed_bytes: u64,
     pub raw_bytes: u64,
     tip: Option<Tip>,
+    /// When set, every ledger also goes through this SDK testee, and the report's law rows
+    /// are the SDK's answers instead of the in-process law book's.
+    sdk: Option<SdkAudit>,
 }
 
 fn header(lcm: &LedgerCloseMeta) -> &LedgerHeaderHistoryEntry {
@@ -53,7 +57,18 @@ impl Audit {
             compressed_bytes: 0,
             raw_bytes: 0,
             tip: None,
+            sdk: None,
         }
+    }
+
+    /// Sends every ledger through `sdk` as well.
+    pub fn with_sdk(mut self, sdk: SdkAudit) -> Audit {
+        self.sdk = Some(sdk);
+        self
+    }
+
+    pub fn sdk(&self) -> Option<&SdkAudit> {
+        self.sdk.as_ref()
     }
 
     /// An audit that continues a window ending at `tip`: the first ledger checked is held
@@ -87,7 +102,17 @@ impl Audit {
         let before = self.checker.report.violations.len();
         let batch = check_encoding::<LedgerCloseMetaBatch>(&raw, &mut self.checker.report)
             .with_context(|| format!("{} does not decode as LedgerCloseMetaBatch", object.key))?;
-        drop(raw);
+        // the sdk gets each ledger's bytes as the lake holds them, not a re-encoding
+        let spans = match &self.sdk {
+            Some(_) => Some(
+                shapekit_pack::lake::Batch::parse(raw)
+                    .with_context(|| format!("splitting {} into ledgers", object.key))?,
+            ),
+            None => {
+                drop(raw);
+                None
+            }
+        };
         ensure!(
             (batch.start_sequence, batch.end_sequence) == want,
             "{} holds ledgers {} to {}, its key names {} to {}",
@@ -137,6 +162,12 @@ impl Audit {
                     .record(Law::HeaderChain, Some(seq), failure);
             }
             self.checker.ledger(lcm);
+            if let (Some(sdk), Some(spans)) = (&mut self.sdk, &spans) {
+                let bytes = spans
+                    .ledger(seq)
+                    .with_context(|| format!("{} has no ledger {seq}", object.key))?;
+                sdk.ledger(lcm, bytes, seq, &object.key)?;
+            }
             self.ledgers.push(seq);
             self.tip = Some(Tip {
                 ledger: seq,
@@ -150,7 +181,7 @@ impl Audit {
     }
 
     /// The report in the audit-report format.
-    pub fn report(&self, seed: Option<u64>, sdk: Option<SdkRef>) -> AuditReport {
+    pub fn report(&self, seed: Option<u64>) -> AuditReport {
         let r = &self.checker.report;
         let mut examples: BTreeMap<Law, Vec<Violation>> = BTreeMap::new();
         for (v, object) in r.violations.iter().zip(&self.object_of_violation) {
@@ -173,6 +204,10 @@ impl Audit {
             })
             .collect();
         laws.sort_by(|a, b| a.law.cmp(&b.law));
+        let (laws, sdk) = match &self.sdk {
+            Some(s) => (s.law_results(), Some(s.sdk_ref())),
+            None => (laws, None),
+        };
         let count = |k: &str| r.envelopes.get(k).copied().unwrap_or(0);
         let envelopes = EnvelopeCounts {
             v0: count("v0"),

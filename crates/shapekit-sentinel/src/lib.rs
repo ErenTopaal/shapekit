@@ -10,6 +10,7 @@
 pub mod check;
 pub mod lake;
 pub mod sample;
+pub mod sdk;
 pub mod summary;
 
 use std::sync::Mutex;
@@ -102,10 +103,20 @@ pub fn ranges_of(lake: &Lake, ledgers: &[u32]) -> Vec<(u32, u32)> {
 
 /// The random audit: `n` distinct ledgers below `below` drawn with `seed`, every ledger of
 /// the batches holding them checked.
-pub fn random_audit(lake: &Lake, n: u32, seed: u32, below: u32, jobs: usize) -> Result<Audit> {
+pub fn random_audit(
+    lake: &Lake,
+    n: u32,
+    seed: u32,
+    below: u32,
+    jobs: usize,
+    sdk: Option<sdk::SdkAudit>,
+) -> Result<Audit> {
     let drawn = sample::ledgers(n, seed, below);
     let ranges = ranges_of(lake, &drawn);
     let mut audit = Audit::new(lake.network);
+    if let Some(s) = sdk {
+        audit = audit.with_sdk(s);
+    }
     check_ranges(lake, &ranges, jobs, &mut audit)?;
     Ok(audit)
 }

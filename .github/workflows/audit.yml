@@ -1,8 +1,9 @@
 name: audit
 
 # the growing random audit: every night a new seed draws 3,000 ledgers from the whole pubnet
-# history in the public SEP-54 data lake and every law is checked on each of them. the seed
-# is the date, so any night's sample can be drawn again with the same command.
+# history in the public SEP-54 data lake. every law is checked on each of them in process,
+# and the same ledgers go through the current version of each sdk's testee. the seed is the
+# date, so any night's sample can be drawn again with the same command.
 
 on:
   schedule:
@@ -29,11 +30,18 @@ env:
   CARGO_INCREMENTAL: "0"
 
 jobs:
-  laws:
+  build:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      seed: ${{ steps.seed.outputs.seed }}
     steps:
       - uses: actions/checkout@v7
+      - name: the seed every job draws with
+        id: seed
+        env:
+          SEED: ${{ inputs.seed }}
+        run: echo "seed=${SEED:-$(date -u +%Y%m%d)}" >> "$GITHUB_OUTPUT"
       - name: restore the shapekit binary built from this source
         id: bin
         uses: actions/cache/restore@v6
@@ -53,23 +61,99 @@ jobs:
         with:
           path: target/release/shapekit
           key: ${{ steps.bin.outputs.cache-primary-key }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shapekit-audit-bin
+          path: target/release/shapekit
+          retention-days: 3
+          if-no-files-found: error
+
+  laws:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit-audit-bin
+          path: ${{ runner.temp }}/bin
       - name: draw and check
         env:
-          SEED: ${{ inputs.seed }}
+          SEED: ${{ needs.build.outputs.seed }}
           N: ${{ inputs.n || '3000' }}
         run: |
           set -euo pipefail
-          seed="${SEED:-$(date -u +%Y%m%d)}"
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
           mkdir -p audit
-          target/release/shapekit audit run --network pubnet --n "$N" --seed "$seed" \
-            --out audit/report.json
+          "$RUNNER_TEMP/bin/shapekit" audit run --network pubnet --n "$N" --seed "$SEED" \
+            --out audit/laws.json
       - name: job summary
-        if: always() && hashFiles('audit/report.json') != ''
-        run: target/release/shapekit audit summary --report audit/report.json >> "$GITHUB_STEP_SUMMARY"
+        if: always() && hashFiles('audit/laws.json') != ''
+        run: '"$RUNNER_TEMP/bin/shapekit" audit summary --report audit/laws.json >> "$GITHUB_STEP_SUMMARY"'
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: audit
+          name: audit-laws
+          path: audit/
+          retention-days: 90
+          if-no-files-found: error
+
+  sdk:
+    # the same ledgers through each sdk: its decoder and encoder on every ledger, its
+    # transaction hash on every envelope, its balance and contract ids where the ledger holds
+    # them, each compared with what the network wrote
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [rust, go, js]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - if: matrix.sdk == 'rust'
+        uses: dtolnay/rust-toolchain@1.99.1
+      - if: matrix.sdk == 'rust'
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: testee-rust
+          workspaces: testees/rust
+      - if: matrix.sdk == 'go'
+        uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - if: matrix.sdk == 'js'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: "testees/js/**/package-lock.json"
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit-audit-bin
+          path: ${{ runner.temp }}/bin
+      - name: draw and check through the current version
+        env:
+          SDK: ${{ matrix.sdk }}
+          SEED: ${{ needs.build.outputs.seed }}
+          N: ${{ inputs.n || '3000' }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          mkdir -p audit
+          "$RUNNER_TEMP/bin/shapekit" audit run --network pubnet --n "$N" --seed "$SEED" \
+            --sdk "$SDK" --version current --out "audit/$SDK.json"
+      - name: job summary
+        if: always() && hashFiles(format('audit/{0}.json', matrix.sdk)) != ''
+        env:
+          SDK: ${{ matrix.sdk }}
+        run: '"$RUNNER_TEMP/bin/shapekit" audit summary --report "audit/$SDK.json" >> "$GITHUB_STEP_SUMMARY"'
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: audit-${{ matrix.sdk }}
           path: audit/
           retention-days: 90
           if-no-files-found: error

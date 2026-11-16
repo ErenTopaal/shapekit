@@ -46,8 +46,8 @@ fn two_windows_cover_the_chain_once_with_the_chain_law_across_them() {
     assert_eq!(a2.ledgers(), (32..=66).collect::<Vec<_>>());
     assert!(window(a2.tip(), None, newest, 1000).unwrap().is_none());
 
-    let r1 = a1.report(None, None);
-    let r2 = a2.report(None, None);
+    let r1 = a1.report(None);
+    let r2 = a2.report(None);
     assert_eq!(r1.total_violations() + r2.total_violations(), 0);
     let chain = |r: &shapekit_contracts::AuditReport| {
         r.laws
@@ -71,7 +71,7 @@ fn two_windows_cover_the_chain_once_with_the_chain_law_across_them() {
         ledger: 31,
         hash: "00".repeat(32),
     };
-    let bad = watch(&l, Some(forged), w2, 3).unwrap().report(None, None);
+    let bad = watch(&l, Some(forged), w2, 3).unwrap().report(None);
     let law = bad.laws.iter().find(|l| l.law == "header-chain").unwrap();
     assert_eq!((law.checked, law.violations), (35, 1));
     assert_eq!(law.examples[0].ledger, 32);
@@ -80,8 +80,8 @@ fn two_windows_cover_the_chain_once_with_the_chain_law_across_them() {
 #[test]
 fn random_audit_checks_each_drawn_ledger_once() {
     let l = lake();
-    let a = random_audit(&l, 20, 7, 67, 4).unwrap();
-    let r = a.report(Some(7), None);
+    let a = random_audit(&l, 20, 7, 67, 4, None).unwrap();
+    let r = a.report(Some(7));
     assert_eq!(r.ledgers.len(), 20);
     assert!(r.ledgers.windows(2).all(|w| w[0] < w[1]));
     assert_eq!(ranges_of(&l, &r.ledgers).len(), 20);
@@ -91,8 +91,40 @@ fn random_audit_checks_each_drawn_ledger_once() {
         <shapekit_contracts::AuditReport as shapekit_contracts::Contract>::problems(&r).is_empty()
     );
     // the same seed draws the same ledgers
-    let again = random_audit(&l, 20, 7, 67, 1)
+    let again = random_audit(&l, 20, 7, 67, 1, None)
         .unwrap()
-        .report(Some(7), None);
+        .report(Some(7));
     assert_eq!(again, r);
+}
+
+#[test]
+fn random_audit_through_the_rust_testee() {
+    use shapekit_sentinel::sdk::{self, SdkAudit};
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let target = sdk::start(
+        &root,
+        &root.join("conformance/versions.toml"),
+        "rust",
+        "30.0.0",
+        true,
+    )
+    .unwrap();
+    let l = lake();
+    let testee = SdkAudit::new(&root, &target, l.network.passphrase()).unwrap();
+    let a = random_audit(&l, 20, 7, 67, 2, Some(testee)).unwrap();
+    let s = a.sdk().unwrap();
+    assert!(s.errors.is_empty(), "{:?}", s.errors);
+    assert!(s.unsupported.is_empty(), "{:?}", s.unsupported);
+    let r = a.report(Some(7));
+    assert_eq!(r.sdk.as_ref().unwrap().version, "30.0.0");
+    let row = |law: &str| r.laws.iter().find(|l| l.law == law).unwrap().clone();
+    assert_eq!(row("roundtrip").checked, 20);
+    // one hash check per envelope of the transaction sets, plus one per fee bump inner
+    let e = r.envelopes.unwrap();
+    assert!(row("tx-hash").checked >= e.v0 + e.v1 + e.fee_bump);
+    assert!(row("balance-id").checked > 0);
+    assert_eq!(r.total_violations(), 0);
+    assert!(
+        <shapekit_contracts::AuditReport as shapekit_contracts::Contract>::problems(&r).is_empty()
+    );
 }
