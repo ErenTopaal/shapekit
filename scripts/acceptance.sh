@@ -95,9 +95,12 @@ current="$shapekit harness reproduce"
 echo "== $current"
 "$shapekit" harness reproduce --table adapters/walletbackend/reproductions.toml \
   --out "$out/harness-reproduce" | tee "$out/harness-reproduce.txt"
-rows=$(grep -c ': holds$\|: does not hold$' "$out/harness-reproduce.txt" || true)
-held=$(grep -c ': holds$' "$out/harness-reproduce.txt" || true)
-echo "harness reproduce: $held of $rows rows hold"
+# the table's rows: one per entry verdict and one per carry check of each case
+table="$out/harness-reproduce/REPRODUCTIONS.md"
+rows=$(grep -c '^| wallet-backend' "$table" || true)
+held=$(grep -c '^| wallet-backend.* | yes |$' "$table" || true)
+carry=$(grep -c '^| wallet-backend[^|]*|[^|]*|[^|]*| carry check |' "$table" || true)
+echo "harness reproduce: $held of $rows table rows hold ($((rows - carry)) entry verdicts, $carry carry checks)"
 if [ "$rows" -eq 0 ] || [ "$held" -ne "$rows" ]; then
   echo "acceptance (full): failed at: $current" >&2
   exit 1
@@ -117,7 +120,8 @@ fi
 step go build -C lint -o "$PWD/$out/bin/indexerlint" ./cmd/indexerlint
 current="indexerlint -baseline lint/baselines/wallet-backend.json on wallet-backend $pin"
 echo "== $current"
-(cd "$wb" && "$OLDPWD/$out/bin/indexerlint" -baseline "$OLDPWD/lint/baselines/wallet-backend.json" ./...)
+# the checkout sits under this repository, whose go.work must not claim it
+(cd "$wb" && GOWORK=off "$OLDPWD/$out/bin/indexerlint" -baseline "$OLDPWD/lint/baselines/wallet-backend.json" ./...)
 
 step "$shapekit" findings check --allow-draft
 step "$shapekit" gen verify-repro --jobs 2

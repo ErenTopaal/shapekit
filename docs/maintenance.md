@@ -113,8 +113,9 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   wallet-backend at the pinned commit with its committed baseline, `findings check
   --allow-draft` and every chain regenerated under both passphrases
   (`gen verify-repro`). It also needs docker and network access. The last lines of its
-  reproduction step and of the findings step give the totals to compare with `STATUS.md`:
-  `harness reproduce: 20 of 20 rows hold` and `24 findings, 504 failures, 0 unmapped`.
+  reproduction step and of the findings step give the totals, measured on 2026-11-16:
+  `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
+  `24 findings, 504 failures, 0 unmapped`.
 
 ## How SDKs pin a corpus release
 
