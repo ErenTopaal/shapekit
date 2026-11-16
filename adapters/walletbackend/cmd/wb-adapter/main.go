@@ -27,6 +27,7 @@ func run() error {
 	commit := flag.String("commit", "", "full wallet-backend commit hash to build and run")
 	repo := flag.String("repo", "", "wallet-backend git clone (default: <user cache dir>/shapekit/wallet-backend, cloned on first use)")
 	dbMemory := flag.Uint64("db-memory", 1<<30, "memory limit of the timescaledb container in bytes")
+	cpus := flag.String("cpus", "", "docker --cpus limit of every container the adapter starts (default: none)")
 	flag.Parse()
 	if *repo == "" {
 		cache, err := os.UserCacheDir()
@@ -38,7 +39,7 @@ func run() error {
 	// a terminating signal tears the target down like end of input does
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	a, err := walletbackend.New(ctx, walletbackend.Config{Commit: *commit, RepoDir: *repo, DBMemoryBytes: *dbMemory})
+	a, err := walletbackend.New(ctx, walletbackend.Config{Commit: *commit, RepoDir: *repo, DBMemoryBytes: *dbMemory, CPUs: *cpus})
 	if err != nil {
 		return err
 	}

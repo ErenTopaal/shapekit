@@ -108,7 +108,9 @@ impl Report {
     /// and the memory checks hold, the harness's own and the target's growth across rounds.
     /// A target over its limit is a finding (verdict `mishandled`, reason `oom`).
     pub fn ok(&self) -> bool {
-        self.chains.iter().all(|c| c.error.is_none())
+        self.chains
+            .iter()
+            .all(|c| c.error.is_none() && c.dump_error.is_none())
             && self.memory.flat
             && self.memory.within_budget
             && self.target_memory.as_ref().is_none_or(|t| t.flat)
@@ -204,7 +206,10 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
     Ok(Report {
         schema: REPORT_SCHEMA,
         shapekit_version: env!("CARGO_PKG_VERSION").into(),
-        adapter_protocol: ADAPTER_PROTOCOL_VERSION,
+        adapter_protocol: first
+            .describe
+            .as_ref()
+            .map_or(ADAPTER_PROTOCOL_VERSION, |d| d.protocol),
         oracle_vocab_version: shapekit_oracle::vocab::ORACLE_VOCAB_VERSION,
         adapter_command: opts.adapter.clone(),
         describe: first.describe,
@@ -405,10 +410,10 @@ pub fn markdown(r: &Report) -> String {
             s.push('\n');
         }
     }
-    s.push_str("## Chains\n\n| chain | network | protocol | delivery | bootstrap | last ingested | last ledger | stop | target peak memory | error |\n|---|---|---|---|---|---|---|---|---|---|\n");
+    s.push_str("## Chains\n\n| chain | network | protocol | delivery | bootstrap | last ingested | last ledger | stop | target peak memory | dump | error |\n|---|---|---|---|---|---|---|---|---|---|---|\n");
     for c in &r.chains {
         s.push_str(&format!(
-            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",
+            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",
             c.chain,
             c.network,
             c.protocol,
@@ -423,6 +428,11 @@ pub fn markdown(r: &Report) -> String {
             c.target_peak_memory_bytes
                 .map(|b| b.to_string())
                 .unwrap_or_default(),
+            match (&c.dump, &c.dump_error) {
+                (_, Some(e)) => cell(&format!("failed: {e}")),
+                (Some(d), None) => format!("{} tables, {} rows", d.tables, d.rows),
+                (None, None) => String::new(),
+            },
             cell(c.error.as_deref().unwrap_or(""))
         ));
     }

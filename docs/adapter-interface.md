@@ -6,7 +6,8 @@ what the indexer stored against the meta oracle. It never talks to the indexer d
 ledger delivery endpoints, reports how far it got, and reads back what it stored in the
 oracle's vocabulary.
 
-Protocol version: **1**. The machine-readable form is `schema/adapter-protocol.schema.json`,
+Protocol version: **2**. The harness still drives version 1 adapters (see "Versions"). The
+machine-readable form is `schema/adapter-protocol.schema.json`,
 generated from `crates/shapekit-harness/src/protocol.rs` together with the vocabulary section
 at the end of this page (`shapekit harness schema --write`; `cargo test -p shapekit-harness`
 fails when either is stale).
@@ -31,7 +32,8 @@ For each chain (one recorded ledger sequence per shape family, protocol and pass
    ingested it, the target died, or it stopped making progress.
 5. Sends `export` for the ledgers from the one after the bootstrap ledger to the last ledger
    the target ingested, and compares the records with the oracle files of the chain's corpus
-   entries.
+   entries. When the adapter offers `dump`, it then asks for every stored table and keeps
+   the answer (see "dump").
 6. Sends `stop`, keeps the returned logs, stops the replay server, and removes the network
    and the work directory.
 
@@ -47,7 +49,8 @@ family does not hide the others.
 - The harness sends one request and reads response lines until the final line for that
   request (`status` `ok` or `error`) before it sends the next. Every response line carries the
   request's `id`. A line with another `id` is a protocol violation and ends the chain's run.
-- Only `export` has more than one response line: any number of `record` lines, then the
+- Only `export` and `dump` have more than one response line: any number of `record` lines
+  (`export`) or `table` and `row` lines (`dump`), then the
   final line.
 - stdout carries responses only. Logs go to stderr; the harness saves the adapter's stderr
   next to the report (`logs/<chain>.<network>.adapter.log`).
@@ -85,7 +88,7 @@ family does not hide the others.
 ```
 
 - `id`: string, unique within one adapter process.
-- `cmd`: `describe`, `start`, `advance`, `status`, `export` or `stop`. The command's members
+- `cmd`: `describe`, `start`, `advance`, `status`, `export`, `dump` or `stop`. The command's members
   sit next to `cmd`.
 
 ### Response
@@ -112,13 +115,13 @@ reported through `status`, not through an error response.
 
 ### describe
 
-Request: `{"id": "0", "cmd": "describe", "protocol": 1}`
+Request: `{"id": "0", "cmd": "describe", "protocol": 2}`
 
 Result:
 
 | member | type | meaning |
 |---|---|---|
-| `protocol` | integer | must be `1`; the harness stops otherwise |
+| `protocol` | integer | the version the adapter speaks: the requested one, or an older one the harness drives (`1`) |
 | `adapter`, `adapter_version` | string | the adapter program and its version |
 | `target` | string | the indexer, for example `wallet-backend` |
 | `target_version` | string | the exact build, for example a full commit hash, never a branch name |
@@ -128,6 +131,14 @@ Result:
 | `vocab_version` | integer | the oracle vocabulary version the claims and exports use; must equal the harness's |
 | `protocols` | `{"min", "max"}` | ledger protocols the target build ingests; chains outside are `out-of-scope` |
 | `claims` | object | what the target records, see "Claims" |
+| `capabilities` | array | optional commands the adapter answers: `dump`. Version 2; absent means none |
+
+#### Versions
+
+The harness asks for version 2. An adapter that does not speak it answers with an
+`unsupported` error, and the harness sends `describe` again with `"protocol": 1` in the same
+process. A version 1 adapter runs exactly as before: no `capabilities`, no `dump`. Any other error, or an answer
+naming a version above the one asked for, ends the chain.
 
 ### start
 
@@ -239,6 +250,36 @@ the entry so a reviewer can tell an indexer drop from an adapter gap.
 
 Result: `logs`, the tail of the target's logs (at most 1 MiB). The adapter removes every
 container, volume and file it created, then exits with status 0.
+
+### dump
+
+Version 2, sent only to an adapter whose `describe` lists the `dump` capability. Request:
+`{"cmd": "dump"}`, or `{"cmd": "dump", "tables": ["state_changes"]}` for named tables only.
+Stream every table the target stored, each as one `table` line followed by its `row` lines,
+then `{"status": "ok", "result": {"tables": T, "rows": R}}` where `T` and `R` count the lines
+sent:
+
+```json
+{"id": "9", "status": "table", "table": {"name": "transactions_accounts", "columns": [{"name": "tx_to_id", "type": "bigint"}, {"name": "account_id", "type": "bytea"}]}}
+{"id": "9", "status": "row", "row": {"table": "transactions_accounts", "cells": ["279172878336", "30aa..."]}}
+{"id": "9", "status": "ok", "result": {"tables": 1, "rows": 1}}
+```
+
+- `columns[].type` is the store's own type name (PostgreSQL: `format_type`, for example
+  `bytea`, `bigint`, `character varying(255)`).
+- `cells` follow `columns`. A byte column's cell is the stored bytes as lowercase hex with
+  no prefix. Every other cell is the store's own text form of the value (PostgreSQL: the
+  value cast to `text`). SQL NULL is `null`.
+- Dump what is stored, unchanged: no decoding, no mapping, no repair. The dump is the
+  evidence the relations search; anything the adapter would interpret belongs in `export`.
+- A row of a table whose `table` line has not been sent, a table sent twice, and a row with
+  a different number of cells than its table has columns are protocol violations.
+- Unknown table names in `tables` are a `bad-request` error.
+
+The harness sends `dump` after `export` and before `stop`, only when the target ingested a
+ledger after the bootstrap ledger, and writes the answer to
+`logs/<chain>.<network>.dump.json`. `--no-dump` skips it. A failed dump does not change any
+verdict; the chain lists the error and the run exits non-zero.
 
 ## Claims
 
@@ -390,8 +431,9 @@ exported.
   `verdict`, `reason`, the problems found and any unmapped rows.
 - `HARNESS.md`: the same as tables, one row per entry.
 - `logs/`: adapter stderr (`<chain>.<network>.adapter.log`) and the target logs `stop`
-  returned (`<chain>.<network>.target.log`) per chain; with `--repeat`, one `logs/round-<n>/`
-  per round.
+  returned (`<chain>.<network>.target.log`) per chain, and the dump
+  (`<chain>.<network>.dump.json`: `{"schema": 1, "tables": {<name>: {"columns", "rows"}}}`)
+  when the adapter offers one; with `--repeat`, one `logs/round-<n>/` per round.
 
 `--repeat N` runs the whole selection N times in one process. The run fails when a later
 round's verdicts differ from the first round's, or when its peak resident memory exceeds the
@@ -407,7 +449,7 @@ checks the verdicts of named entries:
 ```toml
 [adapter]
 # the command line; {commit} is replaced by each case's commit
-command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}"]
+command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}", "--cpus", "2"]
 
 [[reproduction]]
 id = "wallet-backend-729"
@@ -465,7 +507,9 @@ shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit ha
 `--commit` is required and takes a full 40-character lowercase commit hash. `--repo` names a
 wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`, cloned from
 github.com/stellar/wallet-backend on first use); `--db-memory` caps the database container
-(default 1 GiB). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes.
+(default 1 GiB); `--cpus` passes docker's `--cpus` to every container it starts (default: no
+limit). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes, and `dump`:
+every base table of the database's `public` schema, rows ordered by every column.
 
 - **Build.** `git archive <commit> | docker buildx build --load -` with the commit's own
   `Dockerfile`, image `shapekit-wallet-backend:<commit>`. Each `FROM` in that Dockerfile is

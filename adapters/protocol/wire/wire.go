@@ -1,4 +1,4 @@
-// Package wire is the Go side of the shapekit adapter protocol, version 1
+// Package wire is the Go side of the shapekit adapter protocol, version 2
 // (docs/adapter-interface.md, schema/adapter-protocol.schema.json): the
 // request and response shapes and a line loop that dispatches requests to a
 // Handler.
@@ -14,8 +14,16 @@ import (
 	"sync"
 )
 
-// ProtocolVersion is the adapter protocol version this package speaks.
-const ProtocolVersion = 1
+// ProtocolVersion is the newest adapter protocol version this package speaks.
+const ProtocolVersion = 2
+
+// MinProtocolVersion is the oldest version it still answers. Version 1 has no
+// dump command and no capabilities.
+const MinProtocolVersion = 1
+
+// CapabilityDump is listed in describe by an adapter whose handler answers
+// dump (version 2).
+const CapabilityDump = "dump"
 
 // Delivery modes.
 const (
@@ -64,6 +72,7 @@ type Request struct {
 	Head     *uint32      `json:"head,omitempty"`
 	From     *uint32      `json:"from,omitempty"`
 	To       *uint32      `json:"to,omitempty"`
+	Tables   []string     `json:"tables,omitempty"`
 	Start    *StartParams `json:"-"`
 }
 
@@ -121,6 +130,7 @@ type DescribeResult struct {
 	VocabVersion    int           `json:"vocab_version"`
 	Protocols       ProtocolRange `json:"protocols"`
 	Claims          Claims        `json:"claims"`
+	Capabilities    []string      `json:"capabilities,omitempty"`
 }
 
 // ProtocolRange is the ledger protocol range a target ingests.
@@ -169,6 +179,39 @@ type StatusResult struct {
 // ExportResult answers export after its records.
 type ExportResult struct {
 	Records uint64 `json:"records"`
+}
+
+// DumpTable is a table header line of a dump, sent before the table's rows.
+type DumpTable struct {
+	Name    string       `json:"name"`
+	Columns []DumpColumn `json:"columns"`
+}
+
+// DumpColumn is one column of a dumped table, with the store's type name.
+type DumpColumn struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+// DumpRow is one stored row. Cells follow the table's columns: byte columns as
+// lowercase hex with no prefix, other columns in the store's text form, nil
+// for SQL NULL.
+type DumpRow struct {
+	Table string    `json:"table"`
+	Cells []*string `json:"cells"`
+}
+
+// DumpResult answers dump after its table and row lines.
+type DumpResult struct {
+	Tables uint64 `json:"tables"`
+	Rows   uint64 `json:"rows"`
+}
+
+// Dumper is implemented by handlers that answer dump. Dump streams each
+// table's header through table, then its rows through row; tables lists the
+// tables asked for, every table when empty.
+type Dumper interface {
+	Dump(tables []string, table func(DumpTable) error, row func(DumpRow) error) (DumpResult, error)
 }
 
 // StopResult answers stop.
@@ -262,6 +305,8 @@ type response struct {
 	Status string         `json:"status"`
 	Result any            `json:"result,omitempty"`
 	Record any            `json:"record,omitempty"`
+	Table  *DumpTable     `json:"table,omitempty"`
+	Row    *DumpRow       `json:"row,omitempty"`
 	Error  *responseError `json:"error,omitempty"`
 }
 
@@ -347,7 +392,7 @@ func parseRequest(line []byte) (*Request, error) {
 		if *req.From > *req.To {
 			return &req, fmt.Errorf("export from %d is after to %d", *req.From, *req.To)
 		}
-	case "status", "stop":
+	case "dump", "status", "stop":
 	default:
 		return &req, fmt.Errorf("unknown cmd %q", req.Cmd)
 	}
@@ -381,6 +426,19 @@ func dispatch(req *Request, h Handler, w *lineWriter) (bool, error) {
 			}
 		}
 		result, err = h.Export(*req.From, *req.To, emit)
+	case "dump":
+		d, ok := h.(Dumper)
+		if !ok {
+			err = Errorf(ClassUnsupported, "this adapter does not answer dump")
+			break
+		}
+		result, err = d.Dump(req.Tables,
+			func(t DumpTable) error {
+				return w.write(response{ID: req.ID, Status: "table", Table: &t})
+			},
+			func(r DumpRow) error {
+				return w.write(response{ID: req.ID, Status: "row", Row: &r})
+			})
 	case "stop":
 		result, err = h.Stop()
 		done = true

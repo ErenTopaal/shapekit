@@ -45,6 +45,7 @@ type target struct {
 	image   string
 	params  wire.StartParams
 	prefix  string
+	cpus    string
 	db      string
 	ingest  string
 	s3      string
@@ -69,13 +70,19 @@ func randomSuffix() (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func (t *target) labels() []string {
-	return []string{"--label", NetworkLabel + "=" + t.params.DockerNetwork, "--label", "shapekit.adapter=wallet-backend"}
+// runFlags are the labels every container gets, and the cpu limit when one
+// is configured.
+func (t *target) runFlags() []string {
+	f := []string{"--label", NetworkLabel + "=" + t.params.DockerNetwork, "--label", "shapekit.adapter=wallet-backend"}
+	if t.cpus != "" {
+		f = append(f, "--cpus", t.cpus)
+	}
+	return f
 }
 
 // startTarget brings up the database, runs the migrations, starts the object
 // store in sep54-s3 mode, and starts ingest. It returns once ingest runs.
-func startTarget(ctx context.Context, src source, commit string, p wire.StartParams, dbMemory uint64) (*target, error) {
+func startTarget(ctx context.Context, src source, commit string, p wire.StartParams, dbMemory uint64, cpus string) (*target, error) {
 	if p.DockerNetwork == "" {
 		return nil, wire.Errorf(wire.ClassUnsupported, "wallet-backend runs in containers; the harness must pass docker_network")
 	}
@@ -102,7 +109,7 @@ func startTarget(ctx context.Context, src source, commit string, p wire.StartPar
 	if err != nil {
 		return nil, err
 	}
-	t := &target{commit: commit, image: image, params: p, prefix: "skwb-" + suffix}
+	t := &target{commit: commit, image: image, params: p, prefix: "skwb-" + suffix, cpus: cpus}
 	t.db, t.ingest, t.s3 = t.prefix+"-db", t.prefix+"-ingest", t.prefix+"-s3"
 	if err := t.startDB(ctx, dbMemory); err != nil {
 		return t, err
@@ -128,7 +135,7 @@ func startTarget(ctx context.Context, src source, commit string, p wire.StartPar
 		// restarting here keeps that behavior, so a controlled give-up reads as
 		// a halt and only a runtime crash or the memory limit reads as a death
 		"--restart", "on-failure"}
-	args = append(args, t.labels()...)
+	args = append(args, t.runFlags()...)
 	for _, e := range env {
 		args = append(args, "-e", e)
 	}
@@ -181,7 +188,7 @@ func (t *target) startDB(ctx context.Context, memory uint64) error {
 	args := []string{"run", "-d", "--name", t.db, "--network", p.DockerNetwork, "--network-alias", t.db,
 		"--memory", strconv.FormatUint(memory, 10), "--memory-swap", strconv.FormatUint(memory, 10),
 		"-e", "POSTGRES_HOST_AUTH_METHOD=trust", "-e", "POSTGRES_DB=" + dbName}
-	args = append(args, t.labels()...)
+	args = append(args, t.runFlags()...)
 	// the settings wallet-backend's docker-compose.yaml passes, which its migrations need
 	args = append(args, TimescaleImage, "postgres", "-c", "timescaledb.enable_chunk_skipping=on", "-c", "timescaledb.enable_sparse_index_bloom=on")
 	if _, err := docker(ctx, args...); err != nil {
@@ -222,7 +229,7 @@ func (t *target) startDB(ctx context.Context, memory uint64) error {
 
 func (t *target) migrate(ctx context.Context, env []string) error {
 	args := []string{"run", "--rm", "--name", t.prefix + "-migrate", "--network", t.params.DockerNetwork}
-	args = append(args, t.labels()...)
+	args = append(args, t.runFlags()...)
 	for _, e := range env {
 		args = append(args, "-e", e)
 	}

@@ -11,7 +11,12 @@ use serde_json::Value;
 use shapekit_oracle::vocab::{Change, Int};
 
 /// Bumped when a message, member or rule changes meaning.
-pub const ADAPTER_PROTOCOL_VERSION: u32 = 1;
+pub const ADAPTER_PROTOCOL_VERSION: u32 = 2;
+
+/// The oldest adapter protocol the harness still drives. A version 1 adapter refuses a
+/// `describe` for version 2 with an `unsupported` error; the harness then asks again for
+/// version 1 and runs it without the commands version 2 added.
+pub const MIN_ADAPTER_PROTOCOL_VERSION: u32 = 1;
 
 /// One line from the harness to the adapter.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -42,8 +47,26 @@ pub enum Command {
     /// Stream what the target stored for transactions in ledgers `from` to `to` inclusive:
     /// any number of `record` lines, then one `ok` line with [`ExportResult`].
     Export { from: u32, to: u32 },
+    /// Since protocol 2, for adapters whose `describe` lists the `dump` capability: stream
+    /// every row the target stored, table by table, as cell text. Any number of `table` and
+    /// `row` lines, then one `ok` line with [`DumpResult`].
+    Dump {
+        /// Only these tables; every table when empty.
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        tables: Vec<String>,
+    },
     /// Tear the target down. Answered with [`StopResult`]; the adapter then exits.
     Stop,
+}
+
+/// Optional commands an adapter offers, listed in `describe`.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "kebab-case")]
+pub enum Capability {
+    /// The adapter answers `dump` (protocol 2).
+    Dump,
 }
 
 /// How ledgers reach the target.
@@ -118,6 +141,15 @@ pub struct DescribeResult {
     /// reported `out-of-scope`.
     pub protocols: ProtocolRange,
     pub claims: Claims,
+    /// Optional commands the adapter answers. Version 2; a version 1 adapter has none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub capabilities: Vec<Capability>,
+}
+
+impl DescribeResult {
+    pub fn offers(&self, c: Capability) -> bool {
+        self.protocol >= 2 && self.capabilities.contains(&c)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -271,6 +303,40 @@ pub struct ExportResult {
     pub records: u64,
 }
 
+/// One stored table, sent before its rows.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct DumpTable {
+    /// The table's name in the target's store, for example `state_changes`.
+    pub name: String,
+    /// Its columns in the order every `row` of the table lists cells.
+    pub columns: Vec<DumpColumn>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct DumpColumn {
+    pub name: String,
+    /// The store's own type name, for example `bytea`, `text`, `bigint`.
+    #[serde(rename = "type")]
+    pub ty: String,
+}
+
+/// One stored row. `cells` follow the table's `columns`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct DumpRow {
+    pub table: String,
+    /// Cell text: byte columns as lowercase hex with no prefix, every other column in the
+    /// store's own text form (for PostgreSQL, the value cast to `text`). `null` for SQL NULL.
+    pub cells: Vec<Option<String>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct DumpResult {
+    /// Number of `table` lines sent for this request.
+    pub tables: u64,
+    /// Number of `row` lines sent for this request.
+    pub rows: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct StopResult {
     /// The tail of the target's logs (at most 1 MiB), kept next to the report.
@@ -413,6 +479,10 @@ pub enum ResponseBody {
     },
     /// One export record; only while an `export` is answered.
     Record { record: Box<ExportRecord> },
+    /// A table header; only while a `dump` is answered, before the table's rows.
+    Table { table: DumpTable },
+    /// One stored row; only while a `dump` is answered, after its table's header.
+    Row { row: DumpRow },
     /// The final line for a failed request.
     Error { error: AdapterError },
 }
@@ -427,6 +497,7 @@ enum AnyResult {
     Advance(AdvanceResult),
     Status(StatusResult),
     Export(ExportResult),
+    Dump(DumpResult),
     Stop(StopResult),
 }
 

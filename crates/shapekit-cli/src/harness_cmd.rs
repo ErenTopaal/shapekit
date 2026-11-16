@@ -62,6 +62,9 @@ pub struct Common {
     /// run as host processes.
     #[arg(long)]
     no_docker: bool,
+    /// Do not ask the adapter for a dump of the target's tables after the export.
+    #[arg(long)]
+    no_dump: bool,
 }
 
 #[derive(Args)]
@@ -207,6 +210,7 @@ fn options(c: &Common, adapter: Vec<String>, logs: PathBuf) -> Result<RunOptions
         },
         docker: !c.no_docker,
         logs,
+        dump: !c.no_dump,
     })
 }
 

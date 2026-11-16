@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -272,4 +273,124 @@ func jsonValue(v any) any {
 		return strconv.FormatInt(x, 10)
 	}
 	return v
+}
+
+// dump streams every table of the public schema (or only those named), each
+// header then its rows ordered by every column, as cell text.
+func (s *store) dump(ctx context.Context, only []string, table func(wire.DumpTable) error, row func(wire.DumpRow) error) (wire.DumpResult, error) {
+	var res wire.DumpResult
+	names, err := s.tableNames(ctx)
+	if err != nil {
+		return res, err
+	}
+	if len(only) > 0 {
+		for _, n := range only {
+			if !slices.Contains(names, n) {
+				return res, wire.Errorf(wire.ClassBadRequest, "no table %q in the store", n)
+			}
+		}
+		names = only
+	}
+	for _, name := range names {
+		cols, bytea, err := s.columns(ctx, name)
+		if err != nil {
+			return res, err
+		}
+		if err := table(wire.DumpTable{Name: name, Columns: cols}); err != nil {
+			return res, err
+		}
+		res.Tables++
+		exprs := make([]string, len(cols))
+		order := make([]string, len(cols))
+		for i, c := range cols {
+			id := pgx.Identifier{c.Name}.Sanitize()
+			if bytea[i] {
+				exprs[i] = "encode(" + id + ", 'hex')"
+			} else {
+				exprs[i] = id + "::text"
+			}
+			order[i] = strconv.Itoa(i + 1)
+		}
+		sql := "SELECT " + strings.Join(exprs, ", ") + " FROM " + pgx.Identifier{"public", name}.Sanitize()
+		if len(cols) > 0 {
+			sql += " ORDER BY " + strings.Join(order, ", ")
+		}
+		n, err := s.dumpRows(ctx, name, sql, len(cols), row)
+		res.Rows += n
+		if err != nil {
+			return res, err
+		}
+	}
+	return res, nil
+}
+
+func (s *store) tableNames(ctx context.Context) ([]string, error) {
+	rows, err := s.pool.Query(ctx, `SELECT table_name FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name`)
+	if err != nil {
+		return nil, fmt.Errorf("listing tables: %w", err)
+	}
+	names, err := pgx.CollectRows(rows, pgx.RowTo[string])
+	if err != nil {
+		return nil, fmt.Errorf("listing tables: %w", err)
+	}
+	return names, nil
+}
+
+// columns returns a table's columns with format_type's names, and which of
+// them are bytea.
+func (s *store) columns(ctx context.Context, name string) ([]wire.DumpColumn, []bool, error) {
+	rows, err := s.pool.Query(ctx, `SELECT a.attname, format_type(a.atttypid, a.atttypmod), a.atttypid = 'bytea'::regtype
+		FROM pg_attribute a WHERE a.attrelid = to_regclass(quote_ident('public') || '.' || quote_ident($1))
+		AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum`, name)
+	if err != nil {
+		return nil, nil, fmt.Errorf("reading the columns of %s: %w", name, err)
+	}
+	defer rows.Close()
+	var (
+		cols  []wire.DumpColumn
+		bytea []bool
+	)
+	for rows.Next() {
+		var (
+			c wire.DumpColumn
+			b bool
+		)
+		if err := rows.Scan(&c.Name, &c.Type, &b); err != nil {
+			return nil, nil, fmt.Errorf("reading the columns of %s: %w", name, err)
+		}
+		cols = append(cols, c)
+		bytea = append(bytea, b)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, fmt.Errorf("reading the columns of %s: %w", name, err)
+	}
+	return cols, bytea, nil
+}
+
+func (s *store) dumpRows(ctx context.Context, name, sql string, width int, row func(wire.DumpRow) error) (uint64, error) {
+	rows, err := s.pool.Query(ctx, sql)
+	if err != nil {
+		return 0, fmt.Errorf("reading %s: %w", name, err)
+	}
+	defer rows.Close()
+	var n uint64
+	for rows.Next() {
+		cells := make([]*string, width)
+		dest := make([]any, width)
+		for i := range cells {
+			dest[i] = &cells[i]
+		}
+		if err := rows.Scan(dest...); err != nil {
+			return n, fmt.Errorf("reading %s: %w", name, err)
+		}
+		if err := row(wire.DumpRow{Table: name, Cells: cells}); err != nil {
+			return n, err
+		}
+		n++
+	}
+	if err := rows.Err(); err != nil {
+		return n, fmt.Errorf("reading %s: %w", name, err)
+	}
+	return n, nil
 }

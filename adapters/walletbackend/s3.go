@@ -27,7 +27,7 @@ func (t *target) startS3(ctx context.Context) error {
 		"until echo s3.bucket.list | weed shell -master localhost:9333 2>/dev/null | grep -q %[1]s; do "+
 		"echo s3.bucket.create -name %[1]s | weed shell -master localhost:9333 2>/dev/null; sleep 1; done; wait", s3Bucket)
 	args := []string{"run", "-d", "--name", t.s3, "--network", p.DockerNetwork, "--network-alias", t.s3}
-	args = append(args, t.labels()...)
+	args = append(args, t.runFlags()...)
 	args = append(args, "--entrypoint", "sh", SeaweedImage, "-c", script)
 	if _, err := docker(ctx, args...); err != nil {
 		return wire.Errorf(wire.ClassTarget, "starting seaweedfs: %v", err)

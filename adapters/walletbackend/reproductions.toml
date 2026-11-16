@@ -4,7 +4,7 @@
 # is the parent of #693's merge and the current pin. The format is in docs/adapter-interface.md.
 
 [adapter]
-command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}"]
+command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}", "--cpus", "2"]
 
 [[reproduction]]
 id = "wallet-backend-729"

@@ -12,7 +12,9 @@ use std::time::{Duration, Instant};
 use serde::de::DeserializeOwned;
 
 use crate::protocol::{
-    AdapterError, Command, ExportRecord, ExportResult, Request, Response, ResponseBody,
+    ADAPTER_PROTOCOL_VERSION, AdapterError, Command, DescribeResult, DumpResult, DumpRow,
+    DumpTable, ErrorClass, ExportRecord, ExportResult, MIN_ADAPTER_PROTOCOL_VERSION, Request,
+    Response, ResponseBody,
 };
 
 /// Longest response line accepted. An export record of one transaction is far smaller; a
@@ -81,6 +83,7 @@ fn cmd_name(c: &Command) -> &'static str {
         Command::Advance { .. } => "advance",
         Command::Status => "status",
         Command::Export { .. } => "export",
+        Command::Dump { .. } => "dump",
         Command::Stop => "stop",
     }
 }
@@ -192,7 +195,10 @@ impl Adapter {
                 return Ok(resp);
             }
             if self.abandoned.contains(&resp.id) {
-                let last = !matches!(resp.body, ResponseBody::Record { .. });
+                let last = matches!(
+                    resp.body,
+                    ResponseBody::Ok { .. } | ResponseBody::Error { .. }
+                );
                 if last {
                     self.abandoned.remove(&resp.id);
                 }
@@ -206,6 +212,8 @@ impl Adapter {
                         ResponseBody::Ok { .. } => "final ok",
                         ResponseBody::Error { .. } => "final error",
                         ResponseBody::Record { .. } => "record",
+                        ResponseBody::Table { .. } => "table",
+                        ResponseBody::Row { .. } => "row",
                     },
                     resp.id
                 ));
@@ -283,10 +291,12 @@ impl Adapter {
                 cmd: name.into(),
                 error,
             }),
-            ResponseBody::Record { .. } => Err(AdapterFailure::Protocol {
-                cmd: name.into(),
-                message: "a record line outside an export".into(),
-            }),
+            ResponseBody::Record { .. } | ResponseBody::Table { .. } | ResponseBody::Row { .. } => {
+                Err(AdapterFailure::Protocol {
+                    cmd: name.into(),
+                    message: "a streamed line outside an export or dump".into(),
+                })
+            }
         }
     }
 
@@ -327,6 +337,115 @@ impl Adapter {
                         error,
                     });
                 }
+                ResponseBody::Table { .. } | ResponseBody::Row { .. } => {
+                    return Err(AdapterFailure::Protocol {
+                        cmd: "export".into(),
+                        message: "a dump line while answering export".into(),
+                    });
+                }
+            }
+        }
+    }
+
+    /// Sends `dump` and hands each table header and row to the callbacks as they arrive. A
+    /// row of a table whose header has not come, a table sent twice, and a row whose cell
+    /// count differs from its table's columns are protocol violations.
+    pub fn dump(
+        &mut self,
+        tables: Vec<String>,
+        timeout: Duration,
+        on_table: &mut dyn FnMut(DumpTable),
+        on_row: &mut dyn FnMut(DumpRow),
+    ) -> Result<DumpResult, AdapterFailure> {
+        let deadline = Instant::now() + timeout;
+        let id = self.send(Command::Dump { tables })?;
+        let protocol = |message: String| AdapterFailure::Protocol {
+            cmd: "dump".into(),
+            message,
+        };
+        let mut widths: std::collections::HashMap<String, usize> = Default::default();
+        let (mut seen_tables, mut seen_rows) = (0u64, 0u64);
+        loop {
+            match self.next("dump", &id, deadline, timeout)?.body {
+                ResponseBody::Table { table } => {
+                    if widths
+                        .insert(table.name.clone(), table.columns.len())
+                        .is_some()
+                    {
+                        return Err(protocol(format!("table {} sent twice", table.name)));
+                    }
+                    seen_tables += 1;
+                    on_table(table);
+                }
+                ResponseBody::Row { row } => {
+                    let Some(width) = widths.get(&row.table) else {
+                        return Err(protocol(format!(
+                            "a row of {} before its table line",
+                            row.table
+                        )));
+                    };
+                    if row.cells.len() != *width {
+                        return Err(protocol(format!(
+                            "a row of {} has {} cells, the table has {width} columns",
+                            row.table,
+                            row.cells.len()
+                        )));
+                    }
+                    seen_rows += 1;
+                    on_row(row);
+                }
+                ResponseBody::Ok { result } => {
+                    let r: DumpResult = serde_json::from_value(result).map_err(|e| {
+                        protocol(format!("the result does not fit the dump result: {e}"))
+                    })?;
+                    if r.tables != seen_tables || r.rows != seen_rows {
+                        return Err(protocol(format!(
+                            "announced {} tables and {} rows, sent {seen_tables} and {seen_rows}",
+                            r.tables, r.rows
+                        )));
+                    }
+                    return Ok(r);
+                }
+                ResponseBody::Error { error } => {
+                    return Err(AdapterFailure::Error {
+                        cmd: "dump".into(),
+                        error,
+                    });
+                }
+                ResponseBody::Record { .. } => {
+                    return Err(protocol("an export record while answering dump".into()));
+                }
+            }
+        }
+    }
+
+    /// Sends `describe` for [`ADAPTER_PROTOCOL_VERSION`]. An adapter that refuses it as
+    /// `unsupported` is asked again for each older version down to
+    /// [`MIN_ADAPTER_PROTOCOL_VERSION`]; the answer must name the version asked for or an
+    /// older one the harness still drives.
+    pub fn describe(&mut self, timeout: Duration) -> Result<DescribeResult, AdapterFailure> {
+        let mut version = ADAPTER_PROTOCOL_VERSION;
+        loop {
+            match self.call::<DescribeResult>(Command::Describe { protocol: version }, timeout) {
+                Ok(d) => {
+                    if !(MIN_ADAPTER_PROTOCOL_VERSION..=version).contains(&d.protocol) {
+                        return Err(AdapterFailure::Protocol {
+                            cmd: "describe".into(),
+                            message: format!(
+                                "asked for protocol {version}, the adapter answered {}; the harness drives {MIN_ADAPTER_PROTOCOL_VERSION} to {ADAPTER_PROTOCOL_VERSION}",
+                                d.protocol
+                            ),
+                        });
+                    }
+                    return Ok(d);
+                }
+                Err(AdapterFailure::Error { error, .. })
+                    if error.class == ErrorClass::Unsupported
+                        && version > MIN_ADAPTER_PROTOCOL_VERSION =>
+                {
+                    version -= 1;
+                }
+                Err(e) => return Err(e),
             }
         }
     }
@@ -475,6 +594,59 @@ echo '{"id":"40","status":"ok","result":{"logs":""}}'; read y
         let status = a.finish(Duration::from_millis(200));
         assert!(started.elapsed() < Duration::from_secs(10), "{status}");
         assert!(status.contains("left behind"), "{status}");
+    }
+
+    const DESCRIBE_V1: &str = r#"{"protocol":1,"adapter":"a","adapter_version":"1","target":"t","target_version":"v","delivery_modes":["rpc"],"default_delivery":"rpc","bootstrap":"ledger","vocab_version":2,"protocols":{"min":1,"max":30},"claims":{"changes":[]}}"#;
+
+    #[test]
+    fn a_version_1_adapter_is_asked_again_for_version_1() {
+        // a version 1 adapter refuses any other version as unsupported
+        let script = format!(
+            r#"read a; echo '{{"id":"0","status":"error","error":{{"class":"unsupported","message":"protocol 2; this adapter speaks 1"}}}}'
+read b; case "$b" in *'"protocol":1'*) echo '{{"id":"1","status":"ok","result":{DESCRIBE_V1}}}';; esac; read c"#
+        );
+        let (mut a, _dir) = spawn(&script);
+        let d = a.describe(Duration::from_secs(20)).unwrap();
+        assert_eq!(d.protocol, 1);
+        assert!(!d.offers(crate::protocol::Capability::Dump));
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_target_error_on_describe_is_not_retried() {
+        let (mut a, _dir) = spawn(
+            r#"read a; echo '{"id":"0","status":"error","error":{"class":"target","message":"clone failed"}}'; read b"#,
+        );
+        let err = a.describe(Duration::from_secs(20)).unwrap_err();
+        assert!(err.to_string().contains("clone failed"), "{err}");
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_dump_streams_tables_then_rows() {
+        let script = r#"read a
+echo '{"id":"0","status":"table","table":{"name":"accounts","columns":[{"name":"id","type":"bytea"},{"name":"n","type":"bigint"}]}}'
+echo '{"id":"0","status":"row","row":{"table":"accounts","cells":["00ab","7"]}}'
+echo '{"id":"0","status":"row","row":{"table":"accounts","cells":["00cd",null]}}'
+echo '{"id":"0","status":"ok","result":{"tables":1,"rows":2}}'
+read b"#;
+        let (mut a, _dir) = spawn(script);
+        let d = crate::dump::Dump::take(&mut a, Vec::new(), Duration::from_secs(20)).unwrap();
+        assert_eq!(d.rows(), 2);
+        assert_eq!(d.tables["accounts"].rows[1], [Some("00cd".into()), None]);
+        a.finish(Duration::from_secs(5));
+    }
+
+    #[test]
+    fn a_dump_row_must_fit_its_table() {
+        let script = r#"read a
+echo '{"id":"0","status":"table","table":{"name":"t","columns":[{"name":"id","type":"text"}]}}'
+echo '{"id":"0","status":"row","row":{"table":"t","cells":["a","b"]}}'
+read b"#;
+        let (mut a, _dir) = spawn(script);
+        let err = crate::dump::Dump::take(&mut a, Vec::new(), Duration::from_secs(20)).unwrap_err();
+        assert!(format!("{err:#}").contains("has 2 cells"), "{err:#}");
+        a.finish(Duration::from_secs(5));
     }
 
     #[test]

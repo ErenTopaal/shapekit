@@ -66,11 +66,16 @@ fn harness_requests_follow_the_schema() {
         workdir: "/tmp/shapekit-harness-x".into(),
     };
     for (i, cmd) in [
+        Command::Describe { protocol: 2 },
         Command::Describe { protocol: 1 },
         Command::Start(Box::new(start)),
         Command::Advance { head: 64 },
         Command::Status,
         Command::Export { from: 64, to: 80 },
+        Command::Dump { tables: Vec::new() },
+        Command::Dump {
+            tables: vec!["state_changes".into()],
+        },
         Command::Stop,
     ]
     .into_iter()
@@ -108,6 +113,19 @@ fn documented_responses_follow_the_schema_and_parse() {
         json!({"id": "4", "status": "record", "record": {"type": "unattributed", "unmapped": []}}),
         json!({"id": "4", "status": "ok", "result": {"records": 2}}),
         json!({"id": "5", "status": "error", "error": {"class": "target", "message": "db down"}}),
+        json!({"id": "0", "status": "ok", "result": {
+            "protocol": 2, "adapter": "a", "adapter_version": "1", "target": "wallet-backend",
+            "target_version": "e967ce8b7362b79c277e700e789181d76fbb5967",
+            "delivery_modes": ["rpc"], "default_delivery": "rpc",
+            "bootstrap": "checkpoint", "vocab_version": 2, "protocols": {"min": 1, "max": 30},
+            "claims": {"changes": []}, "capabilities": ["dump"]}}),
+        json!({"id": "6", "status": "table", "table": {"name": "transactions_accounts",
+            "columns": [{"name": "tx_to_id", "type": "bigint"}, {"name": "account_id", "type": "bytea"}]}}),
+        json!({"id": "6", "status": "row", "row": {"table": "transactions_accounts",
+            "cells": ["279172878336", "30aa"]}}),
+        json!({"id": "6", "status": "row", "row": {"table": "transactions_accounts",
+            "cells": ["279172878337", null]}}),
+        json!({"id": "6", "status": "ok", "result": {"tables": 1, "rows": 2}}),
     ];
     for l in &lines {
         assert_valid(&v, l);

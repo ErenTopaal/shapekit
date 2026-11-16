@@ -56,6 +56,9 @@
           "$ref": "#/$defs/ExportResult"
         },
         {
+          "$ref": "#/$defs/DumpResult"
+        },
+        {
           "$ref": "#/$defs/StopResult"
         }
       ],
@@ -72,6 +75,16 @@
         {
           "const": "ledger",
           "description": "The target can be told to start at any ledger. The harness passes the chain's first\nledger as `ledgers.bootstrap`.",
+          "type": "string"
+        }
+      ]
+    },
+    "Capability": {
+      "description": "Optional commands an adapter offers, listed in `describe`.",
+      "oneOf": [
+        {
+          "const": "dump",
+          "description": "The adapter answers `dump` (protocol 2).",
           "type": "string"
         }
       ]
@@ -1128,6 +1141,13 @@
         "bootstrap": {
           "$ref": "#/$defs/Bootstrap"
         },
+        "capabilities": {
+          "description": "Optional commands the adapter answers. Version 2; a version 1 adapter has none.",
+          "items": {
+            "$ref": "#/$defs/Capability"
+          },
+          "type": "array"
+        },
         "claims": {
           "$ref": "#/$defs/Claims"
         },
@@ -1179,6 +1199,87 @@
         "vocab_version",
         "protocols",
         "claims"
+      ],
+      "type": "object"
+    },
+    "DumpColumn": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "description": "The store's own type name, for example `bytea`, `text`, `bigint`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "type": "object"
+    },
+    "DumpResult": {
+      "properties": {
+        "rows": {
+          "description": "Number of `row` lines sent for this request.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "tables": {
+          "description": "Number of `table` lines sent for this request.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tables",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "DumpRow": {
+      "description": "One stored row. `cells` follow the table's `columns`.",
+      "properties": {
+        "cells": {
+          "description": "Cell text: byte columns as lowercase hex with no prefix, every other column in the\nstore's own text form (for PostgreSQL, the value cast to `text`). `null` for SQL NULL.",
+          "items": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "type": "array"
+        },
+        "table": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "table",
+        "cells"
+      ],
+      "type": "object"
+    },
+    "DumpTable": {
+      "description": "One stored table, sent before its rows.",
+      "properties": {
+        "columns": {
+          "description": "Its columns in the order every `row` of the table lists cells.",
+          "items": {
+            "$ref": "#/$defs/DumpColumn"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "The table's name in the target's store, for example `state_changes`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "columns"
       ],
       "type": "object"
     },
@@ -1627,6 +1728,26 @@
           "type": "object"
         },
         {
+          "description": "Since protocol 2, for adapters whose `describe` lists the `dump` capability: stream\nevery row the target stored, table by table, as cell text. Any number of `table` and\n`row` lines, then one `ok` line with [`DumpResult`].",
+          "properties": {
+            "cmd": {
+              "const": "dump",
+              "type": "string"
+            },
+            "tables": {
+              "description": "Only these tables; every table when empty.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "cmd"
+          ],
+          "type": "object"
+        },
+        {
           "description": "Tear the target down. Answered with [`StopResult`]; the adapter then exits.",
           "properties": {
             "cmd": {
@@ -1685,6 +1806,40 @@
           "required": [
             "status",
             "record"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "A table header; only while a `dump` is answered, before the table's rows.",
+          "properties": {
+            "status": {
+              "const": "table",
+              "type": "string"
+            },
+            "table": {
+              "$ref": "#/$defs/DumpTable"
+            }
+          },
+          "required": [
+            "status",
+            "table"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "One stored row; only while a `dump` is answered, after its table's header.",
+          "properties": {
+            "row": {
+              "$ref": "#/$defs/DumpRow"
+            },
+            "status": {
+              "const": "row",
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "row"
           ],
           "type": "object"
         },
@@ -2112,5 +2267,5 @@
       "$ref": "#/$defs/Response"
     }
   ],
-  "title": "shapekit adapter protocol, version 1"
+  "title": "shapekit adapter protocol, version 2"
 }

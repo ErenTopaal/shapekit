@@ -6,6 +6,7 @@ package walletbackend
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -28,6 +29,9 @@ type Config struct {
 	RepoDir string
 	// DBMemoryBytes caps the TimescaleDB container.
 	DBMemoryBytes uint64
+	// CPUs is docker's --cpus for every container the adapter starts; no
+	// limit when empty.
+	CPUs string
 }
 
 // Adapter implements wire.Handler.
@@ -101,8 +105,8 @@ func Claims() wire.Claims {
 func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if protocol != wire.ProtocolVersion {
-		return wire.DescribeResult{}, wire.Errorf(wire.ClassUnsupported, "protocol %d; this adapter speaks %d", protocol, wire.ProtocolVersion)
+	if protocol < wire.MinProtocolVersion || protocol > wire.ProtocolVersion {
+		return wire.DescribeResult{}, wire.Errorf(wire.ClassUnsupported, "protocol %d; this adapter speaks %d to %d", protocol, wire.MinProtocolVersion, wire.ProtocolVersion)
 	}
 	if err := a.src.ensure(a.ctx, a.cfg.Commit); err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
@@ -111,8 +115,12 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 	if err != nil {
 		return wire.DescribeResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
+	var caps []string
+	if protocol >= 2 {
+		caps = []string{wire.CapabilityDump}
+	}
 	return wire.DescribeResult{
-		Protocol:        wire.ProtocolVersion,
+		Protocol:        protocol,
 		Adapter:         "shapekit-wallet-backend-adapter",
 		AdapterVersion:  Version,
 		Target:          "wallet-backend",
@@ -123,8 +131,9 @@ func (a *Adapter) Describe(protocol int) (wire.DescribeResult, error) {
 		VocabVersion:    VocabVersion,
 		// go-stellar-sdk decodes every older LedgerCloseMeta version, so only the
 		// top of the range depends on the commit
-		Protocols: wire.ProtocolRange{Min: 1, Max: maxProto},
-		Claims:    Claims(),
+		Protocols:    wire.ProtocolRange{Min: 1, Max: maxProto},
+		Claims:       Claims(),
+		Capabilities: caps,
 	}, nil
 }
 
@@ -135,7 +144,7 @@ func (a *Adapter) Start(p wire.StartParams) (wire.StartResult, error) {
 	if a.target != nil {
 		return wire.StartResult{}, wire.Errorf(wire.ClassBadRequest, "start sent twice")
 	}
-	t, err := startTarget(a.ctx, a.src, a.cfg.Commit, p, a.cfg.DBMemoryBytes)
+	t, err := startTarget(a.ctx, a.src, a.cfg.Commit, p, a.cfg.DBMemoryBytes, a.cfg.CPUs)
 	a.target = t
 	if err != nil {
 		return wire.StartResult{}, err
@@ -197,6 +206,24 @@ func (a *Adapter) Export(from, to uint32, emit func(any) error) (wire.ExportResu
 		return wire.ExportResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	return wire.ExportResult{Records: n}, nil
+}
+
+// Dump answers dump: every table wallet-backend's migrations created, as
+// stored.
+func (a *Adapter) Dump(tables []string, table func(wire.DumpTable) error, row func(wire.DumpRow) error) (wire.DumpResult, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.target == nil || a.target.store == nil {
+		return wire.DumpResult{}, wire.Errorf(wire.ClassBadRequest, "dump before a successful start")
+	}
+	res, err := a.target.store.dump(a.ctx, tables, table, row)
+	if err != nil {
+		if _, ok := errors.AsType[*wire.Error](err); ok {
+			return res, err
+		}
+		return res, wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	return res, nil
 }
 
 // Stop answers stop.

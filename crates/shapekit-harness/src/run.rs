@@ -19,10 +19,11 @@ use crate::compare::{
 };
 use crate::corpus::{ChainJob, EntryRef};
 use crate::dockernet;
+use crate::dump::{Dump, DumpSummary};
 use crate::protocol::{
-    ADAPTER_PROTOCOL_VERSION, AdvanceResult, Bootstrap, Command, Delivery, DeliveryMode,
-    DescribeResult, ExportRecord, Health, Lake, LedgerWindow, Limits, StartParams, StartResult,
-    StatusResult, StopResult, TxRecord, Unmapped, vocabulary_fields,
+    AdvanceResult, Bootstrap, Capability, Command, Delivery, DeliveryMode, DescribeResult,
+    ExportRecord, Health, Lake, LedgerWindow, Limits, StartParams, StartResult, StatusResult,
+    StopResult, TxRecord, Unmapped, vocabulary_fields,
 };
 
 /// Ledgers per history checkpoint: core's default, which every chain is recorded with.
@@ -35,6 +36,7 @@ pub struct Timeouts {
     pub advance: Duration,
     pub status: Duration,
     pub export: Duration,
+    pub dump: Duration,
     pub stop: Duration,
     /// From `start` until the target reports the bootstrap ledger ingested.
     pub bootstrap: Duration,
@@ -53,6 +55,7 @@ impl Default for Timeouts {
             // with a load average near 200 the wallet-backend adapter took over 60 s
             status: Duration::from_secs(300),
             export: Duration::from_secs(10 * 60),
+            dump: Duration::from_secs(10 * 60),
             stop: Duration::from_secs(5 * 60),
             bootstrap: Duration::from_secs(10 * 60),
             ledger: Duration::from_secs(120),
@@ -72,8 +75,11 @@ pub struct RunOptions {
     /// Create an internal Docker network per chain and bind the replay server to its
     /// gateway. Without it the server binds to 127.0.0.1.
     pub docker: bool,
-    /// Where adapter and target logs go.
+    /// Where adapter and target logs go, and the dumps.
     pub logs: PathBuf,
+    /// Ask an adapter that offers `dump` for what the target stored, after the export, and
+    /// keep it as `<logs>/<chain>.<network>.dump.json`.
+    pub dump: bool,
 }
 
 /// What happened to one chain.
@@ -104,6 +110,13 @@ pub struct ChainResult {
     pub unattributed_rows: u64,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub unattributed_sample: Vec<Unmapped>,
+    /// The target's stored tables, when the adapter offers `dump` and the target ingested a
+    /// ledger after the bootstrap ledger.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dump: Option<DumpSummary>,
+    /// Why the dump could not be taken. The verdicts stand; the run is not ok.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dump_error: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notes: Vec<String>,
     pub adapter_exit: String,
@@ -209,6 +222,8 @@ fn run_chain(
             exported_records: 0,
             unattributed_rows: 0,
             unattributed_sample: Vec::new(),
+            dump: None,
+            dump_error: None,
             notes: Vec::new(),
             adapter_exit: String::new(),
             seconds: 0.0,
@@ -393,18 +408,7 @@ fn drive_adapter(
 ) -> Result<(Option<Stop>, Records)> {
     let job = ctx.job;
     let t = &opts.timeouts;
-    let describe: DescribeResult = adapter.call(
-        Command::Describe {
-            protocol: ADAPTER_PROTOCOL_VERSION,
-        },
-        t.describe,
-    )?;
-    if describe.protocol != ADAPTER_PROTOCOL_VERSION {
-        bail!(
-            "the adapter speaks protocol {}, the harness {ADAPTER_PROTOCOL_VERSION}",
-            describe.protocol
-        );
-    }
+    let describe = adapter.describe(t.describe)?;
     if describe.vocab_version != ORACLE_VOCAB_VERSION {
         bail!(
             "the adapter maps to vocabulary version {}, the oracle files are {ORACLE_VOCAB_VERSION}",
@@ -542,6 +546,9 @@ fn drive_adapter(
         let mut records = Records::new();
         if let Some(through) = ctx.result.last_ingested.filter(|l| *l > bootstrap) {
             records = export(ctx, adapter, wanted, bootstrap + 1, through, t.export)?;
+            if opts.dump && describe.offers(Capability::Dump) {
+                take_dump(ctx, adapter, opts);
+            }
         }
         Ok((stop, records))
     })();
@@ -578,6 +585,25 @@ fn drive_adapter(
         (Ok(_), false) => bail!("{}", cleanup.join("; ")),
         (Err(e), true) => Err(e),
         (Err(e), false) => Err(e.context(format!("and then: {}", cleanup.join("; ")))),
+    }
+}
+
+/// Takes and writes the dump. A failure is kept on the chain, not raised: the verdicts do
+/// not depend on the dump, and the report is not ok while a dump is missing.
+fn take_dump(ctx: &mut Ctx<'_>, adapter: &mut Adapter, opts: &RunOptions) {
+    let name = format!("{}.{}.dump.json", ctx.job.chain, ctx.job.network);
+    let path = opts.logs.join(&name);
+    let taken = Dump::take(adapter, Vec::new(), opts.timeouts.dump)
+        .and_then(|d| d.write(&path).map(|()| d));
+    match taken {
+        Ok(d) => {
+            ctx.result.dump = Some(DumpSummary {
+                file: name,
+                tables: d.tables.len() as u64,
+                rows: d.rows(),
+            });
+        }
+        Err(e) => ctx.result.dump_error = Some(format!("{e:#}")),
     }
 }
 
