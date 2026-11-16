@@ -1,7 +1,9 @@
 # wallet-backend sightings reproduced by `shapekit harness reproduce --table adapters/walletbackend/reproductions.toml`.
 # Commit pairs: the pre-fix commit is the parent of the fix's merge (for the rebase-merged
 # #792, the commit before its first rebased commit). #716 has no single fix; its default pair
-# is the parent of #693's merge and the current pin. The format is in docs/adapter-interface.md.
+# is the parent of #693's merge and the current pin. A case's `carry` names the columns where
+# the carry check finds truncated and fabricated values. The format is in
+# docs/adapter-interface.md.
 
 [adapter]
 command = ["go", "-C", "adapters", "run", "./walletbackend/cmd/wb-adapter", "--commit", "{commit}", "--cpus", "2"]
@@ -63,6 +65,7 @@ commit = "79ea2acd1dc65a07166133cc04b12e76db314db0"
 expect = [
   { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "mishandled", reason = "undecodable-address" },
 ]
+carry = { truncated = ["state_changes.signer_account_id"], fabricated = [] }
 
 [[reproduction.case]]
 label = "fixed"
@@ -70,6 +73,7 @@ commit = "e967ce8b7362b79c277e700e789181d76fbb5967"
 expect = [
   { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "pass" },
 ]
+carry = { truncated = [], fabricated = [] }
 
 [[reproduction]]
 id = "wallet-backend-716-muxed"
@@ -85,6 +89,7 @@ expect = [
   { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "mishandled", reason = "undecodable-address" },
   { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "mishandled", reason = "undecodable-address" },
 ]
+carry = { truncated = ["operations_accounts.account_id", "transactions_accounts.account_id"], fabricated = [] }
 
 [[reproduction.case]]
 label = "fixed"
@@ -93,6 +98,7 @@ expect = [
   { entry = "soroban.muxed-source.p28-restore-muxed-source", verdict = "pass" },
   { entry = "soroban.muxed-source.p28-muxed-and-base-source-one-ledger", verdict = "pass" },
 ]
+carry = { truncated = [], fabricated = [] }
 
 [[reproduction]]
 id = "wallet-backend-753"

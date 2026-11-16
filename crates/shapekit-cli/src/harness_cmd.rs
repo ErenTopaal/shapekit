@@ -24,6 +24,10 @@ pub enum HarnessCommand {
     /// Write an expectations file from a reviewed harness-report.json (--write), or compare a
     /// report with one (--check). `harness run --expect` does the comparison inline.
     Expect(ExpectArgs),
+    /// Run the carry check on a dump a harness run kept: every cell is looked up among the
+    /// identifiers and amounts the chain carried, and truncated or fabricated values are
+    /// listed.
+    Carry(CarryArgs),
     /// Check, or with --write regenerate, schema/adapter-protocol.schema.json and the
     /// vocabulary section of docs/adapter-interface.md.
     Schema {
@@ -98,6 +102,22 @@ pub struct RunArgs {
     expect: Option<PathBuf>,
     #[command(flatten)]
     common: Common,
+}
+
+#[derive(Args)]
+pub struct CarryArgs {
+    /// A `<chain>.<network>.dump.json` from a run's logs directory.
+    #[arg(long)]
+    dump: PathBuf,
+    /// The chain directory, for example corpus/chains/<chain>/testnet.
+    #[arg(long)]
+    chain_dir: PathBuf,
+    /// The last ledger the target ingested; the chain's last ledger when absent.
+    #[arg(long)]
+    through: Option<u32>,
+    /// Write the full report as JSON here.
+    #[arg(long)]
+    out: Option<PathBuf>,
 }
 
 #[derive(Args)]
@@ -233,6 +253,52 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 .with_context(|| format!("writing {}", path.display()))?;
             println!("wrote {} ({} entries)", path.display(), e.entries.len());
             Ok(true)
+        }
+        HarnessCommand::Carry(a) => {
+            let dump = shapekit_harness::dump::Dump::read(&a.dump)?;
+            let chain = shapekit_pack::chain::ChainFile::read(&a.chain_dir)
+                .with_context(|| format!("reading {}", a.chain_dir.display()))?;
+            let through = a.through.unwrap_or(chain.ledger_range.last);
+            let known = shapekit_harness::relations::known::Known::from_chain(
+                &a.chain_dir,
+                &chain.passphrase,
+                through,
+            )?;
+            let r = shapekit_harness::relations::carry::check(&dump, &known);
+            println!(
+                "known: {} addresses ({} found in the dump), {} amounts; {} cells",
+                r.known_addresses, r.addresses_found, r.known_amounts, r.cells
+            );
+            for c in &r.carried {
+                println!(
+                    "carried: {} {} {}: {} cells, {} values",
+                    c.column,
+                    c.kind,
+                    c.encoding.name(),
+                    c.cells,
+                    c.values
+                );
+            }
+            for p in &r.problems {
+                println!(
+                    "{}: {} row {}: {}{}",
+                    p.kind.name(),
+                    p.column,
+                    p.row,
+                    p.cell,
+                    p.of.as_deref()
+                        .or(p.decodes_to.as_deref())
+                        .map(|v| format!(" ({v})"))
+                        .unwrap_or_default()
+                );
+            }
+            println!("truncated: {}, fabricated: {}", r.truncated, r.fabricated);
+            if let Some(out) = &a.out {
+                let mut text = serde_json::to_string_pretty(&r)?;
+                text.push('\n');
+                std::fs::write(out, text).with_context(|| format!("writing {}", out.display()))?;
+            }
+            Ok(r.truncated == 0 && r.fabricated == 0)
         }
         HarnessCommand::Schema { write, root } => {
             let stale = sync_generated(&root, write)?;

@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::compare::{Reason, Verdict};
 use crate::corpus::{Filter, select};
+use crate::relations::carry::ProblemKind;
 use crate::report::{self, MemoryOptions};
 use crate::run::RunOptions;
 
@@ -43,6 +44,17 @@ pub struct Case {
     pub label: String,
     pub commit: String,
     pub expect: Vec<Expect>,
+    /// The carry check's outcome on the case's chain: the exact sets of `table.column` with
+    /// truncated and with fabricated values. Needs an adapter that offers `dump`.
+    #[serde(default)]
+    pub carry: Option<CarryExpect>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CarryExpect {
+    pub truncated: Vec<String>,
+    pub fabricated: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -64,6 +76,18 @@ pub struct ExpectResult {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CarryResult {
+    pub expected_truncated: Vec<String>,
+    pub observed_truncated: Vec<String>,
+    pub expected_fabricated: Vec<String>,
+    pub observed_fabricated: Vec<String>,
+    /// Why the chain has no carry report, when it has none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub missing: Option<String>,
+    pub holds: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CaseResult {
     pub reproduction: String,
     pub issue: String,
@@ -75,6 +99,8 @@ pub struct CaseResult {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     pub expectations: Vec<ExpectResult>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carry: Option<CarryResult>,
     pub holds: bool,
 }
 
@@ -185,7 +211,50 @@ pub fn run(
                     holds,
                 });
             }
-            let holds = error.is_none() && expectations.iter().all(|e| e.holds);
+            let carry = c.carry.as_ref().map(|want| {
+                let chain = rep
+                    .chains
+                    .iter()
+                    .find(|ch| ch.chain == r.chain && ch.network == r.network);
+                let sorted = |v: &[String]| {
+                    let mut v = v.to_vec();
+                    v.sort();
+                    v.dedup();
+                    v
+                };
+                let (exp_t, exp_f) = (sorted(&want.truncated), sorted(&want.fabricated));
+                match chain.and_then(|ch| ch.carry.as_ref()) {
+                    Some(cr) => {
+                        let (obs_t, obs_f) = (
+                            cr.columns_with(ProblemKind::Truncated),
+                            cr.columns_with(ProblemKind::Fabricated),
+                        );
+                        CarryResult {
+                            holds: obs_t == exp_t && obs_f == exp_f,
+                            expected_truncated: exp_t,
+                            observed_truncated: obs_t,
+                            expected_fabricated: exp_f,
+                            observed_fabricated: obs_f,
+                            missing: None,
+                        }
+                    }
+                    None => CarryResult {
+                        expected_truncated: exp_t,
+                        observed_truncated: Vec::new(),
+                        expected_fabricated: exp_f,
+                        observed_fabricated: Vec::new(),
+                        missing: Some(
+                            chain
+                                .and_then(|ch| ch.dump_error.clone())
+                                .unwrap_or_else(|| "the adapter took no dump".into()),
+                        ),
+                        holds: false,
+                    },
+                }
+            });
+            let holds = error.is_none()
+                && expectations.iter().all(|e| e.holds)
+                && carry.as_ref().is_none_or(|c| c.holds);
             results.push(CaseResult {
                 reproduction: r.id.clone(),
                 issue: r.issue.clone(),
@@ -196,6 +265,7 @@ pub fn run(
                 report: dir.join(report::REPORT_FILE).display().to_string(),
                 error,
                 expectations,
+                carry,
                 holds,
             });
         }
@@ -223,6 +293,32 @@ pub fn markdown(results: &[CaseResult]) -> String {
                 e.expected,
                 e.observed,
                 if e.holds { "yes" } else { "no" }
+            ));
+        }
+        if let Some(x) = &c.carry {
+            let show = |v: &[String]| {
+                if v.is_empty() {
+                    "none".to_owned()
+                } else {
+                    v.join(", ")
+                }
+            };
+            s.push_str(&format!(
+                "| {} | {} | `{}` | carry check | truncated: {}; fabricated: {} | {} | {} |\n",
+                c.reproduction,
+                c.label,
+                short(&c.commit),
+                show(&x.expected_truncated),
+                show(&x.expected_fabricated),
+                match &x.missing {
+                    Some(m) => format!("no carry report: {}", m.replace('|', "\\|")),
+                    None => format!(
+                        "truncated: {}; fabricated: {}",
+                        show(&x.observed_truncated),
+                        show(&x.observed_fabricated)
+                    ),
+                },
+                if x.holds { "yes" } else { "no" }
             ));
         }
         if let Some(err) = &c.error {

@@ -11,6 +11,7 @@ use crate::compare::Verdict;
 use crate::corpus::Selection;
 use crate::memory;
 use crate::protocol::{ADAPTER_PROTOCOL_VERSION, DescribeResult};
+use crate::relations::carry::ProblemKind;
 use crate::run::{ChainResult, EntryRow, RunOptions, logs_dir, run_round, verdict_digest};
 
 pub const REPORT_FILE: &str = "harness-report.json";
@@ -435,6 +436,27 @@ pub fn markdown(r: &Report) -> String {
             },
             cell(c.error.as_deref().unwrap_or(""))
         ));
+    }
+    if r.chains.iter().any(|c| c.carry.is_some()) {
+        s.push_str("\n## Carry check\n\nEvery cell of the target's dump looked up among the identifiers and amounts the chain carried. Truncated and fabricated values are errors whatever the column means.\n\n| chain | network | known addresses | found | cells | truncated | fabricated | columns |\n|---|---|---|---|---|---|---|---|\n");
+        for c in &r.chains {
+            let Some(x) = &c.carry else { continue };
+            let mut cols = x.columns_with(ProblemKind::Truncated);
+            cols.extend(x.columns_with(ProblemKind::Fabricated));
+            cols.sort();
+            cols.dedup();
+            s.push_str(&format!(
+                "| {} | {} | {} | {} | {} | {} | {} | {} |\n",
+                c.chain,
+                c.network,
+                x.known_addresses,
+                x.addresses_found,
+                x.cells,
+                x.truncated,
+                x.fabricated,
+                cell(&cols.join(", "))
+            ));
+        }
     }
     s.push_str("\n## Entries\n\n| entry | network | ledger | verdict | reason | detail |\n|---|---|---|---|---|---|\n");
     for e in &r.entries {

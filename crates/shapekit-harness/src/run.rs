@@ -25,6 +25,8 @@ use crate::protocol::{
     ExportRecord, Health, Lake, LedgerWindow, Limits, StartParams, StartResult, StatusResult,
     StopResult, TxRecord, Unmapped, vocabulary_fields,
 };
+use crate::relations::carry::{self, CarryReport};
+use crate::relations::known::Known;
 
 /// Ledgers per history checkpoint: core's default, which every chain is recorded with.
 pub const CHECKPOINT_FREQUENCY: u32 = 64;
@@ -114,7 +116,10 @@ pub struct ChainResult {
     /// ledger after the bootstrap ledger.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dump: Option<DumpSummary>,
-    /// Why the dump could not be taken. The verdicts stand; the run is not ok.
+    /// The carry check over the dump (see `relations::carry`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub carry: Option<CarryReport>,
+    /// Why the dump could not be taken or checked. The verdicts stand; the run is not ok.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dump_error: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -223,6 +228,7 @@ fn run_chain(
             unattributed_rows: 0,
             unattributed_sample: Vec::new(),
             dump: None,
+            carry: None,
             dump_error: None,
             notes: Vec::new(),
             adapter_exit: String::new(),
@@ -547,7 +553,7 @@ fn drive_adapter(
         if let Some(through) = ctx.result.last_ingested.filter(|l| *l > bootstrap) {
             records = export(ctx, adapter, wanted, bootstrap + 1, through, t.export)?;
             if opts.dump && describe.offers(Capability::Dump) {
-                take_dump(ctx, adapter, opts);
+                take_dump(ctx, adapter, opts, chain, through);
             }
         }
         Ok((stop, records))
@@ -590,7 +596,13 @@ fn drive_adapter(
 
 /// Takes and writes the dump. A failure is kept on the chain, not raised: the verdicts do
 /// not depend on the dump, and the report is not ok while a dump is missing.
-fn take_dump(ctx: &mut Ctx<'_>, adapter: &mut Adapter, opts: &RunOptions) {
+fn take_dump(
+    ctx: &mut Ctx<'_>,
+    adapter: &mut Adapter,
+    opts: &RunOptions,
+    chain: &ChainFile,
+    through: u32,
+) {
     let name = format!("{}.{}.dump.json", ctx.job.chain, ctx.job.network);
     let path = opts.logs.join(&name);
     let taken = Dump::take(adapter, Vec::new(), opts.timeouts.dump)
@@ -602,6 +614,12 @@ fn take_dump(ctx: &mut Ctx<'_>, adapter: &mut Adapter, opts: &RunOptions) {
                 tables: d.tables.len() as u64,
                 rows: d.rows(),
             });
+            match Known::from_chain(&ctx.job.dir, &chain.passphrase, through) {
+                Ok(known) => ctx.result.carry = Some(carry::check(&d, &known)),
+                Err(e) => {
+                    ctx.result.dump_error = Some(format!("reading the chain's values: {e:#}"))
+                }
+            }
         }
         Err(e) => ctx.result.dump_error = Some(format!("{e:#}")),
     }

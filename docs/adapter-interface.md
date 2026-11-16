@@ -137,7 +137,7 @@ Result:
 
 The harness asks for version 2. An adapter that does not speak it answers with an
 `unsupported` error, and the harness sends `describe` again with `"protocol": 1` in the same
-process. A version 1 adapter runs exactly as before: no `capabilities`, no `dump`. Any other error, or an answer
+process. A version 1 adapter runs exactly as before: no `capabilities`, no `dump`, and so no carry check. Any other error, or an answer
 naming a version above the one asked for, ends the chain.
 
 ### start
@@ -421,6 +421,37 @@ pair when they agree on the kind's key fields that the claim compares:
 Changes are compared as multisets: two equal transfers in one transaction must both be
 exported.
 
+## Carry check
+
+When the adapter offers `dump`, the harness also checks what the target stored without any
+mapping from its columns to the vocabulary. It collects every identifier and amount the
+chain's ledgers carry, up to the last ledger the target ingested, from the ledgers' own
+values: account, muxed, signed-payload, contract, pool and claimable balance strkeys, and
+the integer amounts, balances, limits and fees. It adds what follows from those and the
+passphrase alone: the genesis root account, the base `G` account of every `M` address and
+`P` signer, and the Stellar Asset Contract id of every asset. Each value is known in these
+encodings: the strkey text, the hex of the strkey's version byte and payload (the form of
+wallet-backend's `AddressBytea`), the hex of the payload alone, and decimal for amounts.
+
+Every non-null cell of the dump is then looked up:
+
+| outcome | when |
+|---|---|
+| carried | the cell equals a known value in one of its encodings. Counted per column and encoding |
+| truncated | the cell is a strict prefix of a known address's encoding (at least 17 bytes of hex or 20 strkey characters) and equals no known value: the target kept part of what it was given |
+| fabricated | the cell decodes as a well-formed strkey (as text, or as version byte and payload in a byte column) that is not known; or the cell is in a column that holds carried addresses in other rows, starts with a strkey version byte and explains as nothing known: the target wrote an identifier the chain cannot account for |
+
+Cells that match nothing and look like no address are not judged: they are the target's own
+values (ids, timestamps, hashes of its own). A truncated or fabricated value is an error
+whatever the column means, so no claim is needed for it. The carry check does not change any
+verdict. The report keeps, per chain, the counts, the carried columns and the first 200
+problems; `HARNESS.md` has a "Carry check" table. The carried columns are the evidence the
+state comparison builds its column mapping from.
+
+`shapekit harness carry --dump <logs>/<chain>.<network>.dump.json --chain-dir
+corpus/chains/<chain>/<network> [--through <ledger>]` runs the same check on a kept dump and
+exits non-zero when it finds a problem.
+
 ## Output
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):
@@ -471,6 +502,15 @@ expect = [
   { entry = "cap40.signed-payload-signer.p28-set-options-payload-1-meta", verdict = "pass" },
 ]
 ```
+
+A case can also name the carry check's outcome on the chain:
+
+```toml
+carry = { truncated = ["state_changes.signer_account_id"], fabricated = [] }
+```
+
+`truncated` and `fabricated` are the exact sets of `table.column` where the check finds such
+values; the case holds only when both sets match, which needs an adapter that offers `dump`.
 
 This excerpt is from `adapters/walletbackend/reproductions.toml`. The adapter command runs
 with the harness's environment, so `go` must be on `PATH` for that table, and the command
