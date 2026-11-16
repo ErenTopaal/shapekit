@@ -91,7 +91,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             println!(
                 "imported {} input(s), provenance in {}",
                 p.inputs.len(),
-                import::PROVENANCE_FILE
+                t.inputs.provenance_file()
             );
             Ok(true)
         }

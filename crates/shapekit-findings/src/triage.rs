@@ -189,6 +189,22 @@ pub struct Inputs {
     /// `shapekit findings import-inputs` reads `from`, reduces it and writes `to`.
     #[serde(default)]
     pub import: Vec<ImportDef>,
+    /// The directory the committed inputs and their provenance file live in, relative to the
+    /// repository root; `findings/inputs` when absent. A second triage, such as the candidate
+    /// lane's, keeps its inputs apart with its own directory.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dir: Option<String>,
+}
+
+impl Inputs {
+    pub fn dir(&self) -> &str {
+        self.dir.as_deref().unwrap_or(INPUTS_DIR)
+    }
+
+    /// The provenance file of the committed inputs.
+    pub fn provenance_file(&self) -> String {
+        format!("{}/provenance.json", self.dir())
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -335,14 +351,12 @@ fn validate_imports(inputs: &Inputs) -> Result<()> {
         if !tos.insert(i.to.as_str()) {
             bail!("import target {} is listed twice", i.to);
         }
+        let dir = inputs.dir();
         let under = Path::new(&i.to)
-            .strip_prefix(INPUTS_DIR)
+            .strip_prefix(dir)
             .is_ok_and(|rest| shapekit_manifest::is_safe_relative(&rest.to_string_lossy()));
         if !under {
-            bail!(
-                "import target {} is not a plain path under {INPUTS_DIR}/",
-                i.to
-            );
+            bail!("import target {} is not a plain path under {dir}/", i.to);
         }
         if !shapekit_manifest::is_safe_relative(&i.from) {
             bail!(

@@ -17,9 +17,10 @@ use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 
 use crate::inputs::{self, MatrixView};
-use crate::triage::{INPUTS_DIR, ImportDef, InputKind, Triage};
+use crate::triage::{ImportDef, InputKind, Triage};
 
 pub const PROVENANCE_SCHEMA: u32 = 1;
+/// The provenance file of the main triage; another triage names its own `[inputs] dir`.
 pub const PROVENANCE_FILE: &str = "findings/inputs/provenance.json";
 /// A failing check's detail can hold a whole XDR-JSON document; this much identifies it.
 pub const DETAIL_CHARS: usize = 400;
@@ -165,7 +166,7 @@ pub fn import(root: &Path, triage: &Triage) -> Result<Provenance> {
         schema: PROVENANCE_SCHEMA,
         inputs: entries,
     };
-    let path = root.join(PROVENANCE_FILE);
+    let path = root.join(triage.inputs.provenance_file());
     std::fs::write(&path, pretty(&p)?).with_context(|| format!("writing {}", path.display()))?;
     Ok(p)
 }
@@ -183,9 +184,10 @@ pub fn verify(root: &Path, triage: &Triage) -> Vec<String> {
         .chain(&inputs.matrices)
         .chain(inputs.lint.iter().map(|l| &l.result))
     {
-        if !Path::new(rel).starts_with(INPUTS_DIR) {
+        if !Path::new(rel).starts_with(inputs.dir()) {
             out.push(format!(
-                "input {rel} is not committed under {INPUTS_DIR}/; declare it in [[inputs.import]] and run `shapekit findings import-inputs`"
+                "input {rel} is not committed under {}/; declare it in [[inputs.import]] and run `shapekit findings import-inputs`",
+                inputs.dir()
             ));
         } else if !inputs.import.iter().any(|i| &i.to == rel) {
             out.push(format!(
@@ -196,7 +198,8 @@ pub fn verify(root: &Path, triage: &Triage) -> Vec<String> {
     if inputs.import.is_empty() {
         return out;
     }
-    let path = root.join(PROVENANCE_FILE);
+    let provenance_file = inputs.provenance_file();
+    let path = root.join(&provenance_file);
     let prov: Provenance = match std::fs::read(&path)
         .map_err(|e| e.to_string())
         .and_then(|b| serde_json::from_slice(&b).map_err(|e| e.to_string()))
@@ -204,7 +207,7 @@ pub fn verify(root: &Path, triage: &Triage) -> Vec<String> {
         Ok(p) => p,
         Err(e) => {
             out.push(format!(
-                "{PROVENANCE_FILE}: {e}; run `shapekit findings import-inputs`"
+                "{provenance_file}: {e}; run `shapekit findings import-inputs`"
             ));
             return out;
         }
@@ -226,7 +229,7 @@ pub fn verify(root: &Path, triage: &Triage) -> Vec<String> {
         match std::fs::read(root.join(&def.to)) {
             Ok(b) if shapekit_manifest::sha256_hex(&b) == rec.sha256 => {}
             Ok(_) => out.push(format!(
-                "{} changed since it was imported (sha256 differs from {PROVENANCE_FILE})",
+                "{} changed since it was imported (sha256 differs from {provenance_file})",
                 def.to
             )),
             Err(e) => out.push(format!("{}: {e}", def.to)),
@@ -235,7 +238,7 @@ pub fn verify(root: &Path, triage: &Triage) -> Vec<String> {
     for rec in &prov.inputs {
         if !inputs.import.iter().any(|d| d.to == rec.path) {
             out.push(format!(
-                "{PROVENANCE_FILE} records {}, which the triage does not declare",
+                "{provenance_file} records {}, which the triage does not declare",
                 rec.path
             ));
         }
@@ -319,6 +322,7 @@ mod tests {
                     to: "findings/inputs/conformance-go.json".into(),
                     command: "shapekit conformance run --sdk go --all-versions".into(),
                 }],
+                dir: None,
             },
             targets: BTreeMap::new(),
             findings: vec![],
