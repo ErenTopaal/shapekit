@@ -103,6 +103,22 @@ pub enum ExploreCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Record a pair of recipes under both passphrases into `<out>/a` and `<out>/b`, and
+    /// compare the entries the last ledger of each changed (all of them, or only those of
+    /// one ledger entry type) into `<out>/pair.json`.
+    Pair {
+        #[arg(long)]
+        a: PathBuf,
+        #[arg(long)]
+        b: PathBuf,
+        /// Compare only entries of this type (`trustline`, `account`, ...).
+        #[arg(long)]
+        only: Option<String>,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Record every recipe of a run again under both passphrases, twice each, and check the
     /// streams repeat and the credited arms are there.
     Verify {
@@ -225,6 +241,13 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             pins,
             twin_pins,
         } => gates_cmd(&gates, &recipes, &protocol, jobs, &out, &pins, &twin_pins),
+        ExploreCommand::Pair {
+            a,
+            b,
+            only,
+            out,
+            pins,
+        } => pair(&a, &b, only.as_deref(), &out, &pins),
         ExploreCommand::Record { recipe, out, pins } => {
             if out.exists() {
                 bail!("{} already exists", out.display());
@@ -236,7 +259,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             let work = scratch()?;
             for n in shapekit_gen::recipe::Network::BOTH {
                 let target = out.join(n.name());
-                let hash = verify::record_into(&ir, n, &image, &work, &target)?;
+                let (hash, _) = verify::record_into(&ir, n, &image, &work, &target)?;
                 println!(
                     "{} ({}): canonical stream {hash}",
                     recipe.display(),
@@ -675,4 +698,65 @@ fn gates_cmd(
         println!("run failed: {f}");
     }
     Ok(failures.is_empty())
+}
+
+fn pair(a: &Path, b: &Path, only: Option<&str>, out: &Path, pins: &Path) -> Result<bool> {
+    use shapekit_explore::pairs::{compare, post_state};
+    use shapekit_gen::recipe::Network;
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let image = CoreImage::from_pins(pins)
+        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    let root = std::env::current_dir()?;
+    let work = scratch()?;
+    let mut states = Vec::new();
+    for (name, file) in [("a", a), ("b", b)] {
+        let ir = IrRecipe::load(file, &root)?;
+        std::fs::create_dir_all(out.join(name))?;
+        std::fs::copy(file, out.join(format!("{name}.json")))?;
+        let mut last = None;
+        for n in Network::BOTH {
+            let (hash, lcm) =
+                verify::record_into(&ir, n, &image, &work, &out.join(name).join(n.name()))?;
+            println!("{name} ({}): canonical stream {hash}", n.name());
+            if n == Network::Testnet {
+                last = Some(lcm);
+            }
+        }
+        let mut state = post_state(&last.expect("testnet ran"))?;
+        if let Some(kind) = only {
+            state.retain(|k, _| {
+                use stellar_xdr::{Limits, ReadXdr};
+                stellar_xdr::LedgerKey::from_xdr(k, Limits::none())
+                    .ok()
+                    .and_then(|k| serde_json::to_value(k).ok())
+                    .is_some_and(|v| v.get(kind).is_some())
+            });
+        }
+        states.push(state);
+    }
+    let rows = compare(&states[0], &states[1])?;
+    let equal = !rows.is_empty() && rows.iter().all(|r| r.equal);
+    let v = serde_json::json!({
+        "a": "a.json",
+        "b": "b.json",
+        "compared": only.unwrap_or("every entry the last ledger changed"),
+        "records_equal": equal,
+        "entries": rows,
+    });
+    std::fs::write(
+        out.join("pair.json"),
+        serde_json::to_string_pretty(&v)? + "\n",
+    )?;
+    println!(
+        "{} entries compared on the testnet chains' last ledgers: {}",
+        rows.len(),
+        if equal {
+            "all byte for byte equal"
+        } else {
+            "they differ"
+        }
+    );
+    Ok(equal)
 }

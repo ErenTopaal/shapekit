@@ -130,7 +130,7 @@ pub fn record_into(
     image: &CoreImage,
     work: &Path,
     target: &Path,
-) -> Result<String> {
+) -> Result<(String, stellar_xdr::LedgerCloseMeta)> {
     let dir = tempfile::Builder::new()
         .prefix("explore-record-")
         .tempdir_in(work)?;
@@ -139,8 +139,9 @@ pub fn record_into(
         ctx.stop()?;
         return Err(e);
     }
+    let last = ctx.driver().last_meta().clone();
     let (summary, _) = ctx.finish(target)?;
     shapekit_pack::pack_chain(target, shapekit_pack::Layout::default())
         .map_err(|e| anyhow::anyhow!("packing {}: {e}", target.display()))?;
-    Ok(summary.canonical_stream_sha256)
+    Ok((summary.canonical_stream_sha256, last))
 }
