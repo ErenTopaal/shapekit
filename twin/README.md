@@ -193,3 +193,29 @@ not be reachable at all.
 
 Region counts of the same chain can differ by a region or two between runs,
 because some of core's code runs on timers and background threads.
+
+## Why the unknown regions are unreached
+
+```sh
+shapekit twin classify --core-src <checkout at the summary's commit>
+```
+
+reads `corpus/coverage/core-coverage.json`, `registry/generated/gates.json` and
+`twin/unknown-labels.toml` and writes `corpus/coverage/unknown-regions.json`:
+every `unknown` range with one cause and how the cause was decided.
+
+| cause | meaning |
+|---|---|
+| defensive | a throw, an assertion or an abort: fires only when core's own state is inconsistent |
+| diagnostics | logging, metrics, tracing or debug output |
+| config-or-test | code compiled only with `BUILD_TESTS`, or run only under configuration or a node mode the chains never use (postgres, catchup, utility commands) |
+| protocol-outside-chains | the body of an `if` on a single protocol gate whose side no chain's protocol is on |
+| ordinary | none of the above: the target list for building new chains |
+
+Static rules decide first, in this order: `build-tests-only`,
+`defensive-statement`, `diagnostic-statements`, `diagnostic-function`,
+`test-function`, `mode-function`, `config-condition`, `gate-branch`. Ranges no
+rule decides take a hand label from `twin/unknown-labels.toml` (by file, by
+function or by range, each with its reason), and the rest are `ordinary` with
+`decided_by: residual`, meaning nobody has shown they are anything else. A
+label that matches no remaining range is an error.

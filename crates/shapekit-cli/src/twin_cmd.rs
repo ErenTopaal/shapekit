@@ -120,6 +120,23 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Sort the regions of a core coverage summary that no chain and no core test reaches
+    /// by cause: defensive checks, diagnostics, configuration or test-only code, protocol
+    /// sides no chain runs, and ordinary code no chain builds yet. Static rules first, then
+    /// the hand labels file; each range records which decided it.
+    Classify {
+        /// A stellar-core checkout at the summary's commit.
+        #[arg(long)]
+        core_src: PathBuf,
+        #[arg(long, default_value = "corpus/coverage/core-coverage.json")]
+        coverage: PathBuf,
+        #[arg(long, default_value = "registry/generated/gates.json")]
+        gates: PathBuf,
+        #[arg(long, default_value = "twin/unknown-labels.toml")]
+        labels: PathBuf,
+        #[arg(long, default_value = "corpus/coverage/unknown-regions.json")]
+        out: PathBuf,
+    },
     /// Run core's own test cases on the twin, one at a time at every protocol version, and
     /// keep the region counts of each (`<out>/tests/<n>/counts.json`, listed in
     /// `<out>/tests.tsv`).
@@ -225,6 +242,13 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::Classify {
+            core_src,
+            coverage,
+            gates,
+            labels,
+            out,
+        } => classify(&core_src, &coverage, &gates, &labels, &out),
         TwinCommand::CoreTests {
             spec,
             twin_pins,
@@ -679,5 +703,65 @@ fn r_list(
         summary.unreached.len() - by_tests,
         out.display()
     );
+    Ok(true)
+}
+
+fn classify(
+    core_src: &Path,
+    coverage: &Path,
+    gates_path: &Path,
+    labels: &Path,
+    out: &Path,
+) -> Result<bool> {
+    use shapekit_twin::classify as cl;
+
+    let summary: shapekit_contracts::CoreCoverage = shapekit_contracts::load(coverage)?;
+    let gate_list: shapekit_contracts::GateList = shapekit_contracts::load(gates_path)?;
+    if gate_list.core.commit != summary.core.commit {
+        bail!(
+            "{} is for core {}, {} for core {}",
+            gates_path.display(),
+            gate_list.core.commit,
+            coverage.display(),
+            summary.core.commit
+        );
+    }
+    let head = checkout_commit(core_src)?;
+    if head != summary.core.commit {
+        bail!(
+            "{} is at {head}, the summary is for core {}",
+            core_src.display(),
+            summary.core.commit
+        );
+    }
+    let scan = gates::scan_tree(core_src)?;
+    let labels = cl::read_labels(labels)?;
+    let result = cl::classify(core_src, &summary, &gate_list, &scan, &labels)?;
+    let mut text = serde_json::to_string_pretty(&result)?;
+    text.push('\n');
+    std::fs::write(out, text).with_context(|| format!("writing {}", out.display()))?;
+    println!(
+        "{} unknown ranges, chains on protocols {:?}:",
+        result.ranges.len(),
+        result.chain_protocols
+    );
+    for c in &result.counts {
+        println!(
+            "  {}: {} ({} by rule, {} by hand, {} residual)",
+            c.cause.as_str(),
+            c.by_rule + c.by_hand + c.residual,
+            c.by_rule,
+            c.by_hand,
+            c.residual
+        );
+    }
+    let mut rules: std::collections::BTreeMap<&str, usize> = Default::default();
+    for r in &result.ranges {
+        *rules.entry(r.decided_by.as_str()).or_default() += 1;
+    }
+    for (k, v) in rules {
+        println!("  decided by {k}: {v}");
+    }
+    println!("written to {}", out.display());
     Ok(true)
 }

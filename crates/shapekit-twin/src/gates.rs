@@ -68,10 +68,23 @@ pub enum GatesError {
     },
 }
 
+/// A function body in a source file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FunctionSpan {
+    pub file: String,
+    pub function: String,
+    pub line_start: u32,
+    pub line_end: u32,
+}
+
 /// The gates of a tree plus what was counted but is not a gate.
 #[derive(Debug, Clone, Default)]
 pub struct GateScan {
     pub gates: Vec<GateCall>,
+    /// Every function body, with the lines it spans.
+    pub functions: Vec<FunctionSpan>,
+    /// Per file, the lines holding code compiled only with `BUILD_TESTS`.
+    pub tests_only_lines: BTreeMap<String, std::collections::BTreeSet<u32>>,
     /// Matches outside any function body: the declarations and definitions
     /// of the gate functions.
     pub declarations: Vec<(String, u32)>,
@@ -620,6 +633,15 @@ pub fn scan_file(
     scan: &mut GateScan,
 ) -> Result<(), GatesError> {
     let toks = tokenize(src);
+    let tests_only: std::collections::BTreeSet<u32> = toks
+        .iter()
+        .filter(|t| t.tests_only)
+        .map(|t| t.line)
+        .collect();
+    if !tests_only.is_empty() {
+        scan.tests_only_lines.insert(file.to_owned(), tests_only);
+    }
+    let mut open_functions: Vec<(String, u32)> = Vec::new();
     let mut scopes: Vec<Scope> = Vec::new();
     let mut header_start = 0usize;
     let mut i = 0;
@@ -668,7 +690,12 @@ pub fn scan_file(
                     }
                 };
                 let init = matches!(scope, Scope::InitBrace | Scope::ExprBrace(_));
+                let opens_function = matches!(scope, Scope::Function(_));
                 scopes.push(scope);
+                if opens_function {
+                    let name = function(&scopes).expect("a function scope was pushed");
+                    open_functions.push((name, t.line));
+                }
                 if !init {
                     header_start = i + 1;
                 }
@@ -679,6 +706,16 @@ pub fn scan_file(
                     line: t.line,
                     what: "unbalanced closing brace".into(),
                 })?;
+                if matches!(popped, Scope::Function(_))
+                    && let Some((name, start)) = open_functions.pop()
+                {
+                    scan.functions.push(FunctionSpan {
+                        file: file.to_owned(),
+                        function: name,
+                        line_start: start,
+                        line_end: t.line,
+                    });
+                }
                 // inside an expression brace the enclosing header is still
                 // being read, whatever closes within it
                 if !matches!(popped, Scope::InitBrace | Scope::ExprBrace(_))

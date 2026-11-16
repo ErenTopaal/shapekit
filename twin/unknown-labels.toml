@@ -1,0 +1,57 @@
+# hand labels for `shapekit twin classify`: unknown core coverage ranges the
+# static rules leave open. a label applies to the residual ranges of a file,
+# of one function in it (`function`, as the classifier reports it), or of one
+# range (`line_start`, `line_end`). every label must match at least one range.
+# causes: defensive, diagnostics, config-or-test, protocol-outside-chains,
+# ordinary. reasons name the source that shows it.
+
+schema_version = 1
+
+[[label]]
+file = "src/ledger/P23HotArchiveBug.cpp"
+cause = "config-or-test"
+reason = "repair of the protocol 23 hot archive corruption: applied at the protocol 24 upgrade of the production network (gIsProductionNetwork, LedgerManagerImpl.cpp), or checked against PATH_TO_PROTOCOL_23_CORRUPTION_FILE; it acts on corrupted entries only mainnet history holds"
+
+[[label]]
+file = "src/ledger/FlushAndRotateMetaDebugWork.cpp"
+cause = "diagnostics"
+reason = "flushes and rotates the debug meta stream, a debugging aid written beside the bucket directory"
+
+[[label]]
+file = "src/ledger/FlushAndRotateMetaDebugWork.h"
+cause = "diagnostics"
+reason = "flushes and rotates the debug meta stream, a debugging aid written beside the bucket directory"
+
+[[label]]
+file = "src/ledger/LedgerManagerImpl.cpp"
+function = "LedgerManagerImpl::maybeResetLedgerCloseMetaDebugStream"
+cause = "diagnostics"
+reason = "opens the debug meta stream (METADATA_DEBUG_LEDGERS), a debugging aid"
+
+[[label]]
+file = "src/ledger/CheckpointRange.cpp"
+cause = "config-or-test"
+reason = "checkpoint ranges are only used by catchup and history work (catchup/, historywork/, history/); the chains never catch up"
+
+[[label]]
+file = "src/ledger/CheckpointRange.h"
+cause = "config-or-test"
+reason = "checkpoint ranges are only used by catchup and history work (catchup/, historywork/, history/); the chains never catch up"
+
+[[label]]
+file = "src/ledger/LedgerTxnImpl.h"
+function = "marshalToPGArray"
+cause = "config-or-test"
+reason = "postgres array marshalling, compiled under USE_POSTGRES and called with a postgres connection; the chains run sqlite"
+
+[[label]]
+file = "src/ledger/LedgerTxnImpl.h"
+function = "marshalToPGArrayItem"
+cause = "config-or-test"
+reason = "postgres array marshalling, compiled under USE_POSTGRES and called with a postgres connection; the chains run sqlite"
+
+[[label]]
+file = "src/ledger/LedgerTxnImpl.h"
+function = "marshalToPGArrayItem<std::string>"
+cause = "config-or-test"
+reason = "postgres array marshalling, compiled under USE_POSTGRES and called with a postgres connection; the chains run sqlite"
