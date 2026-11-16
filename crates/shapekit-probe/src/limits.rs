@@ -567,6 +567,20 @@ fn memo_text(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
 fn signatures(w: &mut World, s: &Subject, n: u64) -> Result<Base> {
     let keys = fresh_keys(s, n - 1);
     add_signers(w, s, &keys)?;
+    // every signature must count: a payment needs the medium threshold, and core stops
+    // checking once the signers reach it, leaving any later signature unused (tx_bad_auth_extra)
+    let t = Some(u32::try_from(n)?);
+    let src = s.source.clone();
+    w.classic_ok(
+        &src,
+        vec![OperationBody::SetOptions(SetOptionsOp {
+            low_threshold: t,
+            med_threshold: t,
+            high_threshold: t,
+            ..Default::default()
+        })],
+        &[],
+    )?;
     let tx = w.tx(&s.source, vec![(None, payment(&s.peers[0], XLM))])?;
     let mut all = vec![&s.source];
     all.extend(keys.iter());
