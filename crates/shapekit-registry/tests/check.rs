@@ -223,3 +223,28 @@ fn derivation_with_an_unknown_key_is_rejected() {
     fs::write(&path, text.replacen("measured_with", "measured_by", 1)).unwrap();
     assert!(Registry::load(dir.path()).is_err());
 }
+
+fn has_problem(reg: &shapekit_registry::Registry, needle: &str) -> bool {
+    reg.check().iter().any(|p| p.to_string().contains(needle))
+}
+
+#[test]
+fn a_family_without_caps_needs_a_reason() {
+    let (_d, reg) = registry_with("families.toml", r#"caps = ["CAP-0040"]"#, "caps = []");
+    assert!(has_problem(&reg, "names no cap"), "{:#?}", reg.check());
+
+    let (_d, reg) = registry_with(
+        "families.toml",
+        r#"caps = ["CAP-0040"]"#,
+        "caps = []\nno_cap_reason = \"the vectors exercise the xdr definitions\"",
+    );
+    assert!(!has_problem(&reg, "names no cap"), "{:#?}", reg.check());
+    assert!(!has_problem(&reg, "no_cap_reason"), "{:#?}", reg.check());
+
+    let (_d, reg) = registry_with(
+        "families.toml",
+        r#"caps = ["CAP-0040"]"#,
+        "caps = [\"CAP-0040\"]\nno_cap_reason = \"x\"",
+    );
+    assert_one_problem(&reg, "no_cap_reason is only for a family that names no cap");
+}

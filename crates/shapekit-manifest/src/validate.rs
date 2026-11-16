@@ -134,8 +134,18 @@ impl Checker<'_> {
         if self.registry.families.is_some() && self.registry.family(&e.family).is_none() {
             self.problem(format!("unknown family {}", e.family));
         }
-        if e.caps.is_empty() {
-            self.problem("caps is empty");
+        // a family of the xdr definitions themselves names no cap, and neither do its entries
+        let capless = self
+            .registry
+            .family(&e.family)
+            .is_some_and(|f| f.caps.is_empty());
+        match (e.caps.is_empty(), capless) {
+            (true, false) => self.problem("caps is empty"),
+            (false, true) => self.problem(format!(
+                "family {} names no cap, so its entries name none",
+                e.family
+            )),
+            _ => {}
         }
         for cap in &e.caps {
             if self.registry.cap(cap).is_none() {

@@ -18,7 +18,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | Arms covered by a core-emitted entry | 436 (87.4%) |
 | Arms uncovered | 63 |
 | Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
-| Family fragments covered | 309 of 319 in 36 families |
+| Family fragments covered | 310 of 320 in 37 families |
 | Fields core does not fully validate, exercised | 36 of 36 |
 
 ## Blockers
@@ -798,6 +798,15 @@ Inflation operations and payouts from before CAP-0026 disabled them. CAPs: CAP-0
 | `OperationResultTr:inflation` | 2: `cap26.inflation.p11-inflation-not-time`, `cap26.inflation.p11-inflation-payout` |  |
 | `InflationResult:success` | 1: `cap26.inflation.p11-inflation-payout` |  |
 | `InflationResult:not_time` | 1: `cap26.inflation.p11-inflation-not-time` |  |
+
+### `format.xdr-grammar`
+
+Accept and reject vectors for every decision point of the XDR definitions. CAPs: . Entries: none.
+Expected source classes with no entry: synthetic.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `LedgerCloseMeta` | 412: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 409 more |  |
 
 ## Fields core does not fully validate
 

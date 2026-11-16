@@ -431,3 +431,36 @@ fn core_test_dump_entries_are_any_variant_transaction_meta() {
         assert!(p.iter().any(|l| l.contains(want)), "{want}: {p:#?}");
     }
 }
+
+#[test]
+fn entries_of_a_capless_family_name_no_cap() {
+    let (dir, mut manifest) = sample();
+    let mut reg = registry();
+    let fam = reg
+        .families
+        .as_mut()
+        .unwrap()
+        .families
+        .iter_mut()
+        .find(|f| f.id == manifest.entries[0].family)
+        .unwrap();
+    fam.caps.clear();
+    fam.no_cap_reason = Some("the xdr definitions themselves".into());
+    let p: Vec<String> = validate(&manifest, &reg, dir.path())
+        .iter()
+        .map(ToString::to_string)
+        .collect();
+    assert!(
+        p.iter()
+            .any(|l| l.contains("names no cap, so its entries name none")),
+        "{p:#?}"
+    );
+    manifest.entries[0].caps.clear();
+    let p: Vec<String> = validate(&manifest, &reg, dir.path())
+        .iter()
+        .map(ToString::to_string)
+        .collect();
+    assert!(!p.iter().any(|l| l.contains("caps")), "{p:#?}");
+    let p = problems(&manifest, dir.path());
+    assert!(p.iter().any(|l| l.contains("caps is empty")), "{p:#?}");
+}

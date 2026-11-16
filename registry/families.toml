@@ -11,7 +11,7 @@
 # payload, muxed accounts, muxed contract, sac trust, auth trees, pool asset order, scmap order and
 # collisions, max length, non-utf8 bytes, unified events, fee-bump muxed, lcm version transitions.
 # 13 is shapes named as a risk without a recorded sighting, 14 is shapes added only so every
-# indexer-visible cap has a family.
+# indexer-visible cap has a family, 15 is the vectors of the xdr definitions, which belong to no cap.
 
 schema_version = 1
 
@@ -958,3 +958,17 @@ fields = ["op.set_options.inflation_dest"]
 linked_issues = []
 priority = 14
 notes = "protocol 12 refuses the operation with opNOT_SUPPORTED at submission, so every inflation result is a contrast entry from a protocol 11 chain. a payout credits the voted destination, an account the envelope never names"
+
+[[family]]
+id = "format.xdr-grammar"
+title = "Accept and reject vectors for every decision point of the XDR definitions"
+caps = []
+no_cap_reason = "the vectors exercise the XDR definitions themselves (union arms, enum members, optional flags, length bounds, padding, truncation and trailing bytes), which no CAP introduces"
+protocol_introduced = 0
+protocol_valid = { min = 0 }
+signature = ["LedgerCloseMeta"]
+source_classes = ["synthetic"]
+fields = []
+linked_issues = []
+priority = 15
+notes = "the vectors are hand-built from the definitions, so none is core-emitted; the one fragment is the root type every ledger close meta holds. an entry's own protocol fields carry the protocol of the definition it exercises"

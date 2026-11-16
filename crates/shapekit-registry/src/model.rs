@@ -233,4 +233,8 @@ pub struct Family {
     pub linked_issues: Vec<String>,
     pub priority: u32,
     pub notes: Option<String>,
+    /// Why the family belongs to no CAP, for shapes that come from the XDR definitions
+    /// themselves rather than from a protocol change. Required exactly when `caps` is empty.
+    #[serde(default)]
+    pub no_cap_reason: Option<String>,
 }

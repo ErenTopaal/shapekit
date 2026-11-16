@@ -293,8 +293,14 @@ fn families(reg: &Registry, out: &mut Vec<Problem>) {
         if blank(&fam.title) {
             out.push(Problem::new(&at, "title is empty"));
         }
-        if fam.caps.is_empty() {
-            out.push(Problem::new(&at, "names no cap"));
+        match (fam.caps.is_empty(), fam.no_cap_reason.as_deref()) {
+            (true, None) => out.push(Problem::new(&at, "names no cap")),
+            (true, Some(r)) if blank(r) => out.push(Problem::new(&at, "no_cap_reason is empty")),
+            (false, Some(_)) => out.push(Problem::new(
+                &at,
+                "no_cap_reason is only for a family that names no cap",
+            )),
+            _ => {}
         }
         for cap_id in &fam.caps {
             match reg.cap(cap_id) {

@@ -44,6 +44,11 @@ priority = 1
 signature of its bytes matches at least one fragment. Run `shapekit registry check` after editing.
 Every id in `fields` must exist in `registry/fields.toml`.
 
+A family whose shapes come from the XDR definitions themselves rather than from a protocol
+change, such as `format.xdr-grammar`, has `caps = []` and a `no_cap_reason` saying why; its
+entries list no caps either. Every other family names at least one CAP and has no
+`no_cap_reason`.
+
 ## 2. The recipe
 
 Create `crates/shapekit-gen/src/recipe/<name>.rs` and register it in
