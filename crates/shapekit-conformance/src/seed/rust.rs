@@ -115,6 +115,15 @@ fn write_workspace(ctx: &Context, ws: &Path) -> Result<()> {
         )
         .replace(&dep_old, "stellar-xdr = { path = \"../stellar-xdr\",")
         .replace("\n[workspace]\n", "\n");
+    // the testee's own unit tests are not the corpus; only the corpus test decides a mutant
+    ensure!(
+        harness.contains("[[bin]]\nname = \"shapekit-testee-rust\"\n"),
+        "the testee manifest has no [[bin]] shapekit-testee-rust"
+    );
+    harness = harness.replace(
+        "[[bin]]\nname = \"shapekit-testee-rust\"\n",
+        "[[bin]]\nname = \"shapekit-testee-rust\"\ntest = false\n",
+    );
     harness.push_str("\n[[test]]\nname = \"corpus\"\npath = \"tests/corpus.rs\"\n");
     std::fs::write(ws.join("harness/Cargo.toml"), harness)?;
     std::fs::write(ws.join("harness/tests/corpus.rs"), TEST)?;
