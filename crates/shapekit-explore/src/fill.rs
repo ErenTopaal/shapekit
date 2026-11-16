@@ -230,7 +230,7 @@ impl<'a> Filler<'a> {
 
     fn sc_address(&mut self) -> Value {
         use stellar_xdr::{MuxedEd25519Account, ScAddress};
-        let a = match self.rng.below(8) {
+        let a = match self.rng.below(9) {
             0 | 1 => ScAddress::Contract(stellar_xdr::ContractId(Hash(self.contract_hash()))),
             2 => {
                 let role = self.role();
@@ -248,6 +248,12 @@ impl<'a> Filler<'a> {
                 }
             }
             4 => ScAddress::LiquidityPool(stellar_xdr::PoolId(Hash(self.pool_hash()))),
+            // a muxed contract's strkey is not one a deploy label names, so its contract is
+            // a random one: a deployed contract would tie the recipe to one passphrase
+            5 => ScAddress::MuxedContract(stellar_xdr::MuxedContract {
+                id: *self.rng.pick(&[0u64, 1, u64::MAX]),
+                contract_id: stellar_xdr::ContractId(Hash(self.hash32())),
+            }),
             _ => {
                 let role = self.role();
                 let key = derive_key(&self.world.recipe_id, &role);

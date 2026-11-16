@@ -157,8 +157,10 @@ mod tests {
                 .map(|w| (w.name.clone(), w.interface))
                 .collect()
         };
-        assert!(at(21).is_empty());
+        assert!(at(20).is_empty());
+        assert_eq!(at(21), [("echo".to_owned(), 21)]);
         assert!(at(22).contains(&("echo".into(), 22)));
+        assert!(at(26).contains(&("echo".into(), 23)));
         assert!(at(30).contains(&("echo".into(), 29)));
         assert!(at(30).iter().any(|(n, _)| n == "delegating_account"));
     }
