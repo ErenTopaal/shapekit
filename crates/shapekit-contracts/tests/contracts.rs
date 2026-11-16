@@ -502,6 +502,7 @@ fn recipe() -> RecipeIr {
                 base_fee: Some(200),
                 base_reserve: None,
                 max_tx_set_size: None,
+                max_soroban_tx_set_size: None,
                 flags: None,
                 config: vec![],
             },
@@ -511,6 +512,8 @@ fn recipe() -> RecipeIr {
                 contract: "echo-1".into(),
                 function: "echo".into(),
                 args: vec![json!({"address": "@muxed:alice:7"})],
+                auth: Default::default(),
+                resources: None,
                 expect: TxExpect::default(),
             },
             Step::Close { label: None },
@@ -852,4 +855,107 @@ fn outcomes_compare_within_a_carrier() {
         &t,
         "in carrier fee-bump is not-validated, but its attempts end in 2",
     );
+}
+
+#[test]
+fn soroban_auth_modes_and_footprint_steps() {
+    use shapekit_contracts::recipe_ir::{AuthSpec, ResourceOverride};
+    use std::collections::BTreeMap;
+    let mut r = recipe();
+    // the invoke at step 10 gets hand-written entries and resource overrides
+    if let Step::Invoke {
+        auth, resources, ..
+    } = &mut r.steps[10]
+    {
+        *auth = AuthSpec::Entries {
+            entries: vec![json!({"credentials": {"address": {"address": "@account:alice"}}})],
+            sign: vec!["alice".into()],
+        };
+        *resources = Some(ResourceOverride {
+            instructions: Some(1),
+            disk_read_bytes: None,
+            write_bytes: None,
+            resource_fee: Some(0),
+        });
+    }
+    let close_at = r.steps.len() - 2;
+    r.steps.insert(
+        close_at,
+        Step::HostFunction {
+            label: Some("create".into()),
+            source: "bob".into(),
+            function: json!({"create_contract": {"contract_id_preimage": {"address": {"address": "@account:bob", "salt": "00"}}, "executable": {"wasm": "@wasm:echo"}}}),
+            auth: AuthSpec::Record {
+                allow_non_root: true,
+                address_v2: true,
+                signers: BTreeMap::from([("alice".into(), vec![]), ("bob".into(), vec!["alice".into()])]),
+            },
+            resources: None,
+            expect: TxExpect::default(),
+        },
+    );
+    r.steps.insert(
+        close_at,
+        Step::ExtendTtl {
+            label: Some("extend".into()),
+            source: "bob".into(),
+            keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
+            extend_to: 1000,
+            expect: TxExpect::default(),
+        },
+    );
+    r.steps.insert(
+        close_at,
+        Step::Restore {
+            label: Some("restore".into()),
+            source: "bob".into(),
+            keys: vec![json!({"contract_code": {"hash": "@wasm:echo"}})],
+            expect: TxExpect::default(),
+        },
+    );
+    if let Step::Upgrade {
+        max_soroban_tx_set_size,
+        ..
+    } = &mut r.steps[9]
+    {
+        *max_soroban_tx_set_size = Some(5);
+    }
+    holds(&r);
+
+    let text = render(&r);
+    assert!(text.contains("\"mode\": \"record\""), "{text}");
+    let unknown = text.replacen("\"mode\": \"record\"", "\"mode\": \"delegated\"", 1);
+    assert!(serde_json::from_str::<RecipeIr>(&unknown).is_err());
+    // an invoke without auth still reads, as source authorization
+    let plain = render(&recipe());
+    assert!(!plain.contains("\"mode\""));
+
+    let mut bad = r.clone();
+    if let Step::HostFunction { auth, .. } = &mut bad.steps[close_at + 2] {
+        *auth = AuthSpec::Record {
+            allow_non_root: false,
+            address_v2: false,
+            signers: BTreeMap::from([("carol".into(), vec![])]),
+        };
+    }
+    has_problem(&bad, "role carol is used before a fund step");
+    let mut bad = r.clone();
+    if let Step::ExtendTtl {
+        keys, extend_to, ..
+    } = &mut bad.steps[close_at + 1]
+    {
+        keys.clear();
+        *extend_to = 0;
+    }
+    has_problem(&bad, "the footprint needs at least one key");
+    has_problem(&bad, "extend_to must be above 0");
+    let mut bad = r.clone();
+    if let Step::Invoke { auth, .. } = &mut bad.steps[10] {
+        *auth = AuthSpec::Entries {
+            entries: vec![],
+            sign: vec!["dave".into()],
+        };
+    }
+    has_problem(&bad, "auth mode entries lists no entry");
+    has_problem(&bad, "role dave is used before a fund step");
 }

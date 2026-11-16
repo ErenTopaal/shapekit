@@ -555,9 +555,15 @@ impl<'a> Session<'a> {
                 base_fee,
                 base_reserve,
                 max_tx_set_size,
+                max_soroban_tx_set_size,
                 flags,
                 config,
             } => {
+                // the contract has this upgrade; this interpreter does not arm it yet
+                ensure!(
+                    max_soroban_tx_set_size.is_none(),
+                    "an upgrade step with max_soroban_tx_set_size: this interpreter does not arm it yet"
+                );
                 let mut params: Vec<(&str, String)> = Vec::new();
                 let mut want = Vec::new();
                 if let Some(v) = protocol_version {
@@ -681,8 +687,16 @@ impl<'a> Session<'a> {
                 contract,
                 function,
                 args,
+                auth,
+                resources,
                 expect,
             } => {
+                // the contract has auth modes and resource overrides; this interpreter does not
+                // build them yet
+                ensure!(
+                    auth.is_source() && resources.is_none(),
+                    "an invoke step with auth or resources: this interpreter does not build them yet"
+                );
                 let key = key_of(ctx, source);
                 let deployed = match SymRef::parse(contract) {
                     None => contract.clone(),
@@ -707,6 +721,11 @@ impl<'a> Session<'a> {
                 let seq = self.next_seq(ctx, source)?;
                 let env = ctx.driver().soroban_at(&key, hf, seq)?;
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
+            }
+            Step::HostFunction { .. } | Step::ExtendTtl { .. } | Step::Restore { .. } => {
+                bail!(
+                    "host-function, extend-ttl and restore steps: this interpreter does not run them yet"
+                )
             }
             Step::Capture {
                 slug,

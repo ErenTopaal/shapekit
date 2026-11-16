@@ -3,13 +3,15 @@
 //! network or the chain's state are written as symbolic references, so one file records the
 //! same chain under every passphrase.
 //!
-//! Steps that submit a transaction (`fund`, `tx`, `upload`, `deploy`, `invoke`) queue it; the
+//! Steps that submit a transaction (`fund`, `tx`, `upload`, `deploy`, `invoke`,
+//! `host-function`, `extend-ttl`, `restore`) queue it; the
 //! next `close` closes one ledger holding everything queued since the previous close. A `tx`
 //! or `invoke` expected to be `rejected` is refused at submission and never queued.
 //!
 //! # Symbolic references
 //!
-//! Inside XDR-JSON values (`operations`, `memo`, `cond`, `args`, `key`, `config`), a string
+//! Inside XDR-JSON values (`operations`, `memo`, `cond`, `args`, `key`, `config`, `function`,
+//! `keys`, auth `entries`), a string
 //! that starts with `@` is a reference the interpreter replaces before encoding:
 //!
 //! | reference | replaced by |
@@ -148,6 +150,8 @@ pub enum Step {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         max_tx_set_size: Option<u32>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
+        max_soroban_tx_set_size: Option<u32>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
         flags: Option<u32>,
         /// XDR-JSON `ConfigSettingEntry` values, applied as one config upgrade set.
         #[serde(default)]
@@ -185,6 +189,50 @@ pub enum Step {
         /// XDR-JSON `ScVal` arguments.
         #[serde(default)]
         args: Vec<Value>,
+        /// How the call is authorized; the source account alone when absent.
+        #[serde(default, skip_serializing_if = "AuthSpec::is_source")]
+        auth: AuthSpec,
+        /// Replaces simulated resource values.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        resources: Option<ResourceOverride>,
+        #[serde(default)]
+        expect: TxExpect,
+    },
+    /// Any host function, built from its XDR-JSON: contract creation, uploads with odd
+    /// arguments, calls with hand-written authorization.
+    HostFunction {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+        source: String,
+        /// XDR-JSON `HostFunction`.
+        function: Value,
+        #[serde(default, skip_serializing_if = "AuthSpec::is_source")]
+        auth: AuthSpec,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        resources: Option<ResourceOverride>,
+        #[serde(default)]
+        expect: TxExpect,
+    },
+    /// Extends the TTL of ledger entries; `keys` are the read-only footprint, resources come
+    /// from simulation.
+    ExtendTtl {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+        source: String,
+        /// XDR-JSON `LedgerKey` values.
+        keys: Vec<Value>,
+        extend_to: u32,
+        #[serde(default)]
+        expect: TxExpect,
+    },
+    /// Restores archived ledger entries; `keys` are the read-write footprint, resources come
+    /// from simulation.
+    Restore {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        label: Option<String>,
+        source: String,
+        /// XDR-JSON `LedgerKey` values.
+        keys: Vec<Value>,
         #[serde(default)]
         expect: TxExpect,
     },
@@ -219,6 +267,57 @@ pub struct FeeBump {
     /// Roles that sign the fee bump, in order; the fee source alone when empty.
     #[serde(default)]
     pub signers: Vec<String>,
+}
+
+/// How a Soroban transaction is authorized, tagged by `mode`.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "mode", rename_all = "kebab-case", deny_unknown_fields)]
+pub enum AuthSpec {
+    /// The source account authorizes everything, as invocations did before auth modes.
+    #[default]
+    Source,
+    /// Simulation in record mode writes the entries, which the named roles sign. The
+    /// signatures expire at the last closed ledger plus 100.
+    Record {
+        /// Record entries for authorizations that are not at the root of the call tree.
+        #[serde(default)]
+        allow_non_root: bool,
+        /// Write `address_v2` credentials instead of `address`.
+        #[serde(default)]
+        address_v2: bool,
+        /// The role whose address appears in an entry, mapped to the roles that sign for it;
+        /// an empty list means the role itself.
+        #[serde(default)]
+        signers: BTreeMap<String, Vec<String>>,
+    },
+    /// The entries as written, simulated in enforce mode.
+    Entries {
+        /// XDR-JSON `SorobanAuthorizationEntry` values.
+        entries: Vec<Value>,
+        /// Each role signs the entry whose address is its account.
+        #[serde(default)]
+        sign: Vec<String>,
+    },
+}
+
+impl AuthSpec {
+    pub fn is_source(&self) -> bool {
+        *self == AuthSpec::Source
+    }
+}
+
+/// Resource values that replace what simulation found.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ResourceOverride {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub instructions: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub disk_read_bytes: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub write_bytes: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resource_fee: Option<i64>,
 }
 
 /// What a transaction must come to.
@@ -448,6 +547,39 @@ impl Checker<'_> {
         }
     }
 
+    fn auth(&mut self, at: &str, auth: &AuthSpec) {
+        match auth {
+            AuthSpec::Source => {}
+            AuthSpec::Record { signers, .. } => {
+                for (role, by) in signers {
+                    self.role(at, role, false);
+                    for s in by {
+                        self.role(at, s, false);
+                    }
+                }
+            }
+            AuthSpec::Entries { entries, sign } => {
+                if entries.is_empty() {
+                    self.out
+                        .push(format!("{at}: auth mode entries lists no entry"));
+                }
+                for s in sign {
+                    self.role(at, s, false);
+                }
+                self.values(at, entries);
+            }
+        }
+    }
+
+    fn resources(&mut self, at: &str, r: Option<&ResourceOverride>) {
+        if let Some(r) = r
+            && r.resource_fee.is_some_and(|f| f < 0)
+        {
+            self.out
+                .push(format!("{at}: the resource fee cannot be negative"));
+        }
+    }
+
     fn values<'v>(&mut self, at: &str, values: impl IntoIterator<Item = &'v Value>) {
         let mut refs = Vec::new();
         for v in values {
@@ -475,7 +607,7 @@ impl Contract for RecipeIr {
     const SCHEMA_FILE: &'static str = "recipe-ir.schema.json";
     const VERSION: u32 = 1;
     const TITLE: &'static str = "shapekit recipe IR";
-    const DESCRIPTION: &'static str = "corpus/recipes/<family>/<name>.json: a recipe as network-independent steps (fund, tx, close, upgrade, upload, deploy, invoke, capture) with symbolic references for values that depend on the network or the chain's state.";
+    const DESCRIPTION: &'static str = "corpus/recipes/<family>/<name>.json: a recipe as network-independent steps (fund, tx, close, upgrade, upload, deploy, invoke, host-function, extend-ttl, restore, capture) with symbolic references for values that depend on the network or the chain's state.";
 
     fn schema_version(&self) -> u32 {
         self.schema_version
@@ -581,6 +713,7 @@ impl Contract for RecipeIr {
                     base_fee,
                     base_reserve,
                     max_tx_set_size,
+                    max_soroban_tx_set_size,
                     flags,
                     config,
                 } => {
@@ -588,6 +721,7 @@ impl Contract for RecipeIr {
                         && base_fee.is_none()
                         && base_reserve.is_none()
                         && max_tx_set_size.is_none()
+                        && max_soroban_tx_set_size.is_none()
                         && flags.is_none()
                         && config.is_empty()
                     {
@@ -637,9 +771,13 @@ impl Contract for RecipeIr {
                     contract,
                     function,
                     args,
+                    auth,
+                    resources,
                     expect,
                 } => {
                     c.role(&at, source, false);
+                    c.auth(&at, auth);
+                    c.resources(&at, resources.as_ref());
                     match SymRef::parse(contract) {
                         Some(_) => c.values(&at, [&Value::String(contract.clone())]),
                         None => {
@@ -652,6 +790,58 @@ impl Contract for RecipeIr {
                         ));
                     }
                     c.values(&at, args);
+                    c.define(
+                        &at,
+                        i,
+                        label.as_ref(),
+                        LabelKind::Submitted {
+                            rejected: expect.outcome == Outcome::Rejected,
+                        },
+                    );
+                }
+                Step::HostFunction {
+                    label,
+                    source,
+                    function,
+                    auth,
+                    resources,
+                    expect,
+                } => {
+                    c.role(&at, source, false);
+                    c.values(&at, [function]);
+                    c.auth(&at, auth);
+                    c.resources(&at, resources.as_ref());
+                    c.define(
+                        &at,
+                        i,
+                        label.as_ref(),
+                        LabelKind::Submitted {
+                            rejected: expect.outcome == Outcome::Rejected,
+                        },
+                    );
+                }
+                Step::ExtendTtl {
+                    label,
+                    source,
+                    keys,
+                    expect,
+                    ..
+                }
+                | Step::Restore {
+                    label,
+                    source,
+                    keys,
+                    expect,
+                } => {
+                    c.role(&at, source, false);
+                    if keys.is_empty() {
+                        c.out
+                            .push(format!("{at}: the footprint needs at least one key"));
+                    }
+                    if let Step::ExtendTtl { extend_to: 0, .. } = step {
+                        c.out.push(format!("{at}: extend_to must be above 0"));
+                    }
+                    c.values(&at, keys);
                     c.define(
                         &at,
                         i,

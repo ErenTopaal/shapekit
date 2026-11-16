@@ -1,5 +1,87 @@
 {
   "$defs": {
+    "AuthSpec": {
+      "description": "How a Soroban transaction is authorized, tagged by `mode`.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "The source account authorizes everything, as invocations did before auth modes.",
+          "properties": {
+            "mode": {
+              "const": "source",
+              "type": "string"
+            }
+          },
+          "required": [
+            "mode"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Simulation in record mode writes the entries, which the named roles sign. The\nsignatures expire at the last closed ledger plus 100.",
+          "properties": {
+            "address_v2": {
+              "default": false,
+              "description": "Write `address_v2` credentials instead of `address`.",
+              "type": "boolean"
+            },
+            "allow_non_root": {
+              "default": false,
+              "description": "Record entries for authorizations that are not at the root of the call tree.",
+              "type": "boolean"
+            },
+            "mode": {
+              "const": "record",
+              "type": "string"
+            },
+            "signers": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "default": {},
+              "description": "The role whose address appears in an entry, mapped to the roles that sign for it;\nan empty list means the role itself.",
+              "type": "object"
+            }
+          },
+          "required": [
+            "mode"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The entries as written, simulated in enforce mode.",
+          "properties": {
+            "entries": {
+              "description": "XDR-JSON `SorobanAuthorizationEntry` values.",
+              "items": true,
+              "type": "array"
+            },
+            "mode": {
+              "const": "entries",
+              "type": "string"
+            },
+            "sign": {
+              "default": [],
+              "description": "Each role signs the entry whose address is its account.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "mode",
+            "entries"
+          ],
+          "type": "object"
+        }
+      ]
+    },
     "FeeBump": {
       "additionalProperties": false,
       "description": "The fee bump envelope around a `tx` step's transaction.",
@@ -84,6 +166,44 @@
           "type": "string"
         }
       ]
+    },
+    "ResourceOverride": {
+      "additionalProperties": false,
+      "description": "Resource values that replace what simulation found.",
+      "properties": {
+        "disk_read_bytes": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "instructions": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "resource_fee": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "write_bytes": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "type": "object"
     },
     "Selection": {
       "description": "Which bytes a capture takes, tagged by `kind`. `of` names a labelled step.",
@@ -337,6 +457,14 @@
                 "null"
               ]
             },
+            "max_soroban_tx_set_size": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
             "max_tx_set_size": {
               "format": "uint32",
               "minimum": 0,
@@ -443,6 +571,10 @@
               "items": true,
               "type": "array"
             },
+            "auth": {
+              "$ref": "#/$defs/AuthSpec",
+              "description": "How the call is authorized; the source account alone when absent."
+            },
             "contract": {
               "description": "Label of the `deploy` step, or a `@contract:` reference.",
               "type": "string"
@@ -462,6 +594,17 @@
                 "null"
               ]
             },
+            "resources": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ResourceOverride"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Replaces simulated resource values."
+            },
             "source": {
               "type": "string"
             },
@@ -475,6 +618,131 @@
             "source",
             "contract",
             "function"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Any host function, built from its XDR-JSON: contract creation, uploads with odd\narguments, calls with hand-written authorization.",
+          "properties": {
+            "auth": {
+              "$ref": "#/$defs/AuthSpec"
+            },
+            "expect": {
+              "$ref": "#/$defs/TxExpect",
+              "default": {
+                "outcome": "success"
+              }
+            },
+            "function": {
+              "description": "XDR-JSON `HostFunction`."
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "resources": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ResourceOverride"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "host-function",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "source",
+            "function"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Extends the TTL of ledger entries; `keys` are the read-only footprint, resources come\nfrom simulation.",
+          "properties": {
+            "expect": {
+              "$ref": "#/$defs/TxExpect",
+              "default": {
+                "outcome": "success"
+              }
+            },
+            "extend_to": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "keys": {
+              "description": "XDR-JSON `LedgerKey` values.",
+              "items": true,
+              "type": "array"
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "extend-ttl",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "source",
+            "keys",
+            "extend_to"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Restores archived ledger entries; `keys` are the read-write footprint, resources come\nfrom simulation.",
+          "properties": {
+            "expect": {
+              "$ref": "#/$defs/TxExpect",
+              "default": {
+                "outcome": "success"
+              }
+            },
+            "keys": {
+              "description": "XDR-JSON `LedgerKey` values.",
+              "items": true,
+              "type": "array"
+            },
+            "label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "type": "string"
+            },
+            "step": {
+              "const": "restore",
+              "type": "string"
+            }
+          },
+          "required": [
+            "step",
+            "source",
+            "keys"
           ],
           "type": "object"
         },
@@ -554,7 +822,7 @@
   "$id": "https://github.com/ErenTopaal/shapekit/schema/recipe-ir.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
-  "description": "corpus/recipes/<family>/<name>.json: a recipe as network-independent steps (fund, tx, close, upgrade, upload, deploy, invoke, capture) with symbolic references for values that depend on the network or the chain's state.",
+  "description": "corpus/recipes/<family>/<name>.json: a recipe as network-independent steps (fund, tx, close, upgrade, upload, deploy, invoke, host-function, extend-ttl, restore, capture) with symbolic references for values that depend on the network or the chain's state.",
   "properties": {
     "below_protocol_valid": {
       "default": false,
