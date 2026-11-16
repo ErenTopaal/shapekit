@@ -507,6 +507,23 @@ The weekly `upstream-drift` workflow runs the check and opens a tracking issue w
 difference. A new version then still goes through `conformance run --all-versions`,
 `conformance reproduce` and triage before it is merged.
 
+## Datasets outside the corpus
+
+`shapekit conformance run --dataset <dir>` runs a set of `TransactionMeta` that is too large
+for the manifest: the converted dump of core's own transaction tests, as
+`shapekit coretest convert` writes it (`index.jsonl` with one line per meta core wrote, and
+`meta/<two hex digits>/<sha256>.xdr` with each distinct meta once). Every distinct meta goes
+through `decode_encode` and passes when the SDK writes the same bytes back. A failure on a meta
+whose test sections all name a protocol newer than the version's `max_protocol` is counted
+apart, as in a corpus run.
+
+The command writes `dataset-report.json`, `DATASET.md` and
+`core-test-sections.obligations.json` (one `core-test-section` obligation per test section)
+into `--out`. A meta an SDK drops is shrunk while the SDK still drops it (operations, changes
+and events removed one at a time) and written to the candidate lane under a family that takes
+`core-test-dump` entries. `conformance/dataset/` holds the result for the current version of
+each SDK.
+
 ## Writing a testee
 
 1. Read requests line by line, answer each with exactly one line, flush after every line.

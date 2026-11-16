@@ -645,3 +645,136 @@ pub fn render(r: &DatasetReport) -> String {
     }
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn write_dataset(dir: &Path, metas: &[(&str, &str, Option<u32>, &[u8])]) {
+        let mut index = String::new();
+        for (file, section, protocol, bytes) in metas {
+            let sha = shapekit_manifest::sha256_hex(bytes);
+            let d = dir.join("meta").join(&sha[..2]);
+            std::fs::create_dir_all(&d).unwrap();
+            std::fs::write(d.join(format!("{sha}.xdr")), bytes).unwrap();
+            index.push_str(
+                &json!({"test": "t", "file": file, "section": section, "ordinal": 0,
+                        "protocol": protocol, "meta_version": 3, "sha256": sha})
+                .to_string(),
+            );
+            index.push('\n');
+        }
+        std::fs::write(dir.join("index.jsonl"), index).unwrap();
+    }
+
+    #[test]
+    fn loads_distinct_metas_sections_and_protocols() {
+        let dir = tempfile::tempdir().unwrap();
+        let a: &[u8] = &[0, 0, 0, 1];
+        let b: &[u8] = &[0, 0, 0, 2];
+        write_dataset(
+            dir.path(),
+            &[
+                ("F", "s|protocol version 19", Some(19), a),
+                ("F", "s|protocol version 20", Some(20), a),
+                ("F", "plain", None, b),
+            ],
+        );
+        let d = Dataset::load(dir.path()).unwrap();
+        assert_eq!(d.records.len(), 3);
+        assert_eq!(d.metas.len(), 2);
+        assert_eq!(d.sections().len(), 3);
+        assert_eq!(d.current_protocol(), 20);
+        let sha_a = shapekit_manifest::sha256_hex(a);
+        assert_eq!(d.protocol(&sha_a), Some(19));
+        assert_eq!(d.protocol(&shapekit_manifest::sha256_hex(b)), None);
+        assert_eq!(d.bytes(&sha_a).unwrap(), a);
+        // a file whose bytes do not match its name is refused
+        std::fs::write(
+            dir.path()
+                .join("meta")
+                .join(&sha_a[..2])
+                .join(format!("{sha_a}.xdr")),
+            b,
+        )
+        .unwrap();
+        assert!(d.bytes(&sha_a).is_err());
+    }
+
+    #[test]
+    fn every_section_gets_an_open_obligation() {
+        let mut sections = BTreeMap::new();
+        sections.insert(
+            ("F".to_string(), "a".to_string()),
+            BTreeSet::from(["x".to_string(), "y".to_string()]),
+        );
+        sections.insert(
+            ("F".to_string(), "b".to_string()),
+            BTreeSet::from(["y".to_string()]),
+        );
+        let report = DatasetReport {
+            core_image: None,
+            metas: 3,
+            distinct: 2,
+            sections: 2,
+            targets: vec![TargetResult {
+                key: "go@v1".to_string(),
+                distinct: 2,
+                results: BTreeMap::new(),
+                beyond_protocol: 0,
+                sections_passing: 1,
+                dropped: vec![Dropped {
+                    sha256: "y".to_string(),
+                    protocol: None,
+                    meta_version: 3,
+                    sections: 2,
+                    first_section: String::new(),
+                    detail: None,
+                    bytes: 4,
+                    shrunk_bytes: 4,
+                    entry: None,
+                }],
+            }],
+        };
+        let ledger = obligations(&report, &sections);
+        assert_eq!(ledger.obligations.len(), 2);
+        assert_eq!(ledger.obligations[0].id, "core-test-section:F|a");
+        assert!(
+            ledger.obligations[0]
+                .evidence
+                .as_deref()
+                .unwrap()
+                .contains("go@v1 1/2")
+        );
+        use shapekit_contracts::Contract as _;
+        assert!(ledger.problems().is_empty());
+    }
+
+    #[test]
+    fn shrink_candidates_are_one_element_smaller() {
+        let meta = TransactionMeta::V3(stellar_xdr::TransactionMetaV3 {
+            ext: stellar_xdr::ExtensionPoint::V0,
+            tx_changes_before: vec![stellar_xdr::LedgerEntryChange::Removed(
+                stellar_xdr::LedgerKey::Ttl(stellar_xdr::LedgerKeyTtl {
+                    key_hash: stellar_xdr::Hash([1; 32]),
+                }),
+            )]
+            .try_into()
+            .unwrap(),
+            operations: vec![stellar_xdr::OperationMeta {
+                changes: Default::default(),
+            }]
+            .try_into()
+            .unwrap(),
+            tx_changes_after: Default::default(),
+            soroban_meta: None,
+        });
+        let c = candidates(&meta);
+        assert_eq!(c.len(), 2);
+        let n = meta.to_xdr(Limits::none()).unwrap().len();
+        assert!(
+            c.iter()
+                .all(|m| m.to_xdr(Limits::none()).unwrap().len() < n)
+        );
+    }
+}
