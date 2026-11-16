@@ -6,7 +6,8 @@ data through the SDK's own decoder, encoder, strkey codec, ordering functions an
 projection, and compares what comes back with the network's answer (the corpus manifest) and
 with the other SDKs.
 
-Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id`, `contract_id` and `coverage_snapshot`
+Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id`, `contract_id`, `coverage_snapshot` and
+`coverage_new`
 and changes nothing else, so the runner also accepts a version 1 testee; that testee cannot
 list the new ops, and their checks count as `unsupported`. The machine-readable form is
 [schema/testee-protocol.schema.json](../schema/testee-protocol.schema.json). This page and the
@@ -353,6 +354,26 @@ set, so those testees send no `uncovered`. Range strings are
 only compared within one SDK version and one tool: the union over runs, or the ranges one
 run adds, is what is meaningful. Counters live in the process, so what a testee covered before
 the runner restarted it is not in a later snapshot.
+
+### coverage_new
+
+Request: no members besides `op`.
+
+The cheap form of `coverage_snapshot`, for a fuzzer that asks after every input whether the
+input reached code nothing before it reached. A testee lists it exactly when it lists
+`coverage_snapshot`. Result: `new`, how many coverage units have run for the first time since
+the previous `coverage_new` request (since the process started, for the first one), and
+`total`, how many have run since the process started. The units are the tool's own, read in
+the process with no files and no external tool:
+
+| testee | a unit is |
+|---|---|
+| Rust | an llvm counter of the testee binary, `stellar-xdr` and the crates around it (`__llvm_profile_begin_counters` to `__llvm_profile_end_counters`) |
+| Go | a statement-block counter of an instrumented package, read from `runtime/coverage.WriteCounters` |
+| JavaScript | a range of the SDK package, folded exactly as `coverage_snapshot` folds it (the two ops share one fold, so neither loses what the other read) |
+
+The numbers are only compared within one process: they say whether coverage grew, not which
+code ran. Ask `coverage_snapshot` for the ranges themselves.
 
 `shapekit conformance run --coverage` builds and starts these variants (the Rust and Go builds
 go to `target/testees-cov/`), runs the selection, asks each testee for one snapshot at the end

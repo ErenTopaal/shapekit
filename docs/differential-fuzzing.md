@@ -20,18 +20,17 @@ shapekit fuzz --replay findings/fuzz          # run every stored reproducer agai
 
 ## Why not cargo-fuzz
 
-cargo-fuzz 0.13.2 with libfuzzer-sys 0.4.13 (both listed in `pins.toml`) needs a nightly
-compiler (`-Zsanitizer`). `cargo +nightly fuzz` would leave the 1.99.1 pin in
-`rust-toolchain.toml` alone, because the `+toolchain` override applies to one invocation.
-shapekit does not use it, for three reasons:
+cargo-fuzz 0.13.2 with libfuzzer-sys 0.4.13 (both listed in `pins.toml`) runs on the pinned
+1.99.1 toolchain when the sanitizer is turned off (`cargo fuzz run -s none`), and
+`shapekit native-fuzz --target rust` uses it that way on stellar-xdr alone. It is not the
+engine of this differential run, for two reasons:
 
 - libFuzzer's feedback is coverage of the process it runs in. Half of every comparison happens
   in the go testee, a separate process, so coverage would steer towards new paths in
-  `stellar-xdr` only and say nothing about go.
+  `stellar-xdr` only and say nothing about go. `shapekit guided-fuzz` (below) steers by the
+  coverage of every testee process instead.
 - Every input costs a pipe round trip to go either way, so the in-process speed libFuzzer is
   built for is not available.
-- A nightly compiler in CI is an unpinned toolchain beside a pinned one, and a second full
-  build of the dependency tree with sanitizer flags, for no gain in what is compared.
 
 So the fuzzer is an ordinary subcommand on the pinned toolchain. Values come from
 `stellar-xdr`'s own `arbitrary` feature (arbitrary 1.5.0) over bytes from a seeded generator,
@@ -171,3 +170,54 @@ minimal reproducer is the `ScVal` `00000000 00000002`. The corpus already holds 
 [rs-stellar-xdr#629](https://github.com/stellar/rs-stellar-xdr/issues/629) and
 [stellar-core#5509](https://github.com/stellar/stellar-core/issues/5509). The eight classes, each with its
 reproducer under `findings/fuzz/`, are the classes `findings/fuzz/known-classes.txt` lists.
+
+## Coverage-guided search across the three sdks
+
+`shapekit guided-fuzz` runs the coverage builds of the rust, go and javascript testees
+(`target/testees-cov/`, the builds `conformance run --coverage` uses) side by side, with
+stellar-xdr in process as the oracle, and sends every input to all three. After each input
+every testee answers `coverage_new` from its live counters (see the
+[testee protocol](testee-protocol.md#coverage_new)), so the search knows at once whether the
+input reached code no input before it reached, in any of the three. Such an input joins one
+pool the three share: an input that opened a new path in go is mutated further and sent to
+rust and javascript too.
+
+```sh
+shapekit guided-fuzz --seed 1 --max-inputs 100000 --compare
+```
+
+The corpus seeds and the pool form one list per type. With the feedback an entry is picked
+with a weight that grows with the inputs mutated from it that grew coverage and shrinks with
+the times it was picked, so new entries are tried soon and worn-out ones rarely. A generated
+input keeps the raw bytes `arbitrary` built it from, and mutating those yields another
+well-formed value close to it. Without the feedback, seeds are picked uniformly and nothing
+joins the pool; a quarter of the inputs is generated in both runs.
+
+`--compare` runs the same seed and input budget once with and once without the feedback, and
+`<out>/REPORT.md` counts per testee the ranges of `coverage_snapshot` each run reached, the
+inputs per source and how many of them grew coverage, and every disagreement class with
+stellar-xdr. The depth-accounting filter above applies to all three testees.
+
+### Measured (2026-11-16)
+
+Against stellar-xdr 30.0.0, go-stellar-sdk v0.9.0 and @stellar/stellar-sdk 17.4.0, 100,000
+inputs per run (about 17 minutes each). The full reports are
+[conformance/guided-fuzz/seed-1.md](../conformance/guided-fuzz/seed-1.md) and
+[seed-2.md](../conformance/guided-fuzz/seed-2.md).
+
+| seed | testee | ranges with feedback | ranges without |
+|---|---|---|---|
+| 1 | rust | 16,128 | 16,010 |
+| 1 | go | 6,526 | 6,443 |
+| 1 | javascript | 4,106 | 4,086 |
+| 2 | rust | 16,100 | 16,009 |
+| 2 | go | 6,529 | 6,441 |
+| 2 | javascript | 4,086 | 4,081 |
+
+With the feedback every testee reached more ranges in both seeds; go and rust gained the most.
+The gain needs a budget well past the number of seeds: at 10,000 inputs the two seeds tried
+split (seed 1 gained 68 rust and 29 javascript ranges and tied in go, seed 2 lost 76, 12 and
+17), because uniform seed mutation still finds new code on almost every seed at that point.
+Every disagreement class in all four runs is the bool word class above (rs-stellar-xdr#629),
+seen from go and from javascript; a class signature cuts a long javascript path, so two of
+them look different in the table and are the same refusal of a bool word other than 0 or 1.

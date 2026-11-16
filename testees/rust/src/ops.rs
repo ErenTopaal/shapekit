@@ -148,8 +148,10 @@ pub fn run(req: &Request) -> Outcome {
         "contract_id" => contract_id(req),
         #[cfg(shapekit_coverage)]
         "coverage_snapshot" => crate::coverage::snapshot().map_err(|m| Outcome::Error(ErrorClass::Internal, m)),
+        #[cfg(shapekit_coverage)]
+        "coverage_new" => crate::coverage::fresh().map_err(|m| Outcome::Error(ErrorClass::Internal, m)),
         #[cfg(not(shapekit_coverage))]
-        "coverage_snapshot" => Err(Outcome::Unsupported(
+        "coverage_snapshot" | "coverage_new" => Err(Outcome::Unsupported(
             "the testee was built without -C instrument-coverage --cfg shapekit_coverage".into(),
         )),
         "to_native" => Err(Outcome::Unsupported(
@@ -165,11 +167,12 @@ pub fn run(req: &Request) -> Outcome {
     }
 }
 
-// coverage_snapshot only in a build instrumented for it
+// coverage_snapshot and coverage_new only in a build instrumented for them
 fn ops() -> Vec<&'static str> {
     let mut out = OPS.to_vec();
     if cfg!(shapekit_coverage) {
         out.push("coverage_snapshot");
+        out.push("coverage_new");
     }
     out
 }

@@ -6,6 +6,7 @@
 use std::ffi::{CString, c_char, c_int};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::{Value, json};
@@ -14,6 +15,10 @@ unsafe extern "C" {
     // compiler-rt's profiler runtime, linked into every instrument-coverage build
     fn __llvm_profile_write_file() -> c_int;
     fn __llvm_profile_set_filename(name: *const c_char);
+    // the bounds of this process's counter section: one u64 per counter of every instrumented
+    // function (instrument-coverage does not use single-byte counters)
+    fn __llvm_profile_begin_counters() -> *const u8;
+    fn __llvm_profile_end_counters() -> *const u8;
 }
 
 fn set_filename(path: &Path) -> Result<(), String> {
@@ -144,4 +149,34 @@ fn collect(dir: &Path) -> Result<Value, String> {
         "tool": "llvm source-based region coverage",
         "ranges": ranges.into_iter().collect::<Vec<_>>(),
     }))
+}
+
+/// `coverage_new`: how many of the process's llvm counters (every instrumented function of the
+/// testee binary, stellar-xdr and the crates around it) have become nonzero since the previous
+/// call, and how many are nonzero. Read from the counter section in place, with no file and no
+/// llvm tool, so it is cheap enough to ask after every input.
+pub fn fresh() -> Result<Value, String> {
+    static SEEN: Mutex<Vec<bool>> = Mutex::new(Vec::new());
+    let (begin, end) = unsafe { (__llvm_profile_begin_counters(), __llvm_profile_end_counters()) };
+    let bytes = (end as usize)
+        .checked_sub(begin as usize)
+        .ok_or("the counter section ends before it begins")?;
+    if bytes % 8 != 0 || (begin as usize) % std::mem::align_of::<u64>() != 0 {
+        return Err("the counter section is not an array of u64 counters".into());
+    }
+    let counters = unsafe { std::slice::from_raw_parts(begin.cast::<u64>(), bytes / 8) };
+    let mut seen = SEEN.lock().map_err(|_| "coverage state poisoned")?;
+    seen.resize(counters.len(), false);
+    let mut new = 0u64;
+    let mut total = 0u64;
+    for (c, s) in counters.iter().zip(seen.iter_mut()) {
+        // read once: the counters are plain memory the instrumented code increments
+        let v = unsafe { std::ptr::read_volatile(c) };
+        if v != 0 && !*s {
+            *s = true;
+            new += 1;
+        }
+        total += u64::from(*s);
+    }
+    Ok(json!({ "new": new, "total": total }))
 }

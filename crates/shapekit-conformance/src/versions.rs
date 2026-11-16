@@ -271,14 +271,21 @@ pub fn go_build_tag(version: &str) -> String {
     format!("shapekit_sdk_{}", version.replace(['.', '-', '+'], "_"))
 }
 
+/// The least per-request timeout of a coverage build. The rust snapshot (llvm-profdata, then
+/// llvm-cov export over the testee binary) took more than 10 s while a
+/// release build ran beside it.
+pub const COVERAGE_TIMEOUT_MS: u64 = 120_000;
+
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
 /// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
 /// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,
 /// and the javascript testee started with `SHAPEKIT_COVERAGE=1`. The build steps are the ones
 /// `conformance sync-versions` writes; a versions file whose steps have another shape is
-/// refused rather than guessed at.
+/// refused rather than guessed at. The per-request timeout is at least
+/// [`COVERAGE_TIMEOUT_MS`]: a snapshot runs the coverage tools over the whole binary.
 pub fn coverage_target(t: &Target) -> Result<Target> {
     let mut c = t.clone();
+    c.timeout_ms = c.timeout_ms.max(COVERAGE_TIMEOUT_MS);
     let swap = |s: &str| s.replacen("target/testees/", "target/testees-cov/", 1);
     match t.sdk.as_str() {
         "rust" => {

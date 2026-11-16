@@ -78,6 +78,28 @@ export class Coverage {
   // 0 that never ran since. a block in neither list ran exactly as often as the smallest listed
   // block around it
   snapshot(): { ranges: string[]; uncovered: string[] } {
+    this.fold();
+    const ran: string[] = [];
+    const never: string[] = [];
+    for (const [path, file] of this.seen) {
+      for (const [key, r] of file) (r.ran ? ran : never).push(`${path}:${key}`);
+    }
+    return { ranges: ran.sort(), uncovered: never.sort() };
+  }
+
+  // coverage_new: how many ranges have run for the first time since the previous call, and how
+  // many have run since the process started; the same fold as a snapshot, without the lists
+  private ranTotal = 0;
+  private ranAtLastNew = 0;
+
+  fresh(): { new: number; total: number } {
+    this.fold();
+    const out = { new: this.ranTotal - this.ranAtLastNew, total: this.ranTotal };
+    this.ranAtLastNew = this.ranTotal;
+    return out;
+  }
+
+  private fold(): void {
     const taken = this.post("Profiler.takePreciseCoverage") as { result: ScriptCoverage[] };
     for (const script of taken.result) {
       if (!script.url.startsWith(this.prefix)) continue;
@@ -117,11 +139,8 @@ export class Coverage {
       }
       for (const [key, value] of updates) file.set(key, value);
     }
-    const ran: string[] = [];
-    const never: string[] = [];
-    for (const [path, file] of this.seen) {
-      for (const [key, r] of file) (r.ran ? ran : never).push(`${path}:${key}`);
-    }
-    return { ranges: ran.sort(), uncovered: never.sort() };
+    let total = 0;
+    for (const file of this.seen.values()) for (const r of file.values()) if (r.ran) total++;
+    this.ranTotal = total;
   }
 }

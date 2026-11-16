@@ -111,7 +111,7 @@ export class Ops {
     if (typeof this.m.Asset?.prototype?.contractId === "function" && typeof this.m.hash === "function") {
       ops.push("contract_id");
     }
-    if (this.coverage) ops.push("coverage_snapshot");
+    if (this.coverage) ops.push("coverage_snapshot", "coverage_new");
     return ops;
   }
 
@@ -155,6 +155,11 @@ export class Ops {
           throw new Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1");
         }
         return { tool: `v8 ${process.versions.v8} precise block coverage`, ...this.coverage.snapshot() };
+      case "coverage_new":
+        if (!this.coverage) {
+          throw new Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1");
+        }
+        return this.coverage.fresh();
       default:
         throw new BadRequest(`unknown op ${req.op}`);
     }

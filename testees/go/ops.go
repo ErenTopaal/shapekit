@@ -70,6 +70,8 @@ func dispatch(req request) (map[string]any, error) {
 		return idParse(req)
 	case "coverage_snapshot":
 		return coverageSnapshot(req)
+	case "coverage_new":
+		return coverageNew(req)
 	}
 	if reason, ok := unsupportedOps[req.op]; ok {
 		return nil, unsupported(reason)
@@ -77,10 +79,10 @@ func dispatch(req request) (map[string]any, error) {
 	return nil, badRequest("unknown op %s", req.op)
 }
 
-// helloOps lists coverage_snapshot only for a build that can answer it
+// helloOps lists coverage_snapshot and coverage_new only for a build that can answer them
 func helloOps() []string {
 	if instrumented() {
-		return append(append([]string{}, ops...), "coverage_snapshot")
+		return append(append([]string{}, ops...), "coverage_snapshot", "coverage_new")
 	}
 	return ops
 }

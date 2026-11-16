@@ -63,6 +63,7 @@ fn registered_commands() {
             "findings",
             "fuzz",
             "native-fuzz",
+            "guided-fuzz",
             "coverage",
             "site",
             "twin",

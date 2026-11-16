@@ -9,6 +9,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/binary"
 	"io"
 	"os"
 	"os/exec"
@@ -75,4 +77,81 @@ func coverageSnapshot(request) (map[string]any, error) {
 	}
 	sort.Strings(out)
 	return map[string]any{"tool": "go -cover statement blocks", "ranges": out}, nil
+}
+
+// coverageNew answers coverage_new: how many counters of the instrumented packages have become
+// nonzero since the previous call, and how many are nonzero. runtime/coverage writes the live
+// counters into memory and they are read from there, with no files and no covdata, so it is
+// cheap enough to ask after every input. The layout read is the counter data file of
+// internal/coverage (defs.go, encodecounter): a 32-byte file header, a 16-byte segment header
+// with the function count and the lengths of the string and argument tables that follow, then per
+// live function uleb128 values: the counter count, the package id, the function id and the
+// counters. The footer after the last function is not read.
+var coverSeen = map[[3]uint32]bool{}
+
+func coverageNew(request) (map[string]any, error) {
+	if !instrumented() {
+		return nil, unsupported("the testee was built without -cover, so it has no coverage counters")
+	}
+	var buf bytes.Buffer
+	if err := coverage.WriteCounters(&buf); err != nil {
+		return nil, internal("writing coverage counters: %v", err)
+	}
+	b := buf.Bytes()
+	const fileHeader, segHeader = 32, 16
+	if len(b) < fileHeader+segHeader || string(b[:4]) != "\x00\x63\x77\x6d" {
+		return nil, internal("the counter data has an unknown header")
+	}
+	if b[24] != 2 { // CtrULeb128
+		return nil, internal("the counter data uses counter flavor %d, not uleb128", b[24])
+	}
+	seg := b[fileHeader:]
+	funcs := binary.LittleEndian.Uint64(seg[0:8])
+	strtab := binary.LittleEndian.Uint32(seg[8:12])
+	args := binary.LittleEndian.Uint32(seg[12:16])
+	p := fileHeader + segHeader + int(strtab) + int(args)
+	if p > len(b) {
+		return nil, internal("the counter data is shorter than its tables")
+	}
+	read := func() (uint32, error) {
+		var v uint64
+		for shift := uint(0); ; shift += 7 {
+			if p >= len(b) || shift > 28 {
+				return 0, internal("the counter data ends inside a value")
+			}
+			c := b[p]
+			p++
+			v |= uint64(c&0x7f) << shift
+			if c&0x80 == 0 {
+				return uint32(v), nil
+			}
+		}
+	}
+	added := 0
+	for f := uint64(0); f < funcs; f++ {
+		n, err := read()
+		if err != nil {
+			return nil, err
+		}
+		pkg, err := read()
+		if err != nil {
+			return nil, err
+		}
+		fn, err := read()
+		if err != nil {
+			return nil, err
+		}
+		for i := uint32(0); i < n; i++ {
+			c, err := read()
+			if err != nil {
+				return nil, err
+			}
+			k := [3]uint32{pkg, fn, i}
+			if c != 0 && !coverSeen[k] {
+				coverSeen[k] = true
+				added++
+			}
+		}
+	}
+	return map[string]any{"new": added, "total": len(coverSeen)}, nil
 }

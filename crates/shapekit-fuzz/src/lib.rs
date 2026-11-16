@@ -9,6 +9,7 @@
 //! iteration), never by which worker reached a lock first. A run cut by the clock is not,
 //! and its report says so.
 
+pub mod guided;
 pub mod minimize;
 pub mod mutate;
 pub mod native;

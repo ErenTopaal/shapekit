@@ -39,6 +39,7 @@ pub const OPS: &[&str] = &[
     "balance_id",
     "contract_id",
     "coverage_snapshot",
+    "coverage_new",
 ];
 
 // how much of a testee's stderr is kept for error reports

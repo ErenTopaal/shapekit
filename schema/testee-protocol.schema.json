@@ -195,6 +195,38 @@
         "ranges"
       ]
     },
+    "CoverageNewRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "coverage_new"
+        }
+      },
+      "required": [
+        "id",
+        "op"
+      ]
+    },
+    "CoverageNewResult": {
+      "type": "object",
+      "properties": {
+        "new": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "new",
+        "total"
+      ]
+    },
     "DecodeEncodeRequest": {
       "type": "object",
       "properties": {
@@ -340,7 +372,8 @@
               "tx_hash",
               "balance_id",
               "contract_id",
-              "coverage_snapshot"
+              "coverage_snapshot",
+              "coverage_new"
             ]
           },
           "uniqueItems": true
@@ -721,6 +754,9 @@
         },
         {
           "$ref": "#/$defs/CoverageSnapshotRequest"
+        },
+        {
+          "$ref": "#/$defs/CoverageNewRequest"
         }
       ]
     },
@@ -778,6 +814,9 @@
                 },
                 {
                   "$ref": "#/$defs/CoverageSnapshotResult"
+                },
+                {
+                  "$ref": "#/$defs/CoverageNewResult"
                 }
               ]
             }
