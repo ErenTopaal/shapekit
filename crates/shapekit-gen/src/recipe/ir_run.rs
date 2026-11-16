@@ -34,7 +34,7 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use shapekit_contracts::RecipeIr;
 use shapekit_contracts::recipe_ir::{FeeBump, Outcome, Selection, Step, SymRef, TxExpect};
-use shapekit_core_driver::chain::{Applied, SETTINGS_WRITER_SALT_DOMAIN, upgrades};
+use shapekit_core_driver::chain::{Applied, ChainError, SETTINGS_WRITER_SALT_DOMAIN, upgrades};
 use shapekit_core_driver::contracts::echo_wasm_for;
 use shapekit_core_driver::keys::{
     account_address, account_id, account_strkey, contract_strkey, muxed_account,
@@ -174,6 +174,8 @@ pub struct Session<'a> {
     /// recorded in `observed` instead.
     learn: bool,
     observed: Vec<Observed>,
+    /// Steps core queued and then left out of the ledger it closed, in learning mode.
+    left_out: Vec<usize>,
     current: usize,
     pending: Vec<Pending>,
     applied: BTreeMap<String, Applied>,
@@ -217,6 +219,7 @@ impl<'a> Session<'a> {
             root,
             learn: false,
             observed: Vec::new(),
+            left_out: Vec::new(),
             current: 0,
             pending: Vec::new(),
             applied: BTreeMap::new(),
@@ -239,6 +242,11 @@ impl<'a> Session<'a> {
     /// What core did with each submitting step since the last call, in step order.
     pub fn take_observed(&mut self) -> Vec<Observed> {
         std::mem::take(&mut self.observed)
+    }
+
+    /// Steps core queued but left out of the ledger it then closed, since the last call.
+    pub fn take_left_out(&mut self) -> Vec<usize> {
+        std::mem::take(&mut self.left_out)
     }
 
     /// Transactions queued and not yet closed.
@@ -389,7 +397,16 @@ impl<'a> Session<'a> {
     /// Checks every queued transaction against the ledger that just closed.
     fn settle(&mut self, ctx: &mut ChainCtx) -> Result<()> {
         for p in std::mem::take(&mut self.pending) {
-            let applied = ctx.driver().applied_in_last(&p.hash)?;
+            let applied = match ctx.driver().applied_in_last(&p.hash) {
+                Ok(a) => a,
+                // core can drop a queued transaction from the set it closes, for one when
+                // its time bounds have passed by the close time
+                Err(ChainError::Missing { .. }) if self.learn && matches!(p.kind, Kind::Tx) => {
+                    self.left_out.push(p.step);
+                    continue;
+                }
+                Err(e) => return Err(e.into()),
+            };
             let what = p.label.as_deref().unwrap_or("an unlabelled step");
             if self.learn && matches!(p.kind, Kind::Tx) {
                 self.observed.push(Observed {
