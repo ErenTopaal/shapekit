@@ -164,3 +164,29 @@ functions (templates, inline functions) counts as reached when any copy ran.
 file and every unreached line range, in the core coverage contract),
 `counts.json` (every region with its count) and `profiles/merged.profdata`.
 `--show` prints the regions overlapping the given lines with their counts.
+
+## Regions core's tests reach and no chain does
+
+```sh
+shapekit twin core-tests --spec '[tx]' --jobs 3 --out <tests dir>
+shapekit twin r-list --chain-dir <coverage dir> [--chain-dir ...] --tests <tests dir> \
+    --out corpus/coverage/core-coverage.json
+```
+
+`twin core-tests` runs each of core's test cases matching the Catch2 spec on
+the twin, one container of one cpu per test case, at every protocol version
+(`--all-versions --rng-seed 12345`, the arguments core's own meta dumps use),
+and keeps each test case's region counts in `<tests dir>/tests/<n>/counts.json`,
+listed with exit code and duration in `<tests dir>/tests.tsv`. It exits 1 if
+any test case does not exit 0.
+
+`twin r-list` adds up the counts of `twin coverage` output directories (all
+from the same twin image), and writes the core coverage summary over all of
+them. Each line range no chain reaches is `reachable-by-core-tests`, with the
+names of the test cases that reach it, or `unknown` when no test case does.
+The first kind is a list of regions known to be reachable, with a core test
+showing how; a recipe for each is a search target. The second kind may or may
+not be reachable at all.
+
+Region counts of the same chain can differ by a region or two between runs,
+because some of core's code runs on timers and background threads.
