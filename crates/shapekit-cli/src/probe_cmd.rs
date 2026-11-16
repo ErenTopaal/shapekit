@@ -68,6 +68,12 @@ pub enum ProbeCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Write the `field` obligations of a validation table beside it, as
+    /// <table stem>.obligations.json; probe all writes them too.
+    Obligations {
+        #[arg(long, default_value = "registry/generated/validation.json")]
+        table: PathBuf,
+    },
     /// Compare registry/fields.toml with the measured verdicts: every row against the struct
     /// fields and carriers it speaks about. Exits 1 on a disagreement no source reading
     /// settles, or on a settlement for a row that agrees.
@@ -103,6 +109,12 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             &pins,
         ),
         ProbeCommand::Compare { table, fields } => probe_compare(&table, &fields),
+        ProbeCommand::Obligations { table } => {
+            let t: ValidationTable = shapekit_contracts::load(&table)
+                .with_context(|| format!("reading {}", table.display()))?;
+            write_obligations(&t, &table)?;
+            Ok(true)
+        }
         ProbeCommand::Limits {
             only,
             out,
@@ -265,6 +277,7 @@ fn probe_all(
     std::fs::write(&out, serde_json::to_string_pretty(&table)? + "\n")
         .with_context(|| format!("writing {}", out.display()))?;
     println!("wrote {} with {} fields", out.display(), table.fields.len());
+    write_obligations(&table, &out)?;
     let version = match shapekit_manifest::build::load(&candidate.join("manifest.json")) {
         Ok(m) => m.corpus_version,
         Err(_) => env!("CARGO_PKG_VERSION").to_owned(),
@@ -527,4 +540,22 @@ fn probe_limits(
     };
     let built = crate::manifest_cmd::build_file(&candidate, pins, &version)?;
     Ok(built && open == 0)
+}
+
+/// The `field` obligations of a table, next to it as `<stem>.obligations.json`.
+fn write_obligations(table: &ValidationTable, out: &Path) -> Result<()> {
+    let ledger = shapekit_probe::compare::obligations(table);
+    let problems = ledger.problems();
+    if !problems.is_empty() {
+        bail!("the field obligations have problems: {problems:#?}");
+    }
+    let path = out.with_extension("obligations.json");
+    std::fs::write(&path, serde_json::to_string_pretty(&ledger)? + "\n")
+        .with_context(|| format!("writing {}", path.display()))?;
+    println!(
+        "wrote {} with {} obligations",
+        path.display(),
+        ledger.obligations.len()
+    );
+    Ok(())
 }

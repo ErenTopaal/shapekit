@@ -601,6 +601,49 @@ pub fn compare(table: &ValidationTable, fields: &toml::Table) -> Result<Vec<Comp
     Ok(out)
 }
 
+/// One `field` obligation per envelope field, met by the attempts' witness entries: the
+/// fragment `registry/generated/validation.obligations.json` the obligation ledger reads.
+pub fn obligations(table: &ValidationTable) -> shapekit_contracts::ObligationLedger {
+    use shapekit_contracts::obligations::Obligation;
+    use shapekit_contracts::{ObligationKind, ObligationStatus};
+    let obligations = table
+        .fields
+        .iter()
+        .map(|f| {
+            let mut witnesses: Vec<String> = f
+                .attempts
+                .iter()
+                .flat_map(|a| a.witnesses.iter().cloned())
+                .collect();
+            witnesses.sort();
+            witnesses.dedup();
+            let mut outcomes: Vec<_> = f.attempts.iter().map(ProbeAttempt::outcome).collect();
+            outcomes.sort();
+            outcomes.dedup();
+            Obligation {
+                id: format!("field:{}", f.path),
+                kind: ObligationKind::Field,
+                status: ObligationStatus::Met,
+                witnesses,
+                evidence: Some(format!(
+                    "{}: {} values tried, {} different answers from core",
+                    match f.verdict {
+                        shapekit_contracts::validation::Verdict::Validated => "validated",
+                        shapekit_contracts::validation::Verdict::Partial => "partial",
+                        shapekit_contracts::validation::Verdict::NotValidated => "not validated",
+                    },
+                    f.attempts.len(),
+                    outcomes.len()
+                )),
+            }
+        })
+        .collect();
+    shapekit_contracts::ObligationLedger {
+        schema_version: 1,
+        obligations,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
