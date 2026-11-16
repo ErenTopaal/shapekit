@@ -2,7 +2,8 @@ name: upstream-drift
 
 # weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr, sdk or
 # stellar-cli release, or change to core's golden index, gets a tracking issue carrying the checklist of
-# docs/protocol-upgrade-runbook.md
+# docs/protocol-upgrade-runbook.md, and a conformance/versions.toml that conformance sync-versions
+# would change gets one listing the difference
 
 on:
   schedule:
@@ -38,3 +39,26 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: scripts/upstream-releases.sh
+      - name: tracking issue when the sdk version matrix is behind the registries
+        if: ${{ !cancelled() }}
+        env:
+          # sync-versions dates a stellar-xdr tag through the github api
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          report="$RUNNER_TEMP/sync-versions.md"
+          if cargo run -p shapekit-cli -- conformance sync-versions --check --report "$report"; then
+            exit 0
+          fi
+          # no report means the command itself failed, not that the matrix is behind
+          test -s "$report"
+          digest=$(sha256sum "$report" | cut -c1-12)
+          title="upstream: sdk version matrix ($digest)"
+          existing=$(gh issue list --state all --search "\"$title\" in:title" --json number,title \
+            --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+          if [ -n "$existing" ]; then
+            echo "#$existing already tracks: $title"
+          else
+            gh issue create --title "$title" --body-file "$report"
+          fi

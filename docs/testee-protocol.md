@@ -396,6 +396,42 @@ single-SDK run accepts a `diverges-from-peers` line whose check passes.
   address-space cap would kill the process before it touches the data. The resource and size
   are set per SDK in `versions.toml` (`memory = { resource = "as" | "data", mib = <n> }`).
 
+## The version matrix
+
+`shapekit conformance sync-versions` writes the version lists of
+[conformance/versions.toml](../conformance/versions.toml) and the per-version testee files under
+`testees/*/versions/` from what crates.io, the Go module proxy and npm publish. For each SDK it
+picks:
+
+- for every release line (a major version, or a minor version below 1.0) the newest stable
+  release that the registry has not yanked, deprecated or retracted and whose XDR knows the
+  protocol in `[sync] min_protocol` or a later one;
+- every version that [conformance/reproductions.toml](../conformance/reproductions.toml) or a
+  file under [conformance/known-failures](../conformance/known-failures) names.
+
+The registry's latest stable release becomes `current`. A version's `max_protocol` comes from
+the stellar/stellar-xdr commit its code was generated from: the `xdr-version` file in the
+stellar-xdr crate, `xdr/xdr_commit_generated.txt` in go-stellar-sdk, and the `XDR_COMMIT` line
+of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. The
+stellar-xdr release tag at that commit names a protocol. Protocols without a tag of their own
+changed no XDR, so `max_protocol` runs up to the protocol before the next tag: `v28.0` covers
+protocol 29. A commit that is not a release tag stops the command.
+
+For a newly picked version the command writes the testee files from those of the current
+version and resolves them with `cargo generate-lockfile`, `go mod tidy` or
+`npm install --package-lock-only`. It removes the files of versions it no longer picks and
+leaves the files of the other versions alone, since their lock files are the pins. The comment
+above each version in `versions.toml` says why it was picked.
+
+```sh
+shapekit conformance sync-versions            # update versions.toml and testees/*/versions/
+shapekit conformance sync-versions --check    # exit 1 and list the difference when either is behind
+```
+
+The weekly `upstream-drift` workflow runs the check and opens a tracking issue with the
+difference. A new version then still goes through `conformance run --all-versions`,
+`conformance reproduce` and triage before it is merged.
+
 ## Writing a testee
 
 1. Read requests line by line, answer each with exactly one line, flush after every line.
@@ -405,6 +441,7 @@ single-SDK run accepts a `diverges-from-peers` line whose check passes.
    `unsupported` with a reason. Never emulate an SDK feature inside the testee.
 4. Catch every exception or panic around SDK calls and classify it.
 5. Add the testee's build and run command per SDK version to
-   [conformance/versions.toml](../conformance/versions.toml).
+   [conformance/versions.toml](../conformance/versions.toml). For the three SDKs here,
+   `shapekit conformance sync-versions` does this (see "The version matrix").
 
 Working testees for all three SDKs are in `testees/rust`, `testees/go` and `testees/js`.

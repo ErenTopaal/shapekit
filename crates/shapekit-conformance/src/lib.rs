@@ -10,5 +10,7 @@ pub mod matrix_md;
 pub mod plan;
 pub mod reproduce;
 pub mod runner;
+pub mod sync;
 pub mod testee;
+pub mod upstream;
 pub mod versions;

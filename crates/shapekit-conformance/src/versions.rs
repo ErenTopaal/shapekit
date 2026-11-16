@@ -12,8 +12,18 @@ pub const VERSIONS_SCHEMA: u32 = 1;
 #[serde(deny_unknown_fields)]
 pub struct VersionsFile {
     pub schema: u32,
+    /// How `conformance sync-versions` picks versions; a file it does not write needs none.
+    #[serde(default)]
+    pub sync: Option<SyncPolicy>,
     /// Keyed by the short sdk name used everywhere else: `rust`, `go`, `js`.
     pub sdk: BTreeMap<String, Sdk>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SyncPolicy {
+    /// The oldest protocol a release line's newest release must know to be in the matrix.
+    pub min_protocol: u32,
 }
 
 #[derive(Debug, Clone, Deserialize)]

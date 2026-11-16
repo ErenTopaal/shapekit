@@ -1,10 +1,10 @@
-//! `shapekit conformance run|crosscheck|reproduce|draft-issues|file-issues`.
+//! `shapekit conformance run|crosscheck|reproduce|sync-versions|draft-issues|file-issues`.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::Subcommand;
-use shapekit_conformance::{crosscheck, issues, reproduce, runner};
+use shapekit_conformance::{crosscheck, issues, reproduce, runner, sync};
 use shapekit_manifest::EntryKind;
 
 // requests and responses with deep XDR-JSON are parsed and dropped recursively
@@ -85,6 +85,21 @@ pub enum ConformanceCommand {
         versions_file: PathBuf,
         #[arg(long, default_value = "conformance/reproductions.toml")]
         reproductions: PathBuf,
+    },
+    /// Derive the SDK version matrix and the testee version files from the package registries.
+    SyncVersions {
+        /// Write nothing; fail when versions.toml or the testee files are not up to date.
+        #[arg(long)]
+        check: bool,
+        /// With --check: on drift, also write the report as markdown to this file.
+        #[arg(long, requires = "check")]
+        report: Option<PathBuf>,
+        #[arg(long, default_value = "conformance/versions.toml")]
+        versions_file: PathBuf,
+        #[arg(long, default_value = "conformance/reproductions.toml")]
+        reproductions: PathBuf,
+        #[arg(long, default_value = "conformance/known-failures")]
+        known_failures: PathBuf,
     },
     /// Write one issue body per SDK and diverging entry from a divergence matrix.
     DraftIssues {
@@ -249,6 +264,54 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             })?;
             print!("{}", reproduce::render(&cells));
             Ok(cells.iter().all(reproduce::Cell::holds))
+        }
+        ConformanceCommand::SyncVersions {
+            check,
+            report,
+            versions_file,
+            reproductions,
+            known_failures,
+        } => {
+            let (old, plans) = sync::discover(&sync::SyncOptions {
+                root: root.clone(),
+                versions: versions_file.clone(),
+                reproductions,
+                known_dir: known_failures,
+            })?;
+            print!("{}", sync::summary(&plans));
+            let rendered = sync::render(&old, &plans)?;
+            if check {
+                let drift = sync::drift(&root, &versions_file, &old, &plans, &rendered)?;
+                if drift.is_empty() {
+                    println!(
+                        "{} and the testee files are up to date",
+                        versions_file.display()
+                    );
+                    return Ok(true);
+                }
+                let mut md =
+                    String::from("`shapekit conformance sync-versions --check` found:\n\n");
+                for l in &drift.lines {
+                    md.push_str(&format!("- {l}\n"));
+                }
+                if drift.file_changed {
+                    md.push_str(&format!(
+                        "- {} is not what sync-versions writes\n",
+                        versions_file.display()
+                    ));
+                }
+                md.push_str("\nRun `shapekit conformance sync-versions` to update them.\n");
+                print!("\n{md}");
+                if let Some(path) = report {
+                    std::fs::write(&path, &md)
+                        .with_context(|| format!("writing {}", path.display()))?;
+                }
+                return Ok(false);
+            }
+            for line in sync::apply(&root, &versions_file, &old, &plans, &rendered)? {
+                println!("{line}");
+            }
+            Ok(true)
         }
         ConformanceCommand::DraftIssues {
             matrix,
