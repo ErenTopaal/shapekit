@@ -133,7 +133,12 @@ pub fn transaction(
         arms.push(arm);
     }
     let memo = f.rng.chance(1, 4).then(|| f.def("Memo"));
-    let cond = f.rng.chance(1, 5).then(|| f.def("Preconditions"));
+    // v0 envelopes, below protocol 13, carry time bounds only
+    let cond = f
+        .rng
+        .chance(1, 5)
+        .then(|| f.def("Preconditions"))
+        .filter(|c| world.protocol >= 13 || c.get("v2").is_none());
     let named = f.named.clone();
     // a quarter of the time the transaction comes from a role its operations name
     if f.rng.chance(1, 4) {
@@ -224,6 +229,10 @@ pub fn follower(
     first: &Step,
 ) -> (Step, Vec<String>) {
     let (mut b, arms) = transaction(schema, world, rng, menu, skip);
+    let first_source = match first {
+        Step::Tx { source, .. } => source.clone(),
+        _ => String::new(),
+    };
     if let (
         Step::Tx {
             source: a_src,
@@ -248,6 +257,16 @@ pub fn follower(
                 *source = (*rng.pick(&others)).clone();
             }
         }
+    }
+    // core queues one transaction per account, fee payers included
+    if let Step::Tx {
+        source,
+        fee_bump: Some(bump),
+        ..
+    } = &mut b
+        && bump.source == first_source
+    {
+        bump.source = source.clone();
     }
     (b, arms)
 }

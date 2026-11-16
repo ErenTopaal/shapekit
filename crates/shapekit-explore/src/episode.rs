@@ -441,6 +441,10 @@ impl<'e, 'a> Live<'e, 'a> {
     fn ordered_pair(&mut self, mut a: Step, mut b: Step) -> Result<Pushed> {
         self.pairs += 1;
         let labels = [format!("o{}a", self.pairs), format!("o{}b", self.pairs)];
+        if let Step::Tx { fee_bump, .. } = &mut a {
+            // a payer of the first could be the second's source, which core queues once
+            *fee_bump = None;
+        }
         for (s, l) in [&mut a, &mut b].into_iter().zip(&labels) {
             if let Step::Tx { label, memo, .. } = s {
                 *label = Some(l.clone());
@@ -754,24 +758,22 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
 /// transaction with the close after it.
 pub fn shrunk_steps(ep: &Episode) -> Vec<Step> {
     let mut out: Vec<Step> = ep.ir.steps[..ep.prefix_len].to_vec();
-    let steps = &ep.ir.steps;
-    let mut i = ep.prefix_len;
-    while i < steps.len() {
-        match &steps[i] {
-            Step::Tx { .. } | Step::Invoke { .. } => {
-                // a new transaction is always followed by the close that applied it
-                if ep.novel_steps.contains(&(i + 1)) {
-                    out.push(steps[i].clone());
-                    out.push(steps[i + 1].clone());
-                }
-                i += 2;
-            }
-            other => {
-                if ep.novel_steps.contains(&i) {
-                    out.push(other.clone());
-                }
-                i += 1;
-            }
+    // the transactions waiting for the next close; a close keeps them only when its ledger
+    // showed something new, and an ordered close always names some of them
+    let mut pending: Vec<Step> = Vec::new();
+    for (i, step) in ep.ir.steps.iter().enumerate().skip(ep.prefix_len) {
+        if submits(step) {
+            pending.push(step.clone());
+            continue;
+        }
+        let closes = matches!(step, Step::Close { .. } | Step::Upgrade { .. });
+        if ep.novel_steps.contains(&i) {
+            out.append(&mut pending);
+            out.push(step.clone());
+        } else if closes {
+            pending.clear();
+        } else {
+            out.push(step.clone());
         }
     }
     out

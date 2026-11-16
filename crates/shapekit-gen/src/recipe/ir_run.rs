@@ -242,7 +242,7 @@ pub struct Session<'a> {
     /// recorded in `observed` instead.
     learn: bool,
     observed: Vec<Observed>,
-    /// Steps core queued and then left out of the ledger it closed, in learning mode.
+    /// Steps that did not reach a ledger, in learning mode (see [`Session::take_left_out`]).
     left_out: Vec<usize>,
     /// Labels of transaction steps some close orders: they are held until that close.
     ordered: BTreeSet<String>,
@@ -329,7 +329,8 @@ impl<'a> Session<'a> {
         std::mem::take(&mut self.observed)
     }
 
-    /// Steps core queued but left out of the ledger it then closed, since the last call.
+    /// Steps that did not reach a ledger, since the last call: core queued them and left them
+    /// out of the set it closed, or did not queue them at all (try again later, duplicate).
     pub fn take_left_out(&mut self) -> Vec<usize> {
         std::mem::take(&mut self.left_out)
     }
@@ -420,6 +421,12 @@ impl<'a> Session<'a> {
                     return Ok(());
                 }
                 (SubmitStatus::Pending, _) => {}
+                // core neither queued nor judged it (one transaction per account, or a
+                // duplicate): in learning mode that is a step left out
+                (SubmitStatus::TryAgainLater | SubmitStatus::Duplicate, _) => {
+                    self.left_out.push(self.current);
+                    return Ok(());
+                }
                 (status, _) => bail!("core answered {status:?} to the submission"),
             }
             let hash = envelope_hash(env, ctx.driver().network_id())?;

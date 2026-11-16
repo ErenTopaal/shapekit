@@ -17,8 +17,9 @@ use stellar_xdr::{
     LiquidityPoolEntryBody, LiquidityPoolParameters, PublicKey, Uint256, WriteXdr,
 };
 
-/// Asset codes the filler draws from: two four-character codes and one long code.
-pub const CODES4: &[&str] = &["USD", "EUR"];
+/// Asset codes the filler draws from: one of each length. Few assets make it likely that
+/// operations of one episode meet on the same one (a trustline, then a payment, an offer).
+pub const CODES4: &[&str] = &["USD"];
 pub const CODES12: &[&str] = &["LONGASSET12"];
 
 /// Amounts kept for the filler to reuse.
@@ -318,6 +319,17 @@ impl World {
                     | LedgerEntryChange::Restored(e) => {
                         self.keys.insert(key_text, key_json);
                         self.note_amounts(&e.data);
+                        if let LedgerEntryData::Account(a) = &e.data
+                            && a.seq_num.0 == i64::MAX
+                        {
+                            // its sequence number cannot grow, so it can never submit again
+                            let id = self.recipe_form(serde_json::to_value(&a.account_id)?);
+                            if let Some(role) =
+                                id.as_str().and_then(|s| s.strip_prefix("@account:"))
+                            {
+                                self.funded.retain(|r| r != role);
+                            }
+                        }
                         match &e.data {
                             LedgerEntryData::Trustline(t) => {
                                 let asset = self.recipe_form(serde_json::to_value(&t.asset)?);

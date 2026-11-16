@@ -392,10 +392,13 @@ impl<'a> Filler<'a> {
         let v: i64 = match field {
             Some("offerID") => {
                 let known: Vec<i64> = self.world.offers.iter().map(|(_, id)| *id).collect();
-                if !known.is_empty() && self.rng.chance(1, 2) {
+                // zero makes a new offer, the commonest useful value
+                if self.rng.chance(3, 5) {
+                    0
+                } else if !known.is_empty() && self.rng.chance(2, 3) {
                     *self.rng.pick(&known)
                 } else {
-                    *self.rng.pick(&[0, 0, 1, 99_999, -1])
+                    *self.rng.pick(&[1, 99_999, -1])
                 }
             }
             Some("absBefore") => *self.rng.pick(&[0, now - 1, now + 864_000, i64::MAX]),
