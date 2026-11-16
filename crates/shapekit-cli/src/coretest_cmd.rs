@@ -31,6 +31,10 @@ pub enum CoretestCommand {
         /// run.json of an earlier run: start the cases that took longest there first.
         #[arg(long)]
         order_from: Option<PathBuf>,
+        /// Run this case once per protocol version, each in its own container (repeatable).
+        /// Defaults to the cases one process cannot hold in 2 GB and the longest ones.
+        #[arg(long = "split-by-version", default_values = shapekit_coretest::run::SPLIT_BY_DEFAULT)]
+        split: Vec<String>,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -45,29 +49,30 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
             out,
             tests,
             order_from,
+            split,
             pins,
-        } => run_tests(shards, cpus, memory, out, tests, order_from, &pins),
+        } => {
+            // with a chosen set of cases, split only those of them the list names
+            let split = if tests.is_empty() {
+                split
+            } else {
+                split.into_iter().filter(|s| tests.contains(s)).collect()
+            };
+            let opts = Options {
+                image: Image::from_pins(&pins, shapekit_coretest::BUILDTESTS_IMAGE_PIN)?,
+                shards,
+                limits: Limits { cpus, memory },
+                out,
+                tests,
+                order_from,
+                split,
+            };
+            run_tests(&opts)
+        }
     }
 }
 
-fn run_tests(
-    shards: usize,
-    cpus: String,
-    memory: String,
-    out: PathBuf,
-    tests: Vec<String>,
-    order_from: Option<PathBuf>,
-    pins: &std::path::Path,
-) -> Result<bool> {
-    let image = Image::from_pins(pins, shapekit_coretest::BUILDTESTS_IMAGE_PIN)?;
-    let opts = Options {
-        image,
-        shards,
-        limits: Limits { cpus, memory },
-        out: out.clone(),
-        tests,
-        order_from,
-    };
+fn run_tests(opts: &Options) -> Result<bool> {
     let progress = |t: &TestRun, done: usize, total: usize| {
         let state = match (&t.error, t.exit_code) {
             (Some(e), _) => format!("error: {e}"),
@@ -79,7 +84,7 @@ fn run_tests(
         };
         eprintln!("[{done}/{total}] {:.0}s {}: {state}", t.seconds, t.name);
     };
-    let report = run::run(&opts, &progress).context("running core's tests")?;
+    let report = run::run(opts, &progress).context("running core's tests")?;
     let t = &report.totals;
     println!("image {}", report.image);
     println!(
@@ -106,7 +111,7 @@ fn run_tests(
         .map(|(v, n)| format!("v{v} {n}"))
         .collect();
     println!("TransactionMeta arms: {}", arms.join(", "));
-    println!("report {}", out.join("run.json").display());
+    println!("report {}", opts.out.join("run.json").display());
     for failed in report.tests.iter().filter(|t| !t.passed()) {
         eprintln!(
             "failed: {} (exit {:?}, oom killed {}, {})",

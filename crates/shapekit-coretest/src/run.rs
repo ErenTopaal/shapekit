@@ -4,15 +4,26 @@
 //! One container per test case, never one process for many: core's memory grows across test
 //! cases in one process (`scripts/check-lcm.sh` saw the oom killer at about 6 GB), and a
 //! separate container gives each case its own network namespace for the ports tests open.
-//! At most `shards` containers run at once, each pulling the next case from a shared queue, so
+//! At most `shards` containers run at once, each pulling the next job from a shared queue, so
 //! a long case does not hold back the cases queued behind it.
+//!
+//! A case named in [`Options::split`] runs as one job per protocol version (`--version N`
+//! instead of `--all-versions`), in its own container each. One process for all 31 versions of
+//! `pathpayment` outgrows 2 GB; one version at a time does not, and the jobs spread over the
+//! shards. core reseeds its random generators only when a test case starts, so a single-version
+//! run could in principle diverge from the all-versions run; the short hashes in core's baseline
+//! decide, and `coretest convert` checks every one. A split case may only record metas inside
+//! core's version wrapper: a part holding a meta of any other version is an error, since that
+//! meta would be recorded once per part.
 //!
 //! Output layout under `out`:
 //!
 //! ```text
 //! names.txt               the test cases, one per line, in run order
-//! dump/NNN.txt            --debug-test-tx-meta of case NNN
-//! baseline/NNN/*.json     --record-test-tx-meta of case NNN (core's baseline format)
+//! dump/NNN.txt            --debug-test-tx-meta of case NNN (a split case's parts, in version
+//!                         order)
+//! baseline/NNN/*.json     --record-test-tx-meta of case NNN (core's baseline format),
+//!                         baseline/NNN/vVV/*.json for each part of a split case
 //! log/NNN.log             stdout and stderr of the container
 //! run.json                the report
 //! ```
@@ -30,6 +41,21 @@ use std::time::Instant;
 use crate::dump::Reader;
 use crate::pins::Image;
 use crate::{Error, RNG_SEED, Result, TX_TAG};
+
+/// The newest protocol stellar-core v30.0.0 tests (`Config::CURRENT_LEDGER_PROTOCOL_VERSION`);
+/// `--all-versions` runs 0 through this.
+pub const MAX_PROTOCOL: u32 = 30;
+
+/// Cases split by default: `create offer`, `pathpayment` and `revoke from pool` are killed by
+/// the kernel at 1.5 GB as one process (`pathpayment` also at 2 GB), and `txresults` and
+/// `archival meta` are the longest cases.
+pub const SPLIT_BY_DEFAULT: &[&str] = &[
+    "create offer",
+    "pathpayment",
+    "revoke from pool",
+    "txresults",
+    "archival meta",
+];
 
 /// Limits for one test container.
 #[derive(Debug, Clone, serde::Serialize)]
@@ -62,6 +88,8 @@ pub struct Options {
     /// A report of an earlier run: cases start longest first by the seconds it recorded,
     /// cases it does not hold before all others. In list order when absent.
     pub order_from: Option<PathBuf>,
+    /// Cases run as one job per protocol version.
+    pub split: Vec<String>,
 }
 
 /// Sorts `names` longest first by the seconds `earlier` recorded; unknown names first.
@@ -94,6 +122,9 @@ pub struct TestRun {
     pub meta_versions: BTreeMap<u32, u64>,
     /// Why the case did not produce a usable dump, when it did not.
     pub error: Option<String>,
+    /// Run as one job per protocol version.
+    #[serde(default)]
+    pub split: bool,
 }
 
 impl TestRun {
@@ -231,19 +262,51 @@ pub fn summarise_dump(path: &Path, run: &mut TestRun) -> Result<()> {
     Ok(())
 }
 
-fn container_name(index: usize) -> String {
-    format!("shapekit-coretest-{}-{index:03}", std::process::id())
+/// A name no other container of this process has had: the state read back after the run must
+/// be this job's own.
+fn container_name(tag: &str) -> String {
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+    let n = NEXT.fetch_add(1, Ordering::SeqCst);
+    format!("shapekit-coretest-{}-{n}-{tag}", std::process::id())
 }
 
-fn run_one(opts: &Options, owner: &str, index: usize, name: &str) -> TestRun {
+/// One container: a whole case, or one protocol version of a split case.
+#[derive(Debug, Clone, Copy)]
+struct Job {
+    case: usize,
+    version: Option<u32>,
+}
+
+impl Job {
+    fn tag(self) -> String {
+        match self.version {
+            None => format!("{:03}", self.case),
+            Some(v) => format!("{:03}-v{v:02}", self.case),
+        }
+    }
+}
+
+fn run_one(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
+    let index = job.case;
     let mut run = TestRun {
         index,
-        name: name.to_owned(),
+        name: match job.version {
+            None => name.to_owned(),
+            Some(v) => format!("{name} [protocol {v}]"),
+        },
+        split: job.version.is_some(),
         ..TestRun::default()
     };
-    let tag = format!("{index:03}");
+    let tag = job.tag();
     let work = opts.out.join("work").join(&tag);
-    let baseline = opts.out.join("baseline").join(&tag);
+    let baseline = match job.version {
+        None => opts.out.join("baseline").join(&tag),
+        Some(v) => opts
+            .out
+            .join("baseline")
+            .join(format!("{index:03}"))
+            .join(format!("v{v:02}")),
+    };
     let log = opts.out.join("log").join(format!("{tag}.log"));
     let dump = opts.out.join("dump").join(format!("{tag}.txt"));
     let started = Instant::now();
@@ -258,7 +321,7 @@ fn run_one(opts: &Options, owner: &str, index: usize, name: &str) -> TestRun {
             path: log.display().to_string(),
             source,
         })?;
-        let container = container_name(index);
+        let container = container_name(&tag);
         let mount = |host: &Path, inside: &str| format!("{}:{inside}", host.display());
         let status = Command::new("docker")
             .args(["run", "--name", &container, "--network", "none"])
@@ -270,7 +333,11 @@ fn run_one(opts: &Options, owner: &str, index: usize, name: &str) -> TestRun {
             .args(["-v", &mount(&baseline, "/baseline")])
             .args(["-v", &mount(&opts.out.join("dump"), "/dump")])
             .arg(opts.image.reference())
-            .args(["test", name, "--all-versions"])
+            .args(["test", name])
+            .args(match job.version {
+                None => vec!["--all-versions".to_owned()],
+                Some(v) => vec!["--version".to_owned(), v.to_string()],
+            })
             .args(["--rng-seed", &RNG_SEED.to_string()])
             .args(["--ll", "fatal", "-r", "simple", "--disable-dots"])
             .args(["--record-test-tx-meta", "/baseline"])
@@ -312,6 +379,24 @@ fn run_one(opts: &Options, owner: &str, index: usize, name: &str) -> TestRun {
             return Ok(());
         }
         summarise_dump(&dump, &mut run)?;
+        if let Some(v) = job.version {
+            let foreign = run.unlabelled
+                + run
+                    .protocols
+                    .iter()
+                    .filter(|(p, _)| **p != v)
+                    .map(|(_, n)| n)
+                    .sum::<u64>();
+            if foreign > 0 {
+                return Err(Error::Dump {
+                    path: dump.display().to_string(),
+                    line: 0,
+                    message: format!(
+                        "{foreign} metas of the protocol {v} run are outside that version; this case cannot be split"
+                    ),
+                });
+            }
+        }
         std::fs::remove_dir_all(&work).map_err(|source| Error::Write {
             path: work.display().to_string(),
             source,
@@ -319,6 +404,65 @@ fn run_one(opts: &Options, owner: &str, index: usize, name: &str) -> TestRun {
     })();
     run.seconds = started.elapsed().as_secs_f64();
     if let Err(e) = result {
+        run.error = Some(e.to_string());
+    }
+    run
+}
+
+/// One case from the runs of its protocol versions: the parts' dumps concatenated in version
+/// order into the case's dump, which is then summarised as a whole.
+fn join_parts(out: &Path, case: usize, name: &str, parts: Vec<TestRun>) -> TestRun {
+    let mut run = TestRun {
+        index: case,
+        name: name.to_owned(),
+        split: true,
+        ..TestRun::default()
+    };
+    run.seconds = parts.iter().map(|p| p.seconds).sum();
+    run.oom_killed = parts.iter().any(|p| p.oom_killed);
+    let failed: Vec<&TestRun> = parts.iter().filter(|p| !p.passed()).collect();
+    if let Some(first) = failed.first() {
+        run.exit_code = first.exit_code;
+        run.error = Some(format!(
+            "{} of {} protocol runs failed, first {}: exit {:?}{}",
+            failed.len(),
+            parts.len(),
+            first.name,
+            first.exit_code,
+            first
+                .error
+                .as_deref()
+                .map(|e| format!(", {e}"))
+                .unwrap_or_default()
+        ));
+        return run;
+    }
+    run.exit_code = Some(0);
+    let joined = (|| -> Result<()> {
+        let path = out.join("dump").join(format!("{case:03}.txt"));
+        let mut target = File::create(&path).map_err(|source| Error::Write {
+            path: path.display().to_string(),
+            source,
+        })?;
+        for v in 0..=MAX_PROTOCOL {
+            let part = out.join("dump").join(format!("{case:03}-v{v:02}.txt"));
+            let mut src = File::open(&part).map_err(|source| Error::Read {
+                path: part.display().to_string(),
+                source,
+            })?;
+            std::io::copy(&mut src, &mut target).map_err(|source| Error::Write {
+                path: path.display().to_string(),
+                source,
+            })?;
+            std::fs::remove_file(&part).map_err(|source| Error::Write {
+                path: part.display().to_string(),
+                source,
+            })?;
+        }
+        drop(target);
+        summarise_dump(&path, &mut run)
+    })();
+    if let Err(e) = joined {
         run.error = Some(e.to_string());
     }
     run
@@ -371,26 +515,74 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
     }
     write(&out.join("names.txt"), (names.join("\n") + "\n").as_bytes())?;
 
+    for name in &opts.split {
+        if !names.contains(name) {
+            return Err(Error::TestName(format!(
+                "{name} (asked to split, but not run)"
+            )));
+        }
+    }
+    let jobs: Vec<Job> = names
+        .iter()
+        .enumerate()
+        .flat_map(|(case, name)| {
+            if opts.split.contains(name) {
+                (0..=MAX_PROTOCOL)
+                    .map(|v| Job {
+                        case,
+                        version: Some(v),
+                    })
+                    .collect::<Vec<_>>()
+            } else {
+                vec![Job {
+                    case,
+                    version: None,
+                }]
+            }
+        })
+        .collect();
+
     let started = Instant::now();
     let next = AtomicUsize::new(0);
     let done = AtomicUsize::new(0);
-    let results: Mutex<Vec<TestRun>> = Mutex::new(Vec::with_capacity(names.len()));
+    let results: Mutex<Vec<(usize, TestRun)>> = Mutex::new(Vec::with_capacity(jobs.len()));
     std::thread::scope(|scope| {
-        for _ in 0..opts.shards.min(names.len()) {
+        for _ in 0..opts.shards.min(jobs.len()) {
             scope.spawn(|| {
                 loop {
-                    let i = next.fetch_add(1, Ordering::SeqCst);
-                    let Some(name) = names.get(i) else { break };
-                    let run = run_one(&opts, &owner, i, name);
+                    let j = next.fetch_add(1, Ordering::SeqCst);
+                    let Some(job) = jobs.get(j).copied() else {
+                        break;
+                    };
+                    let run = run_one(&opts, &owner, job, &names[job.case]);
                     let n = done.fetch_add(1, Ordering::SeqCst) + 1;
-                    progress(&run, n, names.len());
-                    results.lock().unwrap_or_else(|p| p.into_inner()).push(run);
+                    progress(&run, n, jobs.len());
+                    results
+                        .lock()
+                        .unwrap_or_else(|p| p.into_inner())
+                        .push((j, run));
                 }
             });
         }
     });
-    let mut tests = results.into_inner().unwrap_or_else(|p| p.into_inner());
-    tests.sort_by_key(|t| t.index);
+    let mut parts = results.into_inner().unwrap_or_else(|p| p.into_inner());
+    parts.sort_by_key(|(j, _)| *j);
+    let mut tests = Vec::with_capacity(names.len());
+    let mut i = 0;
+    while i < parts.len() {
+        let case = jobs[parts[i].0].case;
+        let end = parts[i..]
+            .iter()
+            .position(|(j, _)| jobs[*j].case != case)
+            .map_or(parts.len(), |p| i + p);
+        let group: Vec<TestRun> = parts[i..end].iter().map(|(_, r)| r.clone()).collect();
+        tests.push(if group.len() == 1 && !group[0].split {
+            group.into_iter().next().expect("one part")
+        } else {
+            join_parts(&out, case, &names[case], group)
+        });
+        i = end;
+    }
     std::fs::remove_dir(out.join("work")).ok();
 
     let mut totals = Totals {
@@ -458,7 +650,10 @@ mod tests {
                 })
                 .collect(),
         };
-        let mut names: Vec<String> = ["a", "b", "c", "new"].iter().map(|s| s.to_string()).collect();
+        let mut names: Vec<String> = ["a", "b", "c", "new"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
         order_by(&mut names, &earlier);
         assert_eq!(names, ["new", "b", "a", "c"]);
     }
