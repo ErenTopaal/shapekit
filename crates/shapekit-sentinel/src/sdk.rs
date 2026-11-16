@@ -3,7 +3,7 @@
 //! (docs/testee-protocol.md). The expected answers are the network's: the ledger's own bytes,
 //! and the hashes and ids core wrote into it (`shapekit_conformance::anchors`).
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use anyhow::{Context, Result, bail};
@@ -19,6 +19,7 @@ use shapekit_contracts::audit::{CoverageDelta, LawResult, NewBranch, SdkRef, Vio
 use stellar_xdr::LedgerCloseMeta;
 
 use crate::check::EXAMPLES_PER_LAW;
+use crate::coverage::Snapshot;
 
 /// The law each op checks, by the name `shapekit laws` gives it.
 fn law_of(op: &str) -> Result<&'static str> {
@@ -58,11 +59,25 @@ struct Coverage {
     /// What the baseline is: `corpus` for the committed corpus, `corpus+candidate` with the
     /// candidate lane added.
     name: String,
-    baseline: BTreeSet<String>,
+    /// Every snapshot taken before the first ledger. V8's takePreciseCoverage resets its
+    /// counters, so each of its snapshots covers only the time since the one before; a range
+    /// ran in the baseline when any of these says so.
+    baseline: Vec<Snapshot>,
     /// Ranges beyond the baseline, with the first ledger that reached each.
     new: BTreeMap<String, u32>,
     /// The process the counters live in; a restart loses them, which ends the run.
     process: u32,
+}
+
+impl Coverage {
+    /// How many ranges ran in the baseline: those any baseline snapshot lists as run.
+    fn ran_in_baseline(&self) -> usize {
+        let mut all = std::collections::BTreeSet::new();
+        for b in &self.baseline {
+            all.extend(b.ran.iter());
+        }
+        all.len()
+    }
 }
 
 /// Loads the target from the versions file (`current` names the sdk's current version), turns
@@ -203,22 +218,16 @@ impl SdkAudit {
             }
             let now = self.snapshot()?;
             let c = self.coverage.as_mut().expect("checked above");
-            for r in now {
-                if !c.baseline.contains(&r) {
-                    c.new.entry(r).or_insert(seq);
+            for r in now.ran {
+                if !c.new.contains_key(&r) && !c.baseline.iter().any(|b| b.ran(&r)) {
+                    c.new.insert(r, seq);
                 }
             }
         }
         Ok(())
     }
 
-    /// The ranges the testee's coverage counters show as run. Only tools whose set of ranges
-    /// is fixed by the code (llvm regions, go statement blocks) are accepted: there a range
-    /// either ran or did not, so two snapshots compare as sets. V8's precise coverage leaves
-    /// out a nested range whose count equals the range around it and lists it once the counts
-    /// differ, so a block the baseline ran can first appear in a later snapshot; comparing its
-    /// ranges as strings would report branches that are not new.
-    fn snapshot(&mut self) -> Result<BTreeSet<String>> {
+    fn snapshot(&mut self) -> Result<Snapshot> {
         let key = self.testee.target().key();
         let mut request = Map::new();
         request.insert("op".into(), Value::from("coverage_snapshot"));
@@ -229,15 +238,7 @@ impl SdkAudit {
         let shapekit_conformance::testee::Reply::Ok(result) = reply else {
             bail!("{key}: coverage_snapshot was answered with {reply:?}");
         };
-        let tool = result["tool"].as_str().unwrap_or_default();
-        if tool.starts_with("v8") {
-            bail!(
-                "{key} measures with {tool:?}, whose ranges are not a fixed set: V8 omits a nested range while its count equals the enclosing one, so a set difference of snapshots reports blocks the baseline already ran. New branches need the ranges with count 0 as well, which this testee does not report"
-            );
-        }
-        let ranges: Vec<String> = serde_json::from_value(result["ranges"].clone())
-            .with_context(|| format!("{key}: the ranges of coverage_snapshot"))?;
-        Ok(ranges.into_iter().collect())
+        Snapshot::parse(&result).with_context(|| format!("{key}: coverage_snapshot"))
     }
 
     /// Sends every check of every entry in `manifests` (the corpus, and optionally the
@@ -249,9 +250,9 @@ impl SdkAudit {
         if !self.testee.supports("coverage_snapshot") {
             bail!("{key} does not collect coverage; start its coverage variant");
         }
-        // one snapshot first, so a tool whose ranges cannot be compared is refused before the
+        // one snapshot first, so a snapshot that cannot be compared is refused before the
         // corpus runs
-        self.snapshot()?;
+        let first = self.snapshot()?;
         let process = self.testee.starts;
         let mut sent = 0;
         let mut names = Vec::new();
@@ -277,7 +278,7 @@ impl SdkAudit {
                 "{key} was restarted while the corpus ran, so its counters lost part of the baseline"
             );
         }
-        let baseline = self.snapshot()?;
+        let baseline = vec![first, self.snapshot()?];
         self.coverage = Some(Coverage {
             name: names.join("+"),
             baseline,
@@ -292,8 +293,8 @@ impl SdkAudit {
         let c = self.coverage.as_ref()?;
         Some(CoverageDelta {
             baseline: c.name.clone(),
-            baseline_ranges: c.baseline.len() as u64,
-            ranges: (c.baseline.len() + c.new.len()) as u64,
+            baseline_ranges: c.ran_in_baseline() as u64,
+            ranges: (c.ran_in_baseline() + c.new.len()) as u64,
             new: c
                 .new
                 .iter()

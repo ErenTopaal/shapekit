@@ -8,6 +8,7 @@
 //! one decompressed object is held while it is checked. Nothing is written to disk.
 
 pub mod check;
+pub mod coverage;
 pub mod lake;
 pub mod sample;
 pub mod sdk;
