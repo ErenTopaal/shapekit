@@ -4,6 +4,7 @@ mod audit_cmd;
 mod capture_cmd;
 mod conformance_cmd;
 mod contracts_cmd;
+mod coretest_cmd;
 mod coverage_cmd;
 mod findings_cmd;
 mod fuzz_cmd;
@@ -172,6 +173,11 @@ enum Command {
     Probe {
         #[command(subcommand)]
         command: probe_cmd::ProbeCommand,
+    },
+    /// stellar-core's own [tx] tests at every protocol version and the metas they apply.
+    Coretest {
+        #[command(subcommand)]
+        command: coretest_cmd::CoretestCommand,
     },
 }
 
@@ -636,6 +642,7 @@ fn main() -> ExitCode {
         Command::Contracts { command } => contracts_cmd::run(command),
         Command::Site { command } => site_cmd::run(command),
         Command::Probe { command } => probe_cmd::run(command),
+        Command::Coretest { command } => coretest_cmd::run(command),
         Command::Schema { command } => schema_cmd::run(command),
         Command::Laws { command } => laws_cmd::run(command),
         Command::Twin { command } => twin_cmd::run(command),

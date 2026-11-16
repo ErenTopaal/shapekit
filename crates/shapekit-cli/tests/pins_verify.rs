@@ -72,6 +72,7 @@ fn registered_commands() {
             "contracts",
             "corpus",
             "probe",
+            "coretest",
             "help",
         ]
     );
