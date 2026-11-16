@@ -225,7 +225,7 @@ fn limits() {
             first_rejected: "331".into(),
             rejection: LimitRejection {
                 stage: Stage::Apply,
-                result_code: "invoke_host_function.resource_limit_exceeded".into(),
+                result_code: Some("invoke_host_function.resource_limit_exceeded".into()),
             },
             network_settings: BTreeMap::from([(
                 "contract_compute_v0.tx_max_instructions".into(),
@@ -770,4 +770,39 @@ fn undecodable_submissions_carry_no_result() {
     let mut bad = t.clone();
     bad.fields[0].attempts[1].applied = ApplyStatus::Failed;
     has_problem(&bad, "cannot have been applied");
+}
+
+#[test]
+fn limits_past_an_xdr_bound_are_refused_by_the_decoder() {
+    let mut t = LimitsTable {
+        schema_version: 1,
+        core: core(true),
+        limits: vec![Limit {
+            path: "TransactionEnvelope.v1.tx.operations".into(),
+            measure: Some("operations in one transaction".into()),
+            max_accepted: "100".into(),
+            first_rejected: "101".into(),
+            rejection: LimitRejection {
+                stage: Stage::Decode,
+                result_code: None,
+            },
+            network_settings: BTreeMap::new(),
+            witnesses: vec![
+                "candidate:probe.ops-100".into(),
+                "candidate:probe.ops-101".into(),
+            ],
+        }],
+    };
+    holds(&t);
+    assert_eq!(
+        serde_json::to_value(Stage::Decode).unwrap(),
+        json!("decode")
+    );
+    t.limits[0].rejection.result_code = Some("tx_malformed".into());
+    has_problem(&t, "a decode rejection has no result code");
+    t.limits[0].rejection = LimitRejection {
+        stage: Stage::Submit,
+        result_code: None,
+    };
+    has_problem(&t, "has no rejection result code");
 }

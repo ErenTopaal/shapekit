@@ -45,7 +45,9 @@ pub struct LimitRejection {
     pub stage: Stage,
     /// The XDR-JSON name of the result: the transaction result arm, `tx_malformed`, or for a
     /// failed operation the operation result, `invoke_host_function.resource_limit_exceeded`.
-    pub result_code: String,
+    /// Present for `submit` and `apply`, absent for `decode`, where core returned no result.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub result_code: Option<String>,
 }
 
 impl Contract for LimitsTable {
@@ -87,8 +89,15 @@ impl Contract for LimitsTable {
                     ));
                 }
             }
-            if l.rejection.result_code.trim().is_empty() {
-                out.push(format!("{what} has no rejection result code"));
+            let code = l.rejection.result_code.as_deref();
+            match (l.rejection.stage, code) {
+                (Stage::Decode, Some(_)) => {
+                    out.push(format!("{what}: a decode rejection has no result code"))
+                }
+                (Stage::Submit | Stage::Apply, c) if c.is_none_or(|c| c.trim().is_empty()) => {
+                    out.push(format!("{what} has no rejection result code"))
+                }
+                _ => {}
             }
             if l.witnesses.len() < 2 {
                 out.push(format!(

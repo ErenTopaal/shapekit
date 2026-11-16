@@ -298,6 +298,8 @@ pub enum Stage {
     Submit,
     /// Included in a ledger and failed there.
     Apply,
+    /// Core's tx endpoint could not decode the bytes and returned an exception, no result.
+    Decode,
 }
 
 pub(crate) fn is_hex(s: &str, len: usize) -> bool {

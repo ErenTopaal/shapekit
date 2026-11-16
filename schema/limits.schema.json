@@ -106,16 +106,18 @@
       "additionalProperties": false,
       "properties": {
         "result_code": {
-          "description": "The XDR-JSON name of the result: the transaction result arm, `tx_malformed`, or for a\nfailed operation the operation result, `invoke_host_function.resource_limit_exceeded`.",
-          "type": "string"
+          "description": "The XDR-JSON name of the result: the transaction result arm, `tx_malformed`, or for a\nfailed operation the operation result, `invoke_host_function.resource_limit_exceeded`.\nPresent for `submit` and `apply`, absent for `decode`, where core returned no result.",
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "stage": {
           "$ref": "#/$defs/Stage"
         }
       },
       "required": [
-        "stage",
-        "result_code"
+        "stage"
       ],
       "type": "object"
     },
@@ -130,6 +132,11 @@
         {
           "const": "apply",
           "description": "Included in a ledger and failed there.",
+          "type": "string"
+        },
+        {
+          "const": "decode",
+          "description": "Core's tx endpoint could not decode the bytes and returned an exception, no result.",
           "type": "string"
         }
       ]
