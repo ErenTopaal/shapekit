@@ -14,6 +14,7 @@ mod oracle_cmd;
 mod pack_cmd;
 mod pins;
 mod registry_cmd;
+mod schema_cmd;
 mod serve_cmd;
 mod site_cmd;
 mod synth_cmd;
@@ -122,6 +123,11 @@ enum Command {
     Site {
         #[command(subcommand)]
         command: site_cmd::SiteCommand,
+    },
+    /// The stellar-xdr definitions in schema/xdr/ as data.
+    Schema {
+        #[command(subcommand)]
+        command: schema_cmd::SchemaCommand,
     },
     /// The corpus as a release asset.
     Corpus {
@@ -552,6 +558,7 @@ fn main() -> ExitCode {
         Command::Coverage(args) => coverage_cmd::coverage(args),
         Command::Corpus { command } => coverage_cmd::corpus(command),
         Command::Site { command } => site_cmd::run(command),
+        Command::Schema { command } => schema_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,

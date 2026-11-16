@@ -35,3 +35,12 @@ internal/indexer/processors/state_change_builder.go and internal/indexer/types/t
 f8e5786d22c04adad16318f2e126728beec5aac9 and e967ce8b7362b79c277e700e789181d76fbb5967. Each file,
 or each function in it, names the upstream file and commit it was taken from and says that it
 was reduced or adapted.
+
+The files schema/xdr/<tag>/xdr.json are generated from the XDR definitions of stellar/stellar-xdr
+(https://github.com/stellar/stellar-xdr, Apache License 2.0, copyright Stellar Development
+Foundation and contributors) at the stellar-xdr ref each directory names, by the
+generator-definitions-json program of stellar/rs-stellar-xdr
+(https://github.com/stellar/rs-stellar-xdr, Apache License 2.0, copyright Stellar Development
+Foundation and contributors) at commit 3c2aa43d2ab54d429ae44aa5143d805bf5dba7e2.
+scripts/fetch-xdr-definitions.sh writes them. Each file lists its source .x files with their
+SHA-256 and quotes the definitions' source text.
