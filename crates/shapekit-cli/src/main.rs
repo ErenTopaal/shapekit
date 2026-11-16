@@ -10,6 +10,7 @@ mod gen_cmd;
 mod golden_cmd;
 mod guide_cmd;
 mod harness_cmd;
+mod laws_cmd;
 mod manifest_cmd;
 mod oracle_cmd;
 mod pack_cmd;
@@ -125,6 +126,11 @@ enum Command {
     Site {
         #[command(subcommand)]
         command: site_cmd::SiteCommand,
+    },
+    /// The law book: laws every ledger satisfies, anchored on the network's own hashes.
+    Laws {
+        #[command(subcommand)]
+        command: laws_cmd::LawsCommand,
     },
     /// The stellar-xdr definitions in schema/xdr/ as data.
     Schema {
@@ -567,6 +573,7 @@ fn main() -> ExitCode {
         Command::Contracts { command } => contracts_cmd::run(command),
         Command::Site { command } => site_cmd::run(command),
         Command::Schema { command } => schema_cmd::run(command),
+        Command::Laws { command } => laws_cmd::run(command),
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,
