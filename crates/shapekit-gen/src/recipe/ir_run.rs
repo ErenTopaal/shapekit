@@ -13,6 +13,7 @@
 //! - fee: [`shapekit_core_driver::tx::BASE_FEE`] per operation, the same as
 //!   [`ChainDriver::classic`](shapekit_core_driver::chain::ChainDriver::classic);
 //! - preconditions: none;
+//! - a fee bump's outer fee: the base fee for each inner operation plus one;
 //! - envelope: v0 below protocol 13 and v1 from then on, as [`ChainCtx::sign`] does;
 //! - sequence numbers: the account's sequence number on the last closed ledger plus one, or
 //!   one more than the role's last transaction still waiting in the queue;
@@ -32,17 +33,18 @@ use ed25519_dalek::SigningKey;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use shapekit_contracts::RecipeIr;
-use shapekit_contracts::recipe_ir::{Outcome, Selection, Step, SymRef, TxExpect};
+use shapekit_contracts::recipe_ir::{FeeBump, Outcome, Selection, Step, SymRef, TxExpect};
 use shapekit_core_driver::chain::{Applied, SETTINGS_WRITER_SALT_DOMAIN, upgrades};
 use shapekit_core_driver::contracts::echo_wasm_for;
 use shapekit_core_driver::keys::{
     account_address, account_id, account_strkey, contract_strkey, muxed_account,
     muxed_account_with_id, muxed_strkey,
 };
-use shapekit_core_driver::settings::PreparedUpgrade;
 use shapekit_core_driver::node::SubmitStatus;
+use shapekit_core_driver::settings::PreparedUpgrade;
 use shapekit_core_driver::tx::{
-    TransactionBuilder, contract_id_from_address, contract_preimage, envelope_hash,
+    BASE_FEE, TransactionBuilder, contract_id_from_address, contract_preimage, envelope_hash,
+    fee_bump, sign_fee_bump,
 };
 use stellar_xdr::{
     ConfigSettingEntry, ConfigUpgradeSet, ContractExecutable, ContractId, CreateAccountOp,
@@ -486,11 +488,6 @@ impl<'a> Session<'a> {
                 expect,
                 fee_bump,
             } => {
-                // the contract has fee bumps; this interpreter does not build them yet
-                ensure!(
-                    fee_bump.is_none(),
-                    "a tx step with fee_bump: this interpreter does not build fee bump envelopes yet"
-                );
                 let key = key_of(ctx, source);
                 let muxed = match source_mux_id {
                     None => muxed_account(&key.verifying_key()),
@@ -521,7 +518,10 @@ impl<'a> Session<'a> {
                     signers.iter().map(|r| key_of(ctx, r)).collect()
                 };
                 let refs: Vec<&SigningKey> = keys.iter().collect();
-                let env = ctx.sign(b.build()?, &refs)?;
+                let mut env = ctx.sign(b.build()?, &refs)?;
+                if let Some(bump) = fee_bump {
+                    env = self.fee_bump(ctx, env, bump, operations.len())?;
+                }
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
             Step::Close { label } => {
@@ -745,6 +745,40 @@ impl<'a> Session<'a> {
                 }
             }
         }
+    }
+
+    /// Wraps a signed transaction in a fee bump. The outer fee defaults to the base fee for
+    /// each operation plus one, the least core accepts at the base fee rate.
+    fn fee_bump(
+        &self,
+        ctx: &mut ChainCtx,
+        inner: TransactionEnvelope,
+        bump: &FeeBump,
+        operations: usize,
+    ) -> Result<TransactionEnvelope> {
+        let TransactionEnvelope::Tx(inner) = inner else {
+            bail!(
+                "a fee bump wraps a v1 envelope, and protocol {} signs v0 envelopes",
+                ctx.protocol()
+            );
+        };
+        let payer = key_of(ctx, &bump.source);
+        let fee = match bump.fee {
+            Some(f) => f,
+            None => i64::from(BASE_FEE) * (i64::try_from(operations)? + 1),
+        };
+        let tx = fee_bump(inner, muxed_account(&payer.verifying_key()), fee);
+        let keys: Vec<SigningKey> = if bump.signers.is_empty() {
+            vec![payer]
+        } else {
+            bump.signers.iter().map(|r| key_of(ctx, r)).collect()
+        };
+        let refs: Vec<&SigningKey> = keys.iter().collect();
+        Ok(TransactionEnvelope::TxFeeBump(sign_fee_bump(
+            tx,
+            ctx.driver().network_id(),
+            &refs,
+        )?))
     }
 
     /// Stores a config upgrade set through the settings writer, deploying the writer first if

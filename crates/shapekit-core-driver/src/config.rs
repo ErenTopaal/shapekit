@@ -422,7 +422,14 @@ mod tests {
     fn default_limits_are_two_gib_and_two_cpus() {
         assert_eq!(
             ContainerLimits::default().docker_args(),
-            ["--memory", "2147483648", "--memory-swap", "2147483648", "--cpus", "2.000"]
+            [
+                "--memory",
+                "2147483648",
+                "--memory-swap",
+                "2147483648",
+                "--cpus",
+                "2.000"
+            ]
         );
         let half = ContainerLimits {
             memory_bytes: 1,

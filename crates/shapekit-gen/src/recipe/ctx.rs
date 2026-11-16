@@ -90,12 +90,7 @@ pub struct ChainCtx {
 }
 
 impl ChainCtx {
-    pub fn new(
-        driver: ChainDriver,
-        recipe_id: &str,
-        network: Network,
-        protocol: u32,
-    ) -> Self {
+    pub fn new(driver: ChainDriver, recipe_id: &str, network: Network, protocol: u32) -> Self {
         Self {
             driver,
             recipe_id: recipe_id.to_owned(),
