@@ -33,6 +33,10 @@ pub enum HarnessCommand {
     /// (--control) are left out; the network variants are translated through the
     /// identifiers core wrote differently in the two chains.
     Relate(RelateArgs),
+    /// Compare the target's stored accounts, trustlines, asset contract balances and pools
+    /// with core's final entries: infer the table mapping from runs, or check runs with it.
+    #[command(subcommand)]
+    State(StateCommand),
     /// Check, or with --write regenerate, schema/adapter-protocol.schema.json and the
     /// vocabulary section of docs/adapter-interface.md.
     Schema {
@@ -111,6 +115,41 @@ pub struct RunArgs {
     expect: Option<PathBuf>,
     #[command(flatten)]
     common: Common,
+}
+
+#[derive(Subcommand)]
+pub enum StateCommand {
+    /// Infer which table and column holds which entry field from the ordinary chains of the
+    /// given runs (no entry mishandled or dropped, carry check clean), keep what holds in
+    /// all of them, and write the mapping.
+    Infer {
+        /// A `harness run --out` directory whose run kept dumps; repeatable.
+        #[arg(long, required = true)]
+        run: Vec<PathBuf>,
+        /// Only chains of this network.
+        #[arg(long)]
+        network: Option<String>,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long)]
+        write: PathBuf,
+    },
+    /// Apply a mapping to every chain of the given runs and list where the stored state
+    /// differs from core's, and where that disagrees with the oracle's verdicts.
+    Check {
+        #[arg(long, required = true)]
+        run: Vec<PathBuf>,
+        #[arg(long)]
+        mapping: PathBuf,
+        /// Only chains of this network.
+        #[arg(long)]
+        network: Option<String>,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        /// Write the per-chain results as JSON here.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
 }
 
 #[derive(Args)]
@@ -349,6 +388,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             }
             Ok(r.truncated == 0 && r.fabricated == 0)
         }
+        HarnessCommand::State(c) => state(c),
         HarnessCommand::Relate(a) => {
             use shapekit_harness::dump::Dump;
             use shapekit_harness::relations::replay;
@@ -510,6 +550,142 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             }
             println!("wrote {}", a.out.join("REPRODUCTIONS.md").display());
             Ok(!results.is_empty() && results.iter().all(|c| c.holds))
+        }
+    }
+}
+
+fn load_runs(
+    runs: &[PathBuf],
+    corpus: &std::path::Path,
+    network: Option<&str>,
+) -> Result<Vec<shapekit_harness::relations::state::RunChain>> {
+    let mut out = Vec::new();
+    for r in runs {
+        out.extend(
+            shapekit_harness::relations::state::load_run(r, corpus)?
+                .into_iter()
+                .filter(|c| network.is_none_or(|n| c.network == n)),
+        );
+    }
+    Ok(out)
+}
+
+fn state(c: StateCommand) -> Result<bool> {
+    use shapekit_harness::relations::state;
+    match c {
+        StateCommand::Infer {
+            run,
+            network,
+            corpus,
+            write,
+        } => {
+            let chains = load_runs(&run, &corpus, network.as_deref())?;
+            let ordinary: Vec<_> = chains.iter().filter(|c| c.ordinary).collect();
+            if ordinary.is_empty() {
+                bail!("the runs hold no ordinary chain with a dump");
+            }
+            let per: Vec<_> = ordinary
+                .iter()
+                .map(|c| state::infer(&c.dump, &c.core, &c.known))
+                .collect();
+            let (m, notes) = state::merge(&per);
+            for n in &notes {
+                println!("note: {n}");
+            }
+            for t in &m.table {
+                println!(
+                    "{} holds {} entries keyed by {}; {} mapped columns, {} ambiguous; {} chains, {} rows",
+                    t.name,
+                    t.entry.name(),
+                    t.keys
+                        .iter()
+                        .map(|k| format!("{}={}", k.field, k.column))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                    t.fields.len(),
+                    t.ambiguous.len(),
+                    t.chains,
+                    t.rows
+                );
+            }
+            let names: Vec<String> = ordinary
+                .iter()
+                .map(|c| format!("{} ({})", c.chain, c.network))
+                .collect();
+            let header = format!(
+                "which stored table and column holds which core entry field, inferred by\n\
+                 `shapekit harness state infer` from {} ordinary chains of {} chains with a dump:\n{}",
+                ordinary.len(),
+                chains.len(),
+                names.join("\n")
+            );
+            std::fs::write(&write, m.render(&header)?)
+                .with_context(|| format!("writing {}", write.display()))?;
+            println!(
+                "wrote {} from {} ordinary chains",
+                write.display(),
+                ordinary.len()
+            );
+            Ok(true)
+        }
+        StateCommand::Check {
+            run,
+            mapping,
+            network,
+            corpus,
+            out,
+        } => {
+            let m = state::Mapping::load(&mapping)?;
+            let chains = load_runs(&run, &corpus, network.as_deref())?;
+            let results: Vec<_> = chains.iter().map(|c| state::check_chain(c, &m)).collect();
+            let (mut ord, mut ord_ok) = (0, 0);
+            for r in &results {
+                if r.ordinary {
+                    ord += 1;
+                    if r.state.ok {
+                        ord_ok += 1;
+                    }
+                }
+                println!(
+                    "{} ({}): {} rows, {} fields compared, {} mismatched, {} stale, {} missing{}",
+                    r.chain,
+                    r.network,
+                    r.state.rows,
+                    r.state.fields_compared,
+                    r.state.mismatches.len(),
+                    r.state.stale.len(),
+                    r.state.missing.len(),
+                    r.disagreement
+                        .as_deref()
+                        .map(|d| format!("; disagreement: {d}"))
+                        .unwrap_or_default()
+                );
+                for x in r.state.mismatches.iter().take(5) {
+                    println!(
+                        "  {} {} {} ({}): stored {:?}, core {}",
+                        x.table,
+                        x.key.join(" "),
+                        x.column,
+                        x.field,
+                        x.stored,
+                        x.core
+                    );
+                }
+                for x in r.state.stale.iter().chain(&r.state.missing).take(5) {
+                    println!("  {x}");
+                }
+            }
+            println!(
+                "ordinary chains where the mapping holds: {ord_ok} of {ord}; chains: {}; disagreements with the oracle: {}",
+                results.len(),
+                results.iter().filter(|r| r.disagreement.is_some()).count()
+            );
+            if let Some(o) = &out {
+                let mut text = serde_json::to_string_pretty(&results)?;
+                text.push('\n');
+                std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
+            }
+            Ok(ord_ok == ord)
         }
     }
 }
