@@ -126,6 +126,9 @@ pub enum Step {
         cond: Option<Value>,
         #[serde(default)]
         expect: TxExpect,
+        /// Wraps the transaction in a fee bump envelope (CAP-15) before it is submitted.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        fee_bump: Option<FeeBump>,
     },
     /// Closes one ledger with everything queued since the last close.
     Close {
@@ -202,6 +205,20 @@ pub enum Step {
         #[serde(default)]
         must_reject: bool,
     },
+}
+
+/// The fee bump envelope around a `tx` step's transaction.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct FeeBump {
+    /// The role whose account pays the outer fee.
+    pub source: String,
+    /// The outer fee in stroops; the interpreter's default when absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub fee: Option<i64>,
+    /// Roles that sign the fee bump, in order; the fee source alone when empty.
+    #[serde(default)]
+    pub signers: Vec<String>,
 }
 
 /// What a transaction must come to.
@@ -517,11 +534,22 @@ impl Contract for RecipeIr {
                     memo,
                     cond,
                     expect,
+                    fee_bump,
                     ..
                 } => {
                     c.role(&at, source, false);
                     for s in signers {
                         c.role(&at, s, false);
+                    }
+                    if let Some(fb) = fee_bump {
+                        c.role(&at, &fb.source, false);
+                        for s in &fb.signers {
+                            c.role(&at, s, false);
+                        }
+                        if fb.fee.is_some_and(|f| f <= 0) {
+                            c.out
+                                .push(format!("{at}: the fee bump fee must be positive"));
+                        }
                     }
                     if let Some(id) = source_mux_id
                         && !parse_decimal(id).is_some_and(|v| u64::try_from(v).is_ok())

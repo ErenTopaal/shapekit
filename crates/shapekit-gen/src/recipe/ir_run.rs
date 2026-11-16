@@ -378,7 +378,13 @@ impl Interp<'_> {
                 fee,
                 cond,
                 expect,
+                fee_bump,
             } => {
+                // the contract has fee bumps; this interpreter does not build them yet
+                ensure!(
+                    fee_bump.is_none(),
+                    "a tx step with fee_bump: this interpreter does not build fee bump envelopes yet"
+                );
                 let key = key_of(ctx, source);
                 let muxed = match source_mux_id {
                     None => muxed_account(&key.verifying_key()),

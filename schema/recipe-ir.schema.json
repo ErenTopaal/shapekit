@@ -1,5 +1,35 @@
 {
   "$defs": {
+    "FeeBump": {
+      "additionalProperties": false,
+      "description": "The fee bump envelope around a `tx` step's transaction.",
+      "properties": {
+        "fee": {
+          "description": "The outer fee in stroops; the interpreter's default when absent.",
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "signers": {
+          "default": [],
+          "description": "Roles that sign the fee bump, in order; the fee source alone when empty.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "source": {
+          "description": "The role whose account pays the outer fee.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "type": "object"
+    },
     "NodeOptions": {
       "additionalProperties": false,
       "description": "How the standalone core is configured before the first step.",
@@ -190,6 +220,17 @@
                 "integer",
                 "null"
               ]
+            },
+            "fee_bump": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/FeeBump"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Wraps the transaction in a fee bump envelope (CAP-15) before it is submitted."
             },
             "label": {
               "type": [

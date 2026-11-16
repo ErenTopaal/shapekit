@@ -437,6 +437,7 @@ fn recipe() -> RecipeIr {
                 fee: None,
                 cond: None,
                 expect: TxExpect::default(),
+                fee_bump: None,
             },
             Step::Close { label: None },
             Step::Capture {
@@ -468,6 +469,7 @@ fn recipe() -> RecipeIr {
                         json!({"tx_failed": [{"op_inner": {"bump_sequence": "bad_seq"}}]}),
                     ),
                 },
+                fee_bump: None,
             },
             Step::Capture {
                 slug: "bump-negative".into(),
@@ -550,6 +552,7 @@ fn recipe_ir() {
                     fee: None,
                     cond: None,
                     expect: TxExpect::default(),
+                    fee_bump: None,
                 },
             )
         }),
@@ -685,4 +688,42 @@ fn committed_schemas_are_current() {
         "stale: {stale:?}; run `shapekit contracts schema --write`"
     );
     assert_eq!(shapekit_contracts::all().len(), 7);
+}
+
+#[test]
+fn a_fee_bump_names_funded_roles() {
+    use shapekit_contracts::recipe_ir::FeeBump;
+    let mut r = recipe();
+    let Step::Tx { fee_bump, .. } = &mut r.steps[2] else {
+        panic!("step 2 is the bump-forward tx");
+    };
+    *fee_bump = Some(FeeBump {
+        source: "bob".into(),
+        fee: Some(400),
+        signers: vec![],
+    });
+    holds(&r);
+    let with = |fb: FeeBump| {
+        let mut r = recipe();
+        if let Step::Tx { fee_bump, .. } = &mut r.steps[2] {
+            *fee_bump = Some(fb);
+        }
+        r
+    };
+    has_problem(
+        &with(FeeBump {
+            source: "carol".into(),
+            fee: None,
+            signers: vec![],
+        }),
+        "role carol is used before a fund step",
+    );
+    has_problem(
+        &with(FeeBump {
+            source: "bob".into(),
+            fee: Some(0),
+            signers: vec!["dave".into()],
+        }),
+        "the fee bump fee must be positive",
+    );
 }
