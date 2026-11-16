@@ -1088,3 +1088,35 @@ fn footprint_steps_take_resource_overrides() {
         has_problem(&bad, "the resource fee cannot be negative");
     }
 }
+
+// the committed recipes are formatted by hand and leave defaults out, so the check is that
+// each reads, writes and reads back to the same recipe, and that writing it adds no
+// emit_ledger_close_meta_ext_v1 key: a new option off by default changes no file
+#[test]
+fn committed_recipes_round_trip_unchanged() {
+    let dir = root().join("corpus/recipes");
+    let mut n = 0;
+    for item in walkdir::WalkDir::new(&dir) {
+        let item = item.unwrap();
+        if item.path().extension().is_some_and(|x| x == "json") {
+            let text = std::fs::read_to_string(item.path()).unwrap();
+            let r: RecipeIr = serde_json::from_str(&text).unwrap();
+            let written = render(&r);
+            let back: RecipeIr = serde_json::from_str(&written).unwrap();
+            assert_eq!(back, r, "{}", item.path().display());
+            assert_eq!(render(&back), written, "{}", item.path().display());
+            assert!(!written.contains("emit_ledger_close_meta_ext_v1"));
+            n += 1;
+        }
+    }
+    assert!(n > 0, "no recipe under corpus/recipes");
+}
+
+#[test]
+fn ledger_close_meta_ext_v1_is_written_only_when_set() {
+    let mut r = recipe();
+    assert!(!render(&r).contains("emit_ledger_close_meta_ext_v1"));
+    r.node.emit_ledger_close_meta_ext_v1 = true;
+    holds(&r);
+    assert!(render(&r).contains("\"emit_ledger_close_meta_ext_v1\": true"));
+}

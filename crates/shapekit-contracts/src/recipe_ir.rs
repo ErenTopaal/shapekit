@@ -73,6 +73,14 @@ pub struct NodeOptions {
     /// `BACKFILL_STELLAR_ASSET_EVENTS`.
     #[serde(default = "yes")]
     pub backfill_stellar_asset_events: bool,
+    /// `EMIT_LEDGER_CLOSE_META_EXT_V1`: core writes `LedgerCloseMetaExt` v1 only with it, and
+    /// core v30.0.0 leaves it off.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub emit_ledger_close_meta_ext_v1: bool,
+}
+
+fn is_false(b: &bool) -> bool {
+    !*b
 }
 
 fn yes() -> bool {
@@ -87,6 +95,7 @@ impl Default for NodeOptions {
             min_persistent_ttl: None,
             emit_classic_events: true,
             backfill_stellar_asset_events: true,
+            emit_ledger_close_meta_ext_v1: false,
         }
     }
 }
