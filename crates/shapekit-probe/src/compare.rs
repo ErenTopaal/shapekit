@@ -7,7 +7,7 @@
 
 use std::collections::BTreeMap;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, bail, ensure};
 use shapekit_contracts::validation::{FieldVerdict, ProbeAttempt, ValidationTable};
 
 /// Where a row's question is put to core.
@@ -20,6 +20,9 @@ pub struct Site {
     pub only: Option<&'static str>,
     /// Leaves out the replacements whose name contains this.
     pub except: Option<&'static str>,
+    /// Only the base attempt: the row is about the transaction the carrier builds, not about
+    /// a value of the field.
+    pub bases: bool,
 }
 
 const fn at(path: &'static str) -> Site {
@@ -28,6 +31,17 @@ const fn at(path: &'static str) -> Site {
         carrier: "",
         only: None,
         except: None,
+        bases: false,
+    }
+}
+
+const fn bases(path: &'static str, carrier: &'static str) -> Site {
+    Site {
+        path,
+        carrier,
+        only: None,
+        except: None,
+        bases: true,
     }
 }
 
@@ -37,6 +51,7 @@ const fn via(path: &'static str, carrier: &'static str) -> Site {
         carrier,
         only: None,
         except: None,
+        bases: false,
     }
 }
 
@@ -46,6 +61,7 @@ const fn only(path: &'static str, carrier: &'static str, name: &'static str) -> 
         carrier,
         only: Some(name),
         except: None,
+        bases: false,
     }
 }
 
@@ -55,6 +71,7 @@ const fn except(path: &'static str, carrier: &'static str, name: &'static str) -
         carrier,
         only: None,
         except: Some(name),
+        bases: false,
     }
 }
 
@@ -64,8 +81,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         (
             "tx.envelope.type",
             vec![
-                via("TransactionV0Envelope.tx", "p12"),
-                via("TransactionV0Envelope.tx", "p30"),
+                bases("TransactionV0Envelope.tx", "p12"),
+                bases("TransactionV0Envelope.tx", "p30"),
+                bases("TransactionV1Envelope.tx", ""),
+                bases("FeeBumpTransactionEnvelope.tx", ""),
             ],
         ),
         (
@@ -497,9 +516,9 @@ pub fn resolutions() -> Vec<Resolution> {
 }
 
 /// The measured verdict of one site: whether its attempts end in more than one way.
-fn site_validated(v: &FieldVerdict, s: &Site) -> Result<(bool, usize)> {
-    let picked: Vec<&ProbeAttempt> = v
-        .attempts
+/// The attempts of `v` that put the site's question to core.
+fn picked<'a>(v: &'a FieldVerdict, s: &Site) -> Vec<&'a ProbeAttempt> {
+    v.attempts
         .iter()
         .filter(|a| s.carrier.is_empty() || a.carrier.as_deref() == Some(s.carrier))
         .filter(|a| {
@@ -507,21 +526,20 @@ fn site_validated(v: &FieldVerdict, s: &Site) -> Result<(bool, usize)> {
             if name.starts_with("base, ") {
                 return true;
             }
+            if s.bases {
+                return false;
+            }
             s.only.is_none_or(|o| name.contains(o)) && s.except.is_none_or(|x| !name.contains(x))
         })
-        .collect();
-    if picked.len() < 2 {
-        bail!(
-            "{} via {:?}: {} attempts match the site",
-            s.path,
-            s.carrier,
-            picked.len()
-        );
-    }
-    let mut outcomes: Vec<_> = picked.iter().map(|a| a.outcome()).collect();
+        .collect()
+}
+
+/// Whether the attempts end in more than one way.
+fn differ(attempts: &[&ProbeAttempt]) -> bool {
+    let mut outcomes: Vec<_> = attempts.iter().map(|a| a.outcome()).collect();
     outcomes.sort();
     outcomes.dedup();
-    Ok((outcomes.len() > 1, picked.len()))
+    outcomes.len() > 1
 }
 
 /// One row of the comparison.
@@ -558,17 +576,49 @@ pub fn compare(table: &ValidationTable, fields: &toml::Table) -> Result<Vec<Comp
             .get(id)
             .with_context(|| format!("no sites for fields.toml row {id}"))?;
         let mut measured = Vec::new();
+        let label = |s: &Site| {
+            if s.carrier.is_empty() {
+                s.path.to_owned()
+            } else {
+                format!("{} [{}]", s.path, s.carrier)
+            }
+        };
+        let mut pooled = Vec::new();
         for s in ss {
             let v = by_path
                 .get(s.path)
                 .with_context(|| format!("{id}: validation.json has no {}", s.path))?;
-            let (yes, n) = site_validated(v, s).with_context(|| format!("row {id}"))?;
-            let label = if s.carrier.is_empty() {
-                s.path.to_owned()
-            } else {
-                format!("{} [{}]", s.path, s.carrier)
-            };
-            measured.push((label, yes, n));
+            let p = picked(v, s);
+            if s.bases {
+                // a row about the transaction itself compares the bases of several carriers
+                ensure!(p.len() == 1, "{id}: {} has {} bases", label(s), p.len());
+                pooled.extend(p);
+                continue;
+            }
+            ensure!(
+                p.len() >= 2,
+                "{id}: {} attempts match {}",
+                p.len(),
+                label(s)
+            );
+            measured.push((label(s), differ(&p), p.len()));
+        }
+        if !pooled.is_empty() {
+            ensure!(
+                measured.is_empty() && pooled.len() >= 2,
+                "{id}: a row compares bases only, two or more"
+            );
+            let names: Vec<String> = ss.iter().map(label).collect();
+            // bases of different envelope types succeed under different codes (a fee bump's
+            // is tx_fee_bump_inner_success), so they compare by whether core applied them
+            let mut ends: Vec<_> = pooled.iter().map(|a| (a.submission, a.applied)).collect();
+            ends.sort();
+            ends.dedup();
+            measured.push((
+                format!("the bases of {}", names.join(", ")),
+                ends.len() > 1,
+                pooled.len(),
+            ));
         }
         let agrees = match said {
             "yes" => measured.iter().all(|m| m.1),

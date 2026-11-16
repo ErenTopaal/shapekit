@@ -695,11 +695,28 @@ pub fn classic() -> Vec<Carrier> {
                 |w, s| v0(w, s, "/tx_v0/tx"),
             )
         },
-        c(
-            "CreateAccountOp",
-            "a create account of a new key",
-            |w, s| simple(w, s, create(&s.fresh("created"), 100 * XLM)),
-        ),
+        Carrier {
+            extra: |_, s, f| {
+                Ok(match f {
+                    "destination" => vec![
+                        extra(
+                            "the source itself",
+                            json!(account_strkey(&s.source.verifying_key())),
+                        ),
+                        extra(
+                            "an account that exists, peer 0",
+                            json!(account_strkey(&s.peers[0].verifying_key())),
+                        ),
+                    ],
+                    _ => Vec::new(),
+                })
+            },
+            ..c(
+                "CreateAccountOp",
+                "a create account of a new key",
+                |w, s| simple(w, s, create(&s.fresh("created"), 100 * XLM)),
+            )
+        },
         Carrier {
             extra: path_extra,
             ..c(
@@ -797,30 +814,41 @@ pub fn classic() -> Vec<Carrier> {
                 )
             },
         ),
-        c(
-            "SetOptionsOp",
-            "a set options with every field set",
-            |w, s| {
-                simple(
-                    w,
-                    s,
-                    OperationBody::SetOptions(SetOptionsOp {
-                        inflation_dest: Some(acc(&s.source)),
-                        clear_flags: Some(0),
-                        set_flags: Some(0),
-                        master_weight: Some(1),
-                        low_threshold: Some(0),
-                        med_threshold: Some(0),
-                        high_threshold: Some(0),
-                        home_domain: Some(stellar_xdr::String32("probe.example".try_into()?)),
-                        signer: Some(Signer {
-                            key: ed25519_signer(&s.peers[0].verifying_key()),
-                            weight: 1,
-                        }),
-                    }),
-                )
+        Carrier {
+            extra: |_, s, f| {
+                Ok(match f {
+                    "signer" => vec![extra(
+                        "the source's own key, weight 1",
+                        json!({"key": account_strkey(&s.source.verifying_key()), "weight": 1}),
+                    )],
+                    _ => Vec::new(),
+                })
             },
-        ),
+            ..c(
+                "SetOptionsOp",
+                "a set options with every field set",
+                |w, s| {
+                    simple(
+                        w,
+                        s,
+                        OperationBody::SetOptions(SetOptionsOp {
+                            inflation_dest: Some(acc(&s.source)),
+                            clear_flags: Some(0),
+                            set_flags: Some(0),
+                            master_weight: Some(1),
+                            low_threshold: Some(0),
+                            med_threshold: Some(0),
+                            high_threshold: Some(0),
+                            home_domain: Some(stellar_xdr::String32("probe.example".try_into()?)),
+                            signer: Some(Signer {
+                                key: ed25519_signer(&s.peers[0].verifying_key()),
+                                weight: 1,
+                            }),
+                        }),
+                    )
+                },
+            )
+        },
         c("Signer", "a signer added by set options", |w, s| {
             simple(
                 w,
