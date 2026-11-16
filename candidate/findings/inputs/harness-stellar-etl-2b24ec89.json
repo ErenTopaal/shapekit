@@ -1,0 +1,2158 @@
+{
+  "schema": 1,
+  "shapekit_version": "0.1.0",
+  "adapter_protocol": 2,
+  "oracle_vocab_version": 2,
+  "adapter_command": [
+    "adapters/bin/etl-adapter",
+    "--commit",
+    "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+    "--cpus",
+    "2"
+  ],
+  "describe": {
+    "protocol": 2,
+    "adapter": "shapekit-stellar-etl-adapter",
+    "adapter_version": "0.1.0",
+    "target": "stellar-etl",
+    "target_version": "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+    "delivery_modes": [
+      "sep54-gcs"
+    ],
+    "default_delivery": "sep54-gcs",
+    "bootstrap": "ledger",
+    "vocab_version": 2,
+    "protocols": {
+      "min": 1,
+      "max": 30
+    },
+    "claims": {
+      "changes": [
+        {
+          "kind": "account-created",
+          "fields": [
+            "account",
+            "starting_balance"
+          ]
+        },
+        {
+          "kind": "account-removed",
+          "fields": [
+            "account"
+          ]
+        },
+        {
+          "kind": "signer-added",
+          "fields": [
+            "account",
+            "signer",
+            "weight"
+          ]
+        },
+        {
+          "kind": "signer-removed",
+          "fields": [
+            "account",
+            "signer"
+          ]
+        },
+        {
+          "kind": "signer-weight",
+          "fields": [
+            "account",
+            "signer",
+            "after"
+          ]
+        },
+        {
+          "kind": "trustline-created",
+          "fields": [
+            "account",
+            "asset",
+            "limit"
+          ]
+        },
+        {
+          "kind": "trustline-removed",
+          "fields": [
+            "account",
+            "asset"
+          ]
+        },
+        {
+          "kind": "trustline-limit",
+          "fields": [
+            "account",
+            "asset",
+            "after"
+          ]
+        },
+        {
+          "kind": "home-domain",
+          "fields": [
+            "account",
+            "after"
+          ]
+        },
+        {
+          "kind": "data-entry",
+          "fields": [
+            "account",
+            "action",
+            "name_hex",
+            "value_after_hex"
+          ]
+        },
+        {
+          "kind": "token-event",
+          "where": {
+            "event": [
+              "transfer",
+              "mint",
+              "burn",
+              "clawback"
+            ]
+          },
+          "fields": [
+            "event",
+            "contract",
+            "from",
+            "to",
+            "amount"
+          ]
+        },
+        {
+          "kind": "token-event",
+          "where": {
+            "event": [
+              "fee"
+            ],
+            "stage": [
+              "before-all-txs"
+            ]
+          },
+          "fields": [
+            "event",
+            "contract",
+            "from"
+          ]
+        }
+      ]
+    },
+    "capabilities": [
+      "dump"
+    ]
+  },
+  "manifest_sha256": "0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4",
+  "memory_limit_bytes": 2147483648,
+  "rounds": [
+    {
+      "round": 1,
+      "peak_rss_bytes": 17604608,
+      "rss_after_bytes": 12185600,
+      "seconds": 184.386942885,
+      "same_verdicts_as_first": true,
+      "target_peak_memory_bytes": {
+        "cap27.muxed-accounts.p30 (testnet)": 62394368,
+        "cap40.signed-payload-signer.p30 (testnet)": 64692224,
+        "cap73.sac-trust.p30 (testnet)": 64008192
+      }
+    }
+  ],
+  "memory": {
+    "slack_bytes": 16777216,
+    "flat": true,
+    "within_budget": true,
+    "detail": "first round peak 17604608 bytes, allowed growth 16777216 bytes over 1 round(s)"
+  },
+  "target_memory": {
+    "limit_bytes": 2147483648,
+    "peak_bytes": 64692224,
+    "within_limit": true,
+    "flat": true,
+    "detail": "target peak 64692224 bytes of a 2147483648-byte limit"
+  },
+  "totals": {
+    "entries": 34,
+    "by_verdict": {
+      "dropped": 4,
+      "pass": 30
+    },
+    "by_reason": {},
+    "without_chain": 0,
+    "without_oracle": 1
+  },
+  "chains": [
+    {
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "protocol": 30,
+      "first_ledger": 2,
+      "last_ledger": 76,
+      "bootstrap": 2,
+      "delivery": "sep54-gcs",
+      "last_ingested": 76,
+      "target_peak_memory_bytes": 62394368,
+      "components": {
+        "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
+        "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
+        "stellar-etl.commit": "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "stellar-etl.image": "sha256:e472b0297f492027b9c366c19c7dba69cfc3aba6acdeaaf748ac7aa4fc7948f9"
+      },
+      "exported_records": 13,
+      "unattributed_rows": 0,
+      "dump": {
+        "file": "cap27.muxed-accounts.p30.testnet.dump.json",
+        "tables": 5,
+        "rows": 139
+      },
+      "carry": {
+        "known_addresses": 19,
+        "known_amounts": 46,
+        "addresses_found": 18,
+        "cells": 2034,
+        "truncated": 0,
+        "fabricated": 0,
+        "carried": [
+          {
+            "column": "contract_events.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 31,
+            "values": 2
+          },
+          {
+            "column": "contract_events.type",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 31,
+            "values": 1
+          },
+          {
+            "column": "effects.address",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 44,
+            "values": 6
+          },
+          {
+            "column": "effects.address_muxed",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 17,
+            "values": 10
+          },
+          {
+            "column": "effects.index",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 18,
+            "values": 1
+          },
+          {
+            "column": "effects.type",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 1,
+            "values": 1
+          },
+          {
+            "column": "operations.source_account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 20,
+            "values": 5
+          },
+          {
+            "column": "operations.source_account_muxed",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 8,
+            "values": 4
+          },
+          {
+            "column": "operations.type",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 9,
+            "values": 1
+          },
+          {
+            "column": "token_transfer.amount",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 12,
+            "values": 1
+          },
+          {
+            "column": "token_transfer.amount_raw",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 31,
+            "values": 6
+          },
+          {
+            "column": "token_transfer.asset_issuer",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 2,
+            "values": 1
+          },
+          {
+            "column": "token_transfer.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 31,
+            "values": 2
+          },
+          {
+            "column": "token_transfer.from",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 30,
+            "values": 5
+          },
+          {
+            "column": "token_transfer.to",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 17,
+            "values": 5
+          },
+          {
+            "column": "token_transfer.to_muxed",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 8,
+            "values": 6
+          },
+          {
+            "column": "token_transfer.to_muxed_id",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 7,
+            "values": 3
+          },
+          {
+            "column": "transactions.account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 13,
+            "values": 5
+          },
+          {
+            "column": "transactions.account_muxed",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 4,
+            "values": 4
+          },
+          {
+            "column": "transactions.account_sequence",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 1,
+            "values": 1
+          },
+          {
+            "column": "transactions.fee_charged",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 13,
+            "values": 3
+          },
+          {
+            "column": "transactions.max_fee",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 13,
+            "values": 3
+          },
+          {
+            "column": "transactions.operation_count",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 11,
+            "values": 1
+          }
+        ],
+        "problems": []
+      },
+      "adapter_exit": "exit status: 0",
+      "seconds": 77.867502577
+    },
+    {
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "protocol": 30,
+      "first_ledger": 2,
+      "last_ledger": 72,
+      "bootstrap": 2,
+      "delivery": "sep54-gcs",
+      "last_ingested": 72,
+      "target_peak_memory_bytes": 64692224,
+      "components": {
+        "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
+        "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
+        "stellar-etl.commit": "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "stellar-etl.image": "sha256:e472b0297f492027b9c366c19c7dba69cfc3aba6acdeaaf748ac7aa4fc7948f9"
+      },
+      "exported_records": 9,
+      "unattributed_rows": 0,
+      "dump": {
+        "file": "cap40.signed-payload-signer.p30.testnet.dump.json",
+        "tables": 5,
+        "rows": 70
+      },
+      "carry": {
+        "known_addresses": 13,
+        "known_amounts": 19,
+        "addresses_found": 5,
+        "cells": 1040,
+        "truncated": 0,
+        "fabricated": 0,
+        "carried": [
+          {
+            "column": "contract_events.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 14,
+            "values": 1
+          },
+          {
+            "column": "effects.address",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 20,
+            "values": 4
+          },
+          {
+            "column": "operations.source_account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 13,
+            "values": 3
+          },
+          {
+            "column": "token_transfer.amount_raw",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 14,
+            "values": 4
+          },
+          {
+            "column": "token_transfer.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 14,
+            "values": 1
+          },
+          {
+            "column": "token_transfer.from",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 14,
+            "values": 3
+          },
+          {
+            "column": "token_transfer.to",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 5,
+            "values": 3
+          },
+          {
+            "column": "transactions.account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 9,
+            "values": 3
+          },
+          {
+            "column": "transactions.fee_charged",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 9,
+            "values": 2
+          },
+          {
+            "column": "transactions.max_fee",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 9,
+            "values": 2
+          }
+        ],
+        "problems": []
+      },
+      "adapter_exit": "exit status: 0",
+      "seconds": 49.732938037
+    },
+    {
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "protocol": 30,
+      "first_ledger": 2,
+      "last_ledger": 73,
+      "bootstrap": 2,
+      "delivery": "sep54-gcs",
+      "last_ingested": 73,
+      "target_peak_memory_bytes": 64008192,
+      "components": {
+        "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
+        "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
+        "stellar-etl.commit": "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+        "stellar-etl.image": "sha256:e472b0297f492027b9c366c19c7dba69cfc3aba6acdeaaf748ac7aa4fc7948f9"
+      },
+      "exported_records": 9,
+      "unattributed_rows": 0,
+      "dump": {
+        "file": "cap73.sac-trust.p30.testnet.dump.json",
+        "tables": 5,
+        "rows": 67
+      },
+      "carry": {
+        "known_addresses": 8,
+        "known_amounts": 49,
+        "addresses_found": 5,
+        "cells": 1037,
+        "truncated": 0,
+        "fabricated": 0,
+        "carried": [
+          {
+            "column": "contract_events.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 20,
+            "values": 1
+          },
+          {
+            "column": "effects.address",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 8,
+            "values": 4
+          },
+          {
+            "column": "operations.source_account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 10,
+            "values": 3
+          },
+          {
+            "column": "token_transfer.amount_raw",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 20,
+            "values": 19
+          },
+          {
+            "column": "token_transfer.contract_id",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 20,
+            "values": 1
+          },
+          {
+            "column": "token_transfer.from",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 20,
+            "values": 3
+          },
+          {
+            "column": "token_transfer.to",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 3,
+            "values": 3
+          },
+          {
+            "column": "transactions.account",
+            "kind": "address",
+            "encoding": "strkey",
+            "cells": 9,
+            "values": 3
+          },
+          {
+            "column": "transactions.fee_charged",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 9,
+            "values": 9
+          },
+          {
+            "column": "transactions.max_fee",
+            "kind": "amount",
+            "encoding": "decimal",
+            "cells": 9,
+            "values": 9
+          }
+        ],
+        "problems": []
+      },
+      "adapter_exit": "exit status: 0",
+      "seconds": 56.741657369
+    }
+  ],
+  "entries": [
+    {
+      "entry": "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-0",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 65,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KAAAAAAAAAAAACAOY",
+            "closed_at": "2026-03-07T00:00:00Z",
+            "closed_at_ms": "2026-03-07T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "279172878337-0",
+            "index": 0,
+            "ledger_sequence": 65,
+            "operation_id": 279172878337,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAB7EA",
+            "closed_at": "2026-03-07T00:00:00Z",
+            "closed_at_ms": "2026-03-07T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "279172878337-1",
+            "index": 1,
+            "ledger_sequence": 65,
+            "operation_id": 279172878337,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 66,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KAAAAAAAAAAAAGQ7Y",
+            "closed_at": "2026-03-08T00:00:00Z",
+            "closed_at_ms": "2026-03-08T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "283467845633-0",
+            "index": 0,
+            "ledger_sequence": 66,
+            "operation_id": 283467845633,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAFPVA",
+            "closed_at": "2026-03-08T00:00:00Z",
+            "closed_at_ms": "2026-03-08T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "283467845633-1",
+            "index": 1,
+            "ledger_sequence": 66,
+            "operation_id": 283467845633,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 67,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KABAAAAAAAAAAB3IE",
+            "closed_at": "2026-03-09T00:00:00Z",
+            "closed_at_ms": "2026-03-09T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "287762812929-0",
+            "index": 0,
+            "ledger_sequence": 67,
+            "operation_id": 287762812929,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUABAAAAAAAAAACEC4",
+            "closed_at": "2026-03-09T00:00:00Z",
+            "closed_at_ms": "2026-03-09T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "287762812929-1",
+            "index": 1,
+            "ledger_sequence": 67,
+            "operation_id": 287762812929,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 68,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3L7777777777775QUU",
+            "closed_at": "2026-03-10T00:00:00Z",
+            "closed_at_ms": "2026-03-10T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "292057780225-0",
+            "index": 0,
+            "ledger_sequence": 68,
+            "operation_id": 292057780225,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVV7777777777776P6M",
+            "closed_at": "2026-03-10T00:00:00Z",
+            "closed_at_ms": "2026-03-10T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "292057780225-1",
+            "index": 1,
+            "ledger_sequence": 68,
+            "operation_id": 292057780225,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-operation-sources-four-ids",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 69,
+      "verdict": "pass",
+      "detail": "5 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747521-0",
+            "index": 0,
+            "ledger_sequence": 69,
+            "operation_id": 296352747521,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAB7EA",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747521-1",
+            "index": 1,
+            "ledger_sequence": 69,
+            "operation_id": 296352747521,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747522-0",
+            "index": 0,
+            "ledger_sequence": 69,
+            "operation_id": 296352747522,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAFPVA",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747522-1",
+            "index": 1,
+            "ledger_sequence": 69,
+            "operation_id": 296352747522,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747523-0",
+            "index": 0,
+            "ledger_sequence": 69,
+            "operation_id": 296352747523,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUABAAAAAAAAAACEC4",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747523-1",
+            "index": 1,
+            "ledger_sequence": 69,
+            "operation_id": 296352747523,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747524-0",
+            "index": 0,
+            "ledger_sequence": 69,
+            "operation_id": 296352747524,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVV7777777777776P6M",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747524-1",
+            "index": 1,
+            "ledger_sequence": 69,
+            "operation_id": 296352747524,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 70,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3L7777777777775QUU",
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-0",
+            "index": 0,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": null,
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-1",
+            "index": 1,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 71,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": "MBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KAAAAAAAAAAAAGQ7Y",
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "304942682113-0",
+            "index": 0,
+            "ledger_sequence": 71,
+            "operation_id": 304942682113,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": null,
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "304942682113-1",
+            "index": 1,
+            "ledger_sequence": 71,
+            "operation_id": 304942682113,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-issued-payment-destination-id-2p53",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 74,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GA5KEZ3T6MFNLZAEOSETSXXF5L7ESM73HN35RJF7EO7FWZEWDPBZ3JGF",
+            "address_muxed": "MA5KEZ3T6MFNLZAEOSETSXXF5L7ESM73HN35RJF7EO7FWZEWDPBZ2ABAAAAAAAAAAAL6W",
+            "closed_at": "2026-03-16T00:00:00Z",
+            "closed_at_ms": "2026-03-16T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_code": "MUXD",
+              "asset_issuer": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+              "asset_type": "credit_alphanum4"
+            },
+            "id": "317827584001-0",
+            "index": 0,
+            "ledger_sequence": 74,
+            "operation_id": 317827584001,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+            "address_muxed": null,
+            "closed_at": "2026-03-16T00:00:00Z",
+            "closed_at_ms": "2026-03-16T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_code": "MUXD",
+              "asset_issuer": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+              "asset_type": "credit_alphanum4"
+            },
+            "id": "317827584001-1",
+            "index": 1,
+            "ledger_sequence": 74,
+            "operation_id": 317827584001,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-clawback-from-id-2p64-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 75,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+            "address_muxed": null,
+            "closed_at": "2026-03-17T00:00:00Z",
+            "closed_at_ms": "2026-03-17T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_code": "MUXD",
+              "asset_issuer": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+              "asset_type": "credit_alphanum4"
+            },
+            "id": "322122551297-0",
+            "index": 0,
+            "ledger_sequence": 75,
+            "operation_id": 322122551297,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GA5KEZ3T6MFNLZAEOSETSXXF5L7ESM73HN35RJF7EO7FWZEWDPBZ3JGF",
+            "address_muxed": "MA5KEZ3T6MFNLZAEOSETSXXF5L7ESM73HN35RJF7EO7FWZEWDPBZ37777777777774ACG",
+            "closed_at": "2026-03-17T00:00:00Z",
+            "closed_at_ms": "2026-03-17T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_code": "MUXD",
+              "asset_issuer": "GDKXBVPU5KVD3VU5HM27ZNIBFZJIHMDOVQ44ISK3KAMZHZWBSNKNY3SH",
+              "asset_type": "credit_alphanum4"
+            },
+            "id": "322122551297-1",
+            "index": 1,
+            "ledger_sequence": 75,
+            "operation_id": 322122551297,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-account-merge-destination-id-2p53",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 76,
+      "verdict": "pass",
+      "detail": "3 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GDJIBR6VIUS2E7R3Q2XL2EAO35DMU6O247R6O5ZX3K4EDKWL2ZX4D5F5",
+            "address_muxed": null,
+            "closed_at": "2026-03-18T00:00:00Z",
+            "closed_at_ms": "2026-03-18T00:00:00Z",
+            "details": {
+              "amount": "9999.9999900",
+              "asset_type": "native"
+            },
+            "id": "326417518593-0",
+            "index": 0,
+            "ledger_sequence": 76,
+            "operation_id": 326417518593,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUABAAAAAAAAAACEC4",
+            "closed_at": "2026-03-18T00:00:00Z",
+            "closed_at_ms": "2026-03-18T00:00:00Z",
+            "details": {
+              "amount": "9999.9999900",
+              "asset_type": "native"
+            },
+            "id": "326417518593-1",
+            "index": 1,
+            "ledger_sequence": 76,
+            "operation_id": 326417518593,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-1-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 65,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-1-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 65,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-4-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 66,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-4-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 66,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-32-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 67,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-set-options-payload-32-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 67,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-sponsored-set-options-payload-64-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 68,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "signer_sponsorship_created",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-10T00:00:00Z",
+            "closed_at_ms": "2026-03-10T00:00:00Z",
+            "details": {
+              "signer": "PDDLGS6XTXODPNKK7OP4FHZSNGVJG3OE3GKGMYN47OP3PWM3SSTPCAAAABADNMWAGY3AKFMULKSIW2WI5VH4AJX5U5BD2R23AZ4JJUBPNCMCIS5WZTXWLA5GZKNH2HZCVTS2P33JQXMM2YBKWEA6YSLUE245F2JPS3VTI",
+              "sponsor": "GDPJDBGR74YTXLSVXUOH5FBDHZ2UZBVFCK56TDFAAXMM5WBYDV3MP4MZ"
+            },
+            "id": "292057780226-1",
+            "index": 1,
+            "ledger_sequence": 68,
+            "operation_id": 292057780226,
+            "type": 72,
+            "type_string": "signer_sponsorship_created"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-sponsored-set-options-payload-64-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 68,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "signer_sponsorship_created",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-10T00:00:00Z",
+            "closed_at_ms": "2026-03-10T00:00:00Z",
+            "details": {
+              "signer": "PDDLGS6XTXODPNKK7OP4FHZSNGVJG3OE3GKGMYN47OP3PWM3SSTPCAAAABADNMWAGY3AKFMULKSIW2WI5VH4AJX5U5BD2R23AZ4JJUBPNCMCIS5WZTXWLA5GZKNH2HZCVTS2P33JQXMM2YBKWEA6YSLUE245F2JPS3VTI",
+              "sponsor": "GDPJDBGR74YTXLSVXUOH5FBDHZ2UZBVFCK56TDFAAXMM5WBYDV3MP4MZ"
+            },
+            "id": "292057780226-1",
+            "index": 1,
+            "ledger_sequence": 68,
+            "operation_id": 292057780226,
+            "type": 72,
+            "type_string": "signer_sponsorship_created"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-authorised-by-payload-32",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 69,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCCKY2DTW66FL46YTD52NMFQAXOHAIKZDISNRQMOE2DN77OMGWRV7GZ2",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747521-0",
+            "index": 0,
+            "ledger_sequence": 69,
+            "operation_id": 296352747521,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "296352747521-1",
+            "index": 1,
+            "ledger_sequence": 69,
+            "operation_id": 296352747521,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-extra-signer-payload-64-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 70,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCCKY2DTW66FL46YTD52NMFQAXOHAIKZDISNRQMOE2DN77OMGWRV7GZ2",
+            "address_muxed": null,
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-0",
+            "index": 0,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-1",
+            "index": 1,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-extra-signer-payload-64-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 70,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCCKY2DTW66FL46YTD52NMFQAXOHAIKZDISNRQMOE2DN77OMGWRV7GZ2",
+            "address_muxed": null,
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-0",
+            "index": 0,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "300647714817-1",
+            "index": 1,
+            "ledger_sequence": 70,
+            "operation_id": 300647714817,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 71,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "signer_sponsorship_removed",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "details": {
+              "former_sponsor": "GDPJDBGR74YTXLSVXUOH5FBDHZ2UZBVFCK56TDFAAXMM5WBYDV3MP4MZ",
+              "signer": "PDDLGS6XTXODPNKK7OP4FHZSNGVJG3OE3GKGMYN47OP3PWM3SSTPCAAAABADNMWAGY3AKFMULKSIW2WI5VH4AJX5U5BD2R23AZ4JJUBPNCMCIS5WZTXWLA5GZKNH2HZCVTS2P33JQXMM2YBKWEA6YSLUE245F2JPS3VTI"
+            },
+            "id": "304942682113-0",
+            "index": 0,
+            "ledger_sequence": 71,
+            "operation_id": 304942682113,
+            "type": 74,
+            "type_string": "signer_sponsorship_removed"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 71,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "signer_sponsorship_removed",
+          "row": {
+            "address": "GCCLUSWMBODKXUESRSM35CX545JJAHX2CFYCCN63RSQY5RRHEJCR4DC2",
+            "address_muxed": null,
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "details": {
+              "former_sponsor": "GDPJDBGR74YTXLSVXUOH5FBDHZ2UZBVFCK56TDFAAXMM5WBYDV3MP4MZ",
+              "signer": "PDDLGS6XTXODPNKK7OP4FHZSNGVJG3OE3GKGMYN47OP3PWM3SSTPCAAAABADNMWAGY3AKFMULKSIW2WI5VH4AJX5U5BD2R23AZ4JJUBPNCMCIS5WZTXWLA5GZKNH2HZCVTS2P33JQXMM2YBKWEA6YSLUE245F2JPS3VTI"
+            },
+            "id": "304942682113-0",
+            "index": 0,
+            "ledger_sequence": 71,
+            "operation_id": 304942682113,
+            "type": 74,
+            "type_string": "signer_sponsorship_removed"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-remove-signer-payload-1-envelope",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 72,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap40.signed-payload-signer.p30-remove-signer-payload-1-meta",
+      "family": "cap40.signed-payload-signer",
+      "chain": "cap40.signed-payload-signer.p30",
+      "network": "testnet",
+      "ledger": 72,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-deploy-credit-sac-envelope",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 69,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0011985,
+            "amount_raw": "-11985",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+            "ledger_sequence": 69,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "d54f9a76b31e9b129eb134b15d62b2eba575703c8960917b8805ba47894d9ff3",
+            "transaction_id": 296352747520
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-deploy-credit-sac-meta",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 69,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0011985,
+            "amount_raw": "-11985",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-11T00:00:00Z",
+            "closed_at_ms": "2026-03-11T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+            "ledger_sequence": 69,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "d54f9a76b31e9b129eb134b15d62b2eba575703c8960917b8805ba47894d9ff3",
+            "transaction_id": 296352747520
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-deploy-xlm-sac-envelope",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 70,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0008661999999999999,
+            "amount_raw": "-8662",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 70,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "527691b3cbbdb7b802b80a43913d16cabb04469208bfe73c60cc0f76c47c52df",
+            "transaction_id": 300647714816
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-deploy-xlm-sac-meta",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 70,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0008661999999999999,
+            "amount_raw": "-8662",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-12T00:00:00Z",
+            "closed_at_ms": "2026-03-12T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 70,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "527691b3cbbdb7b802b80a43913d16cabb04469208bfe73c60cc0f76c47c52df",
+            "transaction_id": 300647714816
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-trust-envelope",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 71,
+      "verdict": "dropped",
+      "detail": "1 of 2 in-scope fact(s) missing",
+      "problems": [
+        {
+          "kind": "dropped",
+          "tx": "1c7551b720df08914b37b0e501b2795df68587876502883f34fad0135f365d13",
+          "fact": "trustline-created",
+          "detail": "trustline-created is missing",
+          "expected": {
+            "account": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "asset": "TRST:GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+            "limit": "9223372036854775807"
+          }
+        }
+      ],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0004839,
+            "amount_raw": "-4839",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 71,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "1c7551b720df08914b37b0e501b2795df68587876502883f34fad0135f365d13",
+            "transaction_id": 304942682112
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-trust-meta",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 71,
+      "verdict": "dropped",
+      "detail": "1 of 2 in-scope fact(s) missing",
+      "problems": [
+        {
+          "kind": "dropped",
+          "tx": "1c7551b720df08914b37b0e501b2795df68587876502883f34fad0135f365d13",
+          "fact": "trustline-created",
+          "detail": "trustline-created is missing",
+          "expected": {
+            "account": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "asset": "TRST:GBRHNLJWCOTZPE45Z33CUBA335WGS25NNAUH5VVBFBGNTKVDA32LLZA5",
+            "limit": "9223372036854775807"
+          }
+        }
+      ],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.0004839,
+            "amount_raw": "-4839",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-13T00:00:00Z",
+            "closed_at_ms": "2026-03-13T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 71,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "1c7551b720df08914b37b0e501b2795df68587876502883f34fad0135f365d13",
+            "transaction_id": 304942682112
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-trust-again",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 72,
+      "verdict": "pass",
+      "detail": "1 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.000484,
+            "amount_raw": "-4840",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-14T00:00:00Z",
+            "closed_at_ms": "2026-03-14T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 72,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "6c7f3eda11780ac9997c27f8b6bd231167cbda64cf6a96dfe21c1c55badd4e6b",
+            "transaction_id": 309237649408
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 73,
+      "verdict": "dropped",
+      "detail": "1 of 3 in-scope fact(s) missing",
+      "problems": [
+        {
+          "kind": "dropped",
+          "tx": "69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a",
+          "fact": "account-created",
+          "detail": "account-created is missing",
+          "expected": {
+            "account": "GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM",
+            "starting_balance": "1000000000"
+          }
+        }
+      ],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "address_muxed": null,
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "details": {
+              "amount": "100.0000000",
+              "asset_type": "native",
+              "contract_event_type": "transfer"
+            },
+            "id": "313532616705-0",
+            "index": 0,
+            "ledger_sequence": 73,
+            "operation_id": 313532616705,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM",
+            "address_muxed": null,
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "details": {
+              "amount": "100.0000000",
+              "asset_type": "native",
+              "contract_event_type": "transfer"
+            },
+            "id": "313532616705-1",
+            "index": 1,
+            "ledger_sequence": 73,
+            "operation_id": 313532616705,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.000491,
+            "amount_raw": "-4910",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 73,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a",
+            "transaction_id": 313532616704
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
+      "family": "cap73.sac-trust",
+      "chain": "cap73.sac-trust.p30",
+      "network": "testnet",
+      "ledger": 73,
+      "verdict": "dropped",
+      "detail": "1 of 3 in-scope fact(s) missing",
+      "problems": [
+        {
+          "kind": "dropped",
+          "tx": "69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a",
+          "fact": "account-created",
+          "detail": "account-created is missing",
+          "expected": {
+            "account": "GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM",
+            "starting_balance": "1000000000"
+          }
+        }
+      ],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "address_muxed": null,
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "details": {
+              "amount": "100.0000000",
+              "asset_type": "native",
+              "contract_event_type": "transfer"
+            },
+            "id": "313532616705-0",
+            "index": 0,
+            "ledger_sequence": 73,
+            "operation_id": 313532616705,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_credited",
+          "row": {
+            "address": "GCF4WKRRASFFTOM3KAFPB2BB5YPBY5AYUG273SCJXFLHGRLK2SCFPSFM",
+            "address_muxed": null,
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "details": {
+              "amount": "100.0000000",
+              "asset_type": "native",
+              "contract_event_type": "transfer"
+            },
+            "id": "313532616705-1",
+            "index": 1,
+            "ledger_sequence": 73,
+            "operation_id": 313532616705,
+            "type": 2,
+            "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "token_transfer",
+          "category": "fee",
+          "row": {
+            "amount": -0.000491,
+            "amount_raw": "-4910",
+            "asset": "native",
+            "asset_code": null,
+            "asset_issuer": null,
+            "asset_type": "native",
+            "closed_at": "2026-03-15T00:00:00Z",
+            "closed_at_ms": "2026-03-15T00:00:00Z",
+            "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+            "event_topic": "fee",
+            "from": "GDKMA2CZT4MP2PTP7GFMTUGDJEE7QBFRNJAYDKEYSEKJ7G4VO6OT5CZQ",
+            "ledger_sequence": 73,
+            "operation_id": null,
+            "to": null,
+            "to_muxed": null,
+            "to_muxed_id": null,
+            "transaction_hash": "69d6a941d953100889d67b93301a822edc56557edb67abe24be12f8ce624311a",
+            "transaction_id": 313532616704
+          },
+          "note": "a fee refund, written as a fee with a negative amount; only the charge is claimed"
+        }
+      ],
+      "notes": []
+    }
+  ]
+}

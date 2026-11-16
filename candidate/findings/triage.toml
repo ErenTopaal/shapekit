@@ -1,0 +1,49 @@
+# findings of the candidate lane: failures new runs report that are triaged and drafted but not
+# filed upstream yet. the format is findings/triage.toml's; the inputs live under
+# candidate/findings/inputs/, so these drafts never count against the main findings check.
+# check: shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft
+
+schema = 1
+
+[inputs]
+manifest = "corpus/manifest.json"
+dir = "candidate/findings/inputs"
+harness = ["candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"]
+
+[[inputs.import]]
+kind = "harness"
+from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
+to = "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"
+command = "shapekit harness run --chain cap27.muxed-accounts.p30 --chain cap40.signed-payload-signer.p30 --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
+
+[targets.stellar-etl]
+repo = "stellar/stellar-etl"
+adapter = "adapters/bin/etl-adapter --commit {version}"
+
+[[finding]]
+id = "ETL-1"
+title = "question: the effects table has no trustline_created for a trustline a Stellar asset contract trust() call opens"
+component = "stellar-etl"
+severity = "data-loss"
+status = "draft"
+draft = "candidate/findings/issues/stellar-etl-E1.md"
+cause = "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended."
+
+[[finding.harness]]
+target = "stellar-etl"
+facts = ["trustline-created"]
+problems = ["dropped"]
+
+[[finding]]
+id = "ETL-2"
+title = "question: the effects table has no account_created for an account a Stellar asset contract transfer creates"
+component = "stellar-etl"
+severity = "data-loss"
+status = "draft"
+draft = "candidate/findings/issues/stellar-etl-E2.md"
+cause = "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended."
+
+[[finding.harness]]
+target = "stellar-etl"
+facts = ["account-created"]
+problems = ["dropped"]

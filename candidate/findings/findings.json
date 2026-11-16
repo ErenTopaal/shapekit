@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "inputs": [
+    {
+      "kind": "manifest",
+      "path": "corpus/manifest.json",
+      "sha256": "0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4",
+      "detail": "corpus 0.1.0"
+    },
+    {
+      "kind": "harness",
+      "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
+      "sha256": "cedd23e8f6442c1890b4af15dc43d775b9063964a6e8bf831040ab5a9de8fe12",
+      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 34 entries, manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4"
+    }
+  ],
+  "summary": {
+    "findings": 2,
+    "failures": 4,
+    "unmapped": 0,
+    "by_component": {
+      "stellar-etl": {
+        "data-loss": 2
+      }
+    },
+    "by_severity": {
+      "data-loss": 2
+    },
+    "by_status": {
+      "draft": 2
+    }
+  },
+  "findings": [
+    {
+      "id": "ETL-1",
+      "title": "question: the effects table has no trustline_created for a trustline a Stellar asset contract trust() call opens",
+      "component": "stellar-etl",
+      "severity": "data-loss",
+      "caps": [
+        "CAP-0046-06",
+        "CAP-0073"
+      ],
+      "minimal_entry": "cap73.sac-trust.p30-trust-envelope",
+      "reproduce": "shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-etl-E1.md",
+      "cause": "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "cap73.sac-trust.p30-trust-envelope",
+        "cap73.sac-trust.p30-trust-meta"
+      ],
+      "recipe": "chain:cap73.sac-trust.p30",
+      "affected": [
+        {
+          "on": "stellar-etl",
+          "tested": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ],
+          "failing": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-trust-envelope",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-trust-meta",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        }
+      ]
+    },
+    {
+      "id": "ETL-2",
+      "title": "question: the effects table has no account_created for an account a Stellar asset contract transfer creates",
+      "component": "stellar-etl",
+      "severity": "data-loss",
+      "caps": [
+        "CAP-0046-06",
+        "CAP-0073"
+      ],
+      "minimal_entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
+      "reproduce": "shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-etl-E2.md",
+      "cause": "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
+        "cap73.sac-trust.p30-xlm-transfer-creates-account-meta"
+      ],
+      "recipe": "chain:cap73.sac-trust.p30",
+      "affected": [
+        {
+          "on": "stellar-etl",
+          "tested": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ],
+          "failing": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
+          "at": "testnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
+          "at": "testnet",
+          "what": "dropped account-created: account-created is missing"
+        }
+      ]
+    }
+  ],
+  "unmapped": [],
+  "input_problems": []
+}

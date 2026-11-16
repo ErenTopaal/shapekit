@@ -352,6 +352,13 @@ the finding's issue link when it is filed and at its draft otherwise. The run yo
 cover more versions; failures on older versions still need their own lines. Then run
 `shapekit oracle run`, `shapekit coverage` and the conformance run for the corpus.
 
+Failures a new run reports that are triaged but not filed upstream yet are recorded the same
+way, apart from the main findings: `candidate/findings/triage.toml` holds their findings, the
+committed run outputs live under `candidate/findings/inputs/`, and the issue drafts under
+`candidate/findings/issues/`. Check them with
+`shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft`.
+A finding moves to `findings/triage.toml` once its upstream decision is recorded.
+
 ### Source classes and fields beyond recipes
 
 - `core-test-dump`: `TransactionMeta` that core's own transaction tests wrote, converted back

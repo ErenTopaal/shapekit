@@ -229,6 +229,11 @@ jobs:
         run: |
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           "$RUNNER_TEMP/bin/shapekit" manifest validate --file candidate/manifest.json
+      - name: candidate findings map every failure and name their drafts
+        # these are findings awaiting a decision, so drafts are allowed here and only here
+        run: |
+          "$RUNNER_TEMP/bin/shapekit" findings check --triage candidate/findings/triage.toml \
+            --out candidate/findings --allow-draft
       - name: candidates through the current sdks, and which can be promoted
         run: |
           set -uo pipefail
