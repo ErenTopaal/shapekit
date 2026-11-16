@@ -158,6 +158,8 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                     soroban_limits: opts.contracts || protocol >= episode::FROZEN_KEYS_PROTOCOL,
                     // a short persistent lifetime lets entries archive within an episode
                     min_persistent_ttl: (opts.contracts && rng.chance(1, 3)).then_some(10),
+                    // the close meta extension exists from protocol 20
+                    emit_ledger_close_meta_ext_v1: protocol >= 20 && rng.chance(1, 4),
                 },
                 prefix: Vec::new(),
                 actions: opts.actions,

@@ -168,6 +168,10 @@ impl Recipe for IrRecipe {
         self.ir.below_protocol_valid
     }
 
+    fn emit_ledger_close_meta_ext_v1(&self) -> bool {
+        self.ir.node.emit_ledger_close_meta_ext_v1
+    }
+
     fn run(&self, ctx: &mut ChainCtx) -> Result<()> {
         let mut interp = Session::new(ctx, &self.root, self.ir.node.soroban_settings)?;
         interp.plan(&self.ir.steps);
@@ -200,6 +204,8 @@ pub struct Observed {
 #[derive(Debug, Clone)]
 enum Kind {
     Tx,
+    /// A host-function step that may create a contract, which `@contract:<label>` then names.
+    Create,
     Upload(Hash),
     Deploy(ContractId),
 }
@@ -397,7 +403,7 @@ impl<'a> Session<'a> {
         expect: &TxExpect,
         kind: Kind,
     ) -> Result<()> {
-        if self.learn && matches!(kind, Kind::Tx) {
+        if self.learn && matches!(kind, Kind::Tx | Kind::Create) {
             let sub = ctx.driver().node().submit(env)?;
             match (sub.status, sub.error) {
                 (SubmitStatus::Error, Some(result)) => {
@@ -495,14 +501,23 @@ impl<'a> Session<'a> {
                 Ok(a) => a,
                 // core can drop a queued transaction from the set it closes, for one when
                 // its time bounds have passed by the close time
-                Err(ChainError::Missing { .. }) if self.learn && matches!(p.kind, Kind::Tx) => {
+                Err(ChainError::Missing { .. })
+                    if self.learn && matches!(p.kind, Kind::Tx | Kind::Create) =>
+                {
                     self.left_out.push(p.step);
                     continue;
                 }
                 Err(e) => return Err(e.into()),
             };
             let what = p.label.as_deref().unwrap_or("an unlabelled step");
-            if self.learn && matches!(p.kind, Kind::Tx) {
+            if matches!(p.kind, Kind::Create)
+                && applied.succeeded()
+                && let (Some(label), Some(ScVal::Address(ScAddress::Contract(id)))) =
+                    (&p.label, applied.return_value())
+            {
+                self.contracts.insert(label.clone(), id.clone());
+            }
+            if self.learn && matches!(p.kind, Kind::Tx | Kind::Create) {
                 self.observed.push(Observed {
                     step: p.step,
                     outcome: if applied.succeeded() {
@@ -535,7 +550,7 @@ impl<'a> Session<'a> {
             self.check_result(ctx, &applied.result.result, &p.expect)
                 .with_context(|| what.to_owned())?;
             match &p.kind {
-                Kind::Tx => {}
+                Kind::Tx | Kind::Create => {}
                 Kind::Upload(hash) => match applied.return_value() {
                     Some(ScVal::Bytes(b)) if b.as_slice() == hash.0.as_slice() => {}
                     other => bail!("{what}: upload returned {other:?}, expected the code hash"),
@@ -870,14 +885,20 @@ impl<'a> Session<'a> {
                 let hf: HostFunction = self.typed(ctx, function, "function")?;
                 let seq = self.next_seq(ctx, source)?;
                 let plan = self.auth(ctx, auth)?;
+                let creates = matches!(
+                    hf,
+                    HostFunction::CreateContract(_) | HostFunction::CreateContractV2(_)
+                );
                 let env = ir_soroban::invoke(ctx, &key, seq, hf, plan, &resources_of(resources))?;
-                self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
+                let kind = if creates { Kind::Create } else { Kind::Tx };
+                self.queue(ctx, (source, seq), label, &env, expect, kind)
             }
             Step::ExtendTtl {
                 label,
                 source,
                 keys,
                 extend_to,
+                resources,
                 expect,
             } => {
                 let key = key_of(ctx, source);
@@ -891,7 +912,7 @@ impl<'a> Session<'a> {
                     ir_soroban::Footprint::Extend {
                         extend_to: *extend_to,
                     },
-                    &ir_soroban::Resources::default(),
+                    &resources_of(resources),
                 )?;
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
@@ -899,6 +920,7 @@ impl<'a> Session<'a> {
                 label,
                 source,
                 keys,
+                resources,
                 expect,
             } => {
                 let key = key_of(ctx, source);
@@ -910,7 +932,7 @@ impl<'a> Session<'a> {
                     seq,
                     &keys,
                     ir_soroban::Footprint::Restore,
-                    &ir_soroban::Resources::default(),
+                    &resources_of(resources),
                 )?;
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }

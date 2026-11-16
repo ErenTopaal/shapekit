@@ -458,12 +458,22 @@ pub fn footprint(world: &World, rng: &mut Rng) -> Option<Step> {
     let n = 1 + rng.below(keys.len().min(2));
     let picked: Vec<Value> = (0..n).map(|_| rng.pick(&keys).clone()).collect();
     let source = rng.pick(&world.funded).clone();
+    // now and then less than simulation asked for: too few bytes, or too small a fee
+    let resources = rng
+        .chance(1, 6)
+        .then(|| shapekit_contracts::recipe_ir::ResourceOverride {
+            instructions: None,
+            disk_read_bytes: rng.chance(1, 2).then_some(0),
+            write_bytes: None,
+            resource_fee: rng.chance(1, 2).then_some(1),
+        });
     Some(if rng.chance(1, 2) {
         Step::ExtendTtl {
             label: None,
             source,
             keys: picked,
             extend_to: *rng.pick(&[1u32, 100, 10_000, 3_000_000]),
+            resources,
             expect: TxExpect::default(),
         }
     } else {
@@ -471,6 +481,7 @@ pub fn footprint(world: &World, rng: &mut Rng) -> Option<Step> {
             label: None,
             source,
             keys: picked,
+            resources,
             expect: TxExpect::default(),
         }
     })
