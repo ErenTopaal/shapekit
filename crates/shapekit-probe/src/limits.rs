@@ -962,6 +962,9 @@ pub fn probes() -> Vec<LimitProbe> {
                 let name = |i: u64| -> Result<stellar_xdr::String64> {
                     Ok(stellar_xdr::String64(format!("d{i}").try_into()?))
                 };
+                // each subentry raises the reserve by the base reserve, 10 XLM from genesis
+                let src = s.source.clone();
+                w.top_up(&src, i64::try_from(n)? * 20 * XLM)?;
                 let mut i = 0;
                 while i + 1 < n {
                     let end = (i + 100).min(n - 1);
