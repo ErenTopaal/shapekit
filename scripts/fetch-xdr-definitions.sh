@@ -11,6 +11,11 @@
 #   --check  regenerate into a scratch directory and compare with the committed files instead
 #            of writing them; exits 1 on any difference.
 #
+# schema/xdr/ holds every stellar-xdr release tag from v20 and the next branch, written with
+#   scripts/fetch-xdr-definitions.sh <tag> <tag> ... next refs/heads/next
+# v19, the oldest tag, uses union default arms, which the pinned generator refuses
+# (UnsupportedDefaultArm at Stellar-transaction.x:851), so it has no definitions file.
+#
 # sources and the built generator are cached in target/xdr-definitions/.
 # needs: git, cargo, tar, cmp, python3 >= 3.11 (scripts/pin.sh).
 set -euo pipefail

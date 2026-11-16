@@ -5,7 +5,10 @@
 //! `xdr-definitions-json/xdr.json`. `scripts/fetch-xdr-definitions.sh` writes it to
 //! `schema/xdr/<tag>/xdr.json`; the pinned tag is embedded here as [`Schema::pinned`].
 
+pub mod fragment;
 pub mod graph;
+pub mod history;
+pub mod names;
 
 use std::collections::BTreeMap;
 use std::path::Path;
