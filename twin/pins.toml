@@ -1,0 +1,18 @@
+# the coverage twin: the stellar-core commit of pins.toml built with
+# --enable-codecoverage by twin/build.sh. same format as pins.toml, read with
+# `--pins twin/pins.toml` (gen) or `--twin-pins` (twin verify, twin coverage).
+#
+# the image is built on this host, not pulled, so it is pinned by its local
+# image id (the digest of its configuration) instead of a registry manifest
+# digest. a rebuild gives a new id: twin/build.sh prints it, and this pin
+# must be updated with it. `shapekit pins verify` does not read this file,
+# there is no upstream to check a local image against.
+
+schema = 1
+
+[[image]]
+name = "stellar-core"
+repository = "shapekit/core-twin"
+tag = "30.0.0-cov"
+image_id = "sha256:8ee4ec27bcf6facd9a2a1b9318843a50bcca7653c7c5f49f647e0c34c53d85e3"
+purpose = "stellar-core 0e49751aa9ddf892302cca02cea7f3f5d97df9f1 with clang source-based coverage, built by twin/build.sh"
