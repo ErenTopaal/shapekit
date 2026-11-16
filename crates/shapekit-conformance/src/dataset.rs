@@ -177,7 +177,9 @@ pub struct TargetResult {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DatasetReport {
-    pub dataset: String,
+    /// The core image whose tests wrote the dump, from the dataset's `convert.json`. The
+    /// dataset's location is left out: it is a local directory, not part of the result.
+    pub core_image: Option<String>,
     pub metas: usize,
     pub distinct: usize,
     pub sections: usize,
@@ -424,8 +426,12 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
             dropped,
         });
     }
+    let core_image = std::fs::read_to_string(opts.dataset.join("convert.json"))
+        .ok()
+        .and_then(|t| serde_json::from_str::<Value>(&t).ok())
+        .and_then(|v| v["run_image"].as_str().map(str::to_string));
     let report = DatasetReport {
-        dataset: opts.dataset.display().to_string(),
+        core_image,
         metas: data.records.len(),
         distinct: data.metas.len(),
         sections: sections.len(),
@@ -436,8 +442,9 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
     text.push('\n');
     std::fs::write(opts.out.join("dataset-report.json"), text)?;
     std::fs::write(opts.out.join("DATASET.md"), render(&report))?;
+    // one obligation per section, 29,691 for core 30: written compact, one line
     let ledger = obligations(&report, &sections);
-    let mut text = serde_json::to_string_pretty(&ledger)?;
+    let mut text = serde_json::to_string(&ledger)?;
     text.push('\n');
     std::fs::write(opts.out.join("core-test-sections.obligations.json"), text)?;
     Ok(report)
@@ -593,9 +600,15 @@ fn family_for<'a>(
 
 pub fn render(r: &DatasetReport) -> String {
     let mut out = format!(
-        "# Core's test metas through the SDKs\n\n{} metas core wrote in its transaction tests, {} distinct, in {} test sections.\n\n\
+        "# Core's test metas through the SDKs\n\nWritten by `shapekit conformance run --dataset`. {} metas core wrote in its transaction tests{}, {} distinct, in {} test sections, each distinct meta through the SDK's decode and encode.\n\n\
          | testee | distinct | round-trip | fail | beyond max_protocol | sections passing |\n|---|---|---|---|---|---|\n",
-        r.metas, r.distinct, r.sections
+        r.metas,
+        r.core_image
+            .as_deref()
+            .map(|i| format!(" ({i})"))
+            .unwrap_or_default(),
+        r.distinct,
+        r.sections
     );
     for t in &r.targets {
         let pass = t.results.get(&ResultClass::Pass).copied().unwrap_or(0);
