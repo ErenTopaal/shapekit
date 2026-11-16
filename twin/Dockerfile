@@ -8,8 +8,10 @@
 #              and the rust toolchain core pins in rust-toolchain.toml,
 #              installed by core's install-rust.sh (pinned rustup, checked sha).
 #   runtime    the built stellar-core binary on the same base, with the shared
-#              libraries it links and llvm-profdata / llvm-cov to read the
-#              profiles it writes.
+#              libraries it links, llvm-profdata / llvm-cov to read the
+#              profiles it writes, and python3, which shapekit's driver runs
+#              inside the container as its http client (the release image
+#              ships it too).
 
 ARG BASE
 
@@ -32,7 +34,7 @@ FROM ${BASE} AS runtime
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -y install --no-install-recommends \
-        ca-certificates libpq5 libc++1-20 libc++abi1-20 llvm-20 && \
+        ca-certificates libpq5 libc++1-20 libc++abi1-20 llvm-20 python3 && \
     rm -rf /var/lib/apt/lists/*
 COPY stellar-core /usr/local/bin/stellar-core
 COPY build-info.txt /usr/local/share/stellar-core-twin/build-info.txt
