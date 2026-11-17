@@ -198,7 +198,7 @@ joins the pool; a quarter of the inputs is generated in both runs.
 inputs per source and how many of them grew coverage, and every disagreement class with
 stellar-xdr. The depth-accounting filter above applies to all three testees.
 
-### Measured (2026-11-16)
+### Measured (2026-11-17)
 
 Against stellar-xdr 30.0.0, go-stellar-sdk v0.9.0 and @stellar/stellar-sdk 17.4.0, 100,000
 inputs per run (about 17 minutes each). The full reports are
@@ -208,13 +208,17 @@ inputs per run (about 17 minutes each). The full reports are
 | seed | testee | ranges with feedback | ranges without |
 |---|---|---|---|
 | 1 | rust | 16,128 | 16,010 |
-| 1 | go | 6,526 | 6,443 |
+| 1 | go | 6,529 | 6,446 |
 | 1 | javascript | 4,106 | 4,086 |
 | 2 | rust | 16,100 | 16,009 |
-| 2 | go | 6,529 | 6,441 |
+| 2 | go | 6,532 | 6,444 |
 | 2 | javascript | 4,086 | 4,081 |
 
 With the feedback every testee reached more ranges in both seeds; go and rust gained the most.
+The inputs follow from the seed: both seeds, run once before and once after the go testee's
+type table was regenerated, gave the same pools (1,190 and 1,196 entries) and the same rust
+and javascript counts; go's count rose by the 3 ranges the new go testee code reaches at
+startup.
 The gain needs a budget well past the number of seeds: at 10,000 inputs the two seeds tried
 split (seed 1 gained 68 rust and 29 javascript ranges and tied in go, seed 2 lost 76, 12 and
 17), because uniform seed mutation still finds new code on almost every seed at that point.

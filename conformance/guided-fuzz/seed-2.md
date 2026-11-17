@@ -5,7 +5,7 @@ Seed 2, 100000 inputs per run, the same seed and budget with and without the fee
 | testee | tool | ranges with feedback | ranges without | ranges at start | inputs that grew it (with / without) | pool entries it credited |
 |---|---|---|---|---|---|---|
 | rust@30.0.0 | llvm source-based region coverage | 16100 | 16009 | 0 | 1051 / 981 | 1051 |
-| go@v0.9.0 | go -cover statement blocks | 6529 | 6441 | 160 | 1121 / 1043 | 1121 |
+| go@v0.9.0 | go -cover statement blocks | 6532 | 6444 | 163 | 1121 / 1043 | 1121 |
 | js@17.4.0 | v8 14.6.202.34-node.40 precise block coverage | 4086 | 4081 | 1095 | 320 / 316 | 320 |
 
 ## Where the inputs came from
