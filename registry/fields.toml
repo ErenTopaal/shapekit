@@ -1000,7 +1000,7 @@ citations = [
 [[field]]
 id = "op.revoke_sponsorship"
 xdr_path = "RevokeSponsorshipOp.ledgerKey | RevokeSponsorshipOp.signer"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "for ledger keys only ACCOUNT, TRUSTLINE (valid non-native asset, account not issuer), OFFER (offerID > 0), DATA (name 1 to 64 printable ascii) and CLAIMABLE_BALANCE are allowed (REVOKE_SPONSORSHIP_MALFORMED); existence and sponsorship are checked at apply. the signer arm is not checked statically"
 protocol_min = 14
 risk = "on failure the key can name nothing"
@@ -1009,6 +1009,7 @@ go_accessors = ["xdr.RevokeSponsorshipOp.Type", "xdr.RevokeSponsorshipOp.LedgerK
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/RevokeSponsorshipOpFrame.cpp", symbol = "RevokeSponsorshipOpFrame::doCheckValid", lines = "402-456" },
 ]
+notes = "probed on core 30: every other ledger key and signer the probe tried fails, statically or at apply (registry/generated/validation.json)"
 
 [[field]]
 id = "op.account_merge.destination"
@@ -1057,7 +1058,7 @@ citations = [
 [[field]]
 id = "op.invoke_host_function.invoke_contract.contract_address"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.contractAddress"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "core validation does not read it (doCheckValidForSoroban checks only wasm size and asset preimages). the host resolves it at execution, where a missing contract or one outside the footprint fails the operation; the transaction is still in the ledger"
 protocol_min = 20
 risk = "on a failed invocation the address can name nothing; even on success the called contract is not the full set of contracts touched"
@@ -1067,11 +1068,12 @@ citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/e2e_invoke.rs", symbol = "invoke_host_function", lines = "517-541" },
 ]
+notes = "probed on core 30: every other address the probe tried fails the operation (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.invoke_contract.function_name"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.functionName"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "xdr limit 32 bytes only in core. the host checks the [a-zA-Z0-9_] symbol character set when converting it at execution"
 protocol_min = 20
 risk = "on a failed transaction the name can contain any bytes up to 32"
@@ -1081,6 +1083,7 @@ citations = [
   { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "SCSymbol", lines = "11-12" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-common/src/symbol.rs", symbol = "SymbolError", lines = "60-85" },
 ]
+notes = "probed on core 30: every other name the probe tried, within the symbol character set or not, fails the operation (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.invoke_contract.args"
@@ -1099,7 +1102,7 @@ citations = [
 [[field]]
 id = "op.invoke_host_function.upload_wasm"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM).wasm"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "size must be <= the network maxContractSizeBytes at validation; whether it is a valid module is decided by the host at execution"
 protocol_min = 20
 risk = "large opaque blob; need not be valid wasm on failed transactions"
@@ -1108,11 +1111,12 @@ go_accessors = ["xdr.HostFunction.Wasm", "xdr.HostFunction.GetWasm"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1446-1456" },
 ]
+notes = "probed on core 30: every byte string the probe tried that is no valid module fails the operation (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.create_contract.preimage"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "core checks only that an asset preimage passes isAssetValid (v1 create only). the host requires the address in an address preimage to authorize the creation, and rejects mismatched preimage and executable pairs, at execution"
 protocol_min = 20
 risk = "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746)"
@@ -1122,11 +1126,12 @@ citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1457-1468" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
 ]
+notes = "probed on core 30: every other preimage the probe tried fails the operation (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.create_contract_v2.constructor_args"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).createContractV2.constructorArgs"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "not read by core validation; converted and passed to the constructor by the host at execution"
 protocol_min = 22
 risk = "as for invoke args"
@@ -1136,6 +1141,7 @@ citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
 ]
+notes = "probed on core 30: every other constructor argument list the probe tried fails the operation, even an owner the constructor takes, because the source's authorization entry names the constructor arguments it authorizes (CreateContractArgsV2 in SorobanAuthorizedFunction)"
 
 [[field]]
 id = "op.invoke_host_function.auth"
@@ -1157,7 +1163,7 @@ citations = [
 [[field]]
 id = "auth.credentials.source_account"
 xdr_path = "SorobanAuthorizationEntry.credentials(SOROBAN_CREDENTIALS_SOURCE_ACCOUNT)"
-validated_by_core = "partial"
+validated_by_core = "yes"
 checks = "binds the entry to the operation source account (the base AccountID core passes to the host); no signature, nonce or expiration; authenticate and verify_and_consume_nonce return immediately. authorization rests on the transaction signatures"
 protocol_min = 20
 risk = "no per-entry proof exists"
@@ -1168,6 +1174,7 @@ citations = [
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::authenticate", lines = "2665-2720" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host.rs", symbol = "Host::source_account_address", lines = "513-521" },
 ]
+notes = "probed on core 30: every other credentials arm the probe tried in place of source account credentials fails the operation (registry/generated/validation.json)"
 
 [[field]]
 id = "auth.credentials.address.address"
