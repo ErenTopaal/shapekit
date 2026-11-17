@@ -15,6 +15,9 @@
 #   scripts/fetch-xdr-definitions.sh <tag> <tag> ... next refs/heads/next
 # v19, the oldest tag, uses union default arms, which the pinned generator refuses
 # (UnsupportedDefaultArm at Stellar-transaction.x:851), so it has no definitions file.
+# there is no v29: stellar-xdr has no v29 tag, and stellar-core v29.0.0 builds protocol 29 from
+# the same stellar-xdr commit as v28.0.0 (src/protocol-curr/xdr at 9c9c1459, the v28.0 tag), so
+# v28.0's definitions are protocol 29's.
 #
 # sources and the built generator are cached in target/xdr-definitions/.
 # needs: git, cargo, tar, cmp, python3 >= 3.11 (scripts/pin.sh).
