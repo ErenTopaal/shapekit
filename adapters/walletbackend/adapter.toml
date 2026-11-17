@@ -1,0 +1,547 @@
+# wallet-backend connected to the replay harness through a mapping file, with no adapter
+# program: `shapekit harness run --mapping adapters/walletbackend/adapter.toml --var commit=<hash>`.
+# it describes the same target as the go adapter in this directory (build, services, status,
+# claims, and how state_changes rows become oracle changes) and gives the same verdicts.
+# the format is in docs/mapping-adapter.md.
+
+schema = 1
+
+[target]
+name = "wallet-backend"
+version = "{commit}"
+bootstrap = "checkpoint"
+delivery_modes = ["rpc", "sep54-s3"]
+default_delivery = "rpc"
+# go-stellar-sdk decodes every older LedgerCloseMeta version, so only the top of the range
+# depends on the commit
+protocols = { min = "1", max = "{fact.max_protocol}" }
+container_prefix = "skwb"
+
+[vars.commit]
+required = true
+pattern = "^[0-9a-f]{40}$"
+about = "the full 40-character lowercase wallet-backend commit hash to build and run"
+
+[vars.repo]
+default = "{cache}/shapekit/wallet-backend"
+about = "a wallet-backend git clone, cloned on first use"
+
+[vars.db_memory]
+default = "1073741824"
+about = "memory limit of the timescaledb container in bytes"
+
+[source]
+git = "https://github.com/stellar/wallet-backend"
+dir = "{repo}"
+commit = "{commit}"
+
+# the newest ledger protocol the go-stellar-sdk release a commit uses can decode
+[[source.fact]]
+name = "sdk"
+file = "go.mod"
+pattern = '(?m)^\s*github\.com/stellar/go-stellar-sdk\s+(\S+)'
+
+[[source.fact]]
+name = "max_protocol"
+file = "go.mod"
+pattern = '(?m)^\s*github\.com/stellar/go-stellar-sdk\s+(\S+)'
+values = { "v0.7.3" = "28", "v0.8.0" = "30" }
+
+# commits before a9bac8d2 still require --stellar-environment on ingest
+[[source.fact]]
+name = "stellar_environment"
+file = "cmd/ingest.go"
+contains = "StellarEnvironmentOption"
+
+[image]
+tag = "shapekit-wallet-backend:{commit}"
+dockerfile = "Dockerfile"
+build_args = { GIT_COMMIT = "{commit}" }
+labels = { "shapekit.wallet-backend.commit" = "{commit}" }
+# the image is rebuilt unless this label holds the digest of the pinned base set below
+base_label = "shapekit.wallet-backend.bases"
+
+# every FROM of wallet-backend's Dockerfile at the commits this repository runs, by the digest
+# pins.toml lists; a FROM missing here is refused
+[image.bases]
+"golang:1.25.9-bookworm" = "docker.io/library/golang@sha256:298734aec230b5f3e8cee450ce6d7eccc39f1797ba548ee90d57e9803030c6c3"
+"debian:bookworm-slim" = "docker.io/library/debian@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc"
+"ubuntu:jammy" = "docker.io/library/ubuntu@sha256:9abcaffc92a5279fff3a6a41635c0800ea33e528425fb389658806476e7defde"
+
+[[service]]
+name = "db"
+image = "timescale/timescaledb:2.28.2-pg17@sha256:909e2c7577c074517c8936b6d8799294b33f25fb5bad978a2199250665f1ce1a"
+component = "timescaledb"
+memory = "{db_memory}"
+env = { POSTGRES_HOST_AUTH_METHOD = "trust", POSTGRES_DB = "wallet-backend" }
+# the settings wallet-backend's docker-compose.yaml passes, which its migrations need
+command = ["postgres", "-c", "timescaledb.enable_chunk_skipping=on", "-c", "timescaledb.enable_sparse_index_bloom=on"]
+# tcp on 127.0.0.1: the image's init phase runs a socket-only server, so this answers only
+# once the real server is up
+ready = { exec = ["pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "wallet-backend"], seconds = 180 }
+
+# seaweedfs as wallet-backend's integration tests run it: no auth, bucket created through
+# weed shell once the filer is up
+[[service]]
+name = "s3"
+delivery = ["sep54-s3"]
+image = "chrislusf/seaweedfs:4.46@sha256:08d516132314207d10c8e37cbffc1f32b147d870169688734cc61c6231625b62"
+component = "seaweedfs"
+entrypoint = "sh"
+command = ["-c", "weed server -dir=/data -s3 & until echo s3.bucket.list | weed shell -master localhost:9333 2>/dev/null | grep -q ledgers; do echo s3.bucket.create -name ledgers | weed shell -master localhost:9333 2>/dev/null; sleep 1; done; wait"]
+ready = { http = "http://{service.s3.ip}:8333/ledgers", seconds = 180 }
+
+[database]
+url = "postgres://postgres@{service.db.ip}:5432/wallet-backend?sslmode=disable"
+# the init script of wallet-backend's compose file; the extension must exist before migrate up
+init = ["CREATE EXTENSION IF NOT EXISTS timescaledb"]
+
+[delivery.sep54-s3]
+bucket_url = "http://{service.s3.ip}:8333/ledgers"
+
+[env]
+DATABASE_URL = "postgres://postgres@{service.db.host}:5432/wallet-backend?sslmode=disable"
+NETWORK_PASSPHRASE = "{network_passphrase}"
+RPC_URL = "{rpc_url}"
+ARCHIVE_URL = "{archive_url}"
+CHECKPOINT_FREQUENCY = "{checkpoint_frequency}"
+INGEST_SERVER_PORT = "8002"
+# older commits default to TRACE, which floods the log the status scan reads
+LOG_LEVEL = "INFO"
+
+# required and only used to tag sentry events, which are off without a dsn
+[[env_when]]
+fact = { stellar_environment = "true" }
+env = { STELLAR_ENVIRONMENT = "shapekit" }
+
+# set explicitly: commits before a9bac8d2 default to the datastore backend
+[[env_when]]
+delivery = "rpc"
+env = { LEDGER_BACKEND_TYPE = "rpc" }
+
+[[env_when]]
+delivery = "sep54-s3"
+# seaweedfs runs without auth; the aws sdk still wants keys to sign with
+env = { LEDGER_BACKEND_TYPE = "datastore", AWS_ACCESS_KEY_ID = "shapekit", AWS_SECRET_ACCESS_KEY = "shapekit", AWS_REGION = "us-east-1", DATASTORE_BUCKET_PATH = "ledgers", DATASTORE_REGION = "us-east-1", DATASTORE_ENDPOINT_URL = "http://{service.s3.host}:8333", DATASTORE_LEDGERS_PER_FILE = "{lake.ledgers_per_batch}", DATASTORE_FILES_PER_PARTITION = "{lake.batches_per_partition}" }
+
+[[step]]
+name = "migrate up"
+command = ["migrate", "up"]
+
+[ingest]
+command = ["ingest"]
+# wallet-backend gives up on a ledger after its retry ladder and exits; deployments restart
+# it, and it then retries the same ledger forever. restarting here keeps that behavior, so a
+# controlled give-up reads as a halt and only a runtime crash or the memory limit as a death
+restart = "on-failure"
+
+[components]
+"wallet-backend.commit" = "{commit}"
+"wallet-backend.image" = "{image.id}"
+"go-stellar-sdk" = "{fact.sdk}"
+
+[status]
+cursor = "SELECT value FROM ingest_store WHERE key = 'latest_ingest_ledger'"
+log_tail = 5000
+# a go runtime failure, as opposed to the "panic: executing root command" wallet-backend
+# prints when it gives up on a ledger
+crash = '(?m)^(panic: runtime error|fatal error: |\[signal SIG)'
+
+# the newest line in which wallet-backend reports an ingestion failure: the cobra "Error:" or
+# "panic:" line it prints on exit, logrus error, fatal and panic lines, and its retry warnings
+# ("Error ingesting data ...", "Error fetching ledger ..."). other warnings, such as a failed
+# blend price snapshot, do not stop ingestion.
+[[status.error]]
+pattern = '^(Error: |panic: )'
+
+[[status.error]]
+pattern = '\blevel=(\w+)'
+values = ["error", "fatal", "panic"]
+
+[[status.error]]
+pattern = '\blevel=(\w+)'
+values = ["warning"]
+also = '\bmsg="Error '
+
+[claims.participants]
+# transactions_accounts holds G and C keys. only accounts are claimed: wallet-backend does
+# not record the contracts that emit events (every fee event's native asset contract among
+# them) as participants
+address_kinds = ["account"]
+mux_ids = false
+
+[[claims.changes]]
+kind = "account-created"
+fields = ["account"]
+
+[[claims.changes]]
+kind = "account-removed"
+fields = ["account"]
+
+[[claims.changes]]
+kind = "contract-deployed"
+fields = ["contract"]
+
+[[claims.changes]]
+kind = "signer-added"
+fields = ["account", "signer", "weight"]
+
+[[claims.changes]]
+kind = "signer-removed"
+fields = ["account", "signer", "weight"]
+
+[[claims.changes]]
+kind = "signer-weight"
+fields = ["account", "signer", "before", "after"]
+
+[[claims.changes]]
+kind = "thresholds"
+fields = ["account"]
+
+[[claims.changes]]
+kind = "account-flags"
+fields = ["account"]
+
+[[claims.changes]]
+kind = "home-domain"
+fields = ["account", "before", "after"]
+
+[[claims.changes]]
+kind = "data-entry"
+fields = ["account", "action", "name_hex", "value_before_hex", "value_after_hex"]
+
+[[claims.changes]]
+kind = "trustline-created"
+fields = ["account", "asset", "limit"]
+
+[[claims.changes]]
+kind = "trustline-limit"
+fields = ["account", "asset", "before", "after"]
+
+[[claims.changes]]
+kind = "trustline-removed"
+fields = ["account", "asset"]
+
+[[claims.changes]]
+kind = "trustline-flags"
+fields = ["account", "asset"]
+
+[[claims.changes]]
+kind = "token-event"
+where = { event = ["transfer", "mint", "burn", "clawback"] }
+fields = ["event", "contract", "from", "to", "amount", "to_muxed_id"]
+
+# wallet-backend keeps one net fee row per transaction: the charge event is claimed without
+# its amount, and a soroban refund event (after-tx or after-all-txs) is not claimed at all
+[[claims.changes]]
+kind = "token-event"
+where = { event = ["fee"], stage = ["before-all-txs"] }
+fields = ["event", "contract", "from"]
+
+[[claims.changes]]
+kind = "token-event"
+where = { event = ["approve"] }
+fields = ["event", "contract", "from", "spender", "amount", "live_until_ledger"]
+
+[export]
+transactions = "SELECT to_id, hash, ledger_number FROM transactions WHERE ledger_number BETWEEN $1 AND $2 ORDER BY to_id"
+transaction = { id = "to_id", hash = "hash", ledger = "ledger_number" }
+participants = "SELECT account_id FROM transactions_accounts WHERE tx_to_id = $1 ORDER BY account_id"
+participant = { address = "account_id", forms = "account" }
+rows = "SELECT * FROM state_changes WHERE to_id = $1 ORDER BY operation_id, state_change_id"
+table = "state_changes"
+category = "state_change_category"
+reason = "state_change_reason"
+order = ["operation_id", "state_change_id"]
+# transaction ids are TOIDs: the operation index is the low 12 bits minus one, and
+# operation_id 0 is the transaction's fee row
+operation = { column = "operation_id", encoding = "toid" }
+unattributed_window = 64
+
+# AddressBytea holds G and C keys; SignerKeyBytea (AddressBytea before the fix of #716)
+# holds signer keys
+[export.forms]
+account = ["G", "C"]
+signer = ["G", "T", "X", "P"]
+
+# token ids on trustline rows are named by the asset contract id of every asset wallet-backend
+# knows: native, trustline_assets and the SAC rows of contract_tokens
+[[export.lookup]]
+name = "assets"
+type = "asset-contract"
+native = true
+query = "SELECT code, issuer FROM trustline_assets UNION SELECT code, issuer FROM contract_tokens WHERE type = 'SAC' AND code IS NOT NULL AND issuer IS NOT NULL"
+
+# a window of ledgers at a time, with the transaction lookup held to the same ledgers: on a
+# long chain one query over every hypertable chunk at once takes more locks than postgres has
+# room for (out of shared memory, SQLSTATE 53200)
+[[export.unattributed]]
+query = """SELECT * FROM state_changes s WHERE s.ledger_number BETWEEN $1 AND $2
+  AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = s.to_id AND t.ledger_number BETWEEN $1 AND $2)
+  ORDER BY s.to_id, s.operation_id, s.state_change_id"""
+ledger = { column = "ledger_number" }
+table = "state_changes"
+category = "state_change_category"
+reason = "state_change_reason"
+note = "state change of a transaction wallet-backend did not store"
+
+# a toid keeps the ledger in its upper 32 bits
+[[export.unattributed]]
+query = """SELECT * FROM transactions_accounts a WHERE a.tx_to_id >= ($1::bigint << 32) AND a.tx_to_id < (($2::bigint + 1) << 32)
+  AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = a.tx_to_id AND t.to_id >= ($1::bigint << 32) AND t.to_id < (($2::bigint + 1) << 32))
+  ORDER BY a.tx_to_id"""
+ledger = { column = "tx_to_id", encoding = "toid" }
+table = "transactions_accounts"
+note = "participant of a transaction wallet-backend did not store"
+
+# pass 1: trustlines first, so the authorization row wallet-backend writes alongside each
+# creation (the initial trustline flags) merges into it
+[[export.pass]]
+select = { state_change_category = "TRUSTLINE" }
+
+[[export.pass.case]]
+when = { state_change_reason = "ADD" }
+kind = "trustline-created"
+fields.account = { address = "account_id", forms = "account" }
+fields.asset = { asset = "token_id", pool = "liquidity_pool_id", lookup = "assets" }
+# limits are stored in horizon's 7-decimal amount form, unlike token amounts
+fields.limit = { stroops = "trustline_limit_new" }
+# wallet-backend's own flag bits (bit 0 authorized, bit 5 clawback enabled, bit 6 authorized
+# to maintain liabilities) as core's TrustLineFlags values
+absorb = { select = { state_change_category = "BALANCE_AUTHORIZATION", state_change_reason = "SET" }, same = ["account_id", "token_id", "liquidity_pool_id"], fields = { flags = { bits = "flags", map = { "0" = 1, "6" = 2, "5" = 4 } } } }
+
+[[export.pass.case]]
+when = { state_change_reason = "UPDATE" }
+kind = "trustline-limit"
+fields.account = { address = "account_id", forms = "account" }
+fields.asset = { asset = "token_id", pool = "liquidity_pool_id", lookup = "assets" }
+fields.before = { stroops = "trustline_limit_old", note = "a trustline limit is not an amount with at most 7 decimals" }
+fields.after = { stroops = "trustline_limit_new", note = "a trustline limit is not an amount with at most 7 decimals" }
+
+[[export.pass.case]]
+when = { state_change_reason = "REMOVE" }
+kind = "trustline-removed"
+fields.account = { address = "account_id", forms = "account" }
+fields.asset = { asset = "token_id", pool = "liquidity_pool_id", lookup = "assets" }
+
+[[export.pass.case]]
+unmapped = "TRUSTLINE with a reason other than ADD, UPDATE or REMOVE"
+
+# pass 2: BALANCE rows back into token events. a transfer is a DEBIT row for the sender and a
+# CREDIT row for the receiver, a classic mint MINT on the issuer plus CREDIT on the receiver, a
+# burn or clawback BURN on the issuer plus DEBIT on the holder, a SEP-41 mint or burn one row.
+# wallet-backend writes the two rows of one event next to each other and numbers a stream's
+# rows 1..N per operation in that order (AssignStateChangeOrdinals), so a row pairs only with
+# the next row when its state_change_id is one higher, its reason the wanted one, and token
+# and amount equal. a row with no partner keeps only the side wallet-backend stored.
+[[export.pass]]
+select = { state_change_category = "BALANCE" }
+
+# fee rows: one net row per fee payer, a debit for a net charge, a credit for a net refund
+[[export.pass.case]]
+level = "transaction"
+when = { state_change_reason = "DEBIT" }
+kind = "token-event"
+fields.event = { value = "fee" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.from = { address = "account_id", forms = "account" }
+fields.amount = { text = "amount", default = "" }
+
+[[export.pass.case]]
+level = "transaction"
+when = { state_change_reason = "CREDIT" }
+kind = "token-event"
+fields.event = { value = "fee" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.from = { address = "account_id", forms = "account" }
+fields.amount = { negate = "amount", default = "", note = "fee refund amount is not a decimal integer" }
+
+[[export.pass.case]]
+level = "transaction"
+unmapped = "transaction-level BALANCE row that is neither DEBIT nor CREDIT"
+
+[[export.pass.case]]
+when = { state_change_reason = "MINT" }
+kind = "token-event"
+fields.event = { value = "mint" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.amount = { text = "amount", default = "" }
+pair = { select = { state_change_reason = "CREDIT" }, next = "state_change_id", same = ["token_id", "amount"] }
+paired.to = { address = "account_id", forms = "account" }
+paired.to_muxed_id = { text = "to_muxed_id", typed = "u64", skip_empty = true }
+unpaired.to = { address = "account_id", forms = "account" }
+unpaired.to_muxed_id = { text = "to_muxed_id", typed = "u64", skip_empty = true }
+
+[[export.pass.case]]
+when = { state_change_reason = "BURN" }
+kind = "token-event"
+fields.event = { value = "burn" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.amount = { text = "amount", default = "" }
+pair = { select = { state_change_reason = "DEBIT" }, next = "state_change_id", same = ["token_id", "amount"] }
+paired.from = { address = "account_id", forms = "account" }
+unpaired.from = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_reason = "DEBIT" }
+kind = "token-event"
+fields.event = { value = "transfer" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.amount = { text = "amount", default = "" }
+fields.from = { address = "account_id", forms = "account" }
+pair = { select = { state_change_reason = "CREDIT" }, next = "state_change_id", same = ["token_id", "amount"] }
+# wallet-backend writes to_muxed_id only for id-typed muxed info, as a u64
+paired.to = { address = "account_id", forms = "account" }
+paired.to_muxed_id = { text = "to_muxed_id", typed = "u64", skip_empty = true }
+
+[[export.pass.case]]
+when = { state_change_reason = "CREDIT" }
+kind = "token-event"
+fields.event = { value = "transfer" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.amount = { text = "amount", default = "" }
+fields.to = { address = "account_id", forms = "account" }
+fields.to_muxed_id = { text = "to_muxed_id", typed = "u64", skip_empty = true }
+
+[[export.pass.case]]
+unmapped = "BALANCE row with a reason other than DEBIT, CREDIT, MINT or BURN"
+
+# pass 3: rows that wallet-backend splits per flag or per threshold merge into one change per
+# account (and asset) and operation
+[[export.pass]]
+select = { state_change_category = ["FLAGS", "SIGNATURE_THRESHOLD", "BALANCE_AUTHORIZATION"] }
+
+# a contract holder's authorization comes from a SAC set_authorized event and has no
+# trustline behind it
+[[export.pass.case]]
+when = { state_change_category = "BALANCE_AUTHORIZATION" }
+when_version = { account_id = ["C"] }
+kind = "token-event"
+fields.event = { value = "set_authorized" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.to = { address = "account_id", forms = "account" }
+fields.authorized = { equals = "state_change_reason", value = "SET" }
+
+[[export.pass.case]]
+when = { state_change_category = "BALANCE_AUTHORIZATION" }
+when_version_not = { account_id = ["G", "C"] }
+unmapped = "BALANCE_AUTHORIZATION holder with version byte {account_id:version}, neither an account (G) nor a contract (C)"
+
+[[export.pass.case]]
+when = { state_change_category = "FLAGS" }
+kind = "account-flags"
+merge = ["account_id", "token_id", "liquidity_pool_id"]
+fields.account = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_category = "SIGNATURE_THRESHOLD" }
+kind = "thresholds"
+merge = ["account_id", "token_id", "liquidity_pool_id"]
+fields.account = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_category = "BALANCE_AUTHORIZATION" }
+kind = "trustline-flags"
+merge = ["account_id", "token_id", "liquidity_pool_id"]
+fields.account = { address = "account_id", forms = "account" }
+fields.asset = { asset = "token_id", pool = "liquidity_pool_id", lookup = "assets" }
+
+# pass 4: every row left
+[[export.pass]]
+
+[[export.pass.case]]
+when = { state_change_category = "ACCOUNT", state_change_reason = "CREATE" }
+when_version = { account_id = ["C"] }
+kind = "contract-deployed"
+fields.contract = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_category = "ACCOUNT", state_change_reason = "CREATE" }
+kind = "account-created"
+fields.account = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_category = "ACCOUNT", state_change_reason = "MERGE" }
+kind = "account-removed"
+fields.account = { address = "account_id", forms = "account" }
+
+[[export.pass.case]]
+when = { state_change_category = "ACCOUNT" }
+unmapped = "ACCOUNT with a reason other than CREATE or MERGE"
+
+[[export.pass.case]]
+when = { state_change_category = "SIGNER", state_change_reason = "ADD" }
+kind = "signer-added"
+fields.account = { address = "account_id", forms = "account" }
+fields.signer = { address = "signer_account_id", forms = "signer" }
+fields.weight = { int = "signer_weight_new" }
+
+[[export.pass.case]]
+when = { state_change_category = "SIGNER", state_change_reason = "REMOVE" }
+kind = "signer-removed"
+fields.account = { address = "account_id", forms = "account" }
+fields.signer = { address = "signer_account_id", forms = "signer" }
+fields.weight = { int = "signer_weight_old" }
+
+[[export.pass.case]]
+when = { state_change_category = "SIGNER", state_change_reason = "UPDATE" }
+kind = "signer-weight"
+fields.account = { address = "account_id", forms = "account" }
+fields.signer = { address = "signer_account_id", forms = "signer" }
+fields.before = { int = "signer_weight_old" }
+fields.after = { int = "signer_weight_new" }
+
+[[export.pass.case]]
+when = { state_change_category = "SIGNER" }
+unmapped = "SIGNER with a reason other than ADD, UPDATE or REMOVE"
+
+[[export.pass.case]]
+when = { state_change_category = "HOME_DOMAIN" }
+kind = "home-domain"
+fields.account = { address = "account_id", forms = "account" }
+fields.before = { json = "key_value", path = "old", as = "string", default = "" }
+fields.after = { json = "key_value", path = "new", as = "string", default = "" }
+
+[[export.pass.case]]
+when = { state_change_category = "DATA_ENTRY", state_change_reason = "ADD" }
+kind = "data-entry"
+fields.account = { address = "account_id", forms = "account" }
+fields.action = { value = "created" }
+fields.name_hex = { text_hex = "data_entry_name", note = "DATA_ENTRY without data_entry_name" }
+fields.value_before_hex = { json = "key_value", path = "old", as = "base64-hex" }
+fields.value_after_hex = { json = "key_value", path = "new", as = "base64-hex" }
+
+[[export.pass.case]]
+when = { state_change_category = "DATA_ENTRY", state_change_reason = "UPDATE" }
+kind = "data-entry"
+fields.account = { address = "account_id", forms = "account" }
+fields.action = { value = "updated" }
+fields.name_hex = { text_hex = "data_entry_name", note = "DATA_ENTRY without data_entry_name" }
+fields.value_before_hex = { json = "key_value", path = "old", as = "base64-hex" }
+fields.value_after_hex = { json = "key_value", path = "new", as = "base64-hex" }
+
+[[export.pass.case]]
+when = { state_change_category = "DATA_ENTRY", state_change_reason = "REMOVE" }
+kind = "data-entry"
+fields.account = { address = "account_id", forms = "account" }
+fields.action = { value = "removed" }
+fields.name_hex = { text_hex = "data_entry_name", note = "DATA_ENTRY without data_entry_name" }
+fields.value_before_hex = { json = "key_value", path = "old", as = "base64-hex" }
+fields.value_after_hex = { json = "key_value", path = "new", as = "base64-hex" }
+
+[[export.pass.case]]
+when = { state_change_category = "DATA_ENTRY" }
+unmapped = "DATA_ENTRY with a reason other than ADD, UPDATE or REMOVE"
+
+[[export.pass.case]]
+when = { state_change_category = "ALLOWANCE" }
+kind = "token-event"
+fields.event = { value = "approve" }
+fields.contract = { address = "token_id", forms = "account" }
+fields.from = { address = "account_id", forms = "account" }
+fields.spender = { address = "spender_account_id", forms = "account" }
+fields.amount = { text = "amount" }
+fields.live_until_ledger = { json = "key_value", path = "live_until_ledger", as = "uint32" }
+
+[[export.pass.case]]
+unmapped = "no vocabulary kind for this category: blend protocol state is recorded by the oracle only as raw contract events, which wallet-backend does not store"
