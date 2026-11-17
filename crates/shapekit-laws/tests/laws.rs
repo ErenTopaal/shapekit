@@ -213,7 +213,7 @@ fn every_recorded_corpus_ledger_holds() {
             }
         }
     }
-    assert_eq!(variants, 714);
+    assert_eq!(variants, 718);
     // the one synthetic ledger is hand-made with zeroed header hashes; its tx set and result
     // set are not the ones those hashes would commit to
     assert_eq!(
