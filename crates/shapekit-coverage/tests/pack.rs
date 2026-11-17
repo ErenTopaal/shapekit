@@ -338,3 +338,51 @@ fn refuses_strays_under_chains() {
         );
     }
 }
+
+#[test]
+fn ships_the_generated_coverage_reports() {
+    let dir = tempfile::tempdir().unwrap();
+    let corpus = dir.path().join("corpus");
+    let m = fixture(&corpus);
+    for r in [
+        "coverage/obligations.json",
+        "coverage/core-coverage.json",
+        "coverage/unknown-regions.json",
+    ] {
+        write(&corpus, r, b"{}\n");
+    }
+    let report = pack(&corpus, &m, &dir.path().join("out")).unwrap();
+    let names: Vec<String> = members(&report.archive).into_iter().map(|m| m.0).collect();
+    for r in [
+        "coverage/obligations.json",
+        "coverage/core-coverage.json",
+        "coverage/unknown-regions.json",
+    ] {
+        assert!(names.iter().any(|n| n.ends_with(r)), "{r} not in {names:?}");
+    }
+}
+
+#[test]
+fn ships_recipe_ir_files_and_refuses_others_under_recipes() {
+    let dir = tempfile::tempdir().unwrap();
+    let corpus = dir.path().join("corpus");
+    let m = fixture(&corpus);
+    write(&corpus, "recipes/f/r.json", b"{}\n");
+    let report = pack(&corpus, &m, &dir.path().join("out")).unwrap();
+    assert!(
+        members(&report.archive)
+            .iter()
+            .any(|m| m.0.ends_with("recipes/f/r.json"))
+    );
+    for stray in ["recipes/notes.txt", "recipes/f/r.txt", "recipes/f/g/r.json"] {
+        let dir = tempfile::tempdir().unwrap();
+        let corpus = dir.path().join("corpus");
+        let m = fixture(&corpus);
+        write(&corpus, stray, b"x");
+        let err = pack(&corpus, &m, &dir.path().join("out")).unwrap_err();
+        assert!(
+            err.to_string().contains("belongs to no manifest entry"),
+            "{stray}: {err}"
+        );
+    }
+}

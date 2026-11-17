@@ -25,6 +25,15 @@ const REQUIRED: [&str; 3] = [
     "coverage/COVERAGE.md",
 ];
 
+/// Generated reports about the corpus that ship beside the required files when they exist:
+/// the obligation ledger `shapekit coverage` writes and the core coverage of the corpus
+/// chains `shapekit twin` writes.
+const REPORTS: [&str; 3] = [
+    "coverage/obligations.json",
+    "coverage/core-coverage.json",
+    "coverage/unknown-regions.json",
+];
+
 /// Directories that must hold at least one file.
 const REQUIRED_DIRS: [&str; 3] = ["entries/", "vectors/", "chains/"];
 
@@ -291,13 +300,21 @@ fn verify_chains(corpus: &Path, files: &[String]) -> Result<(), CoverageError> {
 }
 
 /// The members allowed outside `entries/`, `vectors/` and `chains/`: the required files, the
-/// golden agreement exceptions and one `index.json` per golden snapshot.
+/// generated coverage reports, the golden agreement exceptions, one `index.json` per golden
+/// snapshot, and the recipe IR files (`recipes/<family>/<name>.json`) entries name as
+/// `source.recipe_ir`.
 fn outside_member(f: &str) -> bool {
-    if REQUIRED.contains(&f) || f == "goldens/agree-exceptions.toml" {
+    if REQUIRED.contains(&f) || REPORTS.contains(&f) || f == "goldens/agree-exceptions.toml" {
         return true;
     }
     let parts: Vec<&str> = f.split('/').collect();
-    matches!(parts.as_slice(), ["goldens", snapshot, "index.json"] if !snapshot.is_empty())
+    match parts.as_slice() {
+        ["goldens", snapshot, "index.json"] => !snapshot.is_empty(),
+        ["recipes", family, name] => {
+            !family.is_empty() && name.ends_with(".json") && name.len() > 5
+        }
+        _ => false,
+    }
 }
 
 fn verify_manifest_files(corpus: &Path, manifest: &Manifest) -> Result<(), CoverageError> {
