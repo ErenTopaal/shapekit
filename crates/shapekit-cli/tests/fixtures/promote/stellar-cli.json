@@ -1,0 +1,78 @@
+{
+  "check_summary": {
+    "stellar-cli@30.0.1": {
+      "diverges-from-network": 1,
+      "pass": 15
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "stellar-cli@30.0.1": {
+          "checks": [
+            {
+              "actual": {
+                "kind": "claimable_balance",
+                "payload": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+              },
+              "check": "case 7/strkey_decode",
+              "detail": "the sdk accepted a value the network refuses",
+              "expected": "rejected",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "source": "corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json case 7"
+            }
+          ],
+          "counts": {
+            "diverges-from-network": 1,
+            "pass": 15
+          },
+          "known_issue": "candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "result": "diverges-from-network"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "stellar-cli@30.0.1": {
+      "strkey_decode": {
+        "diverges-from-network": 1,
+        "pass": 15
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "stellar-cli@30.0.1": {
+      "diverges-from-network": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "stellar-xdr": "30.0.0"
+      },
+      "decode_limits": "ignored",
+      "key": "stellar-cli@30.0.1",
+      "ops": [
+        "decode_encode",
+        "decode_json",
+        "encode_json",
+        "strkey_decode",
+        "strkey_encode",
+        "tx_hash"
+      ],
+      "package": "stellar-cli",
+      "sdk": "stellar-cli",
+      "version": "30.0.1"
+    }
+  ]
+}

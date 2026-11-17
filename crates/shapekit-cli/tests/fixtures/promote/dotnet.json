@@ -1,0 +1,95 @@
+{
+  "check_summary": {
+    "dotnet@17.0.0": {
+      "diverges-from-network": 2,
+      "pass": 14
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "dotnet@17.0.0": {
+          "checks": [
+            {
+              "actual": {
+                "kind": "claimable_balance",
+                "payload": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+              },
+              "check": "case 13/strkey_decode",
+              "detail": "the sdk accepted a value the network refuses",
+              "expected": "rejected",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "source": "corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json case 13"
+            },
+            {
+              "actual": {
+                "kind": "claimable_balance",
+                "payload": "AT8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+ia"
+              },
+              "check": "case 15/strkey_decode",
+              "detail": "the sdk accepted a value the network refuses",
+              "expected": "rejected",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "source": "corpus/vectors/strkey/cap23.claimable-balances.synth-strkey-b-invalid.json case 15"
+            }
+          ],
+          "counts": {
+            "diverges-from-network": 2,
+            "pass": 14
+          },
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "result": "diverges-from-network"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "dotnet@17.0.0": {
+      "strkey_decode": {
+        "diverges-from-network": 2,
+        "pass": 14
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "dotnet@17.0.0": {
+      "diverges-from-network": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "stellar-dotnet-sdk-xdr": "17.0.0"
+      },
+      "decode_limits": "ignored",
+      "key": "dotnet@17.0.0",
+      "ops": [
+        "decode_encode",
+        "strkey_decode",
+        "strkey_encode",
+        "asset_order",
+        "pool_id",
+        "id_parse",
+        "to_native",
+        "address_from_scval",
+        "tx_hash",
+        "balance_id",
+        "contract_id"
+      ],
+      "package": "stellar-dotnet-sdk",
+      "sdk": "dotnet",
+      "version": "17.0.0"
+    }
+  ]
+}
