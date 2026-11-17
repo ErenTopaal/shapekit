@@ -13,7 +13,9 @@ pub enum GuideCommand {
     /// regions of the guide.
     Table(GuideArgs),
     /// Fail when a rendered region differs from the guide, when a field core does not fully
-    /// validate has no corpus entry, or when a corpus entry names a field the table lacks.
+    /// validate has no corpus entry, when a corpus entry names a field the table lacks, or
+    /// when the verdicts measured on core contradict a row's validated_by_core and no reading
+    /// of core's source settles it.
     Check(GuideArgs),
 }
 
@@ -35,6 +37,10 @@ pub struct GuideArgs {
     /// Write corpus entry ids without links.
     #[arg(long)]
     plain_entries: bool,
+    /// The verdicts measured on core (`shapekit probe all`) that `check` compares the
+    /// field table with.
+    #[arg(long, default_value = "registry/generated/validation.json")]
+    validation: PathBuf,
 }
 
 pub fn run(command: GuideCommand) -> Result<bool> {
@@ -134,7 +140,8 @@ fn check(args: &GuideArgs) -> Result<bool> {
         checklist: &l.checklist,
         links: &l.links,
     };
-    let report = shapekit_guide::check(&l.doc, &src)?;
+    let rows = measured_rows(args)?;
+    let report = shapekit_guide::check(&l.doc, &src, &rows)?;
     for name in &report.stale {
         println!("stale region {name}: run shapekit guide table");
     }
@@ -155,8 +162,11 @@ fn check(args: &GuideArgs) -> Result<bool> {
     for p in &report.checklist {
         println!("{p}");
     }
+    for p in &report.measured.problems {
+        println!("{p}");
+    }
     let summary = format!(
-        "{} fields in the table, {} exercised by {} corpus entries; {} stale regions, {} uncovered fields, {} unknown field references, {} checklist problems",
+        "{} fields in the table, {} exercised by {} corpus entries; {} stale regions, {} uncovered fields, {} unknown field references, {} checklist problems; against core: {} rows, {} agree, {} settled by core's source, {} problems",
         report.table_fields,
         report.exercised_fields,
         l.manifest.entries.len(),
@@ -164,6 +174,10 @@ fn check(args: &GuideArgs) -> Result<bool> {
         report.uncovered.len(),
         report.unknown.len(),
         report.checklist.len(),
+        report.measured.rows,
+        report.measured.agree,
+        report.measured.settled,
+        report.measured.problems.len(),
     );
     if report.passed() {
         println!("guide ok: {summary}");
@@ -171,4 +185,25 @@ fn check(args: &GuideArgs) -> Result<bool> {
         println!("guide check failed: {summary}");
     }
     Ok(report.passed())
+}
+
+/// Every row of `fields.toml` compared with the verdicts measured on core, the comparison
+/// `shapekit probe compare` prints.
+fn measured_rows(args: &GuideArgs) -> Result<Vec<shapekit_guide::MeasuredRow>> {
+    let table: shapekit_contracts::validation::ValidationTable =
+        shapekit_contracts::load(&args.validation)
+            .with_context(|| format!("reading {}", args.validation.display()))?;
+    let fields_path = args.registry.join("fields.toml");
+    let fields: toml::Table = std::fs::read_to_string(&fields_path)
+        .with_context(|| format!("reading {}", fields_path.display()))?
+        .parse()
+        .with_context(|| format!("parsing {}", fields_path.display()))?;
+    Ok(shapekit_probe::compare::compare(&table, &fields)?
+        .into_iter()
+        .map(|c| shapekit_guide::MeasuredRow {
+            row: c.row,
+            agrees: c.agrees,
+            settled: c.resolved.is_some(),
+        })
+        .collect())
 }

@@ -250,6 +250,13 @@ reason. `shapekit coverage` also rewrites the obligation ledger,
 `corpus/coverage/obligations.json`, from the fragments in `registry/obligation-sources.toml`,
 the gap tables and the obligations the entries name; its per-kind counts are in `COVERAGE.md`.
 
+`shapekit guide check` also compares every row of `registry/fields.toml` with the verdicts
+measured on core in `registry/generated/validation.json`, the comparison `shapekit probe compare`
+prints. It fails while a row's `validated_by_core` contradicts the measured verdicts and no
+reading of core's source settles it, and while a settlement belongs to a row that agrees. After
+re-running `shapekit probe all` on the new core, fix each contradiction in the row or settle
+it in `crates/shapekit-probe/src/compare.rs` with the file and lines of core that explain it.
+
 ### 8. SDK testees and the version matrix
 
 Let the registries decide the versions:

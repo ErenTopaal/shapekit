@@ -4,7 +4,8 @@
 use std::path::{Path, PathBuf};
 
 use shapekit_guide::{
-    CORPUS_BY_FIELD, ChecklistFile, CorpusLinks, FIELD_TABLE, REGIONS, Sources, UnknownField,
+    CORPUS_BY_FIELD, ChecklistFile, CorpusLinks, FIELD_TABLE, MeasuredRow, REGIONS, Sources,
+    UnknownField,
 };
 use shapekit_manifest::Manifest;
 use shapekit_registry::{Registry, ValidatedByCore};
@@ -41,6 +42,69 @@ fn skeleton() -> String {
     doc
 }
 
+/// Every row of the field table, measured as agreeing.
+fn agreeing(r: &Registry) -> Vec<MeasuredRow> {
+    r.fields
+        .fields
+        .iter()
+        .map(|f| MeasuredRow {
+            row: f.id.clone(),
+            agrees: true,
+            settled: false,
+        })
+        .collect()
+}
+
+#[test]
+fn the_field_table_must_stand_against_the_measured_verdicts() {
+    let f = fixture();
+    let mut rows = agreeing(&f.registry);
+    let ok = shapekit_guide::measured(&f.registry, &rows);
+    assert!(ok.problems.is_empty(), "{:?}", ok.problems);
+    assert_eq!((ok.rows, ok.agree, ok.settled), (rows.len(), rows.len(), 0));
+
+    // a settled disagreement passes
+    rows[0].agrees = false;
+    rows[0].settled = true;
+    let m = shapekit_guide::measured(&f.registry, &rows);
+    assert!(m.problems.is_empty(), "{:?}", m.problems);
+    assert_eq!(m.settled, 1);
+
+    // an open disagreement, a stale settlement, a missing row and an unknown row fail
+    rows[0].settled = false;
+    rows[1].settled = true;
+    let missing = rows.pop().unwrap().row;
+    rows.push(MeasuredRow {
+        row: "tx.not_a_row".into(),
+        agrees: true,
+        settled: false,
+    });
+    let m = shapekit_guide::measured(&f.registry, &rows);
+    let first = &rows[0].row;
+    let second = &rows[1].row;
+    assert!(
+        m.problems
+            .iter()
+            .any(|p| p.starts_with(&format!("{first}: the verdicts measured")))
+    );
+    assert!(
+        m.problems
+            .iter()
+            .any(|p| p.starts_with(&format!("{second}: the measured verdicts agree")))
+    );
+    assert!(
+        m.problems
+            .iter()
+            .any(|p| p == &format!("{missing}: no measured verdict compares this row"))
+    );
+    assert!(
+        m.problems
+            .iter()
+            .any(|p| p.starts_with("tx.not_a_row: compared, but not"))
+    );
+    assert_eq!(m.problems.len(), 4, "{:?}", m.problems);
+}
+
 fn links() -> CorpusLinks {
     CorpusLinks::Relative("../../corpus".into())
 }
@@ -56,7 +120,7 @@ fn applied_guide_is_current_and_lists_every_field() {
         links: &links,
     };
     let doc = shapekit_guide::apply(&skeleton(), &src).unwrap();
-    let report = shapekit_guide::check(&doc, &src).unwrap();
+    let report = shapekit_guide::check(&doc, &src, &agreeing(&f.registry)).unwrap();
     assert!(report.stale.is_empty(), "{:?}", report.stale);
     assert!(report.unknown.is_empty(), "{:?}", report.unknown);
     assert!(report.checklist.is_empty(), "{:?}", report.checklist);
@@ -96,7 +160,7 @@ fn edited_region_is_stale_and_dropped_row_is_unknown() {
         .filter(|l| !l.starts_with(&format!("| `{}`", exercised.1)))
         .map(|l| format!("{l}\n"))
         .collect();
-    let report = shapekit_guide::check(&edited, &src).unwrap();
+    let report = shapekit_guide::check(&edited, &src, &agreeing(&f.registry)).unwrap();
     assert_eq!(report.stale, [FIELD_TABLE]);
     assert!(report.unknown.contains(&UnknownField {
         entry: exercised.0,
@@ -128,7 +192,7 @@ fn field_without_entries_is_uncovered() {
         links: &links,
     };
     let doc = shapekit_guide::apply(&skeleton(), &src).unwrap();
-    let report = shapekit_guide::check(&doc, &src).unwrap();
+    let report = shapekit_guide::check(&doc, &src, &agreeing(&f.registry)).unwrap();
     assert!(report.uncovered.iter().any(|u| u.field == target));
     let region = &shapekit_guide::render(&src).unwrap()[1];
     assert_eq!(region.0, CORPUS_BY_FIELD);
@@ -149,7 +213,7 @@ fn unknown_field_in_manifest_is_reported() {
         links: &links,
     };
     let doc = shapekit_guide::apply(&skeleton(), &src).unwrap();
-    let report = shapekit_guide::check(&doc, &src).unwrap();
+    let report = shapekit_guide::check(&doc, &src, &agreeing(&f.registry)).unwrap();
     assert_eq!(
         report.unknown,
         [UnknownField {

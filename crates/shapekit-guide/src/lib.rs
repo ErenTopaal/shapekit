@@ -6,7 +6,10 @@
 //!
 //! `apply` rewrites those regions; `check` reports regions that differ from what the registry
 //! and manifest render to, fields core does not fully validate that no corpus entry exercises,
-//! and corpus entries naming a field that is not in the field table.
+//! corpus entries naming a field that is not in the field table, and field table rows whose
+//! `validated_by_core` the verdicts measured on core (`registry/generated/validation.json`,
+//! compared row by row by `shapekit probe compare`) contradict without a settlement read from
+//! core's source.
 
 pub mod checklist;
 mod mdx;
@@ -82,6 +85,68 @@ pub struct UnknownField {
     pub field: String,
 }
 
+/// One row of `registry/fields.toml` compared with the verdicts measured on core.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MeasuredRow {
+    pub row: String,
+    /// The measured verdicts agree with the row's `validated_by_core`.
+    pub agrees: bool,
+    /// A reading of core's source settles the row; only a disagreement may have one.
+    pub settled: bool,
+}
+
+/// How the field table stands against the measured verdicts.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Measured {
+    pub rows: usize,
+    pub agree: usize,
+    pub settled: usize,
+    /// Every reason the field table and the measured verdicts are out of step.
+    pub problems: Vec<String>,
+}
+
+/// Checks the field table against the measured verdicts: every row of the registry is
+/// compared exactly once, a disagreement has a settlement, and a settlement belongs to a
+/// disagreement.
+pub fn measured(registry: &Registry, rows: &[MeasuredRow]) -> Measured {
+    let mut m = Measured {
+        rows: rows.len(),
+        ..Measured::default()
+    };
+    let mut seen: BTreeMap<&str, usize> = BTreeMap::new();
+    for r in rows {
+        *seen.entry(r.row.as_str()).or_default() += 1;
+        match (r.agrees, r.settled) {
+            (true, false) => m.agree += 1,
+            (false, true) => m.settled += 1,
+            (false, false) => m.problems.push(format!(
+                "{}: the verdicts measured on core contradict validated_by_core and no reading of core's source settles it",
+                r.row
+            )),
+            (true, true) => m.problems.push(format!(
+                "{}: the measured verdicts agree, so its settlement is stale",
+                r.row
+            )),
+        }
+    }
+    for f in &registry.fields.fields {
+        match seen.get(f.id.as_str()) {
+            None => m
+                .problems
+                .push(format!("{}: no measured verdict compares this row", f.id)),
+            Some(n) if *n > 1 => m.problems.push(format!("{}: compared {n} times", f.id)),
+            Some(_) => {}
+        }
+    }
+    for r in seen.keys() {
+        if !registry.fields.fields.iter().any(|f| f.id == *r) {
+            m.problems
+                .push(format!("{r}: compared, but not a row of the field table"));
+        }
+    }
+    m
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct Report {
     /// Regions whose text in the guide differs from the rendered text.
@@ -89,6 +154,8 @@ pub struct Report {
     pub uncovered: Vec<Uncovered>,
     pub unknown: Vec<UnknownField>,
     pub checklist: Vec<Problem>,
+    /// The field table against the verdicts measured on core.
+    pub measured: Measured,
     /// Field ids found in the guide's field table.
     pub table_fields: usize,
     /// Fields that at least one corpus entry exercises.
@@ -101,6 +168,7 @@ impl Report {
             && self.uncovered.is_empty()
             && self.unknown.is_empty()
             && self.checklist.is_empty()
+            && self.measured.problems.is_empty()
     }
 }
 
@@ -138,7 +206,9 @@ pub fn apply(doc: &str, src: &Sources) -> Result<String, GuideError> {
     mdx::splice(doc, &render(src)?)
 }
 
-pub fn check(doc: &str, src: &Sources) -> Result<Report, GuideError> {
+/// `measured` is every row of `registry/fields.toml` compared with the verdicts measured on
+/// core.
+pub fn check(doc: &str, src: &Sources, measured: &[MeasuredRow]) -> Result<Report, GuideError> {
     let current = mdx::extract(doc, &REGIONS)?;
     let mut report = Report::default();
     for (name, body) in render(src)? {
@@ -181,6 +251,7 @@ pub fn check(doc: &str, src: &Sources) -> Result<Report, GuideError> {
     report.unknown.dedup();
 
     report.checklist = src.checklist.problems(src.registry);
+    report.measured = self::measured(src.registry, measured);
     Ok(report)
 }
 
