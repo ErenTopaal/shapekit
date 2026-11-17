@@ -36,8 +36,8 @@ const CONTRACT_UNIONS: &[&str] = &[
 ];
 
 /// Arms of shared unions that only smart contracts produce: the three Soroban operations,
-/// the four Soroban ledger entry types, the two Soroban ledger upgrades and the
-/// transaction extension that carries `SorobanTransactionData`.
+/// the four Soroban ledger entry types, the two Soroban ledger upgrades, the transaction
+/// extension that carries `SorobanTransactionData`, and the restored change.
 const CONTRACT_ARMS: &[&str] = &[
     "OperationBody:invoke_host_function",
     "OperationBody:extend_footprint_ttl",
@@ -56,6 +56,9 @@ const CONTRACT_ARMS: &[&str] = &[
     "LedgerUpgrade:config",
     "LedgerUpgrade:max_soroban_tx_set_size",
     "TransactionExt:v1",
+    // only an archived entry is restored (TransactionMeta.cpp, v30.0.0), and only Soroban
+    // entries archive
+    "LedgerEntryChange:restored",
 ];
 
 /// Whether an arm belongs to smart contracts rather than to classic transactions.
