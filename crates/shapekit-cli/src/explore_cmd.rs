@@ -48,6 +48,10 @@ pub enum ExploreCommand {
         /// Arms counted as targets: the core-witnessed arms of this coverage report.
         #[arg(long, default_value = "corpus/coverage/coverage.json")]
         coverage_report: PathBuf,
+        /// The registry whose `uncovered.toml` names the arms only network history holds,
+        /// which are left out of the targets.
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
         #[arg(long, default_value = "twin/pins.toml")]
@@ -148,6 +152,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             seed,
             out,
             coverage_report,
+            registry,
             pins,
             twin_pins,
         } => {
@@ -166,9 +171,17 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             };
             let reachable = arms::reachable()?;
             let witnessed = arms::core_witnessed(&coverage_report)?;
+            let uncovered = shapekit_coverage::uncovered::UncoveredFile::load(&registry)
+                .with_context(|| format!("reading the uncovered arms of {}", registry.display()))?;
+            let history_only: BTreeSet<String> = uncovered
+                .history_only_arms
+                .iter()
+                .map(|r| r.arm.clone())
+                .collect();
             let targets: BTreeSet<String> = witnessed
                 .into_iter()
                 .filter(|a| contracts || !is_contract_arm(a))
+                .filter(|a| !history_only.contains(a))
                 .collect();
             let schema = Schema::pinned();
             let root = std::env::current_dir().context("reading the working directory")?;
@@ -196,6 +209,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 contracts,
                 out: out.clone(),
                 targets,
+                history_only: history_only.into_iter().collect(),
             };
             let r = explore::run(&env, &opts)?;
             println!(
@@ -219,6 +233,9 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             );
             for m in &r.missing {
                 println!("missing: {m}");
+            }
+            for h in &r.history_only {
+                println!("left out, network history only: {h}");
             }
             for e in &r.errors {
                 println!("error: {e}");

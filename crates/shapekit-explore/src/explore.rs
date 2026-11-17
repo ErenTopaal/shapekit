@@ -32,6 +32,9 @@ pub struct Options {
     pub out: PathBuf,
     /// The arms the run is measured against.
     pub targets: BTreeSet<String>,
+    /// Core-witnessed arms left out of the targets because only network history holds them
+    /// (`registry/uncovered.toml`).
+    pub history_only: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -85,6 +88,8 @@ pub struct Report {
     pub targets: usize,
     pub targets_witnessed: usize,
     pub missing: Vec<String>,
+    /// Arms left out of the targets because only network history holds them.
+    pub history_only: Vec<String>,
     /// Arms outside the targets that the run witnessed.
     pub beyond_targets: Vec<String>,
     pub witnesses: BTreeMap<String, Witness>,
@@ -343,6 +348,7 @@ pub fn run(env: &Env<'_>, opts: &Options) -> Result<Report> {
         targets: opts.targets.len(),
         targets_witnessed: opts.targets.len() - missing.len(),
         missing,
+        history_only: opts.history_only.clone(),
         beyond_targets: beyond,
         witnesses: g.witnesses,
         errors: g.errors,
