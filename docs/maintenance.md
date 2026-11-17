@@ -121,7 +121,7 @@ describes.
 ## Acceptance gate
 
 `scripts/acceptance.sh` runs the checks every change to `main` passes, in two modes. Run it
-from anywhere in the repository; it needs `cargo`, `go` and `node` on `PATH` and writes run
+from anywhere in the repository; it needs `cargo`, `go`, `golangci-lint`, `node` and `npm` on `PATH` and writes run
 outputs under `target/acceptance/`. It stops at the first failing check and names it.
 
 - Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
@@ -142,7 +142,7 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
   sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on
   wallet-backend at the pinned commit with its committed baseline, `findings check
-  --allow-draft` and every chain regenerated under both passphrases
+  --allow-draft`, every chain regenerated under both passphrases
   (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
   with the committed wasm, and the site built as `site.yml` builds it. It also needs docker,
   network access and the `wasm32v1-none` Rust target. The last lines of its
