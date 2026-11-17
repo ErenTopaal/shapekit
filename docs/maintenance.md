@@ -125,9 +125,13 @@ from anywhere in the repository; it needs `cargo`, `go` and `node` on `PATH` and
 outputs under `target/acceptance/`. It stops at the first failing check and names it.
 
 - Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
-  the workspace tests; the registry, the corpus and candidate manifests, the contract schemas,
-  coverage, the guide, golden agreement and the committed chains; the current version of each
-  SDK over the corpus; the findings record; the em dash check; and
+  the workspace tests; `go vet`, `go test` and golangci-lint in every module of `go.work`, and
+  `indexerlint` over `adapters/`; the JavaScript testee's typecheck, build and tests; the
+  registry, the corpus and candidate manifests, the synthetic entries, manifest and oracle
+  files as the tools write them, the contract schemas, coverage, the guide, golden agreement,
+  the committed chains, the repro selection, the adapter protocol schema and the release
+  archive; the current version of each SDK over the corpus; the findings record; the em dash
+  check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
   directory, a scratch or worktree directory name, a private or tailnet address, the build
   machine's name, or a name from the pattern file. That file names people, so it is not
@@ -139,7 +143,9 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on
   wallet-backend at the pinned commit with its committed baseline, `findings check
   --allow-draft` and every chain regenerated under both passphrases
-  (`gen verify-repro`). It also needs docker and network access. The last lines of its
+  (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
+  with the committed wasm, and the site built as `site.yml` builds it. It also needs docker,
+  network access and the `wasm32v1-none` Rust target. The last lines of its
   reproduction step and of the findings step give the totals, measured on 2026-11-16:
   `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
   `24 findings, 504 failures, 0 unmapped`.

@@ -5,10 +5,12 @@
 #        scripts/acceptance.sh --full    quick mode, then the nightly checks: pins against the
 #                                        live sources, every sdk version and the upstream
 #                                        sightings, the wallet-backend reproductions and linter
-#                                        baseline, findings with drafts allowed and every chain
-#                                        regenerated under both passphrases
+#                                        baseline, findings with drafts allowed, every chain
+#                                        regenerated under both passphrases, the test
+#                                        contracts rebuilt and the site built
 #
-# needs cargo, go and node on PATH; full mode also needs docker and network access. runs from
+# needs cargo, go, golangci-lint, node and npm on PATH; full mode also needs docker and network
+# access, and the wasm32v1-none rust target for the test contracts. runs from
 # the repository root wherever it is started, builds without debug info, and writes run
 # outputs to target/acceptance/.
 # docs/maintenance.md, "Acceptance gate", describes both modes.
@@ -29,11 +31,12 @@ case "${1:-}" in
 esac
 
 cd "$(git rev-parse --show-toplevel)"
+root=$PWD
 
 # without debug info a workspace build stays a few gigabytes; with it, tens
 export CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0
 
-for tool in cargo go node; do
+for tool in cargo go node npm golangci-lint; do
   if ! command -v "$tool" >/dev/null; then
     echo "acceptance: $tool is not on PATH" >&2
     exit 2
@@ -56,20 +59,71 @@ step() {
   "$@"
 }
 
+# runs "$@" and fails when it leaves tracked files under $1 changed: the committed copy must
+# be what the tool writes
+unchanged() {
+  local dir=$1
+  shift
+  step "$@"
+  local changed
+  changed=$(git status --porcelain -- "$dir")
+  if [ -n "$changed" ]; then
+    echo "$changed" >&2
+    echo "acceptance ($mode): committed $dir differs from what $* writes" >&2
+    exit 1
+  fi
+}
+
+# go vet, go test and golangci-lint in one module of go.work
+go_module() {
+  (cd "$1" && go vet ./... && go test ./... && golangci-lint run --config "$root/.golangci.yml" ./...)
+}
+
+# the site's install, typecheck, linter and prerendered build
+site_build() {
+  (cd site && npm ci --no-audit --no-fund && npm run typecheck && npm run lint && npm run build)
+}
+
+# the javascript testee's typecheck, build and unit tests
+js_testee() {
+  (cd testees/js && npm ci --no-audit --no-fund && npx tsc --noEmit && npx tsc && node --test "dist/**/*.test.js")
+}
+
 # quick mode
 
 step cargo fmt --all --check
 step cargo clippy --workspace --all-targets --locked -- -D warnings
 step cargo test --workspace --locked
 step cargo build --release --locked -p shapekit-cli
+# the consumer checks in adapters/protocol serve chains with the cli
+export SHAPEKIT_BIN="$root/$shapekit"
+case "$shapekit" in /*) SHAPEKIT_BIN=$shapekit ;; esac
+# every module of go.work, so a module added later is not missed
+for dir in $(go list -m -f '{{.Dir}}'); do
+  step go_module "$dir"
+done
+step go build -C lint -o "$root/$out/bin/indexerlint" ./cmd/indexerlint
+current="indexerlint over adapters/"
+echo "== $current"
+(cd adapters && "$root/$out/bin/indexerlint" ./...)
+step js_testee
 step "$shapekit" registry check
 step "$shapekit" manifest validate --file corpus/manifest.json --registry registry
+unchanged corpus sh -c "\"$shapekit\" synth build && \"$shapekit\" manifest build"
+unchanged corpus "$shapekit" oracle run
 step "$shapekit" manifest validate --file candidate/manifest.json --registry registry
 step "$shapekit" contracts schema --check
 step "$shapekit" coverage --check
 step "$shapekit" guide check
 step "$shapekit" goldens agree
 step "$shapekit" pack verify
+current="repro selection families"
+echo "== $current"
+diff <(scripts/select-repro.sh --families | sort) <("$shapekit" gen families | sort)
+step scripts/select-repro.sh --check-chains
+step "$shapekit" harness schema
+rm -rf "$out/dist"
+step "$shapekit" corpus pack --out "$out/dist"
 for sdk in rust go js; do
   step "$shapekit" conformance run --sdk "$sdk" --out "$out/conformance/$sdk"
 done
@@ -126,6 +180,13 @@ echo "== $current"
 
 step "$shapekit" findings check --allow-draft
 step "$shapekit" gen verify-repro --jobs 2
+
+# the test contracts with the pinned stellar-cli, byte for byte against the committed wasm
+unchanged contracts sh -c "contracts/build.sh && contracts/build-legacy.sh"
+
+# the site as site.yml builds it, from data derived from this checkout
+step "$shapekit" site data --out site/public/data --commit "$(git rev-parse HEAD)"
+step site_build
 
 trap - ERR
 echo "acceptance (full): every check passed"
