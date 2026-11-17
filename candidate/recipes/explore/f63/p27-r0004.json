@@ -1,0 +1,1373 @@
+{
+  "schema_version": 1,
+  "id": "explore.s1b.e0",
+  "family": "explore",
+  "protocol": 27,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": true,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "250000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upload",
+      "label": "auth-tree",
+      "source": "a",
+      "wasm": "contracts/wasm/p23/auth_tree.wasm",
+      "sha256": "ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upload",
+      "label": "echo",
+      "source": "a",
+      "wasm": "contracts/wasm/p23/echo.wasm",
+      "sha256": "34add805291a2a2b5e2ad383ce58c43abde0803115cf06adb77fb8e9ee8566eb"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "deploy",
+      "label": "auth-tree-1",
+      "source": "a",
+      "code": "auth-tree",
+      "salt": "2d48ee1ed4f51b780b49b6225f7f36be83965288cfbb404b6ac4925f74f2c5de",
+      "constructor_args": []
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "deploy",
+      "label": "echo-1",
+      "source": "a",
+      "code": "echo",
+      "salt": "bd8a21c04a194d27c87c4fb71ccc18f4b2ce7695d48f22163d2f67a6b9a20b25",
+      "constructor_args": []
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": false,
+        "signers": {
+          "a": [],
+          "e": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:e"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": true,
+        "address_v2": true,
+        "signers": {
+          "e": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "c",
+      "function": {
+        "create_contract_v2": {
+          "constructor_args": [],
+          "contract_id_preimage": {
+            "address": {
+              "address": "@account:c",
+              "salt": "c3bc856c384fe0a9e4745b7470fbacd37b0e21599b8fd582c53179f126540239"
+            }
+          },
+          "executable": {
+            "wasm": "@wasm:echo"
+          }
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "i256": "10000000"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "d",
+      "function": {
+        "create_contract": {
+          "contract_id_preimage": {
+            "asset": {
+              "credit_alphanum4": {
+                "asset_code": "USD",
+                "issuer": "@account:a"
+              }
+            }
+          },
+          "executable": "stellar_asset"
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "u256": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "put_temp",
+      "args": [
+        {
+          "i64": "999999599999999601"
+        },
+        {
+          "string": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "a",
+      "function": {
+        "create_contract_v2": {
+          "constructor_args": [],
+          "contract_id_preimage": {
+            "address": {
+              "address": "@account:a",
+              "salt": "72dde1e4185ea10b9286e7886b767cf273da62a3cfc12bbc1456646ce2649d60"
+            }
+          },
+          "executable": {
+            "wasm": "@wasm:auth-tree"
+          }
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "b",
+      "contract": "echo-1",
+      "function": "emit",
+      "args": [
+        {
+          "vec": []
+        },
+        {
+          "symbol": ""
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "clawback": {
+              "amount": "100",
+              "asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "from": "@account:a"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "7",
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@muxed:e:1",
+              "path": [
+                "native"
+              ],
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "send_max": "50000000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback": "no_trust"
+              }
+            },
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "extend-ttl",
+      "source": "b",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@account:a",
+            "durability": "temporary",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "4598685041475779676"
+              }
+            }
+          }
+        }
+      ],
+      "extend_to": 3000000,
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "restore",
+      "source": "a",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": "ledger_key_contract_instance"
+          }
+        },
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": "ledger_key_contract_instance"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "clawback_claimable_balance": {
+              "balance_id": "BAAMA4BBM4GZUBKTQMEJATHTU5TGMNAGV54ZVWMMHIHCX4U5NTETZPDS3U"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "a",
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback_claimable_balance": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:b"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": true,
+        "signers": {
+          "b": [],
+          "e": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "extend-ttl",
+      "source": "c",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@account:a",
+            "durability": "temporary",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "4598685041475779676"
+              }
+            }
+          }
+        },
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "temporary",
+            "key": {
+              "i64": "999999599999999601"
+            }
+          }
+        }
+      ],
+      "extend_to": 10000,
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "base_reserve": 20000000,
+      "config": []
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": false,
+        "signers": {
+          "a": [],
+          "d": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "1",
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@muxed:d:1",
+              "path": [],
+              "send_asset": "native",
+              "send_max": "99999748848"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "c",
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "a",
+      "function": {
+        "create_contract": {
+          "contract_id_preimage": {
+            "asset": {
+              "credit_alphanum12": {
+                "asset_code": "LONGASSET12",
+                "issuer": "@account:a"
+              }
+            }
+          },
+          "executable": "stellar_asset"
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "d",
+      "function": {
+        "create_contract": {
+          "contract_id_preimage": {
+            "address": {
+              "address": "@account:d",
+              "salt": "a4851c2f042ce55973ce039bf12b14e6cf7808f920df91028d320dedf52285dd"
+            }
+          },
+          "executable": {
+            "wasm": "@wasm:auth-tree"
+          }
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": true,
+        "signers": {
+          "a": [],
+          "d": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@muxed:a:18446744073709551615"
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "change_trust": {
+              "limit": "1",
+              "line": {
+                "pool_share": {
+                  "liquidity_pool_constant_product": {
+                    "asset_a": "native",
+                    "asset_b": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:b"
+                      }
+                    },
+                    "fee": 30
+                  }
+                }
+              }
+            }
+          },
+          "source_account": "@account:a"
+        }
+      ],
+      "signers": [
+        "b",
+        "a"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "99999878395"
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "change_trust": "trust_line_missing"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "b",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "bool": true
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:d"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": true,
+        "signers": {
+          "a": [],
+          "d": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "e",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "ledger_entry": {
+                "account": {
+                  "account_id": "@account:d"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": [
+          "b"
+        ]
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:d"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": true,
+        "address_v2": false,
+        "signers": {
+          "d": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "99999986679",
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@account:c",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:a"
+                  }
+                },
+                "native",
+                "native"
+              ],
+              "send_asset": "native",
+              "send_max": "999999599999999501"
+            }
+          },
+          "source_account": "@account:e"
+        }
+      ],
+      "signers": [
+        "a",
+        "e"
+      ],
+      "memo": {
+        "id": "1000"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "extend-ttl",
+      "source": "b",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": {
+              "symbol": "last"
+            }
+          }
+        }
+      ],
+      "extend_to": 100,
+      "resources": {
+        "disk_read_bytes": 0
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_deposit": {
+              "liquidity_pool_id": "LAUUAJ6TM5GAZCKHRQO52CUHXDSQGGEVK7G6XJHHJZQSUPVWOMKKTDCN",
+              "max_amount_a": "249937895",
+              "max_amount_b": "7",
+              "max_price": {
+                "d": 1,
+                "n": 3
+              },
+              "min_price": {
+                "d": 2147483647,
+                "n": 1
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@account:a"
+          },
+          "source_account": "@account:b"
+        }
+      ],
+      "signers": [
+        "d",
+        "b"
+      ],
+      "cond": "none",
+      "expect": {
+        "outcome": "success"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "emit",
+      "args": [
+        {
+          "vec": [
+            {
+              "vec": [
+                {
+                  "bytes": "968761d31a2a581f91d774c6fa7e5129ebd6ee45d4c3b3272094ea75c88695ba"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "u128": "1"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": true,
+        "address_v2": false,
+        "signers": {
+          "a": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "e",
+      "operations": [
+        {
+          "body": {
+            "bump_sequence": {
+              "bump_to": "@seq:e+1"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "e"
+      ],
+      "memo": {
+        "hash": "49af83b95c3715be83f5623dba2a07a8f8c73470dc53acf3be7500015363f29f"
+      },
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "bump_sequence": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": false,
+        "signers": {
+          "a": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "put_temp",
+      "args": [
+        {
+          "i128": "-1"
+        },
+        {
+          "string": ""
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:c"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": true,
+        "address_v2": false,
+        "signers": {
+          "c": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "extend-ttl",
+      "source": "e",
+      "keys": [
+        {
+          "contract_code": {
+            "hash": "ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb"
+          }
+        },
+        {
+          "contract_code": {
+            "hash": "ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb"
+          }
+        }
+      ],
+      "extend_to": 1,
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "clawback": {
+              "amount": "99999555555",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "from": "@muxed:e:18446744073709551615"
+            }
+          },
+          "source_account": "@account:a"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "resources": {
+        "instructions": 1000
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "invoke_host_function": "resource_limit_exceeded"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:a"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": true,
+        "address_v2": false,
+        "signers": {
+          "a": []
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@contract:echo-1"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "d",
+      "function": {
+        "create_contract_v2": {
+          "constructor_args": [],
+          "contract_id_preimage": {
+            "address": {
+              "address": "@account:d",
+              "salt": "5c0a0ed5301172444594217fa5596341ac33023b5d575019e4c0695c07872be3"
+            }
+          },
+          "executable": {
+            "wasm": "@wasm:auth-tree"
+          }
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "1",
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@account:e",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_asset": "native",
+              "send_max": "50000000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "c",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

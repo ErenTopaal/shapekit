@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "id": "explore.s17.e0",
+  "family": "explore",
+  "protocol": 23,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": true,
+    "min_persistent_ttl": 10,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "210000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upload",
+      "label": "auth-tree",
+      "source": "a",
+      "wasm": "contracts/wasm/p23/auth_tree.wasm",
+      "sha256": "ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upload",
+      "label": "echo",
+      "source": "a",
+      "wasm": "contracts/wasm/p23/echo.wasm",
+      "sha256": "34add805291a2a2b5e2ad383ce58c43abde0803115cf06adb77fb8e9ee8566eb"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "deploy",
+      "label": "auth-tree-1",
+      "source": "a",
+      "code": "auth-tree",
+      "salt": "2d48ee1ed4f51b780b49b6225f7f36be83965288cfbb404b6ac4925f74f2c5de",
+      "constructor_args": []
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "deploy",
+      "label": "echo-1",
+      "source": "a",
+      "code": "echo",
+      "salt": "bd8a21c04a194d27c87c4fb71ccc18f4b2ce7695d48f22163d2f67a6b9a20b25",
+      "constructor_args": []
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "echo-1",
+      "function": "put_temp",
+      "args": [
+        {
+          "u256": "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+        },
+        {
+          "u64": "1"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "b",
+      "contract": "echo-1",
+      "function": "put_temp",
+      "args": [
+        {
+          "u64": "18446744073709551615"
+        },
+        {
+          "i128": "7"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "100",
+              "dest_asset": "native",
+              "destination": "@muxed:b:18446744073709551615",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "send_max": "99999796679"
+            }
+          },
+          "source_account": "@account:b"
+        }
+      ],
+      "signers": [
+        "c",
+        "b"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "echo-1",
+      "function": "emit",
+      "args": [
+        {
+          "vec": [
+            {
+              "u128": "340282366920938463463374607431768211455"
+            },
+            {
+              "i128": "-170141183460469231731687303715884105728"
+            }
+          ]
+        },
+        {
+          "bool": false
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "end_sponsoring_future_reserves",
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "b",
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "end_sponsoring_future_reserves": "not_sponsored"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "e",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@account:c"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "auth": {
+        "mode": "record",
+        "allow_non_root": false,
+        "address_v2": false,
+        "signers": {
+          "c": [],
+          "e": []
+        }
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "invoke_host_function": "entry_archived"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "restore",
+      "source": "e",
+      "keys": [
+        {
+          "contract_code": {
+            "hash": "ac4984203d55fb4f04f9fe8aecd135a57a6e863d4047154f0f402e1308bc7eeb"
+          }
+        },
+        {
+          "contract_code": {
+            "hash": "34add805291a2a2b5e2ad383ce58c43abde0803115cf06adb77fb8e9ee8566eb"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "max_tx_set_size": 1,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "10000000000",
+              "line": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "hash": "4c188d36d2982b879a615975211b843ba27a7efb7fa82673340e4c94e40e8d4e"
+      },
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "auth-tree-1",
+      "function": "guarded",
+      "args": [
+        {
+          "address": "@contract:auth-tree-1"
+        },
+        {
+          "bool": false
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "10000000000",
+              "line": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "hash": "4c188d36d2982b879a615975211b843ba27a7efb7fa82673340e4c94e40e8d4e"
+      },
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

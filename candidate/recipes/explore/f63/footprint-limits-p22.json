@@ -1,0 +1,123 @@
+{
+ "schema_version": 1,
+ "id": "contracts.footprint-limits-p22",
+ "family": "explore",
+ "protocol": 22,
+ "node": {
+  "soroban_limits": true,
+  "min_persistent_ttl": 10
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "code",
+   "source": "owner",
+   "wasm": "contracts/wasm/p22/echo.wasm",
+   "sha256": "ea1734e43c093e882a3e3474312731f7e85249ac35d80019d8b120eed710f0a1"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "extend-ttl",
+   "source": "owner",
+   "keys": [
+    {
+     "contract_code": {
+      "hash": "ea1734e43c093e882a3e3474312731f7e85249ac35d80019d8b120eed710f0a1"
+     }
+    }
+   ],
+   "extend_to": 10000,
+   "resources": {
+    "disk_read_bytes": 0
+   },
+   "expect": {
+    "outcome": "failed"
+   }
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "restore",
+   "source": "owner",
+   "keys": [
+    {
+     "contract_code": {
+      "hash": "ea1734e43c093e882a3e3474312731f7e85249ac35d80019d8b120eed710f0a1"
+     }
+    }
+   ],
+   "resources": {
+    "disk_read_bytes": 0
+   },
+   "expect": {
+    "outcome": "failed"
+   }
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "restore",
+   "source": "owner",
+   "keys": [
+    {
+     "contract_code": {
+      "hash": "ea1734e43c093e882a3e3474312731f7e85249ac35d80019d8b120eed710f0a1"
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

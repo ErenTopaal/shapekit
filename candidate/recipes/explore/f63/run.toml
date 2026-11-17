@@ -1,0 +1,148 @@
+# contract recipes: one explorer run per protocol 21 to 30, each verified under both
+# passphrases twice, plus hand-written recipes for arms the runs did not reach
+kept_here = "the explorer recipes a greedy cover over the verified recipes picked, at least one per protocol, and the hand-written ones"
+
+[runs.p21]
+command = "shapekit explore run --budget 4 --protocol 21 --max-protocol 21 --contracts --jobs 1 --actions 25 --seed 21"
+result = "3 episodes (0 replays) in 281s: 3 recipes, 120 of 436 target arms witnessed (27.5%), 0 more arms beyond the targets"
+
+[runs.p22]
+command = "shapekit explore run --budget 4 --protocol 22 --max-protocol 22 --contracts --jobs 1 --actions 25 --seed 22"
+result = "3 episodes (0 replays) in 284s: 3 recipes, 129 of 436 target arms witnessed (29.6%), 0 more arms beyond the targets"
+
+[runs.p23]
+command = "shapekit explore run --budget 4 --protocol 23 --max-protocol 23 --contracts --jobs 1 --actions 25 --seed 23"
+result = "3 episodes (1 replays) in 361s: 3 recipes, 145 of 436 target arms witnessed (33.3%), 0 more arms beyond the targets"
+
+[runs.p24]
+command = "shapekit explore run --budget 4 --protocol 24 --max-protocol 24 --contracts --jobs 1 --actions 25 --seed 24"
+result = "2 episodes (1 replays) in 250s: 2 recipes, 96 of 436 target arms witnessed (22.0%), 0 more arms beyond the targets"
+
+[runs.p25]
+command = "shapekit explore run --budget 4 --protocol 25 --max-protocol 25 --contracts --jobs 1 --actions 25 --seed 25"
+result = "6 episodes (4 replays) in 287s: 6 recipes, 138 of 436 target arms witnessed (31.7%), 0 more arms beyond the targets"
+
+[runs.p26]
+command = "shapekit explore run --budget 4 --protocol 26 --max-protocol 26 --contracts --jobs 1 --actions 25 --seed 26"
+result = "5 episodes (2 replays) in 301s: 5 recipes, 144 of 436 target arms witnessed (33.0%), 0 more arms beyond the targets"
+
+[runs.p27]
+command = "shapekit explore run --budget 4 --protocol 27 --max-protocol 27 --contracts --jobs 1 --actions 25 --seed 27"
+result = "5 episodes (0 replays) in 311s: 5 recipes, 140 of 436 target arms witnessed (32.1%), 0 more arms beyond the targets"
+
+[runs.p28]
+command = "shapekit explore run --budget 4 --protocol 28 --max-protocol 28 --contracts --jobs 1 --actions 25 --seed 28"
+result = "4 episodes (2 replays) in 241s: 4 recipes, 128 of 436 target arms witnessed (29.4%), 0 more arms beyond the targets"
+
+[runs.p29]
+command = "shapekit explore run --budget 4 --protocol 29 --max-protocol 29 --contracts --jobs 1 --actions 25 --seed 29"
+result = "4 episodes (0 replays) in 242s: 4 recipes, 144 of 436 target arms witnessed (33.0%), 0 more arms beyond the targets"
+
+[runs.p30]
+command = "shapekit explore run --budget 4 --protocol 30 --max-protocol 30 --contracts --jobs 1 --actions 25 --seed 30"
+result = "4 episodes (0 replays) in 280s: 4 recipes, 125 of 436 target arms witnessed (28.7%), 0 more arms beyond the targets"
+
+[recipes."p21-r0001"]
+id = "explore.s15.e0"
+protocol = 21
+steps = 54
+contract_arms_first_witnessed = ["ConfigSettingEntry:contract_bandwidth_v0", "ConfigSettingEntry:contract_compute_v0", "ConfigSettingEntry:contract_cost_params_cpu_instructions", "ConfigSettingEntry:contract_cost_params_memory_bytes", "ConfigSettingEntry:contract_data_entry_size_bytes", "ConfigSettingEntry:contract_data_key_size_bytes", "ConfigSettingEntry:contract_events_v0", "ConfigSettingEntry:contract_execution_lanes", "ConfigSettingEntry:contract_historical_data_v0", "ConfigSettingEntry:contract_ledger_cost_v0", "ConfigSettingEntry:contract_max_size_bytes", "ConfigSettingEntry:eviction_iterator", "ConfigSettingEntry:live_soroban_state_size_window", "ConfigSettingEntry:state_archival", "ContractCodeEntryExt:v1", "ContractEventBody:v0", "ContractExecutable:stellar_asset", "ContractExecutable:wasm", "ContractIdPreimage:address", "ContractIdPreimage:asset", "ExtendFootprintTtlResult:success", "HostFunction:create_contract", "HostFunction:invoke_contract", "HostFunction:upload_contract_wasm", "InvokeHostFunctionResult:success", "LedgerEntryData:config_setting", "LedgerEntryData:contract_code", "LedgerEntryData:contract_data", "LedgerEntryData:ttl", "LedgerKey:contract_code", "LedgerKey:contract_data", "OperationBody:extend_footprint_ttl", "OperationBody:invoke_host_function", "OperationBody:restore_footprint", "OperationResultTr:extend_footprint_ttl", "OperationResultTr:invoke_host_function", "OperationResultTr:restore_footprint", "RestoreFootprintResult:success", "ScAddress:account", "ScAddress:contract", "ScVal:address", "ScVal:bool", "ScVal:bytes", "ScVal:contract_instance", "ScVal:ledger_key_contract_instance", "ScVal:map", "ScVal:string", "ScVal:symbol", "ScVal:timepoint", "ScVal:u32", "ScVal:vec", "ScVal:void", "SorobanAuthorizedFunction:create_contract_host_fn", "SorobanCredentials:source_account", "SorobanTransactionDataExt:v0", "SorobanTransactionMetaExt:v0", "TransactionExt:v1"]
+
+[recipes."p22-r0001"]
+id = "explore.s16.e1"
+protocol = 22
+steps = 27
+contract_arms_first_witnessed = ["HostFunction:create_contract_v2", "InvokeHostFunctionResult:resource_limit_exceeded", "ScVal:i128", "ScVal:u256", "SorobanAuthorizedFunction:create_contract_v2_host_fn"]
+
+[recipes."p23-r0000"]
+id = "explore.s17.e0"
+protocol = 23
+steps = 35
+contract_arms_first_witnessed = ["ConfigSettingEntry:contract_ledger_cost_ext_v0", "ConfigSettingEntry:contract_parallel_compute_v0", "ConfigSettingEntry:scp_timing", "InvokeHostFunctionResult:entry_archived", "LedgerEntryChange:restored", "ScVal:ledger_key_nonce", "ScVal:u128", "ScVal:u64", "SorobanAuthorizedFunction:contract_fn", "SorobanCredentials:address", "SorobanTransactionDataExt:v1"]
+
+[recipes."p24-r0001"]
+id = "explore.s18.e0"
+protocol = 24
+steps = 42
+contract_arms_first_witnessed = []
+
+[recipes."p25-r0001"]
+id = "explore.s19.e0"
+protocol = 25
+steps = 57
+contract_arms_first_witnessed = ["ScVal:i64"]
+
+[recipes."p26-r0002"]
+id = "explore.s1a.e0"
+protocol = 26
+steps = 69
+contract_arms_first_witnessed = ["ConfigSettingEntry:freeze_bypass_txs", "ConfigSettingEntry:frozen_ledger_keys", "ScError:wasm_vm", "ScVal:duration", "ScVal:error", "ScVal:i256", "ScVal:i32"]
+
+[recipes."p27-r0004"]
+id = "explore.s1b.e0"
+protocol = 27
+steps = 108
+contract_arms_first_witnessed = ["SorobanCredentials:address_v2"]
+
+[recipes."p28-r0000"]
+id = "explore.s1c.e0"
+protocol = 28
+steps = 41
+contract_arms_first_witnessed = []
+
+[recipes."p29-r0003"]
+id = "explore.s1d.e1"
+protocol = 29
+steps = 80
+contract_arms_first_witnessed = ["LedgerUpgrade:config", "ScError:budget"]
+
+[recipes."p30-r0003"]
+id = "explore.s1e.e2"
+protocol = 30
+steps = 73
+contract_arms_first_witnessed = ["ScError:crypto", "ScVal:executable_tag"]
+
+[recipes."refundable-fee"]
+id = "contracts.refundable-fee"
+protocol = 30
+steps = 24
+contract_arms_first_witnessed = ["ExtendFootprintTtlResult:insufficient_refundable_fee", "InvokeHostFunctionResult:insufficient_refundable_fee", "RestoreFootprintResult:insufficient_refundable_fee"]
+
+[recipes."footprint-limits-p22"]
+id = "contracts.footprint-limits-p22"
+protocol = 22
+steps = 22
+contract_arms_first_witnessed = ["ExtendFootprintTtlResult:resource_limit_exceeded", "RestoreFootprintResult:resource_limit_exceeded"]
+
+[recipes."p23-r0002"]
+id = "explore.s17.e2"
+protocol = 23
+steps = 32
+contract_arms_first_witnessed = ["ScAddress:claimable_balance"]
+
+[recipes."p27-r0002"]
+id = "explore.s1b.e0"
+protocol = 27
+steps = 66
+contract_arms_first_witnessed = ["ScAddress:muxed_account"]
+
+[recipes."external-ref"]
+id = "contracts.external-ref"
+protocol = 30
+steps = 14
+contract_arms_first_witnessed = ["ContractExecutable:external_ref"]
+
+[recipes."restore-archived-code"]
+id = "contracts.restore-archived-code"
+protocol = 30
+steps = 17
+contract_arms_first_witnessed = []
+# written to witness LedgerEntryChange:restored on its own: an uploaded code entry with a
+# persistent lifetime of 10 ledgers is archived, then restored; the explorer runs above reach it first
+verified_arms = ["LedgerEntryChange:restored"]
+
+[recipes."soroban-tx-set-size-upgrade"]
+id = "contracts.soroban-tx-set-size-upgrade"
+protocol = 30
+steps = 4
+contract_arms_first_witnessed = ["LedgerUpgrade:max_soroban_tx_set_size"]

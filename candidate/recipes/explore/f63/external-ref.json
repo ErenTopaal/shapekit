@@ -1,0 +1,107 @@
+{
+ "schema_version": 1,
+ "id": "contracts.external-ref",
+ "family": "explore",
+ "protocol": 30,
+ "node": {
+  "soroban_settings": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "echo",
+   "source": "owner",
+   "wasm": "contracts/wasm/echo.wasm",
+   "sha256": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "er",
+   "source": "owner",
+   "wasm": "contracts/wasm/exec_ref.wasm",
+   "sha256": "aecaa8c9509ad5b5af17ce2b51d7b796334b993a860bd67f628d2ff349fb0c6d"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "deploy",
+   "label": "pub",
+   "source": "owner",
+   "code": "er",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000002"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "pub",
+   "function": "publish",
+   "args": [
+    {
+     "string": "echo"
+    },
+    {
+     "bytes": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "host-function",
+   "label": "ext",
+   "source": "owner",
+   "function": {
+    "create_contract_v2": {
+     "constructor_args": [],
+     "contract_id_preimage": {
+      "address": {
+       "address": "@account:owner",
+       "salt": "0000000000000000000000000000000000000000000000000000000000000003"
+      }
+     },
+     "executable": {
+      "external_ref": {
+       "executable_owner": "@contract:pub",
+       "tag": "echo"
+      }
+     }
+    }
+   }
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "@contract:ext",
+   "function": "echo",
+   "args": [
+    {
+     "u32": 7
+    }
+   ]
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

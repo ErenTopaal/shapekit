@@ -1,0 +1,25 @@
+{
+ "schema_version": 1,
+ "id": "contracts.soroban-tx-set-size-upgrade",
+ "family": "explore",
+ "protocol": 30,
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upgrade",
+   "max_soroban_tx_set_size": 150
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

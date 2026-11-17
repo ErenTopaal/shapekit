@@ -1,0 +1,646 @@
+{
+  "schema_version": 1,
+  "id": "explore.s15.e0",
+  "family": "explore",
+  "protocol": 21,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": true,
+    "emit_classic_events": false,
+    "backfill_stellar_asset_events": false
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "200000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upload",
+      "label": "echo",
+      "source": "a",
+      "wasm": "contracts/wasm/p21/echo.wasm",
+      "sha256": "3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "deploy",
+      "label": "echo-1",
+      "source": "a",
+      "code": "echo",
+      "salt": "bd8a21c04a194d27c87c4fb71ccc18f4b2ce7695d48f22163d2f67a6b9a20b25",
+      "constructor_args": []
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "restore",
+      "source": "c",
+      "keys": [
+        {
+          "contract_code": {
+            "hash": "3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "host-function",
+      "source": "a",
+      "function": {
+        "create_contract": {
+          "contract_id_preimage": {
+            "asset": {
+              "credit_alphanum4": {
+                "asset_code": "USD",
+                "issuer": "@account:a"
+              }
+            }
+          },
+          "executable": "stellar_asset"
+        }
+      },
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "dest_min": "1000000000000",
+              "destination": "@account:d",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                },
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                },
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:b"
+                  }
+                }
+              ],
+              "send_amount": "100",
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "hash": "b0aaf5b4c2824b9be25067bb2c699f72aa41abf3329140328076aac9d395b131"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "src_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "d",
+      "contract": "echo-1",
+      "function": "put_temp",
+      "args": [
+        {
+          "timepoint": "1"
+        },
+        "void"
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "string": "shapekit"
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "restore",
+      "source": "d",
+      "keys": [
+        {
+          "contract_code": {
+            "hash": "3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@account:a"
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "99999931677"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "a",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "49999965860",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@account:c"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "c",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "b",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "u32": 1
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "b",
+      "contract": "echo-1",
+      "function": "echo",
+      "args": [
+        {
+          "string": ""
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "flags": 2,
+      "config": []
+    },
+    {
+      "step": "restore",
+      "source": "b",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": {
+              "symbol": "last"
+            }
+          }
+        },
+        {
+          "contract_code": {
+            "hash": "3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "99999932292",
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "destination": "@account:e",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "send_max": "10000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_withdraw": {
+              "amount": "10000000",
+              "liquidity_pool_id": "LBWDHFT7IZ2QK7SZ36NYVILCPHRFKGK4IT3RFK3LIEDSZAUZV4AD7WIT",
+              "min_amount_a": "1000000000000",
+              "min_amount_b": "1000000000"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": "native",
+              "dest_min": "10000000",
+              "destination": "@account:a",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                }
+              ],
+              "send_amount": "9223372036854775807",
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "b"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_withdraw": "no_trust"
+              }
+            },
+            {
+              "op_inner": {
+                "path_payment_strict_send": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "extend-ttl",
+      "source": "c",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": "ledger_key_contract_instance"
+          }
+        }
+      ],
+      "extend_to": 10000,
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "flags": 4,
+      "config": []
+    },
+    {
+      "step": "restore",
+      "source": "a",
+      "keys": [
+        {
+          "contract_data": {
+            "contract": "@contract:echo-1",
+            "durability": "persistent",
+            "key": {
+              "symbol": "last"
+            }
+          }
+        },
+        {
+          "contract_code": {
+            "hash": "3bb9d0722370b368eb6c8f038d11c61001749083383add26f89fcb3e8bb78e94"
+          }
+        }
+      ],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "invoke",
+      "source": "c",
+      "contract": "echo-1",
+      "function": "last",
+      "args": [],
+      "expect": {
+        "outcome": "success"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "dest_min": "99999898259",
+              "destination": "@account:a",
+              "path": [
+                "native"
+              ],
+              "send_amount": "1",
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": "end_sponsoring_future_reserves",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "end_sponsoring_future_reserves": "not_sponsored"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}
