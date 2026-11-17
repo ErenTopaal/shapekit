@@ -285,7 +285,11 @@ fn validate(pins: &Pins) -> Result<()> {
     let mut seen = HashSet::new();
     for p in &pins.pypi {
         let what = format!("pypi {}@{}", p.name, p.version);
-        require_unique(&mut seen, "pypi", format!("{}@{} {}", p.name, p.version, p.file))?;
+        require_unique(
+            &mut seen,
+            "pypi",
+            format!("{}@{} {}", p.name, p.version, p.file),
+        )?;
         if p.file.is_empty() || p.file.contains('/') {
             bail!("{what}: file must be a file name");
         }

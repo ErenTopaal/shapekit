@@ -417,10 +417,26 @@ mod tests {
             {"filename":"stellar_sdk-17.0.1.tar.gz","yanked":true,"digests":{"sha256":"bb"}}]}"#;
         let wheel = "stellar_sdk-17.0.1-py3-none-any.whl";
         assert!(check_pypi(doc, "17.0.1", wheel, "aa").is_ok());
-        assert!(check_pypi(doc, "17.0.1", wheel, "cc").unwrap_err().contains("pinned cc"));
-        assert!(check_pypi(doc, "17.0.1", "stellar_sdk-17.0.1.tar.gz", "bb").unwrap_err().contains("yanked"));
-        assert!(check_pypi(doc, "17.0.1", "x.whl", "aa").unwrap_err().contains("no file"));
-        assert!(check_pypi(doc, "16.1.1", wheel, "aa").unwrap_err().contains("expected 16.1.1"));
+        assert!(
+            check_pypi(doc, "17.0.1", wheel, "cc")
+                .unwrap_err()
+                .contains("pinned cc")
+        );
+        assert!(
+            check_pypi(doc, "17.0.1", "stellar_sdk-17.0.1.tar.gz", "bb")
+                .unwrap_err()
+                .contains("yanked")
+        );
+        assert!(
+            check_pypi(doc, "17.0.1", "x.whl", "aa")
+                .unwrap_err()
+                .contains("no file")
+        );
+        assert!(
+            check_pypi(doc, "16.1.1", wheel, "aa")
+                .unwrap_err()
+                .contains("expected 16.1.1")
+        );
     }
 
     #[test]

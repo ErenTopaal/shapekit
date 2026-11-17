@@ -263,6 +263,15 @@ observed = "an SCVal holding a vec cannot be hashed, so scval.to_map cannot take
 evidence = "stellar_sdk/xdr/sc_vec.py:90-91 (__hash__ hashes the list)"
 
 [[candidate]]
+finding = "CORE-1"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["soroban.scval-shapes.synth-bool-value-2", "soroban.invoke-basics.synth-invoke-arg-bool-2"]
+checks = "any/decode_encode and any/decode_json, diverges-from-peers in a run with the other sdks"
+observed = "the bool word 2 decodes as true and re-encodes as 1, as stellar-core's xdrpp reads it (CORE-1), where go-stellar-sdk and js-stellar-sdk refuse it and stellar-xdr reads false (RS-3, rs-stellar-xdr#629)"
+evidence = "xdrlib3 0.1.1 xdrlib3/__init__.py:187-188 (unpack_bool returns bool(self.unpack_int())); stellar_sdk/xdr/base.py Boolean.unpack calls it"
+
+[[candidate]]
 finding = "JS-1766"
 sdk = "python"
 versions = ["16.1.1"]

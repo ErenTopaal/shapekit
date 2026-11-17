@@ -652,7 +652,10 @@ pub fn pypi_published(http: &Http, name: &str) -> Result<Published> {
 /// The GitHub repository a PyPI release records under `project_urls` (`Repository`, else
 /// `Source`, else `Homepage`).
 pub fn pypi_repository(http: &Http, name: &str, version: &str) -> Result<String> {
-    let project = pypi_project(http, &format!("https://pypi.org/pypi/{name}/{version}/json"))?;
+    let project = pypi_project(
+        http,
+        &format!("https://pypi.org/pypi/{name}/{version}/json"),
+    )?;
     let urls = project.info.project_urls.unwrap_or_default();
     let url = ["Repository", "Source", "Homepage"]
         .iter()
@@ -673,7 +676,8 @@ pub fn tagged_xdr_commit(
     version: &str,
     version_file: &str,
 ) -> Result<String> {
-    let at = |path: &str| format!("https://raw.githubusercontent.com/{repo}/refs/tags/{version}/{path}");
+    let at =
+        |path: &str| format!("https://raw.githubusercontent.com/{repo}/refs/tags/{version}/{path}");
     let declared = http.get_text(&at(version_file))?;
     ensure!(
         declared.contains(&format!("\"{version}\"")),

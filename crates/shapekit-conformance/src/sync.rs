@@ -1152,10 +1152,9 @@ mod tests {
 
     #[test]
     fn the_venv_python_is_the_pinned_build() {
-        let pins = std::fs::read_to_string(
-            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml"),
-        )
-        .unwrap();
+        let pins =
+            std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml"))
+                .unwrap();
         let asset = format!("asset = \"cpython-{PYTHON}+");
         assert!(
             pins.contains(&asset),
