@@ -121,7 +121,8 @@ describes.
 ## Acceptance gate
 
 `scripts/acceptance.sh` runs the checks every change to `main` passes, in two modes. Run it
-from anywhere in the repository; it needs `cargo`, `go`, `golangci-lint`, `node` and `npm` on `PATH` and writes run
+from anywhere in the repository; it needs `cargo`, `go`, `golangci-lint`, `node`, `npm`,
+`flutter`, `php`, `composer` and `dotnet` on `PATH` and writes run
 outputs under `target/acceptance/`. The Python testee's uv and CPython and the Java testee's JDK and
 Maven are fetched once from their pinned releases into `target/toolchains/` by
 `scripts/python-toolchain.sh` and `scripts/java-toolchain.sh`, which check each download
@@ -133,7 +134,10 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   registry, the corpus and candidate manifests, the synthetic entries, manifest and oracle
   files as the tools write them, the contract schemas, coverage, the guide, golden agreement,
   the committed chains, the repro selection, the adapter protocol schema and the release
-  archive; the current version of each SDK over the corpus; the Python and Java testees' unit tests;
+  archive; the current version of rust, go and js over the corpus; the build and unit tests of
+  the other testees at their current version (Python, Java, soroban-sdk, Dart, PHP, .NET, KMP
+  and stellar-cli; the .NET and KMP builds treat warnings as errors, and neither testee has
+  unit tests of its own), whose corpus runs are in full mode and in their own `pr.yml` jobs;
   the findings record; the em dash
   check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
@@ -143,7 +147,8 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   `SHAPEKIT_TEXT_PATTERNS` names, one perl regex per line, and stops with exit status 2 when
   neither exists.
 - Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
-  runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
+  runs: `shapekit pins verify` against the live sources, every version of every SDK over the
+  corpus (the current versions of the newer SDKs included) and the upstream
   sightings (`conformance reproduce`), the Python and Java testees' type tables regenerated and
   compared with the committed ones, the wallet-backend reproductions table, the linter on
   wallet-backend at the pinned commit with its committed baseline, the stellar-rpc adapter
@@ -151,8 +156,8 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   `crates/shapekit-harness/expect/stellar-rpc.toml`, `findings check --allow-draft`, every
   chain regenerated under both passphrases
   (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
-  with the committed wasm, and the site built as `site.yml` builds it. It also needs docker,
-  network access and the `wasm32v1-none` Rust target. The last lines of its
+  with the committed wasm, and the site built as `site.yml` builds it. It also needs docker
+  and the `wasm32v1-none` Rust target. The last lines of its
   reproduction step and of the findings step give the totals, measured on 2026-11-17:
   `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
   `24 findings, 516 failures, 0 unmapped`.

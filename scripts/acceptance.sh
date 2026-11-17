@@ -3,17 +3,20 @@
 #
 # usage: scripts/acceptance.sh           quick mode, the gate for every change
 #        scripts/acceptance.sh --full    quick mode, then the nightly checks: pins against the
-#                                        live sources, every sdk version and the upstream
+#                                        live sources, every version of every sdk through the
+#                                        corpus (quick mode runs rust, go and js at their
+#                                        current version and only builds and unit tests the
+#                                        other testees), the upstream
 #                                        sightings, the wallet-backend reproductions and linter
 #                                        baseline, the stellar-rpc harness runs, findings with
 #                                        drafts allowed, every chain
 #                                        regenerated under both passphrases, the test
 #                                        contracts rebuilt and the site built
 #
-# needs cargo, go, golangci-lint, node and npm on PATH, and network access once to fetch the python
-# and java testees' pinned uv, cpython, jdk and maven into target/toolchains/; full mode also
-# needs docker, flutter, php, composer, dotnet and network
-# access, and the wasm32v1-none rust target for the test contracts. runs from
+# needs cargo, go, golangci-lint, node, npm, flutter, php, composer and dotnet on PATH, and
+# network access to fetch the python and java testees' pinned uv, cpython, jdk and maven into
+# target/toolchains/ and the newer sdks' dependencies; full mode also needs docker and the
+# wasm32v1-none rust target for the test contracts. runs from
 # the repository root wherever it is started, builds without debug info, and writes run
 # outputs to target/acceptance/.
 # docs/maintenance.md, "Acceptance gate", describes both modes.
@@ -24,7 +27,7 @@ case "${1:-}" in
   "" | --quick) ;;
   --full) mode=full ;;
   -h | --help)
-    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+    awk 'NR > 1 && !/^#/ { exit } NR > 1' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
   *)
@@ -50,8 +53,8 @@ if [ "$mode" = full ] && ! command -v docker >/dev/null; then
   exit 2
 fi
 for tool in flutter php composer dotnet; do
-  if [ "$mode" = full ] && ! command -v "$tool" >/dev/null; then
-    echo "acceptance: full mode needs $tool (the dart, php and dotnet testees' builds)" >&2
+  if ! command -v "$tool" >/dev/null; then
+    echo "acceptance: $tool is not on PATH (the dart, php and dotnet testees' builds)" >&2
     exit 2
   fi
 done
@@ -109,8 +112,20 @@ cargo_testee() {
   cargo test --locked --manifest-path "$manifest" --target-dir "$target"
 }
 
-# the python testee's unit tests, against the current version's venv that its conformance run
-# below has built
+# the build steps of an sdk's current version in conformance/versions.toml, the ones its
+# conformance run takes before it starts the testee
+testee_build() {
+  python3 -I - "$1" <<'PY'
+import os, subprocess, sys, tomllib
+sdk = tomllib.load(open("conformance/versions.toml", "rb"))["sdk"][sys.argv[1]]
+version = next(v for v in sdk["versions"] if v["version"] == sdk["current"])
+for step in version.get("build", []):
+    env = dict(os.environ, **step.get("env", {}))
+    subprocess.run(step["argv"], cwd=step.get("dir", "."), env=env, check=True)
+PY
+}
+
+# the python testee's unit tests, against the current version's venv that its build has made
 python_testee() {
   local v
   v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["python"]["current"])' conformance/versions.toml)
@@ -125,16 +140,21 @@ java_testee() {
 }
 
 # the dart testee as its conformance build lays it out under target/testees/dart/<version>/
-# (run that build first): dart analyze over the sources and the unit tests. needs flutter on
-# PATH, so it runs in full mode only
+# (testee_build dart first): dart analyze over the sources and the unit tests
 dart_testee() {
   local version
   version=$(sed -n "/^\[sdk\.dart\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
   (cd "target/testees/dart/$version" && dart analyze --fatal-infos bin lib test tool && dart test)
 }
 
-# the php testee's unit checks in its conformance build directory (run that build first);
-# needs php and composer on PATH, so it runs in full mode only
+# the stellar-cli testee's wrapper: rustfmt, clippy and its unit tests
+stellar_cli_testee() {
+  rustfmt --edition 2024 --check testees/stellar-cli/src/*.rs
+  cargo clippy --locked --all-targets --manifest-path testees/stellar-cli/Cargo.toml --target-dir target/testees/stellar-cli/testee -- -D warnings
+  cargo test --locked --manifest-path testees/stellar-cli/Cargo.toml --target-dir target/testees/stellar-cli/testee
+}
+
+# the php testee's unit checks in its build directory (testee_build php first)
 php_testee() {
   local version
   version=$(sed -n "/^\[sdk\.php\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
@@ -184,14 +204,26 @@ done
 current="python toolchain"
 echo "== $current"
 python_path=$(scripts/python-toolchain.sh)
-PATH="$python_path:$PATH" step "$shapekit" conformance run --sdk python --out "$out/conformance/python"
+# the newer sdks' testees are built and unit tested here; their conformance runs are in full
+# mode (pr.yml runs each one in its own job)
+PATH="$python_path:$PATH" step testee_build python
 step python_testee
 # the java testee's pinned jdk and maven, fetched once into target/toolchains/
 current="java toolchain"
 echo "== $current"
 java_path=$(scripts/java-toolchain.sh)
-PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk java --out "$out/conformance/java"
+PATH="$java_path:$PATH" step testee_build java
 PATH="$java_path:$PATH" step java_testee
+step testee_build dart
+step dart_testee
+step testee_build php
+step php_testee
+# the dotnet build treats warnings as errors; the testee has no unit tests of its own
+step testee_build dotnet
+# the kmp build treats warnings as errors and checks the resolved jars against lib.sha256
+PATH="$java_path:$PATH" step testee_build kmp
+step stellar_cli_testee
+step testee_build stellar-cli
 step "$shapekit" findings check
 step scripts/check-no-em-dash.sh
 step scripts/check-public-text.sh
@@ -216,9 +248,7 @@ PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk java --all-versio
 # the type table of the java testee is what its generator writes from every version's jars
 unchanged testees/java sh -c "cd testees/java && python3 -I gentypes.py"
 step "$shapekit" conformance run --sdk dart --all-versions --out "$out/conformance-all/dart"
-step dart_testee
 step "$shapekit" conformance run --sdk php --all-versions --out "$out/conformance-all/php"
-step php_testee
 step "$shapekit" conformance run --sdk dotnet --all-versions --out "$out/conformance-all/dotnet"
 PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk kmp --all-versions --out "$out/conformance-all/kmp"
 # the type table of the kmp testee is what its generator writes from every version's jars
