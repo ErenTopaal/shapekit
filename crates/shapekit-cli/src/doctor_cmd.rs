@@ -143,7 +143,13 @@ fn tool(r: &mut Report, name: &str, pins: Option<&pins::Pins>, why: &str) {
             first_line("node", &["--version"]).map(|v| v.trim_start_matches('v').to_owned())
         }
         // the testee toolchains are not tools doctor checks; no name above maps to them
-        Some(Toolchain::Flutter | Toolchain::Php | Toolchain::Composer | Toolchain::Dotnet)
+        Some(
+            Toolchain::Flutter
+            | Toolchain::Php
+            | Toolchain::Composer
+            | Toolchain::Dotnet
+            | Toolchain::Libsodium,
+        )
         | None => None,
     };
     match (found, pinned) {

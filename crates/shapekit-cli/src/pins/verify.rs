@@ -75,6 +75,19 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
                     let sha512 = t.sha512.as_deref().ok_or("a dotnet pin needs sha512")?;
                     check::check_dotnet(&doc, &t.version, &t.artifact, sha512)
                 }
+                Toolchain::Libsodium => {
+                    let url = format!(
+                        "https://download.libsodium.org/libsodium/releases/{}",
+                        t.artifact
+                    );
+                    let key = t
+                        .minisign_key
+                        .as_deref()
+                        .ok_or("a libsodium pin needs minisign_key")?;
+                    let bytes = net(http.get_bytes(&url))?;
+                    let sig = net(http.get_text(&format!("{url}.minisig")))?;
+                    check::check_minisigned(&bytes, &sig, key, &t.artifact, &t.sha256)
+                }
             }),
         ));
     }

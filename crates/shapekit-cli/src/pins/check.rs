@@ -344,6 +344,92 @@ pub fn check_image_digest(header: Option<&str>, digest: &str) -> Verdict {
     }
 }
 
+/// Checks a release artifact the upstream signs with minisign and publishes no checksum for:
+/// the downloaded bytes have the pinned sha256, and the `.minisig` next to them is a valid
+/// signature by the pinned key over those bytes, with a trusted comment that names the
+/// artifact and is itself signed. Both the legacy (`Ed`) and the prehashed (`ED`, BLAKE2b-512)
+/// signature algorithms are read.
+pub fn check_minisigned(
+    bytes: &[u8],
+    minisig: &str,
+    public_key: &str,
+    artifact: &str,
+    sha256: &str,
+) -> Verdict {
+    use base64::Engine as _;
+    use base64::engine::general_purpose::STANDARD as B64;
+    use blake2::{Blake2b512, Digest as _};
+    use ed25519_dalek::{Signature, Verifier as _, VerifyingKey};
+
+    let got = hex::encode(sha2::Sha256::digest(bytes));
+    if got != sha256 {
+        return Err(format!("{artifact} sha256 is {got}, pinned {sha256}"));
+    }
+    let key = B64
+        .decode(public_key)
+        .map_err(|e| format!("the pinned minisign key is not base64: {e}"))?;
+    let [b'E', b'd', key_id @ ..] = key.as_slice() else {
+        return Err("the pinned minisign key is not an Ed25519 key".to_string());
+    };
+    if key_id.len() != 8 + 32 {
+        return Err("the pinned minisign key has the wrong length".to_string());
+    }
+    let (key_id, key_bytes) = key_id.split_at(8);
+    let vk = VerifyingKey::from_bytes(key_bytes.try_into().expect("32 bytes"))
+        .map_err(|e| format!("the pinned minisign key is invalid: {e}"))?;
+
+    let mut lines = minisig.lines();
+    let (_untrusted, sig_line, trusted, global) =
+        match (lines.next(), lines.next(), lines.next(), lines.next()) {
+            (Some(u), Some(s), Some(t), Some(g)) => (u, s, t, g),
+            _ => return Err(format!("{artifact}.minisig does not have four lines")),
+        };
+    let sig = B64
+        .decode(sig_line.trim())
+        .map_err(|e| format!("{artifact}.minisig signature is not base64: {e}"))?;
+    if sig.len() != 2 + 8 + 64 {
+        return Err(format!("{artifact}.minisig signature has the wrong length"));
+    }
+    let (alg, rest) = sig.split_at(2);
+    let (sig_key_id, sig_bytes) = rest.split_at(8);
+    if sig_key_id != key_id {
+        return Err(format!(
+            "{artifact}.minisig is signed by key {}, pinned key {}",
+            hex::encode(sig_key_id),
+            hex::encode(key_id)
+        ));
+    }
+    let signed: Vec<u8> = match alg {
+        b"ED" => Blake2b512::digest(bytes).to_vec(),
+        b"Ed" => bytes.to_vec(),
+        _ => return Err(format!("{artifact}.minisig uses an unknown algorithm")),
+    };
+    let signature = Signature::from_slice(sig_bytes).map_err(|e| e.to_string())?;
+    vk.verify(&signed, &signature)
+        .map_err(|_| format!("{artifact}.minisig is not a valid signature of the artifact"))?;
+
+    let comment = trusted
+        .strip_prefix("trusted comment: ")
+        .ok_or_else(|| format!("{artifact}.minisig has no trusted comment"))?;
+    let global = B64
+        .decode(global.trim())
+        .map_err(|e| format!("{artifact}.minisig global signature is not base64: {e}"))?;
+    let global = Signature::from_slice(&global).map_err(|e| e.to_string())?;
+    let mut both = sig_bytes.to_vec();
+    both.extend_from_slice(comment.as_bytes());
+    vk.verify(&both, &global)
+        .map_err(|_| format!("{artifact}.minisig trusted comment is not signed"))?;
+    if !comment.split('\t').any(|f| f == format!("file:{artifact}")) {
+        return Err(format!(
+            "{artifact}.minisig trusted comment names another file: {comment}"
+        ));
+    }
+    Ok(format!(
+        "{artifact} sha256 matches, minisign signature by key {} verifies",
+        hex::encode(key_id)
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -779,5 +865,70 @@ mod tests {
         assert!(check_dotnet(doc, "11.0.100", a, "aa").is_ok());
         assert!(check_dotnet(doc, "11.0.100", a, "ab").is_err());
         assert!(check_dotnet(doc, "11.0.101", a, "aa").is_err());
+    }
+
+    // a minisig made with a fixed test key over a small artifact, the way minisign -S -H writes it
+    fn minisig_for(data: &[u8], file: &str, prehash: bool) -> (String, String) {
+        use base64::Engine as _;
+        use base64::engine::general_purpose::STANDARD as B64;
+        use blake2::{Blake2b512, Digest as _};
+        use ed25519_dalek::{Signer as _, SigningKey};
+        let sk = SigningKey::from_bytes(&[7u8; 32]);
+        let key_id = [1u8, 2, 3, 4, 5, 6, 7, 8];
+        let mut pk = b"Ed".to_vec();
+        pk.extend_from_slice(&key_id);
+        pk.extend_from_slice(sk.verifying_key().as_bytes());
+        let (alg, msg) = if prehash {
+            (b"ED", Blake2b512::digest(data).to_vec())
+        } else {
+            (b"Ed", data.to_vec())
+        };
+        let sig = sk.sign(&msg).to_bytes();
+        let mut line = alg.to_vec();
+        line.extend_from_slice(&key_id);
+        line.extend_from_slice(&sig);
+        let comment = format!("timestamp:1\tfile:{file}\thashed");
+        let mut both = sig.to_vec();
+        both.extend_from_slice(comment.as_bytes());
+        let global = sk.sign(&both).to_bytes();
+        (
+            B64.encode(pk),
+            format!(
+                "untrusted comment: test\n{}\ntrusted comment: {comment}\n{}\n",
+                B64.encode(line),
+                B64.encode(global)
+            ),
+        )
+    }
+
+    #[test]
+    fn minisigned_artifact_verifies_both_algorithms() {
+        use sha2::Digest as _;
+        let data = b"libsodium release bytes";
+        let sha = hex::encode(sha2::Sha256::digest(data));
+        for prehash in [true, false] {
+            let (key, sig) = minisig_for(data, "a.tar.gz", prehash);
+            assert!(check_minisigned(data, &sig, &key, "a.tar.gz", &sha).is_ok());
+            // other bytes with the pinned sha256 cannot exist; other bytes fail the hash first
+            assert!(check_minisigned(b"other", &sig, &key, "a.tar.gz", &sha).is_err());
+            // the comment must name the artifact
+            assert!(check_minisigned(data, &sig, &key, "b.tar.gz", &sha).is_err());
+        }
+    }
+
+    #[test]
+    fn minisigned_artifact_refuses_a_tampered_signature_or_comment() {
+        use sha2::Digest as _;
+        let data = b"libsodium release bytes";
+        let sha = hex::encode(sha2::Sha256::digest(data));
+        let (key, sig) = minisig_for(data, "a.tar.gz", true);
+        let comment = sig.replace("file:a.tar.gz", "file:a.tar.gz\textra:1");
+        assert!(check_minisigned(data, &comment, &key, "a.tar.gz", &sha).is_err());
+        let (other_key, _) = minisig_for(b"x", "a.tar.gz", true);
+        assert_eq!(other_key, key, "one fixed test key");
+        let mut lines: Vec<String> = sig.lines().map(str::to_string).collect();
+        lines[1] = lines[1].replacen('A', "B", 1);
+        let bad = lines.join("\n");
+        assert!(check_minisigned(data, &bad, &key, "a.tar.gz", &sha).is_err());
     }
 }

@@ -3,8 +3,8 @@
 # registries and git remotes, never typed in by hand.
 #
 # tables:
-#   [[toolchain]]  name (rust, go, node, flutter, php, composer, dotnet), version, release artifact and its sha256
-#                  (and sha512 where the upstream publishes only that)
+#   [[toolchain]]  name (rust, go, node, flutter, php, composer, dotnet, libsodium), version, release artifact and its sha256
+#                  (and sha512 where the upstream publishes only that, or the minisign key it signs with)
 #   [[image]]      docker hub repository, tag and manifest digest (the index digest for multi-arch images)
 #   [[git]]        remote url, optional ref, commit sha. a ref without a sha is a
 #                  deliberately floating ref (only checked to exist). a sha without a
@@ -56,6 +56,14 @@ version = "8.5.12"
 artifact = "php-8.5.12.tar.xz"
 sha256 = "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
 purpose = "php for the php testee, built from source with bcmath, gmp, mbstring, sodium, openssl and phar, the extensions soneso/stellar-php-sdk and composer require"
+
+[[toolchain]]
+name = "libsodium"
+version = "1.0.22"
+artifact = "libsodium-1.0.22.tar.gz"
+sha256 = "adbdd8f16149e81ac6078a03aca6fc03b592b89ef7b5ed83841c086191be3349"
+minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3"
+purpose = "libsodium for php's sodium extension in the php testee, built from source; the project publishes no checksums, so the sha256 is of the release tarball whose minisign signature by the key from libsodium's installation docs verifies"
 
 [[toolchain]]
 name = "composer"

@@ -42,7 +42,7 @@ Docker.
 | `stellar-sdk` (PyPI, py-stellar-base) | 16.1.1, 17.0.1 (current) | Python testee matrix, under CPython 3.15.2 and uv 0.13.9 |
 | `network.lightsail:stellar-sdk` (Maven Central, java-stellar-sdk) | 5.0.0, 6.0.0 (current) | Java testee matrix, on Temurin JDK 27.0.1 and Maven 3.10.1 |
 | `stellar_flutter_sdk` (pub.dev) | 3.12.0 (current) | Dart testee matrix, with Flutter 3.50.0 |
-| `soneso/stellar-php-sdk` (Packagist) | 1.18.0 (current) | PHP testee matrix, on PHP 8.5.12 with Composer 2.11.2 |
+| `soneso/stellar-php-sdk` (Packagist) | 1.18.0 (current) | PHP testee matrix, on PHP 8.5.12 (its sodium extension on libsodium 1.0.22, pinned by sha256 and minisign key) with Composer 2.11.2 |
 | `stellar-dotnet-sdk` (NuGet) | 16.0.0, 17.0.0 (current) | .NET testee matrix, on the .NET SDK 11.0.100 |
 | `com.soneso.stellar:stellar-sdk-jvm` (Maven Central, kmp-stellar-sdk) | 1.18.0 (current) | Kotlin Multiplatform testee matrix (the JVM target), on the Java testee's JDK and Maven |
 | `stellar-cli` (crates.io for the versions, GitHub release assets for the binaries) | 28.1.0, 30.0.1 (current) | stellar-cli testee matrix: the `stellar xdr`, `strkey` and `tx hash` commands of each release binary, pinned by `testees/stellar-cli/versions/<version>/asset.sha256` |

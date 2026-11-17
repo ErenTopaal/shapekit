@@ -46,6 +46,7 @@ pub enum Toolchain {
     Php,
     Composer,
     Dotnet,
+    Libsodium,
 }
 
 #[derive(Debug, Deserialize)]
@@ -59,6 +60,10 @@ pub struct ToolchainPin {
     /// then computed from the artifact that matched it.
     #[serde(default)]
     pub sha512: Option<String>,
+    /// The minisign public key the upstream signs its releases with, where it publishes
+    /// signatures and no checksums (libsodium).
+    #[serde(default)]
+    pub minisign_key: Option<String>,
     pub purpose: String,
 }
 
