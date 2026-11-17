@@ -843,7 +843,7 @@ Every obligation the corpus owes a witness for, from `corpus/coverage/obligation
 | `format` | 3869 | 0 | 0 | 3869 |
 | `gap` | 9 | 0 | 4 | 13 |
 | `core-test-section` | 29691 | 0 | 0 | 29691 |
-| `gate-side` | 353 by branch count, 129 inferred from execution count | 0 | 208 | 690 |
+| `gate-side` | 375 by branch count, 126 inferred from execution count | 0 | 189 | 690 |
 | `field` | 203 | 0 | 0 | 203 |
 | `sdk-version` | 25 | 0 | 0 | 25 |
 | `seed` | 72 | 0 | 142 | 214 |

@@ -263,4 +263,18 @@ are left out; none of them is at a gate in core v30.0.0.
 then writes its coverage profiles into `<dir>/<chain name>`, for example
 `<dir>/probe.envelope-fields.p30`, so each probe chain's coverage can be read
 apart from the others. With a registry image the flag is refused, because a
-release build writes no profiles.
+release build writes no profiles. The tables and the candidate manifest record
+the stellar-core source commit and stack from `--source-pins` (default
+`pins.toml`), since the twin's pins file names only the image.
+
+```sh
+shapekit probe verify-repro --pins twin/pins.toml --profile-dir <dir>
+shapekit twin profiles --dir <dir>/probe.envelope-fields.p30 \
+    --label chain:probe.envelope-fields.p30 --protocol 30 --out <coverage dir>
+```
+
+`probe verify-repro` names the `chain.json` fields that differ. On the twin
+they are `core_image` and `archive` (the history archive records the core
+version string), while the canonical hashes and the ledger lake agree.
+`twin profiles` turns one chain's profiles into the outputs of `twin coverage`,
+ready for `twin gate-witnesses`.

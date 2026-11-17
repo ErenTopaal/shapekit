@@ -52,6 +52,11 @@ pub enum ProbeCommand {
         /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
         #[arg(long)]
         profile_dir: Option<PathBuf>,
+        /// The pins file naming the stellar-core source commit the tables record
+        /// (`[[git]] stellar-core`). Differs from --pins only on the twin, whose pins file
+        /// names the image alone.
+        #[arg(long, default_value = "pins.toml")]
+        source_pins: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -75,6 +80,11 @@ pub enum ProbeCommand {
         /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
         #[arg(long)]
         profile_dir: Option<PathBuf>,
+        /// The pins file naming the stellar-core source commit the tables record
+        /// (`[[git]] stellar-core`). Differs from --pins only on the twin, whose pins file
+        /// names the image alone.
+        #[arg(long, default_value = "pins.toml")]
+        source_pins: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -97,6 +107,11 @@ pub enum ProbeCommand {
         /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
         #[arg(long)]
         profile_dir: Option<PathBuf>,
+        /// The pins file naming the stellar-core source commit the tables record
+        /// (`[[git]] stellar-core`). Differs from --pins only on the twin, whose pins file
+        /// names the image alone.
+        #[arg(long, default_value = "pins.toml")]
+        source_pins: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -139,6 +154,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             dump,
             scratch,
             profile_dir,
+            source_pins,
             pins,
         } => probe_all(
             &only,
@@ -148,6 +164,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             scratch.as_deref(),
             &pins,
             profile_dir.as_deref(),
+            &source_pins,
         ),
         ProbeCommand::Compare {
             table,
@@ -161,6 +178,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             caps,
             candidate,
             profile_dir,
+            source_pins,
             pins,
         } => {
             let out = out.unwrap_or_else(|| {
@@ -176,6 +194,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
                 &pins,
                 profile_dir.as_deref(),
                 limits.then_some(caps.as_path()),
+                &source_pins,
             )
         }
         ProbeCommand::Obligations { table } => {
@@ -191,6 +210,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             caps,
             scratch,
             profile_dir,
+            source_pins,
             pins,
         } => probe_limits(
             &only,
@@ -200,6 +220,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             scratch.as_deref(),
             &pins,
             profile_dir.as_deref(),
+            &source_pins,
         ),
     }
 }
@@ -288,6 +309,7 @@ fn probe_run(fields: &[String], network: &str, out: Option<&Path>, pins: &Path) 
     Ok(true)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn probe_all(
     only: &[String],
     out: &Path,
@@ -296,6 +318,7 @@ fn probe_all(
     scratch: Option<&Path>,
     pins: &Path,
     profile_dir: Option<&Path>,
+    source_pins: &Path,
 ) -> Result<bool> {
     // where the table, the witnesses and the chains go, decided before the run: each world's
     // chain is recorded when the probe is done with it
@@ -369,7 +392,7 @@ fn probe_all(
     }
     let table = ValidationTable {
         schema_version: ValidationTable::VERSION,
-        core: core_ref(pins, &image)?,
+        core: core_ref(source_pins, &image)?,
         fields: runs.into_iter().map(|r| r.verdict).collect(),
     };
     let problems = table.problems();
@@ -387,7 +410,7 @@ fn probe_all(
         Ok(m) => m.corpus_version,
         Err(_) => env!("CARGO_PKG_VERSION").to_owned(),
     };
-    crate::manifest_cmd::build_file(&candidate, pins, &version)
+    crate::manifest_cmd::build_file(&candidate, source_pins, &version)
 }
 
 /// Removes the chains of the probe `family` under `chains`, which a run records again.
@@ -450,6 +473,7 @@ fn probe_verify_repro(
     pins: &Path,
     profile_dir: Option<&Path>,
     limits: Option<&Path>,
+    source_pins: &Path,
 ) -> Result<bool> {
     let fresh = tempfile::Builder::new()
         .prefix("shapekit-probe-repro-")
@@ -473,6 +497,7 @@ fn probe_verify_repro(
                 None,
                 pins,
                 profile_dir,
+                source_pins,
             )?,
         ),
         None => (
@@ -485,6 +510,7 @@ fn probe_verify_repro(
                 None,
                 pins,
                 profile_dir,
+                source_pins,
             )?,
         ),
     };
@@ -504,12 +530,29 @@ fn probe_verify_repro(
             continue;
         }
         let (x, y) = (committed_chains.join(rel), fresh_chains.join(rel));
-        if reproducible_chain_json(&x.join("chain.json"))?
-            != reproducible_chain_json(&y.join("chain.json"))?
-        {
+        let (cx, cy) = (
+            reproducible_chain_json(&x.join("chain.json"))?,
+            reproducible_chain_json(&y.join("chain.json"))?,
+        );
+        if cx != cy {
+            // name the fields, so a run on another image (the coverage twin) shows that
+            // only `core_image` differs while the canonical hashes agree
+            let keys: Vec<&String> = cx
+                .as_object()
+                .into_iter()
+                .flat_map(|o| o.keys())
+                .chain(cy.as_object().into_iter().flat_map(|o| o.keys()))
+                .collect::<std::collections::BTreeSet<_>>()
+                .into_iter()
+                .filter(|k| cx.get(k.as_str()) != cy.get(k.as_str()))
+                .collect();
             diffs.push(format!(
-                "{}: chain.json differs in canonical hashes or ledger range",
-                rel.display()
+                "{}: chain.json differs in {}",
+                rel.display(),
+                keys.iter()
+                    .map(|k| k.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ")
             ));
         }
         if shapekit_pack::lake_digest(&x.join("ledgers"))?
@@ -644,6 +687,7 @@ fn probe_compare(table: &Path, fields: &Path, verdicts: &Path, write: bool) -> R
     Ok(open == 0 && stale == 0 && current)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn probe_limits(
     only: &[String],
     out: &Path,
@@ -652,6 +696,7 @@ fn probe_limits(
     scratch: Option<&Path>,
     pins: &Path,
     profile_dir: Option<&Path>,
+    source_pins: &Path,
 ) -> Result<bool> {
     use shapekit_contracts::limits::LimitsTable;
     use shapekit_probe::limits::{Check, checks, measure, probes};
@@ -835,7 +880,7 @@ fn probe_limits(
     limits.sort_by(|a, b| (&a.path, &a.measure).cmp(&(&b.path, &b.measure)));
     let table = LimitsTable {
         schema_version: LimitsTable::VERSION,
-        core: core_ref(pins, &image)?,
+        core: core_ref(source_pins, &image)?,
         limits,
     };
     let problems = table.problems();
@@ -851,7 +896,7 @@ fn probe_limits(
         Ok(m) => m.corpus_version,
         Err(_) => env!("CARGO_PKG_VERSION").to_owned(),
     };
-    let built = crate::manifest_cmd::build_file(&candidate, pins, &version)?;
+    let built = crate::manifest_cmd::build_file(&candidate, source_pins, &version)?;
     Ok(built && open == 0)
 }
 

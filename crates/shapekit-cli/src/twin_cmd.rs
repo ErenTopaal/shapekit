@@ -120,6 +120,27 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Read a directory of coverage profiles a tool wrote on the twin (`probe ...
+    /// --profile-dir`) into the same outputs as `twin coverage`: region counts, branch
+    /// counts and the core coverage summary, for one committed chain.
+    Profiles {
+        /// The directory holding the `.profraw` files of one chain's nodes.
+        #[arg(long)]
+        dir: PathBuf,
+        /// How the chain is named as a witness, `chain:<...>`.
+        #[arg(long)]
+        label: String,
+        /// The chain's protocol.
+        #[arg(long)]
+        protocol: u32,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        /// Output directory; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// `twin coverage` for a recipe IR file whose committed chain is outside
     /// corpus/chains (candidate chains): record it under both passphrases on the twin the
     /// way `explore record` committed it, check the canonical hashes against the committed
@@ -294,6 +315,14 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::Profiles {
+            dir,
+            label,
+            protocol,
+            pins,
+            twin_pins,
+            out,
+        } => profiles(&dir, &label, protocol, &pins, &twin_pins, &out),
         TwinCommand::CoverageIr {
             ir,
             committed,
@@ -1131,5 +1160,62 @@ fn coverage_ir(
     let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
     let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
     println!("{label}: {reached} of {} regions reached", reached + missed);
+    Ok(true)
+}
+
+fn profiles(
+    dir: &Path,
+    label: &str,
+    protocol: u32,
+    pins_path: &Path,
+    twin_pins: &Path,
+    out: &Path,
+) -> Result<bool> {
+    use shapekit_twin::coverage as cov;
+
+    if !label.starts_with("chain:") {
+        bail!("--label must be a chain: reference");
+    }
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let twin = twin_image(twin_pins)?;
+    // merge in a copy, so the input directory stays as the tool left it
+    let work = out.join("profiles");
+    std::fs::create_dir_all(&work)?;
+    let mut n = 0;
+    for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let e = e?;
+        if e.file_name().to_string_lossy().ends_with(".profraw") {
+            std::fs::copy(e.path(), work.join(e.file_name()))?;
+            n += 1;
+        }
+    }
+    if n == 0 {
+        bail!("no .profraw file in {}", dir.display());
+    }
+    let work = work.canonicalize()?;
+    let export = cov::merge_and_export(&twin, &work)?;
+    let (counts, branches) = cov::read_export_with_branches(&export)?;
+    std::fs::remove_file(&export)?;
+    for e in std::fs::read_dir(&work)? {
+        let e = e?;
+        if e.file_name().to_string_lossy().ends_with(".profraw") {
+            std::fs::remove_file(e.path())?;
+        }
+    }
+    cov::write_counts(&out.join("counts.json"), &counts)?;
+    cov::write_branches(&out.join("branches.json"), &branches)?;
+    std::fs::write(out.join("protocol"), format!("{protocol}\n"))?;
+    let mut core = pinned_core(pins_path)?;
+    core.image = Some(cov::image_ref(&twin));
+    let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
+    shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
+    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+    println!(
+        "{label}: {n} profiles, {reached} of {} regions reached",
+        reached + missed
+    );
     Ok(true)
 }
