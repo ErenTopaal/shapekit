@@ -60,9 +60,7 @@ chmod +x shapekit-linux-x86_64 indexerlint-linux-x86_64 wb-adapter-linux-x86_64
 
 Each platform's binaries are built on a GitHub runner of that platform. The project's own CI
 runs only the Linux x86-64 build; release builds for the other platforms run `--version` and
-nothing more before they are published. `check indexer` and `harness` read the process's
-peak memory from Linux's `/proc` and stop with an error on macOS, so replay an indexer on
-Linux. A binary downloaded with a browser on macOS carries the quarantine attribute, and
+nothing more before they are published. A binary downloaded with a browser on macOS carries the quarantine attribute, and
 macOS refuses to start an unsigned binary that has it; `xattr -d com.apple.quarantine
 <file>` removes it. Downloads with `gh release download` or `curl` do not get it.
 

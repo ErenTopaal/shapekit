@@ -11,8 +11,7 @@ databases, hosted services or other build systems. Releases are GitHub releases 
 repository. Nothing runs between CI jobs.
 
 You run the tools on your own machine or CI runner. The released binaries are built for Linux and macOS,
-each on x86-64 and arm64; `check indexer` and `harness` need Linux, since they read the
-process's memory from `/proc`. The commands that start containers (`gen`, `harness`, the `check-lcm` script) need
+each on x86-64 and arm64. The commands that start containers (`gen`, `harness`, the `check-lcm` script) need
 Docker.
 
 ## Toolchains

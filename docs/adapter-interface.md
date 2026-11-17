@@ -597,8 +597,12 @@ report as JSON.
 `--repeat N` runs the whole selection N times in one process. The run fails when a later
 round's verdicts differ from the first round's, or when its peak resident memory exceeds the
 first round's by more than `--memory-slack` (default 10% or 16 MiB, whichever is larger).
-`--memory-budget` fails a round over a fixed bound. The harness reads its peak memory from
-`/proc/self/status` (`VmHWM`) and resets it between rounds through `/proc/self/clear_refs`.
+`--memory-budget` fails a round over a fixed bound. On Linux the harness reads its peak memory
+from `/proc/self/status` (`VmHWM`) and resets it between rounds through
+`/proc/self/clear_refs`. macOS has no peak a process can reset, so there the harness reads
+`getrusage` (`ru_maxrss`, the peak since the process started) and a round's peak is the
+highest of that round and every round before it. A later round that grows past the first
+still raises it, so both checks keep working.
 
 ## Reproductions
 
