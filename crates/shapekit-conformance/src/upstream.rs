@@ -307,6 +307,50 @@ pub fn crate_xdr_commit(http: &Http, name: &str, version: &str) -> Result<String
     bail!("{url} has no {want}")
 }
 
+/// The version a crate release pins one of its normal (not dev, not build) dependencies to
+/// with `=`. Any other requirement stops the command: a range names no single version.
+pub fn crate_exact_dep(http: &Http, name: &str, version: &str, dep: &str) -> Result<String> {
+    #[derive(Deserialize)]
+    struct Deps {
+        dependencies: Vec<D>,
+    }
+    #[derive(Deserialize)]
+    struct D {
+        crate_id: String,
+        req: String,
+        kind: String,
+    }
+    let url = format!("https://crates.io/api/v1/crates/{name}/{version}/dependencies");
+    let deps: Deps =
+        serde_json::from_str(&http.get_text(&url)?).with_context(|| format!("parsing {url}"))?;
+    let reqs: std::collections::BTreeSet<String> = deps
+        .dependencies
+        .into_iter()
+        .filter(|d| d.crate_id == dep && d.kind == "normal")
+        .map(|d| d.req)
+        .collect();
+    ensure!(
+        reqs.len() == 1,
+        "{name} {version} has {} normal requirements on {dep}: {reqs:?}",
+        reqs.len()
+    );
+    let req = reqs.into_iter().next().expect("one requirement");
+    let exact = req
+        .strip_prefix('=')
+        .map(str::trim)
+        .filter(|v| !v.is_empty() && v.bytes().all(|b| b.is_ascii_digit() || b == b'.'))
+        .with_context(|| format!("{name} {version} requires {dep} {req}, not one exact version"))?;
+    Ok(exact.to_string())
+}
+
+/// The stellar-xdr release a soroban-sdk release links: soroban-sdk pins soroban-env-host,
+/// which pins soroban-env-common, which pins stellar-xdr, each with `=`.
+pub fn soroban_sdk_xdr_crate(http: &Http, name: &str, version: &str) -> Result<String> {
+    let host = crate_exact_dep(http, name, version, "soroban-env-host")?;
+    let common = crate_exact_dep(http, "soroban-env-host", &host, "soroban-env-common")?;
+    crate_exact_dep(http, "soroban-env-common", &common, "stellar-xdr")
+}
+
 // ---- the go module proxy
 
 const GO_PROXY: &str = "https://proxy.golang.org";

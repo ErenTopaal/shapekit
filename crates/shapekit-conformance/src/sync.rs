@@ -29,7 +29,7 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 3] = ["rust", "go", "js"];
+pub const SDKS: [&str; 4] = ["rust", "go", "js", "soroban"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct Semver {
@@ -304,6 +304,20 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
                 (p, c)
             }
+            "soroban" => {
+                let p = upstream::crates_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        let xdr = upstream::soroban_sdk_xdr_crate(&http, &s.package, v)?;
+                        xdr_of_commit(
+                            &tags,
+                            &upstream::crate_xdr_commit(&http, "stellar-xdr", &xdr)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
             _ => unreachable!("checked against SDKS above"),
         };
         plans.push(SdkPlan {
@@ -361,12 +375,16 @@ const HEADER: &str = "\
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead): the release tag at that
-# commit names a protocol, extended up to the protocol before the next tag, because a
-# protocol without a tag of its own changed no xdr (v28.0 covers protocol 29).
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, and for soroban-sdk the
+# xdr-version file of the stellar-xdr release that its soroban-env-host's soroban-env-common
+# pins with `=`): the release tag at that commit names a protocol, extended up to the
+# protocol before the next tag, because a protocol without a tag of its own changed no xdr
+# (v28.0 covers protocol 29).
 #
 # rust: one source (testees/rust/src) with one thin cargo manifest and lock file per version
 # under testees/rust/versions/<version>/, each built into its own target directory.
+# soroban: the same layout as rust (testees/soroban/src, testees/soroban/versions/<version>/),
+# linking soroban-sdk with its testutils feature, which runs the host in the testee process.
 # go: one source (testees/go) built per version with an alternate module file
 # testees/go/versions/<version>.mod (and its .sum) through go's -modfile flag, outside the
 # go.work workspace, which -modfile cannot be combined with.
@@ -396,9 +414,9 @@ fn array(items: &[String]) -> String {
 fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
     let s = |x: &str| x.to_string();
     match sdk {
-        "rust" => {
-            let manifest = format!("testees/rust/versions/{v}/Cargo.toml");
-            let target = format!("target/testees/rust/{v}");
+        "rust" | "soroban" => {
+            let manifest = format!("testees/{sdk}/versions/{v}/Cargo.toml");
+            let target = format!("target/testees/{sdk}/{v}");
             (
                 vec![format!(
                     "  {{ argv = {} }},",
@@ -413,7 +431,7 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                         target.clone(),
                     ])
                 )],
-                vec![format!("{target}/release/shapekit-testee-rust")],
+                vec![format!("{target}/release/shapekit-testee-{sdk}")],
             )
         }
         "go" => (
@@ -545,9 +563,9 @@ pub fn render(file: &VersionsFile, plans: &[SdkPlan]) -> Result<String> {
 /// The files a version's testee needs, relative to the root.
 fn testee_files(sdk: &str, v: &str) -> Vec<String> {
     match sdk {
-        "rust" => vec![
-            format!("testees/rust/versions/{v}/Cargo.toml"),
-            format!("testees/rust/versions/{v}/Cargo.lock"),
+        "rust" | "soroban" => vec![
+            format!("testees/{sdk}/versions/{v}/Cargo.toml"),
+            format!("testees/{sdk}/versions/{v}/Cargo.lock"),
         ],
         "go" => vec![
             format!("testees/go/versions/{v}.mod"),
@@ -705,13 +723,13 @@ fn from_template(template: &str, old: &str, new: &str, expect: usize) -> Result<
 /// Writes the testee files of a version that has none, from the current version's.
 fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Result<()> {
     match sdk {
-        "rust" => {
+        "rust" | "soroban" => {
             let from = root.join(format!(
-                "testees/rust/versions/{template_version}/Cargo.toml"
+                "testees/{sdk}/versions/{template_version}/Cargo.toml"
             ));
             let text = std::fs::read_to_string(&from)
                 .with_context(|| format!("reading {}", from.display()))?;
-            let dir = root.join(format!("testees/rust/versions/{v}"));
+            let dir = root.join(format!("testees/{sdk}/versions/{v}"));
             std::fs::create_dir_all(&dir)?;
             std::fs::write(
                 dir.join("Cargo.toml"),

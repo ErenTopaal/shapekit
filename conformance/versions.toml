@@ -30,12 +30,16 @@
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead): the release tag at that
-# commit names a protocol, extended up to the protocol before the next tag, because a
-# protocol without a tag of its own changed no xdr (v28.0 covers protocol 29).
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, and for soroban-sdk the
+# xdr-version file of the stellar-xdr release that its soroban-env-host's soroban-env-common
+# pins with `=`): the release tag at that commit names a protocol, extended up to the
+# protocol before the next tag, because a protocol without a tag of its own changed no xdr
+# (v28.0 covers protocol 29).
 #
 # rust: one source (testees/rust/src) with one thin cargo manifest and lock file per version
 # under testees/rust/versions/<version>/, each built into its own target directory.
+# soroban: the same layout as rust (testees/soroban/src, testees/soroban/versions/<version>/),
+# linking soroban-sdk with its testutils feature, which runs the host in the testee process.
 # go: one source (testees/go) built per version with an alternate module file
 # testees/go/versions/<version>.mod (and its .sum) through go's -modfile flag, outside the
 # go.work workspace, which -modfile cannot be combined with.
@@ -248,3 +252,28 @@ build = [
 ]
 command = ["node", "target/testees/js/17.4.0/dist/main.js"]
 max_protocol = 30
+
+[sdk.soroban]
+package = "soroban-sdk"
+current = "29.0.1"
+issues_repo = "stellar/rs-soroban-sdk"
+timeout_ms = 10000
+memory = { resource = "as", mib = 4096 }
+
+# 28.0.0: newest 28.x release; xdr v28.0 (9c9c1459), protocols up to 29
+[[sdk.soroban.versions]]
+version = "28.0.0"
+build = [
+  { argv = ["cargo", "build", "--release", "--locked", "--manifest-path", "testees/soroban/versions/28.0.0/Cargo.toml", "--target-dir", "target/testees/soroban/28.0.0"] },
+]
+command = ["target/testees/soroban/28.0.0/release/shapekit-testee-soroban"]
+max_protocol = 29
+
+# 29.0.1: newest 29.x release; xdr v28.0 (9c9c1459), protocols up to 29
+[[sdk.soroban.versions]]
+version = "29.0.1"
+build = [
+  { argv = ["cargo", "build", "--release", "--locked", "--manifest-path", "testees/soroban/versions/29.0.1/Cargo.toml", "--target-dir", "target/testees/soroban/29.0.1"] },
+]
+command = ["target/testees/soroban/29.0.1/release/shapekit-testee-soroban"]
+max_protocol = 29
