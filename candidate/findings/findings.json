@@ -42,11 +42,17 @@
       "path": "candidate/findings/inputs/conformance-kmp.json",
       "sha256": "8341c807b87b2f301b23f368b8e802c41d81cea298506981938d0008f226b7a8",
       "detail": "corpus 0.1.0, kmp@1.18.0"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-stellar-cli.json",
+      "sha256": "94f7a5302339cb6a39b16f094fbab0dcb4bbdc5add7a64af3ad11c37637b431a",
+      "detail": "corpus 0.1.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
     }
   ],
   "summary": {
-    "findings": 31,
-    "failures": 283,
+    "findings": 37,
+    "failures": 376,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -60,6 +66,10 @@
       "soneso/stellar-php-sdk": {
         "divergence": 5,
         "robustness": 3
+      },
+      "stellar-cli": {
+        "divergence": 4,
+        "robustness": 2
       },
       "stellar-dotnet-sdk": {
         "data-loss": 1,
@@ -77,11 +87,11 @@
     },
     "by_severity": {
       "data-loss": 6,
-      "divergence": 12,
-      "robustness": 13
+      "divergence": 16,
+      "robustness": 15
     },
     "by_status": {
-      "draft": 31
+      "draft": 37
     }
   },
   "findings": [
@@ -743,6 +753,7 @@
       "draft": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
       "cause": "toXdrJsonValue renders a signed-payload signer as its P strkey, and StrKey refuses an empty payload (lib/src/key_pair.dart L433, \"carries an empty payload, which has no strkey rendering\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form, so the question is whether refusing the whole document is the intended answer; stellar-xdr writes an <INVALID: marker instead.",
       "siblings": [
+        "CLI-SIGNEDPAYLOAD-JSON",
         "KMP-SIGNEDPAYLOAD-JSON",
         "PHP-SIGNEDPAYLOAD-JSON"
       ],
@@ -768,7 +779,9 @@
       ],
       "other_sdks": [
         "kmp@1.18.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -822,6 +835,7 @@
       "draft": "candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md",
       "cause": "Operation.fromXdr has no case for INFLATION and throws \"Unknown operation body OperationType.9\" (lib/src/operation.dart L258-L259), so the sdk cannot build a transaction object, nor its hash, for envelopes from before protocol 12 that core applied.",
       "siblings": [
+        "CLI-TXHASH-V1",
         "NET-DEPRECATED-OPS",
         "PHP-INFLATION"
       ],
@@ -845,7 +859,9 @@
       "other_sdks": [
         "dotnet@16.0.0",
         "dotnet@17.0.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -1318,7 +1334,9 @@
       "status": "draft",
       "draft": "candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md",
       "cause": "XdrInnerTransactionResultPair and XdrConfigUpgradeSetKey keep their hash as hex text (bin2hex in decode, Soneso/StellarSDK/Xdr/XdrInnerTransactionResultPair.php L21 and Xdr/XdrConfigUpgradeSetKey.php L18), while the base classes' toJsonValue hex-encodes the field again (Xdr/XdrInnerTransactionResultPairBase.php L52), so XDR-JSON carries a 128-character string. Reading that JSON back fails (\"Unexpected length for value. Has length 16, expected 32\") or crashes with a TypeError in XdrEncoder::opaqueFixed. The bytes round trip; only XDR-JSON is wrong. Encoding the pair from a decoded value also raises php warnings (pack(): illegal hex digit) on stderr.",
-      "siblings": [],
+      "siblings": [
+        "CLI-TXHASH-V1"
+      ],
       "related": [],
       "entries": [
         "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
@@ -1356,6 +1374,9 @@
             "1.18.0"
           ]
         }
+      ],
+      "other_sdks": [
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -1644,6 +1665,8 @@
       "draft": "candidate/findings/issues/php-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
       "cause": "toJson calls json_encode and fromJson json_decode without a depth (Soneso/StellarSDK/Xdr/XdrTransactionEnvelopeBase.php L123-L128 and the same in every generated class), so php's default of 512 nested arrays refuses the XDR-JSON of authorization trees and ScVal maps that stellar-core accepts (\"Maximum stack depth exceeded\").",
       "siblings": [
+        "CLI-DEPTH",
+        "CLI-JSON-DEPTH",
         "KMP-JSON-DEPTH",
         "NET-DEPTH"
       ],
@@ -1669,7 +1692,9 @@
       "other_sdks": [
         "dotnet@16.0.0",
         "dotnet@17.0.0",
-        "kmp@1.18.0"
+        "kmp@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -1723,6 +1748,7 @@
       "draft": "candidate/findings/issues/php-cap40.signed-payload-signer.synth-empty-payload-signer.md",
       "cause": "The signed-payload signer renders as its P strkey and the encoder refuses an empty payload (\"Zero-length signed payload has no SEP-23 strkey representation\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form; the same choice as DART-SIGNEDPAYLOAD-JSON in the Dart sdk from the same team.",
       "siblings": [
+        "CLI-SIGNEDPAYLOAD-JSON",
         "DART-SIGNEDPAYLOAD-JSON",
         "KMP-SIGNEDPAYLOAD-JSON"
       ],
@@ -1748,7 +1774,9 @@
       ],
       "other_sdks": [
         "dart@3.12.0",
-        "kmp@1.18.0"
+        "kmp@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -1802,6 +1830,7 @@
       "draft": "candidate/findings/issues/php-cap26.inflation.p11-inflation-payout.md",
       "cause": "AbstractOperation::fromXdr has no case for INFLATION and throws \"Unknown operation type: 9\" (Soneso/StellarSDK/AbstractOperation.php L132), so the sdk cannot build a transaction object, nor its hash, for envelopes core applied before protocol 12. The same as DART-INFLATION in the Dart sdk.",
       "siblings": [
+        "CLI-TXHASH-V1",
         "DART-INFLATION",
         "NET-DEPRECATED-OPS"
       ],
@@ -1825,7 +1854,9 @@
       "other_sdks": [
         "dart@3.12.0",
         "dotnet@16.0.0",
-        "dotnet@17.0.0"
+        "dotnet@17.0.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -2112,6 +2143,7 @@
       "draft": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
       "cause": "Operation.FromXdr throws NotSupportedException for ALLOW_TRUST and INFLATION (StellarDotnetSdk/Operations/Operation.cs L101-L105), so the sdk builds no transaction object, nor hash, for envelopes core applied. Allow trust is still a valid operation in protocol 30; inflation was valid until protocol 12.",
       "siblings": [
+        "CLI-TXHASH-V1",
         "DART-INFLATION",
         "PHP-INFLATION"
       ],
@@ -2148,7 +2180,9 @@
       ],
       "other_sdks": [
         "dart@3.12.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -2391,6 +2425,8 @@
       "draft": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
       "cause": "XdrDataInputStream counts every nested decode against DefaultMaxDepth, 200 (StellarDotnetSdk.Xdr/XdrDataInputStream.cs L18), and the generated Decode methods throw \"Maximum decoding depth reached\" past it, so authorization trees and ScVal values core accepted at its own limit do not decode, nor hash.",
       "siblings": [
+        "CLI-DEPTH",
+        "CLI-JSON-DEPTH",
         "KMP-JSON-DEPTH",
         "PHP-JSON-DEPTH"
       ],
@@ -2428,7 +2464,9 @@
       ],
       "other_sdks": [
         "kmp@1.18.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -2710,7 +2748,9 @@
       "status": "draft",
       "draft": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
       "cause": "DecodeClaimableBalanceId checks only the version byte and checksum (StellarDotnetSdk/StrKey.cs L447-L450), so a balance id with sub-version 1 decodes; DecodeSignedPayload reads the payload with the XDR decoder and does not check that it consumed the whole strkey (L405-L420), so a payload one byte long or a length prefix shorter than the bytes decodes; DecodeVersionByte indexes the first decoded byte without a length check (L311-L314) and throws IndexOutOfRangeException for \"M\".",
-      "siblings": [],
+      "siblings": [
+        "CLI-STRKEY-TRIM"
+      ],
       "related": [],
       "entries": [
         "cap23.claimable-balances.synth-strkey-b-invalid",
@@ -2729,6 +2769,10 @@
             "17.0.0"
           ]
         }
+      ],
+      "other_sdks": [
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -3415,6 +3459,8 @@
       "draft": "candidate/findings/issues/kmp-soroban.auth-trees.p30-declared-depth-245.md",
       "cause": "XdrJson caps nesting at RECURSION_CAP, 128 (commonMain/com/soneso/stellar/sdk/xdr/XdrJson.kt L50), in both directions, so the XDR-JSON of authorization trees, ScVal maps and vectors and contract events that stellar-core accepted is refused (\"input nests deeper than the limit of 128\").",
       "siblings": [
+        "CLI-DEPTH",
+        "CLI-JSON-DEPTH",
         "NET-DEPTH",
         "PHP-JSON-DEPTH"
       ],
@@ -3449,7 +3495,9 @@
       "other_sdks": [
         "dotnet@16.0.0",
         "dotnet@17.0.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -3566,6 +3614,7 @@
       "draft": "candidate/findings/issues/kmp-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md",
       "cause": "XdrJson renders a signed-payload signer as its P strkey and fails for an empty payload (commonMain/com/soneso/stellar/sdk/xdr/XdrJson.kt L536, \"has an empty signed payload, which has no strkey form\"), so a transaction the network applied with such a signer has no XDR-JSON. SEP-51 gives the value no canonical form; the same choice as the Dart and PHP sdks from the same team.",
       "siblings": [
+        "CLI-SIGNEDPAYLOAD-JSON",
         "DART-SIGNEDPAYLOAD-JSON",
         "PHP-SIGNEDPAYLOAD-JSON"
       ],
@@ -3591,7 +3640,9 @@
       ],
       "other_sdks": [
         "dart@3.12.0",
-        "php@1.18.0"
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
       ],
       "occurrences": [
         {
@@ -3628,6 +3679,982 @@
           "entry": "cap40.signed-payload-signer.synth-empty-payload-signer",
           "at": "kmp@1.18.0",
           "what": "diverges-from-network (1 check(s): any/decode_json)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-ALLOC",
+      "title": "stellar xdr decode allocates what a length prefix asks before reading it, so 12 bytes make it abort",
+      "component": "stellar-cli",
+      "severity": "robustness",
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "minimal_entry": "soroban.scval-shapes.synth-bytes-length-overrun",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.synth-bytes-length-overrun",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-soroban.scval-shapes.synth-bytes-length-overrun.md",
+      "cause": "stellar xdr decode is stellar-xdr's cli (stellar-xdr 30.0.0 src/cli/decode.rs L78-L100), which reads every input under Limits::none(): no length limit, so a variable-length opaque whose prefix is 0xffffffff is allocated in full before its bytes are read. Under a 4 GiB address space the process aborts (memory allocation of 4294967295 bytes failed, SIGABRT); without a limit it allocates 4 GiB for a 12-byte input before refusing it.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "soroban.scval-shapes.synth-bytes-length-overrun"
+      ],
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "28.1.0",
+            "30.0.1"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.scval-shapes.synth-bytes-length-overrun",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.synth-bytes-length-overrun",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-TXHASH-V1",
+      "title": "stellar tx hash refuses v0 and fee bump envelopes the network applied",
+      "component": "stellar-cli",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0002",
+        "CAP-0003",
+        "CAP-0006",
+        "CAP-0015",
+        "CAP-0026",
+        "CAP-0028"
+      ],
+      "minimal_entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-cap03.offer-liabilities.mainnet-25000000.md",
+      "cause": "tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands/tx/hash.rs L31, src/commands/tx/xdr.rs L79-L84), which returns OnlyTransactionV1Supported (xdr.rs L18-L19) for a TransactionV0 or fee bump envelope, so the hash of those transactions, which stellar-core computes, cannot be had from the command.",
+      "siblings": [
+        "DART-INFLATION",
+        "NET-DEPRECATED-OPS",
+        "PHP-HEXHASH",
+        "PHP-INFLATION"
+      ],
+      "related": [],
+      "entries": [
+        "cap03.offer-liabilities.mainnet-25000000",
+        "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
+        "cap15.fee-bump.p30-fee-source-is-inner-source-envelope",
+        "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+        "cap15.fee-bump.p30-inner-bad-auth",
+        "cap15.fee-bump.p30-inner-bad-auth-extra",
+        "cap15.fee-bump.p30-inner-bad-min-seq-gap",
+        "cap15.fee-bump.p30-inner-bad-seq",
+        "cap15.fee-bump.p30-inner-bad-sponsorship",
+        "cap15.fee-bump.p30-inner-failed-envelope",
+        "cap15.fee-bump.p30-inner-success-envelope",
+        "cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope",
+        "cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope",
+        "cap26.inflation.p11-inflation-not-time",
+        "cap26.inflation.p11-inflation-payout",
+        "classic.failed-tx.p12-allow-trust-self-not-allowed",
+        "classic.failed-tx.p12-allow-trust-trust-not-required",
+        "classic.failed-tx.p12-change-trust-self-not-allowed",
+        "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+        "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+        "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+        "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+        "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+        "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+        "classic.failed-tx.p12-payment-no-issuer",
+        "classic.failed-tx.p9-change-trust-native-internal-error-envelope"
+      ],
+      "recipe": "chain:classic.failed-tx.change-trust-native.p9",
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "28.1.0",
+            "30.0.1"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "php@1.18.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap03.offer-liabilities.mainnet-25000000",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (14 check(s): mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap26.inflation.p11-inflation-not-time",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-allow-trust-self-not-allowed",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-allow-trust-trust-not-required",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-change-trust-self-not-allowed",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p12-payment-no-issuer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash, mainnet/tx_hash)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap03.offer-liabilities.mainnet-25000000",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (14 check(s): mainnet/tx_hash 0, mainnet/tx_hash 1, mainnet/tx_hash 2, mainnet/tx_hash 3)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): any/tx_hash 0, any/tx_hash 0 inner, any/tx_hash 1, any/tx_hash 1 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-bad-auth",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 1, testnet/tx_hash 1 inner, mainnet/tx_hash 1, mainnet/tx_hash 1 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-bad-auth-extra",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-bad-min-seq-gap",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 1, mainnet/tx_hash 1 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-bad-seq",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 1, testnet/tx_hash 1 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-bad-sponsorship",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash 0, testnet/tx_hash 0 inner, mainnet/tx_hash 0, mainnet/tx_hash 0 inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-failed-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-inner-success-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-muxed-fee-source-inner-failed-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap15.fee-bump.p30-muxed-fee-source-inner-success-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/tx_hash, testnet/tx_hash inner, mainnet/tx_hash, mainnet/tx_hash inner)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap26.inflation.p11-inflation-not-time",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-allow-trust-self-not-allowed",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-allow-trust-trust-not-required",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-change-trust-self-not-allowed",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p12-payment-no-issuer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash 0, mainnet/tx_hash 0)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/tx_hash, mainnet/tx_hash)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-DEPTH",
+      "title": "stellar tx hash decodes with a depth limit of 500, below what stellar-core accepts",
+      "component": "stellar-cli",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-11"
+      ],
+      "minimal_entry": "soroban.scval-shapes.p30-map-depth-max-envelope",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.p30-map-depth-max-envelope",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-soroban.auth-trees.p30-declared-depth-245.md",
+      "cause": "tx_envelope_from_input reads the envelope with Limits::depth(XDR_DEPTH_LIMIT) (soroban-cli 30.0.1 src/commands/tx/xdr.rs L41), and XDR_DEPTH_LIMIT is 500 (src/utils.rs L21), so the authorization trees and ScVal maps of transactions stellar-core applied are refused (failed to decode XDR: depth limit exceeded).",
+      "siblings": [
+        "KMP-JSON-DEPTH",
+        "NET-DEPTH",
+        "PHP-JSON-DEPTH"
+      ],
+      "related": [],
+      "entries": [
+        "soroban.auth-trees.p30-declared-depth-245",
+        "soroban.auth-trees.p30-declared-depth-246",
+        "soroban.auth-trees.p30-declared-depth-492",
+        "soroban.scval-shapes.p30-map-depth-max-envelope",
+        "soroban.scval-shapes.p30-map-depth-over"
+      ],
+      "recipe": "chain:soroban.scval-shapes.p30",
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "30.0.1"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dotnet@17.0.0",
+        "kmp@1.18.0",
+        "php@1.18.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.auth-trees.p30-declared-depth-245",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (6 check(s): testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.auth-trees.p30-declared-depth-246",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (6 check(s): testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.auth-trees.p30-declared-depth-492",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (6 check(s): testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-map-depth-max-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (6 check(s): testnet/decode_encode, testnet/encode_json, testnet/tx_hash, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-map-depth-over",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (6 check(s): testnet/decode_encode, testnet/encode_json, testnet/tx_hash 0, mainnet/decode_encode)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-JSON-DEPTH",
+      "title": "stellar xdr encode stops reading XDR-JSON at serde_json's nesting default of 128",
+      "component": "stellar-cli",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-11"
+      ],
+      "minimal_entry": "soroban.scval-shapes.synth-event-vec-depth-101",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry soroban.scval-shapes.synth-event-vec-depth-101",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-soroban.auth-trees.synth-auth-depth-493-deepest-accepted.md",
+      "cause": "stellar xdr encode reads its input with Type::from_json_collecting_ignored_fields (stellar-xdr 30.0.0 src/cli/encode.rs L96), which builds serde_json::Deserializer::from_reader without disable_recursion_limit (src/generated/type_enum.rs L16183), so serde_json's default limit of 128 refuses the XDR-JSON of authorization trees, ScVal maps and vectors that the network accepted and that stellar xdr decode itself writes (recursion limit exceeded).",
+      "siblings": [
+        "KMP-JSON-DEPTH",
+        "NET-DEPTH",
+        "PHP-JSON-DEPTH"
+      ],
+      "related": [
+        "https://github.com/stellar/rs-stellar-xdr"
+      ],
+      "entries": [
+        "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+        "soroban.scval-shapes.p30-map-depth-max-meta",
+        "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+        "soroban.scval-shapes.p30-vec-depth-max-envelope",
+        "soroban.scval-shapes.p30-vec-depth-max-meta",
+        "soroban.scval-shapes.p30-vec-depth-over",
+        "soroban.scval-shapes.synth-event-vec-depth-101",
+        "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+        "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted"
+      ],
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "28.1.0",
+            "30.0.1"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "kmp@1.18.0",
+        "php@1.18.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.scval-shapes.synth-event-vec-depth-101",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-map-depth-max-meta",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/decode_encode, testnet/encode_json, mainnet/decode_encode, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/decode_encode, testnet/encode_json, mainnet/decode_encode, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-vec-depth-max-envelope",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/decode_encode, testnet/encode_json, mainnet/decode_encode, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-vec-depth-max-meta",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/decode_encode, testnet/encode_json, mainnet/decode_encode, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.p30-vec-depth-over",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (4 check(s): testnet/decode_encode, testnet/encode_json, mainnet/decode_encode, mainnet/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.synth-event-vec-depth-101",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): any/decode_encode, any/encode_json)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-SIGNEDPAYLOAD-JSON",
+      "title": "stellar xdr encode refuses the XDR-JSON of an empty signed payload signer that stellar xdr decode writes",
+      "component": "stellar-cli",
+      "severity": "divergence",
+      "caps": [
+        "CAP-0040"
+      ],
+      "minimal_entry": "cap40.signed-payload-signer.p28-set-options-empty-payload",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry cap40.signed-payload-signer.p28-set-options-empty-payload",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-cap40.signed-payload-signer.p28-extra-signer-empty-payload.md",
+      "cause": "the XDR-JSON of a signed payload signer is its P strkey, read back with stellar-strkey 1.0.0 SignedPayload::new, which requires an inner payload of 1 to 64 bytes (src/ed25519.rs L458-L461); CAP-40 allows 0, so a transaction the network applied with an empty payload decodes to JSON that encode refuses (xdr value invalid). The Dart, PHP and KMP SDKs have the same gap.",
+      "siblings": [
+        "DART-SIGNEDPAYLOAD-JSON",
+        "KMP-SIGNEDPAYLOAD-JSON",
+        "PHP-SIGNEDPAYLOAD-JSON"
+      ],
+      "related": [],
+      "entries": [
+        "cap40.signed-payload-signer.p28-extra-signer-empty-payload",
+        "cap40.signed-payload-signer.p28-set-options-empty-payload",
+        "cap40.signed-payload-signer.p30-extra-signer-empty-payload",
+        "cap40.signed-payload-signer.p30-set-options-empty-payload",
+        "cap40.signed-payload-signer.synth-empty-payload-signer"
+      ],
+      "recipe": "chain:cap40.signed-payload-signer.p28",
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "28.1.0",
+            "30.0.1"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "kmp@1.18.0",
+        "php@1.18.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.p28-extra-signer-empty-payload",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.p28-set-options-empty-payload",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.synth-empty-payload-signer",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.p28-extra-signer-empty-payload",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.p28-set-options-empty-payload",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.p30-extra-signer-empty-payload",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.p30-set-options-empty-payload",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): testnet/decode_encode, mainnet/decode_encode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.synth-empty-payload-signer",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): any/decode_encode)"
+        }
+      ]
+    },
+    {
+      "id": "CLI-STRKEY-TRIM",
+      "title": "stellar strkey decode trims whitespace around its input before decoding it",
+      "component": "stellar-cli",
+      "severity": "robustness",
+      "caps": [
+        "CAP-0023",
+        "CAP-0027",
+        "CAP-0038",
+        "CAP-0040",
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-12",
+        "CAP-0054",
+        "CAP-0058",
+        "CAP-0084"
+      ],
+      "minimal_entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "reproduce": "shapekit conformance run --sdk stellar-cli --version 30.0.1 --entry cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-cli-cap23.claimable-balances.synth-strkey-b-invalid.md",
+      "cause": "stellar strkey decode is stellar-strkey's cli (stellar-strkey 1.0.0 src/cli/decode.rs L57), which decodes buf.trim(), so a strkey with surrounding spaces, newlines or carriage returns decodes where SEP-23 and the decoders refuse it. A command line trimming stdin is a convenience; the finding is that the command does not tell a text with them from the strkey.",
+      "siblings": [
+        "NET-STRKEY"
+      ],
+      "related": [],
+      "entries": [
+        "cap23.claimable-balances.synth-strkey-b-invalid",
+        "cap27.muxed-accounts.synth-strkey-g-invalid",
+        "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+        "cap27.muxed-accounts.synth-strkey-m-invalid",
+        "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+        "cap27.muxed-accounts.synth-strkey-s-invalid",
+        "cap38.liquidity-pools.synth-strkey-l-invalid",
+        "cap40.signed-payload-signer.synth-strkey-p-invalid",
+        "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+        "cap40.signed-payload-signer.synth-strkey-t-invalid",
+        "cap40.signed-payload-signer.synth-strkey-x-invalid",
+        "cap84.muxed-contract.synth-strkey-w-invalid",
+        "soroban.invoke-basics.synth-strkey-c-invalid"
+      ],
+      "affected": [
+        {
+          "on": "stellar-cli",
+          "tested": [
+            "28.1.0",
+            "30.0.1"
+          ],
+          "failing": [
+            "28.1.0",
+            "30.0.1"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dotnet@16.0.0",
+        "dotnet@17.0.0"
+      ],
+      "occurrences": [
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap23.claimable-balances.synth-strkey-b-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap27.muxed-accounts.synth-strkey-s-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap38.liquidity-pools.synth-strkey-l-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.synth-strkey-t-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "cap40.signed-payload-signer.synth-strkey-x-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@28.1.0",
+          "entry": "soroban.invoke-basics.synth-strkey-c-invalid",
+          "at": "stellar-cli@28.1.0",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap23.claimable-balances.synth-strkey-b-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-g-noncanonical-chars",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-m-noncanonical-chars",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap27.muxed-accounts.synth-strkey-s-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap38.liquidity-pools.synth-strkey-l-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.synth-strkey-p-noncanonical-chars",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (2 check(s): case 0/strkey_decode, case 1/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.synth-strkey-t-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap40.signed-payload-signer.synth-strkey-x-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "cap84.muxed-contract.synth-strkey-w-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
+        },
+        {
+          "source": "conformance",
+          "on": "stellar-cli@30.0.1",
+          "entry": "soroban.invoke-basics.synth-strkey-c-invalid",
+          "at": "stellar-cli@30.0.1",
+          "what": "diverges-from-network (1 check(s): case 7/strkey_decode)"
         }
       ]
     }

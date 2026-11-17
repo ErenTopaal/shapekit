@@ -2,6 +2,27 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: stellar-cli conformance
+
+- `testees/stellar-cli` checks the `stellar xdr decode|encode`, `stellar strkey` and `stellar tx
+  hash` commands of stellar-cli 28.1.0 and 30.0.1, the newest release of each line whose XDR
+  knows protocol 29. A small Rust program speaks the testee protocol and runs the release binary
+  once per request; `testees/stellar-cli/fetch.sh` installs each release asset after checking it
+  against the sha256 GitHub records for it. `conformance sync-versions` reads the versions from
+  crates.io and the XDR from the stellar-xdr release in the `Cargo.lock` the crate ships.
+- Corpus: 30.0.1 passes 609 entries, diverges on 59 and cannot run 48; 28.1.0 passes 298,
+  diverges on 34 and cannot run 384 (its XDR predates protocol 30). Six candidate findings,
+  drafted and not filed: `tx hash` refuses v0 and fee bump envelopes (CLI-TXHASH-V1); `tx hash`
+  decodes with a depth limit of 500 (CLI-DEPTH); `xdr encode` reads XDR-JSON with serde_json's
+  nesting default of 128 (CLI-JSON-DEPTH); `xdr decode` allocates what a length prefix asks for
+  before reading it, so a 12-byte input aborts the process under a 4 GiB limit (CLI-ALLOC); the
+  XDR-JSON of an empty signed payload does not read back (CLI-SIGNEDPAYLOAD-JSON); and `strkey
+  decode` trims whitespace around its input (CLI-STRKEY-TRIM).
+- Candidate lane: 30.0.1 passes 6,049 entries and diverges on 119, all of them the same
+  three findings (v0 and fee bump hashes, XDR-JSON nesting, empty signed payloads); 28.1.0
+  diverges on 94, adding the vectors of types and limits its v28.0 XDR predates.
+- The `sdk-version` obligations grow from 26 to 28, both new ones met.
+
 ## 2026-11-17: Kotlin Multiplatform SDK conformance
 
 - `testees/kmp` runs the JVM target of Soneso's Kotlin Multiplatform SDK
@@ -149,7 +170,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
   | `gate-side`: sides of stellar-core's protocol gates | 375 by branch count, 126 inferred from execution count | 189 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
-  | `sdk-version`: SDK versions the corpus runs against | 26 | 0 | 26 |
+  | `sdk-version`: SDK versions the corpus runs against | 28 | 0 | 28 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every

@@ -223,6 +223,7 @@ step "$shapekit" conformance run --sdk dotnet --all-versions --out "$out/conform
 PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk kmp --all-versions --out "$out/conformance-all/kmp"
 # the type table of the kmp testee is what its generator writes from every version's jars
 unchanged testees/kmp sh -c "cd testees/kmp && python3 -I gentypes.py"
+step "$shapekit" conformance run --sdk stellar-cli --all-versions --out "$out/conformance-all/stellar-cli"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

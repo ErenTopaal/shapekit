@@ -60,6 +60,16 @@
       "command": "shapekit conformance run --sdk kmp --all-versions --out target/conformance/kmp",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, kmp@1.18.0"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-stellar-cli.json",
+      "sha256": "94f7a5302339cb6a39b16f094fbab0dcb4bbdc5add7a64af3ad11c37637b431a",
+      "from": "target/conformance/stellar-cli/divergence-matrix.json",
+      "from_sha256": "16c06da1708364d8ab047f46fe522391bc9ec03b882ef3766f84fb95675338a2",
+      "command": "shapekit conformance run --sdk stellar-cli --all-versions --out target/conformance/stellar-cli",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
     }
   ]
 }

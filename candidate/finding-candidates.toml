@@ -713,3 +713,12 @@ checks = "decode_encode and decode_json"
 observed = "the decoders refuse nesting stellar-xdr reads within the corpus limit: a SorobanDelegateSignature nested past 129 levels, and ClaimPredicate and SCPQuorumSet past 500 of their own levels"
 evidence = "the generated decoders cap their own recursion per type: SorobanDelegateSignatureXdr.kt L30 enterRecursion(129), and enterRecursion(500) in ClaimPredicateXdr.kt L71 and the other 11 recursive types; XdrReader.jvm.kt L102-L109 counts the levels"
 
+
+# stellar-cli on the candidate lane (`shapekit conformance run --sdk stellar-cli --all-versions
+# --manifest candidate/manifest.json`): every failing check of 30.0.1 is one of the corpus
+# findings: 79 entries CLI-TXHASH-V1, 34 CLI-JSON-DEPTH (the format.xdr-grammar depth vectors
+# within stellar-xdr's limit, refused when their XDR-JSON is read back) and 6
+# CLI-SIGNEDPAYLOAD-JSON. 28.1.0 shows the same three, and besides them refuses the
+# format.xdr-grammar vectors of types and arms its XDR (v28.0) predates (ML-DSA cost types,
+# muxed contract addresses, delegate signatures, the longer contract spec names), which is its
+# XDR's age, not a defect.

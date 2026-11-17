@@ -31,8 +31,18 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 10] = [
-    "rust", "go", "js", "soroban", "python", "java", "dart", "php", "dotnet", "kmp",
+pub const SDKS: [&str; 11] = [
+    "rust",
+    "go",
+    "js",
+    "soroban",
+    "python",
+    "java",
+    "dart",
+    "php",
+    "dotnet",
+    "kmp",
+    "stellar-cli",
 ];
 
 /// The CPython every python testee venv is made with; pins.toml pins its build.
@@ -430,6 +440,20 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                     lookup(&mut cache, v, || {
                         let repo = upstream::maven_repository(&http, &s.package, v)?;
                         xdr_of_pinned(&http, &tags, &upstream::kmp_xdr_commit(&http, &repo, v)?)
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
+            "stellar-cli" => {
+                let p = upstream::crates_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        let xdr = upstream::crate_locked_dep(&http, &s.package, v, "stellar-xdr")?;
+                        xdr_of_commit(
+                            &tags,
+                            &upstream::crate_xdr_commit(&http, "stellar-xdr", &xdr)?,
+                        )
                     })
                 };
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
@@ -859,6 +883,36 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 vec![s("java"), s("-jar"), format!("{t}/testee.jar")],
             )
         }
+        // one testee build runs every version's release binary, which fetch.sh installs after
+        // checking it against the version's asset.sha256
+        "stellar-cli" => {
+            let testee = s("target/testees/stellar-cli/testee");
+            (
+                vec![
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("cargo"),
+                            s("build"),
+                            s("--release"),
+                            s("--locked"),
+                            s("--manifest-path"),
+                            s("testees/stellar-cli/Cargo.toml"),
+                            s("--target-dir"),
+                            testee.clone(),
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[s("testees/stellar-cli/fetch.sh"), s(v)])
+                    ),
+                ],
+                vec![
+                    format!("{testee}/release/shapekit-testee-stellar-cli"),
+                    format!("target/testees/stellar-cli/{v}/stellar"),
+                ],
+            )
+        }
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
@@ -965,6 +1019,7 @@ fn testee_files(sdk: &str, v: &str) -> Vec<String> {
             format!("testees/kmp/versions/{v}/pom.xml"),
             format!("testees/kmp/versions/{v}/lib.sha256"),
         ],
+        "stellar-cli" => vec![format!("testees/stellar-cli/versions/{v}/asset.sha256")],
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
 }
@@ -1283,6 +1338,8 @@ fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Resu
             // builds the version and writes lib.sha256 from the jars maven resolved
             run_step(&["testees/kmp/lock.sh", v], root, &[])
         }
+        // the sha256 github records for the release asset, then the install it pins
+        "stellar-cli" => run_step(&["testees/stellar-cli/fetch.sh", "--lock", v], root, &[]),
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
 }

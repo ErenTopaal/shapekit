@@ -437,3 +437,30 @@ build = [
 ]
 command = ["java", "-jar", "target/testees/kmp/1.18.0/testee.jar"]
 max_protocol = 30
+
+[sdk.stellar-cli]
+package = "stellar-cli"
+current = "30.0.1"
+issues_repo = "stellar/stellar-cli"
+timeout_ms = 30000
+memory = { resource = "as", mib = 4096 }
+
+# 28.1.0: newest 28.x release; xdr v28.0 (9c9c1459), protocols up to 29
+[[sdk.stellar-cli.versions]]
+version = "28.1.0"
+build = [
+  { argv = ["cargo", "build", "--release", "--locked", "--manifest-path", "testees/stellar-cli/Cargo.toml", "--target-dir", "target/testees/stellar-cli/testee"] },
+  { argv = ["testees/stellar-cli/fetch.sh", "28.1.0"] },
+]
+command = ["target/testees/stellar-cli/testee/release/shapekit-testee-stellar-cli", "target/testees/stellar-cli/28.1.0/stellar"]
+max_protocol = 29
+
+# 30.0.1: newest 30.x release; named in known-failures/stellar-cli.txt; xdr v30.0 (4f524bba), protocols up to 30
+[[sdk.stellar-cli.versions]]
+version = "30.0.1"
+build = [
+  { argv = ["cargo", "build", "--release", "--locked", "--manifest-path", "testees/stellar-cli/Cargo.toml", "--target-dir", "target/testees/stellar-cli/testee"] },
+  { argv = ["testees/stellar-cli/fetch.sh", "30.0.1"] },
+]
+command = ["target/testees/stellar-cli/testee/release/shapekit-testee-stellar-cli", "target/testees/stellar-cli/30.0.1/stellar"]
+max_protocol = 30

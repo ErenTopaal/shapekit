@@ -519,6 +519,43 @@ jobs:
         run: |
           if [ -f target/conformance-kmp/MATRIX.md ]; then cat target/conformance-kmp/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
 
+  stellar-cli:
+    # the stellar-cli testee: rustfmt and clippy of its wrapper, then the corpus through the
+    # current release binary, fetched and checked against its pinned sha256 by the build steps
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt, clippy
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/testees/stellar-cli/testee
+          key: testee-stellar-cli-${{ hashFiles('testees/stellar-cli/Cargo.lock') }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: rustfmt and clippy of the stellar-cli testee
+        run: |
+          set -euo pipefail
+          rustfmt --edition 2024 --check testees/stellar-cli/src/*.rs
+          cargo clippy --locked --all-targets --manifest-path testees/stellar-cli/Cargo.toml --target-dir target/testees/stellar-cli/testee -- -D warnings
+      - name: conformance run on the current stellar-cli
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk stellar-cli --out target/conformance-stellar-cli
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-stellar-cli/MATRIX.md ]; then cat target/conformance-stellar-cli/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+
   harness:
     # the wallet-backend reference adapter at the current pin, testnet variant, on the chains
     # behind the rfp's reproductions; every chain runs nightly

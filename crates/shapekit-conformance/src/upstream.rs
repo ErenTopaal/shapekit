@@ -343,6 +343,46 @@ pub fn crate_exact_dep(http: &Http, name: &str, version: &str, dep: &str) -> Res
     Ok(exact.to_string())
 }
 
+/// The version of `dep` in the `Cargo.lock` a crate release ships, which crates.io keeps for
+/// crates with a binary: what `cargo install --locked` builds and the release binaries link.
+/// No lock file, or a lock holding `dep` at more than one version, stops the command.
+pub fn crate_locked_dep(http: &Http, name: &str, version: &str, dep: &str) -> Result<String> {
+    let url = format!("https://static.crates.io/crates/{name}/{name}-{version}.crate");
+    let bytes = http.get_bytes(&url)?;
+    let want = format!("{name}-{version}/Cargo.lock");
+    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(&bytes[..]));
+    for entry in archive
+        .entries()
+        .with_context(|| format!("reading {url}"))?
+    {
+        let mut entry = entry.with_context(|| format!("reading {url}"))?;
+        if entry.path()?.to_str() != Some(want.as_str()) {
+            continue;
+        }
+        let mut text = String::new();
+        entry
+            .read_to_string(&mut text)
+            .with_context(|| format!("reading {want}"))?;
+        let lock: toml::Value =
+            toml::from_str(&text).with_context(|| format!("parsing {want} in {url}"))?;
+        let found: std::collections::BTreeSet<&str> = lock
+            .get("package")
+            .and_then(toml::Value::as_array)
+            .with_context(|| format!("{want} in {url} lists no packages"))?
+            .iter()
+            .filter(|p| p.get("name").and_then(toml::Value::as_str) == Some(dep))
+            .filter_map(|p| p.get("version").and_then(toml::Value::as_str))
+            .collect();
+        ensure!(
+            found.len() == 1,
+            "{want} in {url} holds {dep} at {} versions: {found:?}",
+            found.len()
+        );
+        return Ok(found.into_iter().next().expect("one version").to_string());
+    }
+    bail!("{url} has no {want}")
+}
+
 /// The stellar-xdr release a soroban-sdk release links: soroban-sdk pins soroban-env-host,
 /// which pins soroban-env-common, which pins stellar-xdr, each with `=`.
 pub fn soroban_sdk_xdr_crate(http: &Http, name: &str, version: &str) -> Result<String> {

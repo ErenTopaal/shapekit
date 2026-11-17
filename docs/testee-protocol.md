@@ -564,6 +564,29 @@ the SDK's. A `StackOverflowError`, `OutOfMemoryError`, `NullPointerException`,
 `ClassCastException` or `IndexOutOfBoundsException` is reported as `panic` with the SDK frame it
 left; every other exception is a rejection.
 
+## The stellar-cli testee
+
+`testees/stellar-cli` checks the `stellar` command of stellar-cli releases. One small Rust
+program (`testees/stellar-cli/src/main.rs`) speaks the protocol and runs the release binary
+given as its first argument once per request, with the request's bytes on stdin. Each version's
+build installs the release's linux x86-64 asset with `testees/stellar-cli/fetch.sh`, which
+checks it against `testees/stellar-cli/versions/<version>/asset.sha256` (written by
+`fetch.sh --lock` from the digest GitHub records for the asset) and against the version the
+binary prints.
+
+| op | what it runs |
+|---|---|
+| `decode_encode` | `stellar xdr decode --output json`, then `stellar xdr encode --input json`: the command has no bytes-to-bytes form |
+| `decode_json`, `encode_json` | `stellar xdr decode --output json` and `stellar xdr encode --input json` |
+| `strkey_decode`, `strkey_encode` | `stellar strkey decode` and `stellar strkey encode` |
+| `tx_hash` | `stellar tx hash --network-passphrase ..`; the inner transaction of a fee bump is `unsupported`, the command hashes only what it is given |
+
+The other ops answer `unsupported`: the command line has nothing that orders assets, derives
+pool, balance or contract ids or converts contract values. A type the binary does not know is
+`unsupported`, a non-zero exit with the command's error line is a rejection, and a Rust panic
+or a death by signal is a `panic`. `decode_limits` is `"ignored"`: the xdr commands take no
+limits. `hello` reports the version and the stellar-xdr crate that `stellar version` prints.
+
 ## The version matrix
 
 `shapekit conformance sync-versions` writes the version lists of
@@ -594,7 +617,9 @@ source. stellar-dotnet-sdk names no commit: its XDR is the stellar-xdr commit wh
 have the same git blob ids as the ones the SDK ships in `StellarDotnetSdk.Xdr/schemes/` at the
 commit its NuGet package records. For kmp-stellar-sdk it is the `XDR_COMMIT` line of
 `tools/xdrgen-kt/xdr-source.cfg` at the repository tag `v<version>`, taken when the tag's
-`gradle.properties` declares that version.
+`gradle.properties` declares that version. For stellar-cli it is the `xdr-version` file of
+the stellar-xdr release in the `Cargo.lock` that the crates.io package ships, which the release
+binaries are built from.
 A commit on stellar-xdr's `curr` branch whose message says it was generated from a release
 tag's commit (`Generate from main (4f524bb)`) counts as that tag. The
 stellar-xdr release tag at that commit names a protocol. Protocols without a tag of their own

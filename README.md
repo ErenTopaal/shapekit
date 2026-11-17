@@ -8,8 +8,8 @@
 
 A test kit for software that reads the Stellar ledger: a corpus of rare but valid XDR shapes,
 most of them recorded on a real stellar-core, a replay harness that feeds them to an indexer, a conformance
-runner that feeds them to the JavaScript, Go, Rust, Python, Java, Dart, PHP, .NET and Kotlin Multiplatform SDKs and to
-soroban-sdk, the Rust contract SDK, a linter for Go indexer code, and an indexer-hardening guide.
+runner that feeds them to the JavaScript, Go, Rust, Python, Java, Dart, PHP, .NET and Kotlin Multiplatform SDKs, to
+soroban-sdk, the Rust contract SDK, and to the `stellar xdr` commands of stellar-cli, a linter for Go indexer code, and an indexer-hardening guide.
 
 Indexers and SDKs keep breaking on shapes that are valid but rare: signed-payload signers, muxed
 accounts, deep Soroban authorization trees, trustlines created by the Stellar Asset Contract,
