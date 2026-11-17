@@ -301,9 +301,10 @@ jobs:
           # promotion needs a result from every sdk in conformance/versions.toml
           for sdk in rust go js soroban python java dart php dotnet kmp stellar-cli; do
             out="target/candidate/$sdk"
+            # the runner starts this script with bash -e, so the exit code is caught, not fatal
+            code=0
             "$shapekit" conformance run --sdk "$sdk" --manifest candidate/manifest.json \
-              --known-failures "$known" --out "$out"
-            code=$?
+              --known-failures "$known" --out "$out" || code=$?
             # 1 is a divergence, anything else is the run itself failing
             if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then exit "$code"; fi
             test -f "$out/divergence-matrix.json" || { echo "::error::no matrix for $sdk"; exit 1; }
@@ -312,8 +313,8 @@ jobs:
           done
           echo "## promotion" >>"$GITHUB_STEP_SUMMARY"
           for id in $ids; do
-            "$shapekit" corpus promote "$id" --dry-run "${matrices[@]}" >"target/candidate/$id.txt"
-            code=$?
+            code=0
+            "$shapekit" corpus promote "$id" --dry-run "${matrices[@]}" >"target/candidate/$id.txt" || code=$?
             if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then cat "target/candidate/$id.txt"; exit "$code"; fi
             { echo '```'; cat "target/candidate/$id.txt"; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
           done
