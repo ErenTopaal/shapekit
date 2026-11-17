@@ -123,72 +123,37 @@ evidence = "internal/indexer/processors/accounts.go at the commit reads account 
 
 # wallet-backend on the probe chains (candidate/chains/probe.envelope-fields.*/testnet, harness
 # run at 3e22515a44979fdc3a558fda3991ca2b48e38cef): 202 failing entries, 138 of them taken by
-# findings/triage.toml (WB-W1, WB-W2, WB-W3, WB-W4, WB-W9), 64 entries with 74 failures taken by
-# none. the four causes of those 64 below, each read from wallet-backend's source at that
-# commit (internal/indexer/processors/effects_horizon.go, which ports horizon's effects). every
-# entry named below fails with its -ledger entry too.
-
-[[candidate]]
-finding = "new"
-target = "wallet-backend"
-versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
-entries = [
-  "probe.envelope-fields.setoptionsop-clearflags-0",
-  "probe.envelope-fields.setoptionsop-clearflags-1",
-  "probe.envelope-fields.setoptionsop-clearflags-3",
-  "probe.envelope-fields.setoptionsop-highthreshold-0",
-  "probe.envelope-fields.setoptionsop-highthreshold-1",
-  "probe.envelope-fields.setoptionsop-homedomain-0",
-  "probe.envelope-fields.setoptionsop-homedomain-1",
-  "probe.envelope-fields.setoptionsop-homedomain-2",
-  "probe.envelope-fields.setoptionsop-homedomain-3",
-  "probe.envelope-fields.setoptionsop-homedomain-5",
-  "probe.envelope-fields.setoptionsop-inflationdest-0",
-  "probe.envelope-fields.setoptionsop-inflationdest-1",
-  "probe.envelope-fields.setoptionsop-inflationdest-3",
-  "probe.envelope-fields.setoptionsop-lowthreshold-0",
-  "probe.envelope-fields.setoptionsop-lowthreshold-1",
-  "probe.envelope-fields.setoptionsop-masterweight-0",
-  "probe.envelope-fields.setoptionsop-masterweight-1",
-  "probe.envelope-fields.setoptionsop-masterweight-2",
-  "probe.envelope-fields.setoptionsop-masterweight-4",
-  "probe.envelope-fields.setoptionsop-masterweight-5",
-  "probe.envelope-fields.setoptionsop-medthreshold-0",
-  "probe.envelope-fields.setoptionsop-medthreshold-1",
-  "probe.envelope-fields.setoptionsop-setflags-0",
-  "probe.envelope-fields.setoptionsop-setflags-1",
-  "probe.envelope-fields.setoptionsop-setflags-3",
-  "probe.envelope-fields.setoptionsop-signer-0",
-  "probe.envelope-fields.setoptionsop-signer-1",
-  "probe.envelope-fields.setoptionsop-signer-2",
-]
-checks = "harness: extra thresholds (56 failures), extra account-flags (2, setoptionsop-clearflags-3)"
-observed = "a SetOptions that names a threshold or a flag stores a thresholds or account-flags state change even when the account's thresholds or flags do not change, so the stored history shows a change the ledger does not"
-evidence = "effects_horizon.go:149-162 emits account_thresholds_updated when op.LowThreshold, MedThreshold or HighThreshold is set, and :166-174 account_flags_updated when op.SetFlags or ClearFlags is set, from the operation's fields alone; the account entry change is read only for signers (:177-207)"
-
-[[candidate]]
-finding = "new"
-target = "wallet-backend"
-versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
-entries = ["probe.envelope-fields.allowtrustop-authorize-1", "probe.envelope-fields.allowtrustop-authorize-4"]
-checks = "harness: extra trustline-flags (4 failures)"
-observed = "an AllowTrust whose authorize value leaves the trustline's flags as they were stores a trustline-flags state change anyway"
-evidence = "effects_horizon.go:319-336 emits trustline_flags_updated in every arm of the switch on op.Authorize, without reading the trustline entry's change"
-
-[[candidate]]
-finding = "new"
-target = "wallet-backend"
-versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
-entries = ["probe.envelope-fields.setoptionsop-masterweight-2", "probe.envelope-fields.setoptionsop-masterweight-5"]
-checks = "harness: extra signer-removed and dropped signer-weight (4 failures each)"
-observed = "setting the master key's weight to 0 is stored as the master key removed as a signer, with weight 1, where the ledger changes threshold 0 of the account from 1 to 0 and keeps no signer list entry for the master key either way"
-evidence = "effects_horizon.go:190-207 compares SignerSummary() before and after, which leaves out a master key of weight 0, so the weight change reads as a removal (signer_removed with the old weight)"
-
-[[candidate]]
-finding = "new"
-target = "wallet-backend"
-versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
-entries = ["probe.envelope-fields.ledgerkeydata-accountid-0", "probe.envelope-fields.ledgerkeydata-dataname-0"]
-checks = "harness: dropped data-entry (4 failures)"
-observed = "a RevokeSponsorship of a data entry updates the entry (its sponsor changes, its value does not), and no data-entry state change is stored. to decide before filing: whether a data entry change that only moves the sponsor is a data-entry fact (the oracle says updated, value before and after equal) or only a sponsorship one"
-evidence = "data effects come only from ManageData (effects_horizon.go:84-85 and addManageDataEffects at :342), so an update by any other operation writes none"
+# findings/triage.toml (WB-W1, WB-W2, WB-W3, WB-W4, WB-W9). the other 64 entries (74 failures)
+# have four causes in internal/indexer/processors/effects_horizon.go, wallet-backend's port of
+# horizon's effects. each was compared with horizon's own effects processor, at stellar/go
+# 096f654e (services/horizon/internal/ingest/processors/effects_processor.go, the last revision
+# before horizon left that repository) and at stellar/stellar-horizon 01ba44a9 (main,
+# internal/ingest/processors/effects_processor.go): the functions involved are the same in both,
+# so no later horizon fix exists, and wallet-backend copies them. horizon documents each effect
+# as the record of an operation, not of a ledger change (stellar-docs 103c6d27,
+# docs/data/apis/horizon/api-reference/resources/effects/types.mdx). none is a defect, so none
+# is a candidate:
+#
+# 1. extra thresholds (56 failures, 28 setoptionsop-* entries and their ledgers) and extra
+#    account-flags (2): a set options names thresholds or flags without changing them. horizon
+#    emits account_thresholds_updated and account_flags_updated from the operation's fields
+#    (effects_processor.go addSetOptionsEffects, stellar-horizon main lines 666-695),
+#    documented as effects of set_options. intended.
+# 2. extra trustline-flags (4, allowtrustop-authorize-1 and -4): an allow trust that leaves the
+#    flags as they were. horizon emits trustline_authorized or trustline_deauthorized and
+#    trustline_flags_updated in every arm of the switch on authorize (addAllowTrustEffects,
+#    lines 882-927; addTrustLineFlagsEffect, lines 1322-1351), documented as effects of
+#    allow_trust. wallet-backend writes the first of the two as trustline_flags_updated too
+#    (effects_horizon.go:319-336), a renamed type, not another trigger. intended.
+# 3. extra signer-removed and dropped signer-weight (4 each, setoptionsop-masterweight-2 and -5):
+#    a master key set to weight 0. horizon compares SignerSummary() before and after (line 720),
+#    which counts the master key only when its weight is above 0 (go-stellar-sdk v0.8.0
+#    xdr/account_entry.go lines 6-8), so a master key that can no longer sign reads as removed.
+#    intended by that definition; not stated in words in horizon's documentation.
+# 4. dropped data-entry (4, ledgerkeydata-accountid-0 and -dataname-0): a revoke sponsorship
+#    moves a data entry's sponsor and leaves its value. horizon writes data_updated only from
+#    manage_data (addManageDataEffects, lines 966-1004) and a sponsor change of a data entry as
+#    data_sponsorship_updated (lines 260-264), documented under revoke_sponsorship. this settles the
+#    open question: in wallet-backend's model a sponsor-only change is a sponsorship fact, while
+#    the oracle vocabulary also counts it as a data-entry update. intended; the difference is
+#    explained in docs/adapter-interface.md, the wallet-backend section.

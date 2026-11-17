@@ -792,6 +792,26 @@ these losses into `out-of-scope` and hide them. The verdict detail and the findi
 name the cause, so a reader can see that the difference is a design choice in wallet-backend
 and decide whether it matters for their use.
 
+### Where wallet-backend's history and the meta tell different things on purpose
+
+wallet-backend writes its classic state changes from a port of Horizon's effects, and Horizon
+records an effect for what an operation did or named, not for what the ledger changed
+(Horizon's effect types list each effect with the operations that produce it). Four kinds of
+failure follow from that and are not defects:
+
+- a set options that names thresholds or flags without changing them stores a `thresholds`
+  or `account-flags` change the meta does not show;
+- an allow trust stores a `trustline-flags` change even when the flags stay as they were;
+- a master key set to weight 0 is stored as the master key removed (`signer-removed`), where
+  the meta shows threshold 0 of the account going to 0 (`signer-weight`), because the signer
+  list it compares holds the master key only while its weight is above 0;
+- a revoke sponsorship that only moves a data entry's sponsor is stored as a sponsorship change
+  and no `data-entry` change, where the vocabulary counts both.
+
+The harness reports these as `mishandled` or `dropped` like any other failure. They are listed
+with Horizon's source as the explanation in `candidate/finding-candidates.toml`, not as
+findings.
+
 ## The stellar-etl adapter
 
 `adapters/stellaretl` (Go), command `adapters/stellaretl/cmd/etl-adapter`:
