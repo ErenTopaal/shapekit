@@ -181,6 +181,8 @@ struct Live<'e, 'a> {
     answers: Vec<String>,
     /// Ordered pairs drawn so far, for their labels.
     pairs: usize,
+    /// The prefix has run and new steps are being drawn.
+    drawing: bool,
 }
 
 /// What a submitted transaction came to.
@@ -344,6 +346,9 @@ impl<'e, 'a> Live<'e, 'a> {
                         result,
                     }
                 }
+                // a fund step a setup move draws is refused like any other transaction, and
+                // dropped with it; the episode's own setup must succeed
+                Step::Fund { .. } if self.drawing && o.outcome == Outcome::Rejected => {}
                 Step::Fund { .. } => {
                     if o.outcome != Outcome::Success {
                         bail!(
@@ -515,18 +520,24 @@ impl<'e, 'a> Live<'e, 'a> {
         Ok(Pushed::Applied(new))
     }
 
-    /// Runs one phase of a setup move.
-    fn phase(&mut self, phase: crate::directed::Phase) -> Result<()> {
+    /// Runs one phase of a setup move; false when the move cannot go on (its accounts were
+    /// not created).
+    fn phase(&mut self, phase: crate::directed::Phase) -> Result<bool> {
         use crate::directed::Phase;
         match phase {
             Phase::Step(s @ Step::Fund { .. }) => {
-                if let Step::Fund { roles, .. } = &s {
-                    // named before the ledger is read, so its strkeys read as the roles
-                    for r in roles {
-                        self.world.add_role(r);
-                    }
+                let Step::Fund { roles, .. } = &s else {
+                    unreachable!()
+                };
+                let roles = roles.clone();
+                // named before the ledger is read, so its strkeys read as the roles
+                for r in &roles {
+                    self.world.add_role(r);
                 }
-                self.transaction(s)?;
+                if !matches!(self.transaction(s)?, Pushed::Applied(_)) {
+                    self.world.funded.retain(|r| !roles.contains(r));
+                    return Ok(false);
+                }
             }
             Phase::Step(s @ Step::Upgrade { .. }) => self.exact(s)?,
             Phase::Step(s) => {
@@ -539,7 +550,7 @@ impl<'e, 'a> Live<'e, 'a> {
                 }
             }
         }
-        Ok(())
+        Ok(true)
     }
 
     /// Submits a new transaction step and closes the ledger it goes into.
@@ -655,6 +666,7 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         unsupported: BTreeSet::new(),
         answers: Vec::new(),
         pairs: 0,
+        drawing: false,
     };
     let prefix = if spec.prefix.is_empty() && spec.setup {
         let mut steps = setup(&mut rng);
@@ -687,6 +699,7 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         Ok(())
     })();
     let prefix_len = live.steps.len();
+    live.drawing = true;
     let mut directed: Option<crate::directed::Move> = None;
     let outcome = outcome.and_then(|()| {
         for _ in 0..spec.actions {
@@ -707,7 +720,9 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             if let Some(m) = directed.as_mut() {
                 match m.next(&live.world, &mut rng) {
                     Some(p) => {
-                        live.phase(p)?;
+                        if !live.phase(p)? {
+                            directed = None;
+                        }
                         continue;
                     }
                     None => directed = None,
@@ -880,6 +895,9 @@ pub fn shrunk_steps(ep: &Episode) -> Vec<Step> {
     // the transactions waiting for the next close; a close keeps them only when its ledger
     // showed something new, and an ordered close always names some of them
     let mut pending: Vec<Step> = Vec::new();
+    // a fund step was kept and the ledger that creates its accounts not yet: later steps of
+    // those accounts need that ledger closed first
+    let mut funding = false;
     for (i, step) in ep.ir.steps.iter().enumerate().skip(ep.prefix_len) {
         if submits(step) {
             pending.push(step.clone());
@@ -889,9 +907,16 @@ pub fn shrunk_steps(ep: &Episode) -> Vec<Step> {
         if ep.novel_steps.contains(&i) {
             out.append(&mut pending);
             out.push(step.clone());
+            funding = false;
+        } else if closes && funding && matches!(step, Step::Close { order, .. } if order.is_empty())
+        {
+            pending.clear();
+            out.push(step.clone());
+            funding = false;
         } else if closes {
             pending.clear();
         } else {
+            funding |= matches!(step, Step::Fund { .. });
             out.push(step.clone());
         }
     }

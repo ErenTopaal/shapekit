@@ -405,6 +405,9 @@ impl World {
                                     let text = serde_json::to_string(&asset)?;
                                     if let Some(h) = self.holders.get_mut(&text) {
                                         h.remove(role);
+                                        if h.is_empty() {
+                                            self.holders.remove(&text);
+                                        }
                                     }
                                     self.lines.remove(&(role.to_owned(), text));
                                 }

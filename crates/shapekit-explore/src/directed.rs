@@ -185,6 +185,8 @@ pub fn start(
         .iter()
         .copied()
         .filter(|k| k.runs_at(world.protocol, orderable))
+        // a fund step pays the interpreter's default fee, which a raised base fee refuses
+        .filter(|k| world.base_fee <= 100 || matches!(k, Kind::Predicate | Kind::Inflation))
         .collect();
     let weights: Vec<u64> = usable
         .iter()
@@ -602,9 +604,14 @@ fn authorization(world: &World, rng: &mut Rng) -> Option<VecDeque<Gen>> {
         }));
     }
     {
+        // the line holds a balance now, so offers selling it reach the authorization check
         let xc = x.clone();
         plan.push_back(one(&h1, move |_| {
             Some(sell_offer(&xc, &AssetRef::native(), 5))
+        }));
+        let xc = x.clone();
+        plan.push_back(one(&h1, move |_| {
+            Some(buy_offer(&xc, &AssetRef::native(), 5))
         }));
     }
     Some(plan)
@@ -904,8 +911,8 @@ fn reserve(world: &World, rng: &mut Rng) -> Option<VecDeque<Gen>> {
 }
 
 /// Two transactions in one ledger: the first, from another account, changes the second's
-/// account (bumps its sequence, touches its sequence ledger, raises its thresholds, removes
-/// a signer, merges it away), so the second fails at apply though it was valid when queued.
+/// account (bumps its sequence, touches its sequence ledger, raises or lowers its
+/// thresholds, merges it away), so the second fails at apply though it was valid when queued.
 /// The second is wrapped in a fee bump when the inner result is what the run misses.
 fn ordered(world: &World, rng: &mut Rng, missing: &BTreeSet<String>) -> Option<VecDeque<Gen>> {
     #[derive(Clone, Copy)]
@@ -953,13 +960,16 @@ fn ordered(world: &World, rng: &mut Rng, missing: &BTreeSet<String>) -> Option<V
     let (v, z) = (vs[0].clone(), vs[1].clone());
     let mut plan: VecDeque<Gen> = VecDeque::new();
     plan.push_back(fixed(fund(&vs, HOLDER_BALANCE)));
-    if matches!(effect, Effect::Auth | Effect::Extra) {
+    if matches!(effect, Effect::Extra) {
+        // thresholds of 2 need both signatures when the second is queued; core stops
+        // counting once a threshold is met, so at lower thresholds the second signature
+        // would already be extra at submission
         let zc = z.clone();
         plan.push_back(one(&v, move |_| {
             Some(set_options(
                 None,
                 Some(json!({ "key": acct(&zc), "weight": 1 })),
-                None,
+                Some(2),
             ))
         }));
     }
@@ -969,15 +979,18 @@ fn ordered(world: &World, rng: &mut Rng, missing: &BTreeSet<String>) -> Option<V
             // a bump to a lower number changes only the sequence ledger and time
             Effect::Gap => json!({ "bump_sequence": { "bump_to": "0" } }),
             Effect::Auth => set_options(None, None, Some(2)),
-            Effect::Extra => set_options(None, Some(json!({ "key": acct(&z), "weight": 0 })), None),
+            // back to 1: the master key alone meets it, and the other signature is extra
+            Effect::Extra => set_options(None, None, Some(1)),
             Effect::Merge => json!({ "account_merge": acct(&first) }),
         };
-        let a = tx(w, &first, vec![op(Some(&v), body)], &[&first, &v]);
         let signers: Vec<&str> = if matches!(effect, Effect::Extra) {
             vec![&v, &z]
         } else {
             vec![&v]
         };
+        let mut a_signers = vec![first.as_str()];
+        a_signers.extend(&signers);
+        let a = tx(w, &first, vec![op(Some(&v), body)], &a_signers);
         let mut b = tx(
             w,
             &v,
