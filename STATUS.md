@@ -2,6 +2,27 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: Kotlin Multiplatform SDK conformance
+
+- `testees/kmp` runs the JVM target of Soneso's Kotlin Multiplatform SDK
+  (`com.soneso.stellar:stellar-sdk-jvm`) 1.18.0, the newest 1.x release, on the Java testee's
+  pinned JDK and Maven, with the resolved jars pinned in `lib.sha256`. `conformance
+  sync-versions` reads its versions from Maven Central and its XDR from the `XDR_COMMIT` of
+  `tools/xdrgen-kt/xdr-source.cfg` at the release tag, a `curr` commit generated from v30.0
+  (protocols up to 30). The type table is generated from the schema and the SDK jar.
+- Corpus: 630 entries pass, 19 are unsupported and 67 diverge from the network. The 67 are five
+  candidate findings, drafted and not filed: the muxed id of a transaction's source dropped when
+  the SDK rebuilds the transaction, so its hash is not the network's (KMP-MUXED-SOURCE); strings
+  decoded as UTF-8 (KMP-UTF8); decoders that accept over-long values and nonzero padding
+  (KMP-BOUNDS); XDR-JSON stopped at a nesting cap of 128 (KMP-JSON-DEPTH); and no XDR-JSON for an
+  empty signed payload (KMP-SIGNEDPAYLOAD-JSON).
+- Candidate lane: 5,713 entries pass and 198 diverge. Besides the same findings, it shows
+  PRECOND_V2 preconditions holding only defaults written back as PRECOND_NONE (another hash),
+  transaction-object checks that refuse values the network applied, and per-type decode depth
+  caps (129 for SorobanDelegateSignature) below stellar-xdr's. The 30 checks on fixed opaques
+  and bare 64-bit integers are stellar-xdr's rendering, not the SDK's.
+- The `sdk-version` obligations grow from 25 to 26, the new one met.
+
 ## 2026-11-17: .NET SDK conformance
 
 - `testees/dotnet` runs `stellar-dotnet-sdk` 16.0.0 and 17.0.0, the newest release of each line
@@ -128,7 +149,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
   | `gate-side`: sides of stellar-core's protocol gates | 353 by branch count, 129 inferred from execution count | 208 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
-  | `sdk-version`: SDK versions the corpus runs against | 25 | 0 | 25 |
+  | `sdk-version`: SDK versions the corpus runs against | 26 | 0 | 26 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every

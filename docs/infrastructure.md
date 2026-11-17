@@ -44,6 +44,7 @@ Docker.
 | `stellar_flutter_sdk` (pub.dev) | 3.12.0 (current) | Dart testee matrix, with Flutter 3.50.0 |
 | `soneso/stellar-php-sdk` (Packagist) | 1.18.0 (current) | PHP testee matrix, on PHP 8.5.12 with Composer 2.11.2 |
 | `stellar-dotnet-sdk` (NuGet) | 16.0.0, 17.0.0 (current) | .NET testee matrix, on the .NET SDK 11.0.100 |
+| `com.soneso.stellar:stellar-sdk-jvm` (Maven Central, kmp-stellar-sdk) | 1.18.0 (current) | Kotlin Multiplatform testee matrix (the JVM target), on the Java testee's JDK and Maven |
 | `github.com/stellar/go-stellar-sdk` | v0.7.1, v0.7.2, v0.7.3, v0.8.0, v0.9.0 (current) | Go testee matrix (all), the wallet-backend adapter and the linter's analysis target (v0.8.0 only) |
 | stellar-rpc | tag `v30.0.1` (commit `6b6ec60c`, image `stellar/stellar-rpc:30.0.1` `sha256:b6d41d314808...`) | the JSON-RPC behaviour `shapekit serve` follows ([replay-server.md](replay-server.md)), and the image the stellar-rpc adapter runs as a harness target |
 | stellar/wallet-backend | commit `3e22515a` (current, `main` on 2026-11-13), plus the pre-fix and fixed commits in `adapters/walletbackend/reproductions.toml` (`e967ce8b`, the previous current pin, is the fixed side of #716) | reference harness target |

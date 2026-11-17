@@ -50,6 +50,16 @@
       "command": "shapekit conformance run --sdk php --all-versions --out target/conformance/php",
       "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
       "describes": "corpus 0.1.0, php@1.18.0"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-kmp.json",
+      "sha256": "8341c807b87b2f301b23f368b8e802c41d81cea298506981938d0008f226b7a8",
+      "from": "target/conformance/kmp/divergence-matrix.json",
+      "from_sha256": "ae7d5db12a7746589bc319e997e8d46b9b82199abf7ec01f1eff2bbe9716e22b",
+      "command": "shapekit conformance run --sdk kmp --all-versions --out target/conformance/kmp",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, kmp@1.18.0"
     }
   ]
 }

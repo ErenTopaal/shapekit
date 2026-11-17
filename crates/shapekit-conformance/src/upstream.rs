@@ -1126,6 +1126,31 @@ pub fn tagged_xdr_commit(
     makefile_xdr_commit(&http.get_text(&url)?).with_context(|| format!("reading {url}"))
 }
 
+/// The stellar-xdr commit a kmp-stellar-sdk release generated its XDR from: `XDR_COMMIT` in
+/// `tools/xdrgen-kt/xdr-source.cfg` at the tag `v<version>`, taken only when `gradle.properties`
+/// at that tag declares `version=<version>`. The commit is usually one of stellar-xdr's `curr`
+/// branch (see [`xdr_curr_source`]).
+pub fn kmp_xdr_commit(http: &Http, repo: &str, version: &str) -> Result<String> {
+    let at = |path: &str| {
+        format!("https://raw.githubusercontent.com/{repo}/refs/tags/v{version}/{path}")
+    };
+    let props = http.get_text(&at("gradle.properties"))?;
+    ensure!(
+        props
+            .lines()
+            .any(|l| l.trim() == format!("version={version}")),
+        "{} does not declare version {version}",
+        at("gradle.properties")
+    );
+    let url = at("tools/xdrgen-kt/xdr-source.cfg");
+    let cfg = http.get_text(&url)?;
+    let commit = cfg
+        .lines()
+        .find_map(|l| l.trim().strip_prefix("XDR_COMMIT="))
+        .with_context(|| format!("{url} sets no XDR_COMMIT"))?;
+    commit_hash(commit.trim()).with_context(|| format!("reading {url}"))
+}
+
 /// `owner/repo` of a GitHub url in any of the forms registries record.
 pub fn github_repo(url: &str) -> Result<String> {
     let u = url.trim();

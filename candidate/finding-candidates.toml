@@ -647,3 +647,69 @@ entries = ["cap03.offer-liabilities.mainnet-37466023"]
 checks = "mainnet/tx_hash 12, mainnet/tx_hash 236 and mainnet/tx_hash 236 inner"
 observed = "Transaction.FromEnvelopeXdr(..).Hash(network) is not the network's hash for offers whose price fraction is not in lowest terms; the wrong hashes are the same ones stellar_flutter_sdk computes (fb4973f6.. for transaction 12), because both sdks rebuild the price from a decimal"
 evidence = "StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L95-L106: FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody (L83) reads it back with Price.FromString, which writes another fraction"
+
+# kmp-stellar-sdk (stellar-sdk-jvm) on the candidate lane (`shapekit conformance run --sdk kmp
+# --all-versions --manifest candidate/manifest.json`): 1.18.0 passes 5,713 entries, diverges
+# from the network on 198 and cannot run 319. Its 231 failing checks by cause: 114 decode_encode checks on
+# *-over-max, *-padding and probe.limits.* vectors (KMP-BOUNDS), 34 XDR-JSON refusals at the
+# nesting cap of 128 (KMP-JSON-DEPTH), 18 refusals at the per-type decode caps (below), 16
+# transaction hashes (12 KMP-MUXED-SOURCE, 4 below), 13 transaction-object refusals (below), 6
+# KMP-SIGNEDPAYLOAD-JSON, and 30 checks on the 17 fixed-opaque and bare Int64 and Uint64
+# entries, where kmp writes the SEP-51 forms and the expected_json is stellar-xdr's rendering
+# (the rust SEP-51 candidate above), so they are no kmp defect.
+
+[[candidate]]
+finding = "new"
+sdk = "kmp"
+versions = ["1.18.0"]
+entries = [
+  "probe.envelope-fields.transaction-cond-invoke-2",
+  "probe.envelope-fields.transaction-cond-invoke-2-ledger",
+  "probe.envelope-fields.transaction-cond-payment-2",
+  "probe.envelope-fields.transaction-cond-payment-2-ledger",
+]
+checks = "tx_hash"
+observed = "AbstractTransaction.fromEnvelopeXdr(..).hash() is not the network's hash for a transaction whose PRECOND_V2 preconditions hold only default values: the sdk writes them back as PRECOND_NONE"
+evidence = "commonMain/com/soneso/stellar/sdk/TransactionPreconditions.kt L61-L93: hasV2() is false when no ledger bounds, minimum sequence number, age, gap or extra signer is set, and toXdr then writes PreconditionsXdr.Void (or TimeBounds), another transaction than the one the network applied"
+
+[[candidate]]
+finding = "new"
+sdk = "kmp"
+versions = ["1.18.0"]
+entries = [
+  "probe.envelope-fields.extendfootprintttlop-extendto-1",
+  "probe.envelope-fields.extendfootprintttlop-extendto-1-ledger",
+  "probe.envelope-fields.ledgerbounds-maxledger-2",
+  "probe.envelope-fields.ledgerbounds-maxledger-2-ledger",
+  "probe.envelope-fields.ledgerkeytrustline-asset-4-ledger",
+  "probe.envelope-fields.preconditionsv2-minseqnum-3",
+  "probe.envelope-fields.preconditionsv2-minseqnum-3-ledger",
+  "probe.envelope-fields.revokesponsorshipopsigner-signerkey-5-ledger",
+  "probe.envelope-fields.timebounds-maxtime-2",
+  "probe.envelope-fields.timebounds-maxtime-2-ledger",
+  "probe.limits.claim-predicate-depth-4",
+  "probe.limits.claim-predicate-depth-4-ledger",
+]
+checks = "tx_hash and balance_id"
+observed = "AbstractTransaction.fromEnvelopeXdr refuses transactions the network applied: extendTo 0, a ledger bound or time bound past the signed range, a negative minimum sequence number, a pool share trust line ledger key, an empty signed payload signer key and a NOT predicate holding a NOT predicate"
+evidence = "commonMain/com/soneso/stellar/sdk/Operation.kt L1841 (extendTo must be positive), L1307 (pool share trust lines unsupported) and L1949 (no nested NOT); LedgerBounds.kt L22 and TimeBounds.kt L26 read uint32 and uint64 into signed Int and Long and require them >= 0; TransactionPreconditions.kt L39 (minSequenceNumber >= 0); SignerKey.kt L161 (a signed payload of 1 to 64 bytes, where CAP-40 allows 0)"
+
+[[candidate]]
+finding = "new"
+sdk = "kmp"
+versions = ["1.18.0"]
+entries = [
+  "format.xdr-grammar.ledgerclosemeta-depth-claimpredicate-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-at",
+  "format.xdr-grammar.ledgerclosemeta-depth-sorobandelegatesignature-below",
+  "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-at",
+  "format.xdr-grammar.sorobandelegatesignature-depth-sorobandelegatesignature-below",
+  "format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-at",
+  "format.xdr-grammar.transactionenvelope-depth-sorobandelegatesignature-below",
+]
+checks = "decode_encode and decode_json"
+observed = "the decoders refuse nesting stellar-xdr reads within the corpus limit: a SorobanDelegateSignature nested past 129 levels, and ClaimPredicate and SCPQuorumSet past 500 of their own levels"
+evidence = "the generated decoders cap their own recursion per type: SorobanDelegateSignatureXdr.kt L30 enterRecursion(129), and enterRecursion(500) in ClaimPredicateXdr.kt L71 and the other 11 recursive types; XdrReader.jvm.kt L102-L109 counts the levels"
+

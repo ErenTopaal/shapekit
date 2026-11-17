@@ -220,6 +220,9 @@ step dart_testee
 step "$shapekit" conformance run --sdk php --all-versions --out "$out/conformance-all/php"
 step php_testee
 step "$shapekit" conformance run --sdk dotnet --all-versions --out "$out/conformance-all/dotnet"
+PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk kmp --all-versions --out "$out/conformance-all/kmp"
+# the type table of the kmp testee is what its generator writes from every version's jars
+unchanged testees/kmp sh -c "cd testees/kmp && python3 -I gentypes.py"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

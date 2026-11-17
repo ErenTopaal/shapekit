@@ -31,8 +31,8 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 9] = [
-    "rust", "go", "js", "soroban", "python", "java", "dart", "php", "dotnet",
+pub const SDKS: [&str; 10] = [
+    "rust", "go", "js", "soroban", "python", "java", "dart", "php", "dotnet", "kmp",
 ];
 
 /// The CPython every python testee venv is made with; pins.toml pins its build.
@@ -44,7 +44,7 @@ const PYTHON_VERSION_FILE: &str = "stellar_sdk/__version__.py";
 /// The file of java-stellar-sdk that declares a release's version, checked at the release tag.
 const JAVA_VERSION_FILE: &str = "build.gradle.kts";
 
-/// How many times a java testee pom names its sdk version: the dependency and the build
+/// How many times a java or kmp testee pom names its sdk version: the dependency and the build
 /// directory.
 const JAVA_POM_VERSIONS: usize = 2;
 
@@ -419,6 +419,17 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                             &tags,
                             &upstream::nuget_xdr_commit(&http, &tags, &s.package, v)?,
                         )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
+            "kmp" => {
+                let p = upstream::maven_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        let repo = upstream::maven_repository(&http, &s.package, v)?;
+                        xdr_of_pinned(&http, &tags, &upstream::kmp_xdr_commit(&http, &repo, v)?)
                     })
                 };
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
@@ -817,6 +828,37 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 vec![s("dotnet"), format!("{t}/ShapekitTestee.dll")],
             )
         }
+        "kmp" => {
+            let t = format!("target/testees/kmp/{v}");
+            (
+                vec![
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("mvn"),
+                            s("-B"),
+                            s("-q"),
+                            s("-f"),
+                            format!("testees/kmp/versions/{v}/pom.xml"),
+                            s("-DskipTests"),
+                            s("package"),
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {}, dir = {} }},",
+                        array(&[
+                            s("sha256sum"),
+                            s("--check"),
+                            s("--strict"),
+                            s("--quiet"),
+                            format!("../../../../../testees/kmp/versions/{v}/lib.sha256"),
+                        ]),
+                        quote(&format!("{t}/lib"))
+                    ),
+                ],
+                vec![s("java"), s("-jar"), format!("{t}/testee.jar")],
+            )
+        }
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
@@ -918,6 +960,10 @@ fn testee_files(sdk: &str, v: &str) -> Vec<String> {
         "dotnet" => vec![
             format!("testees/dotnet/versions/{v}/ShapekitTestee.csproj"),
             format!("testees/dotnet/versions/{v}/packages.lock.json"),
+        ],
+        "kmp" => vec![
+            format!("testees/kmp/versions/{v}/pom.xml"),
+            format!("testees/kmp/versions/{v}/lib.sha256"),
         ],
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
@@ -1223,6 +1269,19 @@ fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Resu
                 from_template(&text, template_version, v, 2)?,
             )?;
             run_step(&["dotnet", "restore", "--use-lock-file"], &dir, &[])
+        }
+        "kmp" => {
+            let from = root.join(format!("testees/kmp/versions/{template_version}/pom.xml"));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/kmp/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("pom.xml"),
+                from_template(&text, template_version, v, JAVA_POM_VERSIONS)?,
+            )?;
+            // builds the version and writes lib.sha256 from the jars maven resolved
+            run_step(&["testees/kmp/lock.sh", v], root, &[])
         }
         _ => unreachable!("only the sdks in SDKS have testees"),
     }

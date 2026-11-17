@@ -484,6 +484,41 @@ jobs:
         run: |
           if [ -f target/conformance-dotnet/MATRIX.md ]; then cat target/conformance-dotnet/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
 
+  kmp:
+    # the kmp testee (the jvm target of kmp-stellar-sdk) at its current version: the maven build
+    # with warnings as errors and the resolved jars checked against lib.sha256, then the corpus
+    # and the generated type table against what gentypes.py writes from the jar
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: testee-kmp-${{ hashFiles('testees/kmp/versions/*/pom.xml') }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pinned jdk and maven
+        run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
+      - name: conformance run on the current version
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk kmp --out target/conformance-kmp
+      - name: type table
+        run: |
+          set -euo pipefail
+          cd testees/kmp
+          python3 -I gentypes.py
+          git diff --exit-code -- src/main/kotlin/org/shapekit/testee/TypesGen.kt
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-kmp/MATRIX.md ]; then cat target/conformance-kmp/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+
   harness:
     # the wallet-backend reference adapter at the current pin, testnet variant, on the chains
     # behind the rfp's reproductions; every chain runs nightly

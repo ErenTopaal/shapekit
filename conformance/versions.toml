@@ -420,3 +420,20 @@ build = [
 ]
 command = ["dotnet", "target/testees/dotnet/17.0.0/ShapekitTestee.dll"]
 max_protocol = 30
+
+[sdk.kmp]
+package = "com.soneso.stellar:stellar-sdk-jvm"
+current = "1.18.0"
+issues_repo = "Soneso/kmp-stellar-sdk"
+timeout_ms = 15000
+memory = { resource = "data", mib = 4096 }
+
+# 1.18.0: newest 1.x release; xdr curr from v30.0 (579a90b2), protocols up to 30
+[[sdk.kmp.versions]]
+version = "1.18.0"
+build = [
+  { argv = ["mvn", "-B", "-q", "-f", "testees/kmp/versions/1.18.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/kmp/versions/1.18.0/lib.sha256"], dir = "target/testees/kmp/1.18.0/lib" },
+]
+command = ["java", "-jar", "target/testees/kmp/1.18.0/testee.jar"]
+max_protocol = 30
