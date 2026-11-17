@@ -120,3 +120,75 @@ chains = ["classic.failed-tx.p30", "cap15.fee-bump.p30"]
 checks = "harness state check, native_balances, both passphrases"
 observed = "account changes a transaction's meta writes in tx_changes_before are not applied to native_balances. on classic.failed-tx.p30 ledger 67 a failed transaction's one-time pre-auth signer of GDD25X2BOFUU33TVAMOKUHP7UNWFO45G2YIB54KLIAJAJJZTRYXUIBES is removed in tx_changes_before (num_sub_entries 1 to 0, signers 1 to 0); native_balances keeps num_subentries 1, and the minimum_balance derived from it. on cap15.fee-bump.p30 ledger 83 the only change to GANS62CX3EJTX47UM5OUMEUHXV3XUXYSTYXX7ESOVWJGBQD4PF5L24F4, the inner source of a fee bump, is its sequence bump in tx_changes_before; native_balances keeps last_modified_ledger 82 where core's entry says 83"
 evidence = "internal/indexer/processors/accounts.go at the commit reads account changes from three phases only: the fee (line 119, GetFeeChanges), each operation (line 88, opWrapper.Changes) and the post-apply refund (line 120, GetPostApplyFeeChanges); tx_changes_before and tx_changes_after are read for contract data only (internal/indexer/indexer.go:865-873)"
+
+# wallet-backend on the probe chains (candidate/chains/probe.envelope-fields.*/testnet, harness
+# run at 3e22515a44979fdc3a558fda3991ca2b48e38cef): 202 failing entries, 138 of them taken by
+# findings/triage.toml (WB-W1, WB-W2, WB-W3, WB-W4, WB-W9), 64 entries with 74 failures taken by
+# none. the four causes of those 64 below, each read from wallet-backend's source at that
+# commit (internal/indexer/processors/effects_horizon.go, which ports horizon's effects). every
+# entry named below fails with its -ledger entry too.
+
+[[candidate]]
+finding = "new"
+target = "wallet-backend"
+versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
+entries = [
+  "probe.envelope-fields.setoptionsop-clearflags-0",
+  "probe.envelope-fields.setoptionsop-clearflags-1",
+  "probe.envelope-fields.setoptionsop-clearflags-3",
+  "probe.envelope-fields.setoptionsop-highthreshold-0",
+  "probe.envelope-fields.setoptionsop-highthreshold-1",
+  "probe.envelope-fields.setoptionsop-homedomain-0",
+  "probe.envelope-fields.setoptionsop-homedomain-1",
+  "probe.envelope-fields.setoptionsop-homedomain-2",
+  "probe.envelope-fields.setoptionsop-homedomain-3",
+  "probe.envelope-fields.setoptionsop-homedomain-5",
+  "probe.envelope-fields.setoptionsop-inflationdest-0",
+  "probe.envelope-fields.setoptionsop-inflationdest-1",
+  "probe.envelope-fields.setoptionsop-inflationdest-3",
+  "probe.envelope-fields.setoptionsop-lowthreshold-0",
+  "probe.envelope-fields.setoptionsop-lowthreshold-1",
+  "probe.envelope-fields.setoptionsop-masterweight-0",
+  "probe.envelope-fields.setoptionsop-masterweight-1",
+  "probe.envelope-fields.setoptionsop-masterweight-2",
+  "probe.envelope-fields.setoptionsop-masterweight-4",
+  "probe.envelope-fields.setoptionsop-masterweight-5",
+  "probe.envelope-fields.setoptionsop-medthreshold-0",
+  "probe.envelope-fields.setoptionsop-medthreshold-1",
+  "probe.envelope-fields.setoptionsop-setflags-0",
+  "probe.envelope-fields.setoptionsop-setflags-1",
+  "probe.envelope-fields.setoptionsop-setflags-3",
+  "probe.envelope-fields.setoptionsop-signer-0",
+  "probe.envelope-fields.setoptionsop-signer-1",
+  "probe.envelope-fields.setoptionsop-signer-2",
+]
+checks = "harness: extra thresholds (56 failures), extra account-flags (2, setoptionsop-clearflags-3)"
+observed = "a SetOptions that names a threshold or a flag stores a thresholds or account-flags state change even when the account's thresholds or flags do not change, so the stored history shows a change the ledger does not"
+evidence = "effects_horizon.go:149-162 emits account_thresholds_updated when op.LowThreshold, MedThreshold or HighThreshold is set, and :166-174 account_flags_updated when op.SetFlags or ClearFlags is set, from the operation's fields alone; the account entry change is read only for signers (:177-207)"
+
+[[candidate]]
+finding = "new"
+target = "wallet-backend"
+versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
+entries = ["probe.envelope-fields.allowtrustop-authorize-1", "probe.envelope-fields.allowtrustop-authorize-4"]
+checks = "harness: extra trustline-flags (4 failures)"
+observed = "an AllowTrust whose authorize value leaves the trustline's flags as they were stores a trustline-flags state change anyway"
+evidence = "effects_horizon.go:319-336 emits trustline_flags_updated in every arm of the switch on op.Authorize, without reading the trustline entry's change"
+
+[[candidate]]
+finding = "new"
+target = "wallet-backend"
+versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
+entries = ["probe.envelope-fields.setoptionsop-masterweight-2", "probe.envelope-fields.setoptionsop-masterweight-5"]
+checks = "harness: extra signer-removed and dropped signer-weight (4 failures each)"
+observed = "setting the master key's weight to 0 is stored as the master key removed as a signer, with weight 1, where the ledger changes threshold 0 of the account from 1 to 0 and keeps no signer list entry for the master key either way"
+evidence = "effects_horizon.go:190-207 compares SignerSummary() before and after, which leaves out a master key of weight 0, so the weight change reads as a removal (signer_removed with the old weight)"
+
+[[candidate]]
+finding = "new"
+target = "wallet-backend"
+versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
+entries = ["probe.envelope-fields.ledgerkeydata-accountid-0", "probe.envelope-fields.ledgerkeydata-dataname-0"]
+checks = "harness: dropped data-entry (4 failures)"
+observed = "a RevokeSponsorship of a data entry updates the entry (its sponsor changes, its value does not), and no data-entry state change is stored. to decide before filing: whether a data entry change that only moves the sponsor is a data-entry fact (the oracle says updated, value before and after equal) or only a sponsorship one"
+evidence = "data effects come only from ManageData (effects_horizon.go:84-85 and addManageDataEffects at :342), so an update by any other operation writes none"
