@@ -1,0 +1,230 @@
+// Command {{adapter}} is a shapekit adapter for {{target}}.
+//
+// The harness starts this program, writes one JSON request per line to stdin and reads one or
+// more JSON lines per request from stdout. The protocol is described in the adapter interface
+// document of the shapekit repository (docs/adapter-interface.md); this file follows protocol
+// version {{adapter_protocol}} and oracle vocabulary version {{vocab}}.
+//
+// Everything that talks to the protocol is written. What starts {{target}} and reads its store
+// is the Target type at the end: each method that is not written yet returns a NotWritten
+// error, which the adapter answers with a `target` error naming the method, so the harness
+// reports the chain as not evaluated with that message.
+package main
+
+import (
+	"bufio"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+)
+
+const (
+	adapterName    = "{{adapter}}"
+	adapterVersion = "0.1.0"
+	protocol       = {{adapter_protocol}}
+	vocabVersion   = {{vocab}}
+
+	// what describe reports; change these to match the build of {{target}} under test
+	targetName    = "{{target}}"
+	targetVersion = "{{target_version}}"
+	// ledger protocols the target build ingests; chains outside the range are out-of-scope
+	protocolMin = {{protocol_min}}
+	protocolMax = {{protocol_max}}
+	// "ledger": the target starts from the bootstrap ledger; "checkpoint": from a history archive
+	bootstrap = "ledger"
+)
+
+// claims says what the target records, in oracle vocabulary terms. Nothing is claimed until
+// you add claims, so every oracle fact is out-of-scope (see "Claims" in
+// docs/adapter-interface.md).
+var claims = map[string]any{
+	"participants": map[string]any{"address_kinds": []string{}, "mux_ids": false},
+	"changes":      []any{},
+}
+
+// NotWritten is returned by a Target method that has not been written yet.
+type NotWritten string
+
+func (n NotWritten) Error() string { return string(n) + " is not written yet" }
+
+type adapterError struct{ class, message string }
+
+func (e *adapterError) Error() string { return e.message }
+
+var out = bufio.NewWriter(os.Stdout)
+
+func send(line map[string]any) {
+	b, err := json.Marshal(line)
+	if err != nil {
+		panic(err)
+	}
+	out.Write(append(b, '\n'))
+	out.Flush()
+}
+
+func sendError(id, class, message string) {
+	send(map[string]any{"id": id, "status": "error", "error": map[string]any{"class": class, "message": message}})
+}
+
+func describe(req map[string]any) (map[string]any, error) {
+	if p, ok := req["protocol"].(float64); ok && p < protocol {
+		return nil, &adapterError{"unsupported", fmt.Sprintf("this adapter speaks protocol %d only", protocol)}
+	}
+	return map[string]any{
+		"protocol":        protocol,
+		"adapter":         adapterName,
+		"adapter_version": adapterVersion,
+		"target":          targetName,
+		"target_version":  targetVersion,
+		// in rpc mode the target reads ledgers from delivery.rpc_url on its own
+		"delivery_modes":   []string{"rpc"},
+		"default_delivery": "rpc",
+		"bootstrap":        bootstrap,
+		"vocab_version":    vocabVersion,
+		"protocols":        map[string]any{"min": protocolMin, "max": protocolMax},
+		"claims":           claims,
+		"capabilities":     []string{},
+	}, nil
+}
+
+func number(req map[string]any, member string) (uint32, error) {
+	v, ok := req[member].(float64)
+	if !ok {
+		return 0, &adapterError{"bad-request", "missing or non-numeric member " + member}
+	}
+	return uint32(v), nil
+}
+
+// handle answers one request and reports whether it was stop.
+func handle(req map[string]any, id string, t *Target) (bool, error) {
+	switch req["cmd"] {
+	case "describe":
+		r, err := describe(req)
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": r})
+	case "start":
+		delivery, _ := req["delivery"].(map[string]any)
+		if delivery["mode"] != "rpc" {
+			return false, &adapterError{"unsupported", "this adapter drives the rpc delivery mode only"}
+		}
+		components, err := t.Start(req)
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": map[string]any{"components": components}})
+	case "advance":
+		// rpc mode: the replay server already shows ledgers up to head, nothing to copy
+		head, err := number(req, "head")
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": map[string]any{"head": head}})
+	case "status":
+		s, err := t.Status()
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": s})
+	case "export":
+		from, err := number(req, "from")
+		if err != nil {
+			return false, err
+		}
+		to, err := number(req, "to")
+		if err != nil {
+			return false, err
+		}
+		records := 0
+		err = t.Export(from, to, func(record map[string]any) {
+			send(map[string]any{"id": id, "status": "record", "record": record})
+			records++
+		})
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": map[string]any{"records": records}})
+	case "stop":
+		logs, err := t.Stop()
+		if err != nil {
+			return false, err
+		}
+		send(map[string]any{"id": id, "status": "ok", "result": map[string]any{"logs": logs}})
+		return true, nil
+	default:
+		return false, &adapterError{"bad-request", fmt.Sprintf("unknown command %v", req["cmd"])}
+	}
+	return false, nil
+}
+
+func main() {
+	t := &Target{}
+	in := bufio.NewScanner(os.Stdin)
+	in.Buffer(make([]byte, 0, 1<<20), 64<<20)
+	for in.Scan() {
+		var req map[string]any
+		if err := json.Unmarshal(in.Bytes(), &req); err != nil {
+			sendError("", "bad-request", "a request is a json object: "+err.Error())
+			continue
+		}
+		id, ok := req["id"].(string)
+		if !ok {
+			sendError("", "bad-request", "a request has a string id")
+			continue
+		}
+		stopped, err := handle(req, id, t)
+		var nw NotWritten
+		var ae *adapterError
+		switch {
+		case errors.As(err, &nw):
+			sendError(id, "target", nw.Error())
+		case errors.As(err, &ae):
+			sendError(id, ae.class, ae.message)
+		case err != nil:
+			sendError(id, "target", err.Error())
+		}
+		if stopped {
+			return
+		}
+	}
+	if err := in.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading stdin:", err)
+	}
+	// stdin closed without stop: tear the target down as stop would
+	if _, err := t.Stop(); err != nil && !errors.As(err, new(NotWritten)) {
+		fmt.Fprintln(os.Stderr, "stop:", err)
+		os.Exit(1)
+	}
+}
+
+// Target is the part that knows {{target}}. Write each method, then run
+// `shapekit check indexer --adapter "./{{adapter}}" --chain <chain id>`.
+type Target struct{}
+
+// Start starts {{target}} configured with req["network_passphrase"] and the rpc_url of
+// req["delivery"], its containers attached to req["docker_network"] only and limited to
+// memory_bytes of req["limits"]. It returns the components the report keeps (image ids,
+// service versions).
+func (t *Target) Start(req map[string]any) (map[string]string, error) {
+	return nil, NotWritten("Target.Start")
+}
+
+// Status returns last_ingested_ledger (read from the target's own store), health (starting,
+// running, crashed or oom), last_error and peak_memory_bytes.
+func (t *Target) Status() (map[string]any, error) {
+	return nil, NotWritten("Target.Status")
+}
+
+// Export calls emit with one record per stored transaction in ledgers from to to, in ledger
+// and apply order ("export" in docs/adapter-interface.md).
+func (t *Target) Export(from, to uint32, emit func(map[string]any)) error {
+	return NotWritten("Target.Export")
+}
+
+// Stop removes every container, volume and file the adapter created and returns the tail of
+// the target's logs. It is called on stop and when stdin closes.
+func (t *Target) Stop() (string, error) {
+	return "", NotWritten("Target.Stop")
+}

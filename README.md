@@ -142,6 +142,18 @@ shapekit lint <your indexer> --baseline indexerlint-baseline.json --json
 [docs/linter.md](docs/linter.md). The same checks are a checklist in the guide for indexers in
 other languages.
 
+### Put your own indexer or SDK behind shapekit
+
+```sh
+shapekit init adapter --lang go --target my-indexer --target-version <commit>   # go, ts or python
+shapekit init testee --lang python                                              # go, ts or python
+```
+
+Each writes a skeleton that speaks the protocol and a README that says what to fill in and how
+to run it with `shapekit check indexer` or `shapekit check sdk`. See "Writing an adapter" in
+[docs/adapter-interface.md](docs/adapter-interface.md#writing-an-adapter) and "Writing a
+testee" in [docs/testee-protocol.md](docs/testee-protocol.md#writing-a-testee).
+
 ### Internal commands
 
 `shapekit --help` lists the commands above. The corpus generator, its checks, the upstream

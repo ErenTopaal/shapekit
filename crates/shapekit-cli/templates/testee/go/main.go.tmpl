@@ -1,0 +1,177 @@
+// Command testee is a shapekit testee for the Go module {{package}}.
+//
+// The conformance runner starts this program, writes one JSON request per line to stdin and
+// reads exactly one JSON line per request from stdout. The protocol is described in the testee
+// protocol document of the shapekit repository (docs/testee-protocol.md); this file follows
+// protocol version {{testee_protocol}}.
+//
+// hello is written: it reports the version of {{package}} linked into the binary, read from
+// its build info. The operations are the ops table at the end. It starts empty, so hello lists
+// no operations and the runner counts every check as unsupported. Add one function per
+// operation you implement against {{package}}'s public API, and hello lists it.
+package main
+
+import (
+	"bufio"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"runtime/debug"
+	"sort"
+
+	// links the sdk, so its version is in the build info before any operation uses it
+	_ "{{go_import}}"
+)
+
+const (
+	protocol = {{testee_protocol}}
+	pkg      = "{{package}}"
+)
+
+// definedOps is every operation the protocol defines, besides hello.
+var definedOps = map[string]bool{
+	{{defined_ops}}
+}
+
+// errRejected marks an input the sdk refused through its normal error path.
+var errRejected = errors.New("rejected")
+
+// errBadRequest marks a request that does not follow the protocol.
+var errBadRequest = errors.New("bad request")
+
+type request map[string]any
+
+func send(w *bufio.Writer, line map[string]any) {
+	b, err := json.Marshal(line)
+	if err != nil {
+		panic(err)
+	}
+	w.Write(append(b, '\n'))
+	w.Flush()
+}
+
+func sdkVersion() (string, error) {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "", errors.New("the binary has no build info")
+	}
+	for _, d := range info.Deps {
+		if d.Path == pkg {
+			if d.Replace != nil && d.Replace.Version != "" {
+				return d.Replace.Version, nil
+			}
+			return d.Version, nil
+		}
+	}
+	return "", fmt.Errorf("%s is not linked into the binary", pkg)
+}
+
+func hello() (map[string]any, error) {
+	v, err := sdkVersion()
+	if err != nil {
+		return nil, err
+	}
+	names := make([]string, 0, len(ops))
+	for name := range ops {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return map[string]any{
+		"protocol":    protocol,
+		"sdk":         pkg,
+		"sdk_version": v,
+		"components":  map[string]string{},
+		"ops":         names,
+		// set to "honoured" once every decode passes depth_limit and len_limit to the sdk
+		"decode_limits": "ignored",
+	}, nil
+}
+
+func errorReply(class, message string) map[string]any {
+	return map[string]any{"status": "error", "error": map[string]any{"class": class, "message": message}}
+}
+
+// answer runs one request; a panic in the sdk is caught and answered as a panic.
+func answer(req request) (reply map[string]any) {
+	op, _ := req["op"].(string)
+	if op == "hello" {
+		r, err := hello()
+		if err != nil {
+			return errorReply("internal", err.Error())
+		}
+		return map[string]any{"status": "ok", "result": r}
+	}
+	f, ok := ops[op]
+	if !ok {
+		if definedOps[op] {
+			return map[string]any{"status": "unsupported", "reason": "this testee does not implement " + op}
+		}
+		return errorReply("bad-request", fmt.Sprintf("unknown op %q", op))
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			reply = errorReply("panic", fmt.Sprint(p))
+		}
+	}()
+	r, err := f(req)
+	switch {
+	case errors.Is(err, errRejected):
+		return errorReply("rejected", err.Error())
+	case errors.Is(err, errBadRequest):
+		return errorReply("bad-request", err.Error())
+	case err != nil:
+		return errorReply("internal", err.Error())
+	}
+	return map[string]any{"status": "ok", "result": r}
+}
+
+func main() {
+	out := bufio.NewWriter(os.Stdout)
+	in := bufio.NewScanner(os.Stdin)
+	// requests can hold a whole LedgerCloseMeta; the protocol asks for at least 64 MiB lines
+	in.Buffer(make([]byte, 0, 1<<20), 64<<20+1)
+	for in.Scan() {
+		var req request
+		if err := json.Unmarshal(in.Bytes(), &req); err != nil {
+			send(out, map[string]any{"id": "", "status": "error", "error": map[string]any{"class": "bad-request", "message": "not a json object: " + err.Error()}})
+			continue
+		}
+		id, ok := req["id"].(string)
+		if !ok {
+			send(out, map[string]any{"id": "", "status": "error", "error": map[string]any{"class": "bad-request", "message": "a request has a string id"}})
+			continue
+		}
+		reply := answer(req)
+		reply["id"] = id
+		send(out, reply)
+	}
+	if err := in.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading stdin:", err)
+		os.Exit(1)
+	}
+}
+
+// b64 returns the bytes of a base64 request member, or errBadRequest.
+func b64(req request, member string) ([]byte, error) {
+	s, ok := req[member].(string)
+	if !ok {
+		return nil, fmt.Errorf("%w: %s is not a string", errBadRequest, member)
+	}
+	b, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s: %v", errBadRequest, member, err)
+	}
+	return b, nil
+}
+
+// ops maps an operation name to its function. Each function calls {{package}}'s public API
+// only, wraps errRejected when the sdk refuses the input (fmt.Errorf("%w: %v", errRejected,
+// err)), and returns the result members docs/testee-protocol.md lists for the op. For example
+// decode_encode decodes b64(req, "xdr") as req["type"] and returns {"xdr": <base64 of the
+// re-encoded bytes>}.
+var ops = map[string]func(request) (map[string]any, error){}
+
+// b64 is there for the operations you add.
+var _ = b64

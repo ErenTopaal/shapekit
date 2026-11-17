@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""shapekit testee for the Python package {{package}}.
+
+The conformance runner starts this program, writes one JSON request per line to stdin and
+reads exactly one JSON line per request from stdout. The protocol is described in the testee
+protocol document of the shapekit repository (docs/testee-protocol.md); this file follows
+protocol version {{testee_protocol}}.
+
+hello is written: it reports the installed version of {{package}}, read from the package's
+metadata. The operations are the OPS table at the end. It starts empty, so hello lists no
+operations and the runner counts every check as unsupported. Add one function per operation
+you implement against {{package}}'s public API, and hello lists it.
+"""
+
+import base64
+import importlib.metadata
+import json
+import sys
+
+PROTOCOL = {{testee_protocol}}
+PACKAGE = "{{package}}"
+
+# every operation the protocol defines, besides hello
+DEFINED_OPS = {
+    {{defined_ops}}
+}
+
+
+class Rejected(Exception):
+    """The SDK refused the input through its normal error path."""
+
+
+class BadRequest(Exception):
+    """The request does not follow the protocol."""
+
+
+def send(line):
+    sys.stdout.write(json.dumps(line, separators=(",", ":")) + "\n")
+    sys.stdout.flush()
+
+
+def hello():
+    return {
+        "protocol": PROTOCOL,
+        "sdk": PACKAGE,
+        "sdk_version": importlib.metadata.version(PACKAGE),
+        "components": {},
+        "ops": sorted(OPS),
+        # set to "honoured" once every decode passes depth_limit and len_limit to the sdk
+        "decode_limits": "ignored",
+    }
+
+
+def answer(req):
+    op = req.get("op")
+    if op == "hello":
+        return {"status": "ok", "result": hello()}
+    if op in OPS:
+        try:
+            return {"status": "ok", "result": OPS[op](req)}
+        except Rejected as e:
+            return {"status": "error", "error": {"class": "rejected", "message": str(e)}}
+        except BadRequest as e:
+            return {"status": "error", "error": {"class": "bad-request", "message": str(e)}}
+        except RecursionError as e:
+            return {"status": "error", "error": {"class": "panic", "message": repr(e)}}
+    if op in DEFINED_OPS:
+        return {"status": "unsupported", "reason": f"this testee does not implement {op}"}
+    return {"status": "error", "error": {"class": "bad-request", "message": f"unknown op {op!r}"}}
+
+
+def main():
+    sys.setrecursionlimit(10000)
+    for raw in sys.stdin:
+        try:
+            req = json.loads(raw)
+        except ValueError as e:
+            send({"id": "", "status": "error", "error": {"class": "bad-request", "message": f"not json: {e}"}})
+            continue
+        if not isinstance(req, dict) or not isinstance(req.get("id"), str):
+            send({"id": "", "status": "error", "error": {"class": "bad-request", "message": "a request is an object with a string id"}})
+            continue
+        try:
+            reply = answer(req)
+        except Exception as e:  # noqa: BLE001, one input must not take the process down
+            reply = {"status": "error", "error": {"class": "internal", "message": repr(e)}}
+        send({"id": req["id"], **reply})
+
+
+def b64(req, member):
+    """The bytes of a base64 request member; a bad-request when it is missing or not base64."""
+    try:
+        return base64.b64decode(req[member], validate=True)
+    except (KeyError, ValueError) as e:
+        raise BadRequest(f"{member}: {e!r}") from e
+
+
+# operation name -> function(request) -> result members. Each function calls {{package}}'s
+# public API only, raises Rejected when the sdk refuses the input, and returns the result
+# members docs/testee-protocol.md lists for the op. For example decode_encode decodes
+# b64(req, "xdr") as req["type"] and returns {"xdr": <base64 of the re-encoded bytes>}.
+OPS = {}
+
+
+if __name__ == "__main__":
+    main()

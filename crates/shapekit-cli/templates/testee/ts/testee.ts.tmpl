@@ -1,0 +1,125 @@
+// shapekit testee for the npm package {{package}}.
+//
+// The conformance runner starts this program, writes one JSON request per line to stdin and
+// reads exactly one JSON line per request from stdout. The protocol is described in the testee
+// protocol document of the shapekit repository (docs/testee-protocol.md); this file follows
+// protocol version {{testee_protocol}}. Node runs it directly (`node testee.ts`), with no build
+// step: it uses only type annotations Node can strip.
+//
+// hello is written: it reports the installed version of {{package}}, read from the package.json
+// of the copy Node resolves. The operations are the OPS table at the end. It starts empty, so
+// hello lists no operations and the runner counts every check as unsupported. Add one function
+// per operation you implement against {{package}}'s public API, and hello lists it.
+
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
+
+const PROTOCOL = {{testee_protocol}};
+const PACKAGE = "{{package}}";
+
+// every operation the protocol defines, besides hello
+const DEFINED_OPS = new Set([
+  {{defined_ops}}
+]);
+
+type Json = Record<string, unknown>;
+
+// the sdk refused the input through its normal error path
+class Rejected extends Error {}
+// the request does not follow the protocol
+class BadRequest extends Error {}
+
+function send(line: Json): void {
+  process.stdout.write(JSON.stringify(line) + "\n");
+}
+
+// the version in the package.json of the installed copy of PACKAGE that node resolves; read
+// from the package's own directory, since a package's exports need not include package.json
+function installedVersion(): string {
+  let dir = dirname(fileURLToPath(import.meta.resolve(PACKAGE)));
+  for (;;) {
+    const candidate = join(dir, "package.json");
+    if (existsSync(candidate)) {
+      const pkg = JSON.parse(readFileSync(candidate, "utf8")) as { name?: string; version?: string };
+      if (pkg.name === PACKAGE && typeof pkg.version === "string") return pkg.version;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) throw new Error(`no package.json of ${PACKAGE} above its entry point`);
+    dir = parent;
+  }
+}
+
+function hello(): Json {
+  return {
+    protocol: PROTOCOL,
+    sdk: PACKAGE,
+    sdk_version: installedVersion(),
+    components: {},
+    ops: Object.keys(OPS).sort(),
+    // set to "honoured" once every decode passes depth_limit and len_limit to the sdk
+    decode_limits: "ignored",
+  };
+}
+
+async function answer(req: Json): Promise<Json> {
+  const op = req.op;
+  if (op === "hello") return { status: "ok", result: hello() };
+  if (typeof op === "string" && Object.hasOwn(OPS, op)) {
+    try {
+      return { status: "ok", result: await OPS[op](req) };
+    } catch (e) {
+      if (e instanceof Rejected) return { status: "error", error: { class: "rejected", message: e.message } };
+      if (e instanceof BadRequest) return { status: "error", error: { class: "bad-request", message: e.message } };
+      if (e instanceof RangeError) return { status: "error", error: { class: "panic", message: String(e) } };
+      throw e;
+    }
+  }
+  if (typeof op === "string" && DEFINED_OPS.has(op)) {
+    return { status: "unsupported", reason: `this testee does not implement ${op}` };
+  }
+  return { status: "error", error: { class: "bad-request", message: `unknown op ${JSON.stringify(op)}` } };
+}
+
+async function main(): Promise<void> {
+  for await (const raw of createInterface({ input: process.stdin, crlfDelay: Infinity })) {
+    let req: unknown;
+    try {
+      req = JSON.parse(raw);
+    } catch (e) {
+      send({ id: "", status: "error", error: { class: "bad-request", message: `not json: ${String(e)}` } });
+      continue;
+    }
+    if (typeof req !== "object" || req === null || Array.isArray(req) || typeof (req as Json).id !== "string") {
+      send({ id: "", status: "error", error: { class: "bad-request", message: "a request is an object with a string id" } });
+      continue;
+    }
+    const r = req as Json;
+    let reply: Json;
+    try {
+      reply = await answer(r);
+    } catch (e) {
+      // one input must not take the process down
+      reply = { status: "error", error: { class: "internal", message: String(e) } };
+    }
+    send({ id: r.id, ...reply });
+  }
+}
+
+// the bytes of a base64 request member; a bad-request when it is missing or not a string
+export function b64(req: Json, member: string): Uint8Array {
+  const v = req[member];
+  if (typeof v !== "string") throw new BadRequest(`${member} is not a base64 string`);
+  return Buffer.from(v, "base64");
+}
+
+export { Rejected, BadRequest };
+
+// operation name -> function(request) -> result members. Each function calls {{package}}'s
+// public API only, throws Rejected when the sdk refuses the input, and returns the result
+// members docs/testee-protocol.md lists for the op. For example decode_encode decodes
+// b64(req, "xdr") as req.type and returns { xdr: <base64 of the re-encoded bytes> }.
+const OPS: Record<string, (req: Json) => Json | Promise<Json>> = {};
+
+await main();

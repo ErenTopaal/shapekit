@@ -45,7 +45,7 @@ fn registered_commands() {
         .collect();
     assert_eq!(
         commands,
-        ["check", "lint", "report", "dev", "serve", "help"]
+        ["check", "lint", "report", "init", "dev", "serve", "help"]
     );
     // the internal commands are left out of --help but keep their paths; `shapekit dev`
     // lists them, sorted

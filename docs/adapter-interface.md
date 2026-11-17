@@ -650,14 +650,24 @@ into `<out>/<reproduction id>/<case label>/`.
 
 ## Writing an adapter
 
+`shapekit init adapter --lang go|ts|python --target <name> --target-version <build>` writes a
+skeleton into `adapter-<name>/` (or `--out <dir>`). Its protocol side is complete: `describe`
+with no claims and the `rpc` delivery mode, `start`, `advance`, `status`, `export` and `stop`,
+error classes and malformed lines. The part that knows your indexer is a `Target` type with
+`start`, `status`, `export` and `stop` methods. Until a method is written, the adapter answers
+the request that needs it with a `target` error naming the method, so a harness run reports
+the chain as `not-evaluated` with that message. The TypeScript skeleton runs with
+`node adapter.ts`, no build step; the Go one builds with `go build`. Every line each skeleton
+answers follows `schema/adapter-protocol.schema.json` (`crates/shapekit-cli/tests/init_skeletons.rs`).
+
 1. Read `describe` and `start` above, then the vocabulary below, and decide the claims: one
    item per vocabulary kind the target stores, with exactly the fields it keeps.
 2. Map the target's rows to vocabulary changes. When the target stores something the
    vocabulary has no kind for, report the rows as `unmapped`.
 3. Decode stored addresses with a strict strkey decoder and report the bytes in `raw`.
 4. Apply the memory limit and join only `docker_network`.
-5. Run `shapekit harness run --adapter "<your command>" --chain <id> --network testnet` on a
-   small chain and read `HARNESS.md`.
+5. Run `shapekit check indexer --adapter "<your command>" --chain <id>` on a small chain and
+   read `HARNESS.md`.
 
 `cargo test -p shapekit-harness` checks the requests the harness builds and example response
 lines against the schema (`crates/shapekit-harness/tests/protocol_schema.rs`). To check your

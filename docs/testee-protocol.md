@@ -566,6 +566,24 @@ each SDK.
 
 ## Writing a testee
 
+`shapekit init testee --lang go|ts|python` writes a skeleton into `testee-<lang>/` (or
+`--out <dir>`) for the Stellar SDK of that language: `@stellar/stellar-sdk` (ts),
+`github.com/stellar/go-stellar-sdk` (go) or `stellar-sdk` (python). For another package, give
+`--package`, `--sdk-version` and `--issues-repo`; `--name` sets its key in the versions file.
+The skeleton answers `hello` with the SDK version read from the installed package or the build
+info, lists no ops yet, answers every op this page defines with `unsupported` until you add it
+to the skeleton's ops table, and answers malformed lines with `bad-request`. Its
+`versions.toml` holds the build steps that install the SDK, so a first run is:
+
+```sh
+shapekit init testee --lang python
+shapekit check sdk --sdk python --versions-file testee-python/versions.toml \
+  --known-failures testee-python/known-failures
+```
+
+Every check of that run is `unsupported` until ops are added. Every line each skeleton answers
+follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_skeletons.rs`).
+
 1. Read requests line by line, answer each with exactly one line, flush after every line.
 2. Answer `hello` with versions read from the build (Go `debug.ReadBuildInfo`, the installed
    package's `package.json`, Cargo's resolved dependency) and never from a constant.

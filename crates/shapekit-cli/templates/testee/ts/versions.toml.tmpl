@@ -1,0 +1,21 @@
+# the conformance runner's description of this testee, for
+# `shapekit check sdk --sdk {{name}} --versions-file {{dir}}/versions.toml`.
+# paths are relative to the directory the runner is started in: the directory `shapekit init`
+# ran in. the format is described in docs/testee-protocol.md and conformance/versions.toml.
+schema = 1
+
+[sdk.{{name}}]
+package = "{{package}}"
+current = "{{sdk_version}}"
+issues_repo = "{{issues_repo}}"
+timeout_ms = 15000
+# node's v8 reserves a large address range up front, so the cap is on data, not address space
+memory = { resource = "data", mib = 4096 }
+
+[[sdk.{{name}}.versions]]
+version = "{{sdk_version}}"
+build = [
+  { argv = ["npm", "install", "--no-audit", "--no-fund"], dir = "{{dir}}" },
+]
+command = ["node", "{{dir}}/testee.ts"]
+max_protocol = {{protocol_max}}

@@ -15,6 +15,7 @@ mod golden_cmd;
 mod guide_cmd;
 mod guided_fuzz_cmd;
 mod harness_cmd;
+mod init_cmd;
 mod laws_cmd;
 mod lint_cmd;
 mod manifest_cmd;
@@ -61,6 +62,11 @@ enum Command {
     /// Write a self-contained HTML report of a harness or conformance run: failures grouped
     /// by finding, each with its smallest entry, the guide section and a reproduce command.
     Report(report_cmd::ReportArgs),
+    /// Write a skeleton adapter (for an indexer) or testee (for an SDK) that speaks the protocol.
+    Init {
+        #[command(subcommand)]
+        command: init_cmd::InitCommand,
+    },
     /// List the internal commands: the corpus generator, its checks and the maintenance tools.
     Dev,
     /// Work with pins.toml, the list of every pinned upstream reference.
@@ -732,6 +738,7 @@ fn main() -> ExitCode {
         Command::Audit { command } => audit_cmd::run(command),
         Command::Check { command } => check_cmd::run(command),
         Command::Lint(args) => lint_cmd::run(args),
+        Command::Init { command } => init_cmd::run(command),
         Command::Dev => {
             print!("{}", dev_listing());
             Ok(true)
@@ -766,7 +773,7 @@ mod tests {
             .filter(|c| !c.is_hide_set())
             .map(|c| c.get_name())
             .collect();
-        assert_eq!(visible, ["check", "lint", "report", "dev", "serve"]);
+        assert_eq!(visible, ["check", "lint", "report", "init", "dev", "serve"]);
         let internal = [
             "twin",
             "explore",

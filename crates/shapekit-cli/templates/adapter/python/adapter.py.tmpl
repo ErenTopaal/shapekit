@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""shapekit adapter for {{target}}.
+
+The harness starts this program, writes one JSON request per line to stdin and reads one or
+more JSON lines per request from stdout. The protocol is described in the adapter interface
+document of the shapekit repository (docs/adapter-interface.md); this file follows protocol
+version {{adapter_protocol}} and oracle vocabulary version {{vocab}}.
+
+Everything that talks to the protocol is written. What starts {{target}} and reads its
+store is the Target class at the end: each method that is not written yet raises NotWritten,
+which the adapter answers with a `target` error naming the method, so the harness reports
+the chain as not evaluated with that message.
+"""
+
+import json
+import sys
+
+ADAPTER = "{{adapter}}"
+ADAPTER_VERSION = "0.1.0"
+PROTOCOL = {{adapter_protocol}}
+VOCAB_VERSION = {{vocab}}
+
+# what describe reports; change these to match the build of {{target}} under test
+TARGET = "{{target}}"
+TARGET_VERSION = "{{target_version}}"
+# ledger protocols the target build ingests; chains outside the range are out-of-scope
+PROTOCOLS = {"min": {{protocol_min}}, "max": {{protocol_max}}}
+# "ledger": the target starts from the bootstrap ledger; "checkpoint": from a history archive
+BOOTSTRAP = "ledger"
+# what the target records, in oracle vocabulary terms. nothing is claimed until you add
+# claims, so every oracle fact is out-of-scope (see "Claims" in docs/adapter-interface.md)
+CLAIMS = {"participants": {"address_kinds": [], "mux_ids": False}, "changes": []}
+
+
+class NotWritten(Exception):
+    """A Target method that has not been written yet."""
+
+
+class AdapterError(Exception):
+    def __init__(self, cls, message):
+        super().__init__(message)
+        self.cls = cls
+
+
+def send(line):
+    sys.stdout.write(json.dumps(line, separators=(",", ":")) + "\n")
+    sys.stdout.flush()
+
+
+def describe(req, target):
+    if req.get("protocol", PROTOCOL) < PROTOCOL:
+        raise AdapterError("unsupported", f"this adapter speaks protocol {PROTOCOL} only")
+    return {
+        "protocol": PROTOCOL,
+        "adapter": ADAPTER,
+        "adapter_version": ADAPTER_VERSION,
+        "target": TARGET,
+        "target_version": TARGET_VERSION,
+        # in rpc mode the target reads ledgers from delivery.rpc_url on its own
+        "delivery_modes": ["rpc"],
+        "default_delivery": "rpc",
+        "bootstrap": BOOTSTRAP,
+        "vocab_version": VOCAB_VERSION,
+        "protocols": PROTOCOLS,
+        "claims": CLAIMS,
+        "capabilities": [],
+    }
+
+
+def handle(req, target):
+    """Answers one request; returns True after stop."""
+    rid = req["id"]
+    cmd = req.get("cmd")
+    if cmd == "describe":
+        send({"id": rid, "status": "ok", "result": describe(req, target)})
+    elif cmd == "start":
+        if req.get("delivery", {}).get("mode") != "rpc":
+            raise AdapterError("unsupported", "this adapter drives the rpc delivery mode only")
+        send({"id": rid, "status": "ok", "result": {"components": target.start(req)}})
+    elif cmd == "advance":
+        # rpc mode: the replay server already shows ledgers up to head, nothing to copy
+        send({"id": rid, "status": "ok", "result": {"head": req["head"]}})
+    elif cmd == "status":
+        send({"id": rid, "status": "ok", "result": target.status()})
+    elif cmd == "export":
+        count = 0
+        for record in target.export(req["from"], req["to"]):
+            send({"id": rid, "status": "record", "record": record})
+            count += 1
+        send({"id": rid, "status": "ok", "result": {"records": count}})
+    elif cmd == "stop":
+        send({"id": rid, "status": "ok", "result": {"logs": target.stop()}})
+        return True
+    else:
+        raise AdapterError("bad-request", f"unknown command {cmd!r}")
+    return False
+
+
+def main():
+    target = Target()
+    for raw in sys.stdin:
+        try:
+            req = json.loads(raw)
+        except ValueError as e:
+            send({"id": "", "status": "error", "error": {"class": "bad-request", "message": f"not json: {e}"}})
+            continue
+        if not isinstance(req, dict) or not isinstance(req.get("id"), str):
+            send({"id": "", "status": "error", "error": {"class": "bad-request", "message": "a request is an object with a string id"}})
+            continue
+        try:
+            if handle(req, target):
+                return
+        except NotWritten as e:
+            send({"id": req["id"], "status": "error", "error": {"class": "target", "message": f"{e} is not written yet"}})
+        except AdapterError as e:
+            send({"id": req["id"], "status": "error", "error": {"class": e.cls, "message": str(e)}})
+        except KeyError as e:
+            send({"id": req["id"], "status": "error", "error": {"class": "bad-request", "message": f"missing member {e}"}})
+        except Exception as e:  # noqa: BLE001, one failing request must not end the adapter
+            send({"id": req["id"], "status": "error", "error": {"class": "internal", "message": repr(e)}})
+    # stdin closed without stop: tear the target down as stop would
+    try:
+        target.stop()
+    except NotWritten:
+        pass
+
+
+class Target:
+    """The part that knows {{target}}. Write each method, then run
+    `shapekit check indexer --adapter "python3 adapter.py" --chain <chain id>`."""
+
+    def start(self, req):
+        """Start {{target}} configured with req["network_passphrase"] and
+        req["delivery"]["rpc_url"], its containers attached to req["docker_network"] only and
+        limited to req["limits"]["memory_bytes"]. Return the components dict the report keeps
+        (image ids, service versions)."""
+        raise NotWritten("Target.start")
+
+    def status(self):
+        """Return last_ingested_ledger (read from the target's own store), health
+        (starting, running, crashed or oom), last_error and peak_memory_bytes."""
+        raise NotWritten("Target.status")
+
+    def export(self, first, last):
+        """Yield one record per stored transaction in ledgers first to last, in ledger and
+        apply order ("export" in docs/adapter-interface.md)."""
+        raise NotWritten("Target.export")
+
+    def stop(self):
+        """Remove every container, volume and file the adapter created; return the tail of
+        the target's logs. Called on stop and when stdin closes."""
+        raise NotWritten("Target.stop")
+
+
+if __name__ == "__main__":
+    main()

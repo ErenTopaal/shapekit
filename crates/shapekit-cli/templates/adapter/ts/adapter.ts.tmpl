@@ -1,0 +1,177 @@
+// shapekit adapter for {{target}}.
+//
+// The harness starts this program, writes one JSON request per line to stdin and reads one or
+// more JSON lines per request from stdout. The protocol is described in the adapter interface
+// document of the shapekit repository (docs/adapter-interface.md); this file follows protocol
+// version {{adapter_protocol}} and oracle vocabulary version {{vocab}}. Node runs it directly
+// (`node adapter.ts`), with no build step: it uses only type annotations Node can strip.
+//
+// Everything that talks to the protocol is written. What starts {{target}} and reads its store
+// is the Target class at the end: each method that is not written yet throws NotWritten, which
+// the adapter answers with a `target` error naming the method, so the harness reports the chain
+// as not evaluated with that message.
+
+import { createInterface } from "node:readline";
+
+const ADAPTER = "{{adapter}}";
+const ADAPTER_VERSION = "0.1.0";
+const PROTOCOL = {{adapter_protocol}};
+const VOCAB_VERSION = {{vocab}};
+
+// what describe reports; change these to match the build of {{target}} under test
+const TARGET = "{{target}}";
+const TARGET_VERSION = "{{target_version}}";
+// ledger protocols the target build ingests; chains outside the range are out-of-scope
+const PROTOCOLS = { min: {{protocol_min}}, max: {{protocol_max}} };
+// "ledger": the target starts from the bootstrap ledger; "checkpoint": from a history archive
+const BOOTSTRAP = "ledger";
+// what the target records, in oracle vocabulary terms. nothing is claimed until you add claims,
+// so every oracle fact is out-of-scope (see "Claims" in docs/adapter-interface.md)
+const CLAIMS = { participants: { address_kinds: [] as string[], mux_ids: false }, changes: [] as unknown[] };
+
+type Json = Record<string, unknown>;
+
+class NotWritten extends Error {}
+
+class AdapterError extends Error {
+  cls: string;
+  constructor(cls: string, message: string) {
+    super(message);
+    this.cls = cls;
+  }
+}
+
+function send(line: Json): void {
+  process.stdout.write(JSON.stringify(line) + "\n");
+}
+
+function describe(req: Json): Json {
+  if (typeof req.protocol === "number" && req.protocol < PROTOCOL) {
+    throw new AdapterError("unsupported", `this adapter speaks protocol ${PROTOCOL} only`);
+  }
+  return {
+    protocol: PROTOCOL,
+    adapter: ADAPTER,
+    adapter_version: ADAPTER_VERSION,
+    target: TARGET,
+    target_version: TARGET_VERSION,
+    // in rpc mode the target reads ledgers from delivery.rpc_url on its own
+    delivery_modes: ["rpc"],
+    default_delivery: "rpc",
+    bootstrap: BOOTSTRAP,
+    vocab_version: VOCAB_VERSION,
+    protocols: PROTOCOLS,
+    claims: CLAIMS,
+    capabilities: [],
+  };
+}
+
+function need(req: Json, member: string): unknown {
+  if (!(member in req)) throw new AdapterError("bad-request", `missing member ${member}`);
+  return req[member];
+}
+
+// answers one request; returns true after stop
+async function handle(req: Json, target: Target): Promise<boolean> {
+  const id = req.id as string;
+  switch (req.cmd) {
+    case "describe":
+      send({ id, status: "ok", result: describe(req) });
+      return false;
+    case "start": {
+      const delivery = (req.delivery ?? {}) as Json;
+      if (delivery.mode !== "rpc") {
+        throw new AdapterError("unsupported", "this adapter drives the rpc delivery mode only");
+      }
+      send({ id, status: "ok", result: { components: await target.start(req) } });
+      return false;
+    }
+    case "advance":
+      // rpc mode: the replay server already shows ledgers up to head, nothing to copy
+      send({ id, status: "ok", result: { head: need(req, "head") } });
+      return false;
+    case "status":
+      send({ id, status: "ok", result: await target.status() });
+      return false;
+    case "export": {
+      let records = 0;
+      for await (const record of target.export(need(req, "from") as number, need(req, "to") as number)) {
+        send({ id, status: "record", record });
+        records++;
+      }
+      send({ id, status: "ok", result: { records } });
+      return false;
+    }
+    case "stop":
+      send({ id, status: "ok", result: { logs: await target.stop() } });
+      return true;
+    default:
+      throw new AdapterError("bad-request", `unknown command ${JSON.stringify(req.cmd)}`);
+  }
+}
+
+async function main(): Promise<void> {
+  const target = new Target();
+  for await (const raw of createInterface({ input: process.stdin, crlfDelay: Infinity })) {
+    let req: unknown;
+    try {
+      req = JSON.parse(raw);
+    } catch (e) {
+      send({ id: "", status: "error", error: { class: "bad-request", message: `not json: ${String(e)}` } });
+      continue;
+    }
+    if (typeof req !== "object" || req === null || Array.isArray(req) || typeof (req as Json).id !== "string") {
+      send({ id: "", status: "error", error: { class: "bad-request", message: "a request is an object with a string id" } });
+      continue;
+    }
+    const r = req as Json;
+    try {
+      if (await handle(r, target)) return;
+    } catch (e) {
+      const [cls, message] =
+        e instanceof NotWritten
+          ? ["target", `${e.message} is not written yet`]
+          : e instanceof AdapterError
+            ? [e.cls, e.message]
+            : ["internal", String(e)];
+      send({ id: r.id, status: "error", error: { class: cls, message } });
+    }
+  }
+  // stdin closed without stop: tear the target down as stop would
+  try {
+    await target.stop();
+  } catch (e) {
+    if (!(e instanceof NotWritten)) throw e;
+  }
+}
+
+// the part that knows {{target}}. write each method, then run
+// `shapekit check indexer --adapter "node adapter.ts" --chain <chain id>`.
+class Target {
+  // start {{target}} configured with req.network_passphrase and req.delivery.rpc_url, its
+  // containers attached to req.docker_network only and limited to req.limits.memory_bytes.
+  // return the components object the report keeps (image ids, service versions).
+  async start(_req: Json): Promise<Record<string, string>> {
+    throw new NotWritten("Target.start");
+  }
+
+  // return last_ingested_ledger (read from the target's own store), health (starting, running,
+  // crashed or oom), last_error and peak_memory_bytes.
+  async status(): Promise<Json> {
+    throw new NotWritten("Target.status");
+  }
+
+  // yield one record per stored transaction in ledgers first to last, in ledger and apply
+  // order ("export" in docs/adapter-interface.md).
+  async *export(_first: number, _last: number): AsyncGenerator<Json> {
+    throw new NotWritten("Target.export");
+  }
+
+  // remove every container, volume and file the adapter created; return the tail of the
+  // target's logs. called on stop and when stdin closes.
+  async stop(): Promise<string> {
+    throw new NotWritten("Target.stop");
+  }
+}
+
+await main();
