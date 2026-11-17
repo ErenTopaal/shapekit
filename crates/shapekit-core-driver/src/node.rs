@@ -162,6 +162,9 @@ impl DockerResources {
     fn release(&mut self) -> Result<(), NodeError> {
         let mut failures = Vec::new();
         if let Some(c) = self.container.take() {
+            // a node dropped while paused for idling (see `http::IDLE_PAUSE`) must run again
+            // to shut down; on a running node this fails, which is fine
+            let _ = docker(&["unpause", &c]);
             // stop first so core shuts down cleanly and flushes its stream
             if let Err(e) = docker_ok(&["stop", "-t", "20", &c]) {
                 failures.push(e.to_string());
@@ -826,6 +829,7 @@ impl CoreNode {
     /// files core writes on its own schedule, such as the history archive, can
     /// be copied without racing a write. The node answers no commands after.
     pub fn halt(&self) -> Result<(), NodeError> {
+        self.http.quiesce();
         docker_ok(&["stop", "-t", "20", self.container()])?;
         Ok(())
     }
@@ -833,6 +837,7 @@ impl CoreNode {
     /// Stops core and removes the container and its network. Dropping a
     /// node does the same but can only print failures.
     pub fn stop(mut self) -> Result<(), NodeError> {
+        self.http.quiesce();
         self.resources.release()
     }
 }

@@ -15,6 +15,8 @@
 
 use std::io::Write as _;
 use std::process::{Command, Stdio};
+use std::sync::{Arc, Mutex, Weak};
+use std::time::{Duration, Instant};
 
 use crate::config::{HTTP_PORT, HTTP_QUERY_PORT};
 
@@ -57,16 +59,118 @@ pub fn percent_encode(s: &str) -> String {
     out
 }
 
+/// How long a node may sit without a request before it is paused.
+///
+/// A standalone node's virtual clock jumps to its next timer whenever the main loop is idle,
+/// about a thousand virtual seconds per wall second (`config::CLOSE_STEP`), and manualclose
+/// refuses a close time behind that clock (`ApplicationImpl::setManualCloseVirtualTime`,
+/// v30.0.0). The driver's close times are fixed by ledger sequence so chains repeat byte for
+/// byte; a node left idle for more than about a minute would refuse the next one. A paused
+/// container runs no event loop, so its clock stands still until the next request unpauses it.
+pub const IDLE_PAUSE: Duration = Duration::from_secs(5);
+
+#[derive(Debug)]
+struct Idle {
+    paused: bool,
+    /// Requests running now; a node is never paused under one.
+    busy: usize,
+    last: Instant,
+    /// Set when the node stops: no more pausing.
+    done: bool,
+}
+
 #[derive(Debug, Clone)]
 pub struct CoreHttp {
     container: String,
+    idle: Arc<Mutex<Idle>>,
 }
 
 impl CoreHttp {
+    /// A client for `container`, with a watcher that pauses the container while no request
+    /// has come for [`IDLE_PAUSE`]. The watcher ends when the last clone is dropped.
     pub fn new(container: impl Into<String>) -> Self {
-        Self {
-            container: container.into(),
+        let container = container.into();
+        let idle = Arc::new(Mutex::new(Idle {
+            paused: false,
+            busy: 0,
+            last: Instant::now(),
+            done: false,
+        }));
+        let weak: Weak<Mutex<Idle>> = Arc::downgrade(&idle);
+        let name = container.clone();
+        std::thread::spawn(move || {
+            loop {
+                std::thread::sleep(Duration::from_millis(500));
+                let Some(idle) = weak.upgrade() else { return };
+                let mut g = idle
+                    .lock()
+                    .expect("no request panics holding the idle state");
+                if g.done {
+                    return;
+                }
+                if !g.paused && g.busy == 0 && g.last.elapsed() >= IDLE_PAUSE {
+                    // a failed pause leaves the node running, which is what it was before
+                    let ok = Command::new("docker")
+                        .args(["pause", &name])
+                        .output()
+                        .is_ok_and(|o| o.status.success());
+                    g.paused = ok;
+                }
+            }
+        });
+        Self { container, idle }
+    }
+
+    /// Unpauses the container if the watcher paused it, and stops pausing it from now on;
+    /// for stopping the node, which needs a running process to shut down cleanly.
+    pub fn quiesce(&self) {
+        let mut g = self
+            .idle
+            .lock()
+            .expect("no request panics holding the idle state");
+        g.done = true;
+        if g.paused {
+            let _ = Command::new("docker")
+                .args(["unpause", &self.container])
+                .output();
+            g.paused = false;
         }
+    }
+
+    fn enter(&self) -> Result<(), HttpError> {
+        let mut g = self
+            .idle
+            .lock()
+            .expect("no request panics holding the idle state");
+        if g.paused {
+            let out = Command::new("docker")
+                .args(["unpause", &self.container])
+                .output()
+                .map_err(|source| HttpError::Spawn {
+                    what: "docker unpause".into(),
+                    source,
+                })?;
+            if !out.status.success() {
+                return Err(HttpError::Client {
+                    container: self.container.clone(),
+                    what: "docker unpause".into(),
+                    code: out.status.code(),
+                    stderr: String::from_utf8_lossy(&out.stderr).trim().to_owned(),
+                });
+            }
+            g.paused = false;
+        }
+        g.busy += 1;
+        Ok(())
+    }
+
+    fn leave(&self) {
+        let mut g = self
+            .idle
+            .lock()
+            .expect("no request panics holding the idle state");
+        g.busy -= 1;
+        g.last = Instant::now();
     }
 
     /// GET on the command port. `path` is the route plus query string, with
@@ -87,6 +191,20 @@ impl CoreHttp {
     }
 
     fn run(
+        &self,
+        what: &str,
+        port: u16,
+        method: &str,
+        path: &str,
+        body: Option<&str>,
+    ) -> Result<String, HttpError> {
+        self.enter()?;
+        let r = self.request(what, port, method, path, body);
+        self.leave();
+        r
+    }
+
+    fn request(
         &self,
         what: &str,
         port: u16,
