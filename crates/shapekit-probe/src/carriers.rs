@@ -70,12 +70,16 @@ pub struct Carrier {
     pub extra: Extra,
 }
 
-pub type Extra = fn(&World, &Subject, &str, &serde_json::Value) -> Result<Vec<Replacement>>;
+/// Called with the world, the attempt's accounts, the field's `.x` name, its base value and
+/// the signed base envelope as XDR-JSON.
+pub type Extra =
+    fn(&World, &Subject, &str, &serde_json::Value, &serde_json::Value) -> Result<Vec<Replacement>>;
 
 pub fn no_extra(
     _: &World,
     _: &Subject,
     _: &str,
+    _: &serde_json::Value,
     _: &serde_json::Value,
 ) -> Result<Vec<Replacement>> {
     Ok(Vec::new())
@@ -387,7 +391,13 @@ fn clawback_setup(w: &mut World, s: &Subject) -> Result<SigningKey> {
 }
 
 /// A path holding one asset that is not valid: an alphanumeric code of zero bytes.
-fn path_extra(w: &World, _: &Subject, f: &str, _: &serde_json::Value) -> Result<Vec<Replacement>> {
+fn path_extra(
+    w: &World,
+    _: &Subject,
+    f: &str,
+    _: &serde_json::Value,
+    _: &serde_json::Value,
+) -> Result<Vec<Replacement>> {
     Ok(match f {
         "path" => vec![extra(
             "one asset whose four letter code is empty",
@@ -397,6 +407,32 @@ fn path_extra(w: &World, _: &Subject, f: &str, _: &serde_json::Value) -> Result<
             }}]),
         )],
         _ => Vec::new(),
+    })
+}
+
+/// Two keys whose public keys end in the same four bytes, so a signature hint names both:
+/// the first collision among keys derived from a fixed sequence of seeds. A birthday search,
+/// about 2^16 keys; deterministic, so every run finds the same pair.
+pub fn hint_collision() -> &'static (SigningKey, SigningKey) {
+    static PAIR: std::sync::OnceLock<(SigningKey, SigningKey)> = std::sync::OnceLock::new();
+    PAIR.get_or_init(|| {
+        let mut seen: std::collections::HashMap<[u8; 4], u64> = std::collections::HashMap::new();
+        let key = |i: u64| {
+            shapekit_core_driver::keys::derive_key(
+                crate::KEY_DOMAIN,
+                &format!("hint-collision-{i}"),
+            )
+        };
+        for i in 0.. {
+            let k = key(i);
+            let pk = k.verifying_key().to_bytes();
+            let suffix: [u8; 4] = pk[28..].try_into().expect("four bytes");
+            if let Some(&j) = seen.get(&suffix) {
+                return (key(j), k);
+            }
+            seen.insert(suffix, i);
+        }
+        unreachable!("the search runs until it finds a pair")
     })
 }
 
@@ -429,15 +465,66 @@ pub fn classic() -> Vec<Carrier> {
                 Ok(b)
             })
         },
-        c(
-            "DecoratedSignature",
-            "the source's signature on a payment",
-            |w, s| {
-                let mut b = pay_base(w, s)?;
-                b.at = Some("/tx/signatures/0".into());
-                Ok(b)
+        Carrier {
+            id: "payment",
+            ..c(
+                "DecoratedSignature",
+                "the source's signature on a payment",
+                |w, s| {
+                    let mut b = pay_base(w, s)?;
+                    b.at = Some("/tx/signatures/0".into());
+                    Ok(b)
+                },
+            )
+        },
+        Carrier {
+            id: "collision",
+            extra: |w, _, f, _, env| {
+                Ok(match f {
+                    // the other signer's signature, under the hint the base carries: both keys
+                    // end in the same four bytes, so the hint names both
+                    "signature" => {
+                        let (_, b) = hint_collision();
+                        let env: TransactionEnvelope = serde_json::from_value(env.clone())?;
+                        let TransactionEnvelope::Tx(e) = env else {
+                            bail!("the collision carrier builds a v1 envelope");
+                        };
+                        let hash =
+                            shapekit_core_driver::tx::transaction_hash(&e.tx, &w.network_id())?;
+                        let sig = shapekit_core_driver::tx::sign_hash(b, &hash);
+                        vec![extra(
+                            "the other signer sharing the hint signs instead",
+                            serde_json::to_value(&sig.signature)?,
+                        )]
+                    }
+                    _ => Vec::new(),
+                })
             },
-        ),
+            ..c(
+                "DecoratedSignature",
+                "a payment signed by one of two signers of the source whose keys end in the same four bytes",
+                |w, s| {
+                    let (a, b) = hint_collision();
+                    let src = s.source.clone();
+                    let signer = |k: &SigningKey| {
+                        OperationBody::SetOptions(SetOptionsOp {
+                            signer: Some(Signer {
+                                key: ed25519_signer(&k.verifying_key()),
+                                weight: 1,
+                            }),
+                            ..Default::default()
+                        })
+                    };
+                    w.classic_ok(&src, vec![signer(a), signer(b)], &[])?;
+                    let tx = w.tx(&s.source, vec![(None, payment(&s.peers[0]))])?;
+                    Ok(Base {
+                        env: World::unsigned(tx),
+                        plan: plan(&[a]),
+                        at: Some("/tx/signatures/0".into()),
+                    })
+                },
+            )
+        },
         Carrier {
             id: "payment",
             ..c("Operation", "a payment's operation", |w, s| {
@@ -464,7 +551,7 @@ pub fn classic() -> Vec<Carrier> {
         },
         Carrier {
             id: "credit",
-            extra: |_, s, f, _| {
+            extra: |_, s, f, _, _| {
                 Ok(match f {
                     "asset" => vec![extra(
                         "an asset whose issuer no longer exists",
@@ -655,7 +742,7 @@ pub fn classic() -> Vec<Carrier> {
             )
         },
         Carrier {
-            extra: |_, _, f, _| {
+            extra: |_, _, f, _, _| {
                 Ok(match f {
                     "maxTime" => vec![extra("a close time already past, 1", json!("1"))],
                     _ => Vec::new(),
@@ -678,7 +765,7 @@ pub fn classic() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |w, _, f, _| {
+            extra: |w, _, f, _, _| {
                 Ok(match f {
                     "maxLedger" => {
                         let next = w.driver.last_closed() + 1;
@@ -764,7 +851,7 @@ pub fn classic() -> Vec<Carrier> {
             )
         },
         Carrier {
-            extra: |_, s, f, _| {
+            extra: |_, s, f, _, _| {
                 Ok(match f {
                     "destination" => vec![
                         extra(
@@ -883,7 +970,7 @@ pub fn classic() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |_, s, f, _| {
+            extra: |_, s, f, _, _| {
                 Ok(match f {
                     "signer" => vec![extra(
                         "the source's own key, weight 1",
@@ -998,7 +1085,7 @@ pub fn classic() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |_, _, f, _| {
+            extra: |_, _, f, _, _| {
                 Ok(match f {
                     "dataName" => vec![extra(
                         "printable ascii of any content",
@@ -1039,7 +1126,7 @@ pub fn classic() -> Vec<Carrier> {
         ),
         Carrier {
             id: "two",
-            extra: |_, s, f, _| {
+            extra: |_, s, f, _, _| {
                 Ok(match f {
                     "destination" => vec![extra(
                         "the other claimant's destination",
@@ -1506,5 +1593,18 @@ pub fn instance(
             "{structure}: {} objects with keys {keys:?}: {many:?}",
             many.len()
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_hint_collision_is_two_keys_sharing_their_last_four_bytes() {
+        let (a, b) = hint_collision();
+        let (a, b) = (a.verifying_key().to_bytes(), b.verifying_key().to_bytes());
+        assert_ne!(a, b);
+        assert_eq!(a[28..], b[28..]);
     }
 }

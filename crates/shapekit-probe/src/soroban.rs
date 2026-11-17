@@ -562,7 +562,7 @@ pub fn carriers() -> Vec<Carrier> {
             })
         },
         Carrier {
-            extra: |_, _, f, _| {
+            extra: |_, _, f, _, _| {
                 Ok(match f {
                     "args" => vec![
                         extra(
@@ -587,7 +587,7 @@ pub fn carriers() -> Vec<Carrier> {
         }),
         Carrier {
             id: "echo",
-            extra: |w, _, f, base| {
+            extra: |w, _, f, base, _| {
                 // a key no part of the call touches: core requires footprint keys to be of an
                 // allowed type and size, not to exist or be read
                 let c = w.contracts()?;
@@ -866,7 +866,7 @@ pub fn carriers() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |_, s, f, _| {
+            extra: |_, s, f, _, _| {
                 Ok(match f {
                     "constructorArgs" => vec![extra(
                         "another owner, which the constructor takes",

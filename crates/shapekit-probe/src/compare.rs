@@ -95,7 +95,17 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
             "tx.signatures",
             vec![at("TransactionV1Envelope.signatures")],
         ),
-        ("tx.signatures.hint", vec![at("DecoratedSignature.hint")]),
+        (
+            "tx.signatures.hint",
+            vec![
+                via("DecoratedSignature.hint", "payment"),
+                only(
+                    "DecoratedSignature.signature",
+                    "collision",
+                    "other signer sharing the hint",
+                ),
+            ],
+        ),
         (
             "tx.signatures.signature",
             vec![at("DecoratedSignature.signature")],
@@ -583,9 +593,8 @@ pub struct Resolution {
     pub reading: &'static str,
 }
 
-/// Every disagreement the source explains. A `partial` row is settled as mixed only when the
-/// unchecked part needs state or a context the probe cannot build; the reading says which
-/// core lines show the missing check and why the probe cannot reach it. A resolution for a row that agrees is stale and
+/// Every disagreement the source explains: rows whose check lies where the probe's submission
+/// path cannot reach, each with the core lines that show it. A resolution for a row that agrees is stale and
 /// fails the comparison.
 pub fn resolutions() -> Vec<Resolution> {
     vec![
@@ -600,12 +609,6 @@ pub fn resolutions() -> Vec<Resolution> {
             verdict: Measured::Validated,
             citation: "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:1266-1272",
             reading: "the only check of the precondition type is the protocol 19 gate: PRECOND_V2 before protocol 19 is txNOT_SUPPORTED (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1266-1272). at protocol 30, where the probe runs, every arm is accepted; the values inside an arm are checked under their own rows (time bounds, ledger bounds, minimum sequence fields, extra signers)",
-        },
-        Resolution {
-            row: "tx.signatures.hint",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/SignatureUtils.cpp:38-45; src/transactions/SignatureUtils.cpp:127-136",
-            reading: "SignatureUtils::verify compares only the last four bytes of the signer's key with the hint (doesHintMatch, a memcmp of 4 bytes) before it verifies the signature, so a hint that equals another signer's last four bytes passes the filter and the signature counts for whichever signer it verifies against: the hint does not identify the signer. the probe cannot reach it, because it needs two signer keys sharing their last four bytes, a search of about 2^32 key generations",
         },
     ]
 }
