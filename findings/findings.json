@@ -4,14 +4,14 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4",
+      "sha256": "16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609",
       "detail": "corpus 0.1.0"
     },
     {
       "kind": "harness",
       "path": "findings/inputs/harness-wallet-backend-3e22515a.json",
-      "sha256": "b27d43b31bdb29356877f96c2a330e2005c73314ce9d5e93d81fb21d22d34a99",
-      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 898 entries, manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4"
+      "sha256": "d23c16c1017ac37a129ae1e6b74142647db43bd39bee99f2611a3be1185befa3",
+      "detail": "wallet-backend 3e22515a44979fdc3a558fda3991ca2b48e38cef, 906 entries, manifest 16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609"
     },
     {
       "kind": "conformance",
@@ -46,7 +46,7 @@
   ],
   "summary": {
     "findings": 24,
-    "failures": 504,
+    "failures": 516,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -385,6 +385,7 @@
       "caps": [
         "CAP-0015",
         "CAP-0023",
+        "CAP-0027",
         "CAP-0035",
         "CAP-0067"
       ],
@@ -402,6 +403,8 @@
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope",
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta",
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
         "cap35.clawback.p30-clawback-claimable-balance-envelope",
         "cap35.clawback.p30-clawback-claimable-balance-meta",
         "cap35.clawback.p30-create-clawback-enabled-balance",
@@ -756,6 +759,34 @@
         {
           "source": "harness",
           "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "extra participant: participant GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "testnet",
+          "what": "extra participant: participant GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "extra participant: participant GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+          "at": "testnet",
+          "what": "extra participant: participant GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I is stored but the meta does not show it, the envelope names it as claimant"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
           "entry": "cap35.clawback.p30-clawback-claimable-balance-envelope",
           "at": "mainnet",
           "what": "dropped participant: participant GACU5O4PFDMUNMQC6FWBU355EEHYU7J4VYDJE7HEXZ5VXMP4X2KPAEMW is missing"
@@ -972,6 +1003,7 @@
       "severity": "data-loss",
       "caps": [
         "CAP-0023",
+        "CAP-0027",
         "CAP-0033",
         "CAP-0035",
         "CAP-0038",
@@ -992,6 +1024,8 @@
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-envelope",
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta",
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
         "cap33.sponsorship.p30-sponsored-claimable-balance-envelope",
         "cap33.sponsorship.p30-sponsored-claimable-balance-meta",
         "cap35.clawback.p30-create-clawback-enabled-balance",
@@ -1130,6 +1164,62 @@
           "source": "harness",
           "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
           "entry": "cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+          "at": "testnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+          "at": "mainnet",
+          "what": "extra token-event: token-event is stored but the meta does not show it"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+          "at": "testnet",
+          "what": "dropped token-event: token-event is missing"
+        },
+        {
+          "source": "harness",
+          "on": "wallet-backend@3e22515a44979fdc3a558fda3991ca2b48e38cef",
+          "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
           "at": "testnet",
           "what": "extra token-event: token-event is stored but the meta does not show it"
         },
