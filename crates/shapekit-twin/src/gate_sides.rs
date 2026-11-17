@@ -119,6 +119,44 @@ pub struct ExploreRun {
     pub reference_count: u64,
 }
 
+/// Two explore outputs over the same twin as one: recipes by name (a name
+/// must keep its path), sides by position with their runs joined, protocols
+/// joined.
+pub fn merge_explore(mut a: ExploreSides, b: ExploreSides) -> anyhow::Result<ExploreSides> {
+    for r in b.recipes {
+        match a.recipes.iter().find(|x| x.name == r.name) {
+            Some(x) if x.path != r.path => {
+                anyhow::bail!(
+                    "recipe {} is {} in one input and {} in another",
+                    r.name,
+                    x.path,
+                    r.path
+                )
+            }
+            Some(_) => {}
+            None => a.recipes.push(r),
+        }
+    }
+    for s in b.sides {
+        match a.sides.iter_mut().find(|x| {
+            x.file == s.file && x.line == s.line && x.column == s.column && x.branch == s.branch
+        }) {
+            Some(x) => {
+                for run in s.runs {
+                    if !x.runs.iter().any(|r| r.run == run.run) {
+                        x.runs.push(run);
+                    }
+                }
+            }
+            None => a.sides.push(s),
+        }
+    }
+    a.protocols.extend(b.protocols);
+    a.protocols.sort_unstable();
+    a.protocols.dedup();
+    Ok(a)
+}
+
 /// A side the two sources disagree on.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Conflict {

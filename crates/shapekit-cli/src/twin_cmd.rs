@@ -166,10 +166,11 @@ pub enum TwinCommand {
         twin_pins: PathBuf,
         #[arg(long, default_value = "registry/generated/gates.json")]
         gates: PathBuf,
-        /// `explore-gate-sides.json` from `shapekit explore gates`: recipe reruns whose
-        /// witnesses join the chains'.
-        #[arg(long)]
-        explore: Option<PathBuf>,
+        /// `explore-gate-sides.json` files from `shapekit explore gates` (repeatable): recipe
+        /// reruns whose witnesses join the chains'. Recipe paths are written relative to the
+        /// repository root, through symbolic links, and must lie inside it.
+        #[arg(long, num_args = 1..)]
+        explore: Vec<PathBuf>,
     },
     /// Sort the regions of a core coverage summary that no chain and no core test reaches
     /// by cause: defensive checks, diagnostics, configuration or test-only code, protocol
@@ -308,13 +309,7 @@ pub fn run(command: TwinCommand) -> Result<bool> {
             twin_pins,
             gates,
             explore,
-        } => gate_witnesses(
-            &chain_dirs,
-            &core_src,
-            &twin_pins,
-            &gates,
-            explore.as_deref(),
-        ),
+        } => gate_witnesses(&chain_dirs, &core_src, &twin_pins, &gates, &explore),
         TwinCommand::Classify {
             core_src,
             coverage,
@@ -845,7 +840,7 @@ fn gate_witnesses(
     core_src: &Path,
     twin_pins: &Path,
     gates_path: &Path,
-    explore: Option<&Path>,
+    explore: &[PathBuf],
 ) -> Result<bool> {
     use shapekit_twin::coverage as cov;
     use shapekit_twin::gate_sides;
@@ -916,31 +911,48 @@ fn gate_witnesses(
     for g in &list.gates {
         lines.insert((g.file.clone(), g.line), line_of(&g.file, g.line));
     }
-    let explore = match explore {
-        Some(p) => {
-            let e: gate_sides::ExploreSides = serde_json::from_slice(
-                &std::fs::read(p).with_context(|| format!("reading {}", p.display()))?,
-            )
-            .with_context(|| format!("parsing {}", p.display()))?;
-            if e.schema_version != 1 {
-                bail!(
-                    "{} has schema_version {}, expected 1",
-                    p.display(),
-                    e.schema_version
-                );
-            }
-            if e.twin_image != twin.digest {
-                bail!(
-                    "{} was run on {}, the twin is {}",
-                    p.display(),
-                    e.twin_image,
-                    twin.digest
-                );
-            }
-            Some(e)
+    let root = std::env::current_dir()?.canonicalize()?;
+    let mut merged: Option<gate_sides::ExploreSides> = None;
+    for p in explore {
+        let mut e: gate_sides::ExploreSides = serde_json::from_slice(
+            &std::fs::read(p).with_context(|| format!("reading {}", p.display()))?,
+        )
+        .with_context(|| format!("parsing {}", p.display()))?;
+        if e.schema_version != 1 {
+            bail!(
+                "{} has schema_version {}, expected 1",
+                p.display(),
+                e.schema_version
+            );
         }
-        None => None,
-    };
+        if e.twin_image != twin.digest {
+            bail!(
+                "{} was run on {}, the twin is {}",
+                p.display(),
+                e.twin_image,
+                twin.digest
+            );
+        }
+        // witnesses name the recipe file inside the repository, never a scratch path
+        for r in &mut e.recipes {
+            let real = Path::new(&r.path)
+                .canonicalize()
+                .with_context(|| format!("resolving recipe {}", r.path))?;
+            let rel = real.strip_prefix(&root).with_context(|| {
+                format!(
+                    "recipe {} lies outside the repository {}",
+                    r.path,
+                    root.display()
+                )
+            })?;
+            r.path = rel.to_string_lossy().into_owned();
+        }
+        merged = Some(match merged.take() {
+            None => e,
+            Some(m) => gate_sides::merge_explore(m, e)?,
+        });
+    }
+    let explore = merged;
     let w = gate_sides::witness(&list, &chains, explore.as_ref(), |f, l| {
         lines.get(&(f.to_owned(), l)).cloned().flatten()
     });
