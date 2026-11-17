@@ -1115,10 +1115,27 @@ impl<'a> Session<'a> {
                 .collect();
             if positions.windows(2).all(|w| w[0] < w[1]) {
                 let mut hashes = Vec::with_capacity(envs.len());
-                for (h, env) in held.iter().zip(&envs) {
+                for (k, (h, env)) in held.iter().zip(&envs).enumerate() {
                     self.current = h.step;
                     let label = Some(h.label.clone());
+                    let refused = (self.observed.len(), self.left_out.len());
                     self.queue(ctx, (&h.role, h.seq), &label, env, &h.expect, Kind::Tx)?;
+                    if self.learn && (self.observed.len(), self.left_out.len()) != refused {
+                        // learning drops what core refused, and a replay orders what is left
+                        // anew; the memo ids chosen for the full set would not repeat. With one
+                        // transaction queued before the refusal it carries no memo, so the
+                        // rest is left out and the replay matches. With more it cannot be
+                        // matched, so the step fails instead of recording a recipe that
+                        // would not repeat
+                        ensure!(
+                            k <= 1,
+                            "an ordered close of {} transactions lost its transaction {} at submission",
+                            held.len(),
+                            k + 1
+                        );
+                        self.left_out.extend(held[k + 1..].iter().map(|h| h.step));
+                        return Ok(hashes);
+                    }
                     hashes.push(envelope_hash(env, ctx.driver().network_id())?);
                 }
                 return Ok(hashes);
