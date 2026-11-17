@@ -739,6 +739,31 @@ fn group_index(groups: &[Group]) -> BTreeMap<(String, String), String> {
     out
 }
 
+/// `1 known finding`, `2 known findings`.
+pub fn count(n: usize, one: &str, many: &str) -> String {
+    format!("{n} {}", if n == 1 { one } else { many })
+}
+
+/// The run's failures and how they are grouped, in one line.
+pub fn grouping_line(r: &Report) -> String {
+    let n = |k: GroupKind| r.groups.iter().filter(|g| g.kind == k).count();
+    format!(
+        "{} in {}, {} and {}",
+        count(r.failures, "failure", "failures"),
+        count(n(GroupKind::Finding), "known finding", "known findings"),
+        count(
+            n(GroupKind::Candidate),
+            "candidate finding",
+            "candidate findings"
+        ),
+        count(
+            n(GroupKind::Untriaged),
+            "untriaged group",
+            "untriaged groups"
+        ),
+    )
+}
+
 /// Writes the HTML page.
 pub fn write_html(r: &Report, path: &Path) -> Result<()> {
     std::fs::write(path, html::render(r)).with_context(|| format!("writing {}", path.display()))

@@ -45,14 +45,10 @@ pub fn render(r: &Report, html_name: Option<&str>) -> String {
             );
         }
     }
-    let count = |k: GroupKind| r.groups.iter().filter(|g| g.kind == k).count();
     let _ = writeln!(
         s,
-        "{} failures in {} known findings, {} candidate findings and {} untriaged groups (corpus {}).\n",
-        r.failures,
-        count(GroupKind::Finding),
-        count(GroupKind::Candidate),
-        count(GroupKind::Untriaged),
+        "{} (corpus {}).\n",
+        crate::grouping_line(r),
         cell(&r.corpus)
     );
     if !r.groups.is_empty() {

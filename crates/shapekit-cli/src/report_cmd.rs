@@ -72,15 +72,7 @@ pub fn run(a: ReportArgs) -> Result<bool> {
         std::fs::write(p, text).map_err(|e| anyhow::anyhow!("writing {}: {e}", p.display()))?;
         println!("wrote {}", p.display());
     }
-    let count = |k| report.groups.iter().filter(|g| g.kind == k).count();
-    use shapekit_report::GroupKind::*;
-    println!(
-        "{} failures: {} known findings, {} candidate findings, {} untriaged groups",
-        report.failures,
-        count(Finding),
-        count(Candidate),
-        count(Untriaged)
-    );
+    println!("{}", shapekit_report::grouping_line(&report));
     if let Some(c) = &report.comparison {
         println!(
             "against the {}: {} new, {} changed, {} fixed, {} unchanged, {} not rerun",
