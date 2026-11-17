@@ -84,6 +84,8 @@ fn protocol_list(sides: &[(u32, Option<u32>)]) -> String {
 pub struct ExploreSides {
     pub schema_version: u32,
     pub twin_image: String,
+    /// The protocols the reruns ran at.
+    pub protocols: Vec<u32>,
     pub recipes: Vec<ExploreRecipe>,
     pub sides: Vec<ExploreSide>,
 }
@@ -129,6 +131,21 @@ pub struct Conflict {
     /// The committed chain of the same recipe and protocol, which evaluated
     /// the condition and never took the side.
     pub chain: String,
+}
+
+/// Consecutive protocols folded into inclusive ranges.
+fn ranges_of(ps: &[u32]) -> Vec<(u32, Option<u32>)> {
+    let mut v: Vec<u32> = ps.to_vec();
+    v.sort_unstable();
+    v.dedup();
+    let mut out: Vec<(u32, Option<u32>)> = Vec::new();
+    for p in v {
+        match out.last_mut() {
+            Some((_, Some(hi))) if *hi + 1 == p => *hi = p,
+            _ => out.push((p, Some(p))),
+        }
+    }
+    out
 }
 
 /// Per gate side, the chains that take it.
@@ -281,6 +298,13 @@ pub fn witness(
                         branch.as_str()
                     )
                 };
+                let evidence = match explore {
+                    Some(e) if !e.protocols.is_empty() => format!(
+                        "{evidence}; no recipe rerun at protocols {} ran the call at a protocol taking this side",
+                        protocol_list(&ranges_of(&e.protocols))
+                    ),
+                    _ => evidence,
+                };
                 sides.push(GateSide {
                     branch,
                     status: ObligationStatus::Open,
@@ -417,6 +441,7 @@ mod tests {
         let explore: ExploreSides = serde_json::from_value(serde_json::json!({
             "schema_version": 1,
             "twin_image": "sha256:x",
+            "protocols": [18, 30],
             "recipes": [{"name": "cap40.r", "id": "cap40.signed-payload-signer", "protocol": 30, "path": "corpus/recipes/cap40/r.json"}],
             "sides": [
                 {"file": "src/transactions/SetOptionsOpFrame.cpp", "line": 310, "column": 14, "branch": "true",
