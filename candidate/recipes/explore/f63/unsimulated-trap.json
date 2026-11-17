@@ -1,0 +1,80 @@
+{
+ "schema_version": 1,
+ "id": "contracts.unsimulated-trap",
+ "family": "explore",
+ "protocol": 30,
+ "node": {
+  "soroban_settings": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner",
+    "alice",
+    "bob"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "echo",
+   "source": "owner",
+   "wasm": "contracts/wasm/echo.wasm",
+   "sha256": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "deploy",
+   "label": "e",
+   "source": "owner",
+   "code": "echo",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000007"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "e",
+   "function": "no_such_function",
+   "args": [],
+   "simulate": false,
+   "footprint": {
+    "read_only": [
+     {
+      "contract_data": {
+       "contract": "@contract:e",
+       "key": "ledger_key_contract_instance",
+       "durability": "persistent"
+      }
+     },
+     {
+      "contract_code": {
+       "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+      }
+     }
+    ],
+    "read_write": []
+   },
+   "resources": {
+    "instructions": 5000000,
+    "disk_read_bytes": 10000,
+    "write_bytes": 0,
+    "resource_fee": 5000000
+   },
+   "expect": {
+    "outcome": "failed"
+   }
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

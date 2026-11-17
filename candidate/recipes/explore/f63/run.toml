@@ -162,3 +162,31 @@ steps = 39
 # a state_archival upgrade starts the eviction scan at level 1; a temporary entry with the
 # 16-ledger minimum lifetime is then evicted with its ttl key
 contract_arms_first_witnessed = ["LedgerKey:ttl"]
+
+[recipes."error-values"]
+id = "contracts.error-values"
+protocol = 30
+steps = 8
+# echo returns a bare error value as a failure, so the seven error types ride in one map
+contract_arms_first_witnessed = ["ScError:auth", "ScError:context", "ScError:contract", "ScError:events", "ScError:object", "ScError:storage", "ScError:value"]
+
+[recipes."unsimulated-trap"]
+id = "contracts.unsimulated-trap"
+protocol = 30
+steps = 8
+# simulate: false, so a call to a function echo does not have reaches core and traps there
+contract_arms_first_witnessed = ["InvokeHostFunctionResult:trapped"]
+
+[recipes."delegates"]
+id = "contracts.delegates"
+protocol = 30
+steps = 10
+# alice's recorded entry carries bob as a delegate; the host does not consult a delegate of a
+# classic account, but the credentials are applied as written
+contract_arms_first_witnessed = ["SorobanCredentials:address_with_delegates"]
+
+[recipes."soroban-meta-ext-v1"]
+id = "contracts.soroban-meta-ext-v1"
+protocol = 30
+steps = 8
+contract_arms_first_witnessed = ["SorobanTransactionMetaExt:v1"]

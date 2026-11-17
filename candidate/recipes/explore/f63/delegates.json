@@ -1,0 +1,81 @@
+{
+ "schema_version": 1,
+ "id": "contracts.delegates",
+ "family": "explore",
+ "protocol": 30,
+ "node": {
+  "soroban_settings": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner",
+    "alice",
+    "bob"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "echo",
+   "source": "owner",
+   "wasm": "contracts/wasm/echo.wasm",
+   "sha256": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "at",
+   "source": "owner",
+   "wasm": "contracts/wasm/auth_tree.wasm",
+   "sha256": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "deploy",
+   "label": "t",
+   "source": "owner",
+   "code": "at",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000008"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "t",
+   "function": "guarded",
+   "args": [
+    {
+     "address": "@account:alice"
+    },
+    {
+     "bool": true
+    }
+   ],
+   "auth": {
+    "mode": "record",
+    "signers": {
+     "alice": []
+    },
+    "delegates": {
+     "alice": [
+      "bob"
+     ]
+    }
+   }
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

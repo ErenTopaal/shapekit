@@ -1,0 +1,126 @@
+{
+ "schema_version": 1,
+ "id": "contracts.error-values",
+ "family": "explore",
+ "protocol": 30,
+ "node": {
+  "soroban_limits": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "echo",
+   "source": "owner",
+   "wasm": "contracts/wasm/echo.wasm",
+   "sha256": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "deploy",
+   "label": "e",
+   "source": "owner",
+   "code": "echo",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000006"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "e",
+   "function": "echo",
+   "args": [
+    {
+     "map": [
+      {
+       "key": {
+        "symbol": "auth"
+       },
+       "val": {
+        "error": {
+         "auth": "invalid_action"
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "context"
+       },
+       "val": {
+        "error": {
+         "context": "internal_error"
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "contract"
+       },
+       "val": {
+        "error": {
+         "contract": 7
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "events"
+       },
+       "val": {
+        "error": {
+         "events": "unexpected_size"
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "object"
+       },
+       "val": {
+        "error": {
+         "object": "index_bounds"
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "storage"
+       },
+       "val": {
+        "error": {
+         "storage": "missing_value"
+        }
+       }
+      },
+      {
+       "key": {
+        "symbol": "value"
+       },
+       "val": {
+        "error": {
+         "value": "invalid_input"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "step": "close"
+  }
+ ]
+}
