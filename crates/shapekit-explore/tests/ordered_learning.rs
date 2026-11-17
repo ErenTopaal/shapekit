@@ -56,6 +56,7 @@ fn a_refused_first_transaction_leaves_the_rest_of_the_order_out() {
             emit_classic_events: true,
             backfill_stellar_asset_events: true,
             emit_ledger_close_meta_ext_v1: false,
+            emit_soroban_transaction_meta_ext_v1: false,
         },
         below_protocol_valid: false,
         steps: Vec::new(),
