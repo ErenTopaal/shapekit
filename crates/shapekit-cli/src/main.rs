@@ -2,6 +2,7 @@
 
 mod audit_cmd;
 mod capture_cmd;
+mod check_cmd;
 mod conformance_cmd;
 mod contracts_cmd;
 mod coretest_cmd;
@@ -15,6 +16,7 @@ mod guide_cmd;
 mod guided_fuzz_cmd;
 mod harness_cmd;
 mod laws_cmd;
+mod lint_cmd;
 mod manifest_cmd;
 mod native_fuzz_cmd;
 mod oracle_cmd;
@@ -33,7 +35,7 @@ mod vectors_cmd;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(
@@ -48,64 +50,85 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Run the corpus through SDK testees or replay it into an indexer.
+    Check {
+        #[command(subcommand)]
+        command: check_cmd::CheckCommand,
+    },
+    /// Run indexerlint over a Go indexer built on go-stellar-sdk.
+    Lint(lint_cmd::LintArgs),
+    /// List the internal commands: the corpus generator, its checks and the maintenance tools.
+    Dev,
     /// Work with pins.toml, the list of every pinned upstream reference.
+    #[command(hide = true)]
     Pins {
         #[command(subcommand)]
         command: PinsCommand,
     },
     /// Work with the shape, field, cap and lint-rule registry.
+    #[command(hide = true)]
     Registry {
         #[command(subcommand)]
         command: RegistryCommand,
     },
     /// Work with the corpus manifest.
+    #[command(hide = true)]
     Manifest {
         #[command(subcommand)]
         command: ManifestCommand,
     },
     /// Run corpus entries through SDK testees: the divergence matrix, reproductions of
     /// upstream sightings, and issue drafting.
+    #[command(hide = true)]
     Conformance {
         #[command(subcommand)]
         command: conformance_cmd::ConformanceCommand,
     },
     /// The meta oracle: what each ledger changed, read from LedgerCloseMeta only.
+    #[command(hide = true)]
     Oracle {
         #[command(subcommand)]
         command: OracleCommand,
     },
     /// Import upstream corpus sources.
+    #[command(hide = true)]
     Import {
         #[command(subcommand)]
         command: ImportCommand,
     },
     /// Checks over imported core goldens.
+    #[command(hide = true)]
     Goldens {
         #[command(subcommand)]
         command: GoldensCommand,
     },
     /// Capture entries from public network history (online).
+    #[command(hide = true)]
     Capture {
         #[command(subcommand)]
         command: CaptureCommand,
     },
     /// Record chains on a private standalone stellar-core (needs docker and
     /// the pinned core image).
+    #[command(hide = true)]
     Gen {
         #[command(subcommand)]
         command: GenCommand,
     },
     /// Hand-crafted synthetic entries and the non-xdr vector kinds.
+    #[command(hide = true)]
     Synth {
         #[command(subcommand)]
         command: SynthCommand,
     },
     /// The indexer-hardening guide: generated tables and their checks.
+    #[command(hide = true)]
     Guide {
         #[command(subcommand)]
         command: guide_cmd::GuideCommand,
     },
     /// Chains in their committed form: SEP-54 lake, archive tar, verification.
+    #[command(hide = true)]
     Pack {
         #[command(subcommand)]
         command: pack_cmd::PackCommand,
@@ -115,80 +138,97 @@ enum Command {
     Serve(serve_cmd::ServeArgs),
     /// Replay chains into an indexer through an adapter and judge what it stored against the
     /// meta oracle.
+    #[command(hide = true)]
     Harness {
         #[command(subcommand)]
         command: harness_cmd::HarnessCommand,
     },
     /// Findings: every harness, conformance and linter failure mapped to a triaged root cause
     /// with its upstream status.
+    #[command(hide = true)]
     Findings {
         #[command(subcommand)]
         command: findings_cmd::FindingsCommand,
     },
     /// Differential decode and re-encode fuzzing, stellar-xdr in process against the go
     /// testee, seeded from the corpus.
+    #[command(hide = true)]
     Fuzz(fuzz_cmd::FuzzArgs),
     /// Each sdk's own coverage-guided fuzzer on its decoder, checked by the encoding laws.
+    #[command(hide = true)]
     NativeFuzz(native_fuzz_cmd::NativeFuzzArgs),
     /// The rust, go and javascript testees fuzzed together, steered by their coverage.
+    #[command(hide = true)]
     GuidedFuzz(guided_fuzz_cmd::GuidedFuzzArgs),
     /// Per-CAP coverage of the corpus: writes corpus/coverage/coverage.json and COVERAGE.md.
+    #[command(hide = true)]
     Coverage(coverage_cmd::CoverageArgs),
     /// The static site in site/: its JSON data, derived from committed files only.
+    #[command(hide = true)]
     Site {
         #[command(subcommand)]
         command: site_cmd::SiteCommand,
     },
     /// The coverage twin of stellar-core: byte equality with the release image, core coverage
     /// of a chain, protocol gates.
+    #[command(hide = true)]
     Twin {
         #[command(subcommand)]
         command: twin_cmd::TwinCommand,
     },
     /// The recipe explorer: recipes found by filling transactions from the schema and the
     /// chain's state, kept when core's ledgers show something new.
+    #[command(hide = true)]
     Explore {
         #[command(subcommand)]
         command: explore_cmd::ExploreCommand,
     },
     /// The law book: laws every ledger satisfies, anchored on the network's own hashes.
+    #[command(hide = true)]
     Laws {
         #[command(subcommand)]
         command: laws_cmd::LawsCommand,
     },
     /// Conformance vectors derived from the schema and the representation gap tables.
+    #[command(hide = true)]
     Vectors {
         #[command(subcommand)]
         command: vectors_cmd::VectorsCommand,
     },
     /// The law book over the public ledger lake: random audits of the history and a watch
     /// over every new ledger.
+    #[command(hide = true)]
     Audit {
         #[command(subcommand)]
         command: audit_cmd::AuditCommand,
     },
     /// The stellar-xdr definitions in schema/xdr/ as data.
+    #[command(hide = true)]
     Schema {
         #[command(subcommand)]
         command: schema_cmd::SchemaCommand,
     },
     /// The data formats the generators and checks exchange, and their schemas.
+    #[command(hide = true)]
     Contracts {
         #[command(subcommand)]
         command: contracts_cmd::ContractsCommand,
     },
     /// The corpus as a release asset.
+    #[command(hide = true)]
     Corpus {
         #[command(subcommand)]
         command: coverage_cmd::CorpusCommand,
     },
     /// Which envelope fields core validates: single-field changes of a valid transaction,
     /// submitted to a standalone core.
+    #[command(hide = true)]
     Probe {
         #[command(subcommand)]
         command: probe_cmd::ProbeCommand,
     },
     /// stellar-core's own [tx] tests at every protocol version and the metas they apply.
+    #[command(hide = true)]
     Coretest {
         #[command(subcommand)]
         command: coretest_cmd::CoretestCommand,
@@ -477,6 +517,26 @@ enum PinsCommand {
     },
 }
 
+/// The hidden top-level commands with their one-line help, the text `shapekit dev` prints.
+fn dev_listing() -> String {
+    let cli = Cli::command();
+    let mut hidden: Vec<_> = cli.get_subcommands().filter(|c| c.is_hide_set()).collect();
+    hidden.sort_by_key(|c| c.get_name());
+    let width = hidden.iter().map(|c| c.get_name().len()).max().unwrap_or(0);
+    let mut out = String::from(
+        "Internal commands: the corpus generator, its checks and the maintenance tools.\n\
+         They are left out of `shapekit --help`; run them as `shapekit <command>`, and see\n\
+         `shapekit <command> --help` for each.\n\n",
+    );
+    for c in hidden {
+        let about = c.get_about().map(|a| a.to_string()).unwrap_or_default();
+        let first = about.split_once(". ").map_or(about.as_str(), |(f, _)| f);
+        let first = first.trim_end_matches('.');
+        out.push_str(&format!("  {:width$}  {first}\n", c.get_name()));
+    }
+    out
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let result = match cli.command {
@@ -665,6 +725,12 @@ fn main() -> ExitCode {
         Command::Explore { command } => explore_cmd::run(command),
         Command::Vectors { command } => vectors_cmd::run(command),
         Command::Audit { command } => audit_cmd::run(command),
+        Command::Check { command } => check_cmd::run(command),
+        Command::Lint(args) => lint_cmd::run(args),
+        Command::Dev => {
+            print!("{}", dev_listing());
+            Ok(true)
+        }
     };
     match result {
         Ok(true) => ExitCode::SUCCESS,
@@ -672,6 +738,101 @@ fn main() -> ExitCode {
         Err(err) => {
             eprintln!("error: {err:#}");
             ExitCode::from(2)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cli_is_consistent() {
+        Cli::command().debug_assert();
+    }
+
+    // the user commands are the whole of `shapekit --help`; every internal command keeps its
+    // path, so scripts and workflows that call it still parse
+    #[test]
+    fn visible_and_internal_commands() {
+        let cli = Cli::command();
+        let visible: Vec<_> = cli
+            .get_subcommands()
+            .filter(|c| !c.is_hide_set())
+            .map(|c| c.get_name())
+            .collect();
+        assert_eq!(visible, ["check", "lint", "dev", "serve"]);
+        let internal = [
+            "twin",
+            "explore",
+            "probe",
+            "coretest",
+            "gen",
+            "laws",
+            "contracts",
+            "schema",
+            "vectors",
+            "synth",
+            "import",
+            "capture",
+            "goldens",
+            "oracle",
+            "pack",
+            "site",
+            "registry",
+            "manifest",
+            "audit",
+            "fuzz",
+            "native-fuzz",
+            "guided-fuzz",
+            "pins",
+            "corpus",
+            "coverage",
+            "guide",
+            "findings",
+            "conformance",
+            "harness",
+        ];
+        let listing = dev_listing();
+        for name in internal {
+            let c = cli
+                .find_subcommand(name)
+                .unwrap_or_else(|| panic!("{name} is gone"));
+            assert!(c.is_hide_set(), "{name} is listed in --help");
+            assert!(
+                listing.contains(&format!("  {name} ")),
+                "{name} missing from dev"
+            );
+        }
+        assert_eq!(
+            cli.get_subcommands().filter(|c| c.is_hide_set()).count(),
+            internal.len()
+        );
+        for argv in [
+            &["shapekit", "registry", "check"][..],
+            &[
+                "shapekit",
+                "conformance",
+                "run",
+                "--sdk",
+                "rust",
+                "--no-build",
+            ],
+            &["shapekit", "harness", "run", "--adapter", "a"],
+            &["shapekit", "check", "sdk", "--sdk", "go", "--all-versions"],
+            &[
+                "shapekit",
+                "check",
+                "indexer",
+                "--adapter",
+                "a b",
+                "--chain",
+                "c",
+            ],
+            &["shapekit", "lint", "dir", "--baseline", "b.json", "--json"],
+            &["shapekit", "dev"],
+        ] {
+            Cli::try_parse_from(argv).unwrap_or_else(|e| panic!("{argv:?}: {e}"));
         }
     }
 }

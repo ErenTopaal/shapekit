@@ -91,38 +91,38 @@ pub struct Common {
 pub struct RunArgs {
     /// The adapter command line, split on whitespace; quote an argument with ' or ".
     #[arg(long)]
-    adapter: String,
+    pub(crate) adapter: String,
     /// Only entries of this family; repeatable.
     #[arg(long)]
-    family: Vec<String>,
+    pub(crate) family: Vec<String>,
     /// Only this chain id; repeatable.
     #[arg(long)]
-    chain: Vec<String>,
+    pub(crate) chain: Vec<String>,
     /// A chain outside the corpus, as `<name>=<dir>` where `<dir>` is laid out like
     /// `corpus/chains/<chain>/<network>`; repeatable. Run for its dump alone, with no entry to
     /// judge, from its first checkpoint; the corpus selection is not used.
     #[arg(long, value_name = "NAME=DIR")]
-    chain_dir: Vec<String>,
+    pub(crate) chain_dir: Vec<String>,
     #[arg(long, default_value = "testnet", value_parser = ["testnet", "mainnet", "both"])]
-    network: String,
+    pub(crate) network: String,
     #[arg(long, default_value = "harness-out")]
-    out: PathBuf,
+    pub(crate) out: PathBuf,
     /// Run the whole selection this many times in one process and fail when a later round's
     /// peak memory grows past the first round's.
     #[arg(long, default_value_t = 1)]
-    repeat: u32,
+    pub(crate) repeat: u32,
     /// Allowed growth of a later round's peak resident memory, as a fraction of the first.
     #[arg(long, default_value_t = 0.1)]
-    memory_slack: f64,
+    pub(crate) memory_slack: f64,
     /// Fail when any round's peak resident memory exceeds this many bytes.
     #[arg(long)]
-    memory_budget: Option<u64>,
+    pub(crate) memory_budget: Option<u64>,
     /// Expected verdicts (see `harness expect`): fail when any entry's verdict or reason
     /// differs, an entry is missing or unlisted, or the target build is another one.
     #[arg(long)]
-    expect: Option<PathBuf>,
+    pub(crate) expect: Option<PathBuf>,
     #[command(flatten)]
-    common: Common,
+    pub(crate) common: Common,
 }
 
 #[derive(Subcommand)]

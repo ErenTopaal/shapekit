@@ -89,13 +89,15 @@ its XDR type, files, CAPs, protocol and expected values; the schema is
 Needs the toolchain of that SDK (cargo, go or node).
 
 ```sh
-shapekit conformance run --sdk js                  # current version, @stellar/stellar-sdk 17.4.0
-shapekit conformance run --sdk go --all-versions   # every version in conformance/versions.toml
-shapekit conformance reproduce                     # the upstream sightings fail before and pass after their fixes
+shapekit check sdk --sdk js                  # current version, @stellar/stellar-sdk 17.4.0
+shapekit check sdk --sdk go --all-versions   # every version in conformance/versions.toml
+shapekit check sdk                           # every SDK at its current version
 ```
 
-The divergence matrix is written to `target/conformance/MATRIX.md`. To run the corpus in an SDK
-repository's own CI, see [docs/sdk-ci.md](docs/sdk-ci.md).
+The divergence matrix is written to `target/conformance/MATRIX.md`. `shapekit check sdk` is
+`shapekit conformance run` with the options most runs need; `shapekit conformance run --help`
+lists the rest. To run the corpus in an SDK repository's own CI, see
+[docs/sdk-ci.md](docs/sdk-ci.md).
 
 ### Replay chains into an indexer
 
@@ -104,22 +106,34 @@ it runs offline.
 
 ```sh
 docker pull "$(scripts/pin.sh image timescaledb)"
-shapekit harness run --adapter "adapters/bin/wb-adapter --commit $(scripts/pin.sh git wallet-backend)" \
-  --chain cap40.signed-payload-signer.p30 --network testnet
-shapekit harness reproduce --table adapters/walletbackend/reproductions.toml
+shapekit check indexer --adapter "adapters/bin/wb-adapter --commit $(scripts/pin.sh git wallet-backend)" \
+  --chain cap40.signed-payload-signer.p30
 ```
 
-Results are in `harness-out/HARNESS.md`. To put another indexer behind the harness, write an
-adapter as described in [docs/adapter-interface.md](docs/adapter-interface.md).
+Without `--chain` or `--family` every chain in the corpus is replayed. Results are in
+`harness-out/HARNESS.md`. `shapekit check indexer` is `shapekit harness run` with the options
+most runs need; `shapekit harness run --help` lists the rest. To put another indexer behind the
+harness, write an adapter as described in [docs/adapter-interface.md](docs/adapter-interface.md).
 
 ### Lint Go indexer code
 
 ```sh
-cd <your indexer> && indexerlint ./...
+shapekit lint <your indexer>                                  # indexerlint ./... in that module
+shapekit lint <your indexer> --baseline indexerlint-baseline.json --json
 ```
 
-Rules, suppressions and the baseline file are described in [docs/linter.md](docs/linter.md).
-The same checks are a checklist in the guide for indexers in other languages.
+`shapekit lint` starts `indexerlint`, so the linter binary has to be on `PATH` (or named with
+`--linter`), and the Go toolchain too, since the linter loads packages with it. Run on its own,
+`indexerlint ./...` does the same. Rules, suppressions and the baseline file are described in
+[docs/linter.md](docs/linter.md). The same checks are a checklist in the guide for indexers in
+other languages.
+
+### Internal commands
+
+`shapekit --help` lists the commands above. The corpus generator, its checks, the upstream
+reproductions and the other maintenance tools (`gen`, `twin`, `conformance`, `harness`,
+`registry` and the rest) work the same way but are left out of that list; `shapekit dev` lists
+them with one line each.
 
 ### The guide as a stellar-docs change
 
