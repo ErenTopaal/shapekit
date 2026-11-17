@@ -4,6 +4,6 @@ Written by `shapekit conformance run --dataset`. 431546 metas core wrote in its 
 
 | testee | distinct | round-trip | fail | beyond max_protocol | sections passing |
 |---|---|---|---|---|---|
-| rust@30.0.0 | 28142 | 28142 | 0 | 0 | 29691 of 29691 |
 | go@v0.9.0 | 28142 | 28142 | 0 | 0 | 29691 of 29691 |
 | js@17.4.0 | 28142 | 28142 | 0 | 0 | 29691 of 29691 |
+| rust@30.0.0 | 28142 | 28142 | 0 | 0 | 29691 of 29691 |
