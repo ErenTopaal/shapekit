@@ -75,7 +75,10 @@ impl<'a> Filler<'a> {
         if union == "OperationBody" && !self.world.books.is_empty() && self.rng.chance(1, 3) {
             let offers: Vec<&crate::world::BookOffer> = self.world.books.values().collect();
             let o = (*self.rng.pick(&offers)).clone();
-            let amount = self.int64(Some("amount"));
+            // small next to the book's offer, so the taker's balance and line fit it
+            let amount = Value::String(
+                (*self.rng.pick(&[1, 7, 100, (o.amount / 2).max(1), o.amount])).to_string(),
+            );
             match arm {
                 "manage_sell_offer" | "create_passive_sell_offer" | "manage_buy_offer" => {
                     self.source_hint = self.holder_of(&o.buying, &o.selling, &o.seller);
@@ -128,6 +131,73 @@ impl<'a> Filler<'a> {
                 _ => {}
             }
         }
+        // a deposit or withdrawal into a pool someone holds shares of, from that holder
+        if union == "OperationBody"
+            && matches!(arm, "liquidity_pool_deposit" | "liquidity_pool_withdraw")
+            && self.rng.chance(2, 3)
+        {
+            let pools: Vec<(String, Vec<String>)> = self
+                .world
+                .holders
+                .iter()
+                .filter(|(k, _)| k.contains("pool_share"))
+                .map(|(k, v)| (k.clone(), v.iter().cloned().collect()))
+                .collect();
+            if !pools.is_empty() {
+                let (k, holders) = self.rng.pick(&pools).clone();
+                if let Ok(Value::Object(m)) = serde_json::from_str::<Value>(&k)
+                    && let Some(id) = m.get("pool_share")
+                    && let Some(body) = self.plain_arm(union, arm)
+                {
+                    let mut body = body;
+                    body[arm]["liquidity_pool_id"] = id.clone();
+                    let h = self.rng.pick(&holders).clone();
+                    if self.world.funded.contains(&h) {
+                        self.source_hint = Some(h);
+                    }
+                    return Some(body);
+                }
+            }
+        }
+        let body = self.plain_arm(union, arm)?;
+        // operations on a credit asset's trustlines and holdings only work from its issuer
+        if union == "OperationBody"
+            && matches!(
+                arm,
+                "allow_trust" | "set_trust_line_flags" | "clawback" | "clawback_claimable_balance"
+            )
+            && self.rng.chance(3, 4)
+        {
+            let text = body.to_string();
+            let issuers: Vec<String> = self
+                .world
+                .issuers
+                .iter()
+                .filter(|i| text.contains(&format!("\"issuer\":\"@account:{i}\"")))
+                .cloned()
+                .collect();
+            let pick = if issuers.is_empty() {
+                self.world.issuers.clone()
+            } else {
+                issuers
+            };
+            if !pick.is_empty() {
+                self.source_hint = Some(self.rng.pick(&pick).clone());
+            }
+        }
+        // account flags matter on an issuer's account
+        if union == "OperationBody"
+            && arm == "set_options"
+            && body.to_string().contains("set_flags\":")
+            && !self.world.issuers.is_empty()
+            && self.rng.chance(1, 2)
+        {
+            self.source_hint = Some(self.rng.pick(&self.world.issuers).clone());
+        }
+        Some(body)
+    }
+
+    fn plain_arm(&mut self, union: &str, arm: &str) -> Option<Value> {
         let Some(Definition::Union(u)) = self.schema.get(union) else {
             return None;
         };
