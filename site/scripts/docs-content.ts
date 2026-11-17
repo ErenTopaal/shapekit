@@ -60,6 +60,7 @@ const groups: Group[] = [
     docs: [
       { source: "docs/adapter-interface.md", slug: "adapter-interface" },
       { source: "docs/replay-server.md", slug: "replay-server" },
+      { source: "docs/indexer-ci.md", slug: "indexer-ci" },
     ],
   },
   {
