@@ -845,7 +845,7 @@ Every obligation the corpus owes a witness for, from `corpus/coverage/obligation
 | `core-test-section` | 29691 | 0 | 0 | 29691 |
 | `gate-side` | 353 by branch count, 129 inferred from execution count | 0 | 208 | 690 |
 | `field` | 203 | 0 | 0 | 203 |
-| `sdk-version` | 21 | 0 | 0 | 21 |
+| `sdk-version` | 25 | 0 | 0 | 25 |
 | `seed` | 72 | 0 | 142 | 214 |
 
 ## Uncovered records against the candidate lane

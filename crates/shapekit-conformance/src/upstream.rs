@@ -351,6 +351,329 @@ pub fn soroban_sdk_xdr_crate(http: &Http, name: &str, version: &str) -> Result<S
     crate_exact_dep(http, "soroban-env-common", &common, "stellar-xdr")
 }
 
+// ---- pub.dev
+
+pub fn pub_published(http: &Http, name: &str) -> Result<Published> {
+    #[derive(Deserialize)]
+    struct Package {
+        latest: V,
+        versions: Vec<V>,
+    }
+    #[derive(Deserialize)]
+    struct V {
+        version: String,
+        published: String,
+        #[serde(default)]
+        retracted: bool,
+    }
+    let url = format!("https://pub.dev/api/packages/{name}");
+    let pkg: Package =
+        serde_json::from_str(&http.get_text(&url)?).with_context(|| format!("parsing {url}"))?;
+    Ok(Published {
+        releases: pkg
+            .versions
+            .into_iter()
+            .map(|v| Release {
+                version: v.version,
+                published: v.published,
+                withdrawn: v.retracted.then(|| "retracted".to_string()),
+            })
+            .collect(),
+        latest: pkg.latest.version,
+    })
+}
+
+/// The stellar-xdr commit a pub.dev release's Makefile names (`XDR_COMMIT`), read from the
+/// archive pub.dev serves for that version.
+pub fn pub_xdr_commit(http: &Http, name: &str, version: &str) -> Result<String> {
+    let url = format!("https://pub.dev/api/archives/{name}-{version}.tar.gz");
+    let bytes = http.get_bytes(&url)?;
+    let mut archive = tar::Archive::new(flate2::read::GzDecoder::new(&bytes[..]));
+    for entry in archive
+        .entries()
+        .with_context(|| format!("reading {url}"))?
+    {
+        let mut entry = entry.with_context(|| format!("reading {url}"))?;
+        if entry.path()?.to_str() == Some("Makefile") {
+            let mut text = String::new();
+            entry
+                .read_to_string(&mut text)
+                .context("reading the Makefile")?;
+            return makefile_xdr_commit(&text).with_context(|| format!("the Makefile in {url}"));
+        }
+    }
+    bail!("{url} has no Makefile")
+}
+
+/// The release tag behind a stellar/stellar-xdr commit that is no tag itself but a commit of
+/// the `curr` branch generated from one: its message is `Generate from main (<sha>)` and the
+/// short sha is a tag's commit. sdks generated with xdrgen pin such commits, because the
+/// `main` branch carries preprocessor directives xdrgen cannot read.
+pub fn xdr_curr_source(http: &Http, tags: &[XdrTag], commit: &str) -> Result<String> {
+    #[derive(Deserialize)]
+    struct C {
+        commit: Inner,
+    }
+    #[derive(Deserialize)]
+    struct Inner {
+        message: String,
+    }
+    let repo = XDR_REPO.trim_start_matches("https://github.com/");
+    let c: C = serde_json::from_str(&http.github_api(&format!("repos/{repo}/commits/{commit}"))?)
+        .with_context(|| format!("parsing stellar-xdr commit {commit}"))?;
+    let first = c.commit.message.lines().next().unwrap_or("");
+    let short = first
+        .strip_prefix("Generate from main (")
+        .and_then(|r| r.strip_suffix(')'))
+        .with_context(|| {
+            format!("stellar-xdr commit {commit} is no tag and says {first:?}, not generated from a main commit")
+        })?;
+    ensure!(
+        short.len() >= 7 && short.bytes().all(|b| b.is_ascii_hexdigit()),
+        "stellar-xdr commit {commit} names {short:?}, which is no commit"
+    );
+    let tag = tags
+        .iter()
+        .find(|t| t.commit.starts_with(short))
+        .with_context(|| {
+            format!(
+                "stellar-xdr commit {commit} was generated from {short}, which is at no release tag"
+            )
+        })?;
+    Ok(tag.commit.clone())
+}
+
+// ---- packagist
+
+/// Every version of a package with its fields, from packagist's composer/2.0 metadata. The
+/// format is minified: a version lists only the fields that differ from the version before it,
+/// and `__unset` removes one, so each version is expanded from its predecessor.
+fn packagist_versions(
+    http: &Http,
+    name: &str,
+) -> Result<Vec<serde_json::Map<String, serde_json::Value>>> {
+    let url = format!("https://repo.packagist.org/p2/{name}.json");
+    let doc: serde_json::Value =
+        serde_json::from_str(&http.get_text(&url)?).with_context(|| format!("parsing {url}"))?;
+    ensure!(
+        doc["minified"].as_str() == Some("composer/2.0"),
+        "{url} is not composer/2.0 minified metadata"
+    );
+    let list = doc["packages"][name]
+        .as_array()
+        .with_context(|| format!("{url} lists no versions of {name}"))?;
+    let mut out = Vec::new();
+    let mut current = serde_json::Map::new();
+    for v in list {
+        let v = v
+            .as_object()
+            .with_context(|| format!("{url}: a version is not an object"))?;
+        for (k, x) in v {
+            if x.as_str() == Some("__unset") {
+                current.remove(k);
+            } else {
+                current.insert(k.clone(), x.clone());
+            }
+        }
+        out.push(current.clone());
+    }
+    Ok(out)
+}
+
+pub fn packagist_published(http: &Http, name: &str) -> Result<Published> {
+    let mut releases = Vec::new();
+    for v in packagist_versions(http, name)? {
+        let version = v["version"].as_str().context("a version without version")?;
+        let time = v["time"]
+            .as_str()
+            .with_context(|| format!("{version} has no time"))?;
+        releases.push(Release {
+            version: version.to_string(),
+            published: time.to_string(),
+            withdrawn: v.get("abandoned").map(|_| "abandoned".to_string()),
+        });
+    }
+    let latest = releases
+        .iter()
+        .filter_map(|r| crate::sync::stable_triple(&r.version).map(|s| (s, r)))
+        .max_by_key(|(s, _)| *s)
+        .map(|(_, r)| r.version.clone())
+        .with_context(|| format!("packagist lists no stable version of {name}"))?;
+    Ok(Published { releases, latest })
+}
+
+/// The stellar-xdr commit the `XDR_COMMIT` line of a packagist release's Makefile names, read
+/// on GitHub at the commit packagist records as the release's source reference.
+pub fn packagist_xdr_commit(http: &Http, name: &str, version: &str) -> Result<String> {
+    let v = packagist_versions(http, name)?
+        .into_iter()
+        .find(|v| v["version"].as_str() == Some(version))
+        .with_context(|| format!("packagist has no {name} {version}"))?;
+    let repo = github_repo(v["source"]["url"].as_str().context("no source url")?)?;
+    let reference = commit_hash(
+        v["source"]["reference"]
+            .as_str()
+            .context("no source reference")?,
+    )?;
+    let url = format!("https://raw.githubusercontent.com/{repo}/{reference}/Makefile");
+    makefile_xdr_commit(&http.get_text(&url)?).with_context(|| format!("reading {url}"))
+}
+
+// ---- nuget
+
+/// Every catalog entry of a package from NuGet's registration index; pages the index does
+/// not inline are fetched.
+fn nuget_entries(http: &Http, id: &str) -> Result<Vec<serde_json::Value>> {
+    let lower = id.to_lowercase();
+    let url = format!("https://api.nuget.org/v3/registration5-semver1/{lower}/index.json");
+    let index: serde_json::Value =
+        serde_json::from_str(&http.get_text(&url)?).with_context(|| format!("parsing {url}"))?;
+    let mut out = Vec::new();
+    for page in index["items"]
+        .as_array()
+        .with_context(|| format!("{url} has no pages"))?
+    {
+        let items = match page["items"].as_array() {
+            Some(items) => items.clone(),
+            None => {
+                let page_url = page["@id"].as_str().context("a page without @id")?;
+                let p: serde_json::Value = serde_json::from_str(&http.get_text(page_url)?)
+                    .with_context(|| format!("parsing {page_url}"))?;
+                p["items"].as_array().cloned().unwrap_or_default()
+            }
+        };
+        out.extend(items.into_iter().map(|i| i["catalogEntry"].clone()));
+    }
+    Ok(out)
+}
+
+pub fn nuget_published(http: &Http, id: &str) -> Result<Published> {
+    let mut releases = Vec::new();
+    for e in nuget_entries(http, id)? {
+        let version = e["version"].as_str().context("an entry without version")?;
+        let published = e["published"]
+            .as_str()
+            .with_context(|| format!("{version} has no published"))?;
+        let withdrawn = if e["listed"].as_bool() == Some(false) {
+            Some("unlisted".to_string())
+        } else if !e["deprecation"].is_null() {
+            Some("deprecated".to_string())
+        } else {
+            None
+        };
+        releases.push(Release {
+            version: version.to_string(),
+            published: published.to_string(),
+            withdrawn,
+        });
+    }
+    let latest = releases
+        .iter()
+        .filter(|r| r.withdrawn.is_none())
+        .filter_map(|r| crate::sync::stable_triple(&r.version).map(|s| (s, r)))
+        .max_by_key(|(s, _)| *s)
+        .map(|(_, r)| r.version.clone())
+        .with_context(|| format!("nuget lists no stable version of {id}"))?;
+    Ok(Published { releases, latest })
+}
+
+/// The git blob ids of the `.x` files under a directory of a GitHub tree, by file name.
+fn x_blobs(http: &Http, repo: &str, commit: &str, dir: &str) -> Result<BTreeMap<String, String>> {
+    #[derive(Deserialize)]
+    struct Tree {
+        tree: Vec<Node>,
+        #[serde(default)]
+        truncated: bool,
+    }
+    #[derive(Deserialize)]
+    struct Node {
+        path: String,
+        sha: String,
+    }
+    let recursive = if dir.is_empty() { "" } else { "?recursive=1" };
+    let t: Tree = serde_json::from_str(
+        &http.github_api(&format!("repos/{repo}/git/trees/{commit}{recursive}"))?,
+    )
+    .with_context(|| format!("parsing the tree of {repo} at {commit}"))?;
+    ensure!(!t.truncated, "the tree of {repo} at {commit} is truncated");
+    let prefix = if dir.is_empty() {
+        String::new()
+    } else {
+        format!("{dir}/")
+    };
+    Ok(t.tree
+        .into_iter()
+        .filter_map(|n| {
+            let name = n.path.strip_prefix(&prefix)?;
+            (name.ends_with(".x") && !name.contains('/')).then(|| (name.to_string(), n.sha))
+        })
+        .collect())
+}
+
+/// The stellar-xdr commit whose `.x` files are, byte for byte, the ones a stellar-dotnet-sdk
+/// release ships in StellarDotnetSdk.Xdr/schemes/ at the commit its nuspec records. The sdk
+/// names no commit, so the files are compared by git blob id with the release tags and with
+/// the `curr` branch commits generated from them (see [`xdr_curr_source`]).
+pub fn nuget_xdr_commit(http: &Http, tags: &[XdrTag], id: &str, version: &str) -> Result<String> {
+    let lower = id.to_lowercase();
+    let url = format!("https://api.nuget.org/v3-flatcontainer/{lower}/{version}/{lower}.nuspec");
+    let nuspec = http.get_text(&url)?;
+    let repo_tag = nuspec
+        .lines()
+        .find(|l| l.contains("<repository"))
+        .with_context(|| format!("{url} names no repository"))?;
+    let attr = |name: &str| -> Result<String> {
+        let start = repo_tag
+            .find(&format!("{name}=\""))
+            .with_context(|| format!("the repository element of {url} has no {name}"))?
+            + name.len()
+            + 2;
+        let end = repo_tag[start..]
+            .find('"')
+            .context("an unterminated attribute")?
+            + start;
+        Ok(repo_tag[start..end].to_string())
+    };
+    let repo = github_repo(&attr("url")?)?;
+    let commit = commit_hash(&attr("commit")?)?;
+    let want = x_blobs(http, &repo, &commit, "StellarDotnetSdk.Xdr/schemes")?;
+    ensure!(
+        !want.is_empty(),
+        "{repo} at {commit} ships no .x files in StellarDotnetSdk.Xdr/schemes"
+    );
+    let xdr = XDR_REPO.trim_start_matches("https://github.com/");
+    let matches = |c: &str| -> Result<bool> {
+        let have = x_blobs(http, xdr, c, "")?;
+        Ok(want.iter().all(|(n, sha)| have.get(n) == Some(sha)))
+    };
+    for t in tags.iter().rev() {
+        if matches(&t.commit)? {
+            return Ok(t.commit.clone());
+        }
+    }
+    #[derive(Deserialize)]
+    struct C {
+        sha: String,
+        commit: Inner,
+    }
+    #[derive(Deserialize)]
+    struct Inner {
+        message: String,
+    }
+    let curr: Vec<C> = serde_json::from_str(
+        &http.github_api(&format!("repos/{xdr}/commits?sha=curr&per_page=100"))?,
+    )
+    .context("parsing stellar-xdr's curr commits")?;
+    for c in curr {
+        if c.commit.message.starts_with("Generate from main (") && matches(&c.sha)? {
+            return Ok(c.sha);
+        }
+    }
+    bail!(
+        "the .x files of {id} {version} match no stellar-xdr release tag and no generated curr commit"
+    )
+}
+
 // ---- the go module proxy
 
 const GO_PROXY: &str = "https://proxy.golang.org";

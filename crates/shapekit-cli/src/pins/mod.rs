@@ -42,6 +42,10 @@ pub enum Toolchain {
     Rust,
     Go,
     Node,
+    Flutter,
+    Php,
+    Composer,
+    Dotnet,
 }
 
 #[derive(Debug, Deserialize)]
@@ -51,6 +55,10 @@ pub struct ToolchainPin {
     pub version: String,
     pub artifact: String,
     pub sha256: String,
+    /// The sha512 the upstream publishes, where it publishes no sha256 (.NET); the sha256 is
+    /// then computed from the artifact that matched it.
+    #[serde(default)]
+    pub sha512: Option<String>,
     pub purpose: String,
 }
 

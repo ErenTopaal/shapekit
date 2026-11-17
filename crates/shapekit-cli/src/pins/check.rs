@@ -220,6 +220,87 @@ pub fn check_node(
     Ok(format!("{want}, {artifact} sha256 matches"))
 }
 
+/// Checks Flutter's release index (`releases_linux.json`): the version is a stable release
+/// whose archive is the pinned artifact with the pinned sha256.
+pub fn check_flutter(index: &str, version: &str, artifact: &str, sha256: &str) -> Verdict {
+    let doc: Value =
+        serde_json::from_str(index).map_err(|e| format!("bad flutter release index: {e}"))?;
+    let release = doc["releases"]
+        .as_array()
+        .ok_or("the flutter release index has no releases")?
+        .iter()
+        .find(|r| r["version"].as_str() == Some(version) && r["channel"].as_str() == Some("stable"))
+        .ok_or_else(|| format!("{version} is no stable release in the flutter release index"))?;
+    let archive = release["archive"].as_str().unwrap_or("");
+    if archive.rsplit('/').next() != Some(artifact) {
+        return Err(format!(
+            "{version}'s archive is {archive}, pinned {artifact}"
+        ));
+    }
+    let hash = release["sha256"].as_str().unwrap_or("");
+    if hash != sha256 {
+        return Err(format!("{artifact} sha256 is {hash}, pinned {sha256}"));
+    }
+    Ok(format!("{version}, {artifact} sha256 matches"))
+}
+
+/// Checks php.net's release document for a version: its source list holds the pinned artifact
+/// with the pinned sha256.
+pub fn check_php(doc: &str, version: &str, artifact: &str, sha256: &str) -> Verdict {
+    let doc: Value =
+        serde_json::from_str(doc).map_err(|e| format!("bad php.net release document: {e}"))?;
+    let hash = doc["source"]
+        .as_array()
+        .ok_or_else(|| format!("php.net lists no source files for {version}"))?
+        .iter()
+        .find(|f| f["filename"].as_str() == Some(artifact))
+        .and_then(|f| f["sha256"].as_str())
+        .ok_or_else(|| format!("php.net lists no {artifact} for {version}"))?;
+    if hash != sha256 {
+        return Err(format!("{artifact} sha256 is {hash}, pinned {sha256}"));
+    }
+    Ok(format!("{version}, {artifact} sha256 matches"))
+}
+
+/// Checks the sha256sum file getcomposer.org publishes next to a release's composer.phar.
+pub fn check_composer(sums: &str, version: &str, artifact: &str, sha256: &str) -> Verdict {
+    let hash = sums
+        .lines()
+        .filter_map(|l| l.split_once("  "))
+        .find(|(_, name)| *name == artifact)
+        .map(|(h, _)| h)
+        .ok_or_else(|| format!("the composer {version} checksum file has no {artifact}"))?;
+    if hash != sha256 {
+        return Err(format!("{artifact} sha256 is {hash}, pinned {sha256}"));
+    }
+    Ok(format!("{version}, {artifact} sha256 matches"))
+}
+
+/// Checks a .NET channel's releases.json: an sdk of the pinned version lists the pinned
+/// artifact with the pinned sha512, the only hash Microsoft publishes for it.
+pub fn check_dotnet(doc: &str, version: &str, artifact: &str, hash: &str) -> Verdict {
+    let doc: Value =
+        serde_json::from_str(doc).map_err(|e| format!("bad .NET release metadata: {e}"))?;
+    let file = doc["releases"]
+        .as_array()
+        .ok_or("the .NET release metadata has no releases")?
+        .iter()
+        .flat_map(|r| r["sdks"].as_array().cloned().unwrap_or_default())
+        .filter(|sdk| sdk["version"].as_str() == Some(version))
+        .flat_map(|sdk| sdk["files"].as_array().cloned().unwrap_or_default())
+        .find(|f| {
+            f["url"]
+                .as_str()
+                .is_some_and(|u| u.ends_with(&format!("/{artifact}")))
+        })
+        .ok_or_else(|| format!("no .NET sdk {version} lists {artifact}"))?;
+    let got = file["hash"].as_str().unwrap_or("");
+    if got != hash {
+        return Err(format!("{artifact} sha512 is {got}, pinned {hash}"));
+    }
+    Ok(format!("{version}, {artifact} sha512 matches"))
+}
+
 /// Checks GitHub's release document for a tag (`/repos/{owner}/{repo}/releases/tags/{tag}`):
 /// a published, non-prerelease release that holds the asset, and the sha256 digest GitHub
 /// computed for the asset on upload.
@@ -641,5 +722,62 @@ mod tests {
             .is_err()
         );
         assert!(check_image_digest(None, pinned).is_err());
+    }
+
+    const FLUTTER_INDEX: &str = r#"{"releases": [
+        {"version": "3.50.0", "channel": "stable", "archive": "stable/linux/flutter_linux_3.50.0-stable.tar.xz", "sha256": "aa"},
+        {"version": "3.51.0-0.1.pre", "channel": "beta", "archive": "beta/linux/flutter_linux_3.51.0-0.1.pre-beta.tar.xz", "sha256": "bb"}
+    ]}"#;
+
+    #[test]
+    fn flutter_pin_matches_the_release_index() {
+        assert!(
+            check_flutter(
+                FLUTTER_INDEX,
+                "3.50.0",
+                "flutter_linux_3.50.0-stable.tar.xz",
+                "aa"
+            )
+            .is_ok()
+        );
+        assert!(
+            check_flutter(
+                FLUTTER_INDEX,
+                "3.50.0",
+                "flutter_linux_3.50.0-stable.tar.xz",
+                "ab"
+            )
+            .is_err()
+        );
+        assert!(
+            check_flutter(
+                FLUTTER_INDEX,
+                "3.51.0-0.1.pre",
+                "flutter_linux_3.51.0-0.1.pre-beta.tar.xz",
+                "bb"
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn php_and_composer_pins_match_their_checksums() {
+        let php = r#"{"source": [{"filename": "php-8.5.12.tar.xz", "sha256": "aa"}]}"#;
+        assert!(check_php(php, "8.5.12", "php-8.5.12.tar.xz", "aa").is_ok());
+        assert!(check_php(php, "8.5.12", "php-8.5.12.tar.xz", "ab").is_err());
+        assert!(check_php(php, "8.5.12", "php-8.5.12.tar.gz", "aa").is_err());
+        let sums = "aa  composer.phar\n";
+        assert!(check_composer(sums, "2.11.2", "composer.phar", "aa").is_ok());
+        assert!(check_composer(sums, "2.11.2", "composer.phar", "ab").is_err());
+    }
+
+    #[test]
+    fn dotnet_pin_matches_the_release_metadata() {
+        let doc = r#"{"releases": [{"sdks": [{"version": "11.0.100", "files": [
+            {"url": "https://x/dotnet-sdk-11.0.100-linux-x64.tar.gz", "hash": "aa"}]}]}]}"#;
+        let a = "dotnet-sdk-11.0.100-linux-x64.tar.gz";
+        assert!(check_dotnet(doc, "11.0.100", a, "aa").is_ok());
+        assert!(check_dotnet(doc, "11.0.100", a, "ab").is_err());
+        assert!(check_dotnet(doc, "11.0.101", a, "aa").is_err());
     }
 }

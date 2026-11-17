@@ -20,6 +20,36 @@
       "command": "shapekit harness run --chain cap27.muxed-accounts.p30 --chain cap40.signed-payload-signer.p30 --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89",
       "reduction": "none",
       "describes": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 34 entries, manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-dart.json",
+      "sha256": "9c1ec705021c93477c8b11bba6ebc126a44a2aa040154fb59689e8f23bdf9630",
+      "from": "target/conformance/dart/divergence-matrix.json",
+      "from_sha256": "ee360b33fc8a95bf3a664d5c7c6eb988c53c946c235cb2a4e17e8e149b5e606c",
+      "command": "shapekit conformance run --sdk dart --all-versions --out target/conformance/dart",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, dart@3.12.0"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-dotnet.json",
+      "sha256": "e9ec43f67e89d05edbd947cd8770fd57808d7c13813cc1ae3da81372dd495882",
+      "from": "target/conformance/dotnet/divergence-matrix.json",
+      "from_sha256": "4317bd3513df8f739099bd2c2c941bc049d31283f1fc2bcc98316da0fb8593ed",
+      "command": "shapekit conformance run --sdk dotnet --all-versions --out target/conformance/dotnet",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, dotnet@16.0.0 dotnet@17.0.0"
+    },
+    {
+      "kind": "conformance",
+      "path": "candidate/findings/inputs/conformance-php.json",
+      "sha256": "2d2a34a6fe8f3b6b9d7f23eb1421792552496f34f8950730286fc93bc034def8",
+      "from": "target/conformance/php/divergence-matrix.json",
+      "from_sha256": "5f11ac100905563f917927e340f2bba5da22170d9c118f49d5b3fa639b60f0b2",
+      "command": "shapekit conformance run --sdk php --all-versions --out target/conformance/php",
+      "reduction": "failing cells only, with their failing checks; check details cut to 400 characters",
+      "describes": "corpus 0.1.0, php@1.18.0"
     }
   ]
 }

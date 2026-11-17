@@ -12,7 +12,7 @@
 #
 # needs cargo, go, golangci-lint, node and npm on PATH, and network access once to fetch the python
 # and java testees' pinned uv, cpython, jdk and maven into target/toolchains/; full mode also
-# needs docker and network
+# needs docker, flutter, php, composer, dotnet and network
 # access, and the wasm32v1-none rust target for the test contracts. runs from
 # the repository root wherever it is started, builds without debug info, and writes run
 # outputs to target/acceptance/.
@@ -49,6 +49,12 @@ if [ "$mode" = full ] && ! command -v docker >/dev/null; then
   echo "acceptance: full mode needs docker" >&2
   exit 2
 fi
+for tool in flutter php composer dotnet; do
+  if [ "$mode" = full ] && ! command -v "$tool" >/dev/null; then
+    echo "acceptance: full mode needs $tool (the dart, php and dotnet testees' builds)" >&2
+    exit 2
+  fi
+done
 
 out=target/acceptance
 mkdir -p "$out"
@@ -116,6 +122,23 @@ java_testee() {
   local v
   v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
   mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+}
+
+# the dart testee as its conformance build lays it out under target/testees/dart/<version>/
+# (run that build first): dart analyze over the sources and the unit tests. needs flutter on
+# PATH, so it runs in full mode only
+dart_testee() {
+  local version
+  version=$(sed -n "/^\[sdk\.dart\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
+  (cd "target/testees/dart/$version" && dart analyze --fatal-infos bin lib test tool && dart test)
+}
+
+# the php testee's unit checks in its conformance build directory (run that build first);
+# needs php and composer on PATH, so it runs in full mode only
+php_testee() {
+  local version
+  version=$(sed -n "/^\[sdk\.php\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
+  php "target/testees/php/$version/tests/run.php"
 }
 
 # quick mode
@@ -192,6 +215,11 @@ unchanged testees/python sh -c "python3 -I testees/python/gentypes.py"
 PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk java --all-versions --out "$out/conformance-all/java"
 # the type table of the java testee is what its generator writes from every version's jars
 unchanged testees/java sh -c "cd testees/java && python3 -I gentypes.py"
+step "$shapekit" conformance run --sdk dart --all-versions --out "$out/conformance-all/dart"
+step dart_testee
+step "$shapekit" conformance run --sdk php --all-versions --out "$out/conformance-all/php"
+step php_testee
+step "$shapekit" conformance run --sdk dotnet --all-versions --out "$out/conformance-all/dotnet"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

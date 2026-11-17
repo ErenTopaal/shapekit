@@ -2,6 +2,65 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: .NET SDK conformance
+
+- `testees/dotnet` runs `stellar-dotnet-sdk` 16.0.0 and 17.0.0, the newest release of each line
+  whose XDR knows protocol 29. The SDK names no XDR commit, so `conformance sync-versions`
+  matches its `.x` files to stellar-xdr commits by git blob id (16.0.0: protocols up to 29,
+  17.0.0: up to 30), and reads the versions from NuGet. The SDK has no XDR-JSON, so most corpus
+  entries count as `unsupported` even where their bytes pass.
+- Corpus: 17.0.0 passes 68 entries and diverges on 58; 16.0.0 passes 65 and diverges on 27.
+  Eight candidate findings, drafted and not filed: a crash on create-contract operations of the
+  first version (NET-CREATECONTRACT), allow trust and inflation operations refused
+  (NET-DEPRECATED-OPS), issuers ordered as strkey text, the open
+  [dotnet-stellar-sdk#257](https://github.com/Beans-BV/dotnet-stellar-sdk/issues/257)
+  (NET-ISSUER-ORDER), a decode depth of 200 below core's (NET-DEPTH), strings decoded as UTF-8
+  so memos and their hashes change (NET-UTF8), strkey checks SEP-23 asks for (NET-STRKEY), an
+  ScVal vec without a body refused (NET-SCVEC) and a 29-byte memo accepted (NET-BOUNDS).
+- Candidate lane: the transaction hash differs from the network's for offers whose price
+  fraction is not in lowest terms, as in the Dart SDK, and for the same reason.
+- The `sdk-version` obligations grow from 23 to 25, both new ones met.
+
+## 2026-11-17: PHP SDK conformance
+
+- `testees/php` runs `soneso/stellar-php-sdk` 1.18.0, the newest 1.x release, whose XDR comes
+  from the same stellar-xdr commit as the Dart SDK's (protocols up to 30). `conformance
+  sync-versions` reads its versions from Packagist. `pins.toml` pins PHP 8.5.12 and Composer
+  2.11.2.
+- Corpus: 616 entries pass, 15 are unsupported and 85 diverge from the network. The 85 are
+  eight candidate findings, drafted and not filed: decoders that accept over-long values,
+  nonzero padding and nesting past core's limit (PHP-BOUNDS); 64-bit values above 2^63-1 and
+  negative sequence numbers without a correct XDR-JSON form (PHP-UINT64); hashes written as the
+  hex of their hex (PHP-HEXHASH); claimable balance ledger keys without their `balance_id`
+  member (PHP-CBKEY-JSON); XDR-JSON stopped at PHP's JSON nesting default (PHP-JSON-DEPTH); no
+  XDR-JSON for an empty signed payload (PHP-SIGNEDPAYLOAD-JSON); no transaction object for an
+  inflation operation (PHP-INFLATION); and negative muxed ids taken and wrapped (PHP-MUXEDID).
+- Candidate lane: 5,631 entries pass and 388 diverge. Besides the same findings, the lane shows
+  transaction hashes that differ from the network's because the SDK drops a set options field
+  whose value is 0 when it rebuilds the operation. 353 of the lane's 570 failing checks are
+  not triaged yet; `candidate/finding-candidates.toml` lists them by kind.
+- The `sdk-version` obligations grow from 22 to 23, the new one met.
+
+## 2026-11-17: Dart SDK conformance
+
+- `testees/dart` runs `stellar_flutter_sdk` 3.12.0, the newest 3.x release. Its XDR comes from
+  stellar-xdr's `curr` branch at the commit generated from the v30.0 tag, so it knows protocols
+  up to 30. `conformance sync-versions` reads its versions from pub.dev. The testee needs
+  Flutter 3.50.0 to resolve the package, which `pins.toml` pins.
+- Corpus: 661 entries pass, 18 are unsupported and 37 diverge from the network. The 37 are
+  seven candidate findings in `candidate/findings/triage.toml`, drafted and not filed: decoders
+  that check no schema maximum (DART-BOUNDS), nesting limits that are not stellar-core's
+  (DART-DEPTH), XDR strings read as UTF-8 so ledgers with other bytes in a memo, symbol or
+  string do not decode (DART-UTF8), offer ids read from hex, signed or out-of-range text
+  (DART-OFFERTEXT), offer ids typed as unsigned (DART-OFFERU64), no XDR-JSON for a signed-payload
+  signer with an empty payload (DART-SIGNEDPAYLOAD-JSON) and no transaction object for an
+  inflation operation (DART-INFLATION).
+- Candidate lane: 5,943 entries pass and 164 diverge. Besides the same findings, the lane shows
+  that the transaction hash differs from the network's for mainnet offers whose price fraction
+  is not in lowest terms, because the SDK rebuilds the operation with a reduced price
+  (`candidate/finding-candidates.toml`).
+- The `sdk-version` obligations grow from 21 to 22, the new one met.
+
 ## 2026-11-17: Java stellar-sdk conformance
 
 - `testees/java` runs java-stellar-sdk (`network.lightsail:stellar-sdk`) at 5.0.0 and 6.0.0,
@@ -34,6 +93,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   `candidate/finding-candidates.toml`, marked as the finding of another SDK it shares or as
   new; none is filed.
 - The `sdk-version` obligations grow from 17 to 19, both new ones met.
+
 
 ## 2026-11-17: soroban-sdk conformance
 
@@ -68,7 +128,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
   | `gate-side`: sides of stellar-core's protocol gates | 353 by branch count, 129 inferred from execution count | 208 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
-  | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
+  | `sdk-version`: SDK versions the corpus runs against | 25 | 0 | 25 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every

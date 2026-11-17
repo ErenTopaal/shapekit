@@ -397,6 +397,93 @@ jobs:
         run: |
           if [ -f target/conformance-soroban/MATRIX.md ]; then cat target/conformance-soroban/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
 
+  dart:
+    # the dart testee at stellar_flutter_sdk's current version: its conformance build, dart
+    # analyze, its unit tests, then the corpus
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: flutter 3.50.0, the archive pins.toml pins
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/flutter.tar.xz" \
+            https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz
+          echo "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >>"$GITHUB_PATH"
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance run on stellar_flutter_sdk 3.12.0
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk dart --out target/conformance-dart
+      - name: dart analyze and unit tests of the dart testee
+        working-directory: target/testees/dart/3.12.0
+        run: dart analyze --fatal-infos bin lib test tool && dart test
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-dart/MATRIX.md ]; then cat target/conformance-dart/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+
+  php:
+    # the php testee at soneso/stellar-php-sdk's current version: its conformance build, its
+    # unit checks, then the corpus
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: bcmath, gmp, mbstring, sodium
+          tools: composer:2.11.2
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance run on soneso/stellar-php-sdk 1.18.0
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk php --out target/conformance-php
+      - name: unit checks of the php testee
+        run: php target/testees/php/1.18.0/tests/run.php
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-php/MATRIX.md ]; then cat target/conformance-php/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+
+  dotnet:
+    # the dotnet testee at stellar-dotnet-sdk's current version: its build with warnings as
+    # errors, then the corpus
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.100
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: conformance run on stellar-dotnet-sdk 17.0.0
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk dotnet --out target/conformance-dotnet
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-dotnet/MATRIX.md ]; then cat target/conformance-dotnet/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
+
   harness:
     # the wallet-backend reference adapter at the current pin, testnet variant, on the chains
     # behind the rfp's reproductions; every chain runs nightly

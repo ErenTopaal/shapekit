@@ -31,7 +31,9 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 6] = ["rust", "go", "js", "soroban", "python", "java"];
+pub const SDKS: [&str; 9] = [
+    "rust", "go", "js", "soroban", "python", "java", "dart", "php", "dotnet",
+];
 
 /// The CPython every python testee venv is made with; pins.toml pins its build.
 pub const PYTHON: &str = "3.15.2";
@@ -72,6 +74,12 @@ fn stable(v: &str) -> Option<Semver> {
         patch: part()?,
     };
     it.next().is_none().then_some(s)
+}
+
+/// A stable `MAJOR.MINOR.PATCH` as a sortable triple, for registries that name no latest
+/// version of their own.
+pub fn stable_triple(v: &str) -> Option<(u64, u64, u64)> {
+    stable(v).map(|s| (s.major, s.minor, s.patch))
 }
 
 /// The release line a version belongs to and its label: `17.x`, `v0.7.x`.
@@ -115,6 +123,19 @@ pub fn xdr_of_commit(tags: &[XdrTag], commit: &str) -> Result<Xdr> {
         commit: commit.to_string(),
         max_protocol: tag_max_protocol(tags, tag.major),
     })
+}
+
+/// The XDR of a commit an sdk pins: a release tag, or a `curr` branch commit generated from one
+/// (see [`upstream::xdr_curr_source`]), which then carries the tag's protocols.
+pub fn xdr_of_pinned(http: &Http, tags: &[XdrTag], commit: &str) -> Result<Xdr> {
+    if tags.iter().any(|t| t.commit == commit) {
+        return xdr_of_commit(tags, commit);
+    }
+    let source = upstream::xdr_curr_source(http, tags, commit)?;
+    let mut x = xdr_of_commit(tags, &source)?;
+    x.tag = format!("curr from {}", x.tag);
+    x.commit = commit.to_string();
+    Ok(x)
 }
 
 /// The oldest tag whose definitions know `min_protocol`: no release published before its
@@ -361,6 +382,48 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
                 (p, c)
             }
+            "dart" => {
+                let p = upstream::pub_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        xdr_of_pinned(
+                            &http,
+                            &tags,
+                            &upstream::pub_xdr_commit(&http, &s.package, v)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
+            "php" => {
+                let p = upstream::packagist_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        xdr_of_pinned(
+                            &http,
+                            &tags,
+                            &upstream::packagist_xdr_commit(&http, &s.package, v)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
+            "dotnet" => {
+                let p = upstream::nuget_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        xdr_of_pinned(
+                            &http,
+                            &tags,
+                            &upstream::nuget_xdr_commit(&http, &tags, &s.package, v)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
             _ => unreachable!("checked against SDKS above"),
         };
         plans.push(SdkPlan {
@@ -388,9 +451,8 @@ fn lookup(
 const HEADER: &str = "\
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy, npm, pypi and maven central publish; `sync-versions --check`
-# reports
-# whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
+# crates.io, the go module proxy, npm, pypi, maven central, pub.dev, packagist and nuget
+# publish; `sync-versions --check` reports whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
 # version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
 # that its hello reports exactly `package` and `version`.
@@ -421,11 +483,14 @@ const HEADER: &str = "\
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
 # js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's and
 # java-stellar-sdk's Makefiles at the release tag, since pypi and maven central record no commit,
-# and for soroban-sdk the xdr-version file of
-# the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
-# release tag at that commit names a protocol, extended up to the
-# protocol before the next tag, because a protocol without a tag of its own changed no xdr
-# (v28.0 covers protocol 29).
+# for soroban-sdk the xdr-version file of the stellar-xdr release that its soroban-env-host's
+# soroban-env-common pins with `=`, for stellar_flutter_sdk the Makefile in the archive pub.dev
+# serves, for soneso/stellar-php-sdk the Makefile at the commit packagist records as the source,
+# and for stellar-dotnet-sdk, which names no commit, the stellar-xdr commit whose .x files have
+# the same git blob ids as the ones its nuspec's commit ships). a commit on stellar-xdr's curr
+# branch whose message says it was generated from a release tag's commit carries that tag. the
+# release tag at that commit names a protocol, extended up to the protocol before the next tag,
+# because a protocol without a tag of its own changed no xdr (v28.0 covers protocol 29).
 #
 # rust: one source (testees/rust/src) with one thin cargo manifest and lock file per version
 # under testees/rust/versions/<version>/, each built into its own target directory.
@@ -447,6 +512,16 @@ const HEADER: &str = "\
 # testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
 # are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
 # tree (gson above all) is pinned, not only the sdk version.
+# dart: the sources in testees/dart are copied next to the pubspec and lock file committed under
+# testees/dart/versions/<version>/ into target/testees/dart/<version>/, resolved with `flutter
+# pub get --enforce-lockfile` (stellar_flutter_sdk declares a flutter dependency, so the flutter
+# sdk resolves it; the testee itself runs on the dart vm), given its type table by
+# tool/gentypes.dart from the schema and the installed sdk, and compiled with `dart compile exe`.
+# php: the sources in testees/php are copied next to the composer files committed under
+# testees/php/versions/<version>/ into target/testees/php/<version>/, installed with `composer
+# install` from the lock file, and given their type table by tools/gentypes.php.
+# dotnet: one source (testees/dotnet/Program.cs) with one project file and nuget lock file per
+# version under testees/dotnet/versions/<version>/, built with `dotnet build` in locked mode.
 ";
 
 fn quote(s: &str) -> String {
@@ -621,6 +696,127 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 vec![s("java"), s("-jar"), format!("{t}/testee.jar")],
             )
         }
+        "dart" => {
+            let t = format!("target/testees/dart/{v}");
+            let src = format!("testees/dart/versions/{v}");
+            let step = |argv: &[String], dir: Option<&str>| match dir {
+                Some(d) => format!("  {{ argv = {}, dir = {} }},", array(argv), quote(d)),
+                None => format!("  {{ argv = {} }},", array(argv)),
+            };
+            (
+                vec![
+                    step(&[s("rm"), s("-rf"), t.clone()], None),
+                    step(&[s("mkdir"), s("-p"), t.clone()], None),
+                    step(
+                        &[
+                            s("cp"),
+                            s("-R"),
+                            s("testees/dart/bin"),
+                            s("testees/dart/lib"),
+                            s("testees/dart/test"),
+                            s("testees/dart/tool"),
+                            format!("{src}/pubspec.yaml"),
+                            format!("{src}/pubspec.lock"),
+                            format!("{t}/"),
+                        ],
+                        None,
+                    ),
+                    step(
+                        &[s("flutter"), s("pub"), s("get"), s("--enforce-lockfile")],
+                        Some(&t),
+                    ),
+                    step(
+                        &[
+                            s("dart"),
+                            s("run"),
+                            s("tool/gentypes.dart"),
+                            format!("../../../../schema/xdr/{DART_SCHEMA}/xdr.json"),
+                            s("lib/tables_gen.dart"),
+                        ],
+                        Some(&t),
+                    ),
+                    step(
+                        &[
+                            s("dart"),
+                            s("compile"),
+                            s("exe"),
+                            s("bin/main.dart"),
+                            s("-o"),
+                            s("testee"),
+                        ],
+                        Some(&t),
+                    ),
+                ],
+                vec![format!("{t}/testee")],
+            )
+        }
+        "php" => {
+            let t = format!("target/testees/php/{v}");
+            let src = format!("testees/php/versions/{v}");
+            let step = |argv: &[String], dir: Option<&str>| match dir {
+                Some(d) => format!("  {{ argv = {}, dir = {} }},", array(argv), quote(d)),
+                None => format!("  {{ argv = {} }},", array(argv)),
+            };
+            (
+                vec![
+                    step(&[s("rm"), s("-rf"), t.clone()], None),
+                    step(&[s("mkdir"), s("-p"), t.clone()], None),
+                    step(
+                        &[
+                            s("cp"),
+                            s("-R"),
+                            s("testees/php/bin"),
+                            s("testees/php/src"),
+                            s("testees/php/tests"),
+                            s("testees/php/tools"),
+                            format!("{src}/composer.json"),
+                            format!("{src}/composer.lock"),
+                            format!("{t}/"),
+                        ],
+                        None,
+                    ),
+                    step(
+                        &[
+                            s("composer"),
+                            s("install"),
+                            s("--no-interaction"),
+                            s("--no-progress"),
+                            s("--no-dev"),
+                        ],
+                        Some(&t),
+                    ),
+                    step(
+                        &[
+                            s("php"),
+                            s("tools/gentypes.php"),
+                            format!("../../../../schema/xdr/{DART_SCHEMA}/xdr.json"),
+                            s("src/TablesGen.php"),
+                        ],
+                        Some(&t),
+                    ),
+                ],
+                vec![s("php"), format!("{t}/bin/testee.php")],
+            )
+        }
+        "dotnet" => {
+            let t = format!("target/testees/dotnet/{v}");
+            (
+                vec![format!(
+                    "  {{ argv = {} }},",
+                    array(&[
+                        s("dotnet"),
+                        s("build"),
+                        format!("testees/dotnet/versions/{v}/ShapekitTestee.csproj"),
+                        s("-c"),
+                        s("Release"),
+                        s("-p:RestoreLockedMode=true"),
+                        s("-o"),
+                        t.clone(),
+                    ])
+                )],
+                vec![s("dotnet"), format!("{t}/ShapekitTestee.dll")],
+            )
+        }
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
@@ -711,9 +907,24 @@ fn testee_files(sdk: &str, v: &str) -> Vec<String> {
             format!("testees/java/versions/{v}/pom.xml"),
             format!("testees/java/versions/{v}/lib.sha256"),
         ],
+        "dart" => vec![
+            format!("testees/dart/versions/{v}/pubspec.yaml"),
+            format!("testees/dart/versions/{v}/pubspec.lock"),
+        ],
+        "php" => vec![
+            format!("testees/php/versions/{v}/composer.json"),
+            format!("testees/php/versions/{v}/composer.lock"),
+        ],
+        "dotnet" => vec![
+            format!("testees/dotnet/versions/{v}/ShapekitTestee.csproj"),
+            format!("testees/dotnet/versions/{v}/packages.lock.json"),
+        ],
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
 }
+
+/// The schema whose types the dart and php testees' builds write their type tables from.
+const DART_SCHEMA: &str = "v30.0";
 
 /// The versions that have testee files on disk.
 fn testee_versions(root: &Path, sdk: &str) -> Result<BTreeSet<String>> {
@@ -966,6 +1177,52 @@ fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Resu
             )?;
             // builds the version and writes lib.sha256 from the jars maven resolved
             run_step(&["testees/java/lock.sh", v], root, &[])
+        }
+        "dart" => {
+            let from = root.join(format!(
+                "testees/dart/versions/{template_version}/pubspec.yaml"
+            ));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/dart/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("pubspec.yaml"),
+                from_template(&text, template_version, v, 2)?,
+            )?;
+            run_step(&["flutter", "pub", "get"], &dir, &[])
+        }
+        "php" => {
+            let from = root.join(format!(
+                "testees/php/versions/{template_version}/composer.json"
+            ));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/php/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("composer.json"),
+                from_template(&text, template_version, v, 1)?,
+            )?;
+            run_step(
+                &["composer", "update", "--no-install", "--no-interaction"],
+                &dir,
+                &[],
+            )
+        }
+        "dotnet" => {
+            let from = root.join(format!(
+                "testees/dotnet/versions/{template_version}/ShapekitTestee.csproj"
+            ));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/dotnet/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("ShapekitTestee.csproj"),
+                from_template(&text, template_version, v, 2)?,
+            )?;
+            run_step(&["dotnet", "restore", "--use-lock-file"], &dir, &[])
         }
         _ => unreachable!("only the sdks in SDKS have testees"),
     }

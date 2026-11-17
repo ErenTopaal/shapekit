@@ -47,6 +47,34 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
                     )))?;
                     check::check_node(&index, &sums, &t.version, &t.artifact, &t.sha256)
                 }
+                Toolchain::Flutter => {
+                    let index = net(http.get_text(
+                        "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json",
+                    ))?;
+                    check::check_flutter(&index, &t.version, &t.artifact, &t.sha256)
+                }
+                Toolchain::Php => {
+                    let doc = net(http.get_text(&format!(
+                        "https://www.php.net/releases/index.php?json&version={}",
+                        t.version
+                    )))?;
+                    check::check_php(&doc, &t.version, &t.artifact, &t.sha256)
+                }
+                Toolchain::Composer => {
+                    let sums = net(http.get_text(&format!(
+                        "https://getcomposer.org/download/{}/composer.phar.sha256sum",
+                        t.version
+                    )))?;
+                    check::check_composer(&sums, &t.version, &t.artifact, &t.sha256)
+                }
+                Toolchain::Dotnet => {
+                    let channel = t.version.split('.').take(2).collect::<Vec<_>>().join(".");
+                    let doc = net(http.get_text(&format!(
+                        "https://builds.dotnet.microsoft.com/dotnet/release-metadata/{channel}/releases.json"
+                    )))?;
+                    let sha512 = t.sha512.as_deref().ok_or("a dotnet pin needs sha512")?;
+                    check::check_dotnet(&doc, &t.version, &t.artifact, sha512)
+                }
             }),
         ));
     }

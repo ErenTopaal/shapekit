@@ -1,8 +1,7 @@
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy, npm, pypi and maven central publish; `sync-versions --check`
-# reports
-# whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
+# crates.io, the go module proxy, npm, pypi, maven central, pub.dev, packagist and nuget
+# publish; `sync-versions --check` reports whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
 # version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
 # that its hello reports exactly `package` and `version`.
@@ -33,11 +32,14 @@
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
 # js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's and
 # java-stellar-sdk's Makefiles at the release tag, since pypi and maven central record no commit,
-# and for soroban-sdk the xdr-version file of
-# the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
-# release tag at that commit names a protocol, extended up to the
-# protocol before the next tag, because a protocol without a tag of its own changed no xdr
-# (v28.0 covers protocol 29).
+# for soroban-sdk the xdr-version file of the stellar-xdr release that its soroban-env-host's
+# soroban-env-common pins with `=`, for stellar_flutter_sdk the Makefile in the archive pub.dev
+# serves, for soneso/stellar-php-sdk the Makefile at the commit packagist records as the source,
+# and for stellar-dotnet-sdk, which names no commit, the stellar-xdr commit whose .x files have
+# the same git blob ids as the ones its nuspec's commit ships). a commit on stellar-xdr's curr
+# branch whose message says it was generated from a release tag's commit carries that tag. the
+# release tag at that commit names a protocol, extended up to the protocol before the next tag,
+# because a protocol without a tag of its own changed no xdr (v28.0 covers protocol 29).
 #
 # rust: one source (testees/rust/src) with one thin cargo manifest and lock file per version
 # under testees/rust/versions/<version>/, each built into its own target directory.
@@ -59,6 +61,16 @@
 # testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
 # are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
 # tree (gson above all) is pinned, not only the sdk version.
+# dart: the sources in testees/dart are copied next to the pubspec and lock file committed under
+# testees/dart/versions/<version>/ into target/testees/dart/<version>/, resolved with `flutter
+# pub get --enforce-lockfile` (stellar_flutter_sdk declares a flutter dependency, so the flutter
+# sdk resolves it; the testee itself runs on the dart vm), given its type table by
+# tool/gentypes.dart from the schema and the installed sdk, and compiled with `dart compile exe`.
+# php: the sources in testees/php are copied next to the composer files committed under
+# testees/php/versions/<version>/ into target/testees/php/<version>/, installed with `composer
+# install` from the lock file, and given their type table by tools/gentypes.php.
+# dotnet: one source (testees/dotnet/Program.cs) with one project file and nuget lock file per
+# version under testees/dotnet/versions/<version>/, built with `dotnet build` in locked mode.
 
 schema = 1
 
@@ -341,4 +353,70 @@ build = [
   { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/java/versions/6.0.0/lib.sha256"], dir = "target/testees/java/6.0.0/lib" },
 ]
 command = ["java", "-jar", "target/testees/java/6.0.0/testee.jar"]
+max_protocol = 30
+
+[sdk.dart]
+package = "stellar_flutter_sdk"
+current = "3.12.0"
+issues_repo = "Soneso/stellar_flutter_sdk"
+timeout_ms = 10000
+memory = { resource = "data", mib = 4096 }
+
+# 3.12.0: newest 3.x release; xdr curr from v30.0 (579a90b2), protocols up to 30
+[[sdk.dart.versions]]
+version = "3.12.0"
+build = [
+  { argv = ["rm", "-rf", "target/testees/dart/3.12.0"] },
+  { argv = ["mkdir", "-p", "target/testees/dart/3.12.0"] },
+  { argv = ["cp", "-R", "testees/dart/bin", "testees/dart/lib", "testees/dart/test", "testees/dart/tool", "testees/dart/versions/3.12.0/pubspec.yaml", "testees/dart/versions/3.12.0/pubspec.lock", "target/testees/dart/3.12.0/"] },
+  { argv = ["flutter", "pub", "get", "--enforce-lockfile"], dir = "target/testees/dart/3.12.0" },
+  { argv = ["dart", "run", "tool/gentypes.dart", "../../../../schema/xdr/v30.0/xdr.json", "lib/tables_gen.dart"], dir = "target/testees/dart/3.12.0" },
+  { argv = ["dart", "compile", "exe", "bin/main.dart", "-o", "testee"], dir = "target/testees/dart/3.12.0" },
+]
+command = ["target/testees/dart/3.12.0/testee"]
+max_protocol = 30
+
+[sdk.php]
+package = "soneso/stellar-php-sdk"
+current = "1.18.0"
+issues_repo = "Soneso/stellar-php-sdk"
+timeout_ms = 10000
+memory = { resource = "as", mib = 4096 }
+
+# 1.18.0: newest 1.x release; xdr curr from v30.0 (579a90b2), protocols up to 30
+[[sdk.php.versions]]
+version = "1.18.0"
+build = [
+  { argv = ["rm", "-rf", "target/testees/php/1.18.0"] },
+  { argv = ["mkdir", "-p", "target/testees/php/1.18.0"] },
+  { argv = ["cp", "-R", "testees/php/bin", "testees/php/src", "testees/php/tests", "testees/php/tools", "testees/php/versions/1.18.0/composer.json", "testees/php/versions/1.18.0/composer.lock", "target/testees/php/1.18.0/"] },
+  { argv = ["composer", "install", "--no-interaction", "--no-progress", "--no-dev"], dir = "target/testees/php/1.18.0" },
+  { argv = ["php", "tools/gentypes.php", "../../../../schema/xdr/v30.0/xdr.json", "src/TablesGen.php"], dir = "target/testees/php/1.18.0" },
+]
+command = ["php", "target/testees/php/1.18.0/bin/testee.php"]
+max_protocol = 30
+
+[sdk.dotnet]
+package = "stellar-dotnet-sdk"
+current = "17.0.0"
+issues_repo = "Beans-BV/dotnet-stellar-sdk"
+timeout_ms = 10000
+memory = { resource = "data", mib = 4096 }
+
+# 16.0.0: newest 16.x release; named in known-failures/dotnet.txt; xdr curr from v28.0 (911c9356), protocols up to 29
+[[sdk.dotnet.versions]]
+version = "16.0.0"
+build = [
+  { argv = ["dotnet", "build", "testees/dotnet/versions/16.0.0/ShapekitTestee.csproj", "-c", "Release", "-p:RestoreLockedMode=true", "-o", "target/testees/dotnet/16.0.0"] },
+]
+command = ["dotnet", "target/testees/dotnet/16.0.0/ShapekitTestee.dll"]
+max_protocol = 29
+
+# 17.0.0: newest 17.x release; named in known-failures/dotnet.txt; xdr curr from v30.0 (579a90b2), protocols up to 30
+[[sdk.dotnet.versions]]
+version = "17.0.0"
+build = [
+  { argv = ["dotnet", "build", "testees/dotnet/versions/17.0.0/ShapekitTestee.csproj", "-c", "Release", "-p:RestoreLockedMode=true", "-o", "target/testees/dotnet/17.0.0"] },
+]
+command = ["dotnet", "target/testees/dotnet/17.0.0/ShapekitTestee.dll"]
 max_protocol = 30

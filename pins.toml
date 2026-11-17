@@ -3,7 +3,8 @@
 # registries and git remotes, never typed in by hand.
 #
 # tables:
-#   [[toolchain]]  name (rust, go, node), version, release artifact and its sha256
+#   [[toolchain]]  name (rust, go, node, flutter, php, composer, dotnet), version, release artifact and its sha256
+#                  (and sha512 where the upstream publishes only that)
 #   [[image]]      docker hub repository, tag and manifest digest (the index digest for multi-arch images)
 #   [[git]]        remote url, optional ref, commit sha. a ref without a sha is a
 #                  deliberately floating ref (only checked to exist). a sha without a
@@ -41,6 +42,35 @@ version = "26.13.1"
 artifact = "node-v26.13.1-linux-x64.tar.xz"
 sha256 = "5c063e46bab0fbc1c17cc445d7ff129cbdcd0471be6ed83b6ab864f8143bc864"
 purpose = "node lts for the js testee"
+
+[[toolchain]]
+name = "flutter"
+version = "3.50.0"
+artifact = "flutter_linux_3.50.0-stable.tar.xz"
+sha256 = "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5"
+purpose = "flutter sdk, with its dart 3.14.0, for the dart testee: stellar_flutter_sdk declares a flutter dependency, so pub resolves it only with flutter"
+
+[[toolchain]]
+name = "php"
+version = "8.5.12"
+artifact = "php-8.5.12.tar.xz"
+sha256 = "08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
+purpose = "php for the php testee, built from source with bcmath, gmp, mbstring, sodium, openssl and phar, the extensions soneso/stellar-php-sdk and composer require"
+
+[[toolchain]]
+name = "composer"
+version = "2.11.2"
+artifact = "composer.phar"
+sha256 = "dd158c0afd41d15fac89e1b4e47b5d42911fe316c3687cd5edac98319b25d028"
+purpose = "composer, which installs the php testee's locked dependencies"
+
+[[toolchain]]
+name = "dotnet"
+version = "11.0.100"
+artifact = "dotnet-sdk-11.0.100-linux-x64.tar.gz"
+sha256 = "6fdb8822f47ccdba28f507dcd5d92e632d5b99cd27908d6838f0cc575be33baf"
+sha512 = "1bec9cca2ec689b1e80245b84f2b53c9441d1aa6daccf2ceb27490768bffa95954fa585bd275def31069d874d543d9ba9e6591fe9ade2dbd9f34ec5c0fd0050c"
+purpose = ".NET sdk for the dotnet testee; Microsoft publishes the sha512, checked by pins verify, and the sha256 was computed from the archive that matched it"
 
 # release binaries, fetched by scripts/fetch-stellar-cli.sh
 

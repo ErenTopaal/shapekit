@@ -2,17 +2,21 @@
 //! with the divergence matrices a conformance run over a candidate manifest holding only that
 //! entry wrote (tests/fixtures/promote/): stellar-xdr 30.0.0 and @stellar/stellar-sdk 17.4.0
 //! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1),
-//! soroban-sdk 29.0.1 has no reader for its strkey kind, and the Python stellar-sdk 17.0.1
-//! diverges on case 6 (a trailing =), a candidate-lane defect no finding in findings/triage.toml
-//! takes, while java-stellar-sdk 6.0.0 passes it. So with python in the versions file the entry
-//! stays a candidate; the tests of the promotion itself use a versions file without python and
-//! java.
+//! soroban-sdk 29.0.1 has no reader for its strkey kind, stellar_flutter_sdk 3.12.0 and
+//! soneso/stellar-php-sdk 1.18.0 pass it, and the Python stellar-sdk 17.0.1 diverges on case 6
+//! (a trailing =), a candidate-lane defect no finding in findings/triage.toml takes, while
+//! java-stellar-sdk 6.0.0 passes it. So with python in the versions file the entry stays a
+//! candidate; the tests of the promotion itself use a versions file without python and java.
+//! The other sdks of the versions file have no fixture and are left out of the copy.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 const ENTRY: &str = "cap23.claimable-balances.synth-strkey-b-invalid";
+
+/// The sdks tests/fixtures/promote/ holds a matrix for.
+const FIXTURE_SDKS: [&str; 6] = ["rust", "go", "js", "soroban", "dart", "php"];
 
 fn repo() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -56,7 +60,7 @@ fn copy_dir(from: &Path, to: &Path) {
 
 /// A repository layout with the entry in the candidate lane and an empty corpus, and the
 /// known-failures lines for the entry taken out, as before it was ever promoted. The versions
-/// file holds every sdk of the repository's, python and java only when `with_python`.
+/// file holds the sdks of FIXTURE_SDKS, and python and java only when `with_python`.
 fn layout() -> tempfile::TempDir {
     layout_with(false)
 }
@@ -74,17 +78,18 @@ fn layout_with(with_python: bool) -> tempfile::TempDir {
     .unwrap();
     fs::copy(r.join("pins.toml"), d.join("pins.toml")).unwrap();
     fs::create_dir_all(d.join("conformance/known-failures")).unwrap();
-    let versions = fs::read_to_string(r.join("conformance/versions.toml")).unwrap();
-    let versions = if with_python {
-        versions
-    } else {
-        // python and java are the last sdks of the file
-        let at = versions
-            .find("\n[sdk.python]\n")
-            .expect("the versions file has a python sdk");
-        format!("{}\n", versions[..at].trim_end())
-    };
-    fs::write(d.join("conformance/versions.toml"), versions).unwrap();
+    // promotion asks every sdk of the versions file, so the copy keeps the sdks with a fixture
+    // matrix, and python and java only when asked
+    let mut versions: toml::Table =
+        toml::from_str(&fs::read_to_string(r.join("conformance/versions.toml")).unwrap()).unwrap();
+    versions["sdk"].as_table_mut().unwrap().retain(|k, _| {
+        FIXTURE_SDKS.contains(&k) || (with_python && (k == "python" || k == "java"))
+    });
+    fs::write(
+        d.join("conformance/versions.toml"),
+        toml::to_string(&versions).unwrap(),
+    )
+    .unwrap();
     for sdk in ["rust", "go", "js"] {
         let known = fs::read_to_string(r.join(format!("conformance/known-failures/{sdk}.txt")))
             .unwrap()
@@ -144,7 +149,7 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
     )
     .unwrap();
 
-    let out = promote(d, &[], &["rust", "go", "js", "soroban"]);
+    let out = promote(d, &[], &["rust", "go", "js", "soroban", "dart", "php"]);
     assert_eq!(out.status.code(), Some(1), "{}", text(&out));
     assert!(
         text(&out).contains(
@@ -165,7 +170,13 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
 fn a_python_divergence_no_finding_takes_keeps_the_entry_a_candidate() {
     let dir = layout_with(true);
     let d = dir.path();
-    let out = promote(d, &[], &["rust", "go", "js", "soroban", "python", "java"]);
+    let out = promote(
+        d,
+        &[],
+        &[
+            "rust", "go", "js", "soroban", "dart", "php", "python", "java",
+        ],
+    );
     assert_eq!(out.status.code(), Some(1), "{}", text(&out));
     assert!(
         text(&out).contains(
@@ -194,11 +205,15 @@ fn every_sdk_needs_a_result() {
 fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
     let dir = layout();
     let d = dir.path();
-    let dry = promote(d, &["--dry-run"], &["rust", "go", "js", "soroban"]);
+    let dry = promote(
+        d,
+        &["--dry-run"],
+        &["rust", "go", "js", "soroban", "dart", "php"],
+    );
     assert_eq!(dry.status.code(), Some(0), "{}", text(&dry));
     assert_eq!(entries(d, "corpus"), 0);
 
-    let out = promote(d, &[], &["rust", "go", "js", "soroban"]);
+    let out = promote(d, &[], &["rust", "go", "js", "soroban", "dart", "php"]);
     assert_eq!(out.status.code(), Some(0), "{}", text(&out));
     assert!(text(&out).contains("is finding GO-1"), "{}", text(&out));
     assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (0, 1));
@@ -222,6 +237,6 @@ fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
         let out = shapekit(d, &["manifest", "validate", "--file", &file]);
         assert!(out.status.success(), "{lane}: {}", text(&out));
     }
-    let again = promote(d, &[], &["rust", "go", "js", "soroban"]);
+    let again = promote(d, &[], &["rust", "go", "js", "soroban", "dart", "php"]);
     assert_eq!(again.status.code(), Some(2), "{}", text(&again));
 }

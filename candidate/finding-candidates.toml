@@ -520,3 +520,130 @@ checks = "case 0/address_from_scval to case 5/address_from_scval: void, bool, u3
 observed = "MuxedAddress::try_from_val(&env, &ScVal) panics with \"incorrect scval type\" for every ScVal that is not an address, although it returns Result<_, ConversionError>; Address::try_from_val returns Err(ConversionError) for the same values"
 evidence = "soroban-sdk 29.0.1 src/muxed_address.rs, impl TryFromVal<Env, ScVal> for MuxedAddress: the ScVal converts to a Val first, then `_ => panic!(\"incorrect scval type\")` for a non-address arm, and `panic!(\"unsupported ScAddress type\")` for claimable balance and liquidity pool addresses, which the Val conversion refuses before that arm is reached"
 open = "already reported upstream as rs-soroban-sdk#2090 and fixed on main by rs-soroban-sdk#2099 (merge 5ad47088, 2026-09-29), which v29.0.1 does not contain and v30.0.0-rc.1 does; the latest stable release still panics. nothing to file; the candidate holds the reproduction until a stable release carries the fix"
+
+# stellar_flutter_sdk 3.12.0 on the candidate lane (`shapekit conformance run --sdk dart
+# --all-versions --manifest candidate/manifest.json`): 5,943 entries pass, 164 diverge from the
+# network, 101 are unsupported and 21 are `error` (the missing probe.limits.p30 chain, as for
+# every sdk). by cause:
+#
+# - 73 decode_encode checks on format.xdr-grammar *-over-max, *-above and longer-than-bound
+#   vectors: DART-BOUNDS (candidate/findings/triage.toml), the decoders check no schema maximum.
+# - 18 decode_encode and decode_json checks on ledger and envelope depth vectors at and below
+#   core's limit: DART-DEPTH, the sdk's own limits (500 recursive decodes, 128 delegate
+#   signatures) refuse nestings core accepts.
+# - 6 decode_json checks on signed-payload signers with an empty payload: DART-SIGNEDPAYLOAD-JSON.
+# - 5 encode_json checks on probe ledgers with negative offer ids: DART-OFFERU64.
+# - 3 id_parse checks on the gap vectors (-0, "+16" and a 2^53 neighbour as text): DART-OFFERTEXT.
+# - 5 decode_json checks on probe ledgers with offer ids: DART-OFFERU64.
+# - 20 tx_hash checks on mainnet ledgers: the price candidate below.
+# - 9 tx_hash checks on probe ledgers: the external reference candidate below; 9 checks on the
+#   sponsorship descriptor and 1 on authorize: the candidates below.
+# - 41 encode_json and 41 decode_json checks on overlay and internal types (AuthCert,
+#   AuthenticatedMessage, Hello, PeerAddress, StellarMessage, the survey messages,
+#   SerializedBinaryFuseFilter, Curve25519Secret, HmacSha256Key): the sdk writes their fixed
+#   opaque fields (Curve25519Public.key, HmacSha256Mac.mac, PeerAddress ip, ShortHashSeed.seed)
+#   as hex strings and refuses arrays, where stellar-xdr, the reference for expected_json,
+#   writes arrays of numbers; and 4 decode_json checks on the int64 and uint64 typedef vectors,
+#   which the sdk writes as strings and stellar-xdr as numbers. no ledger or envelope holds these
+#   values in this form. not triaged: which rendering SEP-51 asks for here needs the crosscheck
+#   against go and js, which has not been run for these entries.
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["cap03.offer-liabilities.mainnet-37466023"]
+checks = "mainnet/tx_hash 12, mainnet/tx_hash 236 and mainnet/tx_hash 236 inner, and 17 more tx_hash checks on candidate mainnet ledgers"
+observed = "AbstractTransaction.fromEnvelopeXdr(..).hash(network) is not the hash the network wrote for transactions whose offers carry a price fraction that is not in lowest terms: the sdk rebuilds the operation and writes 3418153/572181201 where the envelope holds 6836306/1144362402, so it hashes other bytes"
+evidence = "lib/src/manage_sell_offer_operation.dart L135-L143: builder() turns the xdr price into Price(n, d).toDecimalString(), and toOperationBody (L109) reads it back with Price.fromString, which writes the reduced or approximated fraction; the hash is taken over the rebuilt envelope (lib/src/transaction.dart L109)"
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["probe.envelope-fields.contractexecutableexternalref-executable-owner-3-ledger", "probe.envelope-fields.createcontractargs-contractidpreimage-2-ledger"]
+checks = "testnet/tx_hash 0 on 5 and 4 probe ledgers"
+observed = "AbstractTransaction.fromEnvelopeXdr refuses envelopes core applied: an external-reference executable whose owner is not a contract (ArgumentError \"External reference owner is not a contract address\") and a create-contract argument whose ContractIdPreimage arm it does not build (UnimplementedError)"
+evidence = "lib/src/invoke_host_function_operation.dart L577 (the owner check) and L155 (throw UnimplementedError()), both reached while rebuilding the operation from xdr"
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["format.xdr-grammar.sponsorshipdescriptor-distinct", "format.xdr-grammar.sponsorshipdescriptor-smallest"]
+checks = "any/decode_encode, any/decode_json and any/encode_json"
+observed = "XdrSponsorshipDescriptor, the typedef AccountID*, is read as a bare PublicKey without the optional flag, so a present descriptor is refused (\"Unknown enum value: 1\") and an encoded one lacks the flag"
+evidence = "lib/src/xdr/xdr_sponsorship_descriptor.dart L31-L32; the ledger entry and change types that hold a sponsorship descriptor read their own optional flag and pass the corpus, so only the standalone type is affected"
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["probe.envelope-fields.allowtrustop-authorize-2"]
+checks = "testnet/decode_json"
+observed = "an AllowTrustOp whose authorize field is 0xFFFFFFFF decodes, but its XDR-JSON is refused: the field is held as a signed int (-1) and the uint32 renderer refuses it"
+evidence = "lib/src/xdr/xdr_allow_trust_op.dart L24-L36: authorize is an int read and written with readInt/writeInt"
+
+# soneso/stellar-php-sdk 1.18.0 on the candidate lane (`shapekit conformance run --sdk php
+# --all-versions --manifest candidate/manifest.json`): 5,631 entries pass, 388 diverge from
+# the network, 190 are unsupported and 21 are `error` (the missing probe.limits.p30 chain, as
+# for every sdk). by cause, as far as triaged:
+#
+# - 112 decode_encode checks on format.xdr-grammar *-over-max vectors: PHP-BOUNDS
+#   (candidate/findings/triage.toml).
+# - 53 checks on depth vectors at and below core's limits, refused by the sdk's own limits
+#   (XdrBuffer RECURSION_LIMIT 128 and DECODE_DEPTH_LIMIT 500) or by json_encode's 512:
+#   PHP-BOUNDS and PHP-JSON-DEPTH, which are not core's limit in either direction.
+# - 23 checks with hashes held as hex and written as the hex of their hex: PHP-HEXHASH.
+# - 11 checks on claimable balance ledger keys: PHP-CBKEY-JSON.
+# - 6 checks with uint64 values at or above 2^63: PHP-UINT64.
+# - 6 checks on signed-payload signers with an empty payload: PHP-SIGNEDPAYLOAD-JSON.
+# - 5 tx_hash checks refused for an external reference whose owner is not a contract, the same
+#   check as the dart sdk's (candidate below).
+# - 70 tx_hash checks where the hash differs: the set options candidate below explains the
+#   clear_flags probe it was checked on; the other setoptionsop-* and the
+#   invokehostfunctionop-* probes among them are not triaged.
+# - 149 decode_json differences, 48 encode_json refusals of ConfigSettingID JSON, 33 of hex
+#   arrays on overlay types, 13 encode_json byte differences on DataValue, and 41 other checks
+#   (the sponsorship descriptor, flood advert and demand vectors that stop early or leave
+#   trailing bytes, DataValue lengths and presence, peer address hex, create contract
+#   arguments): not triaged. part of the 149 are the findings above seen through a
+#   ledger; the rest needs the source reading this pass did not do.
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["probe.envelope-fields.setoptionsop-clearflags-0"]
+checks = "testnet/tx_hash; the round trip of this envelope was compared field by field. the other setoptionsop-* hash differences were not checked one by one"
+observed = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) is not the hash the network wrote for a set options operation that sets a field to 0: the rebuilt envelope leaves clear_flags and set_flags out where the original holds 0, so the sdk hashes other bytes"
+evidence = "Soneso/StellarSDK/SetOptionsOperation.php L200-L224: toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (`if ($this->clearFlags)`), so a present 0 or empty home domain becomes absent; the weights and thresholds are compared with null and keep a 0"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["probe.envelope-fields.contractexecutableexternalref-executable-owner-3-ledger", "probe.envelope-fields.contractexecutableexternalref-executable-owner-4-ledger", "probe.envelope-fields.contractexecutableexternalref-executable-owner-5-ledger"]
+checks = "testnet/tx_hash 0"
+observed = "AbstractTransaction::fromEnvelopeXdr refuses envelopes core applied whose external-reference executable has an owner that is not a contract (\"External reference owner is not a contract address\"), the same check the dart sdk from the same team makes"
+
+# stellar-dotnet-sdk on the candidate lane (`shapekit conformance run --sdk dotnet
+# --all-versions --manifest candidate/manifest.json`): 17.0.0 passes 1,248 entries, diverges
+# from the network on 135 and cannot run 4,826 (the sdk has no XDR-JSON); 16.0.0 passes 1,245
+# and diverges on 111. 21 checks per version are `error`, the missing probe.limits.p30 chain.
+# 17.0.0's 148 failing checks by cause: 36 NET-DEPTH, 36 decode_encode checks on *-over-max
+# vectors (the bounds NET-BOUNDS shows for the memo hold for other arrays and strings too), 27
+# NET-CREATECONTRACT, 16 NET-DEPRECATED-OPS, 14 NET-SCVEC (vec and map bodies), 2 refusals of
+# invoke-contract arguments holding claimable balance or liquidity pool addresses, and 17
+# transaction hashes that differ from the network's; the price candidate below explains the
+# three hashes of mainnet ledger 37466023 among them; the other 14 (fee-bump mainnet ledger
+# 57369500, the price-d-3 and transaction-cond-* probes) are not triaged.
+
+[[candidate]]
+finding = "new"
+sdk = "dotnet"
+versions = ["16.0.0", "17.0.0"]
+entries = ["cap03.offer-liabilities.mainnet-37466023"]
+checks = "mainnet/tx_hash 12, mainnet/tx_hash 236 and mainnet/tx_hash 236 inner"
+observed = "Transaction.FromEnvelopeXdr(..).Hash(network) is not the network's hash for offers whose price fraction is not in lowest terms; the wrong hashes are the same ones stellar_flutter_sdk computes (fb4973f6.. for transaction 12), because both sdks rebuild the price from a decimal"
+evidence = "StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L95-L106: FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody (L83) reads it back with Price.FromString, which writes another fraction"

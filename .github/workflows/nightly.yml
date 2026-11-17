@@ -165,6 +165,22 @@ jobs:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: testees/js/**/package-lock.json
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.100
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: bcmath, gmp, mbstring, sodium
+          tools: composer:2.11.2
+      - name: flutter 3.50.0, the archive pins.toml pins, for the dart testee
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/flutter.tar.xz" \
+            https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz
+          echo "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >>"$GITHUB_PATH"
       - uses: actions/download-artifact@v8
         with:
           name: shapekit
@@ -179,7 +195,7 @@ jobs:
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           status=0
-          for sdk in rust go js soroban python java; do
+          for sdk in rust go js soroban python java dart php dotnet; do
             "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
               --out "target/conformance/$sdk" || status=1
           done
@@ -195,7 +211,7 @@ jobs:
       - name: matrices to the job summary
         if: ${{ !cancelled() }}
         run: |
-          for sdk in rust go js soroban python java; do
+          for sdk in rust go js soroban python java dart php dotnet; do
             f="target/conformance/$sdk/MATRIX.md"
             if [ -f "$f" ]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; fi
           done
@@ -226,6 +242,22 @@ jobs:
           node-version: 26.13.1
           cache: npm
           cache-dependency-path: testees/js/**/package-lock.json
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.100
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: bcmath, gmp, mbstring, sodium
+          tools: composer:2.11.2
+      - name: flutter 3.50.0, the archive pins.toml pins, for the dart testee
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/flutter.tar.xz" \
+            https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz
+          echo "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >>"$GITHUB_PATH"
       - uses: actions/download-artifact@v8
         with:
           name: shapekit
@@ -255,10 +287,10 @@ jobs:
           # candidate entries are in no known-failures list, so every failure is reported
           known="$RUNNER_TEMP/known-failures"
           mkdir -p "$known"
-          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"; : >"$known/soroban.txt"; : >"$known/python.txt"; : >"$known/java.txt"
+          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"; : >"$known/soroban.txt"; : >"$known/python.txt"; : >"$known/java.txt"; : >"$known/dart.txt"; : >"$known/php.txt"; : >"$known/dotnet.txt"
           matrices=()
           # promotion needs a result from every sdk in conformance/versions.toml
-          for sdk in rust go js soroban python java; do
+          for sdk in rust go js soroban python java dart php dotnet; do
             out="target/candidate/$sdk"
             "$shapekit" conformance run --sdk "$sdk" --manifest candidate/manifest.json \
               --known-failures "$known" --out "$out"

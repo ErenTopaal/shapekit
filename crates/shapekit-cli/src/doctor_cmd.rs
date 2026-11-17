@@ -142,7 +142,9 @@ fn tool(r: &mut Report, name: &str, pins: Option<&pins::Pins>, why: &str) {
         Some(Toolchain::Node) => {
             first_line("node", &["--version"]).map(|v| v.trim_start_matches('v').to_owned())
         }
-        None => None,
+        // the testee toolchains are not tools doctor checks; no name above maps to them
+        Some(Toolchain::Flutter | Toolchain::Php | Toolchain::Composer | Toolchain::Dotnet)
+        | None => None,
     };
     match (found, pinned) {
         (Some(f), Some(p)) if f == p => r.ok(&format!("{name}: {f}, the pinned version ({why})")),
