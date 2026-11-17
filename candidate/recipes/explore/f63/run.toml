@@ -190,3 +190,10 @@ id = "contracts.soroban-meta-ext-v1"
 protocol = 30
 steps = 8
 contract_arms_first_witnessed = ["SorobanTransactionMetaExt:v1"]
+
+[recipes."sac-transfer-to-muxed-contract"]
+id = "contracts.sac-transfer-to-muxed-contract"
+protocol = 30
+steps = 10
+# the issuer transfers through its asset's contract to echo's address muxed with id 67
+contract_arms_first_witnessed = ["ScAddress:muxed_contract"]
