@@ -165,6 +165,24 @@ fn arms(out: &mut String, c: &Coverage) {
         a.covered.len(),
         a.reachable
     );
+    let history: Vec<_> = a
+        .covered
+        .iter()
+        .filter(|c| c.locally_reachable == Some(false))
+        .collect();
+    if !history.is_empty() {
+        out.push_str("### Arms only public network history holds\n\nA local core cannot write these, so only history entries cover them, and the explorer does not aim for them (`[[history-only-arm]]` in `registry/uncovered.toml`).\n\n| Arm | Entries | Why a local core cannot write it |\n|---|---|---|\n");
+        for h in history {
+            let _ = writeln!(
+                out,
+                "| `{}` | {} | {} |",
+                h.arm,
+                examples(&h.examples),
+                cell(h.history_only_reason.as_deref().unwrap_or_default())
+            );
+        }
+        out.push('\n');
+    }
     out.push_str(
         "### Uncovered arms\n\n| Arm | Blocker | Reason | Shape seen in |\n|---|---|---|---|\n",
     );

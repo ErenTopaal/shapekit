@@ -259,3 +259,11 @@ family = "soroban.events-max"
 shape = "a local-core transaction at events.contract.per_tx, 682 minimal contract events in one invocation"
 blocker = "recipe-gap"
 reason = "the recipe records the byte limit with one large event or 200 topics; the echo contract has no function that emits n events, so the count limit needs a new contract function and a rebuilt wasm. the many-events fragment itself is covered by golden 692fdd0e57531ce4 record 25 and by classic operation events"
+
+# union arms the corpus covers only with public network history, because a local core never
+# writes them. the check requires each to be covered, and only by history entries; the explorer
+# reads this table to leave them out of the arms it aims for.
+
+[[history-only-arm]]
+arm = "StellarValueExt:basic"
+reason = "a local core always signs the values it proposes: HerderImpl::makeStellarValue writes STELLAR_VALUE_SIGNED or STELLAR_VALUE_SIGNED_MS (src/herder/HerderImpl.cpp 2947-2967, stellar-core v30.0.0), and PendingEnvelopes refuses an envelope carrying an unsigned value (src/herder/PendingEnvelopes.cpp 344-346). public network history holds the arm, in cap03.offer-liabilities.mainnet-25000000"

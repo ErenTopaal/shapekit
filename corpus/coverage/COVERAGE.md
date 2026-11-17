@@ -144,6 +144,14 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 
 436 of 499 arms are held by at least one core-emitted entry. The full per-arm counts are in `coverage.json`.
 
+### Arms only public network history holds
+
+A local core cannot write these, so only history entries cover them, and the explorer does not aim for them (`[[history-only-arm]]` in `registry/uncovered.toml`).
+
+| Arm | Entries | Why a local core cannot write it |
+|---|---|---|
+| `StellarValueExt:basic` | 1: `cap03.offer-liabilities.mainnet-25000000` | a local core always signs the values it proposes: HerderImpl::makeStellarValue writes STELLAR_VALUE_SIGNED or STELLAR_VALUE_SIGNED_MS (src/herder/HerderImpl.cpp 2947-2967, stellar-core v30.0.0), and PendingEnvelopes refuses an envelope carrying an unsigned value (src/herder/PendingEnvelopes.cpp 344-346). public network history holds the arm, in cap03.offer-liabilities.mainnet-25000000 |
+
 ### Uncovered arms
 
 | Arm | Blocker | Reason | Shape seen in |

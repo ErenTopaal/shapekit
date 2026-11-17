@@ -21,6 +21,19 @@ pub struct UncoveredFile {
     pub fragments: Vec<FragmentReason>,
     #[serde(default, rename = "planned")]
     pub planned: Vec<PlannedShape>,
+    #[serde(default, rename = "history-only-arm")]
+    pub history_only_arms: Vec<HistoryOnlyArm>,
+}
+
+/// A union arm the corpus covers only with public network history, because a local core
+/// cannot write it. Coverage requires it to be covered, and only by history entries; the
+/// explorer leaves it out of the arms it aims for, so this table is the one list of them.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct HistoryOnlyArm {
+    pub arm: String,
+    /// Why a local core never writes it, with the source file and lines at the pinned tag.
+    pub reason: String,
 }
 
 /// Why no core-emitted entry exists, coarse enough to count and fine enough to act on.
@@ -118,6 +131,10 @@ impl UncoveredFile {
 
     pub fn arm(&self, arm: &str) -> Option<&ArmReason> {
         self.arms.iter().find(|r| r.arms.iter().any(|a| a == arm))
+    }
+
+    pub fn history_only(&self, arm: &str) -> Option<&HistoryOnlyArm> {
+        self.history_only_arms.iter().find(|r| r.arm == arm)
     }
 
     pub fn fragment(&self, family: &str, fragment: &str) -> Option<&FragmentReason> {

@@ -166,3 +166,66 @@ fn the_candidate_lane_contradicts_no_uncovered_record() {
                 && r.standing == Standing::ConfirmedByRefusal)
     );
 }
+
+/// `run` over the repository's corpus with a copy of its registry whose uncovered.toml gets
+/// `extra` appended.
+fn problems_with_uncovered(extra: &str) -> Vec<String> {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let dir = tempfile::tempdir().unwrap();
+    copy_dir(&root.join("registry"), dir.path());
+    let path = dir.path().join("uncovered.toml");
+    let mut text = fs::read_to_string(&path).unwrap();
+    text.push_str(extra);
+    fs::write(&path, text).unwrap();
+    let (_, problems) = shapekit_coverage::run(&root.join("corpus"), dir.path()).unwrap();
+    problems.iter().map(|p| p.to_string()).collect()
+}
+
+#[test]
+fn the_history_only_basic_value_is_covered_by_history_alone() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let (report, problems) =
+        shapekit_coverage::run(&root.join("corpus"), &root.join("registry")).unwrap();
+    assert!(problems.is_empty(), "{problems:?}");
+    let basic = report
+        .arms
+        .covered
+        .iter()
+        .find(|a| a.arm == "StellarValueExt:basic")
+        .unwrap();
+    assert_eq!(basic.locally_reachable, Some(false));
+    assert!(
+        basic
+            .by_source_class
+            .keys()
+            .all(|c| c.ends_with("-history"))
+    );
+}
+
+#[test]
+fn a_history_only_arm_a_local_core_writes_is_refused() {
+    let p = problems_with_uncovered(
+        "\n[[history-only-arm]]\narm = \"StellarValueExt:signed_ms\"\nreason = \"r\"\n",
+    );
+    assert!(
+        p.iter()
+            .any(|x| x.contains("history-only-arm StellarValueExt:signed_ms")
+                && x.contains("not public network history")),
+        "{p:?}"
+    );
+}
+
+#[test]
+fn a_history_only_arm_nothing_covers_is_refused() {
+    let p = problems_with_uncovered(
+        "\n[[history-only-arm]]\narm = \"StellarValueExt:empty_tx_set\"\nreason = \"r\"\n",
+    );
+    assert!(
+        p.iter().any(|x| x.contains("also an [[arm]] record")),
+        "{p:?}"
+    );
+    assert!(
+        p.iter().any(|x| x.contains("must be covered by history")),
+        "{p:?}"
+    );
+}

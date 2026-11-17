@@ -207,6 +207,33 @@ export function CoveragePage() {
             ))}
           </TableBody>
         </Table>
+        {coverage.arms.history_only.length > 0 && (
+          <Table>
+            <caption className="sr-only">Covered arms that only public network history holds</caption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Arm only history holds</TableHead>
+                <TableHead>Entries</TableHead>
+                <TableHead className="min-w-64 sm:min-w-80">Why a local core cannot write it</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {coverage.arms.history_only.map((h) => (
+                <TableRow key={h.arm}>
+                  <TableCell className="align-top">
+                    <Id>{h.arm}</Id>
+                  </TableCell>
+                  <TableCell className="align-top">
+                    {h.entries.map((e) => (
+                      <Id key={e}>{e}</Id>
+                    ))}
+                  </TableCell>
+                  <TableCell className="text-sm whitespace-normal text-muted-foreground">{h.reason}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
         <Collapsible>
           <CollapsibleTrigger asChild>
             <Button variant="outline" size="sm" className="w-fit">

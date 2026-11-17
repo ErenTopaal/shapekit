@@ -112,6 +112,12 @@ pub struct CoveredArm {
     pub core_emitted_entries: usize,
     pub by_source_class: BTreeMap<&'static str, usize>,
     pub examples: Vec<String>,
+    /// `false` for an arm only public network history holds, with the reason a local core
+    /// cannot write it; absent for the others.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub locally_reachable: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub history_only_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -465,6 +471,23 @@ fn arm_rows(
         for h in &holders {
             *by_class.entry(h.entry.source.class.as_str()).or_insert(0) += 1;
         }
+        let history_only = uncovered.history_only(arm);
+        if history_only.is_some() {
+            let local: Vec<&str> = holders
+                .iter()
+                .filter(|h| !is_history(h.entry.source.class))
+                .map(|h| h.entry.id.as_str())
+                .collect();
+            if !local.is_empty() {
+                problems.push(Problem::new(
+                    format!("{UNCOVERED_FILE}: history-only-arm {arm}"),
+                    format!(
+                        "held by entries that are not public network history ({}), so a local core writes it; remove the record",
+                        local.join(", ")
+                    ),
+                ));
+            }
+        }
         covered.push(CoveredArm {
             arm: arm.clone(),
             core_emitted_entries: holders.len(),
@@ -474,6 +497,8 @@ fn arm_rows(
                 .take(ARM_EXAMPLES)
                 .map(|h| h.entry.id.clone())
                 .collect(),
+            locally_reachable: history_only.map(|_| false),
+            history_only_reason: history_only.map(|r| r.reason.clone()),
         });
     }
     Ok(Arms {
@@ -481,6 +506,14 @@ fn arm_rows(
         covered,
         uncovered: missing,
     })
+}
+
+/// Bytes a public network wrote, which a local core may never write.
+fn is_history(class: SourceClass) -> bool {
+    matches!(
+        class,
+        SourceClass::MainnetHistory | SourceClass::TestnetHistory
+    )
 }
 
 fn ids<'a, 'b: 'a>(shapes: impl Iterator<Item = &'a EntryShape<'b>>) -> Vec<String> {
@@ -616,6 +649,32 @@ fn stale_reasons(
                 ),
             )),
             Some(_) => {}
+        }
+    }
+    let mut seen_history = BTreeSet::new();
+    for r in &uncovered.history_only_arms {
+        let at_arm = at(format!("history-only-arm {}", r.arm));
+        if r.reason.trim().is_empty() {
+            problems.push(Problem::new(at_arm.clone(), "empty reason"));
+        }
+        if !seen_history.insert(r.arm.as_str()) {
+            problems.push(Problem::new(at_arm.clone(), "listed twice"));
+        }
+        if uncovered.arm(&r.arm).is_some() {
+            problems.push(Problem::new(
+                at_arm.clone(),
+                "also an [[arm]] record; an arm is either uncovered or covered by history only",
+            ));
+        }
+        if !arms.covered.iter().any(|c| c.arm == r.arm) {
+            problems.push(Problem::new(
+                at_arm,
+                if arms.uncovered.iter().any(|u| u.arm == r.arm) {
+                    "no history entry holds it; a history-only arm must be covered by history"
+                } else {
+                    "not a union arm reachable from the root type"
+                },
+            ));
         }
     }
     let mut seen = BTreeSet::new();

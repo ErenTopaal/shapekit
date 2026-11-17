@@ -495,6 +495,18 @@ fn coverage_json(
             "reachable": c.arms.reachable,
             "covered": c.arms.covered.len(),
             "uncovered": uncovered_arms,
+            // arms a local core cannot write, covered by public network history only
+            "history_only": c
+                .arms
+                .covered
+                .iter()
+                .filter(|a| a.get("locally_reachable") == Some(&Value::Bool(false)))
+                .map(|a| json!({
+                    "arm": a.get("arm"),
+                    "entries": a.get("examples"),
+                    "reason": a.get("history_only_reason"),
+                }))
+                .collect::<Vec<_>>(),
         },
         "fields": fields,
         "obligations": c

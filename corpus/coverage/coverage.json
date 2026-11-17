@@ -4884,7 +4884,9 @@
         "core_emitted_entries": 1,
         "examples": [
           "cap03.offer-liabilities.mainnet-25000000"
-        ]
+        ],
+        "history_only_reason": "a local core always signs the values it proposes: HerderImpl::makeStellarValue writes STELLAR_VALUE_SIGNED or STELLAR_VALUE_SIGNED_MS (src/herder/HerderImpl.cpp 2947-2967, stellar-core v30.0.0), and PendingEnvelopes refuses an envelope carrying an unsigned value (src/herder/PendingEnvelopes.cpp 344-346). public network history holds the arm, in cap03.offer-liabilities.mainnet-25000000",
+        "locally_reachable": false
       },
       {
         "arm": "StellarValueExt:signed",

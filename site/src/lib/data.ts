@@ -110,6 +110,8 @@ export interface Coverage {
     reachable: number
     covered: number
     uncovered: { arm: string; non_core: number; refused_by_core: number; uncovered: Reason | null }[]
+    // covered arms a local core cannot write, held by public network history only
+    history_only: { arm: string; entries: string[]; reason: string }[]
   }
   fields: {
     id: string
