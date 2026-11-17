@@ -1,0 +1,120 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "e84f9c30",
+        "signature": "eba344c53ac6c55736b76213433f2ae5d030cf6383244a7d18e212f0d4c4cee22d7ac3085d6d3471fd4c3ba78391d30c290cdad0042ae8551e48af7b21f12403"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50012794",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+                  }
+                }
+              ],
+              "read_write": []
+            },
+            "instructions": 10367032,
+            "write_bytes": 10000
+          }
+        }
+      },
+      "fee": 50012894,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": {
+                    "address_v2": {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                      "nonce": "0",
+                      "signature": {
+                        "vec": [
+                          {
+                            "map": [
+                              {
+                                "key": {
+                                  "symbol": "public_key"
+                                },
+                                "val": {
+                                  "bytes": "6b4a44fa2e6db3a31fc65e0e8e270eea2a04f7584d1dfd14643a5129fcfd06da"
+                                }
+                              },
+                              {
+                                "key": {
+                                  "symbol": "signature"
+                                },
+                                "val": {
+                                  "bytes": "fa84e9f1ca2a8ef9ce6fccf78c489eef2f8402666f1f2d219ce80dd30197799e47ee575c39480e979fd23826ed1f3a48abc47de32a5964198e63c2b93efb1c04"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "signature_expiration_ledger": 0
+                    }
+                  },
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "address": "GBVUURH2FZW3HIY7YZPA5DRHB3VCUBHXLBGR37IUMQ5FCKP47UDNVTLY"
+                          },
+                          {
+                            "bool": false
+                          }
+                        ],
+                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                        "function_name": "guarded"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "address": "GBVUURH2FZW3HIY7YZPA5DRHB3VCUBHXLBGR37IUMQ5FCKP47UDNVTLY"
+                    },
+                    {
+                      "bool": false
+                    }
+                  ],
+                  "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                  "function_name": "guarded"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "7400228651009",
+      "source_account": "GAXVIDXGJONBOPOUNKCQ54KI7ZEWSPXQV6UA3VCUC3B2G27IJ6ODB45W"
+    }
+  }
+}

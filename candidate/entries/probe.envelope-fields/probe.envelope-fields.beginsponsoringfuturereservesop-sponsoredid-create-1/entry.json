@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-1",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of BeginSponsoringFutureReservesOp.sponsoredID in carrier create, attempt \"same arm, first byte changed: \\\"GAVZ7QYN7CCKXR3NE2T7JF4OWBUUDEKDQPGATM4HWBTP2P47TBWV52VD\\\"\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR/////wAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 160,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "71a7b1f90e5561b59735bd2f92dcf8322263e3039cddebd6d2a90b0d5ad6d649"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-1/testnet.expected.json",
+      "expected_json_sha256": "c9b9737eebcb73e07631a0ef363190723efb1a92b42bf5faa000155b2c6f92a6",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-1/testnet.xdr",
+      "xdr_sha256": "69e18e7dee980ff95f1613086b5424e2e64a96ddbf1253f5752877a5b649f142"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

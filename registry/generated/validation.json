@@ -316,26 +316,64 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the source sponsoring a data entry of a peer: \"GAGY3DHK27YFVXCFIQZ2WS4PLRMZ3DKSU2CKJX5Y245Q7H22BRGPUPDQ\"",
+          "variant": "base, the source sponsoring an account the same transaction creates, which does not exist when core checks the operation: \"GDN3JXVAZMDS2NKHS2Z4D37NBX2BJQWPGVLQOKB4UYNSBN3LTED7KIEW\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAASwAAAAAAAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-0",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-0-ledger"
+          ],
+          "carrier": "create"
+        },
+        {
+          "variant": "same arm, first byte changed: \"GAVZ7QYN7CCKXR3NE2T7JF4OWBUUDEKDQPGATM4HWBTP2P47TBWV52VD\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR/////wAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-1",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-1-ledger"
+          ],
+          "carrier": "create"
+        },
+        {
+          "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR/////wAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-2",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-create-2-ledger"
+          ],
+          "carrier": "create"
+        },
+        {
+          "variant": "base, the source sponsoring a data entry of a peer: \"GCDHAC2EI4JYV3ACRVHZK6L6IXBP5WAFX6FBYRKHK342NG3FGL3G4VLH\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAASwAAAAAAAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAARAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-0",
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-0",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-0-ledger"
+          ],
+          "carrier": "peer"
         },
         {
-          "variant": "same arm, first byte changed: \"GDRS73T3IUW6ILZNIAIW6K5234NSKYKTXN5BOJBFP2KY2INB6XYTY6W6\"",
+          "variant": "same arm, first byte changed: \"GCYBKJHPLWOLX4UJZFJ2SW5R7QNJTDFNECGDJBMM6PH27DTTUEFZRTRW\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAR/////wAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-1",
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-1",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-1-ledger"
+          ],
+          "carrier": "peer"
         },
         {
           "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
@@ -344,9 +382,10 @@
           "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAR/////wAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-2",
-            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-2",
+            "candidate:probe.envelope-fields.beginsponsoringfuturereservesop-sponsoredid-peer-2-ledger"
+          ],
+          "carrier": "peer"
         }
       ]
     },
@@ -355,7 +394,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a bump of the source's sequence number by 10: \"695784701962\"",
+          "variant": "base, a bump of the source's sequence number by 10: \"717259538442\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAALAAAAAAAAAAA=",
@@ -398,7 +437,7 @@
           ]
         },
         {
-          "variant": "one more, 700079669259: \"700079669259\"",
+          "variant": "one more, 721554505739: \"721554505739\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAALAAAAAAAAAAA=",
@@ -409,7 +448,7 @@
           ]
         },
         {
-          "variant": "one less, 700079669257: \"700079669257\"",
+          "variant": "one less, 721554505737: \"721554505737\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAALAAAAAAAAAAA=",
@@ -532,7 +571,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a claim of a balance created for the source: \"BAAFD4N32MI2ZQDXVLSGNQI2FAHIBAUJNJ2RBOK3IZVBNUVTGAUTGUYD2Y\"",
+          "variant": "base, a claim of a balance created for the source: \"BAAGFWT4JVLXIU47XSE7QZHKYNOKJONI4274PGHXB6TBGNT7J7M7VXWPO4\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAPAAAAAAAAAAA=",
@@ -543,7 +582,7 @@
           ]
         },
         {
-          "variant": "same arm, first byte changed: \"BAAILSIZ7IGITZUSMR4XGBQTVKUQ224CUWL4AAQMQXTAIWXWWVLLAINGFI\"",
+          "variant": "same arm, first byte changed: \"BAAOLP5LSTYNZL7Z2WICXOJBW32KDPKOTG74Q2NONIRLEG2TCEVKXCN6PE\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAP/////wAAAAA=",
@@ -574,7 +613,7 @@
           "variant": "base, the first of two claimants of a native claimable balance: \"GAUJK73QMCDI6EHW4IQERQOPHMFLEDIXWUQMDA2WREHRDUF4PDXSTAJQ\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAD2XkkYP/j8fF1SSAmSNYD25ZXJsC/hmRmkLFOZs8KBPwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADJZmGO/CPapSVGqSLYqRFXWxaWoCyAoq9mBJa/nLamugAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-two-0",
@@ -586,7 +625,7 @@
           "variant": "same arm, first byte changed: \"GB7EOSU4Y74K7226MVBFUAIIRDVIRE6URXQVKB2CDHSG2IXROQC6XPWT\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAABVXsEd01Sdd8sm30bTQjzdXkxa+Djhu9W94ztri2juwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAABEBzbefI8mISC3M2JViS0oh0AD8mpQHPdF1LRqmY5tgAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-two-1",
@@ -598,7 +637,7 @@
           "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACJOrpw77gMnjgZUEKWTBvyTpXxJ63EbIdIDmkOd2KtgAAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADexvFA9MKcRBrfzTAFNTLsV71VvBfqJyw0otZV/0gKYwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-two-2",
@@ -621,7 +660,7 @@
           "variant": "base, the claimant of a native claimable balance: \"GC7S6XIOBDKSGLSOGZX2DYKPLYELGCN26WFRY54WRGIYHLD2CYHKAXEH\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAACeVnll2sqJzrbzm5IqMb8eqLWpgYmTvWwQebz6inNRAAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADmIlVXtyZdjm60nYMvRQi/g8SXZOC/c7hiMRaDxmkAlAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-one-0",
@@ -633,7 +672,7 @@
           "variant": "same arm, first byte changed: \"GBMMH3B3C6BVOXOT4CQ5ROFNNYCKQHLTN7WQSD7TEWTTHKKKTMZS66HK\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACeH78eUfW91t7GzHiErXIRLVGrhecFFSvlsBYxoo0DpgAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADd1HTH96c1e7VKphBqRJ0xrjIP755PnBZqSLk1F0EcugAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-one-1",
@@ -645,7 +684,7 @@
           "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADfuoMerilr52LJDAFf3O/2bWcjKNJZN6YgIBXD037+/AAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAB51BFJjYKVOZdrgZmUYLV9pn3W/aa+fPfEUP+1Xlv/rAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-destination-one-2",
@@ -663,7 +702,7 @@
           "variant": "base, the first of two claimants of a native claimable balance: \"unconditional\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAABdkHgMZX0QKOxnIaK4xR0iEOKq9oDyJSz/aZkA4qqUjQAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAABPZQMqMdLz95gJD6owBTkd2HzCIFbUCLs0ZhmgIzpLqwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-two-0",
@@ -708,7 +747,7 @@
           "variant": "arm before_absolute_time, smallest: {\"before_absolute_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADVNIJrUMCPJ+pDLbHU2CPywKDpqFHlQdvL76fho2zIHwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACetu7zHpL5eGFOATgXMJ0aIuEPXP7IcQLcQ5aiMczibwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-two-4",
@@ -720,7 +759,7 @@
           "variant": "arm before_relative_time, smallest: {\"before_relative_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACKrqyoFkY8yYWRz/Q8sMIyiLgbWMWf+KqFDLpzhYN9jwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADxhcEgjvOw0PAOgh2QGsgHSDHOw/I8o4DpAvq/PvM/kwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-two-5",
@@ -732,7 +771,7 @@
           "variant": "base, the claimant of a native claimable balance: \"unconditional\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACUQ/KUCFQU3Xd24zGcaaz1OSeZrwPaOCJtqPpcq4AqiwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAABNOlqY+OlHRACgg9mh/DGz7wSr0Hkm7wdwaMm8R63EvQAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-one-0",
@@ -777,7 +816,7 @@
           "variant": "arm before_absolute_time, smallest: {\"before_absolute_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAA72JcOkh1KK1Ev/CPdSLGciKkMPDzCVF5XfZlbk5ADpQAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACBtHctlva1MwK7sblW2fSbejg+s7ahqSQKpJ9nJZKpVwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-one-4",
@@ -789,7 +828,7 @@
           "variant": "arm before_relative_time, smallest: {\"before_relative_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAC69SLSp7iJVbeHszaMVY6VrAQBqLqVPtN6wVy+06z/sAAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAABF4AbaAGSbvxrh4Gs+NOLxvfAeswzqR53xPWdKyhI8EwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.claimantv0-predicate-one-5",
@@ -804,7 +843,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, an issuer with clawback taking back a balance of its asset: \"BAAMGUPHUHJ6Z4VLG6VB6R57FCZZZVAOKBOZ2VNRBAIPI5ZOJKLDHVCVO4\"",
+          "variant": "base, an issuer with clawback taking back a balance of its asset: \"BAAB3JRXUXNHPFE3IEKMW5UHY3MWTIBOFL5Y65M3OK4NJS3LI5LGOEYOAM\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAUAAAAAAAAAAA=",
@@ -815,7 +854,7 @@
           ]
         },
         {
-          "variant": "same arm, first byte changed: \"BAAD5KFNCYFWAP3P6XZMMQTYI2QZDAM2R4OGIVMV6WG2QXQGO5GCJMBJAM\"",
+          "variant": "same arm, first byte changed: \"BAAHNBOBCWSH3SC5RUQCRG57PMKRTIKVE5K3TVMB4GB6RWYTJSA7UB2QXY\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAU/////wAAAAA=",
@@ -1421,7 +1460,7 @@
           "variant": "base, a native claimable balance with one unconditional claimant: \"10000000\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAACCgv+uIWLjYki1TZNw4MKv+DQMqwNV39ycJ+pkJPDSLQAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAB9fYR5hNT5wNjo95JTuZNCGX1e0RV29PsuXq7lRmyZMAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.createclaimablebalanceop-amount-0",
@@ -1463,7 +1502,7 @@
           "variant": "one more, 10000001: \"10000001\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAC7U9R2IbCsGZYKfPupiTbz4RPBCdv6lg3gY6Q/p+g5jwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAAXvHEcLG5Sk+69ugWNRjGTNVm7/0AKFPhrbR9o9XEfdwAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.createclaimablebalanceop-amount-4",
@@ -1474,7 +1513,7 @@
           "variant": "one less, 9999999: \"9999999\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADl3X7c3HViR5n8L4UrYKPY0CLLJuG+MoLlTU01mcy3tAAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAADOIf1tgvk0Z1s/aMhPPHTyWhE3/OPTVYrAE+qanqMMEQAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.createclaimablebalanceop-amount-5",
@@ -1491,7 +1530,7 @@
           "variant": "base, a native claimable balance with one unconditional claimant: \"native\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAAt0k6IlX6PQCxcFW+XAeeM+gHjXflAM7RMMtMsSjigBwAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAABWoBKlkZxcHdQBC9hYGEHkpqE//5m9otp9D8MBeXyhaAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.createclaimablebalanceop-asset-0",
@@ -1528,7 +1567,7 @@
           "variant": "base, a native claimable balance with one unconditional claimant: [{\"claimant_type_v0\":{\"destination\":\"GBK6TMRONBETWYKZIRW5EQK7FEJUJNUU...",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAAasrjMtvUh5rKRFaqsvRfnGX+NtCXJKVDqsSgSTnZSygAAAAA=",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAOAAAAAAAAAAA8nqLjT1i94T8ldlxKD9FbV8hLuWm68/EdYvnCgER4OAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.createclaimablebalanceop-claimants-0",
@@ -1692,6 +1731,17 @@
           "witnesses": [
             "candidate:probe.envelope-fields.createcontractargsv2-constructorargs-2",
             "candidate:probe.envelope-fields.createcontractargsv2-constructorargs-2-ledger"
+          ]
+        },
+        {
+          "variant": "another owner, which the constructor takes: [{\"address\":\"GAOPQJ3IYVGZJOVCOVYNBHX4UG4M3CT2Q5S2ZDYLE6AXXPXHG4DTERN3\"}]",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAMrP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.createcontractargsv2-constructorargs-3",
+            "candidate:probe.envelope-fields.createcontractargsv2-constructorargs-3-ledger"
           ]
         }
       ]
@@ -2019,7 +2069,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the source's signature on a payment: \"aa2529848dcdcc550f6525e5b262834e930cd0c989fb7fd0608ad34f33308123eb45...",
+          "variant": "base, the source's signature on a payment: \"e6a268064a9afe0dddfed8aaf95969cfbe59ab078cdbb240055876d66483583e1257...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -2059,7 +2109,7 @@
           "variant": "base, an extension of echo's instance and code: \"v0\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAX50AAAAAAAAAAQAAAAAAAAAZAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAX9cAAAAAAAAAAQAAAAAAAAAZAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.extendfootprintttlop-ext-0",
@@ -2144,7 +2194,7 @@
           "variant": "base, a fee bump of a payment: \"v0\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB3CPQS4a0qHcm7a6IOzsJd7GsUwPEOFY4x7xXYlJn+50AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABNWwXCjV9Om9Fwrzhl+K+Ua9qa35EVUXFtse4NCY4AWIAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-ext-0",
@@ -2169,7 +2219,7 @@
           "variant": "base, a fee bump of a payment: \"400\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABGlTFX8I0NhSA47pON5/bgHdkueRpTtD8kM5x8l5vMGUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABAfNnVMTQQxSnQwoXHAw3ZHDx9LEt6spO1ASToqV8OLwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-0",
@@ -2210,7 +2260,7 @@
           "variant": "one more, 401: \"401\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABKzoaIwFdJDUAaTXEVMZXOLPiK3WChA0Yl+Bntx1fQ3oAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABi+vjMDZB7kzQ8Nw/znUxJr04R8i4OI8+Z7jVpn/+B5oAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-4",
@@ -2221,7 +2271,7 @@
           "variant": "one less, 399: \"399\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABmE0YU6Yuh17wa7uJV++wt0ubeRov5p05rtZAVi2smrAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABD+fY1zUcjW5+6xsQciXO9BCxpqHuilV00N7MOfM0YNkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-5",
@@ -2238,7 +2288,7 @@
           "variant": "base, a fee bump of a payment: \"GCZNAO2EFMXPFUEBKDPREO3LCIPVUVU26EMM4IZW45KVKQQ2OP4WSMOX\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABFItZNellS8ApgxFVYKsxyWztlFwZ/Qw2yg6V0IIx/uwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAAB6x5/ZJwmAhYfOzD/GfhmmvYfVvXmZYEPir5E9ORFiikAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-feesource-0",
@@ -2282,10 +2332,10 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a fee bump of a payment: {\"tx\":{\"signatures\":[{\"hint\":\"2d2127f1\",\"signature\":\"bb54a478b2897368...",
+          "variant": "base, a fee bump of a payment: {\"tx\":{\"signatures\":[{\"hint\":\"2d2127f1\",\"signature\":\"c098547b15dfef9a...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB4pg5u8EOPMVF2v/K0bprJBHpuvglHV9shW+6aYjBHRUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABhdcfWxGiA2FEhnFu63Woexr7P2UVM96v+aJygqU0a/0AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-innertx-0",
@@ -2309,10 +2359,10 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a fee bump of a payment: [{\"hint\":\"219be049\",\"signature\":\"3651ef082a0d97190c72f15bccaf9c8ec8c8...",
+          "variant": "base, a fee bump of a payment: [{\"hint\":\"219be049\",\"signature\":\"5e380a3ea6d14a758274ed81953a767fedb1...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB+cO+rjI+CHHWRQt1/Xm2k8w2SoXRw/hlR6lq5fnOgNYAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABANVrslDQlPHPeyR5IJ1C/aIFTDdy/Qg91CXlBcH6asMAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransactionenvelope-signatures-0",
@@ -2330,7 +2380,7 @@
           ]
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"0f526516\",\"signature\":\"510cde7d216a413361fcbe8a9d11b33d3f59...",
+          "variant": "first element repeated: [{\"hint\":\"0f526516\",\"signature\":\"8a38f48c4b0e254d8e2f6e7da31d4b85e118...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAMj////2AAAAAA==",
@@ -2349,7 +2399,7 @@
           "variant": "base, a fee bump of a payment: {\"ext\":\"v0\",\"fee\":\"400\",\"fee_source\":\"GAESABAHCKOOGEHHRPQUPOLCAFXSAN7...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB5iye6LWG4uJ6k4icfhKW7X2Zo/r7POg+UHO7td4OrgcAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABGB4Iv/7GbjZhRwXx4kyues/F7ty60NZAqgf7uJ6ri48AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransactionenvelope-tx-0",
@@ -2792,6 +2842,28 @@
             "candidate:probe.envelope-fields.invokecontractargs-args-2",
             "candidate:probe.envelope-fields.invokecontractargs-args-2-ledger"
           ]
+        },
+        {
+          "variant": "a value of another type, which echo takes: [{\"symbol\":\"other\"}]",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAANGYAAAAAAAAAAQAAAAAAAAAYAAAAAEGhVDdKcLNZMh9r/XDTPqMVK1Dt11auSIrCX1IGKwb/AAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.invokecontractargs-args-3",
+            "candidate:probe.envelope-fields.invokecontractargs-args-3-ledger"
+          ]
+        },
+        {
+          "variant": "a value of another type, which echo takes, i64: [{\"i64\":\"-5\"}]",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAMT8AAAAAAAAAAQAAAAAAAAAYAAAAAFhIGUiX5nry39ApWECgB93HJHNIZDLOxGOd1/nUqW4hAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.invokecontractargs-args-4",
+            "candidate:probe.envelope-fields.invokecontractargs-args-4-ledger"
+          ]
         }
       ]
     },
@@ -3232,7 +3304,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's ledger bounds: 1526",
+          "variant": "base, a payment's ledger bounds: 1534",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3265,7 +3337,7 @@
           ]
         },
         {
-          "variant": "one more, 1531: 1531",
+          "variant": "one more, 1539: 1539",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3276,7 +3348,7 @@
           ]
         },
         {
-          "variant": "one less, 1530: 1530",
+          "variant": "one less, 1538: 1538",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3287,7 +3359,7 @@
           ]
         },
         {
-          "variant": "the ledger the attempt closes in, 533: 533",
+          "variant": "the ledger the attempt closes in, 541: 541",
           "submission": "error",
           "result_code": "tx_too_late",
           "result_xdr": "AAAAAAAAAGT////9AAAAAA==",
@@ -3376,6 +3448,18 @@
           "carrier": "echo"
         },
         {
+          "variant": "an extra key the call never touches: [{\"contract_data\":{\"contract\":\"CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAMa8AAAAAAAAAAQAAAAAAAAAYAAAAACPSPIvT/+rRqsG5B6pvMsuQzLV5fD7qY4m6kHdjzkY7AAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.ledgerfootprint-readonly-echo-3",
+            "candidate:probe.envelope-fields.ledgerfootprint-readonly-echo-3-ledger"
+          ],
+          "carrier": "echo"
+        },
+        {
           "variant": "base, a restore of an archived echo value: []",
           "submission": "pending",
           "result_code": "tx_success",
@@ -3436,6 +3520,18 @@
           "applied": "not-applied",
           "witnesses": [
             "candidate:probe.envelope-fields.ledgerfootprint-readwrite-echo-2"
+          ],
+          "carrier": "echo"
+        },
+        {
+          "variant": "an extra key the call never touches: [{\"contract_data\":{\"contract\":\"CCKL6DQNVE7PIZ6BBSKN6G4KC2GRE7S7MOGK4O...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAANpEAAAAAAAAAAQAAAAAAAAAYAAAAACPSPIvT/+rRqsG5B6pvMsuQzLV5fD7qY4m6kHdjzkY7AAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.ledgerfootprint-readwrite-echo-3",
+            "candidate:probe.envelope-fields.ledgerfootprint-readwrite-echo-3-ledger"
           ],
           "carrier": "echo"
         },
@@ -3520,7 +3616,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the sponsor of a claimable balance handing the sponsorship to a peer: \"BAAALLXINGJBNWFKRAXAUTZFSXEUAMGQPBFD54ZDJ7ZMNE3DX3GJ4XXI2A\"",
+          "variant": "base, the sponsor of a claimable balance handing the sponsorship to a peer: \"BAAH6WKT2HCOXUE5JNODW4VGS5CSIHT6NAKQTXWF5TGCT3N57FHZIP5RVQ\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAASwAAAAAAAAAAwAAAAAAAAAQAAAAAAAAAAAAAAASAAAAAAAAAAAAAAARAAAAAAAAAAA=",
@@ -3531,7 +3627,7 @@
           ]
         },
         {
-          "variant": "same arm, first byte changed: \"BAAGXAA5ADEG75NBBLSJGPC2IFTKPFEZG27R2JWSGEZ2M5POM5C42JJG5M\"",
+          "variant": "same arm, first byte changed: \"BAACO5NLXYRV3VXXF2N6EHIQAHIHNYX4GKNFHT2JELDJUMM72QMSN6U2NA\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAS/////wAAAAAAAAARAAAAAAAAAAA=",
@@ -5507,6 +5603,17 @@
           "witnesses": [
             "candidate:probe.envelope-fields.managedataop-dataname-3"
           ]
+        },
+        {
+          "variant": "printable ascii of any content: \"a name, with spaces & signs?\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAKAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.managedataop-dataname-4",
+            "candidate:probe.envelope-fields.managedataop-dataname-4-ledger"
+          ]
         }
       ]
     },
@@ -5984,7 +6091,7 @@
           "variant": "base, a fee bump's muxed fee source, id 7: \"fbfbbbda44017bad080d84913edfd96ec8bfc8219cbfa88c3a988cf77cfda37f\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABelr6F1D+oC1LmpxVVU5ah/Tlr+rbfLV3rbzl0pINnpQAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABE9/8LszERBs1z0MHm0g7YKpPMw/fRBZ/wPEgdACiTZgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-ed25519-fee-source-0",
@@ -6324,7 +6431,7 @@
           "variant": "base, a fee bump's muxed fee source, id 7: \"7\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABmHU4mplXu3zcrpONvIggHGj7hx3/1zlqYDXRKMrgI0cAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABl5tAR5ekG7ZwJjHCsM+iEIx42Cw1QkGuY+w3zeIpruUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-0",
@@ -6336,7 +6443,7 @@
           "variant": "zero 0: \"0\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB1oDwqK7niOLkCRmbXc7rDzY6K9bL1LShMnKErM5h6c4AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABZemo2YAr3RoD2ITY89Jz9F8CcnBmdIj+W72N1iKnBKkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-1",
@@ -6348,7 +6455,7 @@
           "variant": "maximum 18446744073709551615: \"18446744073709551615\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB31o6SgWjkQbReWATz/2SLuf3vPUNW1GDRiJjNiNTM+kAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABTbjygJEogXs9fCQhzO73c/r0Ls0Iu804RalFmH/LdcoAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-2",
@@ -6360,7 +6467,7 @@
           "variant": "one more, 8: \"8\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB9dkZ5GUPNkipjaQy3EEw2cJ252RuJJEzScJeehXzgOkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABXdIvmHK8Wk3BWylCx5qJqfrk8YYLGoGnqo1EDna3kggAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-3",
@@ -6372,7 +6479,7 @@
           "variant": "one less, 6: \"6\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABRq7n2a0Z6rSkUzsQ8XgWYJHYdc+at/Qa7y973ZVrBhEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABxQNtUbPZil++vy2H2dQcdNXTf0vqZOVvnIqcN7RmYJMAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-4",
@@ -8246,9 +8353,10 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-0",
-            "candidate:probe.envelope-fields.paymentop-amount-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-0",
+            "candidate:probe.envelope-fields.paymentop-amount-native-0-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "zero 0: \"0\"",
@@ -8257,8 +8365,9 @@
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-1"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-1"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "minimum -9223372036854775808: \"-9223372036854775808\"",
@@ -8267,8 +8376,9 @@
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-2"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-2"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "maximum 9223372036854775807: \"9223372036854775807\"",
@@ -8277,9 +8387,10 @@
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+AAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-3",
-            "candidate:probe.envelope-fields.paymentop-amount-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-3",
+            "candidate:probe.envelope-fields.paymentop-amount-native-3-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "one more, 10000001: \"10000001\"",
@@ -8288,9 +8399,10 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-4",
-            "candidate:probe.envelope-fields.paymentop-amount-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-4",
+            "candidate:probe.envelope-fields.paymentop-amount-native-4-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "one less, 9999999: \"9999999\"",
@@ -8299,9 +8411,80 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-amount-5",
-            "candidate:probe.envelope-fields.paymentop-amount-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-amount-native-5",
+            "candidate:probe.envelope-fields.paymentop-amount-native-5-ledger"
+          ],
+          "carrier": "native"
+        },
+        {
+          "variant": "base, a payment of the shared credit, the source also holding an asset whose issuer merged away: \"100000000\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-0",
+            "candidate:probe.envelope-fields.paymentop-amount-credit-0-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "zero 0: \"0\"",
+          "submission": "error",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-1"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "minimum -9223372036854775808: \"-9223372036854775808\"",
+          "submission": "error",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-2"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "maximum 9223372036854775807: \"9223372036854775807\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-3",
+            "candidate:probe.envelope-fields.paymentop-amount-credit-3-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "one more, 100000001: \"100000001\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-4",
+            "candidate:probe.envelope-fields.paymentop-amount-credit-4-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "one less, 99999999: \"99999999\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-amount-credit-5",
+            "candidate:probe.envelope-fields.paymentop-amount-credit-5-ledger"
+          ],
+          "carrier": "credit"
         }
       ]
     },
@@ -8316,9 +8499,10 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-asset-0",
-            "candidate:probe.envelope-fields.paymentop-asset-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-asset-native-0",
+            "candidate:probe.envelope-fields.paymentop-asset-native-0-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "arm credit_alphanum4, smallest: {\"credit_alphanum4\":{\"asset_code\":\"\",\"issuer\":\"GAAAAAAAAAAAAAAAAAAAAA...",
@@ -8327,8 +8511,9 @@
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-asset-1"
-          ]
+            "candidate:probe.envelope-fields.paymentop-asset-native-1"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "arm credit_alphanum12, smallest: {\"credit_alphanum12\":{\"asset_code\":\"\\\\0\\\\0\\\\0\\\\0\\\\0\",\"issuer\":\"GAAAAA...",
@@ -8337,8 +8522,67 @@
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-asset-2"
-          ]
+            "candidate:probe.envelope-fields.paymentop-asset-native-2"
+          ],
+          "carrier": "native"
+        },
+        {
+          "variant": "base, a payment of the shared credit, the source also holding an asset whose issuer merged away: {\"credit_alphanum4\":{\"asset_code\":\"PRB\",\"issuer\":\"GDQMGWLIAV4GE4CENHJ...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-asset-credit-0",
+            "candidate:probe.envelope-fields.paymentop-asset-credit-0-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "same arm, smallest value: {\"credit_alphanum4\":{\"asset_code\":\"\",\"issuer\":\"GAAAAAAAAAAAAAAAAAAAAA...",
+          "submission": "error",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-asset-credit-1"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "arm native, smallest: \"native\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-asset-credit-2",
+            "candidate:probe.envelope-fields.paymentop-asset-credit-2-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "arm credit_alphanum12, smallest: {\"credit_alphanum12\":{\"asset_code\":\"\\\\0\\\\0\\\\0\\\\0\\\\0\",\"issuer\":\"GAAAAA...",
+          "submission": "error",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////wAAAAA=",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-asset-credit-3"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "an asset whose issuer no longer exists: {\"credit_alphanum4\":{\"asset_code\":\"DEAD\",\"issuer\":\"GB5J563CUH6MGML4GS...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-asset-credit-4",
+            "candidate:probe.envelope-fields.paymentop-asset-credit-4-ledger"
+          ],
+          "carrier": "credit"
         }
       ]
     },
@@ -8347,26 +8591,28 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a native payment: \"GB4CYSI54SICPGP62IA7AAWJ676UQTWVSEWGXRIJK7O4AUWWBT35EWNI\"",
+          "variant": "base, a native payment: \"GCHVGHTICD3KD76VQCZWGPC5T7DVQRF5SY7F7ZUPQJ2A5MWFU4SOV2YX\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-destination-0",
-            "candidate:probe.envelope-fields.paymentop-destination-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-destination-native-0",
+            "candidate:probe.envelope-fields.paymentop-destination-native-0-ledger"
+          ],
+          "carrier": "native"
         },
         {
-          "variant": "same arm, first byte changed: \"GAJBML2Y3HPZVHABRRUOHHTOWPQFBP67OQZ5SAI6LMTBH6POSZNO3BHT\"",
+          "variant": "same arm, first byte changed: \"GCBDOFTNMKPYOFWFZHDZORYXVL3TL6SPUHJXUOTXUZNMK24HPAA4LQ5K\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+wAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-destination-1",
-            "candidate:probe.envelope-fields.paymentop-destination-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-destination-native-1",
+            "candidate:probe.envelope-fields.paymentop-destination-native-1-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
@@ -8375,9 +8621,10 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-destination-2",
-            "candidate:probe.envelope-fields.paymentop-destination-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-destination-native-2",
+            "candidate:probe.envelope-fields.paymentop-destination-native-2-ledger"
+          ],
+          "carrier": "native"
         },
         {
           "variant": "arm muxed_ed25519, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
@@ -8386,9 +8633,58 @@
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.paymentop-destination-3",
-            "candidate:probe.envelope-fields.paymentop-destination-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.paymentop-destination-native-3",
+            "candidate:probe.envelope-fields.paymentop-destination-native-3-ledger"
+          ],
+          "carrier": "native"
+        },
+        {
+          "variant": "base, a payment of the shared credit, the source also holding an asset whose issuer merged away: \"GAFDXSJTFZQN5GIG7NGWPUDMFI7YMAL43VCVEXAJKPJJYDMBG36KVK4Z\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-destination-credit-0",
+            "candidate:probe.envelope-fields.paymentop-destination-credit-0-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "same arm, first byte changed: \"GDRTRH7W3JQMZFZC3BY7GNBGLP3FCOZEDFENUE55XC56PY2CH7UZTKMT\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+wAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-destination-credit-1",
+            "candidate:probe.envelope-fields.paymentop-destination-credit-1-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-destination-credit-2",
+            "candidate:probe.envelope-fields.paymentop-destination-credit-2-ledger"
+          ],
+          "carrier": "credit"
+        },
+        {
+          "variant": "arm muxed_ed25519, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.paymentop-destination-credit-3",
+            "candidate:probe.envelope-fields.paymentop-destination-credit-3-ledger"
+          ],
+          "carrier": "credit"
         }
       ]
     },
@@ -8434,7 +8730,7 @@
       "verdict": "not-validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_ledger\":2204,\"min_ledger\":0}",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_ledger\":2322,\"min_ledger\":0}",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8549,7 +8845,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: \"5226975199232\"",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: \"5733781340160\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8603,7 +8899,7 @@
           ]
         },
         {
-          "variant": "present, one more, 5231270166529: \"5231270166529\"",
+          "variant": "present, one more, 5738076307457: \"5738076307457\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -8613,7 +8909,7 @@
           ]
         },
         {
-          "variant": "present, one less, 5231270166527: \"5231270166527\"",
+          "variant": "present, one less, 5738076307455: \"5738076307455\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8630,7 +8926,7 @@
       "verdict": "not-validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_time\":\"1874065600\",\"min_time\":\"0\"}",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_time\":\"1884260800\",\"min_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -9035,7 +9331,7 @@
           "variant": "base, the one entry of a map echo receives: {\"symbol\":\"k\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAOuYAAAAAAAAAAQAAAAAAAAAYAAAAALwxO6ovbebdtfMiAVHmTfFdWkrrpX7quHSx4MsoKtMcAAAAAA==",
+          "result_xdr": "AAAAAAAAOuQAAAAAAAAAAQAAAAAAAAAYAAAAALwxO6ovbebdtfMiAVHmTfFdWkrrpX7quHSx4MsoKtMcAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-0",
@@ -9057,7 +9353,7 @@
           "variant": "same arm, 32 bytes, the maximum: {\"symbol\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAPrEAAAAAAAAAAQAAAAAAAAAYAAAAACiQs9Nw1xcndoROdze80Rk1jubqVloPJdCRK9gM0qHSAAAAAA==",
+          "result_xdr": "AAAAAAAAPq8AAAAAAAAAAQAAAAAAAAAYAAAAACiQs9Nw1xcndoROdze80Rk1jubqVloPJdCRK9gM0qHSAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-2",
@@ -9101,7 +9397,7 @@
           "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAANN4AAAAAAAAAAQAAAAAAAAAYAAAAABMm0g5qQsW0vuoqV9lnhpliFLf8613szScFPDApuiPAAAAAAA==",
+          "result_xdr": "AAAAAAAANN0AAAAAAAAAAQAAAAAAAAAYAAAAABMm0g5qQsW0vuoqV9lnhpliFLf8613szScFPDApuiPAAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-6",
@@ -9134,7 +9430,7 @@
           "variant": "arm u64, smallest: {\"u64\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAM1wAAAAAAAAAAQAAAAAAAAAYAAAAANQNHtj3bu4s+ODNABIB+g3EijE28DQaEzv3f4x4nuWmAAAAAA==",
+          "result_xdr": "AAAAAAAAM1sAAAAAAAAAAQAAAAAAAAAYAAAAANQNHtj3bu4s+ODNABIB+g3EijE28DQaEzv3f4x4nuWmAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-9",
@@ -9178,7 +9474,7 @@
           "variant": "arm u128, smallest: {\"u128\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAANRcAAAAAAAAAAQAAAAAAAAAYAAAAAPKSTNmHnljqO0kzkoBkv5NoQBcv1lXQS8tuxdtOexGJAAAAAA==",
+          "result_xdr": "AAAAAAAANRYAAAAAAAAAAQAAAAAAAAAYAAAAAPKSTNmHnljqO0kzkoBkv5NoQBcv1lXQS8tuxdtOexGJAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-13",
@@ -9200,7 +9496,7 @@
           "variant": "arm u256, smallest: {\"u256\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAOIwAAAAAAAAAAQAAAAAAAAAYAAAAACnWlFQ1t5R9/Uhi25TYU417EnY2UDh6fxm1PYEpDYH0AAAAAA==",
+          "result_xdr": "AAAAAAAAOIoAAAAAAAAAAQAAAAAAAAAYAAAAACnWlFQ1t5R9/Uhi25TYU417EnY2UDh6fxm1PYEpDYH0AAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-15",
@@ -9266,7 +9562,7 @@
           "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAPrEAAAAAAAAAAQAAAAAAAAAYAAAAADOgM/ZBLWeqSOujLpjCxO2pQvfVSGIzordFV8eE4MBMAAAAAA==",
+          "result_xdr": "AAAAAAAAPq4AAAAAAAAAAQAAAAAAAAAYAAAAADOgM/ZBLWeqSOujLpjCxO2pQvfVSGIzordFV8eE4MBMAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-key-21",
@@ -9327,7 +9623,7 @@
           "variant": "base, the one entry of a map echo receives: {\"u32\":1}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAM1wAAAAAAAAAAQAAAAAAAAAYAAAAALwxO6ovbebdtfMiAVHmTfFdWkrrpX7quHSx4MsoKtMcAAAAAA==",
+          "result_xdr": "AAAAAAAAM1sAAAAAAAAAAQAAAAAAAAAYAAAAALwxO6ovbebdtfMiAVHmTfFdWkrrpX7quHSx4MsoKtMcAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-val-0",
@@ -9404,7 +9700,7 @@
           "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAANPsAAAAAAAAAAQAAAAAAAAAYAAAAAEjXM53BGtqPlxedQ6Mc5AqCnoOHpEGktdIFnhQsxloUAAAAAA==",
+          "result_xdr": "AAAAAAAANPoAAAAAAAAAAQAAAAAAAAAYAAAAAEjXM53BGtqPlxedQ6Mc5AqCnoOHpEGktdIFnhQsxloUAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-val-7",
@@ -9426,7 +9722,7 @@
           "variant": "arm u64, smallest: {\"u64\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAM3kAAAAAAAAAAQAAAAAAAAAYAAAAAOPZCp0PMLsA5/BUAiLXLVqdyDpiaeJqMoLkbLyJuaRjAAAAAA==",
+          "result_xdr": "AAAAAAAAM3gAAAAAAAAAAQAAAAAAAAAYAAAAAOPZCp0PMLsA5/BUAiLXLVqdyDpiaeJqMoLkbLyJuaRjAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-val-9",
@@ -9492,7 +9788,7 @@
           "variant": "arm u256, smallest: {\"u256\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAOKgAAAAAAAAAAQAAAAAAAAAYAAAAAGUBGlDQTtGAfiLR+IicsrGikHVM47mIvPCSolaMlon0AAAAAA==",
+          "result_xdr": "AAAAAAAAOKcAAAAAAAAAAQAAAAAAAAAYAAAAAGUBGlDQTtGAfiLR+IicsrGikHVM47mIvPCSolaMlon0AAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-val-15",
@@ -9569,7 +9865,7 @@
           "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAPswAAAAAAAAAAQAAAAAAAAAYAAAAAFBBqW3zoKrEqLzZH+c+z4AbFtnPLUudrAIv5b3xIFI2AAAAAA==",
+          "result_xdr": "AAAAAAAAPskAAAAAAAAAAQAAAAAAAAAYAAAAAFBBqW3zoKrEqLzZH+c+z4AbFtnPLUudrAIv5b3xIFI2AAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.scmapentry-val-22",
@@ -9848,6 +10144,17 @@
           "applied": "not-applied",
           "witnesses": [
             "candidate:probe.envelope-fields.setoptionsop-homedomain-4"
+          ]
+        },
+        {
+          "variant": "printable ascii that is no domain name: \"no domain, just text!\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAAFAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.setoptionsop-homedomain-5",
+            "candidate:probe.envelope-fields.setoptionsop-homedomain-5-ledger"
           ]
         }
       ]
@@ -10563,26 +10870,28 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a peer's address credentials for one require_auth: \"GA65ZWWCZU6ZUT7Y6PJ63UUTUPH6QTFTLLTJGLDDP36ZC3HX6NEUS2L6\"",
+          "variant": "base, a peer's address credentials for one require_auth: \"GAG77FCUPATD3ZCS42TF5BPOLMUDENNSLC4W5ACCIMU5FLIXZU2INNZR\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
-          "variant": "same arm, same arm, first byte changed: \"GCEKRMAF6HNQLXBYUK473ZMCEZQN4NODBBEMKTXJ253AAZTDHDSPWD2A\"",
+          "variant": "same arm, same arm, first byte changed: \"GDY7FZYE7M72FZ43YMUTN473DHMZIUB7E7WG5MAH2I46U44LNUCFTQPL\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
@@ -10591,9 +10900,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-2",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm contract, smallest: \"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"",
@@ -10602,9 +10912,10 @@
           "result_xdr": "AAAAAAAAOVL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-3",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm muxed_account, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
@@ -10613,9 +10924,10 @@
           "result_xdr": "AAAAAAAAOWT/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-4",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-4-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm claimable_balance, smallest: \"BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE\"",
@@ -10624,9 +10936,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-5",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-5-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm liquidity_pool, smallest: \"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\"",
@@ -10635,9 +10948,10 @@
           "result_xdr": "AAAAAAAAOVL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-6",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-6-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-6-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm muxed_contract, smallest: \"WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCKU\"",
@@ -10646,9 +10960,106 @@
           "result_xdr": "AAAAAAAAOWT/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-7",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-7-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-7",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-matched-7-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: \"GDUFH3HCRQJHVKBTD3QD3IETIKFJGZI3CP7K2T5U6P3ZUGHXGG7GPLIG\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, same arm, first byte changed: \"GBKLWHYFZCREOBGKIW7X5SK5KUP35UN26TP53RYIXJ6ZSC2JQRDGLR2D\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm contract, smallest: \"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm muxed_account, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALj//////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm claimable_balance, smallest: \"BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALjb/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm liquidity_pool, smallest: \"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALi7/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-6-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm muxed_contract, smallest: \"WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCKU\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALj//////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-7",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-address-unmatched-7-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -10663,9 +11074,10 @@
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "zero 0: \"0\"",
@@ -10674,9 +11086,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "minimum -9223372036854775808: \"-9223372036854775808\"",
@@ -10685,9 +11098,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-2",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "maximum 9223372036854775807: \"9223372036854775807\"",
@@ -10696,9 +11110,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-3",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "one more, 4598685041475779677: \"4598685041475779677\"",
@@ -10707,9 +11122,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-4",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-4-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "one less, 4598685041475779675: \"4598685041475779675\"",
@@ -10718,9 +11134,82 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-5",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-matched-5-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: \"1662722582437082215\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "zero 0: \"0\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "minimum -9223372036854775808: \"-9223372036854775808\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "maximum 9223372036854775807: \"9223372036854775807\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one more, 8991868116235874730: \"8991868116235874730\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one less, 1630735177049622082: \"1630735177049622082\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-nonce-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -10729,15 +11218,16 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a peer's address credentials for one require_auth: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"41682b...",
+          "variant": "base, a peer's address credentials for one require_auth: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"841bb4...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, absent: {\"vec\":null}",
@@ -10746,9 +11236,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, present, empty: {\"vec\":[]}",
@@ -10757,20 +11248,22 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-2",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
-          "variant": "same arm, present, first element repeated: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"99170d...",
+          "variant": "same arm, present, first element repeated: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"09098f...",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAOsH/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-3",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm bool, smallest: {\"bool\":false}",
@@ -10779,9 +11272,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-4",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-4-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm void, smallest: \"void\"",
@@ -10790,9 +11284,10 @@
           "result_xdr": "AAAAAAAAN+T/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-5",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-5-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
@@ -10801,9 +11296,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-6",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-6-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-6-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u32, smallest: {\"u32\":0}",
@@ -10812,9 +11308,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-7",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-7-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-7",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-7-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i32, smallest: {\"i32\":0}",
@@ -10823,9 +11320,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-8",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-8-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-8",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-8-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u64, smallest: {\"u64\":\"0\"}",
@@ -10834,9 +11332,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-9",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-9-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-9",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-9-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i64, smallest: {\"i64\":\"0\"}",
@@ -10845,9 +11344,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-10",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-10-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-10",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-10-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm timepoint, smallest: {\"timepoint\":\"0\"}",
@@ -10856,9 +11356,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-11",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-11-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-11",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-11-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm duration, smallest: {\"duration\":\"0\"}",
@@ -10867,9 +11368,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-12",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-12-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-12",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-12-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u128, smallest: {\"u128\":\"0\"}",
@@ -10878,9 +11380,10 @@
           "result_xdr": "AAAAAAAAOAf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-13",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-13-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-13",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-13-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i128, smallest: {\"i128\":\"0\"}",
@@ -10889,9 +11392,10 @@
           "result_xdr": "AAAAAAAAOAf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-14",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-14-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-14",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-14-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u256, smallest: {\"u256\":\"0\"}",
@@ -10900,9 +11404,10 @@
           "result_xdr": "AAAAAAAAOCr/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-15",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-15-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-15",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-15-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i256, smallest: {\"i256\":\"0\"}",
@@ -10911,9 +11416,10 @@
           "result_xdr": "AAAAAAAAOCr/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-16",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-16-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-16",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-16-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm bytes, smallest: {\"bytes\":\"\"}",
@@ -10922,9 +11428,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-17",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-17-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-17",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-17-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm string, smallest: {\"string\":\"\"}",
@@ -10933,9 +11440,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-18",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-18-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-18",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-18-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm symbol, smallest: {\"symbol\":\"\"}",
@@ -10944,9 +11452,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-19",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-19-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-19",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-19-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm map, smallest: {\"map\":null}",
@@ -10955,9 +11464,10 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-20",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-20-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-20",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-20-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
@@ -10966,9 +11476,10 @@
           "result_xdr": "AAAAAAAAODP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-21",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-21-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-21",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-21-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm contract_instance, smallest: {\"contract_instance\":{\"executable\":\"stellar_asset\",\"storage\":null}}",
@@ -10977,9 +11488,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-22",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-22-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-22",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-22-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm ledger_key_contract_instance, smallest: \"ledger_key_contract_instance\"",
@@ -10988,9 +11500,10 @@
           "result_xdr": "AAAAAAAAN+T/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-23",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-23-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-23",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-23-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm ledger_key_nonce, smallest: {\"ledger_key_nonce\":{\"nonce\":\"0\"}}",
@@ -10999,9 +11512,10 @@
           "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-24",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-24-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-24",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-24-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm executable_tag, smallest: {\"executable_tag\":\"\"}",
@@ -11010,9 +11524,322 @@
           "result_xdr": "AAAAAAAAN+3/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-25",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-25-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-25",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-matched-25-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"66d755...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, absent: {\"vec\":null}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALMn/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, present, empty: {\"vec\":[]}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, present, first element repeated: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"81806b...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAL7AAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm bool, smallest: {\"bool\":false}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm void, smallest: \"void\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALNQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-5",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-6",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-6-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u32, smallest: {\"u32\":0}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-7",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-7-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i32, smallest: {\"i32\":0}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-8",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-8-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u64, smallest: {\"u64\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-9",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-9-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i64, smallest: {\"i64\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-10",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-10-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm timepoint, smallest: {\"timepoint\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-11",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-11-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm duration, smallest: {\"duration\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALOYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-12",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-12-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u128, smallest: {\"u128\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALPYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-13",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-13-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i128, smallest: {\"i128\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALPYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-14",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-14-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u256, smallest: {\"u256\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALRkAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-15",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-15-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i256, smallest: {\"i256\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALRkAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-16",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-16-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm bytes, smallest: {\"bytes\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-17",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-17-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm string, smallest: {\"string\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-18",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-18-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm symbol, smallest: {\"symbol\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-19",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-19-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm map, smallest: {\"map\":null}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALMn/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-20",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-20-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALSIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-21",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-21-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm contract_instance, smallest: {\"contract_instance\":{\"executable\":\"stellar_asset\",\"storage\":null}}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALNL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-22",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-22-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm ledger_key_contract_instance, smallest: \"ledger_key_contract_instance\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALMD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-23",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-23-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm ledger_key_nonce, smallest: {\"ledger_key_nonce\":{\"nonce\":\"0\"}}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALNL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-24",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-24-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm executable_tag, smallest: {\"executable_tag\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALN0AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-25",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signature-unmatched-25-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11021,15 +11848,16 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a peer's address credentials for one require_auth: 1612",
+          "variant": "base, a peer's address credentials for one require_auth: 1777",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "zero 0: 0",
@@ -11038,9 +11866,10 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "maximum 4294967295: 4294967295",
@@ -11049,31 +11878,94 @@
           "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-2",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
-          "variant": "one more, 1617: 1617",
+          "variant": "one more, 1782: 1782",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-3",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
-          "variant": "one less, 1616: 1616",
+          "variant": "one less, 1781: 1781",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-4",
-            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-matched-4-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: 1784",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "zero 0: 0",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "maximum 4294967295: 4294967295",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one more, 1789: 1789",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one less, 1788: 1788",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-4",
+            "candidate:probe.envelope-fields.sorobanaddresscredentials-signatureexpirationledger-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11088,9 +11980,10 @@
           "result_xdr": "AAAAAAAAQOkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "smallest value: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"...",
@@ -11099,9 +11992,34 @@
           "result_xdr": "AAAAAAAAO8n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-matched-1-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a delegating account's credentials for a call that never requires them: {\"address\":\"CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7\"...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "smallest value: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-addresscredentials-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11116,9 +12034,10 @@
           "result_xdr": "AAAAAAAAQOkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-0",
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "empty: []",
@@ -11127,9 +12046,10 @@
           "result_xdr": "AAAAAAAAOen/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-1",
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "first element repeated: [{\"address\":\"GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4...",
@@ -11138,9 +12058,46 @@
           "result_xdr": "AAAAAAAAPan/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-2",
-            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-matched-2-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, a delegating account's credentials for a call that never requires them: [{\"address\":\"GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "empty: []",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALMIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "first element repeated: [{\"address\":\"GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4...",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAAMG7/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanaddresscredentialswithdelegates-delegates-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11255,6 +12212,66 @@
             "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-source-3-ledger"
           ],
           "carrier": "source"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: {\"address\":{\"address\":\"GAC7RCF27EEAYZIZ6B5KPAHQVHK52KQDNIB2LROKQURUJ7...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, smallest value: {\"address\":{\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm source_account, smallest: \"source_account\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALFoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm address_v2, smallest: {\"address_v2\":{\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm address_with_delegates, smallest: {\"address_with_delegates\":{\"address_credentials\":{\"address\":\"CAAAAAAA...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-4",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-credentials-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11309,6 +12326,30 @@
             "candidate:probe.envelope-fields.sorobanauthorizationentry-rootinvocation-source-1-ledger"
           ],
           "carrier": "source"
+        },
+        {
+          "variant": "base, a peer's address credentials for a call that never requires them: {\"function\":{\"contract_fn\":{\"args\":[{\"address\":\"GDJVWTMWYC4G44HA7LMJA...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-rootinvocation-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-rootinvocation-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "smallest value: {\"function\":{\"create_contract_host_fn\":{\"contract_id_preimage\":{\"asse...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALYIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-rootinvocation-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizationentry-rootinvocation-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11323,9 +12364,10 @@
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-0",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, smallest value: {\"contract_fn\":{\"args\":[],\"contract_address\":\"CAAAAAAAAAAAAAAAAAAAAAA...",
@@ -11334,9 +12376,10 @@
           "result_xdr": "AAAAAAAAOE7/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-1",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm create_contract_host_fn, smallest: {\"create_contract_host_fn\":{\"contract_id_preimage\":{\"asset\":\"native\"}...",
@@ -11345,9 +12388,10 @@
           "result_xdr": "AAAAAAAAOAf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-2",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-2",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm create_contract_v2_host_fn, smallest: {\"create_contract_v2_host_fn\":{\"constructor_args\":[],\"contract_id_pre...",
@@ -11356,9 +12400,58 @@
           "result_xdr": "AAAAAAAAOBD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-3",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-3",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-matched-3-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, the root invocation of credentials no require_auth matches: {\"contract_fn\":{\"args\":[{\"address\":\"GAKTOGMOJ6HRLVQ4DVNDWYAUGXNWE3CMJ...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, smallest value: {\"contract_fn\":{\"args\":[],\"contract_address\":\"CAAAAAAAAAAAAAAAAAAAAAA...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALcgAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm create_contract_host_fn, smallest: {\"create_contract_host_fn\":{\"contract_id_preimage\":{\"asset\":\"native\"}...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALYIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-2",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm create_contract_v2_host_fn, smallest: {\"create_contract_v2_host_fn\":{\"constructor_args\":[],\"contract_id_pre...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALYsAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-3",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-function-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11373,9 +12466,10 @@
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-0",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-matched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "one element, smallest: [{\"function\":{\"create_contract_host_fn\":{\"contract_id_preimage\":{\"ass...",
@@ -11384,9 +12478,34 @@
           "result_xdr": "AAAAAAAAOYf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-1",
-            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-matched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-matched-1-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, the root invocation of credentials no require_auth matches: []",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-unmatched-0",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one element, smallest: [{\"function\":{\"create_contract_host_fn\":{\"contract_id_preimage\":{\"ass...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALnYAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-unmatched-1",
+            "candidate:probe.envelope-fields.sorobanauthorizedinvocation-subinvocations-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11401,9 +12520,10 @@
           "result_xdr": "AAAAAAAAQOkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-0",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, same arm, first byte changed: \"GBMFNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJN5F\"",
@@ -11412,9 +12532,10 @@
           "result_xdr": "AAAAAAAAO8n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-1",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
@@ -11423,9 +12544,10 @@
           "result_xdr": "AAAAAAAAO8n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-2",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-2",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm contract, smallest: \"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"",
@@ -11434,9 +12556,10 @@
           "result_xdr": "AAAAAAAAO8D/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-3",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-3",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm muxed_account, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
@@ -11445,9 +12568,10 @@
           "result_xdr": "AAAAAAAAO9L/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-4",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-4",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-4-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm claimable_balance, smallest: \"BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE\"",
@@ -11456,9 +12580,10 @@
           "result_xdr": "AAAAAAAAO8n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-5",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-5",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-5-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm liquidity_pool, smallest: \"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\"",
@@ -11467,9 +12592,10 @@
           "result_xdr": "AAAAAAAAO8D/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-6",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-6-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-6",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-6-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm muxed_contract, smallest: \"WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCKU\"",
@@ -11478,9 +12604,106 @@
           "result_xdr": "AAAAAAAAO9L/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-7",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-address-7-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-7",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-matched-7-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, the delegate's signature in credentials no require_auth matches: \"GBMVNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJ4P4\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, same arm, first byte changed: \"GBMFNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJN5F\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, same arm, all zero: \"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-2",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm contract, smallest: \"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALpkAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-3",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm muxed_account, smallest: \"MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB5IG\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALpf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-4",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm claimable_balance, smallest: \"BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFMUE\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALo7/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-5",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm liquidity_pool, smallest: \"LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABLIR\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALoX/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-6",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-6-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm muxed_contract, smallest: \"WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADCKU\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALpf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-7",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-address-unmatched-7-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11495,9 +12718,10 @@
           "result_xdr": "AAAAAAAAQOkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-0",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-matched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "one element, smallest: [{\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4...",
@@ -11506,9 +12730,34 @@
           "result_xdr": "AAAAAAAAQUkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-1",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-matched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-matched-1-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, the delegate's signature in credentials no require_auth matches: []",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-unmatched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "one element, smallest: [{\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALwIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-unmatched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-nesteddelegates-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -11523,9 +12772,10 @@
           "result_xdr": "AAAAAAAAQOkAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-0",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-0-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, absent: {\"vec\":null}",
@@ -11534,9 +12784,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-1",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-1-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-1-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, present, empty: {\"vec\":[]}",
@@ -11545,9 +12796,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-2",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-2-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-2",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-2-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "same arm, present, first element repeated: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"5956c5...",
@@ -11556,9 +12808,10 @@
           "result_xdr": "AAAAAAAAPS//////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-3",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-3-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-3",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-3-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm bool, smallest: {\"bool\":false}",
@@ -11567,9 +12820,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-4",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-4-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-4",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-4-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm void, smallest: \"void\"",
@@ -11578,9 +12832,10 @@
           "result_xdr": "AAAAAAAAOlL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-5",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-5-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-5",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-5-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
@@ -11589,9 +12844,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-6",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-6-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-6",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-6-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u32, smallest: {\"u32\":0}",
@@ -11600,9 +12856,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-7",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-7-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-7",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-7-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i32, smallest: {\"i32\":0}",
@@ -11611,9 +12868,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-8",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-8-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-8",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-8-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u64, smallest: {\"u64\":\"0\"}",
@@ -11622,9 +12880,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-9",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-9-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-9",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-9-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i64, smallest: {\"i64\":\"0\"}",
@@ -11633,9 +12892,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-10",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-10-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-10",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-10-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm timepoint, smallest: {\"timepoint\":\"0\"}",
@@ -11644,9 +12904,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-11",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-11-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-11",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-11-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm duration, smallest: {\"duration\":\"0\"}",
@@ -11655,9 +12916,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-12",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-12-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-12",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-12-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u128, smallest: {\"u128\":\"0\"}",
@@ -11666,9 +12928,10 @@
           "result_xdr": "AAAAAAAAOnX/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-13",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-13-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-13",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-13-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i128, smallest: {\"i128\":\"0\"}",
@@ -11677,9 +12940,10 @@
           "result_xdr": "AAAAAAAAOnX/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-14",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-14-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-14",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-14-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm u256, smallest: {\"u256\":\"0\"}",
@@ -11688,9 +12952,10 @@
           "result_xdr": "AAAAAAAAOpf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-15",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-15-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-15",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-15-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm i256, smallest: {\"i256\":\"0\"}",
@@ -11699,9 +12964,10 @@
           "result_xdr": "AAAAAAAAOpf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-16",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-16-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-16",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-16-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm bytes, smallest: {\"bytes\":\"\"}",
@@ -11710,9 +12976,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-17",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-17-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-17",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-17-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm string, smallest: {\"string\":\"\"}",
@@ -11721,9 +12988,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-18",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-18-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-18",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-18-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm symbol, smallest: {\"symbol\":\"\"}",
@@ -11732,9 +13000,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-19",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-19-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-19",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-19-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm map, smallest: {\"map\":null}",
@@ -11743,9 +13012,10 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-20",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-20-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-20",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-20-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
@@ -11754,9 +13024,10 @@
           "result_xdr": "AAAAAAAAOqD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-21",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-21-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-21",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-21-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm contract_instance, smallest: {\"contract_instance\":{\"executable\":\"stellar_asset\",\"storage\":null}}",
@@ -11765,9 +13036,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-22",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-22-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-22",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-22-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm ledger_key_contract_instance, smallest: \"ledger_key_contract_instance\"",
@@ -11776,9 +13048,10 @@
           "result_xdr": "AAAAAAAAOlL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-23",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-23-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-23",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-23-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm ledger_key_nonce, smallest: {\"ledger_key_nonce\":{\"nonce\":\"0\"}}",
@@ -11787,9 +13060,10 @@
           "result_xdr": "AAAAAAAAOmP/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-24",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-24-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-24",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-24-ledger"
+          ],
+          "carrier": "matched"
         },
         {
           "variant": "arm executable_tag, smallest: {\"executable_tag\":\"\"}",
@@ -11798,9 +13072,322 @@
           "result_xdr": "AAAAAAAAOlv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
           "applied": "failed",
           "witnesses": [
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-25",
-            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-25-ledger"
-          ]
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-25",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-matched-25-ledger"
+          ],
+          "carrier": "matched"
+        },
+        {
+          "variant": "base, the delegate's signature in credentials no require_auth matches: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"5956c5...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALqIAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-0",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-0-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, absent: {\"vec\":null}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALSD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-1",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-1-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, present, empty: {\"vec\":[]}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-2",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-2-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "same arm, present, first element repeated: {\"vec\":[{\"map\":[{\"key\":{\"symbol\":\"public_key\"},\"val\":{\"bytes\":\"5956c5...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAMAcAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-3",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-3-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm bool, smallest: {\"bool\":false}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-4",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-4-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm void, smallest: \"void\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALSsAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-5",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-5-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm error, smallest: {\"error\":{\"wasm_vm\":\"arith_domain\"}}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-6",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-6-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u32, smallest: {\"u32\":0}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-7",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-7-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i32, smallest: {\"i32\":0}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-8",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-8-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u64, smallest: {\"u64\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-9",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-9-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i64, smallest: {\"i64\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-10",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-10-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm timepoint, smallest: {\"timepoint\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-11",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-11-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm duration, smallest: {\"duration\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTwAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-12",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-12-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u128, smallest: {\"u128\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALU4AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-13",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-13-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i128, smallest: {\"i128\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALU4AAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-14",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-14-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm u256, smallest: {\"u256\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALXAAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-15",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-15-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm i256, smallest: {\"i256\":\"0\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALXAAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-16",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-16-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm bytes, smallest: {\"bytes\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-17",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-17-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm string, smallest: {\"string\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-18",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-18-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm symbol, smallest: {\"symbol\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-19",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-19-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm map, smallest: {\"map\":null}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALSD/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-20",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-20-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm address, smallest: {\"address\":\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALXkAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-21",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-21-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm contract_instance, smallest: {\"contract_instance\":{\"executable\":\"stellar_asset\",\"storage\":null}}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALSj/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-22",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-22-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm ledger_key_contract_instance, smallest: \"ledger_key_contract_instance\"",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALRf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-23",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-23-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm ledger_key_nonce, smallest: {\"ledger_key_nonce\":{\"nonce\":\"0\"}}",
+          "submission": "pending",
+          "result_code": "tx_failed",
+          "result_xdr": "AAAAAAAALSj/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+          "applied": "failed",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-24",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-24-ledger"
+          ],
+          "carrier": "unmatched"
+        },
+        {
+          "variant": "arm executable_tag, smallest: {\"executable_tag\":\"\"}",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAALTQAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-25",
+            "candidate:probe.envelope-fields.sorobandelegatesignature-signature-unmatched-25-ledger"
+          ],
+          "carrier": "unmatched"
         }
       ]
     },
@@ -12173,7 +13760,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's time bounds: \"1909576000\"",
+          "variant": "base, a payment's time bounds: \"1930657600\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -12206,7 +13793,7 @@
           ]
         },
         {
-          "variant": "one more, 1909921601: \"1909921601\"",
+          "variant": "one more, 1931003201: \"1931003201\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -12217,7 +13804,7 @@
           ]
         },
         {
-          "variant": "one less, 1910007999: \"1910007999\"",
+          "variant": "one less, 1931089599: \"1931089599\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -12741,7 +14328,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment: \"7249904795649\"",
+          "variant": "base, a payment: \"8297876815873\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -12786,7 +14373,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one more, 7254199762946: \"7254199762946\"",
+          "variant": "one more, 8302171783170: \"8302171783170\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -12797,7 +14384,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one less, 7254199762944: \"7254199762944\"",
+          "variant": "one less, 8302171783168: \"8302171783168\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -12808,7 +14395,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "base, a call of echo(7): \"7262789697537\"",
+          "variant": "base, a call of echo(7): \"8310761717761\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAMSMAAAAAAAAAAQAAAAAAAAAYAAAAACPSPIvT/+rRqsG5B6pvMsuQzLV5fD7qY4m6kHdjzkY7AAAAAA==",
@@ -12853,7 +14440,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one more, 7267084664834: \"7267084664834\"",
+          "variant": "one more, 8315056685058: \"8315056685058\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -12864,7 +14451,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one less, 7267084664832: \"7267084664832\"",
+          "variant": "one less, 8315056685056: \"8315056685056\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -13414,7 +15001,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"7378753814529\"",
+          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"8426725834753\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13459,7 +15046,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one more, 7383048781826: \"7383048781826\"",
+          "variant": "one more, 8431020802050: \"8431020802050\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -13470,7 +15057,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one less, 7383048781824: \"7383048781824\"",
+          "variant": "one less, 8431020802048: \"8431020802048\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -13649,7 +15236,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"b5a76b34cfd9778d9ad0abd9c18e3ba001bf...",
+          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"9fe0ecb62c8ae49819af35a77fa306d10e46...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13672,7 +15259,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"b5aaea3abe082b21560140e19916bef67e8d...",
+          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"b3e6bb0a8b9318f0c2067ca1515644ac5662...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",
@@ -13741,7 +15328,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"2d93b1e6bf77c0f8e98d06206df913f2f4de...",
+          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"d906e8ad7e05bc4642ebfe236e872fcac891...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13762,7 +15349,7 @@
           ]
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"610b8cf46050aea1c4ed22252d486ba4edab...",
+          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"aa2929630e2894ee03bf2b68254e9bcbec3f...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",
@@ -13808,7 +15395,7 @@
           "variant": "base, a u128 echo receives: \"1\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAANgAAAAAAAAAAAQAAAAAAAAAYAAAAAEoiqQXOIBBopja+0SKoBdFqNOVzfwJehsk09EnqVzQ6AAAAAA==",
+          "result_xdr": "AAAAAAAANf4AAAAAAAAAAQAAAAAAAAAYAAAAAEoiqQXOIBBopja+0SKoBdFqNOVzfwJehsk09EnqVzQ6AAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.uint128parts-hi-0",
@@ -13930,7 +15517,7 @@
           "variant": "base, a u256 echo receives: \"1\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAN/gAAAAAAAAAAQAAAAAAAAAYAAAAAEKVLh7qwKQHgNakStoJZplDeefWleO8FXdZkwZxUJZSAAAAAA==",
+          "result_xdr": "AAAAAAAAN/UAAAAAAAAAAQAAAAAAAAAYAAAAAEKVLh7qwKQHgNakStoJZplDeefWleO8FXdZkwZxUJZSAAAAAA==",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.uint256parts-hi-hi-0",

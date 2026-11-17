@@ -1,0 +1,99 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "6cbd59b0",
+        "signature": "5a7d96f589a55fec11da9eb45fba81b0f46dec504607a28b57dc2468988baea82765b098b52070d883ff932fba4fff05860db643a983fbd1419258a7046dde07"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50012794",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+                  }
+                }
+              ],
+              "read_write": []
+            },
+            "instructions": 10367032,
+            "write_bytes": 10000
+          }
+        }
+      },
+      "fee": 50012894,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": {
+                    "address": {
+                      "address": "GANDPE3SGO7TGQ4QXBRMKJRB2FHA2MBINSQ5X6IMEAIJWHOFBZYOFKDU",
+                      "nonce": "4141940247748880468",
+                      "signature": {
+                        "i32": 0
+                      },
+                      "signature_expiration_ledger": 1758
+                    }
+                  },
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "address": "GANDPE3SGO7TGQ4QXBRMKJRB2FHA2MBINSQ5X6IMEAIJWHOFBZYOFKDU"
+                          },
+                          {
+                            "bool": false
+                          }
+                        ],
+                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                        "function_name": "guarded"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "address": "GANDPE3SGO7TGQ4QXBRMKJRB2FHA2MBINSQ5X6IMEAIJWHOFBZYOFKDU"
+                    },
+                    {
+                      "bool": false
+                    }
+                  ],
+                  "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                  "function_name": "guarded"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "7086696038401",
+      "source_account": "GDI7BV4KZPFAXPGKRX64SIZYYPVM24CNHKZIW5ZLL5D5R2LMXVM3ADSP"
+    }
+  }
+}

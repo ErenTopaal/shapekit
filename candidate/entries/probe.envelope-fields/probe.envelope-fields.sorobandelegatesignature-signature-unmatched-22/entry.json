@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.sorobandelegatesignature-signature-unmatched-22",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of SorobanDelegateSignature.signature in carrier unmatched, attempt \"arm contract_instance, smallest: {\\\"contract_instance\\\":{\\\"executable\\\":\\\"stellar_asset\\\",\\\"storage\\\":null}}\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAALSj/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "stage": "apply"
+    },
+    "ledger_seq": 1841,
+    "recipe": "probe.envelope-fields",
+    "tx_hash": "1520af1acd73ebd8e1c6530abc08b2ff6497dda9608a70b8bd926b7be2ebdf2f"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-signature-unmatched-22/testnet.expected.json",
+      "expected_json_sha256": "3089d80441bca8a619bf83972a58014893eb938b8e8b27d5bff926fe508c6a43",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-signature-unmatched-22/testnet.xdr",
+      "xdr_sha256": "7add6ae6365567914602eb6c4309e014d81b4b3ce94abb2db1a1e49a116bc874"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

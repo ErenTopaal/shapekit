@@ -1,0 +1,129 @@
+{
+  "tx": {
+    "signatures": [
+      {
+        "hint": "5d40251a",
+        "signature": "595b8699a6317ea9aa39a9e63b43487b7d01b67706c8863d7b204a6550ad6acaddaaeddeb7ba7d4f1a7ec44ab25200002c4d282e182813b01019214b0b28c10a"
+      }
+    ],
+    "tx": {
+      "cond": "none",
+      "ext": {
+        "v1": {
+          "ext": "v0",
+          "resource_fee": "50012776",
+          "resources": {
+            "disk_read_bytes": 10000,
+            "footprint": {
+              "read_only": [
+                {
+                  "contract_data": {
+                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_code": {
+                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
+                  }
+                }
+              ],
+              "read_write": []
+            },
+            "instructions": 10366895,
+            "write_bytes": 10000
+          }
+        }
+      },
+      "fee": 50012876,
+      "memo": "none",
+      "operations": [
+        {
+          "body": {
+            "invoke_host_function": {
+              "auth": [
+                {
+                  "credentials": {
+                    "address_with_delegates": {
+                      "address_credentials": {
+                        "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7",
+                        "nonce": "4996337115231508242",
+                        "signature": "void",
+                        "signature_expiration_ledger": 1873
+                      },
+                      "delegates": [
+                        {
+                          "address": "GBMFNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJN5F",
+                          "nested_delegates": [],
+                          "signature": {
+                            "vec": [
+                              {
+                                "map": [
+                                  {
+                                    "key": {
+                                      "symbol": "public_key"
+                                    },
+                                    "val": {
+                                      "bytes": "5956c5a3d1f8d7884edd637d74ab16f14b136bbc103f41ff9e6ab23010619524"
+                                    }
+                                  },
+                                  {
+                                    "key": {
+                                      "symbol": "signature"
+                                    },
+                                    "val": {
+                                      "bytes": "a9a7d93828f22376dfbbca2aee29c9dc869c3bcd91041b70d6fe295990d7542dafc3e383eb60aaa88efef355ebf9000c61b110c304300d89f7be37a7f9d3a60f"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "root_invocation": {
+                    "function": {
+                      "contract_fn": {
+                        "args": [
+                          {
+                            "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7"
+                          },
+                          {
+                            "bool": false
+                          }
+                        ],
+                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                        "function_name": "guarded"
+                      }
+                    },
+                    "sub_invocations": []
+                  }
+                }
+              ],
+              "host_function": {
+                "invoke_contract": {
+                  "args": [
+                    {
+                      "address": "CADJEVAFU33FEZEONZH4UP4H6M6MM6NDR4E7CXBPMFS4T5NZXN6TRJY7"
+                    },
+                    {
+                      "bool": false
+                    }
+                  ],
+                  "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                  "function_name": "guarded"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "seq_num": "7610682048513",
+      "source_account": "GB5QWVBVNLX2XCHLNIP3SL4IEID2YNAHOOYOQJBZT4V6FKS5IASRUBIJ"
+    }
+  }
+}

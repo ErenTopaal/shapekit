@@ -1,0 +1,1521 @@
+{
+  "schema": 1,
+  "source": "registry/generated/validation.json",
+  "rows": [
+    {
+      "id": "auth.credentials.address.address",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAddressCredentials.address",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAddressCredentials.address",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.credentials.address.nonce",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAddressCredentials.nonce",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAddressCredentials.nonce",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.credentials.address.signature",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAddressCredentials.signature",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAddressCredentials.signature",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.credentials.address.signature_expiration_ledger",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAddressCredentials.signatureExpirationLedger",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAddressCredentials.signatureExpirationLedger",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.credentials.address_with_delegates.delegates",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAddressCredentialsWithDelegates.delegates",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAddressCredentialsWithDelegates.delegates",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.credentials.source_account",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SorobanAuthorizationEntry.credentials",
+          "carrier": "source",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "auth.root_invocation",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SorobanAuthorizationEntry.rootInvocation",
+          "carrier": "address",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAuthorizationEntry.rootInvocation",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "SorobanAuthorizedInvocation.function",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAuthorizedInvocation.function",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "SorobanAuthorizedInvocation.subInvocations",
+          "carrier": "matched",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanAuthorizedInvocation.subInvocations",
+          "carrier": "unmatched",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "feebump.fee",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "FeeBumpTransaction.fee",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "feebump.fee_source",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "FeeBumpTransaction.feeSource",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "feebump.fee_source.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "fee-source",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "feebump.inner_tx",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "FeeBumpTransaction.innerTx",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "feebump.signatures",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "FeeBumpTransactionEnvelope.signatures",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.account_merge.destination",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Operation.body",
+          "carrier": "merge",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.allow_trust",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "AllowTrustOp.trustor",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "AllowTrustOp.asset",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "AllowTrustOp.authorize",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.begin_sponsoring.sponsored_id",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "BeginSponsoringFutureReservesOp.sponsoredID",
+          "carrier": "peer",
+          "verdict": "validated"
+        },
+        {
+          "field": "BeginSponsoringFutureReservesOp.sponsoredID",
+          "carrier": "peer",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "BeginSponsoringFutureReservesOp.sponsoredID",
+          "carrier": "create",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.bump_sequence.bump_to",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "BumpSequenceOp.bumpTo",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.change_trust.limit",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ChangeTrustOp.limit",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.change_trust.line",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ChangeTrustOp.line",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.change_trust.line.liquidity_pool",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "LiquidityPoolConstantProductParameters.assetA",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolConstantProductParameters.assetB",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolConstantProductParameters.fee",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.claim_claimable_balance.balance_id",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ClaimClaimableBalanceOp.balanceID",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.clawback.asset_amount",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ClawbackOp.asset",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ClawbackOp.amount",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.clawback.from",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ClawbackOp.from",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.clawback.from.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "clawback",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.clawback_claimable_balance.balance_id",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ClawbackClaimableBalanceOp.balanceID",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.create_account.destination",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "CreateAccountOp.destination",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.create_account.starting_balance",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "CreateAccountOp.startingBalance",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.create_claimable_balance.asset_amount",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "CreateClaimableBalanceOp.asset",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreateClaimableBalanceOp.amount",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.create_claimable_balance.claimants.destination",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "ClaimantV0.destination",
+          "carrier": "one",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "ClaimantV0.destination",
+          "carrier": "two",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.create_claimable_balance.claimants.predicate",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ClaimantV0.predicate",
+          "carrier": "one",
+          "verdict": "validated"
+        },
+        {
+          "field": "ClaimantV0.predicate",
+          "carrier": "two",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.extend_footprint_ttl.extend_to",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ExtendFootprintTTLOp.extendTo",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.auth",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "InvokeHostFunctionOp.auth",
+          "carrier": "auth",
+          "verdict": "validated"
+        },
+        {
+          "field": "InvokeHostFunctionOp.auth",
+          "carrier": "auth",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.create_contract.preimage",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "CreateContractArgs.contractIDPreimage",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreateContractArgsV2.contractIDPreimage",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ContractIDPreimageFromAddress.address",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ContractIDPreimageFromAddress.salt",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.create_contract_v2.constructor_args",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "CreateContractArgsV2.constructorArgs",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.invoke_contract.args",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "InvokeContractArgs.args",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "InvokeContractArgs.args",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.invoke_contract.contract_address",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "InvokeContractArgs.contractAddress",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.invoke_contract.function_name",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "InvokeContractArgs.functionName",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.invoke_host_function.upload_wasm",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "InvokeHostFunctionOp.hostFunction",
+          "carrier": "upload",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.liquidity_pool_deposit",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "LiquidityPoolDepositOp.liquidityPoolID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolDepositOp.maxAmountA",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolDepositOp.maxAmountB",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolDepositOp.minPrice",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolDepositOp.maxPrice",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.liquidity_pool_withdraw",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "LiquidityPoolWithdrawOp.liquidityPoolID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolWithdrawOp.amount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolWithdrawOp.minAmountA",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LiquidityPoolWithdrawOp.minAmountB",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.manage_data.data_name",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "ManageDataOp.dataName",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageDataOp.dataName",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.manage_data.data_value",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "ManageDataOp.dataValue",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.manage_offer.assets_amount_price",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ManageSellOfferOp.selling",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageSellOfferOp.buying",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageSellOfferOp.amount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageSellOfferOp.price",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageBuyOfferOp.selling",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageBuyOfferOp.buying",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageBuyOfferOp.buyAmount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageBuyOfferOp.price",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreatePassiveSellOfferOp.selling",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreatePassiveSellOfferOp.buying",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreatePassiveSellOfferOp.amount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "CreatePassiveSellOfferOp.price",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "Price.n",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "Price.d",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.manage_offer.offer_id",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "ManageSellOfferOp.offerID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "ManageBuyOfferOp.offerID",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.path_payment.amounts",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PathPaymentStrictReceiveOp.sendMax",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictReceiveOp.destAmount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictSendOp.sendAmount",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictSendOp.destMin",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.path_payment.destination",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PathPaymentStrictReceiveOp.destination",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictSendOp.destination",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.path_payment.destination.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "path-payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.path_payment.path",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "PathPaymentStrictReceiveOp.path",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictReceiveOp.path",
+          "carrier": "single",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "PathPaymentStrictSendOp.path",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "PathPaymentStrictSendOp.path",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.payment.amount",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PaymentOp.amount",
+          "carrier": "credit",
+          "verdict": "validated"
+        },
+        {
+          "field": "PaymentOp.amount",
+          "carrier": "native",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.payment.asset",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "PaymentOp.asset",
+          "carrier": "native",
+          "verdict": "validated"
+        },
+        {
+          "field": "PaymentOp.asset",
+          "carrier": "credit",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.payment.destination",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PaymentOp.destination",
+          "carrier": "credit",
+          "verdict": "validated"
+        },
+        {
+          "field": "PaymentOp.destination",
+          "carrier": "native",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.payment.destination.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.restore_footprint",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "LedgerFootprint.readOnly",
+          "carrier": "restore",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerFootprint.readWrite",
+          "carrier": "restore",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.revoke_sponsorship",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "RevokeSponsorshipOpSigner.accountID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "RevokeSponsorshipOpSigner.signerKey",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyAccount.accountID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyTrustLine.accountID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyTrustLine.asset",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyOffer.sellerID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyOffer.offerID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyData.accountID",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyData.dataName",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerKeyClaimableBalance.balanceID",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.set_options.home_domain",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SetOptionsOp.homeDomain",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.homeDomain",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.set_options.inflation_dest",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SetOptionsOp.inflationDest",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.set_options.signer",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SetOptionsOp.signer",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "Signer.key",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "Signer.weight",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.set_options.thresholds_and_flags",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SetOptionsOp.clearFlags",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.setFlags",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.masterWeight",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.lowThreshold",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.medThreshold",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetOptionsOp.highThreshold",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.set_trust_line_flags",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SetTrustLineFlagsOp.trustor",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetTrustLineFlagsOp.asset",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetTrustLineFlagsOp.clearFlags",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SetTrustLineFlagsOp.setFlags",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.source_account",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Operation.sourceAccount",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "op.source_account.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "op-source",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "signer_key.signed_payload.payload",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "SignerKeyEd25519SignedPayload.payload",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SignerKeyEd25519SignedPayload.payload",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.extra_signers",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PreconditionsV2.extraSigners",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.ledger_bounds",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "LedgerBounds.minLedger",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerBounds.maxLedger",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.min_seq_age",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PreconditionsV2.minSeqAge",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.min_seq_ledger_gap",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PreconditionsV2.minSeqLedgerGap",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.min_seq_num",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "PreconditionsV2.minSeqNum",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.time_bounds",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "TimeBounds.minTime",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "TimeBounds.maxTime",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.cond.type",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "Transaction.cond",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": {
+        "verdict": "validated",
+        "reading": "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:1266-1272"
+      }
+    },
+    {
+      "id": "tx.envelope.type",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "TransactionV0Envelope.tx",
+          "carrier": "p12",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "TransactionV0Envelope.tx",
+          "carrier": "p30",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "TransactionV1Envelope.tx",
+          "carrier": "single",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "FeeBumpTransactionEnvelope.tx",
+          "carrier": "single",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": {
+        "verdict": "validated",
+        "reading": "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:1257-1265; src/overlay/Peer.cpp:183-185; src/main/CommandHandler.cpp:1074-1084; src/transactions/TransactionBridge.cpp:18-47"
+      }
+    },
+    {
+      "id": "tx.ext",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Transaction.ext",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.fee",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Transaction.fee",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.memo.hash",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "Transaction.memo",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.memo.id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "Transaction.memo",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.memo.return",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "Transaction.memo",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.memo.text",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "Transaction.memo",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.memo.type",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "Transaction.memo",
+          "carrier": "invoke",
+          "verdict": "validated"
+        },
+        {
+          "field": "Transaction.memo",
+          "carrier": "payment",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.operations",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Transaction.operations",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.seq_num",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Transaction.seqNum",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.signatures",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "TransactionV1Envelope.signatures",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.signatures.hint",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "DecoratedSignature.hint",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": {
+        "verdict": "mixed",
+        "reading": "stellar-core v30.0.0 src/transactions/SignatureUtils.cpp:38-45; src/transactions/SignatureUtils.cpp:127-136"
+      }
+    },
+    {
+      "id": "tx.signatures.signature",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "DecoratedSignature.signature",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.soroban.ext.archived_soroban_entries",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SorobanResourcesExtV0.archivedSorobanEntries",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.soroban.footprint",
+      "measured": "mixed",
+      "sites": [
+        {
+          "field": "LedgerFootprint.readOnly",
+          "carrier": "echo",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerFootprint.readOnly",
+          "carrier": "echo",
+          "verdict": "not-validated"
+        },
+        {
+          "field": "LedgerFootprint.readWrite",
+          "carrier": "echo",
+          "verdict": "validated"
+        },
+        {
+          "field": "LedgerFootprint.readWrite",
+          "carrier": "echo",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.soroban.resource_fee",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SorobanTransactionData.resourceFee",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.soroban.resources.limits",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "SorobanResources.instructions",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanResources.diskReadBytes",
+          "carrier": "single",
+          "verdict": "validated"
+        },
+        {
+          "field": "SorobanResources.writeBytes",
+          "carrier": "single",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.source_account",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "Transaction.sourceAccount",
+          "carrier": "payment",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.source_account.mux_id",
+      "measured": "not-validated",
+      "sites": [
+        {
+          "field": "MuxedAccountMed25519.id",
+          "carrier": "tx-source",
+          "verdict": "not-validated"
+        }
+      ],
+      "settled_by_source": null
+    },
+    {
+      "id": "tx.v0.source_account_ed25519",
+      "measured": "validated",
+      "sites": [
+        {
+          "field": "TransactionV0.sourceAccountEd25519",
+          "carrier": "p12",
+          "verdict": "validated"
+        }
+      ],
+      "settled_by_source": null
+    }
+  ]
+}
