@@ -936,7 +936,7 @@ Run the harness once with each to check all three methods.
 - **Status.** `last_ingested_ledger` is the `sequence` that `getLatestLedger` answers, which
   stellar-rpc reads from its database: the backfill process's answer, then the serving
   process's. While a new process backfills, the value stays at the newest one an earlier
-  process of the chain answered. `health` is `starting` until the first serving process
+  process of the chain answered. `health` is `starting` until the current serving process
   answers, `crashed` when a backfill process exited before its HTTP server started or a
   serving process exited, and `oom` when docker reports an OOM kill. `last_error` is the newest log line at level `error` or `fatal`, or a
   `panic:` line. Lines of the live ingestion path, which cannot run here (the retry above

@@ -322,6 +322,11 @@ func (t *target) run(ctx context.Context, phase string) error {
 		return wire.Errorf(wire.ClassTarget, "starting stellar-rpc: %v", err)
 	}
 	t.current, t.phase = name, phase
+	// health and the reads follow this process from now on: it has not
+	// answered yet, whatever the one before it did
+	t.mu.Lock()
+	t.answered = false
+	t.mu.Unlock()
 	ip, err := containerIP(ctx, name, t.params.DockerNetwork)
 	if err != nil {
 		return wire.Errorf(wire.ClassTarget, "%v", err)
