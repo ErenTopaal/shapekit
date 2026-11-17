@@ -2,6 +2,22 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: Python stellar-sdk conformance
+
+- `testees/python` runs the Python `stellar-sdk` (py-stellar-base) at 16.1.1 and 17.0.1, the
+  newest release of each line whose XDR knows protocol 29, under CPython 3.15 in a venv per
+  version built from hash-locked requirements. It implements every op except `map_validate`,
+  for which the SDK has no API. `conformance sync-versions` derives its versions from PyPI.
+- Corpus (716 entries): 17.0.1 passes 195, diverges from the network on 504 and cannot run 17;
+  16.1.1 passes 182, diverges on 513 and cannot run 21. Most divergences are the SDK's XDR-JSON
+  names (`txsuccess` where SEP-51 has `tx_success`); the others include non-zero XDR padding
+  that decodes, a trailing `=` that strkey decoding accepts, ids past 64 bits that wrap, map
+  keys that merge in the native projection, the default depth of 512, and on 16.1.1 asset
+  issuers ordered by text. Each is listed with source lines in
+  `candidate/finding-candidates.toml`, marked as the finding of another SDK it shares or as
+  new; none is filed.
+- The `sdk-version` obligations grow from 17 to 19, both new ones met.
+
 ## 2026-11-17: soroban-sdk conformance
 
 - `testees/soroban` runs `soroban-sdk`, the SDK contracts are written with, at 28.0.0 and
@@ -35,7 +51,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
   | `gate-side`: sides of stellar-core's protocol gates | 353 by branch count, 129 inferred from execution count | 208 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
-  | `sdk-version`: SDK versions the corpus runs against | 17 | 0 | 17 |
+  | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every

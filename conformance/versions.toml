@@ -1,8 +1,8 @@
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy and npm publish; `sync-versions --check` reports whether they
-# are up to date. change the per-sdk settings or [sync] here and run it again; the version
-# lists are not edited by hand. paths are relative to the repository root;
+# crates.io, the go module proxy, npm and pypi publish; `sync-versions --check` reports
+# whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
+# version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
 # that its hello reports exactly `package` and `version`.
 #
@@ -30,9 +30,10 @@
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead, and for soroban-sdk the
-# xdr-version file of the stellar-xdr release that its soroban-env-host's soroban-env-common
-# pins with `=`): the release tag at that commit names a protocol, extended up to the
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's Makefile at
+# the release tag, since pypi records no commit, and for soroban-sdk the xdr-version file of
+# the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
+# release tag at that commit names a protocol, extended up to the
 # protocol before the next tag, because a protocol without a tag of its own changed no xdr
 # (v28.0 covers protocol 29).
 #
@@ -48,6 +49,10 @@
 # version. each install is `npm ci` from the package.json and lock file committed under
 # testees/js/versions/<version>/, so the sdk's own dependencies (js-xdr above all) are pinned
 # too.
+# python: one source (testees/python) run by the python of a per-version venv under
+# target/testees/python/<version>/venv, made with uv from the hash-locked
+# testees/python/versions/<version>/requirements.txt, so the sdk and every dependency it
+# imports (xdrlib3, pynacl) are pinned.
 
 schema = 1
 

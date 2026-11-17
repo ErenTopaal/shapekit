@@ -1,8 +1,11 @@
 //! `shapekit corpus promote` on a real synthetic entry, cap23.claimable-balances.synth-strkey-b-invalid,
 //! with the divergence matrices a conformance run over a candidate manifest holding only that
 //! entry wrote (tests/fixtures/promote/): stellar-xdr 30.0.0 and @stellar/stellar-sdk 17.4.0
-//! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1), and
-//! soroban-sdk 29.0.1 has no reader for its strkey kind.
+//! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1),
+//! soroban-sdk 29.0.1 has no reader for its strkey kind, and the Python stellar-sdk 17.0.1
+//! diverges on case 6 (a trailing =), a candidate-lane defect no finding in findings/triage.toml
+//! takes. So with python in the versions file the entry stays a candidate; the tests of the
+//! promotion itself use a versions file without python.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -51,8 +54,13 @@ fn copy_dir(from: &Path, to: &Path) {
 }
 
 /// A repository layout with the entry in the candidate lane and an empty corpus, and the
-/// known-failures lines for the entry taken out, as before it was ever promoted.
+/// known-failures lines for the entry taken out, as before it was ever promoted. The versions
+/// file holds every sdk of the repository's, python only when `with_python`.
 fn layout() -> tempfile::TempDir {
+    layout_with(false)
+}
+
+fn layout_with(with_python: bool) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     let d = dir.path();
     let r = repo();
@@ -65,11 +73,17 @@ fn layout() -> tempfile::TempDir {
     .unwrap();
     fs::copy(r.join("pins.toml"), d.join("pins.toml")).unwrap();
     fs::create_dir_all(d.join("conformance/known-failures")).unwrap();
-    fs::copy(
-        r.join("conformance/versions.toml"),
-        d.join("conformance/versions.toml"),
-    )
-    .unwrap();
+    let versions = fs::read_to_string(r.join("conformance/versions.toml")).unwrap();
+    let versions = if with_python {
+        versions
+    } else {
+        // python is the last sdk of the file
+        let at = versions
+            .find("\n[sdk.python]\n")
+            .expect("the versions file has a python sdk");
+        format!("{}\n", versions[..at].trim_end())
+    };
+    fs::write(d.join("conformance/versions.toml"), versions).unwrap();
     for sdk in ["rust", "go", "js"] {
         let known = fs::read_to_string(r.join(format!("conformance/known-failures/{sdk}.txt")))
             .unwrap()
@@ -144,6 +158,22 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
             .unwrap()
             .contains(ENTRY)
     );
+}
+
+#[test]
+fn a_python_divergence_no_finding_takes_keeps_the_entry_a_candidate() {
+    let dir = layout_with(true);
+    let d = dir.path();
+    let out = promote(d, &[], &["rust", "go", "js", "soroban", "python"]);
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        text(&out).contains(
+            "refused: python@17.0.1 answers diverges-from-network and no finding in findings/triage.toml takes it"
+        ),
+        "{}",
+        text(&out)
+    );
+    assert_eq!(entries(d, "corpus"), 0);
 }
 
 #[test]
