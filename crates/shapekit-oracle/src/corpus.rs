@@ -427,15 +427,19 @@ mod tests {
     #[test]
     fn a_v0_entry_is_found_in_its_v1_form_by_hash() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../candidate");
-        let entry = root.join(
-            "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-ext-p30-0/testnet.xdr",
-        );
-        let bytes = std::fs::read(entry).unwrap();
+        let dir = root
+            .join("entries/probe.envelope-fields/probe.envelope-fields.transactionv0-ext-p30-0");
+        let bytes = std::fs::read(dir.join("testnet.xdr")).unwrap();
+        // the ledger the entry names, so a new probe run, which moves every ledger, keeps
+        // the test meaningful
+        let entry: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(dir.join("entry.json")).unwrap()).unwrap();
+        let seq = u32::try_from(entry["source"]["ledger_seq"].as_u64().unwrap()).unwrap();
         let lcm =
             LcmStream::open(&root.join("chains/probe.envelope-fields.p30/testnet/ledgers.xdr"))
                 .unwrap()
                 .map(Result::unwrap)
-                .find(|l| crate::view::ledger_seq(&l.meta) == 1701)
+                .find(|l| crate::view::ledger_seq(&l.meta) == seq)
                 .unwrap()
                 .meta;
         let net = Network::new("Test SDF Network ; September 2015");
