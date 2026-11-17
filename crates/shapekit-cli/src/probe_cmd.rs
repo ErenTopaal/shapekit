@@ -81,8 +81,15 @@ pub enum ProbeCommand {
     /// Run the probe again in a scratch directory and compare its recorded chains (canonical
     /// hashes, ledger range, lake), the table and the witness entries with the committed ones.
     VerifyRepro {
-        #[arg(long, default_value = "registry/generated/validation.json")]
-        out: PathBuf,
+        /// The table to compare: validation.json, or limits.json with --limits.
+        #[arg(long)]
+        out: Option<PathBuf>,
+        /// Run the limit finder (`probe limits`) instead of the envelope field probe, against
+        /// this caps-limits file.
+        #[arg(long)]
+        limits: bool,
+        #[arg(long, default_value = "registry/caps-limits.toml")]
+        caps: PathBuf,
         #[arg(long, default_value = "candidate")]
         candidate: PathBuf,
         /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
@@ -150,10 +157,27 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
         } => probe_compare(&table, &fields, &verdicts, write),
         ProbeCommand::VerifyRepro {
             out,
+            limits,
+            caps,
             candidate,
             profile_dir,
             pins,
-        } => probe_verify_repro(&out, &candidate, &pins, profile_dir.as_deref()),
+        } => {
+            let out = out.unwrap_or_else(|| {
+                PathBuf::from(if limits {
+                    "registry/generated/limits.json"
+                } else {
+                    "registry/generated/validation.json"
+                })
+            });
+            probe_verify_repro(
+                &out,
+                &candidate,
+                &pins,
+                profile_dir.as_deref(),
+                limits.then_some(caps.as_path()),
+            )
+        }
         ProbeCommand::Obligations { table } => {
             let t: ValidationTable = shapekit_contracts::load(&table)
                 .with_context(|| format!("reading {}", table.display()))?;
@@ -285,7 +309,7 @@ fn probe_all(
     };
     let chains = target.as_ref().map(|(_, c)| c.join("chains"));
     if let Some(dir) = &chains {
-        clear_chains(dir)?;
+        clear_chains(dir, shapekit_probe::witness::FAMILY)?;
     }
     let schema = shapekit_schema::Schema::pinned();
     let fields = shapekit_probe::run::selected(&schema, only)?;
@@ -366,12 +390,12 @@ fn probe_all(
     crate::manifest_cmd::build_file(&candidate, pins, &version)
 }
 
-/// Removes the probe's recorded chains under `chains`, which a run records again.
-fn clear_chains(chains: &Path) -> Result<()> {
+/// Removes the chains of the probe `family` under `chains`, which a run records again.
+fn clear_chains(chains: &Path, family: &str) -> Result<()> {
     if !chains.is_dir() {
         return Ok(());
     }
-    let prefix = format!("{}.", shapekit_probe::witness::FAMILY);
+    let prefix = format!("{family}.");
     for e in std::fs::read_dir(chains)? {
         let p = e?.path();
         let name = p.file_name().and_then(|n| n.to_str()).unwrap_or_default();
@@ -382,9 +406,9 @@ fn clear_chains(chains: &Path) -> Result<()> {
     Ok(())
 }
 
-/// The probe's chains under `chains`, by directory name relative to it.
-fn probe_chains(chains: &Path) -> Result<Vec<PathBuf>> {
-    let prefix = format!("{}.", shapekit_probe::witness::FAMILY);
+/// The chains of the probe `family` under `chains`, by directory name relative to it.
+fn probe_chains(chains: &Path, family: &str) -> Result<Vec<PathBuf>> {
+    let prefix = format!("{family}.");
     let mut out = Vec::new();
     for e in std::fs::read_dir(chains).with_context(|| format!("reading {}", chains.display()))? {
         let p = e?.path();
@@ -425,6 +449,7 @@ fn probe_verify_repro(
     candidate: &Path,
     pins: &Path,
     profile_dir: Option<&Path>,
+    limits: Option<&Path>,
 ) -> Result<bool> {
     let fresh = tempfile::Builder::new()
         .prefix("shapekit-probe-repro-")
@@ -432,25 +457,45 @@ fn probe_verify_repro(
         .context("creating the regeneration directory")?;
     // an empty scratch lane: only the probe's own entries are compared
     let all: Vec<String> = Vec::new();
-    let fresh_out = fresh.path().join("validation.json");
+    let fresh_out = fresh
+        .path()
+        .join(out.file_name().context("a table path names a file")?);
     let fresh_candidate = fresh.path().join("candidate");
     std::fs::create_dir_all(&fresh_candidate)?;
-    if !probe_all(
-        &all,
-        &fresh_out,
-        &fresh_candidate,
-        None,
-        None,
-        pins,
-        profile_dir,
-    )? {
+    let (family, ran) = match limits {
+        Some(caps) => (
+            shapekit_probe::witness::LIMITS_FAMILY,
+            probe_limits(
+                &all,
+                &fresh_out,
+                &fresh_candidate,
+                caps,
+                None,
+                pins,
+                profile_dir,
+            )?,
+        ),
+        None => (
+            shapekit_probe::witness::FAMILY,
+            probe_all(
+                &all,
+                &fresh_out,
+                &fresh_candidate,
+                None,
+                None,
+                pins,
+                profile_dir,
+            )?,
+        ),
+    };
+    if !ran {
         bail!("the regenerating run failed");
     }
     let mut diffs = Vec::new();
     let committed_chains = candidate.join("chains");
     let fresh_chains = fresh_candidate.join("chains");
-    let a = probe_chains(&committed_chains)?;
-    let b = probe_chains(&fresh_chains)?;
+    let a = probe_chains(&committed_chains, family)?;
+    let b = probe_chains(&fresh_chains, family)?;
     if a != b {
         diffs.push(format!("chains differ: committed {a:?}, regenerated {b:?}"));
     }
@@ -484,7 +529,7 @@ fn probe_verify_repro(
         let m = shapekit_manifest::build::load(&root.join("manifest.json"))?;
         Ok(m.entries
             .iter()
-            .filter(|e| e.family == shapekit_probe::witness::FAMILY)
+            .filter(|e| e.family == family)
             .map(serde_json::to_value)
             .collect::<std::result::Result<_, _>>()?)
     };
@@ -650,6 +695,19 @@ fn probe_limits(
             bail!("{r}: a row is measured exactly when its check is not unmeasured");
         }
     }
+    // where the table, the witnesses and the chains go, decided before the run
+    let target = match (only.is_empty(), scratch) {
+        (true, None) => Some((out.to_owned(), candidate.to_owned())),
+        (false, Some(dir)) => {
+            std::fs::create_dir_all(dir)?;
+            Some((dir.join("limits.json"), dir.join("candidate")))
+        }
+        (false, None) => None,
+        (true, Some(_)) => bail!("--scratch is for runs with --only"),
+    };
+    if let Some((_, c)) = &target {
+        clear_chains(&c.join("chains"), shapekit_probe::witness::LIMITS_FAMILY)?;
+    }
     let image = core_image(pins, profile_dir)?;
     let work = tempfile::Builder::new()
         .prefix("shapekit-probe-limits-")
@@ -694,7 +752,23 @@ fn probe_limits(
         }
         measured.push(m);
     }
-    drop(worlds);
+    // each world's chain is recorded beside its witnesses, which name it; a partial run
+    // without --scratch keeps neither
+    for (kind, w) in worlds {
+        match &target {
+            Some((_, c)) => w.finish(
+                &c.join("chains")
+                    .join(format!(
+                        "{}.{}",
+                        shapekit_probe::witness::LIMITS_FAMILY,
+                        kind.chain()
+                    ))
+                    .join("testnet"),
+            )?,
+            // dropping the world stops its node
+            None => drop(w),
+        }
+    }
 
     let mut open = 0;
     for (id, rec) in &rows {
@@ -744,14 +818,8 @@ fn probe_limits(
         measured.len()
     );
 
-    let (out, candidate) = match (only.is_empty(), scratch) {
-        (true, None) => (out.to_owned(), candidate.to_owned()),
-        (false, Some(dir)) => {
-            std::fs::create_dir_all(dir)?;
-            (dir.join("limits.json"), dir.join("candidate"))
-        }
-        (false, None) => return Ok(open == 0),
-        (true, Some(_)) => bail!("--scratch is for runs with --only"),
+    let Some((out, candidate)) = target else {
+        return Ok(open == 0);
     };
     let family = shapekit_probe::witness::LIMITS_FAMILY;
     shapekit_probe::witness::clear(&candidate, family)?;
