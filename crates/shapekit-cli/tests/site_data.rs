@@ -140,10 +140,40 @@ fn site_data_matches_the_committed_files() {
             for f in e["files"].as_array().unwrap() {
                 let p = f["path"].as_str().unwrap();
                 assert!(root.join(p).is_file(), "{p} is linked but missing");
+                // the explorer shows sizes and decoded json from these, so both are exact
+                let size = std::fs::metadata(root.join(p)).unwrap().len();
+                assert_eq!(f["bytes"].as_u64(), Some(size), "{p}");
+                if let Some(x) = f["expected"].as_str() {
+                    let size = std::fs::metadata(root.join(x)).unwrap().len();
+                    assert_eq!(f["expected_bytes"].as_u64(), Some(size), "{x}");
+                }
+            }
+            if let Some(r) = e["recipe_ir"].as_str() {
+                assert!(root.join(r).is_file(), "recipe {r} is linked but missing");
             }
             e["id"].as_str().unwrap()
         })
         .collect();
+
+    // the guide rows: every field an entry names is a field table row, and every checklist
+    // item names only such rows
+    let guide_fields: std::collections::BTreeSet<&str> = entries["guide"]["fields"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|f| f["id"].as_str().unwrap())
+        .collect();
+    assert!(!guide_fields.is_empty());
+    for e in entries["entries"].as_array().unwrap() {
+        for f in e["fields"].as_array().unwrap() {
+            assert!(guide_fields.contains(f.as_str().unwrap()), "{f}");
+        }
+    }
+    for i in entries["guide"]["checklist"].as_array().unwrap() {
+        for f in i["fields"].as_array().unwrap() {
+            assert!(guide_fields.contains(f.as_str().unwrap()), "{f}");
+        }
+    }
 
     // findings: the record's summary and one row per finding
     let record = read_json(&root.join("findings/findings.json"));

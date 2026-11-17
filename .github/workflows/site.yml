@@ -94,6 +94,10 @@ jobs:
           caps=$(jq '.caps | length' data/coverage.json)
           capdirs=$(find dashboard/coverage -mindepth 2 -name index.html | wc -l)
           test "$caps" -eq "$capdirs" || { echo "$caps caps but $capdirs cap pages"; exit 1; }
+          entries=$(jq '.entries | length' data/entries.json)
+          entrydirs=$(find dashboard/corpus -mindepth 2 -name index.html | wc -l)
+          test "$entries" -eq "$entrydirs" || { echo "$entries entries but $entrydirs explorer pages"; exit 1; }
+          test -f dashboard/corpus/index.html || { echo "missing dashboard/corpus/index.html"; exit 1; }
       - name: validate the caddy configuration
         run: |
           image=$(sed -n 's/^image=//p' site/scripts/preview.sh)

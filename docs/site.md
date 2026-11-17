@@ -3,7 +3,7 @@
 The shapekit.org website is built from `site/`: the documentation under `/docs` and a
 dashboard over the committed results under `/dashboard`. The dashboard shows which shape
 families and CAPs the corpus covers, which SDK version diverges on which entry, what the
-wallet-backend reference run found, and the findings list. The site root redirects to `/docs`
+wallet-backend reference run found, the findings list, and a page for every corpus entry. The site root redirects to `/docs`
 (`site/src/routes/home.tsx`).
 
 Every page is prerendered to a static HTML file at build time, so the site needs no server-side
@@ -36,6 +36,8 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 | `/dashboard` | overview | `dashboard/index.html` |
 | `/dashboard/coverage`, `/dashboard/coverage/<CAP>` | coverage per CAP, one page per CAP in `coverage.json` | `dashboard/coverage/.../index.html` |
 | `/dashboard/sdk`, `/dashboard/indexer`, `/dashboard/findings` | SDK matrix, indexer run, findings | `dashboard/<page>/index.html` |
+| `/dashboard/corpus`, `/dashboard/corpus/<entry>` | the corpus explorer, one page per entry in `entries.json` | `dashboard/corpus/.../index.html` |
+| `/corpus/...` | a copy of every corpus file the manifest names, for download and for the explorer's XDR-JSON | the files themselves |
 | any other address | not-found page | `__spa-fallback.html`, served with status 404 |
 
 Docs pages are complete HTML and read without JavaScript. Each has a "Copy Markdown" button and
@@ -45,12 +47,43 @@ link to its source file. Dashboard pages are prerendered as their navigation wit
 state; the browser then fetches `/data/*.json` and renders the
 page. Filters live in the query string (`/dashboard/sdk?entry=...`), so a filtered view can be
 linked; a finding can be linked as `/dashboard/findings#WB-W3` (it opens) and a corpus entry as
-`/dashboard/coverage/<CAP>#<entry-id>`. Each dashboard page has a "Terms used on this page" block
+`/dashboard/coverage/<CAP>#<entry-id>` or `/dashboard/corpus/<entry-id>`. Each dashboard page has a "Terms used on this page" block
 that explains its vocabulary (verdicts, severities, statuses, check results, source classes,
 blockers) and links the docs page or repository file that defines it; the words are kept in
 `site/src/lib/terms.ts`, next to the source each one follows. Old dashboard links of the form
 `/#/sdk` are redirected to `/dashboard/sdk`. Next to each route's HTML file the build writes a `.data` file that the client router fetches on in-site
 navigation.
+
+## The corpus explorer
+
+`/dashboard/corpus` lists every corpus entry. Its filters (CAP, shape, an SDK that fails on
+the entry and the failing version, and the entry id) are kept in the query string, for example
+`/dashboard/corpus?sdk=go&version=v0.7.1`. Each entry has its own page at
+`/dashboard/corpus/<entry-id>` with:
+
+- the manifest record: shape, kind, XDR type, CAPs (linked to their coverage pages), protocol
+  range, expected decode result, source class and provenance, flags and upstream sightings;
+- how the entry was recorded: its recipe IR file or recorded chain;
+- its results: each SDK version whose committed matrix has a failing check on it, with the
+  checks and the known-failures issue, the committed wallet-backend verdict per network, and
+  the findings that name the entry;
+- commands that run it again (`shapekit check sdk` per SDK, at the newest failing version
+  when there is one, and `shapekit check indexer` on its chain);
+- each file with its size, a download link and its decoded XDR-JSON. XDR-JSON files over
+  512 KiB are offered as a download instead of shown;
+- the fields the entry exercises, with their rows in the guide's field table, and the guide
+  sections and checklist items that cover them.
+
+The committed matrices keep failing cells only, so the explorer cannot tell a pass from an
+unsupported answer: an entry without a failing SDK version is shown as such, not as passing.
+
+The files come from `site/scripts/corpus-files.ts`, which runs before every dev server start
+and build. It copies each file `corpus/manifest.json` names (every variant's `.xdr` and
+`.expected.json`, and every vector file) to `site/public/corpus/`, so the site serves
+`/corpus/entries/<family>/<entry>/<variant>.xdr` and the explorer reads the XDR-JSON from the
+site's own origin. That is about 2,300 files and 59 MiB, which makes the built site about
+100 MiB; the 716 entry pages bring the build to 842 prerendered pages, and `npm run build`
+takes about 12 seconds on a 10-core machine.
 
 ## Docs come from docs/
 
@@ -119,7 +152,9 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 
 | File read | What it gives the site |
 |---|---|
-| `corpus/manifest.json` | every entry: family, CAPs, protocol, source class, expected decode, file paths |
+| `corpus/manifest.json` | every entry: family, CAPs, protocol, source class, expected decode, file paths, fields exercised, notes, recipe and chain |
+| the corpus files the manifest names | their sizes only (the explorer shows sizes and decides whether XDR-JSON is shown inline) |
+| `registry/guide-checklist.toml` | the guide's checklist items and the fields each names |
 | `corpus/coverage/coverage.json` | per-CAP, per-family, per-fragment and per-arm coverage, and the summary |
 | `corpus/coverage/COVERAGE.md` | the meaning of each blocker, from its "Blockers" table |
 | `registry/*.toml` | CAP texts (linked at the pinned stellar-protocol commit), XDR additions, family priority and protocol range |
@@ -182,17 +217,18 @@ npm run build           # prerenders every route into dist/client
 npm run preview         # serves dist/client with site/Caddyfile in the pinned caddy image (docker), port 5182
 ```
 
-`site/public/data/`, `site/content/` and `site/.source/` (fumadocs-mdx's output for
-`site/source.config.ts`) are ignored by git; all are always regenerated. Run
+`site/public/data/`, `site/public/corpus/`, `site/content/` and `site/.source/`
+(fumadocs-mdx's output for `site/source.config.ts`) are ignored by git; all are always
+regenerated. Run
 `npm run preview` again after a build, since the build replaces `dist/`.
 
 ## Checks in CI
 
 `.github/workflows/site.yml` runs on pull requests and pushes to `main` that touch the site, its
 docs or its inputs. It builds the CLI, runs `shapekit site data`, then `npm ci`, the typecheck,
-the linter and the build; checks that every docs page, every CAP page and every dashboard page
-has a prerendered file; validates `site/Caddyfile` with the pinned caddy image; and uploads
-`site/dist/client` as an artifact. It does not deploy; hosting is outside this repository.
+the linter and the build; checks that every docs page, every CAP page, every dashboard page
+and every corpus entry's explorer page has a prerendered file; validates `site/Caddyfile` with
+the pinned caddy image; and uploads `site/dist/client` as an artifact. It does not deploy; hosting is outside this repository.
 
 ## Hosting
 

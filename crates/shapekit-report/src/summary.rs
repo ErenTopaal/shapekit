@@ -68,11 +68,14 @@ pub fn render(r: &Report, html_name: Option<&str>) -> String {
             };
             let _ = writeln!(
                 s,
-                "| **{}** {} | {} | {finding} | `{}` |",
+                "| **{}** {} | {} | {finding} | {} |",
                 cell(&g.id),
                 cell(&g.title),
                 g.occurrences.len(),
-                cell(g.minimal_entry.as_deref().unwrap_or(""))
+                g.minimal_entry
+                    .as_deref()
+                    .map(|e| format!("[`{}`]({})", cell(e), crate::entry_page(&r.site, e)))
+                    .unwrap_or_default()
             );
         }
         if r.groups.len() > GROUP_ROWS {

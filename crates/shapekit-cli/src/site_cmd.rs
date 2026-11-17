@@ -188,7 +188,10 @@ pub fn write_data(
 
     let blockers = blocker_meanings(&src.text("corpus/coverage/COVERAGE.md")?)?;
     let coverage_out = coverage_json(&coverage, &registry, &protocol_sha, &blockers)?;
-    let entries_out = entries_json(&manifest);
+    src.read("registry/guide-checklist.toml")?;
+    let checklist = shapekit_guide::ChecklistFile::load(&src.path("registry/guide-checklist.toml"))
+        .map_err(|e| anyhow::anyhow!("loading registry/guide-checklist.toml: {e}"))?;
+    let entries_out = entries_json(&manifest, &src.path("corpus"), &registry, &checklist)?;
     let conformance_out = conformance_json(&mut src, &triage, &versions, &reproductions)?;
     let harness_out = harness_json(&mut src, &triage)?;
     let findings_out = findings_json(&findings);
@@ -532,40 +535,99 @@ fn coverage_json(
     }))
 }
 
-fn entries_json(m: &Manifest) -> Value {
-    let entries: Vec<Value> = m
-        .entries
+/// Size of a corpus file. The explorer offers the file for download and shows its XDR-JSON
+/// inline below a size limit; only the size is read here, the site copies the files at build
+/// time (site/scripts/corpus-files.ts).
+fn corpus_file_size(corpus: &Path, rel: &str) -> Result<u64> {
+    ensure!(
+        shapekit_manifest::is_safe_relative(rel),
+        "the manifest names {rel:?}, which is not a path inside the corpus"
+    );
+    let path = corpus.join(rel);
+    Ok(std::fs::metadata(&path)
+        .with_context(|| format!("reading the size of {}", path.display()))?
+        .len())
+}
+
+fn entries_json(
+    m: &Manifest,
+    corpus: &Path,
+    registry: &Registry,
+    checklist: &shapekit_guide::ChecklistFile,
+) -> Result<Value> {
+    let mut entries = Vec::with_capacity(m.entries.len());
+    for e in &m.entries {
+        let mut files = Vec::new();
+        for (name, v) in e.variants.iter() {
+            let expected_bytes = v
+                .expected_json_file
+                .as_deref()
+                .map(|f| corpus_file_size(corpus, f))
+                .transpose()?;
+            files.push(json!({
+                "variant": name,
+                "path": format!("corpus/{}", v.xdr_file),
+                "bytes": corpus_file_size(corpus, &v.xdr_file)?,
+                "expected": v.expected_json_file.as_ref().map(|f| format!("corpus/{f}")),
+                "expected_bytes": expected_bytes,
+            }));
+        }
+        if let Some(v) = &e.vector {
+            files.push(json!({
+                "variant": "vector",
+                "path": format!("corpus/{}", v.path),
+                "bytes": corpus_file_size(corpus, &v.path)?,
+                "expected": null,
+                "expected_bytes": null,
+            }));
+        }
+        entries.push(json!({
+            "id": e.id,
+            "family": e.family,
+            "kind": e.kind,
+            "caps": e.caps,
+            "protocol": e.protocol,
+            "source": e.source.class,
+            "synthetic": e.synthetic,
+            "xdr_type": e.xdr_type,
+            "expected": e.expected,
+            "flags": e.flags,
+            "linked_issues": e.linked_issues,
+            "files": files,
+            "fields": e.fields_exercised,
+            "notes": e.notes,
+            "chain": e.source.chain,
+            "recipe_ir": e.source.recipe_ir,
+            "provenance_url": e.source.provenance_url,
+            "ledger_seq": e.source.ledger_seq,
+        }));
+    }
+    // the guide rows the explorer links an entry to: the field table, and the checklist items
+    // that name a field (registry/fields.toml, registry/guide-checklist.toml)
+    let fields: Vec<Value> = registry
+        .fields
+        .fields
         .iter()
-        .map(|e| {
-            let mut files: Vec<Value> = e
-                .variants
-                .iter()
-                .map(|(name, v)| json!({ "variant": name, "path": format!("corpus/{}", v.xdr_file) }))
-                .collect();
-            if let Some(v) = &e.vector {
-                files.push(json!({ "variant": "vector", "path": format!("corpus/{}", v.path) }));
-            }
+        .map(|f| {
             json!({
-                "id": e.id,
-                "family": e.family,
-                "kind": e.kind,
-                "caps": e.caps,
-                "protocol": e.protocol,
-                "source": e.source.class,
-                "synthetic": e.synthetic,
-                "xdr_type": e.xdr_type,
-                "expected": e.expected,
-                "flags": e.flags,
-                "linked_issues": e.linked_issues,
-                "files": files,
+                "id": f.id,
+                "validated_by_core": f.validated_by_core,
+                "risk": f.risk,
+                "handling": f.handling,
             })
         })
         .collect();
-    json!({
+    let items: Vec<Value> = checklist
+        .items
+        .iter()
+        .map(|i| json!({ "id": i.id, "title": i.title, "fields": i.fields }))
+        .collect();
+    Ok(json!({
         "schema": SITE_SCHEMA,
         "corpus_version": m.corpus_version,
         "entries": entries,
-    })
+        "guide": { "fields": fields, "checklist": items },
+    }))
 }
 
 /// Check results that count as a failure (docs/testee-protocol.md, "How the runner uses the

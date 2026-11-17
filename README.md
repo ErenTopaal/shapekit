@@ -82,7 +82,9 @@ shapekit goldens agree          # structural agreement with stellar-core's golde
 
 Any pipeline can read the corpus without shapekit: `corpus/manifest.json` lists every entry with
 its XDR type, files, CAPs, protocol and expected values; the schema is
-`schema/manifest.schema.json`.
+`schema/manifest.schema.json`. To browse the entries, with their decoded XDR-JSON and what
+each SDK version and the reference indexer did with them, use the
+[corpus explorer](https://shapekit.org/dashboard/corpus).
 
 ### Run an SDK over the corpus
 

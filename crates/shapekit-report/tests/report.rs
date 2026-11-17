@@ -204,5 +204,8 @@ fn html_is_self_contained_and_escaped() {
     );
     for g in &r.groups {
         assert!(page.contains(&format!("id=\"{}\"", g.id)));
+        // the smallest entry links its page in the site's corpus explorer
+        let m = g.minimal_entry.as_deref().unwrap();
+        assert!(page.contains(&format!("https://shapekit.org/dashboard/corpus/{m}\"")));
     }
 }

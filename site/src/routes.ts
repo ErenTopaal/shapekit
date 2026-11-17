@@ -17,6 +17,8 @@ export default [
       route("sdk", "routes/dashboard/sdk.tsx"),
       route("indexer", "routes/dashboard/indexer.tsx"),
       route("findings", "routes/dashboard/findings.tsx"),
+      route("corpus", "routes/dashboard/corpus.tsx"),
+      route("corpus/:entry", "routes/dashboard/entry.tsx"),
       route("*", "routes/dashboard/not-found.tsx"),
     ]),
   ]),

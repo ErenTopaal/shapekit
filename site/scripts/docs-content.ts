@@ -48,7 +48,10 @@ const groups: Group[] = [
     icon: "Boxes",
     dir: "corpus",
     docs: [{ source: "docs/adding-a-shape.md", slug: "adding-a-shape" }],
-    links: [{ text: "Coverage per CAP", url: "/dashboard/coverage" }],
+    links: [
+      { text: "Coverage per CAP", url: "/dashboard/coverage" },
+      { text: "Corpus explorer", url: "/dashboard/corpus" },
+    ],
   },
   {
     title: "Harness",

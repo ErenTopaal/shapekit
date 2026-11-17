@@ -13,6 +13,7 @@ const nav = [
   { to: "/dashboard/sdk", label: "SDK matrix", end: false },
   { to: "/dashboard/indexer", label: "Indexer run", end: false },
   { to: "/dashboard/findings", label: "Findings", end: false },
+  { to: "/dashboard/corpus", label: "Corpus explorer", end: false },
 ]
 
 // the dashboard keeps the site navigation on top and its own pages in a second row, which

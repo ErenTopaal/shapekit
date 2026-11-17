@@ -58,7 +58,9 @@ conformance cell whose result is neither `pass` nor `unsupported`.
 ## What each group links
 
 - **Smallest entry.** The finding's own minimal entry when the triage names one and this run
-  shows it, otherwise the group's entry with the smallest file.
+  shows it, otherwise the group's entry with the smallest file. Every entry the page names
+  links its page in the site's corpus explorer, which shows the decoded XDR-JSON, where the
+  bytes come from and the committed results for it.
 - **Reproduce.** For a harness run, `shapekit check indexer --chain <chain> --network
   <network> --adapter <the run's adapter command>` for that entry's chain (testnet when the
   entry ran on both). For a conformance run, `shapekit check sdk --sdk <sdk> --version

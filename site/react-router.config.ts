@@ -10,7 +10,8 @@ const markdownUrl = createGetUrl("/llms.mdx/docs")
 // every page is prerendered to plain html, so the output is a static site with no server.
 // the llms routes (/llms.txt, /llms-full.txt, a markdown file per docs page) are resource
 // routes prerendered to files the same way.
-// cap pages are listed from the same coverage.json the dashboard reads at runtime.
+// cap pages and corpus entry pages are listed from the same coverage.json and entries.json the
+// dashboard reads at runtime.
 export default {
   appDirectory: "src",
   buildDirectory: "dist",
@@ -25,6 +26,9 @@ export default {
     }
     const coverage = JSON.parse(await readFile("public/data/coverage.json", "utf8")) as { caps: { id: string }[] }
     for (const cap of coverage.caps) paths.add(`/dashboard/coverage/${cap.id}`)
+    // one explorer page per corpus entry, from the entries.json the explorer reads
+    const entries = JSON.parse(await readFile("public/data/entries.json", "utf8")) as { entries: { id: string }[] }
+    for (const e of entries.entries) paths.add(`/dashboard/corpus/${encodeURIComponent(e.id)}`)
     return [...paths]
   },
 } satisfies Config

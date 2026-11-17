@@ -739,6 +739,11 @@ fn group_index(groups: &[Group]) -> BTreeMap<(String, String), String> {
     out
 }
 
+/// The explorer page of a corpus entry on the site.
+pub fn entry_page(site: &str, entry: &str) -> String {
+    format!("{site}/dashboard/corpus/{entry}")
+}
+
 /// `1 known finding`, `2 known findings`.
 pub fn count(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })

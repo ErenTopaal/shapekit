@@ -146,12 +146,29 @@ export interface Entry {
   expected: { decode: string; validity: string; roundtrip: boolean }
   flags: string[]
   linked_issues: string[]
-  files: { variant: string; path: string }[]
+  // repository paths; the site serves a copy of each at /<path> (site/scripts/corpus-files.ts)
+  files: { variant: string; path: string; bytes: number; expected: string | null; expected_bytes: number | null }[]
+  // registry/fields.toml rows the entry exercises
+  fields: string[]
+  notes: string | null
+  chain: string | null
+  recipe_ir: string | null
+  provenance_url: string | null
+  ledger_seq: number | null
+}
+
+export interface GuideField {
+  id: string
+  validated_by_core: string
+  risk: string
+  handling: string
 }
 
 export interface Entries {
   corpus_version: string
   entries: Entry[]
+  // the field table and the checklist items of the indexer-hardening guide
+  guide: { fields: GuideField[]; checklist: { id: string; title: string; fields: string[] }[] }
 }
 
 export interface Check {

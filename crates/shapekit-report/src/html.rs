@@ -118,7 +118,7 @@ pub fn render(r: &Report) -> String {
     );
 
     if let Some(c) = &r.comparison {
-        comparison(&mut s, c, r.kind);
+        comparison(&mut s, c, r.kind, &r.site);
     }
 
     if r.groups.is_empty() {
@@ -138,7 +138,7 @@ pub fn render(r: &Report) -> String {
         }
         let _ = writeln!(s, "</ul></nav>");
         for g in &r.groups {
-            group(&mut s, g);
+            group(&mut s, g, &r.site);
         }
     }
 
@@ -176,11 +176,20 @@ pub fn render(r: &Report) -> String {
     s
 }
 
+/// A corpus entry, linked to its page in the explorer.
+fn entry_link(site: &str, entry: &str) -> String {
+    format!(
+        "<a href=\"{}\"><code>{}</code></a>",
+        esc(&crate::entry_page(site, entry)),
+        esc(entry)
+    )
+}
+
 fn tile(s: &mut String, n: usize, label: &str) {
     let _ = write!(s, "<div class=\"tile\"><b>{n}</b>{}</div>", esc(label));
 }
 
-fn comparison(s: &mut String, c: &Comparison, kind: RunKind) {
+fn comparison(s: &mut String, c: &Comparison, kind: RunKind, site: &str) {
     let _ = writeln!(
         s,
         "<h2>Compared with the {}</h2><p class=\"muted\"><code>{}</code>: {} new, {} changed, \
@@ -214,12 +223,12 @@ fn comparison(s: &mut String, c: &Comparison, kind: RunKind) {
             if name == "fixed" { "" } else { " open" },
             list.len()
         );
-        changes(s, list, kind);
+        changes(s, list, kind, site);
         let _ = writeln!(s, "</details>");
     }
 }
 
-fn changes(s: &mut String, list: &[Change], kind: RunKind) {
+fn changes(s: &mut String, list: &[Change], kind: RunKind, site: &str) {
     let at = match kind {
         RunKind::Harness => "network",
         RunKind::Conformance => "testee",
@@ -232,8 +241,8 @@ fn changes(s: &mut String, list: &[Change], kind: RunKind) {
     for c in list.iter().take(CHANGE_ROWS) {
         let _ = write!(
             s,
-            "<tr><td><code>{}</code></td><td>{}</td>",
-            esc(&c.entry),
+            "<tr><td>{}</td><td>{}</td>",
+            entry_link(site, &c.entry),
             esc(&c.at)
         );
         if kind == RunKind::Conformance {
@@ -265,7 +274,7 @@ fn changes(s: &mut String, list: &[Change], kind: RunKind) {
     }
 }
 
-fn group(s: &mut String, g: &Group) {
+fn group(s: &mut String, g: &Group, site: &str) {
     let kind = match g.kind {
         GroupKind::Finding => "finding",
         GroupKind::Candidate => "candidate finding",
@@ -307,7 +316,7 @@ fn group(s: &mut String, g: &Group) {
         let _ = writeln!(s, "<dt>finding</dt><dd>{}</dd>", links.join(" · "));
     }
     if let Some(m) = &g.minimal_entry {
-        let _ = writeln!(s, "<dt>smallest entry</dt><dd><code>{}</code></dd>", esc(m));
+        let _ = writeln!(s, "<dt>smallest entry</dt><dd>{}</dd>", entry_link(site, m));
     }
     if let Some(r) = &g.reproduce {
         let _ = writeln!(
@@ -376,8 +385,11 @@ fn group(s: &mut String, g: &Group) {
     for o in g.occurrences.iter().take(OCCURRENCE_ROWS) {
         let _ = writeln!(
             s,
-            "<tr><td><code>{}</code></td><td>{}</td><td>{}</td><td>{}</td></tr>",
-            esc(o.entry.as_deref().unwrap_or("")),
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
+            o.entry
+                .as_deref()
+                .map(|e| entry_link(site, e))
+                .unwrap_or_default(),
             esc(&o.on),
             esc(&o.at),
             esc(&o.what)
