@@ -272,8 +272,8 @@ pub fn go_build_tag(version: &str) -> String {
 }
 
 /// The least per-request timeout of a coverage build. The rust snapshot (llvm-profdata, then
-/// llvm-cov export over the testee binary) took more than 10 s while a
-/// release build ran beside it.
+/// llvm-cov export over the testee binary) has taken more than 10 s while a release build ran
+/// beside it.
 pub const COVERAGE_TIMEOUT_MS: u64 = 120_000;
 
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built

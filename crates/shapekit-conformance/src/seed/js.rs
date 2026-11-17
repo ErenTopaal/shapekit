@@ -269,6 +269,8 @@ pub fn check(ctx: &Context) -> Result<Report> {
             by_key.insert(k, m);
         }
     }
+    let scrub = ctx.scrub();
+    let corpus_ids = ctx.corpus_ids()?;
     let mut faults = Vec::new();
     for m in &chosen {
         let k = key(&m.file_name, &m.location, &m.mutator_name, &m.replacement);
@@ -306,6 +308,8 @@ pub fn check(ctx: &Context) -> Result<Report> {
             format!("{} -> {}", m.mutator_name, m.replacement),
             status,
             outcome.as_ref(),
+            &scrub,
+            &corpus_ids,
         ));
     }
 

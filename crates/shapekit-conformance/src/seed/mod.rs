@@ -278,11 +278,13 @@ pub struct Report {
 }
 
 impl Report {
-    /// Caught or timed out, out of the faults that built.
+    /// Caught, out of the faults that built. A timed-out fault is not counted as caught: no
+    /// entry is known to have changed, so its obligation stays open, and the rate counts
+    /// exactly the faults whose obligation is met.
     pub fn rate(&self) -> (usize, usize) {
         let get = |s| self.counts.get(&s).copied().unwrap_or(0);
-        let caught = get(Status::Caught) + get(Status::Timeout);
-        (caught, caught + get(Status::Missed))
+        let caught = get(Status::Caught);
+        (caught, caught + get(Status::Timeout) + get(Status::Missed))
     }
 }
 
@@ -302,7 +304,48 @@ pub fn counts(faults: &[Fault]) -> BTreeMap<Status, usize> {
     out
 }
 
-/// A fault's outcome as the report keeps it.
+/// Rewrites the machine's own paths in captured tool output (a node stack trace, a compiler
+/// error) to stable placeholders, so a report says the same on every machine and names none:
+/// the seed-check work directory becomes `<work>`, the repository `<root>`, the temporary
+/// directory `<tmp>` and the home directory `<home>`, longest first.
+#[derive(Debug, Clone)]
+pub struct Scrub {
+    prefixes: Vec<(String, &'static str)>,
+}
+
+impl Scrub {
+    pub fn new(work: &Path, root: &Path) -> Scrub {
+        let mut prefixes: Vec<(String, &'static str)> = Vec::new();
+        let mut add = |p: &Path, label: &'static str| {
+            let text = p.display().to_string();
+            let text = text.trim_end_matches('/').to_string();
+            if text.len() > 1 {
+                prefixes.push((text, label));
+            }
+        };
+        add(work, "<work>");
+        add(root, "<root>");
+        add(&std::env::temp_dir(), "<tmp>");
+        if let Some(home) = std::env::var_os("HOME") {
+            add(Path::new(&home), "<home>");
+        }
+        prefixes.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.1.cmp(b.1)));
+        Scrub { prefixes }
+    }
+
+    pub fn apply(&self, text: &str) -> String {
+        let mut out = text.to_string();
+        for (prefix, label) in &self.prefixes {
+            out = out.replace(prefix.as_str(), label);
+        }
+        out
+    }
+}
+
+/// A fault's outcome as the report keeps it. A corpus run that stopped (the faulty testee
+/// does not start, or quits on some entry) leaves every entry without its cells, which is how
+/// [`compare`] counts an entry that changed; so such a fault is caught with the corpus's
+/// entries as what changed, and its note keeps the scrubbed message.
 pub fn fault_from(
     key: String,
     file: String,
@@ -310,6 +353,8 @@ pub fn fault_from(
     mutation: String,
     status: Status,
     probe: Option<&ProbeOutcome>,
+    scrub: &Scrub,
+    corpus_ids: &[String],
 ) -> Fault {
     let (entries, changed, note) = match probe {
         Some(ProbeOutcome::Changed { entries }) => (
@@ -318,9 +363,17 @@ pub fn fault_from(
             None,
         ),
         Some(ProbeOutcome::Failed { message }) => (
-            Vec::new(),
-            0,
-            Some(format!("the corpus run stopped: {message}")),
+            if status == Status::Caught {
+                corpus_ids.iter().take(WITNESS_LIMIT).cloned().collect()
+            } else {
+                Vec::new()
+            },
+            if status == Status::Caught {
+                corpus_ids.len()
+            } else {
+                0
+            },
+            Some(format!("the corpus run stopped: {}", scrub.apply(message))),
         ),
         _ => (Vec::new(), 0, None),
     };
@@ -574,6 +627,20 @@ impl Context {
         })
     }
 
+    /// The scrubber for this check's captured output: the work root (every sdk's work
+    /// directory sits under it), the repository, the temporary and the home directory.
+    pub fn scrub(&self) -> Scrub {
+        Scrub::new(self.work.parent().unwrap_or(&self.work), &self.paths.root)
+    }
+
+    /// The ids of every corpus entry a probe runs, sorted.
+    pub fn corpus_ids(&self) -> Result<Vec<String>> {
+        let (manifest, _) = runner::load_manifest(&self.paths.manifest)?;
+        let mut ids: Vec<String> = manifest.entries.into_iter().map(|e| e.id).collect();
+        ids.sort();
+        Ok(ids)
+    }
+
     /// Where the mutation tools are installed, kept across runs.
     pub fn tools(&self) -> PathBuf {
         self.work
@@ -762,5 +829,44 @@ mod tests {
         );
         use shapekit_contracts::Contract as _;
         assert!(ledger.problems().is_empty(), "{:?}", ledger.problems());
+    }
+
+    #[test]
+    fn captured_paths_are_scrubbed() {
+        let scrub = Scrub::new(Path::new("/x/tmp/s3/seedwork"), Path::new("/x/repo"));
+        let msg = "stderr tail: file:///x/tmp/s3/seedwork/js/node_modules/a.js:1 at /x/repo/testees/js/dist/main.js";
+        assert_eq!(
+            scrub.apply(msg),
+            "stderr tail: file://<work>/js/node_modules/a.js:1 at <root>/testees/js/dist/main.js"
+        );
+        if let Some(home) = std::env::var_os("HOME").filter(|h| h.len() > 1) {
+            let home = home.to_string_lossy().to_string();
+            let text = format!("{home}/elsewhere/file.go:3");
+            assert_eq!(scrub.apply(&text), "<home>/elsewhere/file.go:3");
+        }
+    }
+
+    #[test]
+    fn a_run_that_stopped_is_caught_with_the_corpus_as_witness() {
+        let scrub = Scrub::new(Path::new("/w"), Path::new("/r"));
+        let ids: Vec<String> = (1..=7).map(|i| format!("e{i}")).collect();
+        let f = fault_from(
+            "k".to_string(),
+            "f.js".to_string(),
+            1,
+            "x".to_string(),
+            Status::Caught,
+            Some(&ProbeOutcome::Failed {
+                message: "hello failed: /w/js/a.js".to_string(),
+            }),
+            &scrub,
+            &ids,
+        );
+        assert_eq!(f.entries, ["e1", "e2", "e3", "e4", "e5"]);
+        assert_eq!(f.entries_changed, 7);
+        assert_eq!(
+            f.note.as_deref(),
+            Some("the corpus run stopped: hello failed: <work>/js/a.js")
+        );
     }
 }
