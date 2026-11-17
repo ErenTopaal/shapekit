@@ -72,19 +72,19 @@ So each SDK has as many met `seed` obligations as faults the corpus and the lane
 | SDK | Version | Tool | Faults listed | Sampled | Did not build | Caught by the corpus alone | Caught with the candidate lane |
 |---|---|---|---|---|---|---|---|
 | rust | 30.0.0 | cargo-mutants 27.1.0 | 11,776 | 40 | 2 | 7 of 38 (18.4%) | 12 of 38 (31.6%) |
-| go | v0.9.0 | go-mutesting v2.3.1 | 1,924 | 100 | 24 | 12 of 76 (15.8%) | 12 of 76 (15.8%) |
-| js | 17.4.0 | Stryker 10.1.1 | 16,456 | 100 | 0 | 35 of 100 (35.0%) | 45 of 100 (45.0%) |
+| go | v0.9.0 | go-mutesting v2.3.1 | 1,924 | 100 | 24 | 14 of 76 (18.4%) | 14 of 76 (18.4%) |
+| js | 17.4.0 | Stryker 10.1.1 | 16,456 | 100 | 0 | 36 of 100 (36.0%) | 46 of 100 (46.0%) |
 
 No sampled fault timed out. The faults the corpus alone misses, by class:
 
 | SDK | equivalent | outside-the-ops | corpus-gap | other | of which the candidate lane catches |
 |---|---|---|---|---|---|
 | rust | 1 | 25 | 5 | 0 | 5 |
-| go | 7 | 54 | 2 | 1 | 0 |
-| js | 5 | 40 | 13 | 7 | 10 |
+| go | 7 | 54 | 0 | 1 | 0 |
+| js | 5 | 40 | 12 | 7 | 10 |
 
 Most missed faults are in code no testee op calls (`outside-the-ops`), such as type names
-that only feed `Display`. The `corpus-gap` faults are the ones new entries can catch: 20 across
+that only feed `Display`. The `corpus-gap` faults are the ones new entries can catch: 17 across
 the three SDKs, 15 of which the format vectors in the candidate lane already catch.
 
 The corpus also catches the three released js-stellar-sdk faults it has reproductions for:

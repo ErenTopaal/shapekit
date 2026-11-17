@@ -146,9 +146,9 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
   with the committed wasm, and the site built as `site.yml` builds it. It also needs docker,
   network access and the `wasm32v1-none` Rust target. The last lines of its
-  reproduction step and of the findings step give the totals, measured on 2026-11-16:
+  reproduction step and of the findings step give the totals, measured on 2026-11-17:
   `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
-  `24 findings, 504 failures, 0 unmapped`.
+  `24 findings, 516 failures, 0 unmapped`.
 
 ## How SDKs pin a corpus release
 

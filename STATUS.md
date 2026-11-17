@@ -16,7 +16,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `gate-side`: sides of stellar-core's protocol gates | 334 by branch count, 142 inferred from execution count | 214 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
   | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
-  | `seed`: faults seeded into the SDKs | 69 | 145 | 214 |
+  | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
   envelope field in 1,310 attempts, each a valid transaction with one field changed. 178 of the 203
@@ -33,15 +33,15 @@ A dated public log of what has landed in shapekit. Newest entry first.
   witness 334 of their 690 sides. For 142 more, a recipe run at a protocol that takes the side
   executes the gate, so the side is inferred from the execution count. Each of the 214 open
   sides carries its cause.
-- Candidate lane: `candidate/` holds 6,225 entries that new runs wrote, such as probe witnesses
+- Candidate lane: `candidate/` holds 6,229 entries that new runs wrote, such as probe witnesses
   and format vectors, apart from the release corpus; `shapekit corpus promote` moves an entry
   into the corpus. `registry/uncovered.toml` is checked against the lane: a probe refusal
   confirms 31 of the 47 union arms recorded as refused before any ledger, and no record is
   contradicted.
 - Seeded faults ([docs/seeded-faults.md](docs/seeded-faults.md)): of the sampled faults that
-  build, the corpus catches 7 of 38 in stellar-xdr 30.0.0, 12 of 76 in go-stellar-sdk v0.9.0
-  and 35 of 100 in `@stellar/stellar-sdk` 17.4.0, plus the three released js-stellar-sdk faults
-  it reproduces. With the candidate lane's format vectors it catches 12 of 38, 12 of 76 and 45
+  build, the corpus catches 7 of 38 in stellar-xdr 30.0.0, 14 of 76 in go-stellar-sdk v0.9.0
+  and 36 of 100 in `@stellar/stellar-sdk` 17.4.0, plus the three released js-stellar-sdk faults
+  it reproduces. With the candidate lane's format vectors it catches 12 of 38, 14 of 76 and 46
   of 100. Every missed fault carries a class; most are in code no testee op calls.
 - Fuzzing ([docs/differential-fuzzing.md](docs/differential-fuzzing.md)): a coverage-guided
   search across the three SDKs reaches more code in every SDK than the same budget without the
@@ -50,7 +50,13 @@ A dated public log of what has landed in shapekit. Newest entry first.
 - Protocol 31 rehearsal ([docs/maintenance.md](docs/maintenance.md#protocol-31-rehearsal)): on
   core's next-protocol image all 144 transaction test cases pass at protocols 0 to 31, and all
   452,555 metas they write match core's next baseline.
-- Findings: 24 findings covering 504 failures, 0 unmapped, unchanged. Three new findings wait
+- Corpus: 716 entries, 594 of them emitted by stellar-core. The wallet-backend harness at
+  `3e22515a` runs 906 entries on both networks: 678 pass, 106 mishandled, 44 dropped, 78 out of
+  scope.
+- Findings: 24 findings covering 516 failures, 0 unmapped. The 12 new failures are two new
+  muxed claimable balance entries
+  (`cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1` and its p30 twin), which
+  wallet-backend fails under two existing findings. Three new findings wait
   in the candidate lane as drafts (two for stellar-etl, one for go-stellar-sdk); nothing new
   is filed.
 - `scripts/acceptance.sh` is the gate every change to `main` passes, in a quick and a full
