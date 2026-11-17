@@ -225,3 +225,57 @@ split (seed 1 gained 68 rust and 29 javascript ranges and tied in go, seed 2 los
 Every disagreement class in all four runs is the bool word class above (rs-stellar-xdr#629),
 seen from go and from javascript; a class signature cuts a long javascript path, so two of
 them look different in the table and are the same refusal of a bool word other than 0 or 1.
+
+## Each SDK's own fuzzer
+
+`shapekit native-fuzz` runs each SDK's own coverage-guided fuzzer on its decoder, with the
+encoding laws of the law library as the check:
+
+| `--target` | SDK | Fuzzer | Target |
+|---|---|---|---|
+| `rust` | stellar-xdr 30.0.0 | cargo-fuzz 0.13.2 (libFuzzer), stable toolchain, `-s none` | `testees/rust/fuzz` |
+| `go` | go-stellar-sdk v0.9.0 | `go test -fuzz` | `testees/go/fuzz_test.go` |
+| `js` | @stellar/stellar-sdk 17.4.0 | jazzer.js 4.0.0 | `testees/js/fuzz/xdr-laws.cjs` |
+
+```sh
+shapekit native-fuzz --target rust --seconds 600 --out target/native-fuzz-out/rust
+```
+
+The three targets read one input format: a type selector byte, then the XDR. They name a
+broken law the same way, as a class:
+
+- `<type>:roundtrip:<in>-><out>`: decoding and encoding again changes the bytes;
+- `<type>:noncanonical:longer` or `<type>:noncanonical:shorter`: the decoder accepts bytes that
+  are not the canonical encoding;
+- `<type>:panic`: the decoder crashes.
+
+The corpus files up to `--max-seed-bytes` (64 KiB) are the seeds. A fuzzer stops at the first
+failing input. The runner records the input with its class, adds the class to the target's skip
+list and starts the fuzzer again on the time left, so one run finds several classes. Each class
+found is minimised by the fuzzer's own tool and checked once more on its own. stellar-xdr then
+judges it under the corpus limits, and it is written to the candidate lane (`--candidate`,
+default `candidate/`) as a synthetic XDR entry.
+
+Classes listed in
+[conformance/native-fuzz/known-classes.txt](../conformance/native-fuzz/known-classes.txt) are
+skipped from the start of a run, so a run looks for others. The list holds the eight rust
+classes of the bool word root cause (rs-stellar-xdr#629), one per fuzzed type that carries a
+bool. `<out>/report.json` gives the run's seconds, seeds, restarts, the skipped classes and
+every class found.
+
+The `native-fuzz.yml` workflow runs the three targets for 600 seconds each, daily at 04:30 UTC.
+A new class does not fail the run: it is listed in the job summary and uploaded with the
+candidate lane, as a finding to triage.
+
+### Measured (2026-11-17)
+
+600 seconds per target, one target at a time, on a shared 10-core machine. The load average
+column is the 1-minute load sampled every 30 seconds during the run.
+
+| Target | Inputs run | Seeds | Restarts | New classes | Load average (min, mean, max) |
+|---|---|---|---|---|---|
+| rust | 36,116,732 | 1,107 | 1 | 0 | 10.0, 16.3, 21.5 |
+| go | 5,827,586 | 1,107 | 1 | 0 | 22.7, 36.3, 44.1 |
+| js | 4,591,179 | 1,107 | 1 | 0 | 34.2, 39.4, 53.0 |
+
+No run found a class outside the known list.
