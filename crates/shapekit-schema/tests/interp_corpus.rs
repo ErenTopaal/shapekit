@@ -311,7 +311,7 @@ fn agree() {
             files += 1;
         }
     }
-    assert_eq!(files, 1103);
+    assert_eq!(files, 1111);
 }
 
 fn candidate() -> PathBuf {
