@@ -123,7 +123,15 @@ export interface Coverage {
   // the blocker table of corpus/coverage/COVERAGE.md
   blockers: { blocker: string; meaning: string }[]
   // the obligation ledger, corpus/coverage/obligations.json, by kind
-  obligations: { kind: string; met: number; unmeetable: number; open: number }[]
+  // gate-side rows split met into branch-count and inferred evidence, never summed on a page
+  obligations: {
+    kind: string
+    met: number | null
+    met_branch_count: number | null
+    met_inferred: number | null
+    unmeetable: number
+    open: number
+  }[]
 }
 
 export interface Entry {

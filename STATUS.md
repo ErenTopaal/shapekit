@@ -13,13 +13,13 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `format`: XDR schema decision points | 3,869 | 0 | 3,869 |
   | `gap`: native type losses per language | 9 | 4 | 13 |
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
-  | `gate-side`: sides of stellar-core's protocol gates | 334 | 356 | 690 |
+  | `gate-side`: sides of stellar-core's protocol gates | 334 by branch count, 135 inferred from execution count | 221 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
   | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
   | `seed`: faults seeded into the SDKs | 69 | 145 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
-  envelope field in 1,179 attempts, each a valid transaction with one field changed. 178 of the 203
+  envelope field in 1,310 attempts, each a valid transaction with one field changed. 178 of the 203
   fields
   are validated and 25 are not (`registry/generated/validation.json`). `shapekit guide check`
   compares each of the 88 rows of `registry/fields.toml` with these verdicts: 86 agree, and 2
@@ -29,9 +29,11 @@ A dated public log of what has landed in shapekit. Newest entry first.
   value and where core refuses it. For example, the largest wasm module that uploads is 130,972
   bytes.
 - Protocol gates: `registry/generated/gates.json` lists the 345 protocol version comparisons in
-  stellar-core v30.0.0's source. Corpus chains witness 334 of their 690 sides, and each open
-  side carries its cause.
-- Candidate lane: `candidate/` holds 5,971 entries that new runs wrote, such as probe witnesses
+  stellar-core v30.0.0's source. The branch counts of corpus chains on an instrumented core
+  witness 334 of their 690 sides. For 135 more, a recipe run at a protocol that takes the side
+  executes the gate, so the side is inferred from the execution count. Each of the 221 open
+  sides carries its cause.
+- Candidate lane: `candidate/` holds 6,225 entries that new runs wrote, such as probe witnesses
   and format vectors, apart from the release corpus; `shapekit corpus promote` moves an entry
   into the corpus. `registry/uncovered.toml` is checked against the lane: a probe refusal
   confirms 31 of the 47 union arms recorded as refused before any ledger, and no record is

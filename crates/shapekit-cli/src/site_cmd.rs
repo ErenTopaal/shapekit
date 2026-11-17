@@ -255,9 +255,14 @@ struct CoverageView {
 #[derive(Deserialize)]
 struct ObligationRowView {
     kind: String,
-    met: usize,
+    #[serde(default)]
+    met: Option<usize>,
     unmeetable: usize,
     open: usize,
+    #[serde(default)]
+    met_branch_count: Option<usize>,
+    #[serde(default)]
+    met_inferred: Option<usize>,
 }
 
 #[derive(Deserialize)]
@@ -512,7 +517,16 @@ fn coverage_json(
         "obligations": c
             .obligations
             .iter()
-            .map(|o| json!({ "kind": o.kind, "met": o.met, "unmeetable": o.unmeetable, "open": o.open }))
+            .map(|o| {
+                json!({
+                    "kind": o.kind,
+                    "met": o.met,
+                    "met_branch_count": o.met_branch_count,
+                    "met_inferred": o.met_inferred,
+                    "unmeetable": o.unmeetable,
+                    "open": o.open,
+                })
+            })
             .collect::<Vec<_>>(),
         "blockers": blockers.iter().map(|(b, m)| json!({ "blocker": b, "meaning": m })).collect::<Vec<_>>(),
     }))

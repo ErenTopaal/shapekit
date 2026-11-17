@@ -245,17 +245,26 @@ fn fields(out: &mut String, c: &Coverage) {
     if !c.obligations.is_empty() {
         out.push_str("\n## Obligations\n\n");
         out.push_str(
-            "Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.\n\n| Kind | Met | Unmeetable | Open | Total |\n|---|---|---|---|---|\n",
+            "Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A gate side is met by a branch count when the clang branch regions of a corpus chain on the twin take it (a `chain:` witness), or inferred from an execution count when a recipe run at a protocol that takes the side executes the gate (only `recipe:` witnesses); the two are counted apart. A kind with no rows has no producer committed yet.\n\n| Kind | Met | Unmeetable | Open | Total |\n|---|---|---|---|---|\n",
         );
         for r in &c.obligations {
+            // a gate side met by a branch count and one inferred from an execution count are
+            // different evidence, so they are never shown as one number
+            let (met, met_total) = match (r.met, r.met_branch_count, r.met_inferred) {
+                (_, Some(b), Some(i)) => (
+                    format!("{b} by branch count, {i} inferred from execution count"),
+                    b + i,
+                ),
+                (Some(m), _, _) => (m.to_string(), m),
+                _ => (String::new(), 0),
+            };
             let _ = writeln!(
                 out,
-                "| `{}` | {} | {} | {} | {} |",
+                "| `{}` | {met} | {} | {} | {} |",
                 r.kind,
-                r.met,
                 r.unmeetable,
                 r.open,
-                r.met + r.unmeetable + r.open
+                met_total + r.unmeetable + r.open
             );
         }
     }

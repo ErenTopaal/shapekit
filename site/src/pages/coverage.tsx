@@ -278,7 +278,9 @@ export function CoveragePage() {
           <>
             Everything the corpus owes a witness for, merged in <RepoLink path="corpus/coverage/obligations.json" />.
             An obligation is met when an entry witnesses it, unmeetable when the source shows that no input can, and open
-            otherwise.
+            otherwise. A protocol gate side is met by a branch count when a corpus chain run on the instrumented core takes
+            it, or inferred from an execution count when a recipe run at a protocol that takes the side executes the gate;
+            the two are counted apart.
           </>
         }
       >
@@ -300,7 +302,16 @@ export function CoveragePage() {
                   <Id>{o.kind}</Id>
                 </TableCell>
                 <TableCell className="text-sm whitespace-normal text-muted-foreground">{obligationKinds[o.kind] ?? ""}</TableCell>
-                <TableCell className="num text-right align-top">{fmt.format(o.met)}</TableCell>
+                <TableCell className="num text-right align-top">
+                  {o.met_branch_count !== null && o.met_inferred !== null ? (
+                    <>
+                      {fmt.format(o.met_branch_count)} by branch count, {fmt.format(o.met_inferred)} inferred from execution
+                      count
+                    </>
+                  ) : (
+                    fmt.format(o.met ?? 0)
+                  )}
+                </TableCell>
                 <TableCell className="num text-right align-top">{fmt.format(o.unmeetable)}</TableCell>
                 <TableCell className="num text-right align-top">{fmt.format(o.open)}</TableCell>
               </TableRow>

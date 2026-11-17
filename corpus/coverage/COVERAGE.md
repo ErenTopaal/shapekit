@@ -836,14 +836,14 @@ Expected source classes with no entry: local-core, local-core-refused, synthetic
 
 ## Obligations
 
-Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A kind with no rows has no producer committed yet.
+Every obligation the corpus owes a witness for, from `corpus/coverage/obligations.json`. That file merges the fragments listed in `registry/obligation-sources.toml`, one `gap` obligation per row of `registry/gaps/`, both sides of every protocol gate in `registry/generated/gates.json`, and the obligations corpus and candidate entries name. An obligation an entry names is met by that entry. A gate side is met by a branch count when the clang branch regions of a corpus chain on the twin take it (a `chain:` witness), or inferred from an execution count when a recipe run at a protocol that takes the side executes the gate (only `recipe:` witnesses); the two are counted apart. A kind with no rows has no producer committed yet.
 
 | Kind | Met | Unmeetable | Open | Total |
 |---|---|---|---|---|
 | `format` | 3869 | 0 | 0 | 3869 |
 | `gap` | 9 | 0 | 4 | 13 |
 | `core-test-section` | 29691 | 0 | 0 | 29691 |
-| `gate-side` | 469 | 0 | 221 | 690 |
+| `gate-side` | 334 by branch count, 135 inferred from execution count | 0 | 221 | 690 |
 | `field` | 203 | 0 | 0 | 203 |
 | `sdk-version` | 15 | 0 | 0 | 15 |
 | `seed` | 69 | 0 | 145 | 214 |

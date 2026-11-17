@@ -78,6 +78,7 @@ pub fn run(corpus: &Path, registry_dir: &Path) -> Result<(Coverage, Vec<Problem>
     }
     let (ledger, ledger_problems) = ledger::build(&root, corpus, registry_dir)?;
     report.obligations = ledger::rows(&ledger);
+    problems.extend(ledger::gate_evidence_problems(&ledger));
     report.ledger = Some(ledger);
     problems.extend(ledger_problems);
     Ok((report, problems))

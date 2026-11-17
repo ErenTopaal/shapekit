@@ -45,19 +45,88 @@ struct SourcesFile {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct KindRow {
     pub kind: &'static str,
-    pub met: usize,
+    /// Met obligations of a kind whose met ones rest on one kind of evidence; absent for
+    /// `gate-side`, whose two kinds of evidence are never summed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub met: Option<usize>,
     pub unmeetable: usize,
     pub open: usize,
+    /// `gate-side` only: the met sides a clang branch count witnesses (a `chain:` witness of
+    /// `twin gate-witnesses`), kept apart from those inferred from an execution count.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub met_branch_count: Option<usize>,
+    /// `gate-side` only: the met sides whose witnesses are all recipe runs at a protocol that
+    /// takes the side, so the side is inferred from an execution count of the gate.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub met_inferred: Option<usize>,
+}
+
+/// How a met gate side is witnessed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GateEvidence {
+    /// At least one `chain:` witness: a clang branch count on the twin.
+    BranchCount,
+    /// Every witness is `recipe:<path>@p<N>`: an execution count at a protocol taking the side.
+    Inferred,
+}
+
+/// The kind of evidence behind a met gate side, or `None` when its witnesses are neither form.
+pub fn gate_evidence(o: &Obligation) -> Option<GateEvidence> {
+    if o.witnesses.iter().any(|w| w.starts_with("chain:")) {
+        Some(GateEvidence::BranchCount)
+    } else if !o.witnesses.is_empty() && o.witnesses.iter().all(|w| w.starts_with("recipe:")) {
+        Some(GateEvidence::Inferred)
+    } else {
+        None
+    }
 }
 
 pub fn rows(ledger: &ObligationLedger) -> Vec<KindRow> {
+    let gate_met = |e: GateEvidence| {
+        ledger
+            .obligations
+            .iter()
+            .filter(|o| {
+                o.kind == ObligationKind::GateSide
+                    && o.status == ObligationStatus::Met
+                    && gate_evidence(o) == Some(e)
+            })
+            .count()
+    };
     ObligationKind::ALL
         .iter()
-        .map(|&k| KindRow {
-            kind: k.as_str(),
-            met: ledger.count(k, ObligationStatus::Met),
-            unmeetable: ledger.count(k, ObligationStatus::Unmeetable),
-            open: ledger.count(k, ObligationStatus::Open),
+        .map(|&k| {
+            let gate = k == ObligationKind::GateSide;
+            // a met gate side the evidence rule does not place is reported as a problem by
+            // gate_evidence_problems and is in neither count
+            KindRow {
+                kind: k.as_str(),
+                met: (!gate).then(|| ledger.count(k, ObligationStatus::Met)),
+                unmeetable: ledger.count(k, ObligationStatus::Unmeetable),
+                open: ledger.count(k, ObligationStatus::Open),
+                met_branch_count: gate.then(|| gate_met(GateEvidence::BranchCount)),
+                met_inferred: gate.then(|| gate_met(GateEvidence::Inferred)),
+            }
+        })
+        .collect()
+}
+
+/// A problem for each met gate side whose witnesses are neither a branch count nor recipe runs
+/// only, so every public count of met sides says which evidence it rests on.
+pub fn gate_evidence_problems(ledger: &ObligationLedger) -> Vec<Problem> {
+    ledger
+        .obligations
+        .iter()
+        .filter(|o| {
+            o.kind == ObligationKind::GateSide
+                && o.status == ObligationStatus::Met
+                && gate_evidence(o).is_none()
+        })
+        .map(|o| {
+            Problem::new(
+                o.id.clone(),
+                "met, but its witnesses are neither a chain: branch count nor recipe: runs only",
+            )
         })
         .collect()
 }
@@ -305,4 +374,48 @@ pub fn render(ledger: &ObligationLedger) -> String {
     }
     out.push_str("]}\n");
     out
+}
+
+#[cfg(test)]
+mod gate_evidence_tests {
+    use super::*;
+    use shapekit_contracts::ObligationLedger;
+
+    fn side(id: &str, status: ObligationStatus, witnesses: &[&str]) -> Obligation {
+        Obligation {
+            id: id.into(),
+            kind: ObligationKind::GateSide,
+            status,
+            witnesses: witnesses.iter().map(|w| w.to_string()).collect(),
+            evidence: None,
+        }
+    }
+
+    #[test]
+    fn met_gate_sides_are_split_by_evidence_and_never_summed() {
+        let ledger = ObligationLedger {
+            schema_version: 1,
+            obligations: vec![
+                side(
+                    "a",
+                    ObligationStatus::Met,
+                    &["chain:c.p18", "recipe:r.json@p18"],
+                ),
+                side("b", ObligationStatus::Met, &["recipe:r.json@p19"]),
+                side("c", ObligationStatus::Open, &[]),
+                side("d", ObligationStatus::Met, &["entry:e"]),
+            ],
+        };
+        let row = rows(&ledger)
+            .into_iter()
+            .find(|r| r.kind == "gate-side")
+            .unwrap();
+        assert_eq!(row.met, None);
+        assert_eq!(row.met_branch_count, Some(1));
+        assert_eq!(row.met_inferred, Some(1));
+        assert_eq!(row.open, 1);
+        let p = gate_evidence_problems(&ledger);
+        assert_eq!(p.len(), 1);
+        assert!(p[0].to_string().contains('d'), "{}", p[0]);
+    }
 }
