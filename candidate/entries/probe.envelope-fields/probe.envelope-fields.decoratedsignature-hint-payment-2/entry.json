@@ -1,0 +1,42 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.envelope-fields",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.envelope-fields.decoratedsignature-hint-payment-2",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "probe of DecoratedSignature.hint in carrier payment, attempt \"all zero: \\\"00000000\\\"\": refused at submission (error, tx_bad_auth)",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.envelope-fields.p30",
+    "class": "local-core-refused",
+    "core_rejection": {
+      "result_code": "tx_bad_auth",
+      "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+      "stage": "submit"
+    },
+    "recipe": "probe.envelope-fields"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.decoratedsignature-hint-payment-2/testnet.expected.json",
+      "expected_json_sha256": "d8ed105622802ca42aaf371f030be7ea777ebb13a76128d3037af08cb29caaea",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.decoratedsignature-hint-payment-2/testnet.xdr",
+      "xdr_sha256": "199fdbcd798ee3119babac1afabf114a56f69accfd065b7fd774be12da6c6e1d"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

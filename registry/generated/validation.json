@@ -2032,25 +2032,27 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the source's signature on a payment: \"8fc45a2a\"",
+          "variant": "base, the source's signature on a payment: \"e9b18a06\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-hint-0",
-            "candidate:probe.envelope-fields.decoratedsignature-hint-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-hint-payment-0",
+            "candidate:probe.envelope-fields.decoratedsignature-hint-payment-0-ledger"
+          ],
+          "carrier": "payment"
         },
         {
-          "variant": "first byte changed: \"43eba51a\"",
+          "variant": "first byte changed: \"cb96d588\"",
           "submission": "error",
           "result_code": "tx_bad_auth",
           "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-hint-1"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-hint-payment-1"
+          ],
+          "carrier": "payment"
         },
         {
           "variant": "all zero: \"00000000\"",
@@ -2059,8 +2061,43 @@
           "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-hint-2"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-hint-payment-2"
+          ],
+          "carrier": "payment"
+        },
+        {
+          "variant": "base, a payment signed by one of two signers of the source whose keys end in the same four bytes: \"88b8cf3c\"",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-hint-collision-0",
+            "candidate:probe.envelope-fields.decoratedsignature-hint-collision-0-ledger"
+          ],
+          "carrier": "collision"
+        },
+        {
+          "variant": "first byte changed: \"89b8cf3c\"",
+          "submission": "error",
+          "result_code": "tx_bad_auth",
+          "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-hint-collision-1"
+          ],
+          "carrier": "collision"
+        },
+        {
+          "variant": "all zero: \"00000000\"",
+          "submission": "error",
+          "result_code": "tx_bad_auth",
+          "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-hint-collision-2"
+          ],
+          "carrier": "collision"
         }
       ]
     },
@@ -2069,15 +2106,16 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the source's signature on a payment: \"e6a268064a9afe0dddfed8aaf95969cfbe59ab078cdbb240055876d66483583e1257...",
+          "variant": "base, the source's signature on a payment: \"331da64e10769b2215d0f105250cc9875623deb30ae12fba271dcd595a6c887236c2...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-signature-0",
-            "candidate:probe.envelope-fields.decoratedsignature-signature-0-ledger"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-signature-payment-0",
+            "candidate:probe.envelope-fields.decoratedsignature-signature-payment-0-ledger"
+          ],
+          "carrier": "payment"
         },
         {
           "variant": "empty: \"\"",
@@ -2086,8 +2124,9 @@
           "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-signature-1"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-signature-payment-1"
+          ],
+          "carrier": "payment"
         },
         {
           "variant": "64 bytes, the maximum: \"abababababababababababababababababababababababababababababababababab...",
@@ -2096,8 +2135,55 @@
           "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
           "applied": "not-applied",
           "witnesses": [
-            "candidate:probe.envelope-fields.decoratedsignature-signature-2"
-          ]
+            "candidate:probe.envelope-fields.decoratedsignature-signature-payment-2"
+          ],
+          "carrier": "payment"
+        },
+        {
+          "variant": "base, a payment signed by one of two signers of the source whose keys end in the same four bytes: \"0a1803fb6d55a92ec66c627a5b82d666bac80c75ccc59baa875ebc8ec5306aea5ad2...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-0",
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-0-ledger"
+          ],
+          "carrier": "collision"
+        },
+        {
+          "variant": "empty: \"\"",
+          "submission": "error",
+          "result_code": "tx_bad_auth",
+          "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-1"
+          ],
+          "carrier": "collision"
+        },
+        {
+          "variant": "64 bytes, the maximum: \"abababababababababababababababababababababababababababababababababab...",
+          "submission": "error",
+          "result_code": "tx_bad_auth",
+          "result_xdr": "AAAAAAAAAGT////6AAAAAA==",
+          "applied": "not-applied",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-2"
+          ],
+          "carrier": "collision"
+        },
+        {
+          "variant": "the other signer sharing the hint signs instead: \"faf562efce46d9fba50b4e9d2491cd4b51e44129f5b9051640b5df6630df15c750cd...",
+          "submission": "pending",
+          "result_code": "tx_success",
+          "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
+          "applied": "succeeded",
+          "witnesses": [
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-3",
+            "candidate:probe.envelope-fields.decoratedsignature-signature-collision-3-ledger"
+          ],
+          "carrier": "collision"
         }
       ]
     },
@@ -2109,7 +2195,7 @@
           "variant": "base, an extension of echo's instance and code: \"v0\"",
           "submission": "pending",
           "result_code": "tx_success",
-          "result_xdr": "AAAAAAAAX9cAAAAAAAAAAQAAAAAAAAAZAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAYF4AAAAAAAAAAQAAAAAAAAAZAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.extendfootprintttlop-ext-0",
@@ -2194,7 +2280,7 @@
           "variant": "base, a fee bump of a payment: \"v0\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABNWwXCjV9Om9Fwrzhl+K+Ua9qa35EVUXFtse4NCY4AWIAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABg3hZnMeuCUE/6026HqEf5uvePebHw+1Jl2T2egN8LRcAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-ext-0",
@@ -2219,7 +2305,7 @@
           "variant": "base, a fee bump of a payment: \"400\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABAfNnVMTQQxSnQwoXHAw3ZHDx9LEt6spO1ASToqV8OLwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABmRV+Uc0AQPBVJwFG6XzIUsD1oWQudt/8PlgxW5lyE/0AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-0",
@@ -2260,7 +2346,7 @@
           "variant": "one more, 401: \"401\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABi+vjMDZB7kzQ8Nw/znUxJr04R8i4OI8+Z7jVpn/+B5oAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAAB5EeZJ0e7C1KkRh/JoYbVk8IKshKNiVo1MPQaSDo3t4gAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-4",
@@ -2271,7 +2357,7 @@
           "variant": "one less, 399: \"399\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABD+fY1zUcjW5+6xsQciXO9BCxpqHuilV00N7MOfM0YNkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABszii3PyvodSSRBT2yitgrp4uX0pAnv8l7dbkt0ETy0cAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-fee-5",
@@ -2288,7 +2374,7 @@
           "variant": "base, a fee bump of a payment: \"GCZNAO2EFMXPFUEBKDPREO3LCIPVUVU26EMM4IZW45KVKQQ2OP4WSMOX\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAAB6x5/ZJwmAhYfOzD/GfhmmvYfVvXmZYEPir5E9ORFiikAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABjAkPASfq+aoR03zl22+eizOG48p38csrVDzTJn8iGIcAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-feesource-0",
@@ -2332,10 +2418,10 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a fee bump of a payment: {\"tx\":{\"signatures\":[{\"hint\":\"2d2127f1\",\"signature\":\"c098547b15dfef9a...",
+          "variant": "base, a fee bump of a payment: {\"tx\":{\"signatures\":[{\"hint\":\"2d2127f1\",\"signature\":\"c41c501bc9e1c823...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABhdcfWxGiA2FEhnFu63Woexr7P2UVM96v+aJygqU0a/0AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABhQWdMYavwKjrau05kFJpeW/S68xsgMyJqu1OtHbuomwAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransaction-innertx-0",
@@ -2359,10 +2445,10 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a fee bump of a payment: [{\"hint\":\"219be049\",\"signature\":\"5e380a3ea6d14a758274ed81953a767fedb1...",
+          "variant": "base, a fee bump of a payment: [{\"hint\":\"219be049\",\"signature\":\"fdcd2e7488952b12ebcd013c064183511d9d...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABANVrslDQlPHPeyR5IJ1C/aIFTDdy/Qg91CXlBcH6asMAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABGpzBnWlXYi4Y+DwpwL8+IYnH80GtIVma7LUe2Yv5WFcAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransactionenvelope-signatures-0",
@@ -2380,7 +2466,7 @@
           ]
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"0f526516\",\"signature\":\"8a38f48c4b0e254d8e2f6e7da31d4b85e118...",
+          "variant": "first element repeated: [{\"hint\":\"0f526516\",\"signature\":\"a94409ea08e86e9c2b6d7bc6fa412108d8cd...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAMj////2AAAAAA==",
@@ -2399,7 +2485,7 @@
           "variant": "base, a fee bump of a payment: {\"ext\":\"v0\",\"fee\":\"400\",\"fee_source\":\"GAESABAHCKOOGEHHRPQUPOLCAFXSAN7...",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABGB4Iv/7GbjZhRwXx4kyues/F7ty60NZAqgf7uJ6ri48AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABlQ09xU0NJKUgGpFSBgr9syBHr4buHW8SzBPS9CrV0scAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.feebumptransactionenvelope-tx-0",
@@ -3304,7 +3390,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's ledger bounds: 1534",
+          "variant": "base, a payment's ledger bounds: 1548",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3337,7 +3423,7 @@
           ]
         },
         {
-          "variant": "one more, 1539: 1539",
+          "variant": "one more, 1553: 1553",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3348,7 +3434,7 @@
           ]
         },
         {
-          "variant": "one less, 1538: 1538",
+          "variant": "one less, 1552: 1552",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -3359,7 +3445,7 @@
           ]
         },
         {
-          "variant": "the ledger the attempt closes in, 541: 541",
+          "variant": "the ledger the attempt closes in, 555: 555",
           "submission": "error",
           "result_code": "tx_too_late",
           "result_xdr": "AAAAAAAAAGT////9AAAAAA==",
@@ -3616,7 +3702,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, the sponsor of a claimable balance handing the sponsorship to a peer: \"BAAH6WKT2HCOXUE5JNODW4VGS5CSIHT6NAKQTXWF5TGCT3N57FHZIP5RVQ\"",
+          "variant": "base, the sponsor of a claimable balance handing the sponsorship to a peer: \"BAAJMDUVOZ2BLQLOFNVFRXYMFGCXCTYNWSZH7ZMU56M5NWJ73SPRQU4NPE\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAASwAAAAAAAAAAwAAAAAAAAAQAAAAAAAAAAAAAAASAAAAAAAAAAAAAAARAAAAAAAAAAA=",
@@ -3627,7 +3713,7 @@
           ]
         },
         {
-          "variant": "same arm, first byte changed: \"BAACO5NLXYRV3VXXF2N6EHIQAHIHNYX4GKNFHT2JELDJUMM72QMSN6U2NA\"",
+          "variant": "same arm, first byte changed: \"BAAF4EUGC72XVZXOOMOUDQQ2IR67BC6GFBLVJ36ZYDS72WULJUJJOKJA64\"",
           "submission": "pending",
           "result_code": "tx_failed",
           "result_xdr": "AAAAAAAAASz/////AAAAAwAAAAAAAAAQAAAAAAAAAAAAAAAS/////wAAAAAAAAARAAAAAAAAAAA=",
@@ -6091,7 +6177,7 @@
           "variant": "base, a fee bump's muxed fee source, id 7: \"fbfbbbda44017bad080d84913edfd96ec8bfc8219cbfa88c3a988cf77cfda37f\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABE9/8LszERBs1z0MHm0g7YKpPMw/fRBZ/wPEgdACiTZgAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAAB3L8JEbP24Nr8hQE0XJk3uHwZ0YAezp4eDlFIKTdW/K4AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-ed25519-fee-source-0",
@@ -6431,7 +6517,7 @@
           "variant": "base, a fee bump's muxed fee source, id 7: \"7\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABl5tAR5ekG7ZwJjHCsM+iEIx42Cw1QkGuY+w3zeIpruUAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABDdrSish+WJcZRQRxsBZnCbS4ESbB8YtheQLB2/V9jNEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-0",
@@ -6443,7 +6529,7 @@
           "variant": "zero 0: \"0\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABZemo2YAr3RoD2ITY89Jz9F8CcnBmdIj+W72N1iKnBKkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAAB8oi1Gbc5jXiXDsu60wmssBnvq/kFtCJE6nmzr0m3FwoAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-1",
@@ -6455,7 +6541,7 @@
           "variant": "maximum 18446744073709551615: \"18446744073709551615\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABTbjygJEogXs9fCQhzO73c/r0Ls0Iu804RalFmH/LdcoAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABAwzKd87rjTbtgYB/EBojoXLUqomWpgBoByHDQPEw3LcAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-2",
@@ -6467,7 +6553,7 @@
           "variant": "one more, 8: \"8\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABXdIvmHK8Wk3BWylCx5qJqfrk8YYLGoGnqo1EDna3kggAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABB+OkgGij3VSMbh8gUg57Xg0+zvYWS3Gq7UaksbXxqskAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-3",
@@ -6479,7 +6565,7 @@
           "variant": "one less, 6: \"6\"",
           "submission": "pending",
           "result_code": "tx_fee_bump_inner_success",
-          "result_xdr": "AAAAAAAAAMgAAAABxQNtUbPZil++vy2H2dQcdNXTf0vqZOVvnIqcN7RmYJMAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
+          "result_xdr": "AAAAAAAAAMgAAAABK03bfjm9GTaiDJC+dqKBJD0dynpu1ByKe1arBiJJPusAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAA=",
           "applied": "succeeded",
           "witnesses": [
             "candidate:probe.envelope-fields.muxedaccountmed25519-id-fee-source-4",
@@ -8730,7 +8816,7 @@
       "verdict": "not-validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_ledger\":2322,\"min_ledger\":0}",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_ledger\":2336,\"min_ledger\":0}",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8845,7 +8931,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: \"5733781340160\"",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: \"5793910882304\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8899,7 +8985,7 @@
           ]
         },
         {
-          "variant": "present, one more, 5738076307457: \"5738076307457\"",
+          "variant": "present, one more, 5798205849601: \"5798205849601\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -8909,7 +8995,7 @@
           ]
         },
         {
-          "variant": "present, one less, 5738076307455: \"5738076307455\"",
+          "variant": "present, one less, 5798205849599: \"5798205849599\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -8926,7 +9012,7 @@
       "verdict": "not-validated",
       "attempts": [
         {
-          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_time\":\"1884260800\",\"min_time\":\"0\"}",
+          "variant": "base, a payment's v2 preconditions, every field set, one extra signer: {\"max_time\":\"1885470400\",\"min_time\":\"0\"}",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -11848,7 +11934,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a peer's address credentials for one require_auth: 1777",
+          "variant": "base, a peer's address credentials for one require_auth: 1791",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11884,7 +11970,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "one more, 1782: 1782",
+          "variant": "one more, 1796: 1796",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11896,7 +11982,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "one less, 1781: 1781",
+          "variant": "one less, 1795: 1795",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAPnwAAAAAAAAAAQAAAAAAAAAYAAAAAN8HGiSdA/wvIjE/dcc0olS76gMSTOp3ABcE2wZwsvwCAAAAAA==",
@@ -11908,7 +11994,7 @@
           "carrier": "matched"
         },
         {
-          "variant": "base, a peer's address credentials for a call that never requires them: 1784",
+          "variant": "base, a peer's address credentials for a call that never requires them: 1798",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -11944,7 +12030,7 @@
           "carrier": "unmatched"
         },
         {
-          "variant": "one more, 1789: 1789",
+          "variant": "one more, 1803: 1803",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -11956,7 +12042,7 @@
           "carrier": "unmatched"
         },
         {
-          "variant": "one less, 1788: 1788",
+          "variant": "one less, 1802: 1802",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAALkoAAAAAAAAAAQAAAAAAAAAYAAAAABXse/C1BzK0n4Io4H0kNlM4+eOrmUsArwjlo7/+Vf2LAAAAAA==",
@@ -13760,7 +13846,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's time bounds: \"1930657600\"",
+          "variant": "base, a payment's time bounds: \"1931867200\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13793,7 +13879,7 @@
           ]
         },
         {
-          "variant": "one more, 1931003201: \"1931003201\"",
+          "variant": "one more, 1932212801: \"1932212801\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -13804,7 +13890,7 @@
           ]
         },
         {
-          "variant": "one less, 1931089599: \"1931089599\"",
+          "variant": "one less, 1932299199: \"1932299199\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -14328,7 +14414,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment: \"8297876815873\"",
+          "variant": "base, a payment: \"8358006358017\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -14373,7 +14459,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one more, 8302171783170: \"8302171783170\"",
+          "variant": "one more, 8362301325314: \"8362301325314\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -14384,7 +14470,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "one less, 8302171783168: \"8302171783168\"",
+          "variant": "one less, 8362301325312: \"8362301325312\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -14395,7 +14481,7 @@
           "carrier": "payment"
         },
         {
-          "variant": "base, a call of echo(7): \"8310761717761\"",
+          "variant": "base, a call of echo(7): \"8370891259905\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAMSMAAAAAAAAAAQAAAAAAAAAYAAAAACPSPIvT/+rRqsG5B6pvMsuQzLV5fD7qY4m6kHdjzkY7AAAAAA==",
@@ -14440,7 +14526,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one more, 8315056685058: \"8315056685058\"",
+          "variant": "one more, 8375186227202: \"8375186227202\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -14451,7 +14537,7 @@
           "carrier": "invoke"
         },
         {
-          "variant": "one less, 8315056685056: \"8315056685056\"",
+          "variant": "one less, 8375186227200: \"8375186227200\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAL7LqD////7AAAAAA==",
@@ -15001,7 +15087,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"8426725834753\"",
+          "variant": "base, a payment in a v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): \"8486855376897\"",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15046,7 +15132,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one more, 8431020802050: \"8431020802050\"",
+          "variant": "one more, 8491150344194: \"8491150344194\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -15057,7 +15143,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "one less, 8431020802048: \"8431020802048\"",
+          "variant": "one less, 8491150344192: \"8491150344192\"",
           "submission": "error",
           "result_code": "tx_bad_seq",
           "result_xdr": "AAAAAAAAAGT////7AAAAAA==",
@@ -15236,7 +15322,7 @@
           "carrier": "p12"
         },
         {
-          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"9fe0ecb62c8ae49819af35a77fa306d10e46...",
+          "variant": "base, a payment's v0 envelope at protocol 30, which core's tx endpoint turns into a v1 envelope before it validates it (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1081): [{\"hint\":\"ee482c66\",\"signature\":\"67b81fdbba93725e0838d98717b9ca65b425...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15259,7 +15345,7 @@
           "carrier": "p30"
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"b3e6bb0a8b9318f0c2067ca1515644ac5662...",
+          "variant": "first element repeated: [{\"hint\":\"6895ae45\",\"signature\":\"99ec3803bf29e316df1d28bdaaf226b886fe...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",
@@ -15328,7 +15414,7 @@
       "verdict": "validated",
       "attempts": [
         {
-          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"d906e8ad7e05bc4642ebfe236e872fcac891...",
+          "variant": "base, a payment's v1 envelope: [{\"hint\":\"36174778\",\"signature\":\"132c48c4daa4c2cd1b05ee09c0ca080f02b3...",
           "submission": "pending",
           "result_code": "tx_success",
           "result_xdr": "AAAAAAAAAGQAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAA=",
@@ -15349,7 +15435,7 @@
           ]
         },
         {
-          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"aa2929630e2894ee03bf2b68254e9bcbec3f...",
+          "variant": "first element repeated: [{\"hint\":\"53558aa7\",\"signature\":\"88e9272f86b688d088cf4cedf1bf0ad0aee2...",
           "submission": "error",
           "result_code": "tx_bad_auth_extra",
           "result_xdr": "AAAAAAAAAGT////2AAAAAA==",

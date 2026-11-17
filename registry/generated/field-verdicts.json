@@ -1383,18 +1383,20 @@
     },
     {
       "id": "tx.signatures.hint",
-      "measured": "validated",
+      "measured": "mixed",
       "sites": [
         {
           "field": "DecoratedSignature.hint",
-          "carrier": "single",
+          "carrier": "payment",
           "verdict": "validated"
+        },
+        {
+          "field": "DecoratedSignature.signature",
+          "carrier": "collision",
+          "verdict": "not-validated"
         }
       ],
-      "settled_by_source": {
-        "verdict": "mixed",
-        "reading": "stellar-core v30.0.0 src/transactions/SignatureUtils.cpp:38-45; src/transactions/SignatureUtils.cpp:127-136"
-      }
+      "settled_by_source": null
     },
     {
       "id": "tx.signatures.signature",
@@ -1402,7 +1404,12 @@
       "sites": [
         {
           "field": "DecoratedSignature.signature",
-          "carrier": "single",
+          "carrier": "collision",
+          "verdict": "validated"
+        },
+        {
+          "field": "DecoratedSignature.signature",
+          "carrier": "payment",
           "verdict": "validated"
         }
       ],
