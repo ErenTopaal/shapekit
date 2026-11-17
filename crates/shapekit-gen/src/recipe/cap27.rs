@@ -14,6 +14,7 @@
 //! | 13       | issuer pays muxed holder (id 2^53)                              |
 //! | 14       | issuer claws back from muxed holder (id 2^64-1)                 |
 //! | 15       | leaver merges into muxed alice (id 2^53)                        |
+//! | 16       | muxed alice (id 1) creates a claimable balance for bob          |
 //!
 //! Core resolves a muxed account to its ed25519 key and drops the id, so
 //! the ids appear only in envelopes. A transaction's meta carries no muxed
@@ -25,8 +26,9 @@ use ed25519_dalek::SigningKey;
 use shapekit_core_driver::keys::{account_id, muxed_account, muxed_account_with_id};
 use shapekit_core_driver::tx::{TransactionBuilder, sign_transaction};
 use stellar_xdr::{
-    AlphaNum4, Asset, AssetCode4, ChangeTrustAsset, ChangeTrustOp, ClawbackOp, LedgerEntryData,
-    LedgerKey, LedgerKeyTrustLine, MuxedAccount, OperationBody, PathPaymentStrictReceiveOp,
+    AlphaNum4, Asset, AssetCode4, ChangeTrustAsset, ChangeTrustOp, ClaimPredicate, Claimant,
+    ClaimantV0, ClawbackOp, CreateClaimableBalanceOp, LedgerEntryData, LedgerKey,
+    LedgerKeyTrustLine, MuxedAccount, OperationBody, PathPaymentStrictReceiveOp,
     PathPaymentStrictSendOp, PaymentOp, SetOptionsOp, TransactionEnvelope, TrustLineAsset,
 };
 
@@ -295,6 +297,37 @@ impl Recipe for MuxedAccounts {
             Selector::ledger_of(&applied),
             Spec::new("an account merges into a muxed account with id 2^53")
                 .fields(&["op.account_merge.destination"]),
+        )?;
+
+        // core derives the balance id from the transaction source's account and sequence
+        // number, so the mux id does not change it: a reader has to strip the id first
+        let env = from_muxed(
+            ctx,
+            &alice,
+            mux(&alice, 1),
+            OperationBody::CreateClaimableBalance(CreateClaimableBalanceOp {
+                asset: Asset::Native,
+                amount: AMOUNT,
+                claimants: vec![Claimant::ClaimantTypeV0(ClaimantV0 {
+                    destination: account_id(&bob.verifying_key()),
+                    predicate: ClaimPredicate::Unconditional,
+                })]
+                .try_into()?,
+            }),
+        )?;
+        let applied = ctx.submit_and_close(&env)?;
+        ctx.capture(
+            "claimable-balance-tx-source-id-1",
+            Selector::ledger_of(&applied),
+            Spec::new(
+                "a claimable balance created by a transaction whose source is a muxed account with id 1",
+            )
+            .fields(&[
+                "tx.source_account",
+                "tx.source_account.mux_id",
+                "op.create_claimable_balance.asset_amount",
+                "op.create_claimable_balance.claimants.destination",
+            ]),
         )
     }
 }
