@@ -188,7 +188,11 @@ fn site_data_matches_the_committed_files() {
 
     // conformance: every matrix entry is a corpus entry, and cell counts add up
     let conformance = read_json(&out.join("conformance.json"));
-    assert_eq!(len(&conformance["sdks"]), 3);
+    // one per sdk of the versions file, with or without a committed matrix
+    let versions =
+        shapekit_conformance::versions::VersionsFile::load(&root.join("conformance/versions.toml"))
+            .unwrap();
+    assert_eq!(len(&conformance["sdks"]), versions.sdk.len());
     // an sdk's cells come from its own matrix and its share of any matrix over every sdk
     let matrices: Vec<Value> = std::fs::read_dir(root.join("findings/inputs"))
         .unwrap()

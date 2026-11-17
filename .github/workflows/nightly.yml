@@ -247,9 +247,10 @@ jobs:
           # candidate entries are in no known-failures list, so every failure is reported
           known="$RUNNER_TEMP/known-failures"
           mkdir -p "$known"
-          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"
+          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"; : >"$known/soroban.txt"
           matrices=()
-          for sdk in rust go js; do
+          # promotion needs a result from every sdk in conformance/versions.toml
+          for sdk in rust go js soroban; do
             out="target/candidate/$sdk"
             "$shapekit" conformance run --sdk "$sdk" --manifest candidate/manifest.json \
               --known-failures "$known" --out "$out"

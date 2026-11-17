@@ -11,7 +11,7 @@ import { FamilyStrip } from "@/components/fragments"
 import { Meter, VerdictBar, VerdictLegend, VersionColumns } from "@/components/charts"
 import { Id, RepoLink, Section, Term, Terms, TextLink, fmt, issueLabel, short } from "@/components/common"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust" }
+const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 
 // pages of this site's docs first, then committed files that only exist in the repository
 const docs: { to?: string; path?: string; label: string }[] = [

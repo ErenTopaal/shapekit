@@ -1,7 +1,8 @@
 //! `shapekit corpus promote` on a real synthetic entry, cap23.claimable-balances.synth-strkey-b-invalid,
 //! with the divergence matrices a conformance run over a candidate manifest holding only that
 //! entry wrote (tests/fixtures/promote/): stellar-xdr 30.0.0 and @stellar/stellar-sdk 17.4.0
-//! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1).
+//! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1), and
+//! soroban-sdk 29.0.1 has no reader for its strkey kind.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -128,7 +129,7 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
     )
     .unwrap();
 
-    let out = promote(d, &[], &["rust", "go", "js"]);
+    let out = promote(d, &[], &["rust", "go", "js", "soroban"]);
     assert_eq!(out.status.code(), Some(1), "{}", text(&out));
     assert!(
         text(&out).contains(
@@ -162,11 +163,11 @@ fn every_sdk_needs_a_result() {
 fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
     let dir = layout();
     let d = dir.path();
-    let dry = promote(d, &["--dry-run"], &["rust", "go", "js"]);
+    let dry = promote(d, &["--dry-run"], &["rust", "go", "js", "soroban"]);
     assert_eq!(dry.status.code(), Some(0), "{}", text(&dry));
     assert_eq!(entries(d, "corpus"), 0);
 
-    let out = promote(d, &[], &["rust", "go", "js"]);
+    let out = promote(d, &[], &["rust", "go", "js", "soroban"]);
     assert_eq!(out.status.code(), Some(0), "{}", text(&out));
     assert!(text(&out).contains("is finding GO-1"), "{}", text(&out));
     assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (0, 1));
@@ -190,6 +191,6 @@ fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
         let out = shapekit(d, &["manifest", "validate", "--file", &file]);
         assert!(out.status.success(), "{lane}: {}", text(&out));
     }
-    let again = promote(d, &[], &["rust", "go", "js"]);
+    let again = promote(d, &[], &["rust", "go", "js", "soroban"]);
     assert_eq!(again.status.code(), Some(2), "{}", text(&again));
 }

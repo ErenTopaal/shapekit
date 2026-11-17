@@ -24,7 +24,7 @@ import {
   type Tone,
 } from "@/components/common"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust" }
+const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 const failing = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
 const failingChecks = (cell: Cell) => cell.checks.filter((k) => failing.has(k.result))
 

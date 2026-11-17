@@ -22,7 +22,7 @@ import {
 } from "@/components/common"
 import { NotFound } from "./not-found"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust" }
+const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 
 function Counts({ counts }: { counts: Record<string, number> }) {
   const e = Object.entries(counts)
