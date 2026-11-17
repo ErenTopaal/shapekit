@@ -342,6 +342,14 @@ impl Scrub {
     }
 }
 
+/// What turns a probe's outcome into a fault record: the path scrubber and the ids of the
+/// corpus entries a probe runs, sorted.
+#[derive(Debug, Clone)]
+pub struct Capture {
+    pub scrub: Scrub,
+    pub corpus_ids: Vec<String>,
+}
+
 /// A fault's outcome as the report keeps it. A corpus run that stopped (the faulty testee
 /// does not start, or quits on some entry) leaves every entry without its cells, which is how
 /// [`compare`] counts an entry that changed; so such a fault is caught with the corpus's
@@ -353,9 +361,9 @@ pub fn fault_from(
     mutation: String,
     status: Status,
     probe: Option<&ProbeOutcome>,
-    scrub: &Scrub,
-    corpus_ids: &[String],
+    capture: &Capture,
 ) -> Fault {
+    let (scrub, corpus_ids) = (&capture.scrub, capture.corpus_ids.as_slice());
     let (entries, changed, note) = match probe {
         Some(ProbeOutcome::Changed { entries }) => (
             entries.iter().take(WITNESS_LIMIT).cloned().collect(),
@@ -633,12 +641,15 @@ impl Context {
         Scrub::new(self.work.parent().unwrap_or(&self.work), &self.paths.root)
     }
 
-    /// The ids of every corpus entry a probe runs, sorted.
-    pub fn corpus_ids(&self) -> Result<Vec<String>> {
+    /// The scrubber and the ids of every corpus entry a probe runs, sorted.
+    pub fn capture(&self) -> Result<Capture> {
         let (manifest, _) = runner::load_manifest(&self.paths.manifest)?;
-        let mut ids: Vec<String> = manifest.entries.into_iter().map(|e| e.id).collect();
-        ids.sort();
-        Ok(ids)
+        let mut corpus_ids: Vec<String> = manifest.entries.into_iter().map(|e| e.id).collect();
+        corpus_ids.sort();
+        Ok(Capture {
+            scrub: self.scrub(),
+            corpus_ids,
+        })
     }
 
     /// Where the mutation tools are installed, kept across runs.
@@ -859,8 +870,10 @@ mod tests {
             Some(&ProbeOutcome::Failed {
                 message: "hello failed: /w/js/a.js".to_string(),
             }),
-            &scrub,
-            &ids,
+            &Capture {
+                scrub,
+                corpus_ids: ids,
+            },
         );
         assert_eq!(f.entries, ["e1", "e2", "e3", "e4", "e5"]);
         assert_eq!(f.entries_changed, 7);

@@ -216,8 +216,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
 
     let records = work.join("records");
     std::fs::create_dir_all(&records)?;
-    let scrub = ctx.scrub();
-    let corpus_ids = ctx.corpus_ids()?;
+    let capture = ctx.capture()?;
     let mut faults = Vec::new();
     for (i, m) in chosen.iter().enumerate() {
         let record = records.join(format!("{i}.json"));
@@ -324,8 +323,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
             mutation,
             st,
             outcome.as_ref(),
-            &scrub,
-            &corpus_ids,
+            &capture,
         ));
     }
     faults.sort_by(|a, b| a.key.cmp(&b.key));

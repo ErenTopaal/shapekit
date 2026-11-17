@@ -355,8 +355,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
     write_json(&setup_file, &setup)?;
     run(&mutesting_argv("1800"), &sdk_dir, &go_env)?;
 
-    let scrub = ctx.scrub();
-    let corpus_ids = ctx.corpus_ids()?;
+    let capture = ctx.capture()?;
     let mut faults = Vec::new();
     for l in &chosen {
         let record = setup.records.join(format!("{}.json", l.digest));
@@ -386,8 +385,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
             } else {
                 Some(&outcome)
             },
-            &scrub,
-            &corpus_ids,
+            &capture,
         ));
     }
     faults.sort_by(|a, b| a.key.cmp(&b.key));
