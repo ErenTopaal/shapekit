@@ -51,6 +51,10 @@ pub struct LimitProbe {
     pub build: fn(&mut World, &Typer, &Subject, u64) -> Result<Built>,
     /// Network settings the limit follows from, `entry.field` as XDR-JSON names them.
     pub settings: &'static [&'static str],
+    /// Try `hi` before `lo`, for a limit whose two attempts share state: a refused attempt
+    /// leaves the ledger as it was, so the accepted one meets the same state after it. Only
+    /// for `hi == lo + 1`, where the bisection has nothing between the two.
+    pub refused_first: bool,
 }
 
 /// One measured limit and the two attempts at its edge.
@@ -207,8 +211,24 @@ fn attempt(w: &mut World, typer: &Typer, p: &LimitProbe, n: u64) -> Result<Evide
 /// Bisects one limit.
 pub fn measure(w: &mut World, typer: &Typer, p: &LimitProbe) -> Result<Measured> {
     let mut tried = Vec::new();
-    let mut lo = attempt(w, typer, p, p.lo)?;
-    tried.push((p.lo, describe(&lo.attempt)));
+    ensure!(
+        !p.refused_first || p.hi == p.lo + 1,
+        "{}: only adjacent bounds can be tried refused first",
+        p.row
+    );
+    let (mut lo, mut hi) = if p.refused_first {
+        let hi = attempt(w, typer, p, p.hi)?;
+        let lo = attempt(w, typer, p, p.lo)?;
+        tried.push((p.hi, describe(&hi.attempt)));
+        tried.push((p.lo, describe(&lo.attempt)));
+        (lo, hi)
+    } else {
+        let lo = attempt(w, typer, p, p.lo)?;
+        tried.push((p.lo, describe(&lo.attempt)));
+        let hi = attempt(w, typer, p, p.hi)?;
+        tried.push((p.hi, describe(&hi.attempt)));
+        (lo, hi)
+    };
     ensure!(
         accepted(&lo.attempt),
         "{}: {} = {} was expected to apply, core answered {}",
@@ -217,8 +237,6 @@ pub fn measure(w: &mut World, typer: &Typer, p: &LimitProbe) -> Result<Measured>
         p.lo,
         describe(&lo.attempt)
     );
-    let mut hi = attempt(w, typer, p, p.hi)?;
-    tried.push((p.hi, describe(&hi.attempt)));
     ensure!(
         !accepted(&hi.attempt),
         "{}: {} = {} was expected to be refused, core applied it",
@@ -392,6 +410,106 @@ fn add_signers(w: &mut World, s: &Subject, keys: &[SigningKey]) -> Result<()> {
         w.classic_ok(&src, ops, &[])?;
     }
     Ok(())
+}
+
+// ---------------------------------------------------------------- order book
+
+/// Offers in the book `offers.crossed.per_op` crosses into: one past MAX_OFFERS_TO_CROSS.
+const BOOK_OFFERS: u64 = 1001;
+/// What each offer sells, in stroops of the book's asset, for as many stroops of XLM.
+const BOOK_OFFER_AMOUNT: i64 = 10_000;
+
+/// The accounts of the book: its issuer, who sells its own asset in 1000 offers (an account
+/// holds at most 1000 subentries), and a second seller for the rest.
+fn book_subject() -> Subject {
+    Subject::new("limit:offers.crossed.per_op#book".to_owned())
+}
+
+fn book_asset(issuer: &SigningKey) -> stellar_xdr::AlphaNum4 {
+    stellar_xdr::AlphaNum4 {
+        asset_code: stellar_xdr::AssetCode4(*b"BOOK"),
+        issuer: account_id(&issuer.verifying_key()),
+    }
+}
+
+/// A trustline to the book's asset with no limit.
+fn trust(asset: &stellar_xdr::AlphaNum4) -> OperationBody {
+    OperationBody::ChangeTrust(stellar_xdr::ChangeTrustOp {
+        line: stellar_xdr::ChangeTrustAsset::CreditAlphanum4(asset.clone()),
+        limit: i64::MAX,
+    })
+}
+
+fn sell(asset: &stellar_xdr::AlphaNum4) -> OperationBody {
+    OperationBody::ManageSellOffer(stellar_xdr::ManageSellOfferOp {
+        selling: Asset::CreditAlphanum4(asset.clone()),
+        buying: Asset::Native,
+        amount: BOOK_OFFER_AMOUNT,
+        price: stellar_xdr::Price { n: 1, d: 1 },
+        offer_id: 0,
+    })
+}
+
+/// The book of [`BOOK_OFFERS`] offers at one price, built once: every attempt of the limit
+/// meets the same book, and a refused attempt leaves it whole.
+fn ensure_book(w: &mut World) -> Result<stellar_xdr::AlphaNum4> {
+    let b = book_subject();
+    let issuer = b.source.clone();
+    let asset = book_asset(&issuer);
+    if w.next_seq(&issuer).is_ok() {
+        return Ok(asset);
+    }
+    w.fund(&b.funded())?;
+    let seller = b.peers[0].clone();
+    let by_issuer = BOOK_OFFERS.min(1000);
+    // each subentry raises the reserve by the base reserve, 10 XLM from genesis
+    w.top_up(&issuer, i64::try_from(by_issuer)? * 20 * XLM)?;
+    let mut i = 0;
+    while i < by_issuer {
+        let end = (i + 100).min(by_issuer);
+        let ops = (i..end).map(|_| sell(&asset)).collect();
+        w.classic_ok(&issuer, ops, &[])?;
+        i = end;
+    }
+    let rest = BOOK_OFFERS - by_issuer;
+    let held = i64::try_from(rest)? * BOOK_OFFER_AMOUNT;
+    w.classic_ok(&seller, vec![trust(&asset)], &[])?;
+    w.classic_ok(
+        &issuer,
+        vec![OperationBody::Payment(PaymentOp {
+            destination: muxed_account(&seller.verifying_key()),
+            asset: Asset::CreditAlphanum4(asset.clone()),
+            amount: held,
+        })],
+        &[],
+    )?;
+    let ops = (0..rest).map(|_| sell(&asset)).collect();
+    w.classic_ok(&seller, ops, &[])?;
+    Ok(asset)
+}
+
+/// The source buys `n` offers' worth of the book's asset with XLM in one path payment to
+/// itself, which crosses exactly `n` offers.
+fn crossing(w: &mut World, s: &Subject, n: u64) -> Result<Built> {
+    let asset = ensure_book(w)?;
+    let src = s.source.clone();
+    w.classic_ok(&src, vec![trust(&asset)], &[])?;
+    let amount = i64::try_from(n)? * BOOK_OFFER_AMOUNT;
+    classic(
+        w,
+        s,
+        vec![OperationBody::PathPaymentStrictReceive(
+            PathPaymentStrictReceiveOp {
+                send_asset: Asset::Native,
+                send_max: amount,
+                destination: muxed_account(&s.source.verifying_key()),
+                dest_asset: Asset::CreditAlphanum4(asset),
+                dest_amount: amount,
+                path: Default::default(),
+            },
+        )],
+        &[&s.source],
+    )
 }
 
 // ---------------------------------------------------------------- soroban building blocks
@@ -812,6 +930,7 @@ pub fn probes() -> Vec<LimitProbe> {
         hi,
         build,
         settings: &[],
+        refused_first: false,
     };
     vec![
         p(
@@ -996,6 +1115,17 @@ pub fn probes() -> Vec<LimitProbe> {
                 )
             },
         ),
+        LimitProbe {
+            refused_first: true,
+            ..p(
+                "offers.crossed.per_op",
+                "PathPaymentStrictReceiveResultSuccess.offers",
+                "offers one path payment crosses in a book of 1001",
+                1000,
+                1001,
+                |w, _, s, n| crossing(w, s, n),
+            )
+        },
         LimitProbe {
             settings: &["contract_ledger_cost_ext_v0.tx_max_footprint_entries"],
             ..p(
@@ -1314,12 +1444,7 @@ pub fn checks() -> Vec<(&'static str, Check)> {
         ("claim_predicate.depth", Equal),
         ("claimants.per_balance", Equal),
         ("path.len", Equal),
-        (
-            "offers.crossed.per_op",
-            Unmeasured(
-                "crossing 1001 offers needs an order book of 1001 offers from several accounts (each account holds at most 1000 subentries); the bound is MAX_OFFERS_TO_CROSS = 1000 in stellar-core v30.0.0 src/transactions/TransactionUtils.cpp 37, not measured by this probe",
-            ),
-        ),
+        ("offers.crossed.per_op", Equal),
         ("tx.operations", Equal),
         ("tx.signatures", Equal),
         ("tx.extra_signers", Equal),
