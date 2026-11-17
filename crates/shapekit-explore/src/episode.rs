@@ -700,6 +700,19 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
     })();
     let prefix_len = live.steps.len();
     live.drawing = true;
+    // pair labels go on from the prefix's, so a recipe extending a seed names each once
+    live.pairs = live
+        .steps
+        .iter()
+        .filter_map(|s| match s {
+            Step::Tx { label: Some(l), .. } => l
+                .strip_prefix('o')
+                .and_then(|r| r.strip_suffix(['a', 'b']))
+                .and_then(|n| n.parse::<usize>().ok()),
+            _ => None,
+        })
+        .max()
+        .unwrap_or(0);
     let mut directed: Option<crate::directed::Move> = None;
     let outcome = outcome.and_then(|()| {
         for _ in 0..spec.actions {
