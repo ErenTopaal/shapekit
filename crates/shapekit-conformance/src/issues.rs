@@ -25,13 +25,13 @@ pub fn release_tag(version: &str) -> String {
     format!("v{version}")
 }
 
-// a check's source starts with a corpus path (`corpus/... case 3`, `corpus/...: decode = ...`);
-// that path becomes a link, the rest stays text
+// a check's source starts with a corpus path (`corpus/... case 3`, `corpus/...: decode = ...`,
+// `corpus/..., envelope 0 ...`); that path becomes a link, the rest stays text
 fn link_source(source: &str, tag: &str) -> String {
     if !source.starts_with("corpus/") {
         return source.to_string();
     }
-    let end = source.find([' ', ':']).unwrap_or(source.len());
+    let end = source.find([' ', ':', ',']).unwrap_or(source.len());
     let (path, rest) = source.split_at(end);
     format!("[`{path}`]({SHAPEKIT_URL}/blob/{tag}/{path}){rest}")
 }
@@ -641,4 +641,35 @@ fn create(repo: &str, title: &str, body: &str) -> Result<String> {
         "gh issue create printed no issue url: {out}"
     );
     Ok(url)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::link_source;
+
+    #[test]
+    fn the_link_ends_where_the_corpus_path_ends() {
+        let url = "https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/a/b.xdr";
+        for (source, rest) in [
+            ("corpus/a/b.xdr case 3", " case 3"),
+            (
+                "corpus/a/b.xdr: decode = must-accept",
+                ": decode = must-accept",
+            ),
+            (
+                "corpus/a/b.xdr, envelope 0 of the set",
+                ", envelope 0 of the set",
+            ),
+            ("corpus/a/b.xdr", ""),
+        ] {
+            assert_eq!(
+                link_source(source, "v0.2.0"),
+                format!("[`corpus/a/b.xdr`]({url}){rest}")
+            );
+        }
+        assert_eq!(
+            link_source("stellar-core case 1", "v0.2.0"),
+            "stellar-core case 1"
+        );
+    }
 }
