@@ -11,7 +11,8 @@
 #                                        baseline, the stellar-rpc harness runs, findings with
 #                                        drafts allowed, every chain
 #                                        regenerated under both passphrases, the test
-#                                        contracts rebuilt and the site built
+#                                        contracts rebuilt, the site built and every
+#                                        link of the docs and the site fetched
 #
 # needs cargo, go, golangci-lint, node, npm, flutter, php, composer and dotnet on PATH, and
 # network access to fetch the python and java testees' pinned uv, cpython, jdk and maven into
@@ -227,6 +228,8 @@ step testee_build stellar-cli
 step "$shapekit" findings check
 step scripts/check-no-em-dash.sh
 step scripts/check-public-text.sh
+# relative links and anchors of the public text; full mode also fetches the external ones
+step node scripts/check-links.ts --offline
 
 if [ "$mode" = quick ]; then
   trap - ERR
@@ -308,6 +311,8 @@ unchanged contracts sh -c "contracts/build.sh && contracts/build-legacy.sh"
 # the site as site.yml builds it, from data derived from this checkout
 step "$shapekit" site data --out site/public/data --commit "$(git rev-parse HEAD)"
 step site_build
+# every link of the docs and the prerendered site, external ones fetched
+step node scripts/check-links.ts --site site/dist/client
 
 trap - ERR
 echo "acceptance (full): every check passed"

@@ -145,7 +145,15 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   machine's name, or a name from the pattern file. That file names people, so it is not
   tracked: the script reads `info/text-patterns` in the clone's git directory, or the file
   `SHAPEKIT_TEXT_PATTERNS` names, one perl regex per line, and stops with exit status 2 when
-  neither exists.
+  neither exists. Last, `scripts/check-links.ts --offline` checks that every relative link and
+  anchor in every tracked markdown file names a tracked file and a heading in it. A link to
+  this repository on GitHub, at `main` or at the tag of the version in `Cargo.toml`, is checked
+  against the working tree, and a link to `shapekit.org` against the built site when one is
+  given, since each resolves once this commit is tagged, published and deployed. Run without
+  `--offline`, the script also fetches every external link and checks its fragment: an id or
+  name in the page, or a line of a GitHub file. A link that answers 404 is broken; one that
+  answers 429, 5xx, 401 or 403, or not at all after six tries, is listed as unchecked and the
+  script exits 3.
 - Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
   runs: `shapekit pins verify` against the live sources, every version of every SDK over the
   corpus (the current versions of the newer SDKs included) and the upstream
@@ -156,8 +164,10 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   `crates/shapekit-harness/expect/stellar-rpc.toml`, `findings check --allow-draft`, every
   chain regenerated under both passphrases
   (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
-  with the committed wasm, and the site built as `site.yml` builds it. It also needs docker
-  and the `wasm32v1-none` Rust target. The last lines of its
+  with the committed wasm, the site built as `site.yml` builds it, and `scripts/check-links.ts
+  --site site/dist/client`, which also checks every link of the prerendered site and fetches
+  every external link. It also needs docker, network access for those fetches and the
+  `wasm32v1-none` Rust target. The last lines of its
   reproduction step and of the findings step give the totals, measured on 2026-11-17:
   `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
   `24 findings, 516 failures, 0 unmapped`.
