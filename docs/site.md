@@ -65,6 +65,7 @@ navigation.
 | Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the dashboard's coverage page) |
 | Harness | `/docs/harness/adapter-interface`, `/docs/harness/replay-server` | `docs/adapter-interface.md`, `docs/replay-server.md` |
 | SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci` | `docs/testee-protocol.md`, `docs/sdk-ci.md` |
+| Results | `/docs/results/report` | `docs/report.md` |
 | Linter | `/docs/linter/indexerlint` | `docs/linter.md` |
 | Guide | `/docs/guide/indexer-hardening` | `docs/guide/indexer-hardening.mdx` |
 | Operations | `/docs/operations/infrastructure`, `maintenance`, `protocol-upgrade-runbook`, `differential-fuzzing`, `site` | the `docs/` file of the same name |

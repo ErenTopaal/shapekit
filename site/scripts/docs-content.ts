@@ -69,6 +69,7 @@ const groups: Group[] = [
       { source: "docs/seeded-faults.md", slug: "seeded-faults" },
     ],
   },
+  { title: "Results", icon: "FileText", dir: "results", docs: [{ source: "docs/report.md", slug: "report" }] },
   { title: "Linter", icon: "ScanSearch", dir: "linter", docs: [{ source: "docs/linter.md", slug: "indexerlint" }] },
   { title: "Guide", icon: "ShieldCheck", dir: "guide", docs: [{ source: "docs/guide/indexer-hardening.mdx", slug: "indexer-hardening" }] },
   {

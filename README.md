@@ -115,6 +115,18 @@ Without `--chain` or `--family` every chain in the corpus is replayed. Results a
 most runs need; `shapekit harness run --help` lists the rest. To put another indexer behind the
 harness, write an adapter as described in [docs/adapter-interface.md](docs/adapter-interface.md).
 
+### Read the results
+
+```sh
+shapekit report harness-out                          # writes harness-out/report.html
+shapekit report target/conformance --known-failures conformance/known-failures
+```
+
+The page groups the failures of one run by finding, and gives each group its smallest corpus
+entry, its upstream issue, the guide sections for the fields involved and the command that
+reruns it. With a baseline it marks failures as new, changed, fixed or unchanged. See
+[docs/report.md](docs/report.md).
+
 ### Lint Go indexer code
 
 ```sh
