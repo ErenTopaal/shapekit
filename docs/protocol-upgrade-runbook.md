@@ -355,6 +355,15 @@ everything out of the release:
   captured at an older protocol; core then decides (it refuses an upgrade set whose cost
   parameter entries do not fit the protocol), and `sorobaninfo` must report the applied set.
 - `next/rehearsal-build.diff` holds the export's changes as rehearsed for protocol 31.
+- Core tests: `shapekit coretest run --pins next/pins.toml --out "$TMP/coretest"` runs the
+  `-vnext-buildtests` image's `[tx]` tests up to the protocol its `stellar-core version`
+  reports, and repeats a run the kernel kills for memory at `--retry-memory` (3 GB).
+  `shapekit coretest convert --run "$TMP/coretest" --baseline next --pins next/pins.toml
+  --core-src "$TMP/core-next" --out "$TMP/converted"` checks every meta against
+  `test-tx-meta-baseline-next`, with `"$TMP/core-next"` a checkout at the commit
+  `next/pins.toml` names.
+- Gates: `shapekit twin gates --core-src "$TMP/core-next" --pins next/pins.toml --out
+  next/generated/gates.json` lists the protocol gates of the next core source.
 - Smoke chain: run the export build's `shapekit gen smoke --pins next/pins.toml --out
   next/chains/smoke.p31/<network>` for both networks, and decode the streams with the current
   `stellar-xdr` release

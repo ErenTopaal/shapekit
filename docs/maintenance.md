@@ -27,7 +27,28 @@ next-protocol build. The outputs are in [`next/`](../next), kept apart from the 
   index in `next/goldens/`;
 - `next/registry/`: draft registry records for the protocol 31 CAPs, merged into a copy of
   `registry/` by `next/overlay-registry.sh`;
-- `next/rehearsal-build.diff`: the code changes the protocol 31 build needs.
+- `next/rehearsal-build.diff`: the code changes the protocol 31 build needs;
+- `next/generated/gates.json`: the protocol gates of the vnext core source (core commit
+  `362dbc51`), written by `shapekit twin gates --pins next/pins.toml`.
+
+What the rehearsal measured on the vnext image (core `362dbc51`, built for ledger protocol 31):
+
+- `shapekit schema diff v30.0 next`: 2 names added (`TestNextType` and its field), none
+  removed, no definition changed. Protocol 31 adds no XDR an indexer reads yet.
+- `shapekit coretest run --pins next/pins.toml --shards 3`: all 144 `[tx]` test cases exit 0
+  at every protocol from 0 to 31. They write 452,555 transaction metas (4.96 GB of dump) in
+  3,588 s with 3 containers at 1 CPU and 1536 MB each. At 1536 MB the kernel kills 12 of the
+  32 per-protocol runs of `pathpayment` and 9 of `revoke from pool`; each one passes when it
+  is repeated at 3 GB, and no run stays killed.
+- `shapekit coretest convert --baseline next`: all 452,555 metas convert and every short hash
+  matches core's `test-tx-meta-baseline-next`, with no baseline hash left unreached.
+- `shapekit twin gates`: 344 protocol gates, 187 of them in `src/transactions`, comparing
+  against `V_2` to `V_30`. No gate names protocol 31 yet. Against core v30.0.0 (345 gates),
+  9 gates exist only in v30.0.0 and 8 only in the vnext source. Most are the same comparison
+  in a renamed or moved function. Two changes are new: the vnext source adds a check
+  that the protocol is before `V_28` in
+  `InvokeHostFunctionApplyHelper::recordStorageChanges`. It also drops the `V_25`
+  comparisons in `LedgerManagerImpl::setLastClosedLedger` and `ApplicationImpl::start`.
 
 How to repeat the rehearsal for the next protocol is in
 [protocol-upgrade-runbook.md](protocol-upgrade-runbook.md#rehearsing-before-the-release-next-tier).
