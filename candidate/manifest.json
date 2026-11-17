@@ -240763,6 +240763,42 @@
         "path": "vectors/native-projection/soroban.scval-shapes.gap-js-property-key-coercion.json",
         "sha256": "482e87f4eb7e24e217c3a039ffaaafdcbe0b19574747d03521f537c9d35cc1c4"
       }
+    },
+    {
+      "caps": [
+        "CAP-0046-01"
+      ],
+      "expected": {
+        "decode": "must-accept",
+        "roundtrip": true,
+        "validity": "valid"
+      },
+      "family": "soroban.scval-shapes",
+      "fields_exercised": [
+        "op.invoke_host_function.invoke_contract.args"
+      ],
+      "flags": [
+        "address-conversion"
+      ],
+      "id": "soroban.scval-shapes.synth-address-from-scval",
+      "kind": "native-projection",
+      "linked_issues": [
+        "https://github.com/stellar/rs-soroban-sdk/issues/2090"
+      ],
+      "notes": "ScVals handed to an sdk conversion into its address type. values that are no address (void, bool, u32, a string or bytes that look like an account, a vec holding an address) must be refused, not crash; account, contract and muxed account addresses give their strkey; claimable balance and liquidity pool addresses may give their strkey or be refused. soroban-sdk 28.0.0 and 29.0.1 MuxedAddress::try_from_val panics with \"incorrect scval type\" on the first six (rs-soroban-sdk#2090, fixed on main by #2099 after 29.0.1)",
+      "passphrase_dependent": false,
+      "protocol": {
+        "introduced": 20,
+        "valid_min": 23
+      },
+      "source": {
+        "class": "synthetic"
+      },
+      "synthetic": true,
+      "vector": {
+        "path": "vectors/native-projection/soroban.scval-shapes.synth-address-from-scval.json",
+        "sha256": "e92ccca1da27d01ccf13c990a8baa645e3125a9ee0884983d9a703816d1b4a1b"
+      }
     }
   ],
   "generated_with": {

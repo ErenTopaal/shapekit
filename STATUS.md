@@ -14,6 +14,13 @@ A dated public log of what has landed in shapekit. Newest entry first.
   by a documented host rule (ledger-only `ScVal` arms, and nesting past the host's depth
   limits), recorded with source lines in `candidate/finding-candidates.toml`.
 - The `sdk-version` obligations grow from 15 to 17, both new ones met.
+- New testee op `address_from_scval`: an `ScVal` handed to the SDK's conversion into its
+  address type. The candidate vector `soroban.scval-shapes.synth-address-from-scval` shows
+  `MuxedAddress::try_from_val` in soroban-sdk 28.0.0 and 29.0.1 panicking on six values that are
+  not addresses, where its signature promises a `ConversionError`. This is
+  [rs-soroban-sdk#2090](https://github.com/stellar/rs-soroban-sdk/issues/2090), fixed on the main
+  branch by [#2099](https://github.com/stellar/rs-soroban-sdk/pull/2099) after 29.0.1 was
+  released.
 
 ## 2026-11-17: obligation ledger, what core validates, candidate lane
 

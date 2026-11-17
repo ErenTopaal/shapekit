@@ -1,0 +1,184 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "reject": "void is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": "void",
+        "xdr": "AAAAAQ=="
+      }
+    },
+    {
+      "expected": {
+        "reject": "bool is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "bool": true
+        },
+        "xdr": "AAAAAAAAAAE="
+      }
+    },
+    {
+      "expected": {
+        "reject": "u32 is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "u32": 7
+        },
+        "xdr": "AAAAAwAAAAc="
+      }
+    },
+    {
+      "expected": {
+        "reject": "a string holding an account strkey is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "string": "GD7777777777777777777777777777777777777777777777777773DB"
+        },
+        "xdr": "AAAADgAAADhHRDc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3NzNEQg=="
+      }
+    },
+    {
+      "expected": {
+        "reject": "bytes holding an account key is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "bytes": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "xdr": "AAAADQAAACD//////////////////////////////////////////w=="
+      }
+    },
+    {
+      "expected": {
+        "reject": "a vec holding an account address is not an address"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "vec": [
+            {
+              "address": "GD7777777777777777777777777777777777777777777777777773DB"
+            }
+          ]
+        },
+        "xdr": "AAAAEAAAAAEAAAABAAAAEgAAAAAAAAAA//////////////////////////////////////////8="
+      }
+    },
+    {
+      "expected": {
+        "text": "GD7777777777777777777777777777777777777777777777777773DB"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "address": "GD7777777777777777777777777777777777777777777777777773DB"
+        },
+        "xdr": "AAAAEgAAAAAAAAAA//////////////////////////////////////////8="
+      }
+    },
+    {
+      "expected": {
+        "text": "CAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6N4O"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "address": "CAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6N4O"
+        },
+        "xdr": "AAAAEgAAAAEAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHw=="
+      }
+    },
+    {
+      "expected": {
+        "text": "MD777777777777777777777777777777777777777777777777776AAAAAAAAAAAA7BTE"
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "address": "MD777777777777777777777777777777777777777777777777776AAAAAAAAAAAA7BTE"
+        },
+        "xdr": "AAAAEgAAAAIAAAAAAAAAB///////////////////////////////////////////"
+      }
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "text": "BAAAAAICAMCAKBQHBAEQUCYMBUHA6EARCIJRIFIWC4MBSGQ3DQOR4H2TOM"
+          },
+          {
+            "reject": "an sdk address type may not hold a claimable balance address"
+          }
+        ]
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "address": "BAAAAAICAMCAKBQHBAEQUCYMBUHA6EARCIJRIFIWC4MBSGQ3DQOR4H2TOM"
+        },
+        "xdr": "AAAAEgAAAAMAAAAAAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8="
+      }
+    },
+    {
+      "expected": {
+        "either": [
+          {
+            "text": "LAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6UWD"
+          },
+          {
+            "reject": "an sdk address type may not hold a liquidity pool address"
+          }
+        ]
+      },
+      "op": "address_from_scval",
+      "value": {
+        "json": {
+          "address": "LAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6UWD"
+        },
+        "xdr": "AAAAEgAAAAQAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHw=="
+      }
+    }
+  ],
+  "entry": {
+    "caps": [
+      "CAP-0046-01"
+    ],
+    "expected": {
+      "decode": "must-accept",
+      "roundtrip": true,
+      "validity": "valid"
+    },
+    "family": "soroban.scval-shapes",
+    "fields_exercised": [
+      "op.invoke_host_function.invoke_contract.args"
+    ],
+    "flags": [
+      "address-conversion"
+    ],
+    "id": "soroban.scval-shapes.synth-address-from-scval",
+    "kind": "native-projection",
+    "linked_issues": [
+      "https://github.com/stellar/rs-soroban-sdk/issues/2090"
+    ],
+    "notes": "ScVals handed to an sdk conversion into its address type. values that are no address (void, bool, u32, a string or bytes that look like an account, a vec holding an address) must be refused, not crash; account, contract and muxed account addresses give their strkey; claimable balance and liquidity pool addresses may give their strkey or be refused. soroban-sdk 28.0.0 and 29.0.1 MuxedAddress::try_from_val panics with \"incorrect scval type\" on the first six (rs-soroban-sdk#2090, fixed on main by #2099 after 29.0.1)",
+    "passphrase_dependent": false,
+    "protocol": {
+      "introduced": 20,
+      "valid_min": 23
+    },
+    "source": {
+      "class": "synthetic"
+    },
+    "synthetic": true
+  }
+}

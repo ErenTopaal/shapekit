@@ -565,10 +565,7 @@ fn address_from_scval(case: &Value) -> Mapped {
     } else {
         Expect::Text(text(e)?)
     };
-    Ok((
-        obj(json!({"op": "address_from_scval", "xdr": xdr})),
-        expect,
-    ))
+    Ok((obj(json!({"op": "address_from_scval", "xdr": xdr})), expect))
 }
 
 /// A strkey_decode case, and for a valid string also the encode check back to the text.

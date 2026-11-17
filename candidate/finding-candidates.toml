@@ -203,3 +203,18 @@ chains = ["cap01.bump-sequence.p30"]
 checks = "stellar-rpc --backfill with CHECKPOINT_FREQUENCY 1 on a database holding ledgers 2 to 69, restarted with ledger 70 added to the datastore"
 observed = "the restarted process logs `Current tip ledger in cloud datastore is 70, going to backfill 1 ledgers`, then `No extra filling needed, local DB head already at most recent checkpoint in datastore` and `Backfill process complete, ledgers [2 -> 69]`; getLatestLedger answers 69. the one ledger between the database head and the datastore's newest checkpoint is never filled by the backfill. with the default frequency the same happens when the database head is one ledger before the newest checkpoint (a restart at ledger 126 with the datastore past 127): live ingestion through captive core then starts at that ledger and fills it, so a node that reaches the network loses nothing, but the backfill does not end at the checkpoint the changelog promises (`Backfill always ends at checkpoint aligned ledger`, #610)"
 evidence = "cmd/stellar-rpc/internal/rpcv1/ingest/backfill.go at 6b6ec60c: setBounds counts the ledger (`fillCount = currentTipLedger - maxDbSeq`, logged as `going to backfill 1 ledgers`), and runFrontfill fills only `if bounds.frontfill.First < bounds.frontfill.Last`; with First = maxDbSeq + 1 = Last the range [Last, Last] is skipped. frontfillChunks itself handles a one-ledger range (`lChunkBound <= rBound`)"
+# address_from_scval (candidate/vectors/native-projection/soroban.scval-shapes.synth-address-from-scval.json):
+# `shapekit conformance run --sdk soroban --all-versions --manifest candidate/manifest.json
+# --entry soroban.scval-shapes.synth-address-from-scval`. both versions give the strkey of the
+# account, contract and muxed account addresses and refuse the claimable balance and liquidity
+# pool addresses through the host (ConversionError), which the vector allows.
+
+[[candidate]]
+finding = "new"
+sdk = "soroban"
+versions = ["28.0.0", "29.0.1"]
+entries = ["soroban.scval-shapes.synth-address-from-scval"]
+checks = "case 0/address_from_scval to case 5/address_from_scval: void, bool, u32, a string and bytes that look like an account, a vec holding an address"
+observed = "MuxedAddress::try_from_val(&env, &ScVal) panics with \"incorrect scval type\" for every ScVal that is not an address, although it returns Result<_, ConversionError>; Address::try_from_val returns Err(ConversionError) for the same values"
+evidence = "soroban-sdk 29.0.1 src/muxed_address.rs, impl TryFromVal<Env, ScVal> for MuxedAddress: the ScVal converts to a Val first, then `_ => panic!(\"incorrect scval type\")` for a non-address arm, and `panic!(\"unsupported ScAddress type\")` for claimable balance and liquidity pool addresses, which the Val conversion refuses before that arm is reached"
+open = "already reported upstream as rs-soroban-sdk#2090 and fixed on main by rs-soroban-sdk#2099 (merge 5ad47088, 2026-09-29), which v29.0.1 does not contain and v30.0.0-rc.1 does; the latest stable release still panics. nothing to file; the candidate holds the reproduction until a stable release carries the fix"
