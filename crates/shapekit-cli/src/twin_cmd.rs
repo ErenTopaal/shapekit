@@ -120,6 +120,16 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// How many of the `ordinary` unknown ranges (the explorer's targets) a set of runs
+    /// reaches: `twin coverage` output directories or `explore gates` run counts.
+    Targets {
+        #[arg(long, default_value = "corpus/coverage/unknown-regions.json")]
+        unknown: PathBuf,
+        /// Region count files (`counts.json` of `twin coverage`, `<run>.counts.json` of
+        /// `explore gates`); repeatable.
+        #[arg(long = "counts", num_args = 1.., required = true)]
+        counts: Vec<PathBuf>,
+    },
     /// Mark each side of each protocol gate met when a measured chain takes it on the twin
     /// (the gate's branch counts in `twin coverage` output), with the chain as witness, and
     /// give every side left open the reason the data shows. Rewrites the gate list.
@@ -261,6 +271,7 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::Targets { unknown, counts } => targets(&unknown, &counts),
         TwinCommand::GateWitnesses {
             chain_dirs,
             core_src,
@@ -940,5 +951,57 @@ fn gate_witnesses(
         println!("  open, {k}: {v}");
     }
     println!("written to {}", gates_path.display());
+    Ok(true)
+}
+
+fn targets(unknown: &Path, counts: &[PathBuf]) -> Result<bool> {
+    use shapekit_twin::classify::{Cause, UnknownRegions};
+    use shapekit_twin::coverage as cov;
+
+    let u: UnknownRegions = serde_json::from_slice(
+        &std::fs::read(unknown).with_context(|| format!("reading {}", unknown.display()))?,
+    )
+    .with_context(|| format!("parsing {}", unknown.display()))?;
+    let runs: Vec<(String, cov::Counts)> = counts
+        .iter()
+        .map(|p| Ok((p.display().to_string(), cov::read_counts(p)?)))
+        .collect::<Result<_>>()?;
+    let targets: Vec<_> = u
+        .ranges
+        .iter()
+        .filter(|r| r.cause == Cause::Ordinary)
+        .collect();
+    let mut reached = 0;
+    let mut by_run: std::collections::BTreeMap<&str, usize> = Default::default();
+    for t in &targets {
+        let mut hit = false;
+        for (name, c) in &runs {
+            // a line range is unreached when one of its spans did not run, so
+            // it is reached only when every span with these lines ran
+            let any = c.get(&t.file).is_some_and(|spans| {
+                let mut of_range = spans
+                    .iter()
+                    .filter(|(s, _)| s.line_start == t.line_start && s.line_end == t.line_end)
+                    .peekable();
+                of_range.peek().is_some() && of_range.all(|(_, n)| *n > 0)
+            });
+            if any {
+                hit = true;
+                *by_run.entry(name.as_str()).or_default() += 1;
+            }
+        }
+        if hit {
+            reached += 1;
+            println!("reached {}:{}-{}", t.file, t.line_start, t.line_end);
+        }
+    }
+    for (name, n) in &by_run {
+        println!("  {n} targets reached by {name}");
+    }
+    println!(
+        "{reached} of {} ordinary target ranges reached by {} runs",
+        targets.len(),
+        runs.len()
+    );
     Ok(true)
 }
