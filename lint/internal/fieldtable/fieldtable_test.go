@@ -14,7 +14,12 @@ func TestTableMatchesRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	want, err := generate.Generate(src)
+	measured, err := os.ReadFile("../../../registry/generated/field-verdicts.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want, err := generate.Generate(src, measured)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +30,7 @@ func TestTableMatchesRegistry(t *testing.T) {
 	}
 
 	if !bytes.Equal(got, want) {
-		t.Fatal("table_gen.go is out of date with registry/fields.toml; run go generate ./internal/fieldtable")
+		t.Fatal("table_gen.go is out of date with registry/fields.toml or registry/generated/field-verdicts.json; run go generate ./internal/fieldtable")
 	}
 }
 
