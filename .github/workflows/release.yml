@@ -1,6 +1,7 @@
 name: release
 
-# publishes a release from a signed tag: the shapekit and indexerlint binaries, the corpus
+# publishes a release from a signed tag: the shapekit, indexerlint and wallet-backend adapter
+# binaries for linux and macos on x86_64 and arm64, the corpus
 # archive and the golden snapshot, one SHA256SUMS over all of them, a build provenance
 # attestation per asset, and release notes from the newest STATUS.md section. the archives are
 # built twice on separate runners and must have equal checksums before anything is published.
@@ -104,9 +105,19 @@ jobs:
           if-no-files-found: error
 
   binaries:
+    # shapekit, indexerlint and the wallet-backend adapter for each platform, each built on a
+    # runner of that platform, so no cross toolchain is involved
     needs: signed-tag
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, platform: linux-x86_64 }
+          - { runner: ubuntu-24.04-arm, platform: linux-arm64 }
+          - { runner: macos-15, platform: macos-arm64 }
+          - { runner: macos-15-intel, platform: macos-x86_64 }
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
@@ -116,26 +127,31 @@ jobs:
           cache: false
       - name: shapekit
         env:
-          # no checkout or home paths inside the binary
-          RUSTFLAGS: --remap-path-prefix=${{ github.workspace }}=/shapekit --remap-path-prefix=/home/runner=/home
+          PLATFORM: ${{ matrix.platform }}
         run: |
+          set -euo pipefail
+          # no checkout or home paths inside the binary
+          export RUSTFLAGS="--remap-path-prefix=$GITHUB_WORKSPACE=/shapekit --remap-path-prefix=$HOME=/home"
           cargo build --release --locked -p shapekit-cli
           mkdir -p "$RUNNER_TEMP/bin"
-          cp target/release/shapekit "$RUNNER_TEMP/bin/shapekit-linux-x86_64"
+          cp target/release/shapekit "$RUNNER_TEMP/bin/shapekit-$PLATFORM"
+          "$RUNNER_TEMP/bin/shapekit-$PLATFORM" --version
       - name: indexerlint
         working-directory: lint
         env:
           CGO_ENABLED: "0"
-        run: go build -trimpath -o "$RUNNER_TEMP/bin/indexerlint-linux-x86_64" ./cmd/indexerlint
+          PLATFORM: ${{ matrix.platform }}
+        run: go build -trimpath -o "$RUNNER_TEMP/bin/indexerlint-$PLATFORM" ./cmd/indexerlint
       - name: wallet-backend adapter
         # the reference adapter, so the harness quick start needs no go toolchain
         working-directory: adapters
         env:
           CGO_ENABLED: "0"
-        run: go build -trimpath -o "$RUNNER_TEMP/bin/wb-adapter-linux-x86_64" ./walletbackend/cmd/wb-adapter
+          PLATFORM: ${{ matrix.platform }}
+        run: go build -trimpath -o "$RUNNER_TEMP/bin/wb-adapter-$PLATFORM" ./walletbackend/cmd/wb-adapter
       - uses: actions/upload-artifact@v7
         with:
-          name: binaries
+          name: binaries-${{ matrix.platform }}
           path: ${{ runner.temp }}/bin/
           retention-days: 7
           if-no-files-found: error
@@ -169,8 +185,14 @@ jobs:
           out="$RUNNER_TEMP/release"
           mkdir -p "$out"
           cp "$RUNNER_TEMP"/in/archives-a/assets/*.tar.zst "$out/"
-          cp "$RUNNER_TEMP"/in/binaries/* "$out/"
-          chmod +x "$out"/*-linux-x86_64
+          cp "$RUNNER_TEMP"/in/binaries-*/* "$out/"
+          # four platforms, three programs each
+          n=$(find "$out" -maxdepth 1 \( -name 'shapekit-*' -o -name 'indexerlint-*' -o -name 'wb-adapter-*' \) | wc -l)
+          if [ "$n" -ne 12 ]; then
+            echo "::error::expected 12 binaries, found $n"
+            exit 1
+          fi
+          chmod +x "$out"/shapekit-* "$out"/indexerlint-* "$out"/wb-adapter-*
           (cd "$out" && sha256sum -- * >SHA256SUMS && cat SHA256SUMS)
       - uses: actions/attest@v4
         with:

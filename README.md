@@ -38,21 +38,33 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 
 ### From a release
 
-Each release has, for linux x86-64:
+Each release has, for each `<platform>` of `linux-x86_64`, `linux-arm64`, `macos-x86_64` and
+`macos-arm64`:
 
-- `shapekit-linux-x86_64`, the CLI;
-- `indexerlint-linux-x86_64`, the linter;
-- `wb-adapter-linux-x86_64`, the wallet-backend reference adapter for the harness;
+- `shapekit-<platform>`, the CLI;
+- `indexerlint-<platform>`, the linter;
+- `wb-adapter-<platform>`, the wallet-backend reference adapter for the harness;
+
+and, for every platform:
+
 - `corpus-<version>.tar.zst`, the corpus;
 - `goldens-core-<tag>.tar.zst`, stellar-core's `test-lcm-current` goldens the corpus was
   checked against;
 - `SHA256SUMS` over all of them.
 
 ```sh
-sha256sum -c SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS      # macOS: shasum -a 256 -c --ignore-missing SHA256SUMS
 gh attestation verify shapekit-linux-x86_64 --repo ErenTopaal/shapekit
 chmod +x shapekit-linux-x86_64 indexerlint-linux-x86_64 wb-adapter-linux-x86_64
 ```
+
+Each platform's binaries are built on a GitHub runner of that platform. The project's own CI
+runs only the Linux x86-64 build; release builds for the other platforms run `--version` and
+nothing more before they are published. `check indexer` and `harness` read the process's
+peak memory from Linux's `/proc` and stop with an error on macOS, so replay an indexer on
+Linux. A binary downloaded with a browser on macOS carries the quarantine attribute, and
+macOS refuses to start an unsigned binary that has it; `xattr -d com.apple.quarantine
+<file>` removes it. Downloads with `gh release download` or `curl` do not get it.
 
 ### From source
 
