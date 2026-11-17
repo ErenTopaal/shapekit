@@ -35,8 +35,15 @@ pub fn markdown(c: &Collection) -> String {
     );
     let _ = writeln!(
         s,
-        "{} findings covering {} failures; {} failures unmapped.\n",
-        c.summary.findings, c.summary.failures, c.summary.unmapped
+        "{} findings covering {} failures; {} failures unmapped{}.\n",
+        c.summary.findings,
+        c.summary.failures,
+        c.summary.unmapped,
+        if c.summary.held == 0 {
+            String::new()
+        } else {
+            format!("; {} held by candidate findings", c.summary.held)
+        }
     );
     let severities = [
         "halt",
@@ -198,6 +205,28 @@ pub fn markdown(c: &Collection) -> String {
                 o.at,
                 o.what
             );
+        }
+    }
+    if !c.held.is_empty() {
+        let _ = writeln!(
+            s,
+            "\n## Failures held by candidate findings\n\nNo finding takes these failures; a finding triaged in the candidate lane does, and they count here once it is promoted.\n"
+        );
+        for (id, occs) in &c.held {
+            for o in occs {
+                let _ = writeln!(
+                    s,
+                    "- {id}: {} {}{} ({}): {}",
+                    o.source,
+                    o.on,
+                    o.entry
+                        .as_deref()
+                        .map(|e| format!(" `{e}`"))
+                        .unwrap_or_default(),
+                    o.at,
+                    o.what
+                );
+            }
         }
     }
     if !c.input_problems.is_empty() {

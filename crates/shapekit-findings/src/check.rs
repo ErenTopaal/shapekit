@@ -144,6 +144,7 @@ mod tests {
     use super::*;
     use crate::collect::{Collection, Occurrence, Summary};
     use crate::triage::Severity;
+    use std::collections::BTreeMap;
 
     fn finding(id: &str, status: Status, link: Option<&str>) -> FindingRecord {
         FindingRecord {
@@ -187,6 +188,7 @@ mod tests {
             summary: Summary::default(),
             findings,
             unmapped: vec![],
+            held: BTreeMap::new(),
             input_problems: vec![],
         }
     }

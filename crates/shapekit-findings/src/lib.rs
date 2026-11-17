@@ -46,6 +46,13 @@
 //! entry pattern may be `*` alone: as the first match such a matcher would take every later
 //! finding's failures.
 //!
+//! A triage can name a second, candidate triage (`candidates`, the candidate lane's
+//! `candidate/findings/triage.toml`). A failure none of its own findings takes is offered to
+//! the candidate findings the same way; the one that takes it holds it. Held failures are
+//! counted in `summary.held` and listed by candidate finding under `held`: they are not
+//! unmapped, not findings of the record, and the check does not fail on them. The candidate
+//! triage cannot name candidates of its own or reuse an id of the triage.
+//!
 //! # Records
 //!
 //! Per finding: CAPs are the union over every matched entry (plus the triage's own);

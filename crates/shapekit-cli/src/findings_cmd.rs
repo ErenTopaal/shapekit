@@ -47,15 +47,34 @@ pub struct Common {
     out: PathBuf,
 }
 
-fn fresh(c: &Common) -> Result<Collection> {
-    let t = triage::load(&c.triage)?;
-    collect(&c.root, &t)
+/// The failures candidate findings hold, when the triage names a candidate triage.
+fn print_held(t: &triage::Triage, col: &Collection) {
+    let Some(candidates) = &t.candidates else {
+        return;
+    };
+    println!(
+        "{} failures held by candidate findings of {candidates}{}",
+        col.summary.held,
+        if col.held.is_empty() {
+            String::new()
+        } else {
+            format!(
+                " ({})",
+                col.held
+                    .iter()
+                    .map(|(id, o)| format!("{id} {}", o.len()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        }
+    );
 }
 
 pub fn run(cmd: FindingsCommand) -> Result<bool> {
     match cmd {
         FindingsCommand::Collect(c) => {
-            let col = fresh(&c)?;
+            let t = triage::load(&c.triage)?;
+            let col = collect(&c.root, &t)?;
             std::fs::create_dir_all(&c.out)
                 .with_context(|| format!("creating {}", c.out.display()))?;
             let json = c.out.join("findings.json");
@@ -73,6 +92,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                 "{} findings, {} failures, {} unmapped",
                 col.summary.findings, col.summary.failures, col.summary.unmapped
             );
+            print_held(&t, &col);
             println!("wrote {} and {}", json.display(), md.display());
             Ok(true)
         }
@@ -141,6 +161,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                     format!(": {}", out.pending.join(", "))
                 }
             );
+            print_held(&t, &col);
             if allow_draft && !out.problems.is_empty() && out.ok {
                 println!(
                     "{} draft finding(s) reported but allowed by --allow-draft",

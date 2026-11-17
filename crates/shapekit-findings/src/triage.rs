@@ -254,6 +254,12 @@ pub struct TargetDef {
 #[serde(deny_unknown_fields)]
 pub struct Triage {
     pub schema: u32,
+    /// A second triage, relative to the repository root, whose findings are triaged but not
+    /// yet promoted (the candidate lane's `candidate/findings/triage.toml`). A failure no
+    /// finding of this triage takes, but one of those does, is held by that candidate
+    /// finding: counted and listed on its own, neither unmapped nor dropped.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub candidates: Option<String>,
     pub inputs: Inputs,
     #[serde(default)]
     pub targets: BTreeMap<String, TargetDef>,

@@ -311,6 +311,7 @@ mod tests {
     fn triage(from: &str) -> Triage {
         Triage {
             schema: 1,
+            candidates: None,
             inputs: Inputs {
                 manifest: "corpus/manifest.json".into(),
                 harness: vec![],

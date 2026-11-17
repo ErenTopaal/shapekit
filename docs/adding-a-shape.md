@@ -358,6 +358,11 @@ committed run outputs live under `candidate/findings/inputs/`, and the issue dra
 `candidate/findings/issues/`. Check them with
 `shapekit findings check --triage candidate/findings/triage.toml --out candidate/findings --allow-draft`.
 A finding moves to `findings/triage.toml` once its upstream decision is recorded.
+`findings/triage.toml` names the candidate triage (`candidates = "candidate/findings/triage.toml"`),
+so when a main input reports a failure that no main finding takes but a candidate finding
+does, `shapekit findings collect` and `check` count it as held by that candidate finding:
+listed on its own, neither unmapped nor dropped, and printed as
+`N failures held by candidate findings of candidate/findings/triage.toml (ID n, ...)`.
 
 ### Source classes and fields beyond recipes
 

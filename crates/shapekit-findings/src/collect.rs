@@ -4,7 +4,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use shapekit_harness::compare::Problem;
@@ -103,6 +103,9 @@ pub struct Summary {
     pub findings: usize,
     pub failures: usize,
     pub unmapped: usize,
+    /// Failures no finding takes but a candidate finding does (see [`Collection::held`]).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub held: usize,
     /// component, then severity, then the number of findings.
     pub by_component: BTreeMap<String, BTreeMap<String, usize>>,
     pub by_severity: BTreeMap<String, usize>,
@@ -118,9 +121,57 @@ pub struct Collection {
     pub findings: Vec<FindingRecord>,
     /// Failures no finding matched.
     pub unmapped: Vec<Occurrence>,
+    /// Failures no finding matched that a finding of the candidate triage
+    /// ([`Triage::candidates`]) takes, by candidate finding id. They are neither unmapped
+    /// nor findings of this record: the candidate finding is triaged and drafted in its own
+    /// lane and counts here once it is promoted.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub held: BTreeMap<String, Vec<Occurrence>>,
     /// Problems the inputs themselves report and that hide failures: chains that did not run,
     /// known-failures lists out of date.
     pub input_problems: Vec<String>,
+}
+
+fn is_zero(n: &usize) -> bool {
+    *n == 0
+}
+
+/// The findings of the candidate triage `triage` names, which hold failures none of its own
+/// findings take.
+fn candidate_findings(root: &Path, triage: &Triage) -> Result<Vec<FindingDef>> {
+    let Some(rel) = &triage.candidates else {
+        return Ok(Vec::new());
+    };
+    let c = crate::triage::load(&root.join(rel))?;
+    if c.candidates.is_some() {
+        bail!("{rel} names candidates of its own; only one triage can hold failures for another");
+    }
+    if let Some(f) = c
+        .findings
+        .iter()
+        .find(|f| triage.findings.iter().any(|m| m.id == f.id))
+    {
+        bail!(
+            "candidate finding {} in {rel} has the id of a finding of the triage",
+            f.id
+        );
+    }
+    Ok(c.findings)
+}
+
+/// Puts an occurrence no finding took with the candidate finding that takes it, if one does,
+/// or with the unmapped failures.
+fn hold_or_unmap(
+    candidates: &[FindingDef],
+    takes: impl Fn(&FindingDef) -> bool,
+    occ: Occurrence,
+    held: &mut BTreeMap<String, Vec<Occurrence>>,
+    unmapped: &mut Vec<Occurrence>,
+) {
+    match candidates.iter().find(|d| takes(d)) {
+        Some(d) => held.entry(d.id.clone()).or_default().push(occ),
+        None => unmapped.push(occ),
+    }
 }
 
 /// The harness verdicts that are failures. `out-of-scope` is a statement about the claims,
@@ -279,6 +330,8 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
             lint_runs: Vec::new(),
         })
         .collect();
+    let candidates = candidate_findings(root, triage)?;
+    let mut held: BTreeMap<String, Vec<Occurrence>> = BTreeMap::new();
     let mut unmapped = Vec::new();
     let mut failures = 0usize;
     // every version each sdk or target ran, failing or not
@@ -376,7 +429,17 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                         }
                         m.occurrences.push(occ);
                     }
-                    None => unmapped.push(occ),
+                    None => hold_or_unmap(
+                        &candidates,
+                        |d| {
+                            d.harness
+                                .iter()
+                                .any(|hm| harness_matches(hm, &target, row, p))
+                        },
+                        occ,
+                        &mut held,
+                        &mut unmapped,
+                    ),
                 }
             }
         }
@@ -477,7 +540,17 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                         run.1.push(version.to_owned());
                         mm.occurrences.push(occ);
                     }
-                    None => unmapped.push(occ),
+                    None => hold_or_unmap(
+                        &candidates,
+                        |d| {
+                            d.conformance
+                                .iter()
+                                .any(|cm| conformance_matches(cm, sdk, version, &e.id))
+                        },
+                        occ,
+                        &mut held,
+                        &mut unmapped,
+                    ),
                 }
             }
         }
@@ -521,7 +594,13 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                     ));
                     m.occurrences.push(occ);
                 }
-                None => unmapped.push(occ),
+                None => hold_or_unmap(
+                    &candidates,
+                    |d| d.lint.iter().any(|lm| lint_matches(lm, &li.target, f)),
+                    occ,
+                    &mut held,
+                    &mut unmapped,
+                ),
             }
         }
     }
@@ -544,6 +623,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         .iter()
         .flat_map(|r| &r.occurrences)
         .chain(&unmapped)
+        .chain(held.values().flatten())
         .filter(|o| o.source == "conformance")
         .cloned()
         .collect();
@@ -555,6 +635,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         findings: records.len(),
         failures,
         unmapped: unmapped.len(),
+        held: held.values().map(Vec::len).sum(),
         ..Summary::default()
     };
     for r in &records {
@@ -571,12 +652,16 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
         *summary.by_status.entry(r.status.name().into()).or_default() += 1;
     }
     unmapped.sort();
+    for v in held.values_mut() {
+        v.sort();
+    }
     Ok(Collection {
         schema: FINDINGS_SCHEMA,
         inputs: input_refs,
         summary,
         findings: records,
         unmapped,
+        held,
         input_problems,
     })
 }
