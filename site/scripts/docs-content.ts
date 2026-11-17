@@ -66,6 +66,7 @@ const groups: Group[] = [
     docs: [
       { source: "docs/testee-protocol.md", slug: "testee-protocol" },
       { source: "docs/sdk-ci.md", slug: "sdk-ci" },
+      { source: "docs/seeded-faults.md", slug: "seeded-faults" },
     ],
   },
   { title: "Linter", icon: "ScanSearch", dir: "linter", docs: [{ source: "docs/linter.md", slug: "indexerlint" }] },
