@@ -1,0 +1,68 @@
+{
+  "check_summary": {
+    "php@1.18.0": {
+      "pass": 16
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "php@1.18.0": {
+          "counts": {
+            "pass": 16
+          },
+          "result": "pass"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "php@1.18.0": {
+      "strkey_decode": {
+        "pass": 16
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "php@1.18.0": {
+      "pass": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "php": "8.5.12"
+      },
+      "decode_limits": "ignored",
+      "key": "php@1.18.0",
+      "ops": [
+        "decode_encode",
+        "decode_json",
+        "encode_json",
+        "strkey_decode",
+        "strkey_encode",
+        "asset_order",
+        "pool_id",
+        "map_sort",
+        "id_parse",
+        "to_native",
+        "address_from_scval",
+        "tx_hash",
+        "balance_id",
+        "contract_id"
+      ],
+      "package": "soneso/stellar-php-sdk",
+      "sdk": "php",
+      "version": "1.18.0"
+    }
+  ]
+}
