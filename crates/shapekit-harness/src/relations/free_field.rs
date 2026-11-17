@@ -20,7 +20,8 @@ use serde_json::Value;
 
 use crate::run::EntryRow;
 
-/// One attempt: a witness entry and core's outcome for it.
+/// One attempt: a witness entry and core's outcome for it, with the carrier transaction the
+/// field sat in.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Attempt {
     pub label: String,
@@ -89,8 +90,11 @@ impl Groups {
                 g.attempt.push(Attempt {
                     label: text(a, "variant"),
                     entries,
+                    // attempts in different carrier transactions are different transactions,
+                    // so the carrier is part of what core treated alike
                     outcome: format!(
-                        "{} {} {}",
+                        "carrier {}: {} {} {}",
+                        text(a, "carrier"),
                         text(a, "submission"),
                         text(a, "applied"),
                         text(a, "result_code")
@@ -248,8 +252,8 @@ mod tests {
             r#"{"fields":[
               {"path":"A.x","verdict":"validated","attempts":[]},
               {"path":"B.y","verdict":"not-validated","attempts":[
-                {"variant":"base","submission":"pending","applied":"succeeded","result_code":"tx_success","witnesses":["candidate:b-0","candidate:b-0-ledger"]},
-                {"variant":"zero","submission":"pending","applied":"succeeded","result_code":"tx_success","witnesses":["candidate:b-1"]}]}]}"#,
+                {"variant":"base","carrier":"pay","submission":"pending","applied":"succeeded","result_code":"tx_success","witnesses":["candidate:b-0","candidate:b-0-ledger"]},
+                {"variant":"zero","carrier":"pay","submission":"pending","applied":"succeeded","result_code":"tx_success","witnesses":["candidate:b-1"]}]}]}"#,
         )
         .unwrap();
         let g = Groups::from_validation(&p).unwrap();
@@ -257,7 +261,7 @@ mod tests {
         assert_eq!(g.group[0].attempt[0].entries, ["b-0", "b-0-ledger"]);
         assert_eq!(
             g.group[0].attempt[1].outcome,
-            "pending succeeded tx_success"
+            "carrier pay: pending succeeded tx_success"
         );
     }
 

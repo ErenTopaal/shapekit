@@ -546,14 +546,16 @@ whatever it holds. An indexer must too. `shapekit harness free-field --run <run 
 attempts that differ in one such field, each with core's outcome:
 
 - `--validation registry/generated/validation.json`: every field it records as
-  `not-validated`, with its attempts and their witness entries;
+  `not-validated`, with its attempts and their witness entries. The witnesses sit in
+  `candidate/`; run the harness over the probe chains under `candidate/chains/` first, on a
+  copy of the candidate lane with oracle files (`shapekit oracle run --corpus <copy>`);
 - `--groups <toml>`: hand-written groups over entries already in a corpus,
   `[[group]] field = "..."` with `attempt = [{ label, entries, outcome }]`.
   `crates/shapekit-harness/free-field/corpus.toml` groups the memo arms of
   classic.memo-arms.p30.
 
-Attempts with the same outcome in core are compared per network by what the run made of
-each: verdict, reason and the kinds of problems found (an attempt carried by an envelope
+Attempts in the same carrier transaction with the same outcome in core are compared per
+network by what the run made of each: verdict, reason and the kinds of problems found (an attempt carried by an envelope
 and a ledger entry takes the more severe of the two). Attempts run on their own funded
 accounts, so their stored rows differ in keys and ledgers as well as in the field; the
 comparison is per attempt against core's meta, not between the attempts' rows. A difference
