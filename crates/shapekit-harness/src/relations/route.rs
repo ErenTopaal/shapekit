@@ -145,3 +145,190 @@ pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) ->
     }
     r
 }
+
+/// One entry of a recipe pair (`candidate/pairs/<pair>/pair.json`): two chains from the same
+/// start that reach it in two ways.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PairEntry {
+    pub entry: EntryKind,
+    pub key: Vec<String>,
+    /// Core holds the entry identically at the end of both chains (its XDR compared).
+    pub core_equal: bool,
+    /// The tables of the entry's kind the mapping names, each with whether the target's rows
+    /// for the key are the same in both runs.
+    pub tables: Vec<PairTable>,
+    /// The changes the target exported about the entry in each run (kind and fields, without
+    /// scope and operation index), and whether they are the same. Empty when the runs kept
+    /// no export.
+    pub changes_a: Vec<String>,
+    pub changes_b: Vec<String>,
+    pub changes_equal: bool,
+}
+
+/// Vocabulary kinds that change an entry of the kind, and the field naming the entry's
+/// asset when the kind has one.
+fn entry_kinds(kind: EntryKind) -> &'static [&'static str] {
+    match kind {
+        EntryKind::Account => &[
+            "account-created",
+            "account-removed",
+            "account-flags",
+            "thresholds",
+            "home-domain",
+            "inflation-destination",
+            "sequence",
+            "signer-added",
+            "signer-removed",
+            "signer-weight",
+        ],
+        EntryKind::Trustline => &[
+            "trustline-created",
+            "trustline-removed",
+            "trustline-limit",
+            "trustline-flags",
+        ],
+        EntryKind::SacBalance | EntryKind::LiquidityPool => &[],
+    }
+}
+
+/// The exported changes about the entry: of a kind that changes it, naming its account and,
+/// for a trustline, its asset.
+fn changes_about(c: &super::state::RunChain, kind: EntryKind, key: &[String]) -> Vec<String> {
+    let kinds = entry_kinds(kind);
+    let mut out: Vec<String> = c
+        .export
+        .iter()
+        .flat_map(|t| &t.changes)
+        .filter(|ch| kinds.contains(&ch.kind.as_str()))
+        .filter(|ch| {
+            ch.fields.get("account").and_then(|v| v.as_str()) == key.first().map(String::as_str)
+        })
+        .filter(|ch| {
+            kind != EntryKind::Trustline
+                || ch.fields.get("asset").and_then(|v| v.as_str()) == key.get(1).map(String::as_str)
+        })
+        .map(|ch| {
+            let mut f = ch.fields.clone();
+            f.remove("scope");
+            f.remove("op_index");
+            format!("{} {}", ch.kind, serde_json::Value::Object(f))
+        })
+        .collect();
+    out.sort();
+    out
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PairTable {
+    pub table: String,
+    pub rows_a: Vec<Vec<Option<String>>>,
+    pub rows_b: Vec<Vec<Option<String>>>,
+    pub equal: bool,
+}
+
+/// The key of a `LedgerKey` as `pair.json` writes it, in the form [`CoreState`] keys
+/// entries by. Accounts and trustlines, the kinds recipe pairs compare.
+pub fn pair_key(v: &serde_json::Value) -> anyhow::Result<(EntryKind, Vec<String>)> {
+    let key: stellar_xdr::LedgerKey = serde_json::from_value(v.clone())
+        .map_err(|e| anyhow::anyhow!("{v} is not a ledger key: {e}"))?;
+    Ok(match key {
+        stellar_xdr::LedgerKey::Account(a) => (
+            EntryKind::Account,
+            vec![shapekit_oracle::addr::account(&a.account_id)],
+        ),
+        stellar_xdr::LedgerKey::Trustline(t) => (
+            EntryKind::Trustline,
+            vec![
+                shapekit_oracle::addr::account(&t.account_id),
+                shapekit_oracle::vocab::trustline_asset_id(&t.asset),
+            ],
+        ),
+        other => anyhow::bail!(
+            "a pair entry of kind {:?} is not compared",
+            other.discriminant()
+        ),
+    })
+}
+
+fn rows_for(
+    c: &super::state::RunChain,
+    table: &super::state::TableMapping,
+    key: &[String],
+) -> Vec<Vec<Option<String>>> {
+    let Some(t) = c.dump.tables.get(&table.name) else {
+        return Vec::new();
+    };
+    let mut rows: Vec<Vec<Option<String>>> = t
+        .rows
+        .iter()
+        .filter(|r| row_key(&c.dump, t, r, &table.keys, &c.known).as_deref() == Some(key))
+        .cloned()
+        .collect();
+    rows.sort();
+    rows
+}
+
+/// Compares, for every entry of a pair, the rows the target keeps for it after chain `a`
+/// and after chain `b`.
+pub fn pair_check(
+    a: &super::state::RunChain,
+    b: &super::state::RunChain,
+    entries: &[(EntryKind, Vec<String>)],
+    mapping: &Mapping,
+) -> Vec<PairEntry> {
+    entries
+        .iter()
+        .map(|(kind, key)| {
+            let ck = (*kind, key.clone());
+            let core_equal = a.core.unkeyed.contains_key(&ck)
+                && a.core.unkeyed.get(&ck) == b.core.unkeyed.get(&ck);
+            let tables = mapping
+                .table
+                .iter()
+                .filter(|t| t.entry == *kind)
+                .map(|t| {
+                    let (ra, rb) = (rows_for(a, t, key), rows_for(b, t, key));
+                    PairTable {
+                        table: t.name.clone(),
+                        equal: ra == rb,
+                        rows_a: ra,
+                        rows_b: rb,
+                    }
+                })
+                .collect();
+            let (changes_a, changes_b) =
+                (changes_about(a, *kind, key), changes_about(b, *kind, key));
+            PairEntry {
+                entry: *kind,
+                key: key.clone(),
+                core_equal,
+                tables,
+                changes_equal: changes_a == changes_b,
+                changes_a,
+                changes_b,
+            }
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pair_keys_read_accounts_and_trustlines() {
+        let a = serde_json::json!({"account": {"account_id": "GB62AEPS2IU6LFQZ4QMJV3PTRRSYCTP35DSCRMLQYMDWQGMPVNM3LPSU"}});
+        assert_eq!(pair_key(&a).unwrap().0, EntryKind::Account);
+        let t = serde_json::json!({"trustline": {
+            "account_id": "GB62AEPS2IU6LFQZ4QMJV3PTRRSYCTP35DSCRMLQYMDWQGMPVNM3LPSU",
+            "asset": {"credit_alphanum4": {"asset_code": "USD", "issuer": "GC54HSZ6KTA7TFBWWS36OD4J65R4QTUZODULVRFG5HNFVCVWLO3VZJ5Z"}}}});
+        let (kind, key) = pair_key(&t).unwrap();
+        assert_eq!(kind, EntryKind::Trustline);
+        assert_eq!(
+            key[1],
+            "USD:GC54HSZ6KTA7TFBWWS36OD4J65R4QTUZODULVRFG5HNFVCVWLO3VZJ5Z"
+        );
+        let o = serde_json::json!({"ttl": {"key_hash": "00".repeat(32)}});
+        assert!(pair_key(&o).is_err());
+    }
+}

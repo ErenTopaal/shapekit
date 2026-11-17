@@ -98,6 +98,11 @@ pub struct RunArgs {
     /// Only this chain id; repeatable.
     #[arg(long)]
     chain: Vec<String>,
+    /// A chain outside the corpus, as `<name>=<dir>` where `<dir>` is laid out like
+    /// `corpus/chains/<chain>/<network>`; repeatable. Run for its dump alone, with no entry to
+    /// judge, from its first checkpoint; the corpus selection is not used.
+    #[arg(long, value_name = "NAME=DIR")]
+    chain_dir: Vec<String>,
     #[arg(long, default_value = "testnet", value_parser = ["testnet", "mainnet", "both"])]
     network: String,
     #[arg(long, default_value = "harness-out")]
@@ -122,6 +127,29 @@ pub struct RunArgs {
 
 #[derive(Subcommand)]
 pub enum StateCommand {
+    /// Route equivalence over a recipe pair (candidate/pairs/<pair>): the target must keep the
+    /// same rows for every entry core holds identically at the end of both chains.
+    Pair {
+        /// The run of chain `a`, run with --chain-dir.
+        #[arg(long)]
+        a: PathBuf,
+        /// The run of chain `b`.
+        #[arg(long)]
+        b: PathBuf,
+        /// The pair's `pair.json`.
+        #[arg(long)]
+        pair: PathBuf,
+        #[arg(long)]
+        mapping: PathBuf,
+        /// Which network's chain of each run, when a run holds both.
+        #[arg(long, default_value = "testnet")]
+        network: String,
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        /// Write the result as JSON here.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
     /// Infer which table and column holds which entry field from the ordinary chains of the
     /// given runs (no entry mishandled or dropped, carry check clean), keep what holds in
     /// all of them, and write the mapping.
@@ -557,14 +585,45 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 "both" => vec!["testnet".into(), "mainnet".into()],
                 n => vec![n.into()],
             };
-            let sel = select(
-                &a.common.corpus,
-                &Filter {
-                    families: &a.family,
-                    chains: &a.chain,
-                    networks: &networks,
-                },
-            )?;
+            let sel = if a.chain_dir.is_empty() {
+                select(
+                    &a.common.corpus,
+                    &Filter {
+                        families: &a.family,
+                        chains: &a.chain,
+                        networks: &networks,
+                    },
+                )?
+            } else {
+                let mut sel = shapekit_harness::corpus::Selection {
+                    manifest_sha256: "none: chains named with --chain-dir".into(),
+                    ..Default::default()
+                };
+                for c in &a.chain_dir {
+                    let (name, dir) = c
+                        .split_once('=')
+                        .with_context(|| format!("--chain-dir {c:?} is not NAME=DIR"))?;
+                    let dir = PathBuf::from(dir);
+                    let chain = shapekit_pack::chain::ChainFile::read(&dir)
+                        .with_context(|| format!("reading {}", dir.display()))?;
+                    let network = match chain.passphrase.as_str() {
+                        "Test SDF Network ; September 2015" => "testnet",
+                        "Public Global Stellar Network ; September 2015" => "mainnet",
+                        other => bail!(
+                            "{}: passphrase {other:?} is neither testnet's nor mainnet's",
+                            dir.display()
+                        ),
+                    };
+                    sel.jobs.push(shapekit_harness::corpus::ChainJob {
+                        chain: name.to_owned(),
+                        network: network.to_owned(),
+                        dir,
+                        entries: Vec::new(),
+                        external: true,
+                    });
+                }
+                sel
+            };
             if sel.jobs.is_empty() {
                 bail!("the selection has no chain with an evaluable entry");
             }
@@ -642,6 +701,83 @@ fn load_runs(
 fn state(c: StateCommand) -> Result<bool> {
     use shapekit_harness::relations::state;
     match c {
+        StateCommand::Pair {
+            a,
+            b,
+            pair,
+            mapping,
+            network,
+            corpus,
+            out,
+        } => {
+            use shapekit_harness::relations::route;
+            let m = state::Mapping::load(&mapping)?;
+            let one = |run: &PathBuf| -> Result<state::RunChain> {
+                let mut cs: Vec<_> = state::load_run(run, &corpus)?
+                    .into_iter()
+                    .filter(|c| c.network == network)
+                    .collect();
+                if cs.len() != 1 {
+                    bail!(
+                        "{} holds {} {network} chains with a dump, the pair needs one",
+                        run.display(),
+                        cs.len()
+                    );
+                }
+                Ok(cs.remove(0))
+            };
+            let (ca, cb) = (one(&a)?, one(&b)?);
+            let text = std::fs::read_to_string(&pair)
+                .with_context(|| format!("reading {}", pair.display()))?;
+            let v: serde_json::Value = serde_json::from_str(&text)
+                .with_context(|| format!("parsing {}", pair.display()))?;
+            let keys = v
+                .get("entries")
+                .and_then(|e| e.as_array())
+                .with_context(|| format!("{} has no entries", pair.display()))?
+                .iter()
+                .map(|e| route::pair_key(e.get("key").unwrap_or(&serde_json::Value::Null)))
+                .collect::<Result<Vec<_>>>()?;
+            let results = route::pair_check(&ca, &cb, &keys, &m);
+            let mut ok = true;
+            for r in &results {
+                println!(
+                    "{} {}: core {}",
+                    r.entry.name(),
+                    r.key.join(" "),
+                    if r.core_equal { "equal" } else { "DIFFERENT" }
+                );
+                ok &= r.core_equal && r.changes_equal;
+                println!(
+                    "  exported changes about it: {} ({} after a, {} after b)",
+                    if r.changes_equal { "same" } else { "DIFFERENT" },
+                    r.changes_a.len(),
+                    r.changes_b.len()
+                );
+                if !r.changes_equal {
+                    println!("    a: {:?}\n    b: {:?}", r.changes_a, r.changes_b);
+                }
+                for t in &r.tables {
+                    ok &= t.equal;
+                    println!(
+                        "  {}: {} ({} row(s) after a, {} after b)",
+                        t.table,
+                        if t.equal { "same" } else { "DIFFERENT" },
+                        t.rows_a.len(),
+                        t.rows_b.len()
+                    );
+                    if !t.equal {
+                        println!("    a: {:?}\n    b: {:?}", t.rows_a, t.rows_b);
+                    }
+                }
+            }
+            if let Some(o) = &out {
+                let mut text = serde_json::to_string_pretty(&results)?;
+                text.push('\n');
+                std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
+            }
+            Ok(ok)
+        }
         StateCommand::Infer {
             run,
             network,

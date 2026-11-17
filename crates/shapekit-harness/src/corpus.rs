@@ -24,6 +24,8 @@ pub struct ChainJob {
     pub dir: PathBuf,
     /// Sorted by ledger, then id.
     pub entries: Vec<EntryRef>,
+    /// A chain outside the corpus, named on the command line and run for its dump alone.
+    pub external: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -119,6 +121,7 @@ pub fn select(corpus: &Path, filter: &Filter<'_>) -> Result<Selection> {
             network,
             dir,
             entries,
+            external: false,
         });
     }
     Ok(sel)

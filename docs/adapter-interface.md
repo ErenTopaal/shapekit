@@ -539,6 +539,23 @@ whose they are, reached by different operations. For every group and every mappe
 its kind, the rows the target keeps for the group's keys must be equal once the key columns
 are left out; a row stored for some of them and not the others is a difference too.
 
+Recipe pairs (`candidate/pairs/<pair>/`) carry the same check across two chains: two recipes
+from one start state that reach an entry in two ways, with the entries core writes
+identically under both listed in `pair.json`. Run the target over each chain on its own with
+`harness run --chain-dir <name>=<dir>`, which replays a chain outside the corpus from its
+first checkpoint for its dump alone, then
+
+```sh
+shapekit harness state pair --a <run of a> --b <run of b> \
+  --pair candidate/pairs/<pair>/pair.json --mapping adapters/walletbackend/state-mapping.toml
+```
+
+For each listed entry it confirms core's entry is the same at the end of both chains, compares
+the target's rows for it in every mapped table of its kind, and compares the changes the
+target exported about it (an entry's own kinds, such as `trustline-created` for a trustline,
+naming its account and asset; `--chain-dir` runs keep their export as
+`logs/<chain>.<network>.export.json`). It exits non-zero on a difference.
+
 ## Free field inertness
 
 A field core does not validate can hold any value, and core treats the transaction the same

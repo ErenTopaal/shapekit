@@ -882,6 +882,9 @@ pub struct RunChain {
     pub verdicts: BTreeMap<String, u64>,
     /// The facts the oracle's problems on the chain are about, for example `token-event`.
     pub problem_facts: BTreeSet<String>,
+    /// What the target exported for every transaction, kept by runs of chains outside the
+    /// corpus (`harness run --chain-dir`); empty otherwise.
+    pub export: Vec<crate::protocol::TxRecord>,
     /// No entry mishandled or dropped, the chain ran without an error and the carry check
     /// found nothing: the chains the mapping is inferred on.
     pub ordinary: bool,
@@ -899,7 +902,10 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
         let (Some(d), Some(through)) = (&c.dump, c.last_ingested) else {
             continue;
         };
-        let dir = corpus.join("chains").join(&c.chain).join(&c.network);
+        let dir = c
+            .dir
+            .clone()
+            .unwrap_or_else(|| corpus.join("chains").join(&c.chain).join(&c.network));
         let chain = shapekit_pack::chain::ChainFile::read(&dir)
             .with_context(|| format!("reading {}", dir.display()))?;
         let mut verdicts = BTreeMap::new();
@@ -936,6 +942,17 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
             known: Known::from_chain(&dir, &chain.passphrase, through)?,
             verdicts,
             problem_facts,
+            export: {
+                let p = logs.join(format!("{}.{}.export.json", c.chain, c.network));
+                if p.exists() {
+                    let b =
+                        std::fs::read(&p).with_context(|| format!("reading {}", p.display()))?;
+                    serde_json::from_slice(&b)
+                        .with_context(|| format!("parsing {}", p.display()))?
+                } else {
+                    Vec::new()
+                }
+            },
             ordinary,
         });
     }

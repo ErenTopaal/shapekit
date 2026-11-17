@@ -94,6 +94,9 @@ pub struct RunOptions {
 pub struct ChainResult {
     pub chain: String,
     pub network: String,
+    /// The chain directory, when it is not `<corpus>/chains/<chain>/<network>`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dir: Option<PathBuf>,
     pub protocol: u32,
     pub first_ledger: u32,
     pub last_ledger: u32,
@@ -222,6 +225,7 @@ fn run_chain(
         result: ChainResult {
             chain: job.chain.clone(),
             network: job.network.clone(),
+            dir: job.external.then(|| job.dir.clone()),
             protocol: 0,
             first_ledger: 0,
             last_ledger: 0,
@@ -456,11 +460,16 @@ fn drive_adapter(
         bail!("--restart needs an adapter that offers the restart capability");
     }
 
-    let first_entry = job
-        .entries
-        .first()
-        .map(|e| e.ledger)
-        .ok_or_else(|| anyhow!("the chain has no entry to evaluate"))?;
+    // a chain run for its dump alone (no entries) starts as early as the target can: after
+    // its first checkpoint
+    let first_entry = match job.entries.first() {
+        Some(e) => e.ledger,
+        None => chain
+            .checkpoints
+            .iter()
+            .min()
+            .map_or(chain.ledger_range.last, |c| c + 1),
+    };
     let off = off_frequency_checkpoints(&chain.checkpoints);
     if !off.is_empty() {
         bail!(
@@ -573,6 +582,17 @@ fn drive_adapter(
         let mut records = Records::new();
         if let Some(through) = ctx.result.last_ingested.filter(|l| *l > bootstrap) {
             records = export(ctx, adapter, wanted, bootstrap + 1, through, t.export)?;
+            if job.external {
+                let path = opts
+                    .logs
+                    .join(format!("{}.{}.export.json", job.chain, job.network));
+                let mut sorted: Vec<&TxRecord> = records.values().collect();
+                sorted.sort_by(|a, b| (a.ledger, &a.hash).cmp(&(b.ledger, &b.hash)));
+                let mut text = serde_json::to_string(&sorted).context("rendering the export")?;
+                text.push('\n');
+                std::fs::write(&path, text)
+                    .with_context(|| format!("writing {}", path.display()))?;
+            }
             if opts.dump && describe.offers(Capability::Dump) {
                 take_dump(ctx, adapter, opts, chain, through);
             }
@@ -798,6 +818,7 @@ fn export(
     to: u32,
     timeout: Duration,
 ) -> Result<Records> {
+    let ctx_external = ctx.job.external;
     let mut records = Records::new();
     let mut notes = Vec::new();
     let mut bad_hashes = Vec::new();
@@ -816,7 +837,8 @@ fn export(
                     tx.hash, tx.ledger
                 ));
             }
-            if wanted.contains(&tx.hash) {
+            // a chain run for its dump alone keeps every record: there is no oracle to pick by
+            if wanted.contains(&tx.hash) || ctx_external {
                 if records.contains_key(&tx.hash) {
                     notes.push(format!("transaction {} was exported twice", tx.hash));
                 }
