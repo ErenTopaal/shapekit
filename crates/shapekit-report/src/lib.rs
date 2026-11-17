@@ -45,8 +45,15 @@ pub const DEFAULT_SITE: &str = "https://shapekit.org";
 pub const GUIDE_PATH: &str = "/docs/guide/indexer-hardening";
 pub const GUIDE_FIELDS_ANCHOR: &str = "validated-and-unvalidated-fields";
 pub const GUIDE_CHECKLIST_ANCHOR: &str = "self-audit-checklist";
-/// The first line of every summary, so a workflow finds and updates its own comment.
-pub const SUMMARY_MARKER: &str = "<!-- shapekit-report -->";
+/// The first line of every summary is this prefix, the run kind and ` -->`
+/// (`<!-- shapekit-report harness -->`), so a workflow finds and updates its own comment and a
+/// harness and a conformance comment on one pull request stay apart.
+pub const SUMMARY_MARKER: &str = "<!-- shapekit-report";
+
+/// The first line of a summary of a run of this kind.
+pub fn summary_marker(kind: RunKind) -> String {
+    format!("{SUMMARY_MARKER} {} -->", kind.name())
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]

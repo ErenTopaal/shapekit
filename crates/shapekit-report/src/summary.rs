@@ -1,5 +1,5 @@
 //! The short markdown summary a workflow posts on a pull request. It starts with
-//! [`crate::SUMMARY_MARKER`] so the workflow can update its own comment instead of adding one
+//! [`crate::summary_marker`] so the workflow can update its own comment instead of adding one
 //! per push, and stays far below GitHub's comment size limit by listing only the first rows.
 
 use std::fmt::Write;
@@ -16,7 +16,7 @@ fn cell(s: &str) -> String {
 
 pub fn render(r: &Report, html_name: Option<&str>) -> String {
     let mut s = String::new();
-    let _ = writeln!(s, "{}", crate::SUMMARY_MARKER);
+    let _ = writeln!(s, "{}", crate::summary_marker(r.kind));
     let _ = writeln!(s, "### shapekit {}: {}\n", r.kind.name(), cell(&r.subject));
     match &r.comparison {
         Some(c) => {

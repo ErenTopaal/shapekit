@@ -41,20 +41,27 @@ on:
         required: false
         type: string
         default: ErenTopaal/shapekit
+      comment:
+        description: "on a pull request, post the run's summary as a comment and update it on later pushes; the calling job must grant pull-requests: write"
+        required: false
+        type: boolean
+        default: false
     outputs:
       matrix-artifact:
         description: "name of the uploaded artifact with divergence-matrix.json and MATRIX.md"
         value: ${{ jobs.conformance.outputs.artifact }}
 
-permissions:
-  contents: read
-
+# no workflow-wide permissions: the conformance job reads only, and the comment job runs with
+# what the calling job grants, so a caller that does not ask for comments grants nothing more
 jobs:
   conformance:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: read
     outputs:
       artifact: ${{ steps.names.outputs.artifact }}
+      summary: ${{ steps.report.outputs.summary }}
     steps:
       - id: names
         env:
@@ -137,6 +144,26 @@ jobs:
           "$SHAPEKIT" conformance run --sdk "$SDK" \
             --manifest "$MANIFEST" --versions-file "$VERSIONS" --known-failures "$KNOWN" \
             --out "$RUNNER_TEMP/conformance"
+      - name: report, grouped by finding
+        # the same report `shapekit report` writes locally: report.html for the artifact, and a
+        # short summary of new, changed, fixed and unchanged failures against the caller's
+        # known-failures list
+        id: report
+        if: ${{ !cancelled() }}
+        working-directory: shapekit
+        env:
+          KNOWN: ${{ github.workspace }}/sdk/${{ inputs.known-failures }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/conformance"
+          if [ ! -f "$out/divergence-matrix.json" ]; then
+            echo "the run wrote no divergence matrix, so there is nothing to report" >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          "$SHAPEKIT" report "$out" --manifest "$MANIFEST" --known-failures "$KNOWN" \
+            --out "$out/report.html" --summary "$out/summary.md"
+          cat "$out/summary.md" >>"$GITHUB_STEP_SUMMARY"
+          echo "summary=summary.md" >>"$GITHUB_OUTPUT"
       - name: matrix to the job summary
         if: ${{ !cancelled() }}
         run: |
@@ -149,3 +176,41 @@ jobs:
           name: ${{ steps.names.outputs.artifact }}
           path: ${{ runner.temp }}/conformance/
           retention-days: 30
+
+  comment:
+    # a pull request from a fork gets a read-only token, so it keeps the job summary and the
+    # artifact and gets no comment
+    needs: conformance
+    if: >-
+      ${{ !cancelled() && inputs.comment && github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && needs.conformance.outputs.summary != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.conformance.outputs.artifact }}
+          path: report
+      - name: post or update the summary comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SUMMARY: report/${{ needs.conformance.outputs.summary }}
+        run: |
+          set -euo pipefail
+          # the summary's first line names it: the shapekit-report marker and the run kind
+          marker=$(head -n 1 "$SUMMARY")
+          # --paginate prints one json array per page; jq reads them one after another
+          id=$(gh api --paginate "repos/$REPO/issues/$PR/comments" |
+            jq -r --arg m "$marker" '.[] | select(.user.login == "github-actions[bot]")
+              | select(.body | startswith($m + "\n")) | .id' |
+            tail -n 1)
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$id" -F "body=@$SUMMARY" >/dev/null
+            echo "updated comment $id"
+          else
+            gh api --method POST "repos/$REPO/issues/$PR/comments" -F "body=@$SUMMARY" >/dev/null
+            echo "posted a comment"
+          fi

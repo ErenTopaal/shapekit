@@ -102,8 +102,9 @@ format of the lists.
 
 `--summary` writes a markdown text of a few kilobytes: the new, changed, fixed and unchanged
 counts, the first rows of each list, and one line per group with its finding and smallest
-entry. Its first line is the HTML comment `<!-- shapekit-report -->`, so a workflow can find
-its earlier comment and update it instead of adding one per push.
+entry. Its first line is the HTML comment `<!-- shapekit-report harness -->` or
+`<!-- shapekit-report conformance -->`, so a workflow can find its earlier comment and update
+it instead of adding one per push.
 
 ## The page
 

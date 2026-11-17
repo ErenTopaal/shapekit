@@ -61,10 +61,45 @@ shapekit conformance run --sdk <sdk> --manifest <corpus>/manifest.json \
   --out "$RUNNER_TEMP/conformance"
 ```
 
-The run executes the build steps of the versions file before it starts the testee. `MATRIX.md`
-goes to the job summary. `divergence-matrix.json` and `MATRIX.md` are uploaded as an artifact
-named `shapekit-conformance-<sdk>`, kept for 30 days; the workflow output `matrix-artifact`
-holds that name.
+The run executes the build steps of the versions file before it starts the testee. After it,
+whether it passed or failed, the job runs [`shapekit report`](report.md) on the matrix with your
+known-failures directory as the baseline:
+
+```sh
+shapekit report "$RUNNER_TEMP/conformance" --manifest <corpus>/manifest.json \
+  --known-failures "$GITHUB_WORKSPACE/sdk/<known-failures>" \
+  --out "$RUNNER_TEMP/conformance/report.html" --summary "$RUNNER_TEMP/conformance/summary.md"
+```
+
+The summary (new, changed, fixed and unchanged failures, and the failures grouped by finding)
+and then `MATRIX.md` go to the job summary. `divergence-matrix.json`, `MATRIX.md`,
+`report.html` and `summary.md` are uploaded as an artifact named `shapekit-conformance-<sdk>`,
+kept for 30 days; the workflow output `matrix-artifact` holds that name. Open `report.html`
+from the downloaded artifact for each group's finding, guide sections and reproduce command.
+
+## A comment on the pull request
+
+With `comment: true` the workflow also posts the summary as a comment on the pull request,
+and on later pushes updates that comment instead of adding another. The comment job runs with
+the permissions of the calling job, so grant it `pull-requests: write`:
+
+```yaml title=".github/workflows/shapekit.yml"
+jobs:
+  corpus:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ErenTopaal/shapekit/.github/workflows/sdk-conformance.yml@<release tag>
+    with:
+      sdk: js
+      comment: true
+      # the other inputs as above
+```
+
+The comment is found again by its first line, `<!-- shapekit-report conformance -->`, among
+the comments of `github-actions[bot]`. A pull request from a fork runs with a read-only token,
+so the comment job skips it; the job summary and the artifact are there as usual. Without
+`comment` (the default) the workflow needs `contents: read` only.
 
 ## Versions files per SDK
 

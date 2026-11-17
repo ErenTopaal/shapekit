@@ -157,7 +157,7 @@ fn harness_baseline_new_fixed_unchanged() {
     assert_eq!(c.fixed[0].now.as_deref(), Some("pass"));
 
     let md = summary::render(&build(&o).unwrap(), Some("report.html"));
-    assert!(md.starts_with(shapekit_report::SUMMARY_MARKER));
+    assert!(md.starts_with("<!-- shapekit-report harness -->\n"));
     assert!(md.contains("**1 new**"));
     assert!(md.contains("**1 fixed**"));
 }
