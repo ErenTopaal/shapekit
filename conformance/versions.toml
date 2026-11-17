@@ -277,3 +277,30 @@ build = [
 ]
 command = ["target/testees/soroban/29.0.1/release/shapekit-testee-soroban"]
 max_protocol = 29
+
+[sdk.python]
+package = "stellar-sdk"
+current = "17.0.1"
+issues_repo = "StellarCN/py-stellar-base"
+timeout_ms = 15000
+memory = { resource = "as", mib = 4096 }
+
+# 16.1.1: newest 16.x release; xdr v28.0 (9c9c1459), protocols up to 29
+[[sdk.python.versions]]
+version = "16.1.1"
+build = [
+  { argv = ["uv", "venv", "--quiet", "--clear", "--no-python-downloads", "--python", "3.15.2", "target/testees/python/16.1.1/venv"] },
+  { argv = ["uv", "pip", "sync", "--quiet", "--require-hashes", "--python", "target/testees/python/16.1.1/venv/bin/python", "testees/python/versions/16.1.1/requirements.txt"] },
+]
+command = ["target/testees/python/16.1.1/venv/bin/python", "-B", "-E", "-s", "testees/python/main.py"]
+max_protocol = 29
+
+# 17.0.1: newest 17.x release; xdr v30.0 (4f524bba), protocols up to 30
+[[sdk.python.versions]]
+version = "17.0.1"
+build = [
+  { argv = ["uv", "venv", "--quiet", "--clear", "--no-python-downloads", "--python", "3.15.2", "target/testees/python/17.0.1/venv"] },
+  { argv = ["uv", "pip", "sync", "--quiet", "--require-hashes", "--python", "target/testees/python/17.0.1/venv/bin/python", "testees/python/versions/17.0.1/requirements.txt"] },
+]
+command = ["target/testees/python/17.0.1/venv/bin/python", "-B", "-E", "-s", "testees/python/main.py"]
+max_protocol = 30

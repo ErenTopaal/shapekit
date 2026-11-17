@@ -600,6 +600,90 @@ pub fn makefile_xdr_commit(makefile: &str) -> Result<String> {
     bail!("no XDR_COMMIT or XDR_BASE_URL_CURR line")
 }
 
+// ---- pypi
+
+#[derive(Debug, Deserialize)]
+struct PypiProject {
+    info: PypiInfo,
+    #[serde(default)]
+    releases: BTreeMap<String, Vec<PypiFile>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PypiInfo {
+    version: String,
+    #[serde(default)]
+    project_urls: Option<BTreeMap<String, String>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct PypiFile {
+    upload_time_iso_8601: String,
+    #[serde(default)]
+    yanked: bool,
+}
+
+fn pypi_project(http: &Http, url: &str) -> Result<PypiProject> {
+    serde_json::from_str(&http.get_text(url)?).with_context(|| format!("parsing {url}"))
+}
+
+/// A release is published when its first file was uploaded and withdrawn when every file is
+/// yanked; a version with no files was never installable and is left out. `info.version` is
+/// the newest release pip installs without `--pre`.
+pub fn pypi_published(http: &Http, name: &str) -> Result<Published> {
+    let project = pypi_project(http, &format!("https://pypi.org/pypi/{name}/json"))?;
+    let mut releases = Vec::new();
+    for (v, files) in &project.releases {
+        let Some(first) = files.iter().map(|f| f.upload_time_iso_8601.as_str()).min() else {
+            continue;
+        };
+        releases.push(Release {
+            version: v.clone(),
+            published: first.to_string(),
+            withdrawn: files.iter().all(|f| f.yanked).then(|| "yanked".to_string()),
+        });
+    }
+    Ok(Published {
+        releases,
+        latest: project.info.version,
+    })
+}
+
+/// The GitHub repository a PyPI release records under `project_urls` (`Repository`, else
+/// `Source`, else `Homepage`).
+pub fn pypi_repository(http: &Http, name: &str, version: &str) -> Result<String> {
+    let project = pypi_project(http, &format!("https://pypi.org/pypi/{name}/{version}/json"))?;
+    let urls = project.info.project_urls.unwrap_or_default();
+    let url = ["Repository", "Source", "Homepage"]
+        .iter()
+        .find_map(|k| urls.get(*k))
+        .with_context(|| format!("PyPI records no repository for {name} {version}"))?;
+    github_repo(url)
+}
+
+// ---- release tags
+
+/// The definitions commit a release's Makefile names, read at the repository tag spelled like
+/// the version, for registries that record no commit (PyPI, Maven Central). The tag is only
+/// taken when `version_file` at that tag declares the version, so a tag that does not hold the
+/// release stops the command instead of naming another release's XDR.
+pub fn tagged_xdr_commit(
+    http: &Http,
+    repo: &str,
+    version: &str,
+    version_file: &str,
+) -> Result<String> {
+    let at = |path: &str| format!("https://raw.githubusercontent.com/{repo}/refs/tags/{version}/{path}");
+    let declared = http.get_text(&at(version_file))?;
+    ensure!(
+        declared.contains(&format!("\"{version}\"")),
+        "{} does not declare version {version}",
+        at(version_file)
+    );
+    let url = at("Makefile");
+    makefile_xdr_commit(&http.get_text(&url)?).with_context(|| format!("reading {url}"))
+}
+
 /// `owner/repo` of a GitHub url in any of the forms registries record.
 pub fn github_repo(url: &str) -> Result<String> {
     let u = url.trim();
@@ -701,6 +785,16 @@ mod tests {
             "9c9c145953e80990d6ff1ae3a6a973a0ce6d0694"
         );
         assert!(makefile_xdr_commit("all:\n\ttsc\n").is_err());
+    }
+
+    #[test]
+    fn makefile_commit_with_spaces() {
+        // py-stellar-base writes `XDR_COMMIT = <sha>`
+        let py = "XDRGEN_COMMIT = 0123\nXDR_COMMIT = 4f524bbac80c781c06e4fb5fc93a2d0d331d6705\n";
+        assert_eq!(
+            makefile_xdr_commit(py).unwrap(),
+            "4f524bbac80c781c06e4fb5fc93a2d0d331d6705"
+        );
     }
 
     #[test]

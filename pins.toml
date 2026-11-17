@@ -13,6 +13,7 @@
 #   [[crate]]      crates.io name, exact version and the .crate sha256
 #   [[npm]]        npm package, version and dist integrity
 #   [[gomod]]      go module, version and the vcs commit the go proxy reports
+#   [[pypi]]       pypi distribution, version, one file of the release and its sha256
 
 schema = 1
 
@@ -49,6 +50,26 @@ commit = "f2a7b74175c34585f3b30a1abf42a2d41cbcc390"
 asset = "stellar-cli-30.0.1-x86_64-unknown-linux-gnu.tar.gz"
 sha256 = "48c70074020e09af0a3ebbd2bf62d53c9aec47935e49a112d3cd90fb4e37658f"
 purpose = "stellar contract build for the test contracts (contracts/build.sh, contracts/build-legacy.sh); the asset carries a github build attestation from the release workflow"
+
+# toolchains of the python testee, official release binaries
+
+[[release]]
+name = "python"
+repository = "astral-sh/python-build-standalone"
+tag = "20261110"
+commit = "9244801782b78e4c4afc5c82a4524aa2101d3298"
+asset = "cpython-3.15.2+20261110-x86_64-unknown-linux-gnu-install_only.tar.gz"
+sha256 = "182e7adf7e4f0e32dafac5143f00d466afd20eef45918ea170f78884e503ac18"
+purpose = "cpython 3.15.2 of the python testee venvs (conformance sync-versions PYTHON), the build uv installs"
+
+[[release]]
+name = "uv"
+repository = "astral-sh/uv"
+tag = "0.13.9"
+commit = "6b2d39dcc390293d51c9c0d2bbcd650f4bcbfdce"
+asset = "uv-x86_64-unknown-linux-gnu.tar.gz"
+sha256 = "a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5"
+purpose = "makes the python testee venvs and locks testees/python/versions/*/requirements.txt"
 
 # container images
 
@@ -779,3 +800,34 @@ module = "github.com/avito-tech/go-mutesting"
 version = "v0.0.0-20251226130216-48d0401f00fb"
 origin_hash = "48d0401f00fbfb9502adc2c5138497ad8ccfafb9"
 purpose = "conformance seed-check, faults seeded into go-stellar-sdk; release v2.3.1, which the proxy serves only as this pseudo-version"
+
+# pypi (the python testee and the python sdk matrix). every other dependency is hash-locked in
+# testees/python/versions/<version>/requirements.txt
+
+[[pypi]]
+name = "stellar-sdk"
+version = "16.1.1"
+file = "stellar_sdk-16.1.1-py3-none-any.whl"
+sha256 = "6f6b0661cf0e5e99d1d4f994fdf048ebe4b351afc2f927739e7566426a35e38b"
+purpose = "python testee matrix, newest 16.x, protocol 29 xdr"
+
+[[pypi]]
+name = "stellar-sdk"
+version = "17.0.1"
+file = "stellar_sdk-17.0.1-py3-none-any.whl"
+sha256 = "04adf81710417833e852965bdbb8f9b44c9b6aa9a404a737598a6c0bea534b78"
+purpose = "python testee matrix, current, protocol 30 xdr"
+
+[[pypi]]
+name = "xdrlib3"
+version = "0.1.1"
+file = "xdrlib3-0.1.1-py3-none-any.whl"
+sha256 = "175c0645f347c64e76bb374c2109480007eb2ff04ad08acfe885a130d2b0877d"
+purpose = "the xdr packer and unpacker stellar-sdk 16.x and 17.x generate their xdr classes on"
+
+[[pypi]]
+name = "coverage"
+version = "7.17.3"
+file = "coverage-7.17.3-cp315-cp315-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+sha256 = "a13a946d8de807d8992e56a09502952d81bfbb4b80204ef77a6a2a38b4ce22be"
+purpose = "coverage_snapshot and coverage_new of the python testee"

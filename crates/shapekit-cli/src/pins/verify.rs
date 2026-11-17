@@ -148,6 +148,17 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
         ));
     }
 
+    for p in &pins.pypi {
+        out.push((
+            "pypi",
+            format!("{}@{} {}", p.name, p.version, p.file),
+            Box::new(move || {
+                let url = format!("https://pypi.org/pypi/{}/{}/json", p.name, p.version);
+                check::check_pypi(&net(http.get_text(&url))?, &p.version, &p.file, &p.sha256)
+            }),
+        ));
+    }
+
     out
 }
 

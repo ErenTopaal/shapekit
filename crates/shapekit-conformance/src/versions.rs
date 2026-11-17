@@ -279,9 +279,9 @@ pub const COVERAGE_TIMEOUT_MS: u64 = 120_000;
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
 /// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
 /// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,
-/// and the javascript testee started with `SHAPEKIT_COVERAGE=1`. The build steps are the ones
-/// `conformance sync-versions` writes; a versions file whose steps have another shape is
-/// refused rather than guessed at. The per-request timeout is at least
+/// and the javascript and python testees started with `SHAPEKIT_COVERAGE=1`. The build steps
+/// are the ones `conformance sync-versions` writes; a versions file whose steps have another
+/// shape is refused rather than guessed at. The per-request timeout is at least
 /// [`COVERAGE_TIMEOUT_MS`]: a snapshot runs the coverage tools over the whole binary.
 pub fn coverage_target(t: &Target) -> Result<Target> {
     let mut c = t.clone();
@@ -343,7 +343,9 @@ pub fn coverage_target(t: &Target) -> Result<Target> {
                 t.key()
             );
         }
-        "js" => {
+        // the javascript testee starts v8's block coverage and the python testee coverage.py
+        // before the sdk loads, both only when this is set
+        "js" | "python" => {
             c.env
                 .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
             return Ok(c);
@@ -370,7 +372,7 @@ mod tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/versions.toml"),
         )
         .unwrap();
-        for sdk in ["rust", "go", "js"] {
+        for sdk in ["rust", "go", "js", "python"] {
             let t = file.target(sdk, &file.sdk(sdk).unwrap().current).unwrap();
             let c = coverage_target(&t).unwrap();
             match sdk {

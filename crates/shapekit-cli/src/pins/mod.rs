@@ -30,6 +30,8 @@ pub struct Pins {
     pub npm: Vec<NpmPin>,
     #[serde(default)]
     pub gomod: Vec<GoModPin>,
+    #[serde(default)]
+    pub pypi: Vec<PypiPin>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -111,6 +113,17 @@ pub struct GoModPin {
     pub module: String,
     pub version: String,
     pub origin_hash: String,
+    pub purpose: String,
+}
+
+/// One file of a PyPI release, the wheel or sdist that gets installed.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PypiPin {
+    pub name: String,
+    pub version: String,
+    pub file: String,
+    pub sha256: String,
     pub purpose: String,
 }
 
@@ -267,6 +280,19 @@ fn validate(pins: &Pins) -> Result<()> {
             bail!("{what}: origin_hash must be 40 lowercase hex characters");
         }
         require_purpose(&what, &m.purpose)?;
+    }
+
+    let mut seen = HashSet::new();
+    for p in &pins.pypi {
+        let what = format!("pypi {}@{}", p.name, p.version);
+        require_unique(&mut seen, "pypi", format!("{}@{} {}", p.name, p.version, p.file))?;
+        if p.file.is_empty() || p.file.contains('/') {
+            bail!("{what}: file must be a file name");
+        }
+        if !is_lower_hex(&p.sha256, 64) {
+            bail!("{what}: sha256 must be 64 lowercase hex characters");
+        }
+        require_purpose(&what, &p.purpose)?;
     }
 
     Ok(())

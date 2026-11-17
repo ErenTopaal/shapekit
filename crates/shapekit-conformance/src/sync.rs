@@ -1,6 +1,6 @@
 //! `shapekit conformance sync-versions`: derives the sdk version matrix in
 //! `conformance/versions.toml` and the per-version testee files under `testees/*/versions/`
-//! from what crates.io, the Go module proxy and npm publish.
+//! from what crates.io, the Go module proxy, npm and PyPI publish.
 //!
 //! Which versions: for every release line (a major version; for 0.x a minor version) the
 //! newest stable release that is not yanked, deprecated or retracted and whose XDR knows
@@ -9,8 +9,9 @@
 //! `current`.
 //!
 //! A version's XDR is the stellar/stellar-xdr commit its code was generated from: the
-//! crate's `xdr-version` file, go-stellar-sdk's `xdr/xdr_commit_generated.txt` and
-//! js-stellar-sdk's Makefile, each at the commit the registry took the release from. The
+//! crate's `xdr-version` file, go-stellar-sdk's `xdr/xdr_commit_generated.txt`,
+//! js-stellar-sdk's Makefile, each at the commit the registry took the release from, and
+//! py-stellar-base's Makefile at the release tag (PyPI records no commit). The
 //! stellar-xdr release tag at that commit names a protocol, and `max_protocol` extends it to
 //! the protocol before the next tag, because a protocol without a tag of its own changed no
 //! XDR. A commit that is no release tag stops the command: there is then no protocol to
@@ -29,7 +30,13 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 4] = ["rust", "go", "js", "soroban"];
+pub const SDKS: [&str; 5] = ["rust", "go", "js", "soroban", "python"];
+
+/// The CPython every python testee venv is made with; pins.toml pins its build.
+pub const PYTHON: &str = "3.15.2";
+
+/// The file of py-stellar-base that declares a release's version, checked at the release tag.
+const PYTHON_VERSION_FILE: &str = "stellar_sdk/__version__.py";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct Semver {
@@ -318,6 +325,20 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
                 (p, c)
             }
+            "python" => {
+                let p = upstream::pypi_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        let repo = upstream::pypi_repository(&http, &s.package, v)?;
+                        xdr_of_commit(
+                            &tags,
+                            &upstream::tagged_xdr_commit(&http, &repo, v, PYTHON_VERSION_FILE)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
             _ => unreachable!("checked against SDKS above"),
         };
         plans.push(SdkPlan {
@@ -345,9 +366,9 @@ fn lookup(
 const HEADER: &str = "\
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy and npm publish; `sync-versions --check` reports whether they
-# are up to date. change the per-sdk settings or [sync] here and run it again; the version
-# lists are not edited by hand. paths are relative to the repository root;
+# crates.io, the go module proxy, npm and pypi publish; `sync-versions --check` reports
+# whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
+# version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
 # that its hello reports exactly `package` and `version`.
 #
@@ -375,9 +396,10 @@ const HEADER: &str = "\
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead, and for soroban-sdk the
-# xdr-version file of the stellar-xdr release that its soroban-env-host's soroban-env-common
-# pins with `=`): the release tag at that commit names a protocol, extended up to the
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's Makefile at
+# the release tag, since pypi records no commit, and for soroban-sdk the xdr-version file of
+# the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
+# release tag at that commit names a protocol, extended up to the
 # protocol before the next tag, because a protocol without a tag of its own changed no xdr
 # (v28.0 covers protocol 29).
 #
@@ -393,6 +415,10 @@ const HEADER: &str = "\
 # version. each install is `npm ci` from the package.json and lock file committed under
 # testees/js/versions/<version>/, so the sdk's own dependencies (js-xdr above all) are pinned
 # too.
+# python: one source (testees/python) run by the python of a per-version venv under
+# target/testees/python/<version>/venv, made with uv from the hash-locked
+# testees/python/versions/<version>/requirements.txt, so the sdk and every dependency it
+# imports (xdrlib3, pynacl) are pinned.
 ";
 
 fn quote(s: &str) -> String {
@@ -493,6 +519,49 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 vec![s("node"), format!("{t}/dist/main.js")],
             )
         }
+        "python" => {
+            let venv = format!("target/testees/python/{v}/venv");
+            let python = format!("{venv}/bin/python");
+            (
+                vec![
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("uv"),
+                            s("venv"),
+                            s("--quiet"),
+                            s("--clear"),
+                            s("--no-python-downloads"),
+                            s("--python"),
+                            s(PYTHON),
+                            venv.clone(),
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("uv"),
+                            s("pip"),
+                            s("sync"),
+                            s("--quiet"),
+                            s("--require-hashes"),
+                            s("--python"),
+                            python.clone(),
+                            format!("testees/python/versions/{v}/requirements.txt"),
+                        ])
+                    ),
+                ],
+                // -B keeps bytecode out of the source tree, -E and -s keep PYTHON* variables and
+                // the user site directory from changing what is imported
+                vec![
+                    python,
+                    s("-B"),
+                    s("-E"),
+                    s("-s"),
+                    s("testees/python/main.py"),
+                ],
+            )
+        }
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
@@ -574,6 +643,10 @@ fn testee_files(sdk: &str, v: &str) -> Vec<String> {
         "js" => vec![
             format!("testees/js/versions/{v}/package.json"),
             format!("testees/js/versions/{v}/package-lock.json"),
+        ],
+        "python" => vec![
+            format!("testees/python/versions/{v}/requirements.in"),
+            format!("testees/python/versions/{v}/requirements.txt"),
         ],
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
@@ -781,6 +854,38 @@ fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Resu
                     "--ignore-scripts",
                     "--no-audit",
                     "--no-fund",
+                ],
+                &dir,
+                &[],
+            )
+        }
+        "python" => {
+            let from = root.join(format!(
+                "testees/python/versions/{template_version}/requirements.in"
+            ));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/python/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("requirements.in"),
+                from_template(&text, template_version, v, 1)?,
+            )?;
+            let minor = PYTHON.rsplit_once('.').map_or(PYTHON, |(m, _)| m);
+            run_step(
+                &[
+                    "uv",
+                    "pip",
+                    "compile",
+                    "--quiet",
+                    "--generate-hashes",
+                    "--universal",
+                    "--python-version",
+                    minor,
+                    "--no-header",
+                    "requirements.in",
+                    "-o",
+                    "requirements.txt",
                 ],
                 &dir,
                 &[],
@@ -1043,6 +1148,19 @@ mod tests {
         })
         .unwrap_err();
         assert!(format!("{err:#}").contains("not published"));
+    }
+
+    #[test]
+    fn the_venv_python_is_the_pinned_build() {
+        let pins = std::fs::read_to_string(
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("../../pins.toml"),
+        )
+        .unwrap();
+        let asset = format!("asset = \"cpython-{PYTHON}+");
+        assert!(
+            pins.contains(&asset),
+            "pins.toml pins no python-build-standalone build of {PYTHON}"
+        );
     }
 
     #[test]

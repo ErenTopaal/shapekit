@@ -1,0 +1,365 @@
+"""the testee protocol operations on stellar-sdk's public api. one source runs against every
+release in the matrix: where releases differ an op checks for the api it needs and answers
+unsupported when the release has none."""
+
+import base64
+import decimal
+import importlib.metadata
+import json
+import platform
+from typing import Any
+
+import stellar_sdk
+from stellar_sdk import Asset, MuxedAccount, Network, StrKey, TransactionBuilder, scval
+from stellar_sdk import xdr as stellar_xdr
+from stellar_sdk.fee_bump_transaction_envelope import FeeBumpTransactionEnvelope
+from stellar_sdk.liquidity_pool_asset import LiquidityPoolAsset
+from stellar_sdk.operation import ManageSellOffer
+from stellar_sdk.utils import sha256
+
+from .native import describe_native
+from .protocol import (
+    PROTOCOL_VERSION,
+    BadRequest,
+    Internal,
+    Request,
+    SdkFailure,
+    Unsupported,
+    base64_member,
+    plain_json,
+    sdk,
+)
+from .types import xdr_class
+
+SDK_PACKAGE = "stellar-sdk"
+
+# the base account of muxed ids: 32 bytes of 0x3a, the key the textual-id vectors use
+MUXED_BASE = "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"
+
+# StrKey has one decoder and encoder per kind; the protocol's kind, its first character and
+# the StrKey method suffix
+STRKEY_KINDS = {
+    "account": ("G", "ed25519_public_key"),
+    "muxed_account": ("M", "med25519_public_key"),
+    "seed": ("S", "ed25519_secret_seed"),
+    "pre_auth_tx": ("T", "pre_auth_tx"),
+    "hash_x": ("X", "sha256_hash"),
+    "signed_payload": ("P", "ed25519_signed_payload"),
+    "contract": ("C", "contract"),
+    "liquidity_pool": ("L", "liquidity_pool"),
+    "claimable_balance": ("B", "claimable_balance"),
+    "muxed_contract": ("W", "muxed_contract"),
+}
+
+UNSUPPORTED_OPS = {
+    "map_validate": "stellar-sdk has no ScMap validation: SCMap.from_xdr_bytes and scval.from_map "
+    "read entries in any key order, and the key comparison scval.to_map sorts with "
+    "(scval._compare_sc_val) is private",
+}
+
+
+class Ops:
+    def __init__(self, coverage: Any = None) -> None:
+        self.coverage = coverage
+        self.version = importlib.metadata.version(SDK_PACKAGE)
+        if stellar_sdk.__version__ != self.version:
+            raise Internal(
+                f"stellar_sdk.__version__ is {stellar_sdk.__version__} but the installed "
+                f"distribution is {self.version}"
+            )
+
+    def supported(self) -> list[str]:
+        ops = [
+            "decode_encode",
+            "decode_json",
+            "encode_json",
+            "strkey_decode",
+            "strkey_encode",
+            "asset_order",
+            "pool_id",
+            "map_sort",
+            "id_parse",
+            "to_native",
+            "tx_hash",
+            "balance_id",
+            "contract_id",
+        ]
+        if self.coverage is not None:
+            ops += ["coverage_snapshot", "coverage_new"]
+        return ops
+
+    def run(self, req: Request) -> dict[str, Any]:
+        handler = {
+            "hello": self.hello,
+            "decode_encode": self.decode_encode,
+            "decode_json": self.decode_json,
+            "encode_json": self.encode_json,
+            "strkey_decode": self.strkey_decode,
+            "strkey_encode": self.strkey_encode,
+            "asset_order": self.asset_order,
+            "pool_id": self.pool_id,
+            "map_sort": self.map_sort,
+            "id_parse": self.id_parse,
+            "to_native": self.to_native,
+            "tx_hash": self.tx_hash,
+            "balance_id": self.balance_id,
+            "contract_id": self.contract_id,
+            "coverage_snapshot": self.coverage_snapshot,
+            "coverage_new": self.coverage_new,
+        }.get(req.op)
+        if handler is not None:
+            return handler(req)
+        if req.op in UNSUPPORTED_OPS:
+            raise Unsupported(UNSUPPORTED_OPS[req.op])
+        raise BadRequest(f"unknown op {req.op}")
+
+    def hello(self, req: Request) -> dict[str, Any]:
+        components = {
+            "python": f"{platform.python_implementation()} {platform.python_version()}",
+        }
+        for dist in ("xdrlib3", "pynacl"):
+            components[dist] = importlib.metadata.version(dist)
+        if self.coverage is not None:
+            components["coverage"] = importlib.metadata.version("coverage")
+        return {
+            "protocol": PROTOCOL_VERSION,
+            "sdk": SDK_PACKAGE,
+            "sdk_version": self.version,
+            "components": components,
+            "ops": self.supported(),
+            # from_xdr_bytes takes no limits. the generated unpack(unpacker, depth_limit) takes a
+            # depth, but nothing in the sdk takes a length limit, so the sdk decodes with its
+            # defaults: depth 512 (stellar_sdk.xdr.base.DEFAULT_XDR_MAX_DEPTH), any length
+            "decode_limits": "ignored",
+        }
+
+    # xdr
+
+    def decode(self, req: Request) -> Any:
+        cls = xdr_class(self.version, req.str("type"))
+        data = req.bytes("xdr")
+        # from_xdr_bytes refuses trailing bytes itself ("Unexpected trailing ... bytes")
+        return sdk(lambda: cls.from_xdr_bytes(data))
+
+    def decode_encode(self, req: Request) -> dict[str, Any]:
+        value = self.decode(req)
+        out = sdk(value.to_xdr_bytes)
+        return {"xdr": base64.b64encode(out).decode("ascii")}
+
+    def decode_json(self, req: Request) -> dict[str, Any]:
+        value = self.decode(req)
+        text = sdk(value.to_json)
+        try:
+            return {"json": json.loads(text)}
+        except ValueError as err:
+            raise Internal(f"to_json wrote text that is not json: {err}") from err
+
+    def encode_json(self, req: Request) -> dict[str, Any]:
+        cls = xdr_class(self.version, req.str("type"))
+        text = json.dumps(plain_json(req.raw("json")))
+        value = sdk(lambda: cls.from_json(text))
+        out = sdk(value.to_xdr_bytes)
+        return {"xdr": base64.b64encode(out).decode("ascii")}
+
+    # strkey
+
+    def strkey_decode(self, req: Request) -> dict[str, Any]:
+        has_text, has_bytes = req.has("text"), req.has("text_base64")
+        if has_text == has_bytes:
+            raise BadRequest("strkey_decode needs exactly one of text and text_base64")
+        if has_text:
+            text = req.str("text")
+        else:
+            raw = req.bytes("text_base64")
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError as err:
+                raise Unsupported(
+                    "StrKey decodes python str, which cannot hold bytes that are not utf-8"
+                ) from err
+        for kind, (prefix, suffix) in STRKEY_KINDS.items():
+            if text.startswith(prefix):
+                decode = getattr(StrKey, f"decode_{suffix}", None)
+                if decode is None:
+                    # the protocol counts a missing decoder for a prefix as the sdk refusing it
+                    raise_rejected(f"StrKey.decode_{suffix} does not exist in stellar-sdk {self.version}")
+                arg: Any = text
+                payload = sdk(lambda: decode(arg))
+                return {"kind": kind, "payload": base64.b64encode(payload).decode("ascii")}
+        raise_rejected(f"no StrKey decoder for a string starting with {text[:1]!r}")
+
+    def strkey_encode(self, req: Request) -> dict[str, Any]:
+        kind = req.str("kind")
+        payload = req.bytes("payload")
+        if kind not in STRKEY_KINDS:
+            raise BadRequest(f"unknown strkey kind {kind}")
+        _, suffix = STRKEY_KINDS[kind]
+        encode = getattr(StrKey, f"encode_{suffix}", None)
+        if encode is None:
+            raise Unsupported(f"stellar-sdk {self.version} has no StrKey.encode_{suffix}")
+        return {"text": sdk(lambda: encode(payload))}
+
+    # ordering
+
+    def asset(self, req: Request, name: str) -> Asset:
+        data = req.bytes(name)
+        xdr_asset = sdk(lambda: stellar_xdr.Asset.from_xdr_bytes(data))
+        return sdk(lambda: Asset.from_xdr_object(xdr_asset))
+
+    def asset_order(self, req: Request) -> dict[str, Any]:
+        a, b = self.asset(req, "a"), self.asset(req, "b")
+        # the sdk's only asset ordering is "a < b", which LiquidityPoolAsset checks its pair with
+        lt = LiquidityPoolAsset.is_valid_lexicographic_order
+        less = sdk(lambda: lt(a, b))
+        greater = sdk(lambda: lt(b, a))
+        return {"order": -1 if less else 1 if greater else 0}
+
+    def pool_id(self, req: Request) -> dict[str, Any]:
+        fee = req.int("fee")
+        # the pair goes in as given: LiquidityPoolAsset refuses pairs it does not see in order
+        a, b = self.asset(req, "a"), self.asset(req, "b")
+        pool = sdk(lambda: LiquidityPoolAsset(a, b, fee))
+        return {"pool_id": sdk(lambda: pool.liquidity_pool_id)}
+
+    def map_sort(self, req: Request) -> dict[str, Any]:
+        entries = req.raw("entries")
+        if not isinstance(entries, list):
+            raise BadRequest("map_sort needs array member entries")
+        items = []
+        for i, entry in enumerate(entries):
+            if not isinstance(entry, dict) or not isinstance(entry.get("key"), str) or not isinstance(entry.get("val"), str):
+                raise BadRequest(f"entries[{i}] needs string members key and val")
+            key_bytes = base64_member(entry["key"], f"entries[{i}].key")
+            val_bytes = base64_member(entry["val"], f"entries[{i}].val")
+            key = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(key_bytes))
+            val = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(val_bytes))
+            items.append((key, val))
+        data = dict(items)
+        if len(data) != len(items):
+            raise Unsupported("scval.to_map takes a dict, which holds one entry per key, and the input repeats a key")
+        out = sdk(lambda: scval.to_map(data).to_xdr_bytes())
+        return {"xdr": base64.b64encode(out).decode("ascii")}
+
+    # ids
+
+    def id_parse(self, req: Request) -> dict[str, Any]:
+        kind = req.str("kind")
+        value = req.raw("input")
+        if isinstance(value, str):
+            reason = {
+                "offer": "ManageSellOffer and the other offer operations take offer_id as an int, and "
+                "the sdk reads no textual offer id (horizon responses are plain dicts)",
+                "muxed": "MuxedAccount takes account_muxed_id as an int, and the sdk reads no textual "
+                "muxed id (horizon responses are plain dicts)",
+            }.get(kind)
+            if reason is None:
+                raise BadRequest(f"id_parse kind must be muxed or offer, not {kind!r}")
+            raise Unsupported(reason)
+        if isinstance(value, bool) or not isinstance(value, (int, decimal.Decimal)):
+            raise BadRequest("id_parse input must be a string or a number")
+        # a caller's json.loads gives an int for an integer literal and a float for any other
+        # number, so that is what reaches the sdk
+        number: int | float = value if isinstance(value, int) else float(value)
+        if kind == "offer":
+            return {"id": self.offer_id(number)}
+        if kind == "muxed":
+            return {"id": self.muxed_id(number)}
+        raise BadRequest(f"id_parse kind must be muxed or offer, not {kind!r}")
+
+    def offer_id(self, number: int | float) -> str:
+        op = sdk(
+            lambda: ManageSellOffer(
+                selling=Asset.native(),
+                buying=Asset("USD", MUXED_BASE),
+                amount="1",
+                price="1",
+                offer_id=number,  # type: ignore[arg-type]
+            )
+        )
+        raw = sdk(lambda: op.to_xdr_object().to_xdr_bytes())
+        # ManageSellOfferOp ends with the int64 offer id, so the operation's xdr does too
+        return str(int.from_bytes(raw[-8:], "big", signed=True))
+
+    def muxed_id(self, number: int | float) -> str:
+        muxed = sdk(lambda: MuxedAccount(MUXED_BASE, number))  # type: ignore[arg-type]
+        # the id the network sees is the one in the M address
+        address = sdk(lambda: muxed.account_muxed)
+        raw = sdk(lambda: StrKey.decode_med25519_public_key(address))
+        return str(int.from_bytes(raw[32:40], "big"))
+
+    def to_native(self, req: Request) -> dict[str, Any]:
+        data = req.bytes("xdr")
+        value = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(data))
+        native = sdk(lambda: scval.to_native(value))
+        return {"native": describe_native(native)}
+
+    # hashes and ids the network writes into a ledger
+
+    def envelope(self, req: Request) -> Any:
+        passphrase = req.str("network_passphrase")
+        text = base64.b64encode(req.bytes("xdr")).decode("ascii")
+        return sdk(lambda: TransactionBuilder.from_xdr(text, passphrase))
+
+    def tx_hash(self, req: Request) -> dict[str, Any]:
+        inner = req.bool("inner") if req.has("inner") else False
+        env = self.envelope(req)
+        if inner:
+            if not isinstance(env, FeeBumpTransactionEnvelope):
+                raise BadRequest("inner is only defined for a fee bump envelope")
+            env = env.transaction.inner_transaction_envelope
+        return {"hash": sdk(env.hash_hex)}
+
+    def balance_id(self, req: Request) -> dict[str, Any]:
+        index = req.int("op_index")
+        if index < 0:
+            raise BadRequest("op_index must not be negative")
+        env = self.envelope(req)
+        # the id comes from the transaction that holds the operation, the inner one of a fee bump
+        if isinstance(env, FeeBumpTransactionEnvelope):
+            env = env.transaction.inner_transaction_envelope
+        tx = env.transaction
+        # get_claimable_balance_id documents IndexError and TypeError as its refusals
+        balance = sdk(lambda: tx.get_claimable_balance_id(index), documented=(IndexError, TypeError))
+        return {"balance_id": balance.lower()}
+
+    def contract_id(self, req: Request) -> dict[str, Any]:
+        """Asset.contract_id is the sdk's api for an asset's contract; a preimage from an address
+        has no api of its own, so its id is the sdk's sha256 of the sdk's encoding of the
+        HashIDPreimage, the way Asset.contract_id builds it."""
+        passphrase = req.str("network_passphrase")
+        data = req.bytes("preimage")
+        preimage_cls = xdr_class(self.version, "ContractIdPreimage")
+        preimage = sdk(lambda: preimage_cls.from_xdr_bytes(data))
+        if preimage.type == stellar_xdr.ContractIDPreimageType.CONTRACT_ID_PREIMAGE_FROM_ASSET:
+            asset = sdk(lambda: Asset.from_xdr_object(preimage.from_asset))
+            text = sdk(lambda: asset.contract_id(passphrase))
+            raw = sdk(lambda: StrKey.decode_contract(text))
+            return {"contract_id": raw.hex()}
+
+        def address_id() -> bytes:
+            full = stellar_xdr.HashIDPreimage(
+                stellar_xdr.EnvelopeType.ENVELOPE_TYPE_CONTRACT_ID,
+                contract_id=stellar_xdr.HashIDPreimageContractID(
+                    network_id=stellar_xdr.Hash(Network(passphrase).network_id()),
+                    contract_id_preimage=preimage,
+                ),
+            )
+            return sha256(full.to_xdr_bytes())
+
+        return {"contract_id": sdk(address_id).hex()}
+
+    # coverage
+
+    def coverage_snapshot(self, req: Request) -> dict[str, Any]:
+        if self.coverage is None:
+            raise Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1")
+        return self.coverage.snapshot()
+
+    def coverage_new(self, req: Request) -> dict[str, Any]:
+        if self.coverage is None:
+            raise Unsupported("coverage is collected only when the testee runs with SHAPEKIT_COVERAGE=1")
+        return self.coverage.fresh()
+
+
+def raise_rejected(message: str) -> Any:
+    raise SdkFailure("rejected", message)

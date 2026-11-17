@@ -112,7 +112,7 @@ Result members:
 | member | type | meaning |
 |---|---|---|
 | `protocol` | integer | `2` (the runner also accepts `1`) |
-| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK) |
+| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK), `stellar-sdk` (Python) |
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose `sdk` or `sdk_version` differs from the `package` and `version` in the versions file |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. Can be empty |
 | `ops` | array of strings | the ops this build implements, excluding `hello`. The runner refuses a `hello` that lists an op this page does not define. It does not send unlisted ops and records their checks as `unsupported` |
@@ -214,7 +214,8 @@ Request: `a`, `b` (each base64 XDR of an `Asset`).
 
 The testee decodes both with the SDK's XDR decoder, turns them into the SDK's asset objects
 where the comparison lives on those objects (JS `Asset.fromOperation`), and calls the SDK's
-comparison (`Asset.compare` in JS, `xdr.Asset.LessThan` in Go, `Ord` in Rust).
+comparison (`Asset.compare` in JS, `xdr.Asset.LessThan` in Go, `Ord` in Rust,
+`LiquidityPoolAsset.is_valid_lexicographic_order` in Python, which is "less than").
 
 Result: `order` (`-1`, `0` or `1`). An SDK that only offers "less than" answers with
 `lt(a, b) ? -1 : lt(b, a) ? 1 : 0`.
@@ -237,7 +238,9 @@ Request: `entries`, an array of `{"key": <base64 ScVal>, "val": <base64 ScVal>}`
 order.
 
 The testee calls the SDK's sorted-map constructor (`scvSortedMap` in JS,
-`ScMap::sorted_from` in Rust).
+`ScMap::sorted_from` in Rust, `scval.to_map` in Python). A constructor that takes a dictionary
+cannot be given two equal keys, so its testee answers `unsupported` for an input that repeats a
+key.
 
 Result: `xdr` (base64 of the resulting `ScVal`, arm `SCV_MAP`).
 
@@ -258,7 +261,8 @@ negative numbers).
 The testee hands `input` to the SDK API that takes a textual or numeric ID (JS `MuxedAccount`
 and `Operation.manageSellOffer`; in Rust the only textual path is the XDR-JSON reader of the
 `id` and `offer_id` fields; in Go the Horizon response types, `horizon.Offer.ID` and
-`horizon.Transaction.AccountMuxedID`, which read IDs from JSON strings only), in the JSON type
+`horizon.Transaction.AccountMuxedID`, which read IDs from JSON strings only; in Python
+`MuxedAccount` and `ManageSellOffer`, which take integers only), in the JSON type
 it arrived as. A testee must read numbers
 without going through a binary floating point type, unless that is what the SDK itself does
 with them. If the SDK has no API for the input's JSON type, answer `unsupported`.
@@ -351,17 +355,18 @@ build or mode does:
 | Rust | built with `RUSTFLAGS="-C instrument-coverage --cfg shapekit_coverage"`; the profiler runtime writes the counters on request and the toolchain's `llvm-profdata` and `llvm-cov export` (rustup's `llvm-tools` component) read them | a code region of a `stellar-xdr` source file, `src/<file>:<line>:<col>-<line>:<col>` |
 | Go | built with `-cover -covermode=atomic -coverpkg=github.com/stellar/go-stellar-sdk/...,.`; `runtime/coverage` writes the counters on request and `go tool covdata textfmt` reads them | a statement block of a go-stellar-sdk file, `<package path>/<file>:<line>.<col>,<line>.<col>` |
 | JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
+| Python | started with `SHAPEKIT_COVERAGE=1`; coverage.py line coverage of the `stellar_sdk` package, started before the SDK is imported, read in the process with no data file | a line of a `stellar_sdk` source file that has run, `stellar_sdk/<path>.py:<line>` |
 
 Result: `tool` (what measured it), `ranges` (sorted strings, each range once), and for the
 JavaScript testee `uncovered` (the ranges V8 has reported with a count of 0 that have not run
 since the process started, in the same form). V8 resets its counters each time it is read, so
 the JavaScript testee folds every read into what it has seen before; every snapshot covers the
-whole process, as for Rust and Go. V8
+whole process, as for Rust, Go and Python. V8
 lists a nested block only while its count differs from the count of the block around it, so a
 block can be missing from both lists: it then ran exactly as often as its parent. To decide
 whether a range ran, look it up in `ranges`, then in `uncovered`, and otherwise take the
 answer of the smallest listed range that contains it. Rust regions and Go blocks are a fixed
-set, so those testees send no `uncovered`. Range strings are
+set, and coverage.py reports only lines that ran, so those testees send no `uncovered`. Range strings are
 only compared within one SDK version and one tool: the union over runs, or the ranges one
 run adds, is what is meaningful. Counters live in the process, so what a testee covered before
 the runner restarted it is not in a later snapshot.
@@ -382,6 +387,7 @@ the process with no files and no external tool:
 | Rust | an llvm counter of the testee binary, `stellar-xdr` and the crates around it (`__llvm_profile_begin_counters` to `__llvm_profile_end_counters`) |
 | Go | a statement-block counter of an instrumented package, read from `runtime/coverage.WriteCounters` |
 | JavaScript | a range of the SDK package, folded exactly as `coverage_snapshot` folds it (the two ops share one fold, so neither loses what the other read) |
+| Python | a line of a `stellar_sdk` source file that has run, as `coverage_snapshot` lists it |
 
 The numbers are only compared within one process: they say whether coverage grew, not which
 code ran. Ask `coverage_snapshot` for the ranges themselves.
@@ -519,7 +525,7 @@ single-SDK run accepts a `diverges-from-peers` line whose check passes.
 
 `shapekit conformance sync-versions` writes the version lists of
 [conformance/versions.toml](../conformance/versions.toml) and the per-version testee files under
-`testees/*/versions/` from what crates.io, the Go module proxy and npm publish. For each SDK it
+`testees/*/versions/` from what crates.io, the Go module proxy, npm and PyPI publish. For each SDK it
 picks:
 
 - for every release line (a major version, or a minor version below 1.0) the newest stable
@@ -531,7 +537,10 @@ picks:
 The registry's latest stable release becomes `current`. A version's `max_protocol` comes from
 the stellar/stellar-xdr commit its code was generated from: the `xdr-version` file in the
 stellar-xdr crate, `xdr/xdr_commit_generated.txt` in go-stellar-sdk, and the `XDR_COMMIT` line
-of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. A
+of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. For
+py-stellar-base it is the `XDR_COMMIT` line of the Makefile at the repository tag named like
+the release (PyPI records no commit, so the tag is used only when its
+`stellar_sdk/__version__.py` declares that version). A
 soroban-sdk release pins `soroban-env-host` with `=`, which pins `soroban-env-common`, which
 pins `stellar-xdr`; the `xdr-version` file of that `stellar-xdr` release is the commit. The
 stellar-xdr release tag at that commit names a protocol. Protocols without a tag of their own
@@ -539,8 +548,10 @@ changed no XDR, so `max_protocol` runs up to the protocol before the next tag: `
 protocol 29. A commit that is not a release tag stops the command.
 
 For a newly picked version the command writes the testee files from those of the current
-version and resolves them with `cargo generate-lockfile`, `go mod tidy` or
-`npm install --package-lock-only`. It removes the files of versions it no longer picks and
+version and resolves them with `cargo generate-lockfile`, `go mod tidy`,
+`npm install --package-lock-only` or `uv pip compile --generate-hashes`. For Python, run
+`python3 -I testees/python/gentypes.py` after the new version's venv is built, so the type
+table covers it. It removes the files of versions it no longer picks and
 leaves the files of the other versions alone, since their lock files are the pins. The comment
 above each version in `versions.toml` says why it was picked.
 
@@ -600,7 +611,8 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
 
 1. Read requests line by line, answer each with exactly one line, flush after every line.
 2. Answer `hello` with versions read from the build (Go `debug.ReadBuildInfo`, the installed
-   package's `package.json`, Cargo's resolved dependency) and never from a constant.
+   package's `package.json`, Cargo's resolved dependency, Python's `importlib.metadata`) and
+   never from a constant.
 3. Implement each op against the SDK's public API only. Where the SDK has no API, answer
    `unsupported` with a reason. Never emulate an SDK feature inside the testee.
 4. Catch every exception or panic around SDK calls and classify it.
@@ -608,7 +620,8 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
    [conformance/versions.toml](../conformance/versions.toml). For the SDKs here,
    `shapekit conformance sync-versions` does this (see "The version matrix").
 
-Working testees are in `testees/rust`, `testees/go`, `testees/js` and `testees/soroban`.
+Working testees are in `testees/rust`, `testees/go`, `testees/js`, `testees/soroban` and
+`testees/python`.
 
 ## The soroban-sdk testee
 
@@ -634,3 +647,29 @@ own XDR limits (depth 500) and converts under its own depth limit (100). A host 
 fails escalates its `HostError` into a panic whose message starts with `HostError:`; that is the
 SDK's documented error path in native tests, so the testee reports it as `rejected`. Every other
 panic is reported as `panic`.
+
+## The Python testee
+
+`testees/python` runs py-stellar-base (`stellar-sdk` on PyPI) under CPython 3.15. Each version
+is installed into its own venv under `target/testees/python/<version>/` from the hash-locked
+`testees/python/versions/<version>/requirements.txt`, so the SDK's own dependencies (the
+`xdrlib3` codec above all) are pinned too. The build needs `uv` and CPython 3.15.2 on `PATH`
+(both pinned in [pins.toml](../pins.toml)).
+
+- `decode_limits` is `"ignored"`: `from_xdr_bytes` takes no limits and the SDK has no length
+  limit at all, so values decode under the SDK's default depth of 512.
+- `id_parse` answers `unsupported` for IDs given as JSON strings: `MuxedAccount` and
+  `ManageSellOffer` take integers, and the SDK reads no textual ID. A JSON number reaches the
+  SDK as Python's `json` module gives it to a caller, an `int` for an integer literal and a
+  `float` otherwise.
+- `map_validate` answers `unsupported`: the SDK has no ScMap validation, and the key
+  comparison `scval.to_map` sorts with is private.
+- `balance_id` counts the `IndexError` and `TypeError` that
+  `Transaction.get_claimable_balance_id` documents as its refusals as `rejected`. Elsewhere
+  `ValueError`, `EOFError`, `OverflowError`, `struct.error` and the `xdrlib3` errors are
+  rejections, and any other exception escaping the SDK (`RecursionError`, `TypeError`,
+  `AttributeError` and the rest) is a `panic`.
+- The type table `shapekit_testee/types_gen.py` is generated by `testees/python/gentypes.py` from
+  the schema, the manifest and each version's `stellar_sdk/xdr` source, and keyed by the
+  stellar-xdr crate's type names; a test of the conformance crate checks the keys against the
+  crate.

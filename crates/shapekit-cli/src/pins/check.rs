@@ -89,6 +89,31 @@ pub fn check_npm(version_doc: &str, version: &str, integrity: &str) -> Verdict {
     }
 }
 
+/// Checks a PyPI release document (`/pypi/<name>/<version>/json`): the pinned file must be one
+/// of the release's files, not yanked, with the pinned sha256.
+pub fn check_pypi(release_doc: &str, version: &str, file: &str, sha256: &str) -> Verdict {
+    let doc: Value =
+        serde_json::from_str(release_doc).map_err(|e| format!("bad registry response: {e}"))?;
+    if doc["info"]["version"].as_str() != Some(version) {
+        return Err(format!(
+            "registry returned version {}, expected {version}",
+            doc["info"]["version"]
+        ));
+    }
+    let files = doc["urls"].as_array().ok_or("registry lists no files")?;
+    let Some(f) = files.iter().find(|f| f["filename"].as_str() == Some(file)) else {
+        return Err(format!("{version} has no file {file}"));
+    };
+    if f["yanked"].as_bool() == Some(true) {
+        return Err(format!("{file} is yanked"));
+    }
+    match f["digests"]["sha256"].as_str() {
+        Some(h) if h == sha256 => Ok(format!("{file}, sha256 matches")),
+        Some(h) => Err(format!("sha256 is {h}, pinned {sha256}")),
+        None => Err(format!("registry has no sha256 for {file}")),
+    }
+}
+
 /// Checks a Go module proxy `.info` document. The origin hash is the VCS commit
 /// the proxy recorded for the version.
 pub fn check_gomod(info: &str, version: &str, origin_hash: &str) -> Verdict {
@@ -384,6 +409,19 @@ mod tests {
     }
 
     const SDK_INFO: &str = r#"{"Version":"v0.8.0","Time":"2026-10-20T21:30:21Z","Origin":{"VCS":"git","URL":"https://github.com/stellar/go-stellar-sdk","Hash":"921a5b16af9a72d973ab9ba666e96ad8bf2f6ce4","Ref":"refs/tags/v0.8.0"}}"#;
+
+    #[test]
+    fn pypi_file_digest_and_yank() {
+        let doc = r#"{"info":{"version":"17.0.1"},"urls":[
+            {"filename":"stellar_sdk-17.0.1-py3-none-any.whl","yanked":false,"digests":{"sha256":"aa"}},
+            {"filename":"stellar_sdk-17.0.1.tar.gz","yanked":true,"digests":{"sha256":"bb"}}]}"#;
+        let wheel = "stellar_sdk-17.0.1-py3-none-any.whl";
+        assert!(check_pypi(doc, "17.0.1", wheel, "aa").is_ok());
+        assert!(check_pypi(doc, "17.0.1", wheel, "cc").unwrap_err().contains("pinned cc"));
+        assert!(check_pypi(doc, "17.0.1", "stellar_sdk-17.0.1.tar.gz", "bb").unwrap_err().contains("yanked"));
+        assert!(check_pypi(doc, "17.0.1", "x.whl", "aa").unwrap_err().contains("no file"));
+        assert!(check_pypi(doc, "16.1.1", wheel, "aa").unwrap_err().contains("expected 16.1.1"));
+    }
 
     #[test]
     fn gomod_origin_matches_and_mismatches() {
