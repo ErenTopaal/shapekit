@@ -67,6 +67,7 @@ fn registered_commands() {
             "coverage",
             "site",
             "twin",
+            "explore",
             "laws",
             "vectors",
             "audit",
