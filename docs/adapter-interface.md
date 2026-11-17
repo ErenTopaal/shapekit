@@ -518,11 +518,15 @@ shapekit harness state check --run <run out> [--run ...] --mapping mapping.toml
   holders, credit or pool-share assets); a table covers only core entries of those forms.
 - `check` applies the mapping to every chain and lists stored values that differ from core's
   (`mismatched`), rows for entries core no longer has (`stale`) and core entries with no row
-  (`missing`), and counts core entries of forms the table never held (`outside`). It
-  also lists every chain where this disagrees with the oracle's verdicts:
-  a differing state where every entry passed, or an equal state where entries were
-  `mishandled` or `dropped`. It exits non-zero when the mapping does not hold on an
-  ordinary chain.
+  (`missing`), and counts core entries of forms the table never held (`outside`).
+  `--exclusions <file>` names core entries a table leaves out on purpose, each rule with
+  the target's source line that says so (`[[exclusion]]` with `table`, `field`, `equals`
+  (a literal or `native-asset-contract`), `reason`, `source`); they are counted per reason,
+  not listed as missing. A chain whose state differs where the oracle found no problem is a
+  disagreement. A chain where the oracle found problems and the mapped tables equal core's
+  is not one: the oracle reads each transaction's stored facts, this comparison the tables'
+  end state, so both can hold; the facts the problems are about are listed. It exits
+  non-zero when the mapping does not hold on an ordinary chain.
 
 The wallet-backend mapping inferred this way is
 `adapters/walletbackend/state-mapping.toml`; its header names the target build and the

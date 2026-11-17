@@ -107,3 +107,16 @@ entries = [
 ]
 checks = "any/decode_encode and any/decode_json"
 observed = "implementation-defined entries with a tied vote (go has no type for them): js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
+
+# indexer state: `shapekit harness state check` on the wallet-backend reference run, against
+# core's final entries. a candidate here is a stored end state that differs from core's
+# entry; it has no corpus entry of its own, the chains below already carry it.
+
+[[candidate]]
+finding = "new"
+target = "wallet-backend"
+versions = ["3e22515a44979fdc3a558fda3991ca2b48e38cef"]
+chains = ["classic.failed-tx.p30", "cap15.fee-bump.p30"]
+checks = "harness state check, native_balances, both passphrases"
+observed = "account changes a transaction's meta writes in tx_changes_before are not applied to native_balances. on classic.failed-tx.p30 ledger 67 a failed transaction's one-time pre-auth signer of GDD25X2BOFUU33TVAMOKUHP7UNWFO45G2YIB54KLIAJAJJZTRYXUIBES is removed in tx_changes_before (num_sub_entries 1 to 0, signers 1 to 0); native_balances keeps num_subentries 1, and the minimum_balance derived from it. on cap15.fee-bump.p30 ledger 83 the only change to GANS62CX3EJTX47UM5OUMEUHXV3XUXYSTYXX7ESOVWJGBQD4PF5L24F4, the inner source of a fee bump, is its sequence bump in tx_changes_before; native_balances keeps last_modified_ledger 82 where core's entry says 83"
+evidence = "internal/indexer/processors/accounts.go at the commit reads account changes from three phases only: the fee (line 119, GetFeeChanges), each operation (line 88, opWrapper.Changes) and the post-apply refund (line 120, GetPostApplyFeeChanges); tx_changes_before and tx_changes_after are read for contract data only (internal/indexer/indexer.go:865-873)"

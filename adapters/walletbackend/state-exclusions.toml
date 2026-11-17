@@ -1,0 +1,10 @@
+# core entries a wallet-backend table leaves out on purpose, each with the line of
+# wallet-backend's source (at 3e22515a44979fdc3a558fda3991ca2b48e38cef) that says so. read by
+# `shapekit harness state check --exclusions`; the format is in docs/adapter-interface.md.
+
+[[exclusion]]
+table = "sac_balances"
+field = "contract"
+equals = "native-asset-contract"
+reason = "balances of the native asset's contract are not stored; native XLM is kept in native_balances, for G accounts only"
+source = "internal/indexer/processors/sac_balances.go:100-101, which calls go-stellar-sdk v0.8.0 ingest/sac/contract_data.go:212-213, where a balance entry of the native asset contract is refused"

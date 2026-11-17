@@ -77,6 +77,8 @@ pub struct CoreState {
     /// the pool id) set to zero bytes: two entries with the same bytes here are records
     /// core holds identically except for whose they are.
     pub unkeyed: BTreeMap<(EntryKind, Vec<String>), Vec<u8>>,
+    /// The native asset's contract on the chain's network, a `C` strkey.
+    pub native_contract: String,
 }
 
 fn flag(v: bool) -> String {
@@ -241,7 +243,14 @@ impl CoreState {
                 state.head_seq()
             );
         }
-        let mut s = CoreState::default();
+        let mut s = CoreState {
+            native_contract: stellar_strkey::Strkey::Contract(stellar_strkey::Contract(
+                net.asset_contract_id(&stellar_xdr::Asset::Native),
+            ))
+            .to_string()
+            .to_string(),
+            ..CoreState::default()
+        };
         for (_, e) in state.iter() {
             s.add(e);
         }
@@ -743,13 +752,68 @@ pub struct StateReport {
     /// on the chains it was inferred from (for example contract holders in a table of
     /// account balances); counted, not listed as missing.
     pub outside: u64,
+    /// Core entries an exclusion explains, counted per table and reason.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub excluded: BTreeMap<String, u64>,
     /// Rows whose key columns do not resolve.
     pub unresolved: u64,
     pub ok: bool,
 }
 
+/// Core entries a table leaves out on purpose, each with the target's source that says so.
+/// Written by hand, next to the inferred mapping: inference sees only what a table holds,
+/// not why it lacks something.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Exclusions {
+    #[serde(default)]
+    pub exclusion: Vec<Exclusion>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Exclusion {
+    pub table: String,
+    /// The key field the rule reads, for example `contract`.
+    pub field: String,
+    /// The value it must hold: a literal, or `native-asset-contract` for the native asset's
+    /// contract on the chain's network.
+    pub equals: String,
+    pub reason: String,
+    /// Where the target's source says so: repository path and line at the target build.
+    pub source: String,
+}
+
+impl Exclusions {
+    pub fn load(path: &Path) -> Result<Exclusions> {
+        let text =
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+        toml::from_str(&text).with_context(|| format!("parsing {}", path.display()))
+    }
+
+    fn excludes(&self, t: &TableMapping, key: &[String], core: &CoreState) -> Option<&Exclusion> {
+        self.exclusion.iter().find(|x| {
+            x.table == t.name
+                && t.entry
+                    .key_fields()
+                    .iter()
+                    .position(|f| *f == x.field)
+                    .and_then(|i| key.get(i))
+                    .is_some_and(|v| match x.equals.as_str() {
+                        "native-asset-contract" => *v == core.native_contract,
+                        lit => v == lit,
+                    })
+        })
+    }
+}
+
 /// Applies `mapping` to one chain's dump.
-pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) -> StateReport {
+pub fn check(
+    dump: &Dump,
+    core: &CoreState,
+    known: &Known,
+    mapping: &Mapping,
+    exclusions: &Exclusions,
+) -> StateReport {
     let mut r = StateReport::default();
     for t in &mapping.table {
         let Some(table) = dump.tables.get(&t.name) else {
@@ -789,7 +853,11 @@ pub fn check(dump: &Dump, core: &CoreState, known: &Known, mapping: &Mapping) ->
         }
         for (kind, key) in core.entries.keys() {
             if *kind == t.entry && !seen.contains(key) {
-                if covers(t, key) {
+                if let Some(x) = exclusions.excludes(t, key, core) {
+                    *r.excluded
+                        .entry(format!("{}: {}", t.name, x.reason))
+                        .or_insert(0) += 1;
+                } else if covers(t, key) {
                     r.missing.push(format!("{}: {}", t.name, key.join(" ")));
                 } else {
                     r.outside += 1;
@@ -812,6 +880,8 @@ pub struct RunChain {
     pub known: Known,
     /// Verdict counts of the chain's entries in the run.
     pub verdicts: BTreeMap<String, u64>,
+    /// The facts the oracle's problems on the chain are about, for example `token-event`.
+    pub problem_facts: BTreeSet<String>,
     /// No entry mishandled or dropped, the chain ran without an error and the carry check
     /// found nothing: the chains the mapping is inferred on.
     pub ordinary: bool,
@@ -833,6 +903,7 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
         let chain = shapekit_pack::chain::ChainFile::read(&dir)
             .with_context(|| format!("reading {}", dir.display()))?;
         let mut verdicts = BTreeMap::new();
+        let mut problem_facts = BTreeSet::new();
         for e in rep
             .entries
             .iter()
@@ -841,6 +912,7 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
             *verdicts
                 .entry(e.result.verdict.name().to_owned())
                 .or_insert(0) += 1;
+            problem_facts.extend(e.result.problems.iter().map(|p| p.fact.clone()));
         }
         let carry_clean = c
             .carry
@@ -863,6 +935,7 @@ pub fn load_run(out: &Path, corpus: &Path) -> Result<Vec<RunChain>> {
             core: CoreState::from_chain(&dir, &chain.passphrase, through)?,
             known: Known::from_chain(&dir, &chain.passphrase, through)?,
             verdicts,
+            problem_facts,
             ordinary,
         });
     }
@@ -879,27 +952,33 @@ pub struct ChainState {
     pub state: StateReport,
     /// Records core holds equally, and whether the target does too.
     pub route: super::route::RouteReport,
-    /// Where the state comparison and the oracle's verdicts tell different stories.
+    /// Where the state comparison contradicts the oracle: the stored state differs from
+    /// core's on a chain where the oracle found no problem.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub disagreement: Option<String>,
+    /// Where the oracle found problems and the mapped tables still equal core's: the two
+    /// checks read different things (the oracle each transaction's stored facts, this
+    /// comparison the tables' end state), so both can hold. The facts the problems are about.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub problems_outside_state: Vec<String>,
 }
 
-pub fn check_chain(c: &RunChain, mapping: &Mapping) -> ChainState {
-    let state = check(&c.dump, &c.core, &c.known, mapping);
+pub fn check_chain(c: &RunChain, mapping: &Mapping, exclusions: &Exclusions) -> ChainState {
+    let state = check(&c.dump, &c.core, &c.known, mapping, exclusions);
     let oracle_problem =
         c.verdicts.contains_key("mishandled") || c.verdicts.contains_key("dropped");
-    let disagreement = match (state.ok, oracle_problem) {
-        (false, false) => Some(format!(
+    let disagreement = (!state.ok && !oracle_problem).then(|| {
+        format!(
             "the stored state differs from core's ({} mismatched fields, {} stale rows, {} missing rows) where the oracle finds no problem",
             state.mismatches.len(),
             state.stale.len(),
             state.missing.len()
-        )),
-        (true, true) => Some(
-            "the oracle finds entries mishandled or dropped, the stored state of the mapped tables equals core's"
-                .into(),
-        ),
-        _ => None,
+        )
+    });
+    let problems_outside_state = if state.ok && oracle_problem {
+        c.problem_facts.iter().cloned().collect()
+    } else {
+        Vec::new()
     };
     ChainState {
         chain: c.chain.clone(),
@@ -909,6 +988,7 @@ pub fn check_chain(c: &RunChain, mapping: &Mapping) -> ChainState {
         route: super::route::check(&c.dump, &c.core, &c.known, mapping),
         state,
         disagreement,
+        problems_outside_state,
     }
 }
 
@@ -976,7 +1056,7 @@ mod tests {
         assert_eq!((t.name.as_str(), t.entry), ("balances", EntryKind::Account));
         assert_eq!(t.fields.get("balance").map(String::as_str), Some("balance"));
         assert!(!t.fields.contains_key("seen"));
-        assert!(check(&dump, &core, &known, &m).ok);
+        assert!(check(&dump, &core, &known, &m, &Exclusions::default()).ok);
     }
 
     #[test]
@@ -984,9 +1064,36 @@ mod tests {
         let (good, core, known) = setup("500");
         let (m, _) = merge(&[infer(&good, &core, &known)]);
         let (bad, _, _) = setup("499");
-        let r = check(&bad, &core, &known, &m);
+        let r = check(&bad, &core, &known, &m, &Exclusions::default());
         assert_eq!(r.mismatches.len(), 1, "{r:?}");
         assert_eq!(r.mismatches[0].core, "500");
+    }
+
+    #[test]
+    fn an_excluded_entry_is_counted_not_missing() {
+        let (dump, mut core, known) = setup("500");
+        let (m, _) = merge(&[infer(&dump, &core, &known)]);
+        let other = "GCZCI5DEMR3VGAG7HYV7IUCS5JNXXC4WDZR4AZVJD5E6DHDJZ5RDQW3A".to_owned();
+        core.entries
+            .insert((EntryKind::Account, vec![other.clone()]), Fields::new());
+        assert_eq!(
+            check(&dump, &core, &known, &m, &Exclusions::default())
+                .missing
+                .len(),
+            1
+        );
+        let x = Exclusions {
+            exclusion: vec![Exclusion {
+                table: "balances".into(),
+                field: "account".into(),
+                equals: other,
+                reason: "not kept".into(),
+                source: "x.go:1".into(),
+            }],
+        };
+        let r = check(&dump, &core, &known, &m, &x);
+        assert!(r.missing.is_empty() && r.ok, "{r:?}");
+        assert_eq!(r.excluded.values().sum::<u64>(), 1);
     }
 
     #[test]

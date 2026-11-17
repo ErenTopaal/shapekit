@@ -141,6 +141,9 @@ pub enum StateCommand {
         run: Vec<PathBuf>,
         #[arg(long)]
         mapping: PathBuf,
+        /// Core entries a table leaves out on purpose, each with the target's source line.
+        #[arg(long)]
+        exclusions: Option<PathBuf>,
         /// Only chains of this network.
         #[arg(long)]
         network: Option<String>,
@@ -635,13 +638,22 @@ fn state(c: StateCommand) -> Result<bool> {
         StateCommand::Check {
             run,
             mapping,
+            exclusions,
             network,
             corpus,
             out,
         } => {
             let m = state::Mapping::load(&mapping)?;
             let chains = load_runs(&run, &corpus, network.as_deref())?;
-            let results: Vec<_> = chains.iter().map(|c| state::check_chain(c, &m)).collect();
+            let x = exclusions
+                .as_deref()
+                .map(state::Exclusions::load)
+                .transpose()?
+                .unwrap_or_default();
+            let results: Vec<_> = chains
+                .iter()
+                .map(|c| state::check_chain(c, &m, &x))
+                .collect();
             let (mut ord, mut ord_ok) = (0, 0);
             for r in &results {
                 if r.ordinary {
@@ -677,6 +689,15 @@ fn state(c: StateCommand) -> Result<bool> {
                 }
                 for x in r.state.stale.iter().chain(&r.state.missing).take(5) {
                     println!("  {x}");
+                }
+                for (why, n) in &r.state.excluded {
+                    println!("  excluded {n}: {why}");
+                }
+                if !r.problems_outside_state.is_empty() {
+                    println!(
+                        "  the oracle's problems are in facts this comparison does not read: {}",
+                        r.problems_outside_state.join(", ")
+                    );
                 }
                 if !r.route.groups.is_empty() {
                     println!(
