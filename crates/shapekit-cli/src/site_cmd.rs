@@ -248,6 +248,16 @@ struct CoverageView {
     arms: ArmsView,
     families: Vec<FamilyRowView>,
     fields: Vec<FieldRowView>,
+    /// The obligation ledger by kind.
+    obligations: Vec<ObligationRowView>,
+}
+
+#[derive(Deserialize)]
+struct ObligationRowView {
+    kind: String,
+    met: usize,
+    unmeetable: usize,
+    open: usize,
 }
 
 #[derive(Deserialize)]
@@ -487,6 +497,11 @@ fn coverage_json(
             "uncovered": uncovered_arms,
         },
         "fields": fields,
+        "obligations": c
+            .obligations
+            .iter()
+            .map(|o| json!({ "kind": o.kind, "met": o.met, "unmeetable": o.unmeetable, "open": o.open }))
+            .collect::<Vec<_>>(),
         "blockers": blockers.iter().map(|(b, m)| json!({ "blocker": b, "meaning": m })).collect::<Vec<_>>(),
     }))
 }

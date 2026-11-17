@@ -16,6 +16,17 @@ type Scope = "visible" | "all" | "gaps"
 // registry/fields.toml's validated_by_core values, in words
 const checked: Record<string, string> = { partial: "in part", no: "never" }
 
+// what one obligation of each kind of the ledger is
+const obligationKinds: Record<string, string> = {
+  format: "A decision point of the XDR schema, in its accept or its reject direction.",
+  gap: "A point where a language's native types lose information an XDR value carries.",
+  "core-test-section": "A test section of stellar-core's own transaction tests.",
+  "gate-side": "One side of a protocol version gate in stellar-core's source.",
+  field: "An envelope field stellar-core was asked about on a standalone node.",
+  "sdk-version": "A published SDK version the corpus runs against.",
+  seed: "A fault seeded into an SDK by its language's mutation tool.",
+}
+
 // the states a cap row can be in; the terms block below explains each
 function state(c: CapRow): { tone: "pass" | "diverge" | "idle" | "known"; label: string } {
   if (!c.indexer_visible) return { tone: "idle", label: "not indexer-visible" }
@@ -231,6 +242,44 @@ export function CoveragePage() {
             </Table>
           </CollapsibleContent>
         </Collapsible>
+      </Section>
+
+      <Section
+        title="Obligations"
+        id="obligations"
+        description={
+          <>
+            Everything the corpus owes a witness for, merged in <RepoLink path="corpus/coverage/obligations.json" />.
+            An obligation is met when an entry witnesses it, unmeetable when the source shows that no input can, and open
+            otherwise.
+          </>
+        }
+      >
+        <Table>
+          <caption className="sr-only">Obligations by kind and status</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Kind</TableHead>
+              <TableHead className="min-w-56">What one obligation is</TableHead>
+              <TableHead className="text-right">Met</TableHead>
+              <TableHead className="text-right">Unmeetable</TableHead>
+              <TableHead className="text-right">Open</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coverage.obligations.map((o) => (
+              <TableRow key={o.kind}>
+                <TableCell className="align-top">
+                  <Id>{o.kind}</Id>
+                </TableCell>
+                <TableCell className="text-sm whitespace-normal text-muted-foreground">{obligationKinds[o.kind] ?? ""}</TableCell>
+                <TableCell className="num text-right align-top">{fmt.format(o.met)}</TableCell>
+                <TableCell className="num text-right align-top">{fmt.format(o.unmeetable)}</TableCell>
+                <TableCell className="num text-right align-top">{fmt.format(o.open)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Section>
 
       <Section
