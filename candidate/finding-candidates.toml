@@ -108,6 +108,23 @@ entries = [
 checks = "any/decode_encode and any/decode_json"
 observed = "implementation-defined entries with a tied vote (go has no type for them): js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
 
+[[candidate]]
+finding = "new"
+sdk = "rust"
+versions = ["30.0.0"]
+entries = [
+  "format.xdr-grammar.curve25519public-*", "format.xdr-grammar.curve25519secret-*",
+  "format.xdr-grammar.hmacsha256key-*", "format.xdr-grammar.hmacsha256mac-*",
+  "format.xdr-grammar.shorthashseed-*", "format.xdr-grammar.authcert-*",
+  "format.xdr-grammar.authenticatedmessage*", "format.xdr-grammar.hello-*",
+  "format.xdr-grammar.serializedbinaryfusefilter-*", "format.xdr-grammar.*surveyrequestmessage-*",
+  "format.xdr-grammar.stellarmessage-*", "format.xdr-grammar.int64-*", "format.xdr-grammar.uint64-*",
+]
+checks = "the expected_json of these 37 candidate entries, which the corpus generator writes with stellar-xdr 30.0.0"
+observed = "stellar-xdr writes a fixed-length opaque field that is not a typedef (Curve25519Public.key, HmacSha256Mac.mac, ShortHashSeed.seed and the rest) as a JSON array of byte numbers, and a bare Int64 or Uint64 value as a JSON number. SEP-51 v2.0.1 requires a hexadecimal string for fixed-length opaque data (\"The XDR fixed-length opaque data type ([RFC 4506 Section 4.9]) are represented as a hexadecimal string.\", ecosystem/sep-0051.md lines 204-207 at stellar-protocol ced008c3) and a base-10 string for hyper and unsigned hyper (\"maps to JSON strings, with the number base10 encoded as a simple integer\", lines 106-109 and 140-143). py-stellar-base and java-stellar-sdk write the SEP-51 forms, so their divergences on these entries are stellar-xdr's rendering, not theirs; this replaces the two open python and java rendering candidates"
+evidence = "stellar-xdr 30.0.0 src/generated/curve25519_public.rs:24-26 (pub key: [u8; 32] with no serde_as hex attribute, so serde writes an array) against fields such as AccountEntry.balance, account_entry.rs:50-54 (serde_as(as = \"NumberOrString\")); src/generated/int64.rs:10 and uint64.rs:10 (pub type Int64 = i64 and Uint64 = u64, so a bare value serializes as a JSON number)"
+open = "on these entries the rust testee is the reference rendering, so the conformance run marks python and java as diverging; a corrected expected_json needs a stellar-xdr release that follows SEP-51 here or a generator change, which is not done"
+
 # python sdk (stellar-sdk, py-stellar-base 16.1.1 and 17.0.1): divergences from
 #   shapekit conformance run --sdk python --all-versions                 (corpus, 716 entries)
 #   shapekit conformance run --sdk python --all-versions --manifest candidate/manifest.json
@@ -280,14 +297,6 @@ checks = "asset_order, pool_id, and tx_hash 3 of the testnet ledger"
 observed = "16.1.1 compares issuers as strkey text, so it orders some pairs against core, refuses pairs core accepts and derives other pool ids; the same defect JS-1766 and GO-3 had (py-stellar-base#1246), fixed in 17.0.0"
 evidence = "16.1.1 stellar_sdk/liquidity_pool_asset.py:81-84 (asset_a.issuer < asset_b.issuer); 17.0.1 :82-87 compares decoded key bytes"
 
-[[candidate]]
-finding = "new"
-sdk = "python"
-versions = ["16.1.1", "17.0.1"]
-entries = ["candidate: 33 entries (Curve25519Public, HmacSha256Mac, ShortHashSeed, PeerAddress and the types holding them)", "candidate: 4 entries (bare Int64 and Uint64)"]
-checks = "decode_json and encode_json"
-observed = "fixed-length opaque fields that are not a named hash type are written as hex where stellar-xdr writes a byte array, and a bare Int64 or Uint64 is written as a string where stellar-xdr writes a number"
-open = "both may be stellar-xdr's rendering rather than a python defect: not settled against SEP-51 text here, so not a defect claim yet"
 
 # java sdk (network.lightsail:stellar-sdk, java-stellar-sdk 5.0.0 and 6.0.0): divergences from
 #   shapekit conformance run --sdk java --all-versions                 (corpus, 716 entries)
@@ -398,14 +407,6 @@ checks = "testnet/tx_hash 0"
 observed = "fromEnvelopeXdr refuses a transaction in a ledger core closed: a revoke sponsorship of a signed payload signer with an empty payload (\"Invalid payload length, must be between 1 and 64, got 0\"); CAP-40 allows 0 to 64 bytes in the xdr"
 evidence = "SignerKey.java:296-304"
 
-[[candidate]]
-finding = "new"
-sdk = "java"
-versions = ["5.0.0", "6.0.0"]
-entries = ["candidate: 33 entries (Curve25519Public, HmacSha256Mac, ShortHashSeed and the types holding them)", "candidate: 4 entries (bare Int64 and Uint64)"]
-checks = "decode_json and encode_json"
-observed = "the same two renderings as python: fixed-length opaque fields written as hex where stellar-xdr writes a byte array (and fromJson crashes on the array, ClassCastException), and a bare Int64 or Uint64 written as a string"
-open = "may be stellar-xdr's rendering rather than a java defect: not settled against SEP-51 text here"
 
 # indexer state: `shapekit harness state check` on the wallet-backend reference run, against
 # core's final entries. a candidate here is a stored end state that differs from core's
