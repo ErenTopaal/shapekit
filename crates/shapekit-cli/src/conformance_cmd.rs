@@ -14,7 +14,8 @@ const STACK_BYTES: usize = 512 << 20;
 pub enum ConformanceCommand {
     /// Run corpus entries through SDK testees and write the divergence matrix.
     Run {
-        /// SDK to run (rust, go, js, soroban); repeatable. All SDKs in versions.toml when absent.
+        /// SDK to run, a key of versions.toml such as rust, go or js; repeatable. All SDKs in
+        /// versions.toml when absent.
         #[arg(long = "sdk")]
         sdks: Vec<String>,
         /// Exact SDK version to run; repeatable, needs exactly one --sdk.

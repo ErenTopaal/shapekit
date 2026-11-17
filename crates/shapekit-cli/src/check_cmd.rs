@@ -23,7 +23,8 @@ pub enum CheckCommand {
 
 #[derive(Args)]
 pub struct SdkArgs {
-    /// SDK to run (rust, go, js, soroban); repeatable. Every SDK in the versions file when absent.
+    /// SDK to run, a key of the versions file such as rust, go or js; repeatable. Every SDK in
+    /// the versions file when absent.
     #[arg(long = "sdk")]
     sdks: Vec<String>,
     /// Exact SDK version to run; repeatable, needs exactly one --sdk.
