@@ -654,6 +654,7 @@ fn symbolic_references() {
         "@account:alice",
         "@muxed:alice:18446744073709551615",
         "@contract:echo-1",
+        "@muxed-contract:echo-1:67",
         "@wasm:echo",
         "@seq:alice",
         "@seq:alice+1048576",
@@ -668,6 +669,8 @@ fn symbolic_references() {
     assert!(SymRef::parse("GABC").is_none());
     for bad in [
         "@muxed:alice:18446744073709551616",
+        "@muxed-contract:echo-1",
+        "@muxed-contract:echo-1:x",
         "@seq:alice+-1",
         "@account:Alice",
         "@ledger:3",
@@ -1337,5 +1340,28 @@ fn record_mode_delegates_name_existing_roles() {
     has_problem(
         &with(BTreeMap::from([("carol".into(), vec!["alice".into()])])),
         "role carol is used before a fund step",
+    );
+}
+
+#[test]
+fn a_muxed_contract_reference_names_a_contract_an_earlier_step_made() {
+    let calling = |to: &str| {
+        recipe_with(Step::Invoke {
+            label: None,
+            source: "bob".into(),
+            contract: "echo-1".into(),
+            function: "echo".into(),
+            args: vec![json!({"address": to})],
+            auth: AuthSpec::Source,
+            resources: None,
+            simulate: true,
+            footprint: None,
+            expect: TxExpect::default(),
+        })
+    };
+    holds(&calling("@muxed-contract:echo-1:67"));
+    has_problem(
+        &calling("@muxed-contract:nowhere:67"),
+        "no earlier step is labelled nowhere",
     );
 }

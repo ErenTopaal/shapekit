@@ -359,6 +359,9 @@ impl<'a> Session<'a> {
                     .get(label)
                     .with_context(|| format!("no deploy step labelled {label} has run"))?,
             ),
+            SymRef::MuxedContract { .. } => bail!(
+                "{r} is in the recipe IR, but this interpreter does not resolve muxed contract addresses yet"
+            ),
             SymRef::Wasm(label) => hex::encode(
                 self.wasm
                     .get(label)

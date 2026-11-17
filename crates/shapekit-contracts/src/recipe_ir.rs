@@ -19,6 +19,7 @@
 //! | `@account:<role>` | the role's account, `G...` |
 //! | `@muxed:<role>:<id>` | the role's account muxed with the decimal u64 `id`, `M...` |
 //! | `@contract:<label>` | the contract a `deploy` step labelled so created, or a `host-function` step whose function creates one (`create_contract`, `create_contract_v2`, the Stellar asset contract included), read from its return address, `C...` |
+//! | `@muxed-contract:<label>:<id>` | the contract `@contract:<label>` names, muxed with the decimal u64 `id`, `W...` |
 //! | `@wasm:<label>` | the hex hash of the code an `upload` step labelled so uploaded |
 //! | `@seq:<role>` or `@seq:<role>+<n>` | the role's current sequence number, plus `n` |
 //! | `@ledger-start:<n>` | the starting sequence number of ledger last-closed + `n`, `(last + n) << 32` |
@@ -437,6 +438,12 @@ pub enum SymRef {
         id: u64,
     },
     Contract(String),
+    /// `@muxed-contract:<label>:<id>`: the `W` strkey of the contract the label made, muxed
+    /// with `id`. Contract ids depend on the network id, so no literal can stand in for it.
+    MuxedContract {
+        label: String,
+        id: u64,
+    },
     Wasm(String),
     Seq {
         role: String,
@@ -479,6 +486,18 @@ impl SymRef {
                     id,
                 })
             }),
+            "muxed-contract" => rest
+                .split_once(':')
+                .ok_or_else(bad)
+                .and_then(|(label, id)| {
+                    let id = parse_decimal(id)
+                        .and_then(|v| u64::try_from(v).ok())
+                        .ok_or_else(bad)?;
+                    Ok(Self::MuxedContract {
+                        label: name(label)?,
+                        id,
+                    })
+                }),
             "seq" => {
                 let (role, add) = match rest.split_once('+') {
                     Some((r, n)) => (
@@ -512,6 +531,7 @@ impl fmt::Display for SymRef {
             Self::Account(r) => write!(f, "@account:{r}"),
             Self::Muxed { role, id } => write!(f, "@muxed:{role}:{id}"),
             Self::Contract(l) => write!(f, "@contract:{l}"),
+            Self::MuxedContract { label, id } => write!(f, "@muxed-contract:{label}:{id}"),
             Self::Wasm(l) => write!(f, "@wasm:{l}"),
             Self::Seq { role, add: 0 } => write!(f, "@seq:{role}"),
             Self::Seq { role, add } => write!(f, "@seq:{role}+{add}"),
@@ -700,7 +720,7 @@ impl Checker<'_> {
                 Ok(
                     SymRef::Account(role) | SymRef::Muxed { role, .. } | SymRef::Seq { role, .. },
                 ) => self.role(at, &role, false),
-                Ok(SymRef::Contract(l)) => {
+                Ok(SymRef::Contract(l) | SymRef::MuxedContract { label: l, .. }) => {
                     if !self.creators.contains(&l) {
                         self.want(
                             at,
