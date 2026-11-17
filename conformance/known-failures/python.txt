@@ -1,0 +1,985 @@
+# known failures of the python testee (stellar-sdk, py-stellar-base).
+# format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see
+# crates/shapekit-conformance/src/known.rs and docs/testee-protocol.md, "Known failures".
+# none of these is filed: each cause is a candidate in candidate/finding-candidates.toml, which
+# names the finding of another sdk it shares or marks it new.
+
+# to_json writes enum values and union arms as the lowercased .x name without the word breaks
+# SEP-51 has: txsuccess for tx_success, txfee_bump_inner_success for tx_fee_bump_inner_success,
+# opinner for op_inner, memalloc for mem_alloc, ipv6 for i_pv6, 8_bit for b8_bit. from_json reads
+# only its own spelling and raises KeyError (a crash, not a ValueError) on the SEP-51 one.
+# java-stellar-sdk writes the same names. new
+cap01.bump-sequence.golden-b71da06f9ce2dec8-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap01.bump-sequence.p30-bump-behind 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-forward 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-past-starting-sequence 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-to-i64-max 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap01.bump-sequence.p30-merge-seqnum-too-far 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.golden-00c0553ff45607f9-10 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.golden-0ebc576d9b25b85a-8 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.golden-1184dd64bb4ead8c-20 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.golden-12c04cf739c52eac-20 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.golden-27d2533d64835282-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.golden-847b038d8a2ce1c2-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap03.offer-liabilities.mainnet-25000000 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-crosses-and-rests-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-near-int64-max-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-buy-offer-takes-two-makers-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-credit-pair-cross-partial 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-issuer-sells-own-asset 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-merge-dest-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-sell-credit-trustline-liabilities 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-sell-native-selling-liabilities 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap03.offer-liabilities.p30-update-offer-by-id 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap15.fee-bump.mainnet-51000294-a25b8226-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap15.fee-bump.p30-fee-source-is-inner-source-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-fee-source-is-inner-source-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-auth 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-auth-extra 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-min-seq-gap 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-seq 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-sponsorship 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-failed-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-failed-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-success-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-success-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-muxed-fee-source-inner-failed-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap15.fee-bump.p30-muxed-fee-source-inner-success-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-muxed-fee-source-inner-success-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap18.maintain-liabilities.golden-3f24be68a9962089-4 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json
+cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap21.preconditions.golden-27d2533d64835282-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap21.preconditions.golden-27d2533d64835282-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap21.preconditions.p30-all-preconditions-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-all-preconditions-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap21.preconditions.p30-ledger-and-time-bounds-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-ledger-and-time-bounds-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap21.preconditions.p30-ledger-bounds-no-maximum-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-ledger-bounds-no-maximum-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap21.preconditions.p30-min-seq-age-and-gap-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-min-seq-age-and-gap-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap21.preconditions.p30-min-seq-num-jump-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-min-seq-num-jump-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap21.preconditions.p30-two-extra-signers-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.p30-two-extra-signers-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap23.claimable-balances.golden-3635a80135f66ca8-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap23.claimable-balances.golden-67b49513ed2f1609-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap23.claimable-balances.p30-claim-through-depth-4-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap23.claimable-balances.p30-claim-through-depth-4-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap26.inflation.p11-inflation-not-time * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap26.inflation.p11-inflation-payout * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.mainnet-36196205-17fee99b-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+cap27.muxed-accounts.p28-account-merge-destination-id-2p53 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-clawback-from-id-2p64-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap27.muxed-accounts.p28-issued-payment-destination-id-2p53 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-operation-sources-four-ids * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-path-payment-strict-receive-destination-id-2p64-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-path-payment-strict-send-destination-id-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-0 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p53 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p28-tx-source-and-payment-destination-id-2p64-1 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-account-merge-destination-id-2p53 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-clawback-from-id-2p64-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap27.muxed-accounts.p30-issued-payment-destination-id-2p53 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-operation-sources-four-ids 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-0 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.golden-16ca002da0d1fd67-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-1c7fb8566ea79e53-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-24cec2c5f1acf638-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-27d2533d64835282-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-3635a80135f66ca8-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-5a03a46b7b48bb06-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.golden-6f067a349543093a-48 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-revoke-signer-sponsorship-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-revoke-signer-sponsorship-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-revoke-trustline-sponsorship-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-revoke-trustline-sponsorship-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-account-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-account-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-claimable-balance-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-claimable-balance-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-signer-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-signer-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-trustline-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.p30-sponsored-trustline-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap35.clawback.golden-3f24be68a9962089-11 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap35.clawback.p30-clawback 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap35.clawback.p30-clawback-claimable-balance-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-clawback-claimable-balance-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap35.clawback.p30-clawback-not-enabled 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap35.clawback.p30-create-clawback-enabled-balance 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap35.clawback.p30-set-flags-authorized-to-maintain 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap35.clawback.p30-set-flags-reauthorize-clear-clawback 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.golden-0d70bfa2dc91b602-10 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap38.liquidity-pools.golden-0d70bfa2dc91b602-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap38.liquidity-pools.golden-d637d6474c6d185d-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.p30-change-trust-pool-byte-order-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.p30-deposit-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.p30-deposit-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.p30-path-payment-through-pool 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.p30-revoke-redeems-pool-shares 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.p30-withdraw-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.p30-withdraw-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap38.liquidity-pools.testnet-5521432 * diverges-from-network candidate/finding-candidates.toml testnet/decode_json
+cap40.signed-payload-signer.p28-authorised-by-payload-32 * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-extra-signer-payload-64-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-remove-signer-payload-1-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-set-options-payload-1-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-set-options-payload-32-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-set-options-payload-4-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p28-sponsored-set-options-payload-64-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-authorised-by-payload-32 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-extra-signer-payload-64-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-extra-signer-payload-64-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-remove-signer-payload-1-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-remove-signer-payload-1-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-1-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-1-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-32-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-32-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-4-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-set-options-payload-4-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-sponsored-set-options-payload-64-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-sponsored-set-options-payload-64-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap40.signed-payload-signer.testnet-4437357 * diverges-from-network candidate/finding-candidates.toml testnet/decode_json, testnet/encode_json
+cap42.generalized-txset.golden-27d2533d64835282-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap63.parallel-txset.golden-04667ce620bffee7-24 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap63.parallel-txset.golden-81af9cfb66a06a01-18 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap63.parallel-txset.p30-five-calls-parallel-phase 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap66.archival.golden-04667ce620bffee7-23 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap66.archival.golden-04667ce620bffee7-26 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap66.archival.golden-9b704e753d572789-23 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap66.archival.p30-auto-restore-invoke-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap66.archival.p30-auto-restore-invoke-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap66.archival.p30-restore-footprint 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.golden-09beaf24eb0cdcb0-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-27d2533d64835282-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-4c437318f87437c5-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-60000be2e73a4207-10 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-19 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-20 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.p22-account-merge-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-account-merge-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-claim-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-clawback * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap67.unified-events.p22-backfill-clawback-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-create-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-liquidity-pool-deposit * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-path-payment-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-burn * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-memo-hash * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-memo-id * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-memo-text * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-mint * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-to-self * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-payment-transfer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-set-authorized-false * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-set-authorized-true * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-claim-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-clawback * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap67.unified-events.p22-clawback-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-create-claimable-balance * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-liquidity-pool-deposit * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-path-payment-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-burn * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-memo-hash * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-memo-id * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-memo-text * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-mint * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-muxed-destination * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-to-self * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-payment-transfer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-set-authorized-false * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p22-set-authorized-true * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-account-merge-muxed-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-claim-claimable-balance 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-clawback 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+cap67.unified-events.p30-clawback-claimable-balance 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-create-claimable-balance 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-liquidity-pool-deposit 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-path-payment-muxed-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-burn 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-hash 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-id 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-text 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-mint 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-muxed-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-to-self 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-payment-transfer 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-set-authorized-false 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-set-authorized-true 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap67.unified-events.p30-soroban-fee-refund 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap71.credentials.golden-e25799a2e2e9eea2-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap71.credentials.p30-address-v2 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap71.credentials.p30-with-delegates-nested 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap71.credentials.p30-with-delegates-unsorted 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.golden-012504b1914e5df1-3 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap73.sac-trust.golden-1467a37ff2a1e960-0 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap73.sac-trust.golden-504393015a71bc7a-8 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap73.sac-trust.golden-a8df5d4dbdc85ac8-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap73.sac-trust.p28-deploy-credit-sac-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p28-deploy-xlm-sac-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p28-trust-again * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p28-trust-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p28-xlm-transfer-creates-account-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p30-deploy-credit-sac-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap73.sac-trust.p30-deploy-credit-sac-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p30-deploy-xlm-sac-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap73.sac-trust.p30-deploy-xlm-sac-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p30-trust-again 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p30-trust-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap73.sac-trust.p30-trust-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap73.sac-trust.p30-xlm-transfer-creates-account-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap73.sac-trust.p30-xlm-transfer-creates-account-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap76.archival-remediation.golden-04667ce620bffee7-26 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.golden-0d70bfa2dc91b602-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.golden-a0fb94c314b8bb2f-15 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.golden-d637d6474c6d185d-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.p30-claim-into-frozen-trustline 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap77.frozen-keys.p30-deposit-frozen-trustline 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap77.frozen-keys.p30-withdraw-frozen-trustline 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-contract-deploys-external-ref-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-contract-deploys-external-ref-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-create-external-ref-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-create-external-ref-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-create-external-ref-missing-tag 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-echo-executable-tag-value-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-echo-executable-tag-value-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-publish-executable-tag 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap85.executable-tag.p30-update-to-external-ref-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-update-to-external-ref-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap88.ms-close-time.testnet-5695387 17.0.1 diverges-from-network candidate/finding-candidates.toml testnet/decode_json, testnet/encode_json
+classic.failed-tx.golden-6f067a349543093a-50 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.failed-tx.golden-8e3126c525875c96-10 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.failed-tx.golden-c6724c1a19ffc3c9-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.failed-tx.golden-e0e11e1fb450f676-32 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.failed-tx.golden-fad872f357f20fe9-12 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.failed-tx.mainnet-63092990-6f36ffa2-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+classic.failed-tx.p12-allow-trust-self-not-allowed * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p12-allow-trust-trust-not-required * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p12-change-trust-self-not-allowed * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-manage-buy-offer-buy-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-manage-buy-offer-sell-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-manage-sell-offer-buy-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-manage-sell-offer-sell-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-path-payment-strict-receive-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-path-payment-strict-send-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p12-payment-no-issuer * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-add-pre-auth-signer-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-add-pre-auth-signer-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-cant-revoke 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p30-allow-trust-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p30-allow-trust-no-trust-line 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p30-change-trust-cannot-delete 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-invalid-limit 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-no-issuer 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-trust-line-missing 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-claim-does-not-exist 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-claim-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-claim-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-claim-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-does-not-exist 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-not-issuer 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p30-clawback-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, testnet/decode_json
+classic.failed-tx.p30-create-account-already-exist 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-create-account-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-create-account-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-bad-price 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-pool-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-buy-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-buy-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-cross-self 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-not-found 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-sell-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-sell-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-name-not-found 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-removed 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-buy-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-buy-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-cross-self 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-not-found 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-sell-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-sell-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-merge-has-sub-entries 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-merge-immutable-set 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-merge-is-sponsor 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-merge-no-account 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-op-bad-auth 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-passive-offer-operation-source 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-exceeded-work-limit 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-no-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-offer-cross-self 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-src-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-src-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-too-few-offers 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-no-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-offer-cross-self 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-src-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-src-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-too-few-offers 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-under-destmin 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-payment-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-payment-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-payment-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-payment-src-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-payment-src-not-authorized 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-pre-auth-failed-removes-signer 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-does-not-exist 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-not-sponsor 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-only-transferable 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-auth-revocable-required 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-cant-change 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-invalid-inflation 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-cant-revoke 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-invalid-state 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-no-trust-line 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-tx-bad-auth-extra 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-tx-bad-min-seq-gap 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-unknown-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-line-full 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-under-minimum 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.failed-tx.p9-change-trust-native-internal-error-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.golden-34519f44ec59503a-22 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.max-length.golden-6f067a349543093a-46 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.max-length.mainnet-63092988-bf644414-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+classic.max-length.p30-data-name-value-64-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-data-name-value-64-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-home-domain-32 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-memo-text-28 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-operations-100 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-path-strict-receive-5 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-path-strict-send-5 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-signatures-20 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.max-length.p30-signer-21-too-many 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-ff 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-sha256 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-zero 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-2-63 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-max 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-muxed-destination 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-zero 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-ff 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-sha256 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-zero 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.golden-e0e11e1fb450f676-32 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+classic.memo-bytes.p30-memo-above-max-code-point 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-ff 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-lone-continuation 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-overlong-nul 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-surrogate 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-truncated-sequence-28 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.golden-938fb779c48ac3af-16 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+sep41.muxed-addresses.p28-credit-mint-to-muxed * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.p28-credit-transfer-to-muxed * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.p28-xlm-transfer-to-muxed * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.p30-credit-mint-to-muxed 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.p30-credit-transfer-to-muxed 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+sep41.muxed-addresses.p30-xlm-transfer-to-muxed 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.golden-27003f6cc5cdecc2-3 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.auth-trees.golden-57a486abce28859d-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.auth-trees.golden-a8df5d4dbdc85ac8-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.auth-trees.p30-address-credentials 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-245 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-246 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-492 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-failed-carries-auth 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-fanout-330 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-fanout-331-fails 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-matched-depth-31 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-matched-depth-32-fails 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-source-account-credentials 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-failed-tx 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-success 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.events-max.golden-4c437318f87437c5-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.events-max.golden-692fdd0e57531ce4-25 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.events-max.golden-a8df5d4dbdc85ac8-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.events-max.golden-a8df5d4dbdc85ac8-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.events-max.p30-echo-bytes-at-limit 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.events-max.p30-echo-bytes-at-limit-over 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.events-max.p30-emit-topics-bytes-at-limit 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.events-max.p30-emit-topics-bytes-at-limit-over 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.golden-04667ce620bffee7-24 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-04667ce620bffee7-26 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-4c437318f87437c5-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-568d51258ccf9080-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-7b59aa36c1776fe1-32 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-7e8aadf36d7d907d-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-8299635e181e651c-11 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-897493fc26f0ff7b-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-a1774bbe0c32cf40-10 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-a8c5079e2141c975-31 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-bf1c69a28fed2564-6 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-d8e7a355b968f3df-28 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-e14cf5fee65b0fed-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-e55ad2d584383867-44 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.golden-ee9b88dc9e59dfba-32 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.invoke-basics.p30-contract-deploys-with-constructor-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-contract-deploys-with-constructor-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-create-contract-v1-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-create-contract-v1-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-create-contract-v2-constructor-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-create-contract-v2-constructor-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-extend-ttl-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-extend-ttl-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-failed-events-discarded-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-failed-events-discarded-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-failed-trapped-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-failed-trapped-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-invoke-restored-contract-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-invoke-restored-contract-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-invoke-temporary-entry-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-invoke-temporary-entry-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-restore-archived-instance-and-code-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.p30-restore-archived-instance-and-code-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.invoke-basics.p30-upload-wasm 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.golden-04667ce620bffee7-24 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.muxed-source.golden-e55ad2d584383867-44 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.muxed-source.p28-muxed-and-base-source-one-ledger * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.p28-restore-muxed-source * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.p30-extend-ttl-muxed-source 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.p30-extend-ttl-noop-muxed-source 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.p30-restore-muxed-source 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.muxed-source.p30-restore-noop-muxed-source 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.golden-3c107a86e830c499-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.golden-4c437318f87437c5-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.golden-7e8aadf36d7d907d-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.golden-8299635e181e651c-27 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.golden-897493fc26f0ff7b-17 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.mainnet-57500008-b3475921-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta * diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json
+soroban.scval-shapes.p30-errors-auth-crypto-events-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-errors-auth-crypto-events-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-integer-extremes-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-integer-extremes-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-max-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-depth-over 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-keys-collide-native-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-keys-collide-native-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-unsorted 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-string-not-utf8-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-string-not-utf8-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-symbol-not-utf8 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-meta 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-max-meta 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-over 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+
+# to_json writes a ContractID (ConfigUpgradeSetKey.contract_id, ContractEvent.contract_id) as hex,
+# where SEP-51 writes the C strkey, and from_json refuses the strkey. new
+cap42.generalized-txset.golden-27003f6cc5cdecc2-5 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap46.config-upgrades.golden-27003f6cc5cdecc2-5 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap46.config-upgrades.p30-testnet-settings-upgrade 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap70.scp-timing.p30-scp-timing-upgrade 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap77.frozen-keys.golden-34d6c37c6481e487-7 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.golden-750ccb6ad63c37bb-9 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap77.frozen-keys.p30-bypass-upgrade 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap77.frozen-keys.p30-freeze-upgrade 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+soroban.scval-shapes.synth-event-map-duplicate-key * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.synth-event-map-unsorted * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.synth-event-vec-absent * diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+
+# to_json writes the AssetCode of AllowTrustOp as {"credit_alphanum4": "USD"}, where SEP-51 writes
+# the bare code, and from_json refuses the bare code. new
+cap18.maintain-liabilities.golden-3f24be68a9962089-4 17.0.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-both-flags 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.testnet-5521432 * diverges-from-network candidate/finding-candidates.toml testnet/encode_json
+classic.failed-tx.p12-allow-trust-self-not-allowed * diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p12-allow-trust-trust-not-required * diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-cant-revoke 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-low-reserve 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-no-trust-line 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+
+# 17.0.1 decodes the CAP-84 muxed contract address (SC_ADDRESS_TYPE_MUXED_CONTRACT) but its
+# SCAddress to_json raises "Unknown SCAddress type" and from_json refuses the W strkey. new
+cap67.unified-events.golden-426337b02a4e2a17-11 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap84.muxed-contract.golden-7f92354d03578deb-11 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+cap84.muxed-contract.p30-issuer-transfer-to-muxed-contract 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap84.muxed-contract.p30-mint-to-muxed-contract-refused 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_json, mainnet/encode_json, testnet/decode_json, testnet/encode_json
+
+# ClawbackOp's field `from` is the python attribute from_, and to_json writes and from_json reads
+# the json key from_, so a clawback written as SEP-51 json cannot be read (KeyError, a crash). new
+cap27.muxed-accounts.p28-clawback-from-id-2p64-1 * diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-clawback-from-id-2p64-1 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-clawback 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-clawback-not-enabled 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p22-backfill-clawback * diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p22-clawback * diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-clawback 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-no-trust 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-underfunded 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+
+# an SCV_VEC arm with no vec (the xdr allows the optional to be absent) decodes, but
+# to_json fails an assert and from_json of {"vec": null} raises TypeError. new
+soroban.auth-trees.golden-5f615b0f98ae09f3-11 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json
+soroban.scval-shapes.synth-event-vec-absent * diverges-from-network candidate/finding-candidates.toml any/decode_json
+
+# 16.1.1 knows protocols up to 29. from_json of a protocol 30 value raises KeyError on the names it
+# does not know instead of a ValueError, so these count as crashes. new (the from_json robustness
+# side of the result code cause above)
+cap01.bump-sequence.golden-b71da06f9ce2dec8-2 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap01.bump-sequence.p30-bump-behind 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-forward 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-past-starting-sequence 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap01.bump-sequence.p30-bump-to-i64-max 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap01.bump-sequence.p30-merge-seqnum-too-far 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.golden-00c0553ff45607f9-10 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.golden-0ebc576d9b25b85a-8 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.golden-1184dd64bb4ead8c-20 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.golden-12c04cf739c52eac-20 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.golden-27d2533d64835282-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.golden-847b038d8a2ce1c2-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap03.offer-liabilities.p30-credit-pair-cross-partial 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-issuer-sells-own-asset 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-merge-dest-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-sell-credit-trustline-liabilities 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-sell-native-selling-liabilities 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap03.offer-liabilities.p30-update-offer-by-id 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.golden-f5fa0a4b15bfd9d9-12 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap15.fee-bump.p30-inner-bad-auth 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-auth-extra 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-min-seq-gap 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-seq 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap15.fee-bump.p30-inner-bad-sponsorship 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.golden-3f24be68a9962089-4 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap21.preconditions.golden-27d2533d64835282-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap21.preconditions.golden-27d2533d64835282-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap23.claimable-balances.golden-3635a80135f66ca8-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap23.claimable-balances.golden-67b49513ed2f1609-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap27.muxed-accounts.p30-account-merge-destination-id-2p53 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-clawback-from-id-2p64-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-issued-payment-destination-id-2p53 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-operation-sources-four-ids 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-path-payment-strict-receive-destination-id-2p64-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-path-payment-strict-send-destination-id-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-0 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p53 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap27.muxed-accounts.p30-tx-source-and-payment-destination-id-2p64-1 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap33.sponsorship.golden-16ca002da0d1fd67-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-1c7fb8566ea79e53-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-24cec2c5f1acf638-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-27d2533d64835282-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-3635a80135f66ca8-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-5a03a46b7b48bb06-2 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap33.sponsorship.golden-6f067a349543093a-48 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap35.clawback.golden-3f24be68a9962089-11 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap35.clawback.p30-clawback 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-clawback-not-enabled 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-create-clawback-enabled-balance 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-set-flags-authorized-to-maintain 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap35.clawback.p30-set-flags-reauthorize-clear-clawback 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.golden-0d70bfa2dc91b602-10 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap38.liquidity-pools.golden-0d70bfa2dc91b602-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap38.liquidity-pools.golden-d637d6474c6d185d-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap38.liquidity-pools.p30-path-payment-through-pool 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap38.liquidity-pools.p30-revoke-redeems-pool-shares 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap40.signed-payload-signer.p30-authorised-by-payload-32 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap42.generalized-txset.golden-27d2533d64835282-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap46.config-upgrades.golden-182fa2818edaf743-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap46.config-upgrades.p30-header-upgrades 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap46.config-upgrades.p30-max-soroban-tx-set-size-upgrade 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap46.config-upgrades.p30-testnet-settings-upgrade 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap63.parallel-txset.golden-04667ce620bffee7-24 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap63.parallel-txset.golden-81af9cfb66a06a01-18 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap63.parallel-txset.p30-five-calls-parallel-phase 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap66.archival.golden-04667ce620bffee7-23 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap66.archival.golden-04667ce620bffee7-26 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap66.archival.golden-7b59aa36c1776fe1-31 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap66.archival.golden-9b704e753d572789-23 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap66.archival.p30-evicted-persistent 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap66.archival.p30-evicted-temporary 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap66.archival.p30-restore-footprint 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.golden-09beaf24eb0cdcb0-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-27d2533d64835282-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-426337b02a4e2a17-11 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-4c437318f87437c5-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-60000be2e73a4207-10 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-19 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.golden-938fb779c48ac3af-20 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap67.unified-events.p30-account-merge-muxed-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-claim-claimable-balance 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-clawback 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-clawback-claimable-balance 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-create-claimable-balance 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-liquidity-pool-deposit 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-path-payment-muxed-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-burn 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-hash 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-id 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-memo-text 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-mint 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-muxed-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-to-self 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-payment-transfer 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-set-authorized-false 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-set-authorized-true 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap67.unified-events.p30-soroban-fee-refund 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap70.scp-timing.p30-scp-timing-upgrade 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap71.credentials.golden-e25799a2e2e9eea2-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap71.credentials.p30-address-v2 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap71.credentials.p30-with-delegates-nested 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap71.credentials.p30-with-delegates-unsorted 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap73.sac-trust.golden-012504b1914e5df1-3 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap73.sac-trust.golden-1467a37ff2a1e960-0 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap73.sac-trust.golden-504393015a71bc7a-8 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap73.sac-trust.golden-a8df5d4dbdc85ac8-2 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap73.sac-trust.p30-trust-again 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap76.archival-remediation.golden-04667ce620bffee7-26 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.golden-0d70bfa2dc91b602-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.golden-34d6c37c6481e487-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.golden-750ccb6ad63c37bb-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.golden-a0fb94c314b8bb2f-15 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.golden-d637d6474c6d185d-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap77.frozen-keys.p30-bypass-upgrade 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap77.frozen-keys.p30-claim-into-frozen-trustline 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap77.frozen-keys.p30-deposit-frozen-trustline 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap77.frozen-keys.p30-freeze-upgrade 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap77.frozen-keys.p30-withdraw-frozen-trustline 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap84.muxed-contract.golden-7f92354d03578deb-11 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap84.muxed-contract.p30-issuer-transfer-to-muxed-contract 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap84.muxed-contract.p30-mint-to-muxed-contract-refused 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap84.muxed-contract.p30-xlm-transfer-to-muxed-contract 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-create-external-ref-missing-tag 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap85.executable-tag.p30-publish-executable-tag 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+cap88.ms-close-time.golden-b71da06f9ce2dec8-3 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+cap88.ms-close-time.testnet-5695387 16.1.1 diverges-from-network candidate/finding-candidates.toml testnet/encode_json
+classic.failed-tx.golden-6f067a349543093a-50 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.failed-tx.golden-8e3126c525875c96-10 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.failed-tx.golden-c6724c1a19ffc3c9-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.failed-tx.golden-fad872f357f20fe9-12 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.failed-tx.p30-allow-trust-cant-revoke 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-allow-trust-no-trust-line 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-cannot-delete 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-invalid-limit 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-no-issuer 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-not-auth-maintain-liabilities 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-change-trust-trust-line-missing 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-claim-does-not-exist 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-claim-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-claim-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-claim-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-does-not-exist 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-not-clawback-enabled 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-claimable-balance-not-issuer 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-clawback-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-account-already-exist 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-account-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-account-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-create-claimable-balance-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-bad-price 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-pool-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-deposit-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-buy-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-buy-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-cross-self 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-not-found 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-sell-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-sell-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-buy-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-name-not-found 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-data-removed 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-buy-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-buy-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-cross-self 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-not-found 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-sell-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-sell-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-manage-sell-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-merge-has-sub-entries 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-merge-immutable-set 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-merge-is-sponsor 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-merge-no-account 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-op-bad-auth 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-passive-offer-operation-source 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-exceeded-work-limit 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-no-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-offer-cross-self 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-src-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-src-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-too-few-offers 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-receive-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-no-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-offer-cross-self 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-src-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-src-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-too-few-offers 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-under-destmin 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-path-send-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-payment-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-payment-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-payment-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-payment-src-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-payment-src-not-authorized 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-pre-auth-failed-removes-signer 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-does-not-exist 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-not-sponsor 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-revoke-only-transferable 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-auth-revocable-required 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-cant-change 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-invalid-inflation 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-options-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-cant-revoke 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-invalid-state 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-low-reserve 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-set-trust-line-flags-no-trust-line 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-tx-bad-auth-extra 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-tx-bad-min-seq-gap 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-unknown-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-line-full 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-no-trust 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-under-minimum 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.failed-tx.p30-withdraw-underfunded 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.golden-34519f44ec59503a-22 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.max-length.golden-6f067a349543093a-46 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+classic.max-length.p30-home-domain-32 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-memo-text-28 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-operations-100 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-path-strict-receive-5 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-path-strict-send-5 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-signatures-20 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.max-length.p30-signer-21-too-many 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-ff 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-sha256 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-hash-zero 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-2-63 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-max 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-muxed-destination 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-id-zero 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-ff 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-sha256 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-arms.p30-memo-return-zero 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-above-max-code-point 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-ff 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-lone-continuation 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-overlong-nul 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-surrogate 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+classic.memo-bytes.p30-memo-truncated-sequence-28 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+sep41.muxed-addresses.golden-938fb779c48ac3af-16 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+sep41.muxed-addresses.p30-credit-mint-to-muxed 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+sep41.muxed-addresses.p30-credit-transfer-to-muxed 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+sep41.muxed-addresses.p30-xlm-transfer-to-muxed 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.golden-57a486abce28859d-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.auth-trees.golden-5f615b0f98ae09f3-11 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.auth-trees.golden-a8df5d4dbdc85ac8-2 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.auth-trees.p30-address-credentials 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-245 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-246 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-declared-depth-492 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-failed-carries-auth 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-fanout-330 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-fanout-331-fails 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-matched-depth-31 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-matched-depth-32-fails 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-source-account-credentials 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-failed-tx 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.auth-trees.p30-unmatched-create-success 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.events-max.golden-4c437318f87437c5-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.events-max.golden-692fdd0e57531ce4-25 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.events-max.golden-a8df5d4dbdc85ac8-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.events-max.golden-a8df5d4dbdc85ac8-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.events-max.p30-echo-bytes-at-limit 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.events-max.p30-echo-bytes-at-limit-over 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.events-max.p30-emit-topics-bytes-at-limit 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.events-max.p30-emit-topics-bytes-at-limit-over 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.invoke-basics.golden-04667ce620bffee7-24 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-04667ce620bffee7-26 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-4c437318f87437c5-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-568d51258ccf9080-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-7b59aa36c1776fe1-32 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-7e8aadf36d7d907d-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-8299635e181e651c-11 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-897493fc26f0ff7b-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a1774bbe0c32cf40-10 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a347bc4c32a9193c-31 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a8c5079e2141c975-31 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-1 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-bf1c69a28fed2564-6 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-d8e7a355b968f3df-28 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-e14cf5fee65b0fed-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-e55ad2d584383867-44 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.golden-ee9b88dc9e59dfba-32 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.invoke-basics.p30-upload-wasm 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.muxed-source.golden-04667ce620bffee7-24 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.muxed-source.golden-e55ad2d584383867-44 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.muxed-source.p30-extend-ttl-muxed-source 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.muxed-source.p30-extend-ttl-noop-muxed-source 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.muxed-source.p30-restore-muxed-source 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.muxed-source.p30-restore-noop-muxed-source 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.golden-04667ce620bffee7-21 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-3c107a86e830c499-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-4c437318f87437c5-9 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-7e8aadf36d7d907d-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-8299635e181e651c-27 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-897493fc26f0ff7b-17 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.golden-a8df5d4dbdc85ac8-7 16.1.1 diverges-from-network candidate/finding-candidates.toml any/encode_json
+soroban.scval-shapes.p30-map-depth-over 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-map-mixed-keys-unsorted 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-symbol-not-utf8 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+soroban.scval-shapes.p30-vec-depth-over 16.1.1 diverges-from-network candidate/finding-candidates.toml mainnet/encode_json, testnet/encode_json
+
+# from_xdr_bytes takes no limits and decodes under DEFAULT_XDR_MAX_DEPTH 512, counting one level
+# per named type: values core accepts at its limit of 1000 are refused. the sdk-default side of
+# JS-16X's depth cell (js-xdr 4 stops at 200)
+soroban.auth-trees.p30-declared-depth-492 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_encode, mainnet/decode_json, testnet/decode_encode, testnet/decode_json
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network candidate/finding-candidates.toml any/decode_encode, any/decode_json
+
+# the same per-type counting reads envelopes nested deeper than core accepts. same class as
+# GO-4 and JS-DEPTH
+soroban.auth-trees.p30-declared-depth-493 17.0.1 diverges-from-network candidate/finding-candidates.toml mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+
+# xdrlib3's unpacker skips the padding of opaque and string data without checking it is zero,
+# so values with non-zero padding decode and re-encode with zeros. new
+cap40.signed-payload-signer.synth-signer-key-nonzero-padding * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+classic.memo-bytes.synth-memo-text-nonzero-padding * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+soroban.scval-shapes.synth-bytes-nonzero-padding * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+soroban.scval-shapes.synth-string-nonzero-padding * diverges-from-network candidate/finding-candidates.toml any/decode_encode
+
+# strkey decoding: _decode_check pads the text to a multiple of 8 with = before base32 decoding,
+# so a key with a trailing = decodes; a signed payload's padding bytes are not checked to be
+# zero; 16.1.1 also reads claimable balance ids of any type byte (GO-1) and has no W decoder. new
+# (the type byte line is GO-1)
+cap23.claimable-balances.synth-strkey-b-invalid 16.1.1 diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode, case 13/strkey_decode, case 15/strkey_decode
+cap23.claimable-balances.synth-strkey-b-invalid 17.0.1 diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode
+cap27.muxed-accounts.synth-strkey-m-invalid * diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode
+cap40.signed-payload-signer.synth-strkey-p-invalid * diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode, case 17/strkey_decode
+cap84.muxed-contract.synth-strkey-w-invalid 17.0.1 diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode
+
+# xdrlib3 packs a hyper as x >> 32 & 0xFFFFFFFF and x & 0xFFFFFFFF, so ids past the 64-bit range
+# wrap instead of being refused: offer id 2^64-1 encodes as -1. same class as JS-1785
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical * diverges-from-network candidate/finding-candidates.toml case 19/id_parse
+
+# scval.to_native keys a dict by each key's native value, so map entries whose keys collide
+# (integers of different types holding the same value, a string and a symbol of the same text)
+# merge. same as JS-1789
+soroban.scval-shapes.synth-map-bool-and-text * diverges-from-network candidate/finding-candidates.toml case 0/to_native
+soroban.scval-shapes.synth-map-numeric-types * diverges-from-network candidate/finding-candidates.toml case 0/to_native
+soroban.scval-shapes.synth-map-u32-string-symbol * diverges-from-network candidate/finding-candidates.toml case 0/to_native
+soroban.scval-shapes.synth-map-void-and-text * diverges-from-network candidate/finding-candidates.toml case 0/to_native
+
+# SCVec.__hash__ hashes a list, so an SCVal holding a vec cannot be a dict key: to_native and
+# scval.to_map raise TypeError on a map with vec keys. new
+soroban.scval-shapes.synth-map-keys-vecs * diverges-from-network candidate/finding-candidates.toml case 0/map_sort
+soroban.scval-shapes.synth-map-vec-and-string * diverges-from-network candidate/finding-candidates.toml case 0/to_native
+
+# 16.1.1 LiquidityPoolAsset.is_valid_lexicographic_order compares issuers as strkey text, not key
+# bytes (py-stellar-base#1246, fixed in 17.0.0). same class as JS-1766 and GO-3
+cap38.liquidity-pools.synth-assets-dotnet257 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-js1766-issuers 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.1.1 diverges-from-network candidate/finding-candidates.toml case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.testnet-5521432 16.1.1 diverges-from-network candidate/finding-candidates.toml testnet/tx_hash 3

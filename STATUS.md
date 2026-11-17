@@ -130,8 +130,9 @@ What 0.1.0 holds:
   pass, 102 mishandled, 44 dropped, 78 out of scope. The reproductions of wallet-backend #729,
   #731, #716, #753 and #792 hold on their pre-fix and fixed commits (all 20 rows of
   `adapters/walletbackend/reproductions.toml`).
-- SDK conformance: `@stellar/stellar-sdk` 16.3.0 to 17.4.0, go-stellar-sdk v0.7.1 to v0.9.0 and
-  the `stellar-xdr` crate 28.0.0 to 30.0.0, with the reproductions of js-stellar-sdk #1766,
+- SDK conformance: `@stellar/stellar-sdk` 16.3.0 to 17.4.0, go-stellar-sdk v0.7.1 to v0.9.0,
+  the `stellar-xdr` crate 28.0.0 to 30.0.0 and the Python `stellar-sdk` (py-stellar-base) 16.1.1
+  and 17.0.1, with the reproductions of js-stellar-sdk #1766,
   #1785 and #1789 in `conformance/reproductions.toml`.
 - Linter: `indexerlint` with rules IDX001 to IDX003.
 - Guide: the indexer-hardening guide in `docs/guide/`, a draft for developers.stellar.org until

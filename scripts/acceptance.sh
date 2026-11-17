@@ -10,7 +10,8 @@
 #                                        regenerated under both passphrases, the test
 #                                        contracts rebuilt and the site built
 #
-# needs cargo, go, golangci-lint, node and npm on PATH; full mode also needs docker and network
+# needs cargo, go, golangci-lint, node and npm on PATH, and network access once to fetch the python
+# testee's pinned uv and cpython into target/toolchains/; full mode also needs docker and network
 # access, and the wasm32v1-none rust target for the test contracts. runs from
 # the repository root wherever it is started, builds without debug info, and writes run
 # outputs to target/acceptance/.
@@ -101,6 +102,14 @@ cargo_testee() {
   cargo test --locked --manifest-path "$manifest" --target-dir "$target"
 }
 
+# the python testee's unit tests, against the current version's venv that its conformance run
+# below has built
+python_testee() {
+  local v
+  v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["python"]["current"])' conformance/versions.toml)
+  "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
+}
+
 # quick mode
 
 step cargo fmt --all --check
@@ -140,6 +149,12 @@ step "$shapekit" corpus pack --out "$out/dist"
 for sdk in rust go js; do
   step "$shapekit" conformance run --sdk "$sdk" --out "$out/conformance/$sdk"
 done
+# the python testee's pinned uv and cpython, fetched once into target/toolchains/
+current="python toolchain"
+echo "== $current"
+python_path=$(scripts/python-toolchain.sh)
+PATH="$python_path:$PATH" step "$shapekit" conformance run --sdk python --out "$out/conformance/python"
+step python_testee
 step "$shapekit" findings check
 step scripts/check-no-em-dash.sh
 step scripts/check-public-text.sh
@@ -157,6 +172,9 @@ for sdk in rust go js; do
   step "$shapekit" conformance run --sdk "$sdk" --all-versions --out "$out/conformance-all/$sdk"
 done
 step "$shapekit" conformance run --sdk soroban --all-versions --out "$out/conformance-all/soroban"
+PATH="$python_path:$PATH" step "$shapekit" conformance run --sdk python --all-versions --out "$out/conformance-all/python"
+# the type table of the python testee is what its generator writes from every version's venv
+unchanged testees/python sh -c "python3 -I testees/python/gentypes.py"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

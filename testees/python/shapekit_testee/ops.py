@@ -28,6 +28,7 @@ from .protocol import (
     base64_member,
     plain_json,
     sdk,
+    testee_recursion,
 )
 from .types import xdr_class
 
@@ -150,13 +151,16 @@ class Ops:
         value = self.decode(req)
         text = sdk(value.to_json)
         try:
-            return {"json": json.loads(text)}
+            with testee_recursion():
+                return {"json": json.loads(text)}
         except ValueError as err:
             raise Internal(f"to_json wrote text that is not json: {err}") from err
 
     def encode_json(self, req: Request) -> dict[str, Any]:
         cls = xdr_class(self.version, req.str("type"))
-        text = json.dumps(plain_json(req.raw("json")))
+        plain = plain_json(req.raw("json"))
+        with testee_recursion():
+            text = json.dumps(plain)
         value = sdk(lambda: cls.from_json(text))
         out = sdk(value.to_xdr_bytes)
         return {"xdr": base64.b64encode(out).decode("ascii")}
@@ -234,7 +238,8 @@ class Ops:
             key = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(key_bytes))
             val = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(val_bytes))
             items.append((key, val))
-        data = dict(items)
+        # a dict key is hashed by the sdk's own SCVal.__hash__
+        data = sdk(lambda: dict(items))
         if len(data) != len(items):
             raise Unsupported("scval.to_map takes a dict, which holds one entry per key, and the input repeats a key")
         out = sdk(lambda: scval.to_map(data).to_xdr_bytes())

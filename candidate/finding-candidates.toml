@@ -108,6 +108,178 @@ entries = [
 checks = "any/decode_encode and any/decode_json"
 observed = "implementation-defined entries with a tied vote (go has no type for them): js 17.x reads values one level past stellar-xdr's limit because its own limit of 1500 is wider and takes no limit from the caller"
 
+# python sdk (stellar-sdk, py-stellar-base 16.1.1 and 17.0.1): divergences from
+#   shapekit conformance run --sdk python --all-versions                 (corpus, 716 entries)
+#   shapekit conformance run --sdk python --all-versions --manifest candidate/manifest.json
+# each triaged against the sdk source at the release tag (stellar_sdk/ paths below are 17.0.1
+# unless named). conformance/known-failures/python.txt lists every corpus cell under these
+# causes. on the candidate manifest, 42 tx_hash checks on probe.limits.* are runner errors (the
+# chain candidate/chains/probe.limits.p30 is not committed), and 16.1.1 refuses protocol 30
+# values its xdr does not know (27 entries); neither is a python defect.
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: 465 entries, every one whose json holds a transaction or operation result code", "candidate: 1186 entries"]
+checks = "decode_json and encode_json"
+observed = "to_json writes enum values and union arms as the lowercased .x name without SEP-51's word breaks: txsuccess for tx_success, txfee_bump_inner_success, opinner for op_inner, opbad_auth, memalloc for mem_alloc, ipv6 for i_pv6, 8_bit for b8_bit. from_json reads only its own spelling and raises KeyError, not ValueError, on the SEP-51 name"
+evidence = "stellar_sdk/xdr/transaction_result_code.py:11-30 (_TRANSACTION_RESULT_CODE_MAP), :154-155 (from_json_dict indexes _TRANSACTION_RESULT_CODE_REVERSE_MAP); every generated enum has the same pair. java-stellar-sdk 6.0.0 writes the same names (see the java candidates)"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: 12 entries (ConfigUpgradeSetKey of cap42, cap46, cap70, cap77 ledgers; ContractEvent ids)", "candidate: 14 entries"]
+checks = "decode_json and encode_json"
+observed = "a ContractID is written as 64 hex digits where SEP-51 writes the C strkey, and from_json refuses the strkey (bytes.fromhex)"
+evidence = "stellar_sdk/xdr/contract_id.py:68-73 delegate to Hash.to_json_dict and Hash.from_json_dict"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: 13 entries (AllowTrustOp)", "candidate: 38 entries"]
+checks = "decode_json and encode_json"
+observed = "AssetCode is written as {\"credit_alphanum4\": \"USD\"} where SEP-51 writes the bare code \"USD\"; from_json refuses the bare code"
+evidence = "stellar_sdk/xdr/asset_code.py:103-110 (to_json_dict wraps the code in its arm name)"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["candidate: 80 entries (format.xdr-grammar asset codes and every type holding one)"]
+checks = "decode_json and encode_json"
+observed = "asset codes holding bytes outside printable ascii are written as the raw characters (\\u0001 in json) where SEP-51 writes the escape text \\x01 (\\0 for a zero byte); from_json encodes the escape text as literal characters"
+evidence = "stellar_sdk/xdr/asset_code12.py:72-78 (decode(\"ascii\") and encode(\"ascii\"), no escaping); asset_code4.py the same"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["17.0.1"]
+entries = ["corpus: 6 entries (cap67 and cap84 muxed contract transfers)", "candidate: 35 entries"]
+checks = "decode_json and encode_json"
+observed = "17.0.1 decodes SC_ADDRESS_TYPE_MUXED_CONTRACT but SCAddress.to_json raises \"Unknown SCAddress type: 5\" and from_json refuses the W strkey; MuxedContract and SignerKeyEd25519SignedPayload on their own are written as objects where SEP-51 writes the W and P strkeys (candidate: 5 entries)"
+evidence = "stellar_sdk/xdr/sc_address.py:176; stellar_sdk/xdr/muxed_contract.py:83-87"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: 9 entries (every ClawbackOp)", "candidate: 44 entries"]
+checks = "decode_json and encode_json"
+observed = "ClawbackOp's field from is the attribute from_, and to_json writes and from_json reads the json key from_, so SEP-51 json of a clawback cannot be read (KeyError)"
+evidence = "stellar_sdk/xdr/clawback_op.py:93 (to_json_dict writes \"from_\") and :100 (from_json_dict reads json_dict[\"from_\"])"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: soroban.scval-shapes.synth-event-vec-absent, soroban.auth-trees.golden-5f615b0f98ae09f3-11", "candidate: 34 entries"]
+checks = "decode_json (panic) and encode_json"
+observed = "an SCV_VEC with no vec decodes, but to_json fails an assert (AssertionError, counted as a crash) and from_json of {\"vec\": null} raises TypeError; from_json also refuses null for an absent optional ClaimPredicate (candidate: 4 entries)"
+evidence = "stellar_sdk/xdr/sc_val.py:478 (assert self.vec is not None in to_json_dict); stellar_sdk/xdr/claim_predicate.py:201-209"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1"]
+entries = ["corpus: 332 entries", "candidate: 1110 entries"]
+checks = "encode_json (panic)"
+observed = "from_json of a protocol 30 value raises KeyError (an index into a name table) instead of ValueError on names 16.1.1 does not know (signed_ms and the protocol 30 enum values), so a value from a newer protocol crashes the reader rather than being refused; 16.1.1 also writes MuxedAccountMed25519 as an object and crashes reading the M strkey (TypeError, candidate: 9 entries; fixed in 17.0.1)"
+evidence = "every generated enum's from_json_dict indexes its reverse map (stellar_sdk/xdr/*.py at 16.1.1)"
+
+[[candidate]]
+finding = "RS-2"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["none in the current runs: the deepest corpus json reaches from_json only after the result code failure above"]
+checks = "encode_json"
+observed = "from_json recurses once per nesting level under python's default recursion limit of 1000. the first run hit RecursionError on soroban.auth-trees.p30-declared-depth-492 and synth-auth-depth-493-deepest-accepted inside the testee's own json handling, which now runs under a raised limit; the sdk's from_json itself has no depth handling of its own"
+evidence = "stellar_sdk/xdr/*.py from_json_dict recursion; python's sys.getrecursionlimit() default 1000"
+open = "whether from_json alone overflows on those values once the result code names are fixed is not checked"
+
+[[candidate]]
+finding = "JS-16X"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["soroban.auth-trees.p30-declared-depth-492", "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted"]
+checks = "decode_encode and decode_json"
+observed = "from_xdr_bytes takes no limits and decodes under DEFAULT_XDR_MAX_DEPTH 512, counting one level per named type, so values core accepts at its limit of 1000 are refused: the default-depth side of JS-16X's depth cell (js-xdr 4 stops at 200)"
+evidence = "stellar_sdk/xdr/base.py:3 (DEFAULT_XDR_MAX_DEPTH = 512); stellar_sdk/xdr/sc_val.py:405-411 (from_xdr_bytes calls unpack with the default)"
+
+[[candidate]]
+finding = "GO-4"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["soroban.auth-trees.p30-declared-depth-493", "soroban.auth-trees.synth-auth-depth-494-over-cap", "soroban.scval-shapes.synth-scvec-depth-247-over-cap"]
+checks = "decode_encode"
+observed = "the same per-type counting reads envelopes nested deeper than core accepts, as go-xdr does (GO-4) and js-xdr 5 (JS-DEPTH)"
+evidence = "stellar_sdk/xdr/*.py unpack(unpacker, depth_limit) subtracts 1 per named type only"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["corpus: cap40.signed-payload-signer.synth-signer-key-nonzero-padding, classic.memo-bytes.synth-memo-text-nonzero-padding, soroban.scval-shapes.synth-bytes-nonzero-padding, soroban.scval-shapes.synth-string-nonzero-padding", "candidate: 52 entries"]
+checks = "decode_encode"
+observed = "opaque and string data with non-zero padding bytes decode and re-encode with zero padding, where stellar-xdr, go and js refuse them"
+evidence = "xdrlib3 0.1.1 xdrlib3/__init__.py:217-227 (unpack_fstring advances past the padding without reading it; unpack_fopaque is the same function)"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["cap23.claimable-balances.synth-strkey-b-invalid", "cap27.muxed-accounts.synth-strkey-m-invalid", "cap40.signed-payload-signer.synth-strkey-p-invalid", "cap84.muxed-contract.synth-strkey-w-invalid"]
+checks = "case 6/strkey_decode (all four), case 17/strkey_decode (p-invalid); on 16.1.1 also case 13 and case 15 of b-invalid"
+observed = "a strkey with a trailing = decodes, and a signed payload whose padding bytes are not zero decodes. on 16.1.1 a claimable balance id of any type byte decodes too, which is GO-1's defect, fixed in 17.0.1"
+evidence = "stellar_sdk/strkey.py:375-381 (_decode_check pads the text with = to a multiple of 8, so a trailing = survives the round-trip check), :420-426 (the signed payload check compares lengths only); 16.1.1 strkey.py has no claimable balance type byte check"
+
+[[candidate]]
+finding = "JS-1785"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical"]
+checks = "case 19/id_parse"
+observed = "the offer id 18446744073709551615 given as a number encodes as -1: xdrlib3 masks a hyper to 64 bits instead of refusing it, so ids past the int64 and uint64 ranges wrap (a muxed id of 2^64 encodes as 0). the same wrap JS-1785 fixed for text"
+evidence = "xdrlib3 0.1.1 xdrlib3/__init__.py:88-98 (pack_uhyper packs x >> 32 & 0xFFFFFFFF and x & 0xFFFFFFFF; pack_hyper = pack_uhyper); stellar_sdk/muxed_account.py:39 checks only the sign"
+
+[[candidate]]
+finding = "JS-1789"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["soroban.scval-shapes.synth-map-bool-and-text", "soroban.scval-shapes.synth-map-numeric-types", "soroban.scval-shapes.synth-map-u32-string-symbol", "soroban.scval-shapes.synth-map-void-and-text", "candidate: soroban.scval-shapes.gap-js-property-key-coercion"]
+checks = "case 0/to_native"
+observed = "scval.to_native returns a dict keyed by each key's native value, so integers of different types with one value, and a string and a symbol with one text, merge into one entry"
+evidence = "stellar_sdk/scval.py:126-130"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["soroban.scval-shapes.synth-map-keys-vecs", "soroban.scval-shapes.synth-map-vec-and-string"]
+checks = "case 0/map_sort, case 0/to_native (both TypeError, counted as crashes)"
+observed = "an SCVal holding a vec cannot be hashed, so scval.to_map cannot take a map with vec keys and to_native raises TypeError on one"
+evidence = "stellar_sdk/xdr/sc_vec.py:90-91 (__hash__ hashes the list)"
+
+[[candidate]]
+finding = "JS-1766"
+sdk = "python"
+versions = ["16.1.1"]
+entries = ["cap38.liquidity-pools.synth-assets-dotnet257", "cap38.liquidity-pools.synth-assets-js1766-issuers", "cap38.liquidity-pools.synth-assets-py1246-testnet-pool", "cap38.liquidity-pools.testnet-5521432"]
+checks = "asset_order, pool_id, and tx_hash 3 of the testnet ledger"
+observed = "16.1.1 compares issuers as strkey text, so it orders some pairs against core, refuses pairs core accepts and derives other pool ids; the same defect JS-1766 and GO-3 had (py-stellar-base#1246), fixed in 17.0.0"
+evidence = "16.1.1 stellar_sdk/liquidity_pool_asset.py:81-84 (asset_a.issuer < asset_b.issuer); 17.0.1 :82-87 compares decoded key bytes"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["16.1.1", "17.0.1"]
+entries = ["candidate: 33 entries (Curve25519Public, HmacSha256Mac, ShortHashSeed, PeerAddress and the types holding them)", "candidate: 4 entries (bare Int64 and Uint64)"]
+checks = "decode_json and encode_json"
+observed = "fixed-length opaque fields that are not a named hash type are written as hex where stellar-xdr writes a byte array, and a bare Int64 or Uint64 is written as a string where stellar-xdr writes a number"
+open = "both may be stellar-xdr's rendering rather than a python defect: not settled against SEP-51 text here, so not a defect claim yet"
+
 # indexer state: `shapekit harness state check` on the wallet-backend reference run, against
 # core's final entries. a candidate here is a stored end state that differs from core's
 # entry; it has no corpus entry of its own, the chains below already carry it.

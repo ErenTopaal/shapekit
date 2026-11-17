@@ -122,7 +122,9 @@ describes.
 
 `scripts/acceptance.sh` runs the checks every change to `main` passes, in two modes. Run it
 from anywhere in the repository; it needs `cargo`, `go`, `golangci-lint`, `node` and `npm` on `PATH` and writes run
-outputs under `target/acceptance/`. It stops at the first failing check and names it.
+outputs under `target/acceptance/`. The Python testee's uv and CPython are fetched once from
+their pinned releases into `target/toolchains/` by `scripts/python-toolchain.sh`, which checks
+each download against its sha256 in `pins.toml`. It stops at the first failing check and names it.
 
 - Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
   the workspace tests; `go vet`, `go test` and golangci-lint in every module of `go.work`, and
@@ -130,7 +132,8 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   registry, the corpus and candidate manifests, the synthetic entries, manifest and oracle
   files as the tools write them, the contract schemas, coverage, the guide, golden agreement,
   the committed chains, the repro selection, the adapter protocol schema and the release
-  archive; the current version of each SDK over the corpus; the findings record; the em dash
+  archive; the current version of each SDK over the corpus; the Python testee's unit tests;
+  the findings record; the em dash
   check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
   directory, a scratch or worktree directory name, a private or tailnet address, the build
@@ -140,7 +143,8 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
   neither exists.
 - Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
   runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
-  sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on
+  sightings (`conformance reproduce`), the Python testee's type table regenerated and compared
+  with the committed one, the wallet-backend reproductions table, the linter on
   wallet-backend at the pinned commit with its committed baseline, the stellar-rpc adapter
   over every chain of both networks once per `--events-from` method, checked against
   `crates/shapekit-harness/expect/stellar-rpc.toml`, `findings check --allow-draft`, every

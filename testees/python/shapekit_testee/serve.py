@@ -4,7 +4,7 @@ import json
 from typing import IO, Any
 
 from .ops import Ops
-from .protocol import BadRequest, parse_line, respond
+from .protocol import BadRequest, parse_line, respond, testee_recursion
 
 
 def handle(ops: Ops, line: bytes) -> dict[str, Any]:
@@ -28,6 +28,9 @@ def serve(stdin: IO[bytes], stdout: IO[str], coverage: Any = None) -> int:
         line = line.rstrip(b"\n")
         if not line:
             continue
-        stdout.write(json.dumps(handle(ops, line), separators=(",", ":")))
+        response = handle(ops, line)
+        with testee_recursion():
+            text = json.dumps(response, separators=(",", ":"))
+        stdout.write(text)
         stdout.write("\n")
         stdout.flush()

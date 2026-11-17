@@ -112,6 +112,31 @@ jobs:
       - run: npx tsc
       - run: node --test "dist/**/*.test.js"
 
+  python:
+    # the python testee: its conformance run on the current version builds that version's venv
+    # from the hash-locked requirements, then the testee's unit tests run in it
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pinned uv and cpython
+        run: scripts/python-toolchain.sh >>"$GITHUB_PATH"
+      - name: conformance run on the current version
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk python --out target/conformance/python
+      - name: unit tests
+        run: |
+          set -euo pipefail
+          v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["python"]["current"])' conformance/versions.toml)
+          "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
+
   contracts:
     # the committed wasm is what `stellar contract build` from the pinned stellar-cli release
     # makes of the committed sources; a source, sdk, toolchain or stellar-cli change without

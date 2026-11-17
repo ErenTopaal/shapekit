@@ -2,10 +2,12 @@
 pick a response status."""
 
 import binascii
+import contextlib
 import decimal
 import json
 import struct
-from collections.abc import Callable
+import sys
+from collections.abc import Callable, Iterator
 from typing import Any, TypeVar
 
 import xdrlib3
@@ -49,6 +51,23 @@ REJECTIONS: tuple[type[BaseException], ...] = (
     binascii.Error,
     xdrlib3.Error,
 )
+
+
+# the request and response json of the deepest corpus values nests about 2100 levels, past
+# python's default recursion limit of 1000. the testee's own json work runs under this limit;
+# sdk calls run under the default a caller of the sdk has, so the sdk's own recursion is
+# measured as it is
+TESTEE_RECURSION_LIMIT = 6000
+
+
+@contextlib.contextmanager
+def testee_recursion() -> Iterator[None]:
+    old = sys.getrecursionlimit()
+    sys.setrecursionlimit(TESTEE_RECURSION_LIMIT)
+    try:
+        yield
+    finally:
+        sys.setrecursionlimit(old)
 
 
 def describe(err: BaseException) -> str:
@@ -139,8 +158,9 @@ def base64_member(text: str, what: str) -> bytes:
 
 def parse_line(line: bytes) -> tuple[str, Request | BadRequest]:
     try:
-        value = json.loads(line, parse_float=decimal.Decimal, parse_constant=reject_constant)
-    except (ValueError, UnicodeDecodeError) as err:
+        with testee_recursion():
+            value = json.loads(line, parse_float=decimal.Decimal, parse_constant=reject_constant)
+    except (ValueError, UnicodeDecodeError, RecursionError) as err:
         return "", BadRequest(f"request is not json: {err}")
     if not isinstance(value, dict):
         return "", BadRequest("request is not a json object")
@@ -160,10 +180,15 @@ def reject_constant(name: str) -> Any:
 def plain_json(value: Any) -> Any:
     """the request value with decimals turned back into the floats json.loads gives a caller,
     for handing json to the sdk's own reader."""
+    with testee_recursion():
+        return _plain(value)
+
+
+def _plain(value: Any) -> Any:
     if isinstance(value, decimal.Decimal):
         return float(value)
     if isinstance(value, list):
-        return [plain_json(v) for v in value]
+        return [_plain(v) for v in value]
     if isinstance(value, dict):
-        return {k: plain_json(v) for k, v in value.items()}
+        return {k: _plain(v) for k, v in value.items()}
     return value
