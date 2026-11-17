@@ -25,6 +25,7 @@ mod pins;
 mod probe_cmd;
 mod promote_cmd;
 mod registry_cmd;
+mod report_cmd;
 mod schema_cmd;
 mod serve_cmd;
 mod site_cmd;
@@ -143,6 +144,9 @@ enum Command {
         #[command(subcommand)]
         command: harness_cmd::HarnessCommand,
     },
+    /// Write a self-contained HTML report of a harness or conformance run: failures grouped
+    /// by finding, each with its smallest entry, the guide section and a reproduce command.
+    Report(report_cmd::ReportArgs),
     /// Findings: every harness, conformance and linter failure mapped to a triaged root cause
     /// with its upstream status.
     #[command(hide = true)]
@@ -710,6 +714,7 @@ fn main() -> ExitCode {
         Command::Serve(args) => serve_cmd::run(args),
         Command::Harness { command } => harness_cmd::run(command),
         Command::Findings { command } => findings_cmd::run(command),
+        Command::Report(args) => report_cmd::run(args),
         Command::Fuzz(args) => fuzz_cmd::run(args),
         Command::NativeFuzz(args) => native_fuzz_cmd::run(args),
         Command::GuidedFuzz(args) => guided_fuzz_cmd::run(args),
