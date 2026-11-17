@@ -25,7 +25,7 @@ use shapekit_manifest::xdr::render_json;
 use shapekit_manifest::{
     Entry, EntryKind, MAINNET_PASSPHRASE, TESTNET_PASSPHRASE, Variant, sha256_hex,
 };
-use stellar_xdr::{LedgerCloseMeta, LedgerHeader, Limits, WriteXdr};
+use stellar_xdr::{LedgerCloseMeta, LedgerHeader, Limits, ReadXdr, TransactionEnvelope, WriteXdr};
 
 use crate::conservation::check_ledger;
 use crate::decode::decode_lcm;
@@ -344,6 +344,25 @@ fn find_tx(
             found.push(i);
         }
     }
+    // core's tx endpoint turns a v0 envelope into the equivalent v1 envelope with the same
+    // hash (stellar-core v30.0.0 src/main/CommandHandler.cpp 1074-1084, TransactionBridge.cpp
+    // 18-47), so a v0 entry submitted there is in the ledger only in its v1 form; it is that
+    // transaction when the hashes agree
+    if found.is_empty()
+        && xdr_type == "TransactionEnvelope"
+        && let Ok(env @ TransactionEnvelope::TxV0(_)) =
+            TransactionEnvelope::from_xdr(bytes, Limits::len(bytes.len()))
+    {
+        let hash = shapekit_laws::derive::envelope_hash(&network.id, &env)
+            .map_err(|e| format!("hashing the v0 entry: {e}"))?;
+        for (i, tx) in view.txs.iter().enumerate() {
+            if tx.result.transaction_hash.0 == hash
+                && matches!(tx.envelope, TransactionEnvelope::Tx(_))
+            {
+                found.push(i);
+            }
+        }
+    }
     match found.as_slice() {
         [i] => Ok(*i),
         [] => Err(format!(
@@ -395,5 +414,33 @@ fn entry_err(path: &Path, message: String) -> RunError {
     RunError::Entry {
         path: path.display().to_string(),
         message,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::decode::LcmStream;
+
+    /// A v0 envelope the probe submitted through core's tx endpoint: the ledger holds its
+    /// v1 form, which has the same hash.
+    #[test]
+    fn a_v0_entry_is_found_in_its_v1_form_by_hash() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../candidate");
+        let entry = root.join(
+            "entries/probe.envelope-fields/probe.envelope-fields.transactionv0-ext-p30-0/testnet.xdr",
+        );
+        let bytes = std::fs::read(entry).unwrap();
+        let lcm =
+            LcmStream::open(&root.join("chains/probe.envelope-fields.p30/testnet/ledgers.xdr"))
+                .unwrap()
+                .map(Result::unwrap)
+                .find(|l| crate::view::ledger_seq(&l.meta) == 1701)
+                .unwrap()
+                .meta;
+        let net = Network::new("Test SDF Network ; September 2015");
+        let i = find_tx(&lcm, &net, "TransactionEnvelope", &bytes).unwrap();
+        let view = LedgerView::new(&lcm, &net).unwrap();
+        assert!(matches!(view.txs[i].envelope, TransactionEnvelope::Tx(_)));
     }
 }
