@@ -585,68 +585,305 @@ observed = "an AllowTrustOp whose authorize field is 0xFFFFFFFF decodes, but its
 evidence = "lib/src/xdr/xdr_allow_trust_op.dart L24-L36: authorize is an int read and written with readInt/writeInt"
 
 # soneso/stellar-php-sdk 1.18.0 on the candidate lane (`shapekit conformance run --sdk php
-# --all-versions --manifest candidate/manifest.json`): 5,631 entries pass, 388 diverge from
-# the network, 190 are unsupported and 21 are `error` (the missing probe.limits.p30 chain, as
-# for every sdk). by cause, as far as triaged:
+# --all-versions --manifest candidate/manifest.json`): 5,654 entries pass, 386 diverge from
+# the network and 190 are unsupported. every one of the 562 failing checks is attributed below:
 #
-# - 112 decode_encode checks on format.xdr-grammar *-over-max vectors: PHP-BOUNDS
-#   (candidate/findings/triage.toml).
-# - 53 checks on depth vectors at and below core's limits, refused by the sdk's own limits
-#   (XdrBuffer RECURSION_LIMIT 128 and DECODE_DEPTH_LIMIT 500) or by json_encode's 512:
-#   PHP-BOUNDS and PHP-JSON-DEPTH, which are not core's limit in either direction.
-# - 23 checks with hashes held as hex and written as the hex of their hex: PHP-HEXHASH.
-# - 11 checks on claimable balance ledger keys: PHP-CBKEY-JSON.
-# - 6 checks with uint64 values at or above 2^63: PHP-UINT64.
-# - 6 checks on signed-payload signers with an empty payload: PHP-SIGNEDPAYLOAD-JSON.
-# - 5 tx_hash checks refused for an external reference whose owner is not a contract, the same
-#   check as the dart sdk's (candidate below).
-# - 70 tx_hash checks where the hash differs: the set options candidate below explains the
-#   clear_flags probe it was checked on; the other setoptionsop-* and the
-#   invokehostfunctionop-* probes among them are not triaged.
-# - 149 decode_json differences, 48 encode_json refusals of ConfigSettingID JSON, 33 of hex
-#   arrays on overlay types, 13 encode_json byte differences on DataValue, and 41 other checks
-#   (the sponsorship descriptor, flood advert and demand vectors that stop early or leave
-#   trailing bytes, DataValue lengths and presence, peer address hex, create contract
-#   arguments): not triaged. part of the 149 are the findings above seen through a
-#   ledger; the rest needs the source reading this pass did not do.
+# - 132 PHP-BOUNDS: decode_encode accepting *-over-max, *-nonzero-padding and probe.limits.*
+#   vectors, and the depth vectors at and below core's limits refused by XdrBuffer's own
+#   recursion limits.
+# - 35 PHP-JSON-DEPTH: the same depth vectors refused by json_encode and json_decode at 512.
+# - 51 PHP-HEXHASH: inner transaction hashes and config upgrade content hashes written as
+#   the hex of their hex, on their own and inside three mainnet ledgers and the ledger close
+#   meta vectors (which also hold the config setting key below; two of the mainnet ledgers
+#   also hold PHP-CBKEY-JSON keys).
+# - 20 PHP-CBKEY-JSON: claimable balance ledger keys without balance_id.
+# - 31 PHP-UINT64: int64 fields at -2^63 written as 2^63 and muxed ids at or above 2^63
+#   refused; the int64 amounts are read with XdrBuffer::readBigInteger64 (XdrBuffer.php
+#   L83-L92), an unsigned BigInteger, as XdrPaymentOperation::decode does (L34), the mechanism
+#   the finding names for the sequence number.
+# - 6 PHP-SIGNEDPAYLOAD-JSON.
+# - 82 checks on the fixed-opaque overlay and survey types (Curve25519Public,
+#   HmacSha256Mac, ShortHashSeed, PeerAddress and the types holding them): the sdk writes and
+#   reads the SEP-51 hex form, the expected_json is stellar-xdr's byte array, so these are the
+#   rust SEP-51 candidate above, not a php defect.
+# - 63 transaction hashes on the setoptionsop-* probes: the set options candidate
+#   below; each envelope was round tripped through the sdk and compared field by field.
+# - 93 config setting ledger keys, 7 host function rebuilds, 4 preconditions, 24 tx advert and
+#   demand vectors, 9 sponsorship descriptors and 5 external references: the candidates below.
+#
+# the four DataValue vectors failed before because the testee's type table named the sdk's
+# XdrDataValue, the optional DataValue* of ManageDataOp; it now names XdrDataValueMandatory, the
+# type itself, and they pass (format.xdr-grammar.datavalue-over-max is PHP-BOUNDS).
 
 [[candidate]]
 finding = "new"
 sdk = "php"
 versions = ["1.18.0"]
-entries = ["probe.envelope-fields.setoptionsop-clearflags-0"]
-checks = "testnet/tx_hash; the round trip of this envelope was compared field by field. the other setoptionsop-* hash differences were not checked one by one"
-observed = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) is not the hash the network wrote for a set options operation that sets a field to 0: the rebuilt envelope leaves clear_flags and set_flags out where the original holds 0, so the sdk hashes other bytes"
+entries = [
+  "probe.envelope-fields.setoptionsop-clearflags-0",
+  "probe.envelope-fields.setoptionsop-clearflags-0-ledger",
+  "probe.envelope-fields.setoptionsop-clearflags-1",
+  "probe.envelope-fields.setoptionsop-clearflags-1-ledger",
+  "probe.envelope-fields.setoptionsop-clearflags-3",
+  "probe.envelope-fields.setoptionsop-clearflags-3-ledger",
+  "probe.envelope-fields.setoptionsop-highthreshold-0",
+  "probe.envelope-fields.setoptionsop-highthreshold-0-ledger",
+  "probe.envelope-fields.setoptionsop-highthreshold-1",
+  "probe.envelope-fields.setoptionsop-highthreshold-1-ledger",
+  "probe.envelope-fields.setoptionsop-highthreshold-3",
+  "probe.envelope-fields.setoptionsop-highthreshold-3-ledger",
+  "probe.envelope-fields.setoptionsop-homedomain-0",
+  "probe.envelope-fields.setoptionsop-homedomain-0-ledger",
+  "probe.envelope-fields.setoptionsop-homedomain-1",
+  "probe.envelope-fields.setoptionsop-homedomain-1-ledger",
+  "probe.envelope-fields.setoptionsop-homedomain-2",
+  "probe.envelope-fields.setoptionsop-homedomain-2-ledger",
+  "probe.envelope-fields.setoptionsop-homedomain-3",
+  "probe.envelope-fields.setoptionsop-homedomain-3-ledger",
+  "probe.envelope-fields.setoptionsop-homedomain-5",
+  "probe.envelope-fields.setoptionsop-homedomain-5-ledger",
+  "probe.envelope-fields.setoptionsop-inflationdest-0",
+  "probe.envelope-fields.setoptionsop-inflationdest-0-ledger",
+  "probe.envelope-fields.setoptionsop-inflationdest-1",
+  "probe.envelope-fields.setoptionsop-inflationdest-1-ledger",
+  "probe.envelope-fields.setoptionsop-inflationdest-2-ledger",
+  "probe.envelope-fields.setoptionsop-inflationdest-3",
+  "probe.envelope-fields.setoptionsop-inflationdest-3-ledger",
+  "probe.envelope-fields.setoptionsop-lowthreshold-0",
+  "probe.envelope-fields.setoptionsop-lowthreshold-0-ledger",
+  "probe.envelope-fields.setoptionsop-lowthreshold-1",
+  "probe.envelope-fields.setoptionsop-lowthreshold-1-ledger",
+  "probe.envelope-fields.setoptionsop-lowthreshold-3",
+  "probe.envelope-fields.setoptionsop-lowthreshold-3-ledger",
+  "probe.envelope-fields.setoptionsop-masterweight-0",
+  "probe.envelope-fields.setoptionsop-masterweight-0-ledger",
+  "probe.envelope-fields.setoptionsop-masterweight-1",
+  "probe.envelope-fields.setoptionsop-masterweight-1-ledger",
+  "probe.envelope-fields.setoptionsop-masterweight-2",
+  "probe.envelope-fields.setoptionsop-masterweight-2-ledger",
+  "probe.envelope-fields.setoptionsop-masterweight-4",
+  "probe.envelope-fields.setoptionsop-masterweight-4-ledger",
+  "probe.envelope-fields.setoptionsop-masterweight-5",
+  "probe.envelope-fields.setoptionsop-masterweight-5-ledger",
+  "probe.envelope-fields.setoptionsop-medthreshold-0",
+  "probe.envelope-fields.setoptionsop-medthreshold-0-ledger",
+  "probe.envelope-fields.setoptionsop-medthreshold-1",
+  "probe.envelope-fields.setoptionsop-medthreshold-1-ledger",
+  "probe.envelope-fields.setoptionsop-medthreshold-3",
+  "probe.envelope-fields.setoptionsop-medthreshold-3-ledger",
+  "probe.envelope-fields.setoptionsop-setflags-0",
+  "probe.envelope-fields.setoptionsop-setflags-0-ledger",
+  "probe.envelope-fields.setoptionsop-setflags-1",
+  "probe.envelope-fields.setoptionsop-setflags-1-ledger",
+  "probe.envelope-fields.setoptionsop-setflags-3",
+  "probe.envelope-fields.setoptionsop-setflags-3-ledger",
+  "probe.envelope-fields.setoptionsop-signer-0",
+  "probe.envelope-fields.setoptionsop-signer-0-ledger",
+  "probe.envelope-fields.setoptionsop-signer-1",
+  "probe.envelope-fields.setoptionsop-signer-1-ledger",
+  "probe.envelope-fields.setoptionsop-signer-2",
+  "probe.envelope-fields.setoptionsop-signer-2-ledger",
+]
+checks = "tx_hash; every one of these envelopes was round tripped through AbstractTransaction::fromEnvelopeXdr and toEnvelopeXdrBase64 and the two decoded with stellar-xdr and compared"
+observed = "AbstractTransaction::fromEnvelopeXdr(..)->hash(network) is not the hash the network wrote for a set options operation that holds a 0 or an empty home domain: the rebuilt envelope leaves clear_flags, set_flags and an empty home_domain out where the original holds them, so the sdk hashes other bytes"
 evidence = "Soneso/StellarSDK/SetOptionsOperation.php L200-L224: toOperationBody writes inflationDestination, clearFlags, setFlags and homeDomain only when they are truthy (`if ($this->clearFlags)`), so a present 0 or empty home domain becomes absent; the weights and thresholds are compared with null and keep a 0"
 
 [[candidate]]
 finding = "new"
 sdk = "php"
 versions = ["1.18.0"]
-entries = ["probe.envelope-fields.contractexecutableexternalref-executable-owner-3-ledger", "probe.envelope-fields.contractexecutableexternalref-executable-owner-4-ledger", "probe.envelope-fields.contractexecutableexternalref-executable-owner-5-ledger"]
-checks = "testnet/tx_hash 0"
+entries = [
+  "format.xdr-grammar.bucketentry-deadentry",
+  "format.xdr-grammar.bucketentry-smallest",
+  "format.xdr-grammar.hotarchivebucketentry-live",
+  "format.xdr-grammar.hotarchivebucketentry-smallest",
+  "format.xdr-grammar.ledgerclosemeta-distinct",
+  "format.xdr-grammar.ledgerclosemetav1-distinct",
+  "format.xdr-grammar.ledgerclosemetav1-evicted-keys-one",
+  "format.xdr-grammar.ledgerclosemetav2-distinct",
+  "format.xdr-grammar.ledgerclosemetav2-evicted-keys-one",
+  "format.xdr-grammar.ledgerentrychange-removed",
+  "format.xdr-grammar.ledgerentrychange-smallest",
+  "format.xdr-grammar.ledgerfootprint-read-only-one",
+  "format.xdr-grammar.ledgerfootprint-read-write-one",
+  "format.xdr-grammar.ledgerkey-config-setting",
+  "format.xdr-grammar.ledgerkey-smallest",
+  "format.xdr-grammar.operationbody-revoke-sponsorship",
+  "format.xdr-grammar.revokesponsorshipop-ledger-entry",
+  "format.xdr-grammar.revokesponsorshipop-smallest",
+  "format.xdr-grammar.transaction-distinct",
+  "format.xdr-grammar.transactionmeta-distinct",
+  "format.xdr-grammar.transactionresultmeta-distinct",
+  "format.xdr-grammar.transactionresultmetav1-distinct",
+  "format.xdr-grammar.transactionv1envelope-distinct",
+  "probe.envelope-fields.ledgerfootprint-readonly-restore-1",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-0",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-1",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-10",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-11",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-12",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-13",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-14",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-15",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-16",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-17",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-18",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-19",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-2",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-20",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-3",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-4",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-5",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-6",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-7",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-8",
+  "probe.envelope-fields.ledgerkeyconfigsetting-configsettingid-9",
+  "probe.envelope-fields.operation-body-invoke-20",
+  "probe.envelope-fields.operation-body-merge-21",
+  "probe.envelope-fields.operation-body-payment-19",
+]
+checks = "decode_json and encode_json"
+observed = "a config setting ledger key renders as the bare ConfigSettingID name in XDR-JSON and the canonical {\"config_setting_id\": ..} object is refused (\"Expected string for XdrConfigSettingID JSON value, got array\"), the class of PHP-CBKEY-JSON for another arm"
+evidence = "Soneso/StellarSDK/Xdr/XdrLedgerKeyBase.php L152 and L187: toJsonValue and fromJsonValue write and read the config_setting arm as XdrConfigSettingID, where the schema's arm is the struct LedgerKeyConfigSetting { configSettingID }; the bytes round trip"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "probe.envelope-fields.createcontractargs-contractidpreimage-2-ledger",
+  "probe.envelope-fields.createcontractargs-executable-3-ledger",
+  "probe.envelope-fields.createcontractargsv2-contractidpreimage-2-ledger",
+  "probe.envelope-fields.createcontractargsv2-executable-3-ledger",
+  "probe.envelope-fields.invokehostfunctionop-hostfunction-auth-4-ledger",
+  "probe.envelope-fields.invokehostfunctionop-hostfunction-echo-4-ledger",
+  "probe.envelope-fields.invokehostfunctionop-hostfunction-upload-5-ledger",
+]
+checks = "tx_hash"
+observed = "AbstractTransaction::fromEnvelopeXdr rebuilds host functions only in the combinations the sdk's classes model: a CREATE_CONTRACT_V2 with an asset preimage is written back as CREATE_CONTRACT (another hash), and a create contract from an asset with a wasm executable, or from an address with the stellar asset executable, is refused (\"Invalid argument\", \"invalid argument\"), though core applied all of them"
+evidence = "Soneso/StellarSDK/InvokeHostFunctionOperation.php L99-L100 maps a V2 asset preimage to DeploySACWithAssetHostFunction, whose toXdr (DeploySACWithAssetHostFunction.php L73-L74) writes XdrHostFunction::forDeploySACWithAsset, the first version; DeploySACWithAssetHostFunction::fromXdr throws for any other executable (L88-L104), and the address preimage with a stellar asset executable falls through to the throw at InvokeHostFunctionOperation.php L104"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "probe.envelope-fields.transaction-cond-invoke-2",
+  "probe.envelope-fields.transaction-cond-invoke-2-ledger",
+  "probe.envelope-fields.transaction-cond-payment-2",
+  "probe.envelope-fields.transaction-cond-payment-2-ledger",
+]
+checks = "tx_hash; both envelopes round tripped and compared"
+observed = "a transaction whose PRECOND_V2 preconditions hold only defaults is rebuilt with PRECOND_NONE, so its hash is not the network's; the same as the kmp and dotnet sdks"
+evidence = "Soneso/StellarSDK/TransactionPreconditions.php L250-L256: hasV2() is false without ledger bounds, minimum sequence number, age, gap or extra signers, and toXdr (L269-L290) then writes NONE or TIME"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "format.xdr-grammar.floodadvert-distinct",
+  "format.xdr-grammar.flooddemand-distinct",
+  "format.xdr-grammar.txadvertvector-distinct",
+  "format.xdr-grammar.txadvertvector-max",
+  "format.xdr-grammar.txadvertvector-one",
+  "format.xdr-grammar.txdemandvector-distinct",
+  "format.xdr-grammar.txdemandvector-max",
+  "format.xdr-grammar.txdemandvector-one",
+]
+checks = "decode_encode, decode_json and encode_json"
+observed = "TxAdvertVector and TxDemandVector (overlay flood advert and demand) are read and written as arrays of variable-length strings, not of 32-byte hashes: their bytes are refused or leave trailing bytes, and their XDR-JSON encodes to other bytes"
+evidence = "Soneso/StellarSDK/Xdr/XdrTxAdvertVector.php L20-L35 and XdrTxDemandVector.php L20-L35 call XdrEncoder::string and XdrBuffer::readString per item, where the schema says Hash txAdvertVector<TX_ADVERT_VECTOR_MAX_SIZE>; overlay types, not on the ledger"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "format.xdr-grammar.sponsorshipdescriptor-distinct",
+  "format.xdr-grammar.sponsorshipdescriptor-smallest",
+  "format.xdr-grammar.sponsorshipdescriptor-some",
+]
+checks = "decode_encode, decode_json and encode_json"
+observed = "XdrSponsorshipDescriptor reads a bare AccountID where the schema's SponsorshipDescriptor is the optional AccountID*, so its bytes and XDR-JSON are refused; the account entry extension that holds these values reads the option itself and is not affected"
+evidence = "Soneso/StellarSDK/Xdr/XdrSponsorshipDescriptor.php: decode returns new XdrSponsorshipDescriptor(XdrPublicKey::decode($xdr)) with no presence flag; XdrAccountEntryV2.php L48-L51 reads the presence flag of each item inline"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "probe.envelope-fields.contractexecutableexternalref-executable-owner-3-ledger",
+  "probe.envelope-fields.contractexecutableexternalref-executable-owner-4-ledger",
+  "probe.envelope-fields.contractexecutableexternalref-executable-owner-5-ledger",
+  "probe.envelope-fields.contractexecutableexternalref-executable-owner-6-ledger",
+  "probe.envelope-fields.contractexecutableexternalref-executable-owner-7-ledger",
+]
+checks = "tx_hash 0"
 observed = "AbstractTransaction::fromEnvelopeXdr refuses envelopes core applied whose external-reference executable has an owner that is not a contract (\"External reference owner is not a contract address\"), the same check the dart sdk from the same team makes"
+evidence = "Soneso/StellarSDK/CreateContractFromExternalRefHostFunction.php L194 and CreateContractFromExternalRefWithConstructorHostFunction.php L222 throw when the reference's owner address is not a contract"
 
 # stellar-dotnet-sdk on the candidate lane (`shapekit conformance run --sdk dotnet
 # --all-versions --manifest candidate/manifest.json`): 17.0.0 passes 1,248 entries, diverges
-# from the network on 135 and cannot run 4,826 (the sdk has no XDR-JSON); 16.0.0 passes 1,245
-# and diverges on 111. 21 checks per version are `error`, the missing probe.limits.p30 chain.
-# 17.0.0's 148 failing checks by cause: 36 NET-DEPTH, 36 decode_encode checks on *-over-max
-# vectors (the bounds NET-BOUNDS shows for the memo hold for other arrays and strings too), 27
-# NET-CREATECONTRACT, 16 NET-DEPRECATED-OPS, 14 NET-SCVEC (vec and map bodies), 2 refusals of
-# invoke-contract arguments holding claimable balance or liquidity pool addresses, and 17
-# transaction hashes that differ from the network's; the price candidate below explains the
-# three hashes of mainnet ledger 37466023 among them; the other 14 (fee-bump mainnet ledger
-# 57369500, the price-d-3 and transaction-cond-* probes) are not triaged.
+# from the network on 136 and cannot run 4,846 (the sdk has no XDR-JSON); 16.0.0 passes 1,245
+# and diverges on 111. every failing check is attributed:
+#
+# 17.0.0, 149 checks: 37 NET-DEPTH, 36 NET-BOUNDS (decode_encode on *-over-max vectors: the
+# bounds NET-BOUNDS shows for the memo hold for other arrays and strings too), 27
+# NET-CREATECONTRACT, 16 NET-DEPRECATED-OPS, 14 NET-SCVEC (vec and map bodies), 13 transaction
+# hashes of the price candidate below (mainnet ledger 37466023 transactions 12 and 236 with its
+# inner, mainnet ledger 57369500 transactions 26, 29, 38, 52, 60, 75, 83 and 104, and the
+# price-d-3 probe and its ledger), 4 hashes of the preconditions candidate below and 2 refusals
+# of the contract address candidate below.
+# 16.0.0, 121 checks: 34 NET-BOUNDS, 30 NET-DEPTH, 26 NET-CREATECONTRACT, 1 NET-DEPRECATED-OPS,
+# the same 11 mainnet price hashes, and 19 refusals of vectors whose types and arms its XDR
+# (v28.0) predates (ML-DSA cost types, muxed contract addresses, delegate signatures, the
+# signed and empty-tx-set StellarValue types, ledger close meta v3 arms, the longer contract
+# spec names): its XDR's age, not a defect.
+#
+# the 57369500 transactions were found by hashing every envelope of the ledger with the 17.0.0
+# testee and matching the hashes against the ledger's results: exactly those 8 differ, and
+# each holds manage offer operations with a price fraction not in lowest terms.
 
 [[candidate]]
 finding = "new"
 sdk = "dotnet"
 versions = ["16.0.0", "17.0.0"]
-entries = ["cap03.offer-liabilities.mainnet-37466023"]
-checks = "mainnet/tx_hash 12, mainnet/tx_hash 236 and mainnet/tx_hash 236 inner"
-observed = "Transaction.FromEnvelopeXdr(..).Hash(network) is not the network's hash for offers whose price fraction is not in lowest terms; the wrong hashes are the same ones stellar_flutter_sdk computes (fb4973f6.. for transaction 12), because both sdks rebuild the price from a decimal"
-evidence = "StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L95-L106: FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody (L83) reads it back with Price.FromString, which writes another fraction"
+entries = [
+  "cap03.offer-liabilities.mainnet-37466023",
+  "cap15.fee-bump.mainnet-57369500",
+  "probe.envelope-fields.price-d-3",
+  "probe.envelope-fields.price-d-3-ledger",
+]
+checks = "mainnet/tx_hash 12, 236 and 236 inner of 37466023; mainnet/tx_hash 26, 29, 38, 52, 60, 75, 83 and 104 of 57369500; testnet/tx_hash of price-d-3 (17.0.0 only, the probe is protocol 30)"
+observed = "Transaction.FromEnvelopeXdr(..).Hash(network) is not the network's hash for offers whose price the sdk does not get back from a decimal: fractions not in lowest terms (the 37466023 hashes are the same wrong ones stellar_flutter_sdk computes, fb4973f6.. for transaction 12), and 1/2147483647, which comes back as 0/1"
+evidence = "StellarDotnetSdk/Operations/ManageSellOfferOperation.cs L95-L106: FromXdr turns the price into decimal.Divide(N, D) written as a string, and ToOperationBody (L83) reads it back with Price.FromString (Price.cs L55-L96, a continued fraction bounded by int.MaxValue), which writes another fraction; checked with the 17.0.0 package: Price.FromString of \"0.0000000004656612875245796924\" (1/2147483647) is 0/1"
+
+[[candidate]]
+finding = "new"
+sdk = "dotnet"
+versions = ["17.0.0"]
+entries = [
+  "probe.envelope-fields.transaction-cond-invoke-2",
+  "probe.envelope-fields.transaction-cond-invoke-2-ledger",
+  "probe.envelope-fields.transaction-cond-payment-2",
+  "probe.envelope-fields.transaction-cond-payment-2-ledger",
+]
+checks = "tx_hash"
+observed = "a transaction whose PRECOND_V2 preconditions hold only defaults is rebuilt with PRECOND_NONE, so its hash is not the network's; the same as the kmp and php sdks"
+evidence = "StellarDotnetSdk/Transactions/TransactionPreconditions.cs L81-L88: HasV2() is false without ledger bounds, gap, age, minimum sequence number or extra signers, and ToXdr (L127-L162) then writes PRECOND_TIME or PRECOND_NONE"
+
+[[candidate]]
+finding = "new"
+sdk = "dotnet"
+versions = ["17.0.0"]
+entries = [
+  "probe.envelope-fields.invokecontractargs-contractaddress-5-ledger",
+  "probe.envelope-fields.invokecontractargs-contractaddress-6-ledger",
+]
+checks = "testnet/tx_hash 0"
+observed = "Transaction.FromEnvelopeXdr refuses an invoke contract operation whose contract address is a claimable balance or liquidity pool address (\"Claimable balances and liquidity pools cannot be arguments to invokeHostFunction\"); core applied both transactions, so their hash cannot be had"
+evidence = "StellarDotnetSdk/Operations/InvokeHostFunctionOperation.cs L464-L468: the InvokeContractHostFunction constructor throws InvalidOperationException for an ScClaimableBalanceId or ScLiquidityPoolId contract address"
 
 # kmp-stellar-sdk (stellar-sdk-jvm) on the candidate lane (`shapekit conformance run --sdk kmp
 # --all-versions --manifest candidate/manifest.json`): 1.18.0 passes 5,713 entries, diverges

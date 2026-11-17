@@ -19,6 +19,9 @@ use Soneso\StellarSDK\StellarSDK;
 // schema name (lower case) => sdk class, where the sdk's name differs. each was checked to be
 // the same xdr shape and the same SEP-51 rendering in the sdk source.
 const ALIASES = [
+    // DataValue is opaque<64>; the sdk's XdrDataValue is the optional DataValue* of
+    // ManageDataOp (a presence flag first), XdrDataValueMandatory the type itself (XdrDataEntry)
+    'datavalue' => 'XdrDataValueMandatory',
     // Xdr/XdrAccountEntryV1.php and its neighbours: the sdk drops "Extension"
     'accountentryextensionv1' => 'XdrAccountEntryV1',
     'accountentryextensionv1ext' => 'XdrAccountEntryV1Ext',

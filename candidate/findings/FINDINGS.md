@@ -1260,16 +1260,12 @@ stellar strkey decode is stellar-strkey's cli (stellar-strkey 1.0.0 src/cli/deco
 
 </details>
 
-## Input problems
-
-- candidate/findings/inputs/harness-stellar-etl-2b24ec89.json: the harness ran against manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4, but corpus/manifest.json is 16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609; rerun the harness and import its report
-
 ## Inputs
 
 | kind | path | sha256 | detail |
 |---|---|---|---|
 | manifest | `corpus/manifest.json` | `16d387657a8edbe9` | corpus 0.1.0 |
-| harness | `candidate/findings/inputs/harness-stellar-etl-2b24ec89.json` | `cedd23e8f6442c18` | stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 34 entries, manifest 0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4 |
+| harness | `candidate/findings/inputs/harness-stellar-etl-2b24ec89.json` | `eea9f4e3fd91bbc1` | stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 35 entries, manifest 16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609 |
 | conformance | `candidate/findings/inputs/conformance-go-textual-offer-id.json` | `4da67c01027fef11` | corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 |
 | conformance | `candidate/findings/inputs/conformance-dart.json` | `9c1ec705021c9347` | corpus 0.1.0, dart@3.12.0 |
 | conformance | `candidate/findings/inputs/conformance-php.json` | `2d2a34a6fe8f3b6b` | corpus 0.1.0, php@1.18.0 |
