@@ -40,8 +40,8 @@ case $workdir in
 esac
 
 commit=$("$repo/scripts/pin.sh" git stellar-core)
-tag=$("$repo/scripts/pin.sh" tag stellar-core)
-version=${tag#v}
+core_tag=$("$repo/scripts/pin.sh" tag stellar-core)
+version=${core_tag#v}
 base=$("$repo/scripts/pin.sh" image twin-ubuntu)
 url=$(python3 -I -c 'import sys,tomllib; print(next(e["url"] for e in tomllib.load(open(sys.argv[1],"rb"))["git"] if e["name"]=="stellar-core"))' "$repo/pins.toml")
 image="shapekit/core-twin:${tag:-${version}-cov}"
@@ -145,7 +145,7 @@ rt="$workdir/runtime-context"
 rm -rf "$rt" && mkdir -p "$rt"
 cp "$src/src/stellar-core" "$rt/stellar-core"
 {
-    echo "stellar-core commit $commit ($tag)"
+    echo "stellar-core commit $commit ($core_tag)"
     echo "base $base"
     echo "CC=$cc CXX=$cxx"
     echo "CFLAGS=$cflags"
