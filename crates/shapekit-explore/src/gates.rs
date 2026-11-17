@@ -242,6 +242,19 @@ pub struct SideWitnesses {
     pub runs: Vec<SideRun>,
 }
 
+/// A recipe the runs name: `name` is what a run's `recipe` field holds.
+#[derive(Debug, Clone, Serialize)]
+pub struct RecipeRef {
+    /// `<directory>.<file stem>`, unique among the recipes of one call.
+    pub name: String,
+    /// The IR's `id`; `<id>.p<protocol>` is its corpus chain id.
+    pub id: String,
+    /// The protocol the recipe itself names; its runs here are at every protocol.
+    pub protocol: u32,
+    /// The IR file, as given on the command line.
+    pub path: String,
+}
+
 /// `explore-gate-sides.json`: the gate sides recipe runs on the twin witness. An input for
 /// the gate list, which a side here never downgrades.
 #[derive(Debug, Clone, Serialize)]
@@ -251,7 +264,7 @@ pub struct GateSides {
     /// Twin image the runs were recorded on, as docker names it.
     pub twin_image: String,
     pub protocols: Vec<u32>,
-    pub recipes: Vec<String>,
+    pub recipes: Vec<RecipeRef>,
     /// Every side with at least one witnessing run, in gate list order.
     pub sides: Vec<SideWitnesses>,
     /// Per gate version N, recipes whose answers differ between their runs at N-1 and N.

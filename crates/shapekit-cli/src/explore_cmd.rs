@@ -678,7 +678,16 @@ fn gates_cmd(
         core: list.core.clone(),
         twin_image: twin.reference(),
         protocols: protocols.clone(),
-        recipes: recipes.iter().map(|(n, _)| n.clone()).collect(),
+        recipes: recipes
+            .iter()
+            .zip(&files)
+            .map(|((n, ir), f)| gates::RecipeRef {
+                name: n.clone(),
+                id: ir.id.clone(),
+                protocol: ir.protocol,
+                path: f.display().to_string(),
+            })
+            .collect(),
         sides,
         differences: diffs,
     };
