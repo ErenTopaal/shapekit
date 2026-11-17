@@ -6,6 +6,7 @@
 //! refused. Every gap must carry a one-line reason in `registry/uncovered.toml`.
 
 pub mod compute;
+pub mod evidence;
 pub mod ledger;
 mod markdown;
 pub mod pack;
@@ -68,6 +69,13 @@ pub fn run(corpus: &Path, registry_dir: &Path) -> Result<(Coverage, Vec<Problem>
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_default();
+    if let Some(candidates) = evidence::candidate_manifest(&root)? {
+        let dir = root.join(evidence::CANDIDATE_MANIFEST);
+        let dir = dir.parent().unwrap_or(&root);
+        let (rows, evidence_problems) = evidence::compare(&report, &candidates, dir)?;
+        report.uncovered_evidence = rows;
+        problems.extend(evidence_problems);
+    }
     let (ledger, ledger_problems) = ledger::build(&root, corpus, registry_dir)?;
     report.obligations = ledger::rows(&ledger);
     report.ledger = Some(ledger);

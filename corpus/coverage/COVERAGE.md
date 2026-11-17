@@ -840,6 +840,48 @@ Every obligation the corpus owes a witness for, from `corpus/coverage/obligation
 | `sdk-version` | 0 | 0 | 0 | 0 |
 | `seed` | 53 | 0 | 161 | 214 |
 
+## Uncovered records against the candidate lane
+
+Records of `registry/uncovered.toml` that entries of `candidate/manifest.json` speak about. `closes-on-promotion`: a candidate entry a local core wrote holds it, so promoting that entry covers it. `contradicted`: such an entry holds it although the blocker says a local core cannot write it; `shapekit coverage --check` fails until the record is corrected. `confirmed-by-refusal`: a candidate entry core refused holds the arm in its result, as `refused-before-ledger` says.
+
+| Record | Blocker | Standing | Candidate entries |
+|---|---|---|---|
+| arm AllowTrustResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 5 (`probe.envelope-fields.allowtrustop-asset-2`, `probe.envelope-fields.allowtrustop-asset-3`, `probe.envelope-fields.allowtrustop-authorize-2`) |
+| arm BumpSequenceResult:bad_seq | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.bumpsequenceop-bumpto-2`) |
+| arm ChangeTrustResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 17 (`probe.envelope-fields.changetrustop-limit-2`, `probe.envelope-fields.changetrustop-line-1`, `probe.envelope-fields.changetrustop-line-2`) |
+| arm ClawbackResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 7 (`probe.envelope-fields.clawbackop-amount-1`, `probe.envelope-fields.clawbackop-amount-2`, `probe.envelope-fields.clawbackop-asset-1`) |
+| arm CreateAccountResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.createaccountop-destination-3`, `probe.envelope-fields.createaccountop-startingbalance-2`) |
+| arm CreateClaimableBalanceResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 16 (`probe.envelope-fields.claimantv0-destination-two-3`, `probe.envelope-fields.claimantv0-predicate-one-1`, `probe.envelope-fields.claimantv0-predicate-one-2`) |
+| arm ExtendFootprintTtlResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.extendfootprintttlop-extendto-2`, `probe.envelope-fields.operation-body-invoke-26`) |
+| arm InnerTransactionResultResult:tx_missing_operation | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.feebumptransaction-innertx-1`) |
+| arm LiquidityPoolDepositResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 8 (`probe.envelope-fields.liquiditypooldepositop-maxamounta-1`, `probe.envelope-fields.liquiditypooldepositop-maxamounta-2`, `probe.envelope-fields.liquiditypooldepositop-maxamountb-1`) |
+| arm LiquidityPoolWithdrawResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 6 (`probe.envelope-fields.liquiditypoolwithdrawop-amount-1`, `probe.envelope-fields.liquiditypoolwithdrawop-amount-2`, `probe.envelope-fields.liquiditypoolwithdrawop-minamounta-2`) |
+| arm ManageBuyOfferResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 12 (`probe.envelope-fields.managebuyofferop-buyamount-1`, `probe.envelope-fields.managebuyofferop-buyamount-2`, `probe.envelope-fields.managebuyofferop-buying-1`) |
+| arm ManageDataResult:invalid_name | `refused-before-ledger` | confirmed-by-refusal | 4 (`probe.envelope-fields.managedataop-dataname-1`, `probe.envelope-fields.managedataop-dataname-3`, `probe.envelope-fields.operation-body-merge-13`) |
+| arm ManageSellOfferResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 28 (`probe.envelope-fields.createpassivesellofferop-amount-1`, `probe.envelope-fields.createpassivesellofferop-amount-2`, `probe.envelope-fields.createpassivesellofferop-buying-1`) |
+| arm OperationResult:op_not_supported | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.operation-body-merge-12`, `probe.envelope-fields.operation-body-payment-10`) |
+| arm PathPaymentStrictReceiveResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 11 (`probe.envelope-fields.operation-body-merge-6`, `probe.envelope-fields.operation-body-payment-3`, `probe.envelope-fields.pathpaymentstrictreceiveop-destamount-1`) |
+| arm PathPaymentStrictSendResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 11 (`probe.envelope-fields.operation-body-merge-16`, `probe.envelope-fields.operation-body-payment-14`, `probe.envelope-fields.pathpaymentstrictsendop-destasset-1`) |
+| arm PaymentResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 8 (`probe.envelope-fields.alphanum12-assetcode-2`, `probe.envelope-fields.alphanum4-assetcode-2`, `probe.envelope-fields.operation-body-merge-5`) |
+| arm RestoreFootprintResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.operation-body-invoke-27`) |
+| arm RevokeSponsorshipResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 12 (`probe.envelope-fields.ledgerkeydata-dataname-1`, `probe.envelope-fields.ledgerkeydata-dataname-3`, `probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-0`) |
+| arm SetOptionsResult:bad_signer | `refused-before-ledger` | confirmed-by-refusal | 3 (`probe.envelope-fields.setoptionsop-signer-3`, `probe.envelope-fields.signer-key-5`, `probe.envelope-fields.signer-weight-2`) |
+| arm SetOptionsResult:invalid_home_domain | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.setoptionsop-homedomain-4`) |
+| arm SetOptionsResult:threshold_out_of_range | `refused-before-ledger` | confirmed-by-refusal | 4 (`probe.envelope-fields.setoptionsop-highthreshold-2`, `probe.envelope-fields.setoptionsop-lowthreshold-2`, `probe.envelope-fields.setoptionsop-masterweight-3`) |
+| arm SetOptionsResult:unknown_flag | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.setoptionsop-clearflags-2`, `probe.envelope-fields.setoptionsop-setflags-2`) |
+| arm SetTrustLineFlagsResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 8 (`probe.envelope-fields.operation-body-merge-24`, `probe.envelope-fields.operation-body-payment-22`, `probe.envelope-fields.settrustlineflagsop-asset-1`) |
+| arm TransactionResultResult:tx_insufficient_balance | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.feebumptransaction-fee-3`) |
+| arm TransactionResultResult:tx_insufficient_fee | `refused-before-ledger` | confirmed-by-refusal | 13 (`probe.envelope-fields.feebumptransaction-fee-1`, `probe.envelope-fields.feebumptransactionenvelope-tx-1`, `probe.envelope-fields.sorobantransactiondata-resourcefee-4`) |
+| arm TransactionResultResult:tx_malformed | `refused-before-ledger` | confirmed-by-refusal | 39 (`probe.envelope-fields.feebumptransaction-fee-2`, `probe.envelope-fields.operation-body-invoke-10`, `probe.envelope-fields.operation-body-invoke-11`) |
+| arm TransactionResultResult:tx_missing_operation | `refused-before-ledger` | confirmed-by-refusal | 7 (`probe.envelope-fields.transaction-operations-invoke-1`, `probe.envelope-fields.transaction-operations-payment-1`, `probe.envelope-fields.transactionv0-operations-p12-1`) |
+| arm TransactionResultResult:tx_soroban_invalid | `refused-before-ledger` | confirmed-by-refusal | 41 (`probe.envelope-fields.ledgerfootprint-readonly-echo-2`, `probe.envelope-fields.ledgerfootprint-readonly-restore-1`, `probe.envelope-fields.ledgerfootprint-readwrite-echo-2`) |
+| arm TransactionResultResult:tx_too_early | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.ledgerbounds-minledger-1`, `probe.envelope-fields.timebounds-mintime-1`) |
+| arm TransactionResultResult:tx_too_late | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.ledgerbounds-maxledger-5`, `probe.envelope-fields.timebounds-maxtime-5`) |
+| family soroban.muxed-source fragment TransactionResultResult:tx_soroban_invalid | `refused-before-ledger` | confirmed-by-refusal | 41 (`probe.envelope-fields.ledgerfootprint-readonly-echo-2`, `probe.envelope-fields.ledgerfootprint-readonly-restore-1`, `probe.envelope-fields.ledgerfootprint-readwrite-echo-2`) |
+| family cap38.liquidity-pools fragment ChangeTrustResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 17 (`probe.envelope-fields.changetrustop-limit-2`, `probe.envelope-fields.changetrustop-line-1`, `probe.envelope-fields.changetrustop-line-2`) |
+| family cap23.claimable-balances fragment CreateClaimableBalanceResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 16 (`probe.envelope-fields.claimantv0-destination-two-3`, `probe.envelope-fields.claimantv0-predicate-one-1`, `probe.envelope-fields.claimantv0-predicate-one-2`) |
+| family cap01.bump-sequence fragment BumpSequenceResult:bad_seq | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.bumpsequenceop-bumpto-2`) |
+
 ## Fields core does not fully validate
 
 | Field | XDR path | Core validates | Entries | Core-emitted | By source class |

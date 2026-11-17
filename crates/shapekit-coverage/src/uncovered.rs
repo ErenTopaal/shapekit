@@ -47,6 +47,21 @@ pub enum Blocker {
     RecipeGap,
 }
 
+impl Blocker {
+    /// The name `uncovered.toml` spells the blocker with.
+    pub fn name(self) -> &'static str {
+        match self {
+            Blocker::RefusedBeforeLedger => "refused-before-ledger",
+            Blocker::OldProtocolOnly => "old-protocol-only",
+            Blocker::HistoryOnly => "history-only",
+            Blocker::NotProducibleLocally => "not-producible-locally",
+            Blocker::NeverEmitted => "never-emitted",
+            Blocker::NotImported => "not-imported",
+            Blocker::RecipeGap => "recipe-gap",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CapReason {

@@ -22705,5 +22705,374 @@
     "fragments": 322,
     "fragments_covered": 312,
     "fragments_uncovered": 10
-  }
+  },
+  "uncovered_evidence": [
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.allowtrustop-asset-2",
+        "probe.envelope-fields.allowtrustop-asset-3",
+        "probe.envelope-fields.allowtrustop-authorize-2"
+      ],
+      "candidate_entry_count": 5,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm AllowTrustResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.bumpsequenceop-bumpto-2"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm BumpSequenceResult:bad_seq"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.changetrustop-limit-2",
+        "probe.envelope-fields.changetrustop-line-1",
+        "probe.envelope-fields.changetrustop-line-2"
+      ],
+      "candidate_entry_count": 17,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ChangeTrustResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.clawbackop-amount-1",
+        "probe.envelope-fields.clawbackop-amount-2",
+        "probe.envelope-fields.clawbackop-asset-1"
+      ],
+      "candidate_entry_count": 7,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ClawbackResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.createaccountop-destination-3",
+        "probe.envelope-fields.createaccountop-startingbalance-2"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm CreateAccountResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.claimantv0-destination-two-3",
+        "probe.envelope-fields.claimantv0-predicate-one-1",
+        "probe.envelope-fields.claimantv0-predicate-one-2"
+      ],
+      "candidate_entry_count": 16,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm CreateClaimableBalanceResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.extendfootprintttlop-extendto-2",
+        "probe.envelope-fields.operation-body-invoke-26"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ExtendFootprintTtlResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.feebumptransaction-innertx-1"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm InnerTransactionResultResult:tx_missing_operation"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.liquiditypooldepositop-maxamounta-1",
+        "probe.envelope-fields.liquiditypooldepositop-maxamounta-2",
+        "probe.envelope-fields.liquiditypooldepositop-maxamountb-1"
+      ],
+      "candidate_entry_count": 8,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm LiquidityPoolDepositResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.liquiditypoolwithdrawop-amount-1",
+        "probe.envelope-fields.liquiditypoolwithdrawop-amount-2",
+        "probe.envelope-fields.liquiditypoolwithdrawop-minamounta-2"
+      ],
+      "candidate_entry_count": 6,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm LiquidityPoolWithdrawResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.managebuyofferop-buyamount-1",
+        "probe.envelope-fields.managebuyofferop-buyamount-2",
+        "probe.envelope-fields.managebuyofferop-buying-1"
+      ],
+      "candidate_entry_count": 12,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ManageBuyOfferResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.managedataop-dataname-1",
+        "probe.envelope-fields.managedataop-dataname-3",
+        "probe.envelope-fields.operation-body-merge-13"
+      ],
+      "candidate_entry_count": 4,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ManageDataResult:invalid_name"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.createpassivesellofferop-amount-1",
+        "probe.envelope-fields.createpassivesellofferop-amount-2",
+        "probe.envelope-fields.createpassivesellofferop-buying-1"
+      ],
+      "candidate_entry_count": 28,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm ManageSellOfferResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.operation-body-merge-12",
+        "probe.envelope-fields.operation-body-payment-10"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm OperationResult:op_not_supported"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.operation-body-merge-6",
+        "probe.envelope-fields.operation-body-payment-3",
+        "probe.envelope-fields.pathpaymentstrictreceiveop-destamount-1"
+      ],
+      "candidate_entry_count": 11,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm PathPaymentStrictReceiveResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.operation-body-merge-16",
+        "probe.envelope-fields.operation-body-payment-14",
+        "probe.envelope-fields.pathpaymentstrictsendop-destasset-1"
+      ],
+      "candidate_entry_count": 11,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm PathPaymentStrictSendResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.alphanum12-assetcode-2",
+        "probe.envelope-fields.alphanum4-assetcode-2",
+        "probe.envelope-fields.operation-body-merge-5"
+      ],
+      "candidate_entry_count": 8,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm PaymentResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.operation-body-invoke-27"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm RestoreFootprintResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.ledgerkeydata-dataname-1",
+        "probe.envelope-fields.ledgerkeydata-dataname-3",
+        "probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-0"
+      ],
+      "candidate_entry_count": 12,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm RevokeSponsorshipResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.setoptionsop-signer-3",
+        "probe.envelope-fields.signer-key-5",
+        "probe.envelope-fields.signer-weight-2"
+      ],
+      "candidate_entry_count": 3,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm SetOptionsResult:bad_signer"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.setoptionsop-homedomain-4"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm SetOptionsResult:invalid_home_domain"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.setoptionsop-highthreshold-2",
+        "probe.envelope-fields.setoptionsop-lowthreshold-2",
+        "probe.envelope-fields.setoptionsop-masterweight-3"
+      ],
+      "candidate_entry_count": 4,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm SetOptionsResult:threshold_out_of_range"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.setoptionsop-clearflags-2",
+        "probe.envelope-fields.setoptionsop-setflags-2"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm SetOptionsResult:unknown_flag"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.operation-body-merge-24",
+        "probe.envelope-fields.operation-body-payment-22",
+        "probe.envelope-fields.settrustlineflagsop-asset-1"
+      ],
+      "candidate_entry_count": 8,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm SetTrustLineFlagsResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.feebumptransaction-fee-3"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_insufficient_balance"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.feebumptransaction-fee-1",
+        "probe.envelope-fields.feebumptransactionenvelope-tx-1",
+        "probe.envelope-fields.sorobantransactiondata-resourcefee-4"
+      ],
+      "candidate_entry_count": 13,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_insufficient_fee"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.feebumptransaction-fee-2",
+        "probe.envelope-fields.operation-body-invoke-10",
+        "probe.envelope-fields.operation-body-invoke-11"
+      ],
+      "candidate_entry_count": 39,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.transaction-operations-invoke-1",
+        "probe.envelope-fields.transaction-operations-payment-1",
+        "probe.envelope-fields.transactionv0-operations-p12-1"
+      ],
+      "candidate_entry_count": 7,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_missing_operation"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.ledgerfootprint-readonly-echo-2",
+        "probe.envelope-fields.ledgerfootprint-readonly-restore-1",
+        "probe.envelope-fields.ledgerfootprint-readwrite-echo-2"
+      ],
+      "candidate_entry_count": 41,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_soroban_invalid"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.ledgerbounds-minledger-1",
+        "probe.envelope-fields.timebounds-mintime-1"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_too_early"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.ledgerbounds-maxledger-5",
+        "probe.envelope-fields.timebounds-maxtime-5"
+      ],
+      "candidate_entry_count": 2,
+      "standing": "confirmed-by-refusal",
+      "subject": "arm TransactionResultResult:tx_too_late"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.ledgerfootprint-readonly-echo-2",
+        "probe.envelope-fields.ledgerfootprint-readonly-restore-1",
+        "probe.envelope-fields.ledgerfootprint-readwrite-echo-2"
+      ],
+      "candidate_entry_count": 41,
+      "standing": "confirmed-by-refusal",
+      "subject": "family soroban.muxed-source fragment TransactionResultResult:tx_soroban_invalid"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.changetrustop-limit-2",
+        "probe.envelope-fields.changetrustop-line-1",
+        "probe.envelope-fields.changetrustop-line-2"
+      ],
+      "candidate_entry_count": 17,
+      "standing": "confirmed-by-refusal",
+      "subject": "family cap38.liquidity-pools fragment ChangeTrustResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.claimantv0-destination-two-3",
+        "probe.envelope-fields.claimantv0-predicate-one-1",
+        "probe.envelope-fields.claimantv0-predicate-one-2"
+      ],
+      "candidate_entry_count": 16,
+      "standing": "confirmed-by-refusal",
+      "subject": "family cap23.claimable-balances fragment CreateClaimableBalanceResult:malformed"
+    },
+    {
+      "blocker": "refused-before-ledger",
+      "candidate_entries": [
+        "probe.envelope-fields.bumpsequenceop-bumpto-2"
+      ],
+      "candidate_entry_count": 1,
+      "standing": "confirmed-by-refusal",
+      "subject": "family cap01.bump-sequence fragment BumpSequenceResult:bad_seq"
+    }
+  ]
 }

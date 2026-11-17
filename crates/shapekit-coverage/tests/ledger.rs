@@ -143,3 +143,26 @@ fn every_gate_contributes_both_sides() {
             .any(|o| o.id == "gate-side:src/transactions/SetOptionsOpFrame.cpp:308:9:false")
     );
 }
+
+#[test]
+fn the_candidate_lane_contradicts_no_uncovered_record() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let (report, problems) =
+        shapekit_coverage::run(&root.join("corpus"), &root.join("registry")).unwrap();
+    use shapekit_coverage::evidence::Standing;
+    assert!(
+        !report
+            .uncovered_evidence
+            .iter()
+            .any(|r| r.standing == Standing::Contradicted),
+        "{problems:?}"
+    );
+    // core refuses a malformed allow trust at submission, and a probe entry holds that result
+    assert!(
+        report
+            .uncovered_evidence
+            .iter()
+            .any(|r| r.subject == "arm AllowTrustResult:malformed"
+                && r.standing == Standing::ConfirmedByRefusal)
+    );
+}

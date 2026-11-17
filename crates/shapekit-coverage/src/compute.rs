@@ -37,6 +37,9 @@ pub struct Coverage {
     pub fields: Vec<FieldRow>,
     /// The obligation ledger by kind and status; empty until `run` merges the ledger.
     pub obligations: Vec<crate::ledger::KindRow>,
+    /// `registry/uncovered.toml` records the candidate lane's entries speak about; empty until
+    /// `run` compares them.
+    pub uncovered_evidence: Vec<crate::evidence::EvidenceRow>,
     /// The merged ledger itself, written to its own file.
     #[serde(skip)]
     pub ledger: Option<shapekit_contracts::ObligationLedger>,
@@ -334,6 +337,7 @@ pub fn compute(
             families: family_rows,
             fields,
             obligations: Vec::new(),
+            uncovered_evidence: Vec::new(),
             ledger: None,
         },
         problems,

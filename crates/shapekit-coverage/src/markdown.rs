@@ -241,6 +241,24 @@ fn fields(out: &mut String, c: &Coverage) {
             );
         }
     }
+    if !c.uncovered_evidence.is_empty() {
+        out.push_str("\n## Uncovered records against the candidate lane\n\nRecords of `registry/uncovered.toml` that entries of `candidate/manifest.json` speak about. `closes-on-promotion`: a candidate entry a local core wrote holds it, so promoting that entry covers it. `contradicted`: such an entry holds it although the blocker says a local core cannot write it; `shapekit coverage --check` fails until the record is corrected. `confirmed-by-refusal`: a candidate entry core refused holds the arm in its result, as `refused-before-ledger` says.\n\n| Record | Blocker | Standing | Candidate entries |\n|---|---|---|---|\n");
+        for r in &c.uncovered_evidence {
+            let standing = match r.standing {
+                crate::evidence::Standing::ClosesOnPromotion => "closes-on-promotion",
+                crate::evidence::Standing::Contradicted => "contradicted",
+                crate::evidence::Standing::ConfirmedByRefusal => "confirmed-by-refusal",
+            };
+            let _ = writeln!(
+                out,
+                "| {} | `{}` | {standing} | {} ({}) |",
+                cell(&r.subject),
+                blocker(r.blocker),
+                r.candidate_entry_count,
+                code_list(&r.candidate_entries)
+            );
+        }
+    }
     out.push_str("\n## Fields core does not fully validate\n\n| Field | XDR path | Core validates | Entries | Core-emitted | By source class |\n|---|---|---|---|---|---|\n");
     for f in &c.fields {
         let v = match f.validated_by_core {
@@ -308,15 +326,7 @@ fn reason(r: &Reason) -> String {
 }
 
 fn blocker(b: Blocker) -> &'static str {
-    match b {
-        Blocker::RefusedBeforeLedger => "refused-before-ledger",
-        Blocker::OldProtocolOnly => "old-protocol-only",
-        Blocker::HistoryOnly => "history-only",
-        Blocker::NotProducibleLocally => "not-producible-locally",
-        Blocker::NeverEmitted => "never-emitted",
-        Blocker::NotImported => "not-imported",
-        Blocker::RecipeGap => "recipe-gap",
-    }
+    b.name()
 }
 
 fn counts<K: std::fmt::Display>(m: &BTreeMap<K, usize>) -> String {

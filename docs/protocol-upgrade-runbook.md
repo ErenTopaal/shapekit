@@ -249,6 +249,10 @@ Every new fragment is either covered by an entry or listed in `registry/uncovere
 reason. `shapekit coverage` also rewrites the obligation ledger,
 `corpus/coverage/obligations.json`, from the fragments in `registry/obligation-sources.toml`,
 the gap tables and the obligations the entries name; its per-kind counts are in `COVERAGE.md`.
+It also compares every record of `registry/uncovered.toml` with the candidate lane: a record a
+candidate entry core wrote holds fails the check unless its blocker is `recipe-gap` or
+`not-imported` (promoting the entry closes those), and a `refused-before-ledger` arm a refused
+candidate entry holds in its result is listed as confirmed.
 
 `shapekit guide check` also compares every row of `registry/fields.toml` with the verdicts
 measured on core in `registry/generated/validation.json`, the comparison `shapekit probe compare`
