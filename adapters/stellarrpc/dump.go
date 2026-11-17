@@ -186,9 +186,9 @@ func (a *Adapter) Dump(tables []string, table func(wire.DumpTable) error, row fu
 	if a.target == nil {
 		return wire.DumpResult{}, wire.Errorf(wire.ClassBadRequest, "dump before start")
 	}
-	c, err := a.target.rpc()
+	c, err := a.target.rpc(a.ctx)
 	if err != nil {
-		return wire.DumpResult{}, wire.Errorf(wire.ClassBadRequest, "%v", err)
+		return wire.DumpResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	names := Tables
 	if len(tables) > 0 {

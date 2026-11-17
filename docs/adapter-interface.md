@@ -876,7 +876,7 @@ shapekit harness run --adapter "adapters/bin/rpc-adapter --cpus 2"
 ```
 
 The adapter runs the stellar-rpc v30.0.1 release image, `stellar/stellar-rpc:30.0.1` by the
-digest in `pins.toml`. When the first process answers, the adapter checks that
+digest in `pins.toml`. When the first serving process answers, the adapter checks that
 `getVersionInfo` reports `30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d`, the commit of
 the `v30.0.1` tag, and stops the chain with a `target` error otherwise. The image carries the
 stellar-core 30.0.0 build that its captive core runs. `--cpus` passes docker's `--cpus` to
@@ -893,7 +893,9 @@ Run the harness once with each to check all three methods.
   when the process starts, before the HTTP server, and then hands over to live ingestion,
   which runs captive core and follows the network over SCP. The harness network has no
   validators, so captive core never ingests a ledger, and stellar-rpc logs
-  `could not run ingestion. Retrying`. The captive core configuration only has to pass
+  `could not run ingestion. Retrying`. After five retries a second apart, stellar-rpc exits
+  (`maxRetries` and `Fatal("could not run ingestion")` in `Start`, `rpcv1/ingest/service.go`).
+  The captive core configuration only has to pass
   stellar-rpc's checks: the archive URL from `start` and a quorum of one key that the adapter
   generates and that signs nothing. Two settings follow from the backfill's source
   (`cmd/stellar-rpc/internal/rpcv1/ingest/backfill.go` at v30.0.1):
@@ -905,8 +907,20 @@ Run the harness once with each to check all three methods.
     (`if bounds.frontfill.First < bounds.frontfill.Last`). On a database at ledger `H`, a
     restart with one new ledger in the datastore fills nothing. So every `advance` replaces
     the container: a new stellar-rpc process on an empty database, whose backfill ingests
-    every released ledger. The process that answers `export` and `dump` has ingested the
-    whole chain in one backfill.
+    every released ledger. The database that answers `export` and `dump` holds the whole
+    chain from one backfill.
+
+  At `CHECKPOINT_FREQUENCY = 1` the backfill process lives only about five seconds after its
+  HTTP server starts: its database is more than two checkpoints past the archive's newest one,
+  so captive core refuses to start (`trying to start online mode too far`), and the retries
+  above end in the exit. A dump that takes longer would lose the process. So once the backfill
+  process answers, or has exited after starting its HTTP server (stellar-rpc starts the server
+  only after the backfill, `MustNew` in `rpcv1/daemon/daemon.go`), the adapter stops it and
+  starts a serving process on the same database: `BACKFILL = false` and the checkpoint
+  frequency from `start` (64). That database head is within two checkpoints of the archive the
+  harness serves, so captive core starts and waits for the next checkpoint, and the process
+  stays up. `status`, `export` and `dump` talk to the serving process; `export` and `dump` wait
+  until it answers, and report a `target` error if it exits instead.
 
   The backfill writes each ledger with the function that live ingestion uses too
   (`ingestLedgerCloseMeta` in `rpcv1/ingest/service.go`: the ledger, its transactions and its
@@ -916,10 +930,11 @@ Run the harness once with each to check all three methods.
   newest checkpoint (`getNextLedgerSequence` in `rpcv1/ingest/service.go`), and the backfill
   ends on a checkpoint.
 - **Status.** `last_ingested_ledger` is the `sequence` that `getLatestLedger` answers, which
-  stellar-rpc reads from its database. While a new process backfills, the value stays at the
-  newest one an earlier process of the chain answered. `health` is `starting` until the
-  first process answers, `crashed` when the container exited, and `oom` when docker reports
-  an OOM kill. `last_error` is the newest log line at level `error` or `fatal`, or a
+  stellar-rpc reads from its database: the backfill process's answer, then the serving
+  process's. While a new process backfills, the value stays at the newest one an earlier
+  process of the chain answered. `health` is `starting` until the first serving process
+  answers, `crashed` when a backfill process exited before its HTTP server started or a
+  serving process exited, and `oom` when docker reports an OOM kill. `last_error` is the newest log line at level `error` or `fatal`, or a
   `panic:` line. Lines of the live ingestion path, which cannot run here (the retry above
   and captive core's own log), are left out. Peak memory is the container's cgroup
   `memory.peak`, sampled at every `status`, across all the containers of the chain.

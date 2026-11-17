@@ -32,9 +32,20 @@ const (
 	readyTimeout = 5 * time.Minute
 )
 
+// Phases of the current process.
+const (
+	// backfilling: a process with BACKFILL on an empty database, until it has
+	// ingested every released ledger (see relaunch)
+	phaseBackfill = "backfill"
+	// serving: a process on the database the backfill wrote, with BACKFILL off,
+	// which answers the reads (see serve)
+	phaseServe = "serve"
+)
+
 // target is one stellar-rpc deployment: a datastore directory the adapter
-// fills with released batches, and the stellar-rpc process that serves them.
-// Every release starts a new process on an empty database (see relaunch).
+// fills with released batches, and the stellar-rpc process on it. Every
+// release backfills on an empty database in one process and then serves that
+// database from another (see relaunch and serve).
 type target struct {
 	params  wire.StartParams
 	cpus    string
@@ -45,6 +56,7 @@ type target struct {
 	copied  map[string]bool
 	runs    int
 	current string // the container of the current process
+	phase   string
 
 	mu       sync.Mutex
 	url      string
@@ -112,6 +124,18 @@ func startTarget(ctx context.Context, cpus string, p wire.StartParams) (*target,
 // captive core never ingests a ledger (stellar-rpc logs "could not run
 // ingestion. Retrying"). Its configuration only has to pass stellar-rpc's
 // checks: a quorum of one key generated here, which signs nothing.
+//
+// The backfill process cannot serve for long: when its live ingestion fails,
+// stellar-rpc retries five times a second apart and then exits
+// (rpcv1/ingest/service.go, Start: maxRetries 5, then Fatal "could not run
+// ingestion"). At CHECKPOINT_FREQUENCY 1 the database is soon more than two
+// checkpoints past the archive, which captive core refuses ("trying to start
+// online mode too far"), so the process exits about five seconds after its
+// HTTP server starts. The serving process (serve.toml) reads the same
+// database with BACKFILL off and the checkpoint frequency the harness gives.
+// Its database head is then within two checkpoints of the archive the harness
+// serves, captive core starts and waits for the next checkpoint, and the
+// process stays up.
 func (t *target) writeConfig() error {
 	kp, err := keypair.Random()
 	if err != nil {
@@ -132,16 +156,17 @@ PUBLIC_KEY=%q
 ADDRESS="127.0.0.1:11625"
 HISTORY="curl -sf %s/{0} -o {1}"
 `, strconv.Quote(t.params.NetworkPassphrase), kp.Address(), t.params.Delivery.ArchiveURL)
-	rpc := fmt.Sprintf(`NETWORK_PASSPHRASE = %s
+	rpc := func(backfill bool, frequency uint32) string {
+		return fmt.Sprintf(`NETWORK_PASSPHRASE = %s
 HISTORY_ARCHIVE_URLS = [%q]
 CAPTIVE_CORE_CONFIG_PATH = "/etc/stellar-rpc/captive-core.cfg"
 CAPTIVE_CORE_STORAGE_PATH = "/data/captive-core"
 DB_PATH = "/data/stellar-rpc.sqlite"
 ENDPOINT = "0.0.0.0:%s"
 LOG_LEVEL = "info"
-BACKFILL = true
+BACKFILL = %t
 SERVE_LEDGERS_FROM_DATASTORE = true
-CHECKPOINT_FREQUENCY = 1
+CHECKPOINT_FREQUENCY = %d
 
 [datastore_config]
 type = "Filesystem"
@@ -152,9 +177,19 @@ destination_path = "/lake"
 [datastore_config.schema]
 ledgers_per_file = %d
 files_per_partition = %d
-`, strconv.Quote(t.params.NetworkPassphrase), t.params.Delivery.ArchiveURL, rpcPort,
-		t.params.Delivery.Lake.LedgersPerBatch, t.params.Delivery.Lake.BatchesPerPartition)
-	for name, body := range map[string]string{"captive-core.cfg": core, "stellar-rpc.toml": rpc} {
+`, strconv.Quote(t.params.NetworkPassphrase), t.params.Delivery.ArchiveURL, rpcPort, backfill, frequency,
+			t.params.Delivery.Lake.LedgersPerBatch, t.params.Delivery.Lake.BatchesPerPartition)
+	}
+	frequency := t.params.Ledgers.CheckpointFrequency
+	if frequency == 0 {
+		return wire.Errorf(wire.ClassBadRequest, "ledgers.checkpoint_frequency is 0")
+	}
+	files := map[string]string{
+		"captive-core.cfg": core,
+		"backfill.toml":    rpc(true, 1),
+		"serve.toml":       rpc(false, frequency),
+	}
+	for name, body := range files {
 		if err := os.WriteFile(filepath.Join(t.etc, name), []byte(body), 0o644); err != nil { //nolint:gosec // read by the container's user
 			return wire.Errorf(wire.ClassInternal, "writing %s: %v", name, err)
 		}
@@ -224,8 +259,9 @@ func batchLast(name string) (uint32, bool) {
 }
 
 // relaunch replaces the stellar-rpc process: it keeps the old container's
-// logs, removes it, empties the database directory and starts a new one,
-// whose backfill ingests every batch in the datastore directory.
+// logs, removes it, empties the database directory and starts a backfill
+// process, whose backfill ingests every batch in the datastore directory.
+// status replaces it with a serving process once the backfill is done.
 //
 // A new process on the old database would not ingest a single new ledger:
 // with the database at ledger H and the datastore at H+1, the frontfill range
@@ -245,8 +281,28 @@ func (t *target) relaunch(ctx context.Context) error {
 	if err := os.MkdirAll(t.data, 0o750); err != nil {
 		return wire.Errorf(wire.ClassInternal, "creating %s: %v", t.data, err)
 	}
+	return t.run(ctx, phaseBackfill)
+}
+
+// serve replaces the backfill process, which has finished its backfill, with
+// a serving process on the same database. docker stop lets the old process
+// close the database first.
+func (t *target) serve(ctx context.Context) error {
+	t.keepLogs(ctx)
+	if _, err := docker(ctx, "stop", "-t", "30", t.current); err != nil && !strings.Contains(err.Error(), "No such container") {
+		return wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	if err := removeContainer(ctx, t.current); err != nil {
+		return wire.Errorf(wire.ClassTarget, "%v", err)
+	}
+	return t.run(ctx, phaseServe)
+}
+
+// run starts a stellar-rpc container of the given phase on the database
+// directory.
+func (t *target) run(ctx context.Context, phase string) error {
 	t.runs++
-	name := fmt.Sprintf("%s-%d", t.prefix, t.runs)
+	name := fmt.Sprintf("%s-%d-%s", t.prefix, t.runs, phase)
 	mem := strconv.FormatUint(t.params.Limits.MemoryBytes, 10)
 	args := []string{"run", "-d", "--name", name,
 		"--network", t.params.DockerNetwork,
@@ -261,11 +317,11 @@ func (t *target) relaunch(ctx context.Context) error {
 	if t.cpus != "" {
 		args = append(args, "--cpus", t.cpus)
 	}
-	args = append(args, Image, "--config-path", "/etc/stellar-rpc/stellar-rpc.toml")
+	args = append(args, Image, "--config-path", "/etc/stellar-rpc/"+phase+".toml")
 	if _, err := docker(ctx, args...); err != nil {
 		return wire.Errorf(wire.ClassTarget, "starting stellar-rpc: %v", err)
 	}
-	t.current = name
+	t.current, t.phase = name, phase
 	ip, err := containerIP(ctx, name, t.params.DockerNetwork)
 	if err != nil {
 		return wire.Errorf(wire.ClassTarget, "%v", err)
@@ -276,31 +332,33 @@ func (t *target) relaunch(ctx context.Context) error {
 	return nil
 }
 
-// waitReady waits until the current process answers getVersionInfo, and
-// checks that it is the pinned build. A process that exits first is left to
-// status, which reports it.
+// waitReady waits until the serving process of the first release answers
+// getVersionInfo, and checks that it is the pinned build. A process that
+// exits first is left to status, which reports it.
 func (t *target) waitReady(ctx context.Context) error {
 	deadline := time.Now().Add(readyTimeout)
 	for {
-		st, err := inspectState(ctx, t.current)
+		st, err := t.status(ctx)
 		if err != nil {
-			return wire.Errorf(wire.ClassTarget, "%v", err)
+			return err
 		}
-		if !st.Running {
+		if st.Health == wire.HealthCrashed || st.Health == wire.HealthOOM {
 			return nil
 		}
-		var v versionInfo
-		cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		err = newClient(t.url).call(cctx, "getVersionInfo", nil, &v)
-		cancel()
-		if err == nil {
-			if v.CommitHash != Commit || v.Version != Version30 {
-				return wire.Errorf(wire.ClassTarget, "the image runs stellar-rpc %s at %s, not %s at %s", v.Version, v.CommitHash, Version30, Commit)
+		if t.phase == phaseServe && st.Health == wire.HealthRunning {
+			var v versionInfo
+			cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			err = newClient(t.url).call(cctx, "getVersionInfo", nil, &v)
+			cancel()
+			if err == nil {
+				if v.CommitHash != Commit || v.Version != Version30 {
+					return wire.Errorf(wire.ClassTarget, "the image runs stellar-rpc %s at %s, not %s at %s", v.Version, v.CommitHash, Version30, Commit)
+				}
+				return nil
 			}
-			return nil
 		}
 		if time.Now().After(deadline) {
-			return wire.Errorf(wire.ClassTarget, "stellar-rpc did not answer getVersionInfo within %s: %v", readyTimeout, err)
+			return wire.Errorf(wire.ClassTarget, "stellar-rpc did not serve within %s", readyTimeout)
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
@@ -337,6 +395,22 @@ func newestError(log string) *string {
 	return last
 }
 
+// latest asks the current process for its newest ledger.
+func (t *target) latest(ctx context.Context) (uint32, bool) {
+	var l latestLedger
+	cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	if err := newClient(t.url).call(cctx, "getLatestLedger", nil, &l); err != nil {
+		return 0, false
+	}
+	return l.Sequence, true
+}
+
+// status reports the current process. A backfill process whose HTTP server
+// has started has finished its backfill: stellar-rpc starts the server only
+// after it (rpcv1/daemon/daemon.go, MustNew). status then replaces it with the
+// serving process, also when the backfill process has already exited from
+// its live ingestion's retries, and reports that one.
 func (t *target) status(ctx context.Context) (wire.StatusResult, error) {
 	st, err := inspectState(ctx, t.current)
 	if err != nil {
@@ -345,22 +419,35 @@ func (t *target) status(ctx context.Context) (wire.StatusResult, error) {
 	if st.Running && st.Pid != 0 {
 		t.samplePeak(st.Pid)
 	}
-	if log, err := dockerCombined(ctx, "logs", t.current); err == nil {
+	log, logErr := dockerCombined(ctx, "logs", t.current)
+	if t.phase == phaseBackfill && !st.OOMKilled {
+		seq, ok := uint32(0), false
+		if st.Running {
+			seq, ok = t.latest(ctx)
+		}
+		if ok || (logErr == nil && strings.Contains(log, `msg="starting HTTP server"`)) {
+			if ok {
+				t.mu.Lock()
+				t.last = &seq
+				t.mu.Unlock()
+			}
+			if err := t.serve(ctx); err != nil {
+				return wire.StatusResult{}, err
+			}
+			return t.status(ctx)
+		}
+	}
+	if logErr == nil {
 		if e := newestError(log); e != nil {
 			t.mu.Lock()
 			t.lastErr = e
 			t.mu.Unlock()
 		}
 	}
-	if st.Running {
-		var l latestLedger
-		cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		err := newClient(t.url).call(cctx, "getLatestLedger", nil, &l)
-		cancel()
-		if err == nil {
+	if st.Running && t.phase == phaseServe {
+		if seq, ok := t.latest(ctx); ok {
 			t.mu.Lock()
 			t.answered = true
-			seq := l.Sequence
 			t.last = &seq
 			t.mu.Unlock()
 		}
@@ -530,11 +617,27 @@ func ensureImage(ctx context.Context) error {
 
 var errNoProcess = errors.New("no stellar-rpc process")
 
-func (t *target) rpc() (*client, error) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	if t.url == "" {
-		return nil, errNoProcess
+// rpc returns a client of the serving process once it answers, replacing a
+// finished backfill process first. A serving process that exits, or that
+// does not answer within readyTimeout, is an error.
+func (t *target) rpc(ctx context.Context) (*client, error) {
+	deadline := time.Now().Add(readyTimeout)
+	for {
+		st, err := t.status(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if st.Health == wire.HealthCrashed || st.Health == wire.HealthOOM {
+			return nil, fmt.Errorf("%w: the stellar-rpc process exited (%s)", errNoProcess, st.Health)
+		}
+		if t.phase == phaseServe && st.Health == wire.HealthRunning {
+			t.mu.Lock()
+			defer t.mu.Unlock()
+			return newClient(t.url), nil
+		}
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("%w: no serving process answered within %s", errNoProcess, readyTimeout)
+		}
+		time.Sleep(200 * time.Millisecond)
 	}
-	return newClient(t.url), nil
 }

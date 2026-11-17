@@ -209,9 +209,9 @@ func (a *Adapter) Export(from, to uint32, emit func(any) error) (wire.ExportResu
 	if a.target == nil {
 		return wire.ExportResult{}, wire.Errorf(wire.ClassBadRequest, "export before start")
 	}
-	c, err := a.target.rpc()
+	c, err := a.target.rpc(a.ctx)
 	if err != nil {
-		return wire.ExportResult{}, wire.Errorf(wire.ClassBadRequest, "%v", err)
+		return wire.ExportResult{}, wire.Errorf(wire.ClassTarget, "%v", err)
 	}
 	// every method scans at most 10000 ledgers per call (get_events.go and
 	// get_transactions.go, LedgerScanLimit); a short page past that window
