@@ -54,6 +54,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: debug
+      # the init skeleton tests build and run the go adapter and run the typescript one with
+      # node's type stripping, so both toolchains are the pinned ones, not the runner's
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked --no-fail-fast

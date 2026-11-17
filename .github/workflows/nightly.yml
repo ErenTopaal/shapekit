@@ -142,6 +142,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: debug
+      # the init skeleton tests build and run the go and typescript skeletons, the ignored
+      # ones with their sdks installed, on the pinned toolchains rather than the runner's
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
       - run: docker pull --quiet "$(scripts/pin.sh image stellar-core)"
       - name: cargo test with docker and network, ignored tests included
         run: cargo test --workspace --locked --no-fail-fast -- --include-ignored
