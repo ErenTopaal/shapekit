@@ -62,6 +62,14 @@ A dated public log of what has landed in shapekit. Newest entry first.
 - Protocol 31 rehearsal ([docs/maintenance.md](docs/maintenance.md#protocol-31-rehearsal)): on
   core's next-protocol image all 144 transaction test cases pass at protocols 0 to 31, and all
   452,555 metas they write match core's next baseline.
+- stellar-rpc is a harness target ([adapter](docs/adapter-interface.md#the-stellar-rpc-adapter)):
+  the v30.0.1 release image backfills each chain from its SEP-54 lake, and the harness judges
+  the events that `getEvents`, `getTransactions` and `getLedgers` serve. Over both networks
+  through `getEvents`, 906 entries: 820 pass and 86 are out of scope (their meta carries no
+  events), with none dropped or mishandled; the carry check finds no truncated or fabricated
+  value in 4,739,572 served cells. `getLedgerEntries` cannot be checked this way, because
+  stellar-rpc answers it from captive core, which follows the network only over SCP. Two
+  backfill defects wait in the candidate lane; nothing is filed.
 - Corpus: 716 entries, 594 of them emitted by stellar-core. The wallet-backend harness at
   `3e22515a` runs 906 entries on both networks: 678 pass, 106 mishandled, 44 dropped, 78 out of
   scope.
