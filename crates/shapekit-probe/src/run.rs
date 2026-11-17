@@ -35,6 +35,17 @@ pub fn all_carriers() -> Result<BTreeMap<&'static str, Vec<Carrier>>> {
     Ok(out)
 }
 
+/// Gives a world's node its own coverage profile directory, `<dir>/<chain name>`, when its
+/// image writes profiles, so each probe chain's coverage can be read apart from the others.
+pub fn world_profiles(cfg: &mut NodeConfig, kind: WorldKind) -> Result<()> {
+    if let Some(base) = &cfg.image.profile_dir {
+        let dir = base.join(format!("{}.{}", crate::witness::FAMILY, kind.chain()));
+        std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
+        cfg.image.profile_dir = Some(dir);
+    }
+    Ok(())
+}
+
 /// The directory a world's chain is recorded in: `<chains>/<family>.<chain>/<network>`.
 pub fn chain_dir(chains: &Path, kind: WorldKind) -> std::path::PathBuf {
     chains
@@ -104,7 +115,9 @@ pub fn run(
             }
             let dir = workdir.join(format!("{:?}", c.world).to_ascii_lowercase());
             std::fs::create_dir_all(&dir)?;
-            let w = World::start(c.world, config(c.world.protocol()), &dir)
+            let mut cfg = config(c.world.protocol());
+            world_profiles(&mut cfg, c.world)?;
+            let w = World::start(c.world, cfg, &dir)
                 .with_context(|| format!("starting the {:?} node", c.world))?;
             current = Some((c.world, w));
         }

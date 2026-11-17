@@ -255,3 +255,12 @@ side says why it is open:
 
 llvm-cov writes `i64::MAX` for branch counts it cannot compute. Such branches
 are left out; none of them is at a gate in core v30.0.0.
+
+## The probe on the twin
+
+`shapekit probe all`, `probe limits` and `probe verify-repro` take
+`--profile-dir <dir>` with `--pins twin/pins.toml`. Every node the probe starts
+then writes its coverage profiles into `<dir>/<chain name>`, for example
+`<dir>/probe.envelope-fields.p30`, so each probe chain's coverage can be read
+apart from the others. With a registry image the flag is refused, because a
+release build writes no profiles.

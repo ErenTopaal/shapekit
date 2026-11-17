@@ -47,6 +47,11 @@ pub enum ProbeCommand {
         /// of leaving them out.
         #[arg(long)]
         scratch: Option<PathBuf>,
+        /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
+        /// per probe chain (`probe.envelope-fields.p30`, ...). Needs the coverage twin
+        /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
+        #[arg(long)]
+        profile_dir: Option<PathBuf>,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -65,6 +70,11 @@ pub enum ProbeCommand {
         caps: PathBuf,
         #[arg(long)]
         scratch: Option<PathBuf>,
+        /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
+        /// per probe chain (`probe.envelope-fields.p30`, ...). Needs the coverage twin
+        /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
+        #[arg(long)]
+        profile_dir: Option<PathBuf>,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -75,6 +85,11 @@ pub enum ProbeCommand {
         out: PathBuf,
         #[arg(long, default_value = "candidate")]
         candidate: PathBuf,
+        /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
+        /// per probe chain (`probe.envelope-fields.p30`, ...). Needs the coverage twin
+        /// (`--pins twin/pins.toml`); `shapekit twin` reads the profiles.
+        #[arg(long)]
+        profile_dir: Option<PathBuf>,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -116,6 +131,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             candidate,
             dump,
             scratch,
+            profile_dir,
             pins,
         } => probe_all(
             &only,
@@ -124,6 +140,7 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             dump.as_deref(),
             scratch.as_deref(),
             &pins,
+            profile_dir.as_deref(),
         ),
         ProbeCommand::Compare {
             table,
@@ -134,8 +151,9 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
         ProbeCommand::VerifyRepro {
             out,
             candidate,
+            profile_dir,
             pins,
-        } => probe_verify_repro(&out, &candidate, &pins),
+        } => probe_verify_repro(&out, &candidate, &pins, profile_dir.as_deref()),
         ProbeCommand::Obligations { table } => {
             let t: ValidationTable = shapekit_contracts::load(&table)
                 .with_context(|| format!("reading {}", table.display()))?;
@@ -148,9 +166,38 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             candidate,
             caps,
             scratch,
+            profile_dir,
             pins,
-        } => probe_limits(&only, &out, &candidate, &caps, scratch.as_deref(), &pins),
+        } => probe_limits(
+            &only,
+            &out,
+            &candidate,
+            &caps,
+            scratch.as_deref(),
+            &pins,
+            profile_dir.as_deref(),
+        ),
     }
+}
+
+/// The core image of `pins`, writing coverage profiles under `profile_dir` when given. Only
+/// a coverage build writes profiles, and the twin is the only one shapekit pins (by local
+/// image id), so a profile dir with a registry image is refused rather than left empty.
+fn core_image(pins: &Path, profile_dir: Option<&Path>) -> Result<CoreImage> {
+    let mut image = CoreImage::from_pins(pins)
+        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    if let Some(dir) = profile_dir {
+        if !image.local {
+            bail!(
+                "--profile-dir needs the coverage twin (--pins twin/pins.toml); {} pins the registry image {}, which writes no profiles",
+                pins.display(),
+                image.reference()
+            );
+        }
+        std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
+        image.profile_dir = Some(dir.canonicalize()?);
+    }
+    Ok(image)
 }
 
 #[derive(serde::Serialize)]
@@ -224,6 +271,7 @@ fn probe_all(
     dump: Option<&Path>,
     scratch: Option<&Path>,
     pins: &Path,
+    profile_dir: Option<&Path>,
 ) -> Result<bool> {
     // where the table, the witnesses and the chains go, decided before the run: each world's
     // chain is recorded when the probe is done with it
@@ -241,8 +289,7 @@ fn probe_all(
     }
     let schema = shapekit_schema::Schema::pinned();
     let fields = shapekit_probe::run::selected(&schema, only)?;
-    let image = CoreImage::from_pins(pins)
-        .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
+    let image = core_image(pins, profile_dir)?;
     let work = tempfile::Builder::new()
         .prefix("shapekit-probe-all-")
         .tempdir()
@@ -373,7 +420,12 @@ fn reproducible_chain_json(path: &Path) -> Result<serde_json::Value> {
 
 /// Runs the probe again into a scratch directory and compares its chains, table and witness
 /// manifest entries with the committed ones.
-fn probe_verify_repro(out: &Path, candidate: &Path, pins: &Path) -> Result<bool> {
+fn probe_verify_repro(
+    out: &Path,
+    candidate: &Path,
+    pins: &Path,
+    profile_dir: Option<&Path>,
+) -> Result<bool> {
     let fresh = tempfile::Builder::new()
         .prefix("shapekit-probe-repro-")
         .tempdir()
@@ -383,7 +435,15 @@ fn probe_verify_repro(out: &Path, candidate: &Path, pins: &Path) -> Result<bool>
     let fresh_out = fresh.path().join("validation.json");
     let fresh_candidate = fresh.path().join("candidate");
     std::fs::create_dir_all(&fresh_candidate)?;
-    if !probe_all(&all, &fresh_out, &fresh_candidate, None, None, pins)? {
+    if !probe_all(
+        &all,
+        &fresh_out,
+        &fresh_candidate,
+        None,
+        None,
+        pins,
+        profile_dir,
+    )? {
         bail!("the regenerating run failed");
     }
     let mut diffs = Vec::new();
@@ -546,6 +606,7 @@ fn probe_limits(
     caps: &Path,
     scratch: Option<&Path>,
     pins: &Path,
+    profile_dir: Option<&Path>,
 ) -> Result<bool> {
     use shapekit_contracts::limits::LimitsTable;
     use shapekit_probe::limits::{Check, checks, measure, probes};
@@ -589,7 +650,7 @@ fn probe_limits(
             bail!("{r}: a row is measured exactly when its check is not unmeasured");
         }
     }
-    let image = CoreImage::from_pins(pins)?;
+    let image = core_image(pins, profile_dir)?;
     let work = tempfile::Builder::new()
         .prefix("shapekit-probe-limits-")
         .tempdir()?;
@@ -605,11 +666,12 @@ fn probe_limits(
                     .path()
                     .join(format!("{:?}", p.world).to_ascii_lowercase());
                 std::fs::create_dir_all(&dir)?;
-                let cfg = shapekit_probe::node_config(
+                let mut cfg = shapekit_probe::node_config(
                     TESTNET_PASSPHRASE,
                     image.clone(),
                     p.world.protocol(),
                 );
+                shapekit_probe::run::world_profiles(&mut cfg, p.world)?;
                 e.insert(shapekit_probe::world::World::start(p.world, cfg, &dir)?)
             }
         };
@@ -741,4 +803,47 @@ fn write_obligations(table: &ValidationTable, out: &Path) -> Result<()> {
         ledger.obligations.len()
     );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pins(dir: &Path, reference: &str) -> PathBuf {
+        let p = dir.join("pins.toml");
+        std::fs::write(
+            &p,
+            format!(
+                "[[image]]\nname = \"stellar-core\"\nrepository = \"r\"\ntag = \"t\"\n{reference} = \"sha256:{}\"\n",
+                "ab".repeat(32)
+            ),
+        )
+        .unwrap();
+        p
+    }
+
+    #[test]
+    fn the_profile_dir_reaches_the_twin_image() {
+        let d = tempfile::tempdir().unwrap();
+        let p = pins(d.path(), "image_id");
+        let img = core_image(&p, Some(&d.path().join("profiles"))).unwrap();
+        assert_eq!(
+            img.profile_dir,
+            Some(d.path().join("profiles").canonicalize().unwrap())
+        );
+        assert_eq!(core_image(&p, None).unwrap().profile_dir, None);
+    }
+
+    #[test]
+    fn a_registry_image_with_a_profile_dir_is_refused() {
+        let d = tempfile::tempdir().unwrap();
+        let p = pins(d.path(), "digest");
+        let e = core_image(&p, Some(&d.path().join("profiles"))).unwrap_err();
+        assert!(
+            e.to_string()
+                .contains("--profile-dir needs the coverage twin"),
+            "{e}"
+        );
+        assert!(!d.path().join("profiles").exists());
+    }
 }
