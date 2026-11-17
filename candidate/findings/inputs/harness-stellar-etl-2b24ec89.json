@@ -143,19 +143,19 @@
       "dump"
     ]
   },
-  "manifest_sha256": "0e151da6193163611c17d89abcbbad7160e15e0cea0cc31778331cc3ca2ebfd4",
-  "memory_limit_bytes": 2147483648,
+  "manifest_sha256": "16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609",
+  "memory_limit_bytes": 4294967296,
   "rounds": [
     {
       "round": 1,
-      "peak_rss_bytes": 17604608,
-      "rss_after_bytes": 12185600,
-      "seconds": 184.386942885,
+      "peak_rss_bytes": 23257088,
+      "rss_after_bytes": 23257088,
+      "seconds": 121.855452382,
       "same_verdicts_as_first": true,
       "target_peak_memory_bytes": {
-        "cap27.muxed-accounts.p30 (testnet)": 62394368,
-        "cap40.signed-payload-signer.p30 (testnet)": 64692224,
-        "cap73.sac-trust.p30 (testnet)": 64008192
+        "cap27.muxed-accounts.p30 (testnet)": 74969088,
+        "cap40.signed-payload-signer.p30 (testnet)": 20340736,
+        "cap73.sac-trust.p30 (testnet)": 59838464
       }
     }
   ],
@@ -163,20 +163,20 @@
     "slack_bytes": 16777216,
     "flat": true,
     "within_budget": true,
-    "detail": "first round peak 17604608 bytes, allowed growth 16777216 bytes over 1 round(s)"
+    "detail": "first round peak 23257088 bytes, allowed growth 16777216 bytes over 1 round(s)"
   },
   "target_memory": {
-    "limit_bytes": 2147483648,
-    "peak_bytes": 64692224,
+    "limit_bytes": 4294967296,
+    "peak_bytes": 74969088,
     "within_limit": true,
     "flat": true,
-    "detail": "target peak 64692224 bytes of a 2147483648-byte limit"
+    "detail": "target peak 74969088 bytes of a 4294967296-byte limit"
   },
   "totals": {
-    "entries": 34,
+    "entries": 35,
     "by_verdict": {
       "dropped": 4,
-      "pass": 30
+      "pass": 31
     },
     "by_reason": {},
     "without_chain": 0,
@@ -188,29 +188,29 @@
       "network": "testnet",
       "protocol": 30,
       "first_ledger": 2,
-      "last_ledger": 76,
+      "last_ledger": 77,
       "bootstrap": 2,
       "delivery": "sep54-gcs",
-      "last_ingested": 76,
-      "target_peak_memory_bytes": 62394368,
+      "last_ingested": 77,
+      "target_peak_memory_bytes": 74969088,
       "components": {
         "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
         "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
         "stellar-etl.commit": "2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
         "stellar-etl.image": "sha256:e472b0297f492027b9c366c19c7dba69cfc3aba6acdeaaf748ac7aa4fc7948f9"
       },
-      "exported_records": 13,
+      "exported_records": 14,
       "unattributed_rows": 0,
       "dump": {
         "file": "cap27.muxed-accounts.p30.testnet.dump.json",
         "tables": 5,
-        "rows": 139
+        "rows": 149
       },
       "carry": {
-        "known_addresses": 19,
-        "known_amounts": 46,
-        "addresses_found": 18,
-        "cells": 2034,
+        "known_addresses": 20,
+        "known_amounts": 48,
+        "addresses_found": 19,
+        "cells": 2180,
         "truncated": 0,
         "fabricated": 0,
         "carried": [
@@ -218,35 +218,35 @@
             "column": "contract_events.contract_id",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 31,
+            "cells": 33,
             "values": 2
           },
           {
             "column": "contract_events.type",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 31,
+            "cells": 33,
             "values": 1
           },
           {
             "column": "effects.address",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 44,
+            "cells": 48,
             "values": 6
           },
           {
             "column": "effects.address_muxed",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 17,
+            "cells": 20,
             "values": 10
           },
           {
             "column": "effects.index",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 18,
+            "cells": 19,
             "values": 1
           },
           {
@@ -260,14 +260,14 @@
             "column": "operations.source_account",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 20,
+            "cells": 21,
             "values": 5
           },
           {
             "column": "operations.source_account_muxed",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 8,
+            "cells": 9,
             "values": 4
           },
           {
@@ -281,14 +281,14 @@
             "column": "token_transfer.amount",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 12,
+            "cells": 13,
             "values": 1
           },
           {
             "column": "token_transfer.amount_raw",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 31,
+            "cells": 33,
             "values": 6
           },
           {
@@ -302,22 +302,22 @@
             "column": "token_transfer.contract_id",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 31,
+            "cells": 33,
             "values": 2
           },
           {
             "column": "token_transfer.from",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 30,
+            "cells": 32,
             "values": 5
           },
           {
             "column": "token_transfer.to",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 17,
-            "values": 5
+            "cells": 18,
+            "values": 6
           },
           {
             "column": "token_transfer.to_muxed",
@@ -337,14 +337,14 @@
             "column": "transactions.account",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 13,
+            "cells": 14,
             "values": 5
           },
           {
             "column": "transactions.account_muxed",
             "kind": "address",
             "encoding": "strkey",
-            "cells": 4,
+            "cells": 5,
             "values": 4
           },
           {
@@ -358,28 +358,28 @@
             "column": "transactions.fee_charged",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 13,
+            "cells": 14,
             "values": 3
           },
           {
             "column": "transactions.max_fee",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 13,
+            "cells": 14,
             "values": 3
           },
           {
             "column": "transactions.operation_count",
             "kind": "amount",
             "encoding": "decimal",
-            "cells": 11,
+            "cells": 12,
             "values": 1
           }
         ],
         "problems": []
       },
       "adapter_exit": "exit status: 0",
-      "seconds": 77.867502577
+      "seconds": 43.261715763
     },
     {
       "chain": "cap40.signed-payload-signer.p30",
@@ -390,7 +390,7 @@
       "bootstrap": 2,
       "delivery": "sep54-gcs",
       "last_ingested": 72,
-      "target_peak_memory_bytes": 64692224,
+      "target_peak_memory_bytes": 20340736,
       "components": {
         "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
         "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
@@ -486,7 +486,7 @@
         "problems": []
       },
       "adapter_exit": "exit status: 0",
-      "seconds": 49.732938037
+      "seconds": 38.494937429
     },
     {
       "chain": "cap73.sac-trust.p30",
@@ -497,7 +497,7 @@
       "bootstrap": 2,
       "delivery": "sep54-gcs",
       "last_ingested": 73,
-      "target_peak_memory_bytes": 64008192,
+      "target_peak_memory_bytes": 59838464,
       "components": {
         "fake-gcs-server": "fsouza/fake-gcs-server:1.56.1@sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef",
         "go-stellar-sdk": "v0.8.1-0.20261106081502-e31e3b146d00",
@@ -593,7 +593,7 @@
         "problems": []
       },
       "adapter_exit": "exit status: 0",
-      "seconds": 56.741657369
+      "seconds": 40.061345362
     }
   ],
   "entries": [
@@ -1275,6 +1275,108 @@
             "operation_id": 326417518593,
             "type": 2,
             "type_string": "account_credited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "entry": "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+      "family": "cap27.muxed-accounts",
+      "chain": "cap27.muxed-accounts.p30",
+      "network": "testnet",
+      "ledger": 77,
+      "verdict": "pass",
+      "detail": "2 in-scope fact(s) match",
+      "problems": [],
+      "unmapped": [
+        {
+          "table": "effects",
+          "category": "claimable_balance_created",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAFPVA",
+            "closed_at": "2026-03-19T00:00:00Z",
+            "closed_at_ms": "2026-03-19T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset": "native",
+              "balance_id": "00000000b5100a5c906da43f0bb50fb67b83142f397341438743276ac8fdc5699be637c1"
+            },
+            "id": "330712485889-0",
+            "index": 0,
+            "ledger_sequence": 77,
+            "operation_id": 330712485889,
+            "type": 50,
+            "type_string": "claimable_balance_created"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "claimable_balance_claimant_created",
+          "row": {
+            "address": "GBJKJZBZDY6OR2Y2LRETVEKGO3BU2GQEXKOBPFM2Q7GS6BFPLYX3KI5I",
+            "address_muxed": null,
+            "closed_at": "2026-03-19T00:00:00Z",
+            "closed_at_ms": "2026-03-19T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset": "native",
+              "balance_id": "00000000b5100a5c906da43f0bb50fb67b83142f397341438743276ac8fdc5699be637c1",
+              "predicate": {
+                "unconditional": true
+              }
+            },
+            "id": "330712485889-1",
+            "index": 1,
+            "ledger_sequence": 77,
+            "operation_id": 330712485889,
+            "type": 51,
+            "type_string": "claimable_balance_claimant_created"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "account_debited",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAFPVA",
+            "closed_at": "2026-03-19T00:00:00Z",
+            "closed_at_ms": "2026-03-19T00:00:00Z",
+            "details": {
+              "amount": "1.0000000",
+              "asset_type": "native"
+            },
+            "id": "330712485889-2",
+            "index": 2,
+            "ledger_sequence": 77,
+            "operation_id": 330712485889,
+            "type": 3,
+            "type_string": "account_debited"
+          },
+          "note": "stellar-etl effect type with no claimed vocabulary kind"
+        },
+        {
+          "table": "effects",
+          "category": "claimable_balance_sponsorship_created",
+          "row": {
+            "address": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7",
+            "address_muxed": "MCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVUAAAAAAAAAAAAFPVA",
+            "closed_at": "2026-03-19T00:00:00Z",
+            "closed_at_ms": "2026-03-19T00:00:00Z",
+            "details": {
+              "balance_id": "00000000b5100a5c906da43f0bb50fb67b83142f397341438743276ac8fdc5699be637c1",
+              "sponsor": "GCNBHRV6GAMZBQX73EXOMEBXIBGUTFDQ4TWCOWXQ4RMC4EO3E5JVVQX7"
+            },
+            "id": "330712485889-3",
+            "index": 3,
+            "ledger_sequence": 77,
+            "operation_id": 330712485889,
+            "type": 69,
+            "type_string": "claimable_balance_sponsorship_created"
           },
           "note": "stellar-etl effect type with no claimed vocabulary kind"
         }
