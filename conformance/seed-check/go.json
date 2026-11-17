@@ -27,7 +27,11 @@
       "line": 118,
       "mutation": "if len(raw) < 3 { -> if len(raw) < 4 {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "strkey.Decode is reached (balance_id: Transaction.ClaimableBalanceID -> xdr.MustMuxedAddress -> MuxedAccount.SetAddress/SetEd25519Address -> strkey.Decode), but the only raw length the change affects is exactly 3 bytes (version + 2 checksum, empty payload). The original then fails on the version, the checksum or checkPayloadLength (every version byte needs a non-empty payload; signed payload needs >= 36 bytes), the mutant fails with 'too short': both refuse, only the error text differs, and a passing refusal records no text. On the testee path the address is the sdk's own 56 or 69 char encoding anyway (35/43 raw bytes)."
+      }
     },
     {
       "key": "strkey/main.go:125:223b1973941c",
@@ -90,7 +94,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 620
+      "entries_changed": 1040
     },
     {
       "key": "strkey/main.go:22:646e45815516",
@@ -105,7 +109,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 599
+      "entries_changed": 901
     },
     {
       "key": "strkey/main.go:22:f7628b188c6e",
@@ -120,7 +124,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 605
+      "entries_changed": 907
     },
     {
       "key": "strkey/main.go:232:a12b4368b622",
@@ -135,7 +139,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 615
+      "entries_changed": 1033
     },
     {
       "key": "strkey/main.go:273:a75f80b15c0f",
@@ -167,7 +171,11 @@
       "line": 64,
       "mutation": "const maxEncodedSize = (maxRawSize*8 + 4) / 5 // (8n+4)/5 is the EncodedLen for no padding -> const maxEncodedSize = (maxRawSize*8 + 3) / 5 // (8n+4)/5 is the EncodedLen for no padding",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "maxRawSize = 103, so (103*8+4)/5 = 828/5 = 165 and (103*8+3)/5 = 827/5 = 165 in integer division: the constant has the same value, the mutant compiles to the same program."
+      }
     },
     {
       "key": "strkey/main.go:80:75d443d700c7",
@@ -205,7 +213,11 @@
       "line": 65,
       "mutation": "raw = append(raw, b.Bytes()...) -> _, _, _ = raw, raw, b.Bytes",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "strkey.MuxedAccount.Address has no caller in the sdk outside tests (grep: strkey.MuxedAccount is only used via strkey.DecodeMuxedAccount in support/contractevents) and the testee only calls strkey.DecodeAny and strkey.Encode. xdr.MuxedAccount.GetAddress builds its M address itself."
+      }
     },
     {
       "key": "strkey/muxed_contract.go:11:85ddc1ae60eb",
@@ -221,7 +233,11 @@
       "line": 50,
       "mutation": "binary.BigEndian.PutUint64(raw[32:], m.id) -> _, _, _ = binary.BigEndian.PutUint64, raw, m.id",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "strkey.MuxedContract.Address has no caller in the sdk outside tests; xdr/scval.go encodes the muxed contract arm with strkey.Encode directly and the testee's muxedContractStrkey builds the 40 bytes itself before strkey.Encode."
+      }
     },
     {
       "key": "strkey/muxed_contract.go:50:a2768846685b",
@@ -229,7 +245,11 @@
       "line": 50,
       "mutation": "binary.BigEndian.PutUint64(raw[32:], m.id) -> binary.BigEndian.PutUint64(raw[33:], m.id)",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "same function as the previous mutant: strkey.MuxedContract.Address is never called by any testee op or by sdk code they use (only DecodeMuxedContract is used, by support/contractevents)."
+      }
     },
     {
       "key": "xdr/account_entry.go:44:df9be42b37c4",
@@ -237,7 +257,11 @@
       "line": 44,
       "mutation": "if account.Ext.V1 != nil && account.Ext.V1.Ext.V2 != nil { -> if account.Ext.V1 != nil && true {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "AccountEntry.NumSponsored has no caller in the sdk outside xdr/account_entry.go itself (grep) and none in the testee; no op reads an AccountEntry through helpers (decode_json reflects over fields)."
+      }
     },
     {
       "key": "xdr/account_flags.go:18:0319c3b74e9f",
@@ -245,7 +269,11 @@
       "line": 18,
       "mutation": "return (accountFlags & AccountFlagsAuthImmutableFlag) != 0 -> return (accountFlags | AccountFlagsAuthImmutableFlag) != 0",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "AccountFlags.IsAuthImmutable has no non-test caller in the sdk; txnbuild FromXDR uses TrustLineFlags helpers, not AccountFlags; the testee does not call it."
+      }
     },
     {
       "key": "xdr/account_id.go:101:0e2eea5312ca",
@@ -253,7 +281,11 @@
       "line": 101,
       "mutation": "return nil -> ",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "AccountId.SetAddress is only called from AddressToAccountId, NewCreditAsset/MustNewCreditAsset/BuildAssets (xdr/asset.go), SignerKey helpers and txnbuild BuildXDR/Validate code; none is on the decode, sep51, tx_hash, balance_id (TransactionFromXDR + ClaimableBalanceID use MuxedAccount.SetAddress -> SetEd25519Address), contract_id, asset_order or pool_id path. The mutated nil-receiver guard additionally needs a nil *AccountId."
+      }
     },
     {
       "key": "xdr/account_id.go:14:7fec496d311e",
@@ -261,7 +293,11 @@
       "line": 14,
       "mutation": "panic(err) -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "AccountId.Address is reached (balance_id: txnbuild assetFromXDR Issuer.Address(), op FromXDR Trustor/Destination .Address()), but the panic branch needs GetAddress to fail, which only happens for a PublicKey type other than ED25519 or a nil Ed25519 arm; the decoder refuses every other type and always sets the arm, and strkey.Encode of 32 bytes with the G version cannot fail. Dead for every value an op can produce."
+      }
     },
     {
       "key": "xdr/account_thresholds.go:8:0db33dfb78d4",
@@ -269,7 +305,11 @@
       "line": 8,
       "mutation": "return t[1] -> return t[0]",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Thresholds.ThresholdLow is only used by AccountEntry helpers in xdr/account_entry.go, which no testee op calls; decode_json renders Thresholds as hex bytes by reflection."
+      }
     },
     {
       "key": "xdr/asset.go:153:b679537b8732",
@@ -277,7 +317,11 @@
       "line": 153,
       "mutation": "if len(parts) != 2 { -> if len(parts) != 3 {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "xdr.BuildAssets is only called by txnbuild.ParseAssetString and processors/token_transfer; neither is on any testee op path (TransactionFromXDR uses assetFromXDR)."
+      }
     },
     {
       "key": "xdr/asset.go:193:067347835766",
@@ -285,7 +329,11 @@
       "line": 193,
       "mutation": "case length >= 1 && length <= 4: -> case length >= 0 && length <= 4:",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Asset.SetCredit is only called by txnbuild CreditAsset.ToXDR (building direction) and xdr NewCreditAsset helpers; TransactionFromXDR, ClaimableBalanceID and the other ops never build an asset from a code string."
+      }
     },
     {
       "key": "xdr/asset.go:193:4d8ba26bf745",
@@ -293,7 +341,11 @@
       "line": 193,
       "mutation": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "same function as the previous mutant (Asset.SetCredit), not reached by any testee op."
+      }
     },
     {
       "key": "xdr/asset.go:231:9d16516bfe83",
@@ -301,7 +353,11 @@
       "line": 231,
       "mutation": "case length >= 1 && length <= 4: -> case length >= 1 && length <= 5:",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Asset.ToAssetCode is only called by txnbuild AllowTrust.BuildXDR; AllowTrust.FromXDR uses assetCodeToCreditAsset instead. No op reaches it."
+      }
     },
     {
       "key": "xdr/asset.go:234:f488b2e7aba5",
@@ -309,7 +365,11 @@
       "line": 234,
       "mutation": "copy(bytecode[:], byteArray[0:length]) -> _, _, _ = bytecode, byteArray, length",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "same function (Asset.ToAssetCode), only used by txnbuild AllowTrust.BuildXDR, not by any testee op."
+      }
     },
     {
       "key": "xdr/asset.go:249:a51fd068df3b",
@@ -317,7 +377,11 @@
       "line": 249,
       "mutation": "a.MustExtract(&t, &c, &i) -> _, _, _, _ = a.MustExtract, t, c, i",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Asset.String is a display helper; no testee op calls it (asset_order uses LessThan/GetCode, pool_id marshals, decode_json reflects, txnbuild FromXDR uses assetFromXDR) and the testee never formats an xdr.Asset with %v/%s."
+      }
     },
     {
       "key": "xdr/asset.go:393:9816225953b5",
@@ -325,7 +389,11 @@
       "line": 393,
       "mutation": "panic(fmt.Errorf(\"Cannot transform type %v to Asset\", a.Type)) -> _, _ = fmt.Errorf, a.Type",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Asset.ToTrustLineAsset is called only by txnbuild TrustLineAssetWrapper.ToXDR (building direction); not reached by TransactionFromXDR or any other op. Its default arm also needs an Asset type the decoder refuses."
+      }
     },
     {
       "key": "xdr/asset.go:481:2b13c054c660",
@@ -333,7 +401,11 @@
       "line": 481,
       "mutation": "return [32]byte{}, err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "Asset.ContractID is reached by contract_id (FromAsset preimage), but the error branch needs HashIdPreimage.MarshalBinary to fail; the asset was produced by xdr.SafeUnmarshal, so its union discriminant and arm are valid and encoding into a bytes.Buffer cannot fail. Dead for every input the op accepts."
+      }
     },
     {
       "key": "xdr/asset.go:59:a37cf4a8db59",
@@ -341,7 +413,11 @@
       "line": 59,
       "mutation": "case length >= 5 && length <= 12: -> case length >= 6 && length <= 12:",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "NewAssetCodeFromString is only called from go_string.go (GoString), which no op uses."
+      }
     },
     {
       "key": "xdr/claim_atom.go:12:bf2cc36c44c3",
@@ -365,7 +441,11 @@
       "line": 56,
       "mutation": "return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[0]) -> return fmt.Errorf(\"invalid claimable balance id type: %v\", payload[1])",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "ClaimableBalanceId.DecodeFromStrkey is only called by support/contractevents; the testee decodes B strkeys with strkey.DecodeAny and renders them with EncodeToStrkey. (Also only changes the error text.)"
+      }
     },
     {
       "key": "xdr/db.go:37:03db2eb5ce2e",
@@ -373,7 +453,11 @@
       "line": 37,
       "mutation": "return errors.New(\"Invalid value for xdr.AssetType\") -> _ = errors.New",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "AssetType.Scan is a database/sql Scanner; nothing in the testee or the sdk paths it uses calls Scan."
+      }
     },
     {
       "key": "xdr/db.go:68:37f4714de776",
@@ -381,7 +465,11 @@
       "line": 68,
       "mutation": "return errors.New(\"Invalid value for xdr.Int64\") -> _ = errors.New",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Int64.Scan is a database/sql Scanner; not reached by any op."
+      }
     },
     {
       "key": "xdr/decorated_signature.go:31:565db37e656d",
@@ -389,7 +477,11 @@
       "line": 31,
       "mutation": "hint[i] ^= keyHint[i] -> hint[i] = keyHint[i]",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "NewDecoratedSignatureForPayload is only called by keypair.Full signing; no op signs."
+      }
     },
     {
       "key": "xdr/decorated_signature.go:7:9f55dd929c89",
@@ -405,7 +497,11 @@
       "line": 157,
       "mutation": "sb.WriteString(fmt.Sprintf(\"InflationDest: xdr.MustAddressPtr(%#v),\", s.InflationDest.Address())) -> _, _, _ = sb.WriteString, fmt.Sprintf, s.InflationDest.Address",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "SetOptionsOp.GoString is only used by %#v formatting; the testee never formats xdr values with %#v."
+      }
     },
     {
       "key": "xdr/go_string.go:250:15cc6d3d4385",
@@ -413,7 +509,11 @@
       "line": 250,
       "mutation": "sb.WriteString(\"(unknown)\") -> _ = sb.WriteString",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Preconditions.GoString is only used by %#v formatting, which no op does."
+      }
     },
     {
       "key": "xdr/hash.go:13:7caafcde0dd6",
@@ -421,7 +521,11 @@
       "line": 13,
       "mutation": "for i := 0; i < len(s); i++ { -> for i := -1; i < len(s); i++ {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Hash.Equals is called from ScVal/ScAddress/ContractExecutable Equals in xdr/scval.go and by ingest; no testee op compares values (map_sort/map_validate are unsupported in the go testee, asset_order uses Asset.LessThan)."
+      }
     },
     {
       "key": "xdr/json.go:138:12b6ec7ac35e",
@@ -429,7 +533,11 @@
       "line": 138,
       "mutation": "parts[i] = converted -> _, _, _ = parts, i, converted",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "convertPredicatesToJSON is part of ClaimPredicate.MarshalJSON (horizon style json); decode_json uses the testee's own reflection walk and id_parse only unmarshals horizon.Offer/Transaction, which hold no ClaimPredicate."
+      }
     },
     {
       "key": "xdr/json.go:162:a3e4158c60af",
@@ -437,7 +545,11 @@
       "line": 162,
       "mutation": "payload.AbsBeforeEpoch = &absBeforeEpoch -> _, _ = payload.AbsBeforeEpoch, absBeforeEpoch",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "ClaimPredicate.toJSON (MarshalJSON) is not called by any op, see the previous mutant."
+      }
     },
     {
       "key": "xdr/json.go:175:aee9beaa9a75",
@@ -445,7 +557,11 @@
       "line": 175,
       "mutation": "return nil, err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "ClaimPredicate.MarshalJSON is not called by any op; the error also needs an invalid predicate type the decoder refuses."
+      }
     },
     {
       "key": "xdr/json.go:64:4aba0578fdc3",
@@ -453,7 +569,11 @@
       "line": 64,
       "mutation": "return &iso8601Time{time.Unix(epoch, 0).UTC()} -> return &iso8601Time{time.Unix(epoch, 1).UTC()}",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "newiso8601Time is only used by ClaimPredicate.toJSON, which no op calls."
+      }
     },
     {
       "key": "xdr/ledger_close_meta.go:10:26e9e1f18913",
@@ -493,7 +613,11 @@
       "line": 33,
       "mutation": "lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-1].LedgerSequence() -> lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-0].LedgerSequence()",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerCloseMetaBatch.AddLedger has no caller outside tests in the sdk (datastore writers); no op builds a batch."
+      }
     },
     {
       "key": "xdr/ledger_close_meta_view.go:160:0f66ba9dff88",
@@ -501,7 +625,11 @@
       "line": 160,
       "mutation": "return 0, err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerCloseMetaView.LedgerCloseTimeMs belongs to the view api; the testee decodes with xdr.UnmarshalWithOptions into generated structs and never builds a view."
+      }
     },
     {
       "key": "xdr/ledger_close_meta_view.go:35:b5f4a2fe7f30",
@@ -525,7 +653,11 @@
       "line": 106,
       "mutation": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == 1 {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize (horizon state verifier helper) has no caller on any op path; decode_encode/decode_json never normalize."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:106:bb29d05f8528",
@@ -533,7 +665,11 @@
       "line": 106,
       "mutation": "if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == -1 {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize, not reached by any op (see above)."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:142:b7df9b88d825",
@@ -549,7 +685,11 @@
       "line": 170,
       "mutation": "return key, err -> _, _ = key, err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntryData.LedgerKey is used by ingest/LedgerEntryChange helpers, not by any op. The branch also needs NewLedgerKey to fail, which it cannot for a fixed valid type."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:44:9e966d836fdb",
@@ -557,7 +697,11 @@
       "line": 44,
       "mutation": "Selling: 0, -> Selling: 1,",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize, not reached by any op."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:50:310c62c75796",
@@ -565,7 +709,11 @@
       "line": 50,
       "mutation": "accountEntry.Ext.V1.Ext.V = 2 -> _ = accountEntry.Ext.V1.Ext.V",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize, not reached by any op."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:88:ed661c9670ad",
@@ -573,7 +721,11 @@
       "line": 88,
       "mutation": "if trustLineEntry.Ext.V == 0 { -> if trustLineEntry.Ext.V == 1 {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize, not reached by any op."
+      }
     },
     {
       "key": "xdr/ledger_entry.go:93:2f2449e157c5",
@@ -581,7 +733,11 @@
       "line": 93,
       "mutation": "Selling: 0, -> Selling: 1,",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerEntry.Normalize, not reached by any op."
+      }
     },
     {
       "key": "xdr/ledger_entry_view.go:23:d26ac9d5b1cb",
@@ -597,7 +753,11 @@
       "line": 111,
       "mutation": "*key = nkey -> _, _ = key, nkey",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerKey.SetTrustline is only called by LedgerEntryData.LedgerKey (ingest helpers); no op derives a ledger key."
+      }
     },
     {
       "key": "xdr/ledger_key.go:122:ade2a647b476",
@@ -605,7 +765,11 @@
       "line": 122,
       "mutation": "return err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerKey.SetClaimableBalance is only called by LedgerEntryData.LedgerKey; not on any op path (and NewLedgerKey cannot fail there)."
+      }
     },
     {
       "key": "xdr/ledger_key.go:171:86ad16fc9aad",
@@ -613,7 +777,11 @@
       "line": 171,
       "mutation": "*key = nkey -> _, _ = key, nkey",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerKey.SetContractCode is only called by LedgerEntryData.LedgerKey; not on any op path."
+      }
     },
     {
       "key": "xdr/ledger_key.go:222:e46d5dcc3dab",
@@ -637,7 +805,11 @@
       "line": 35,
       "mutation": "return l.AccountId.Equals(r.AccountId) && l.Asset.Equals(r.Asset) -> return true && l.Asset.Equals(r.Asset)",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerKey.Equals is used by ingest change readers/compactors only; no op compares ledger keys."
+      }
     },
     {
       "key": "xdr/ledger_key.go:37:52294b282f83",
@@ -653,7 +825,11 @@
       "line": 72,
       "mutation": "*key = nkey -> _, _ = key, nkey",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "LedgerKey.SetAccount is only called by AccountId.LedgerKey and LedgerEntryData.LedgerKey; not on any op path."
+      }
     },
     {
       "key": "xdr/main.go:200:c332d1befc58",
@@ -661,7 +837,11 @@
       "line": 200,
       "mutation": "return nil, err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "EncodingBuffer.UnsafeMarshalBase64 is used by EncodingBuffer.MarshalBase64 for ingest key compression; the testee and txnbuild FromXDR/ClaimableBalanceID use MarshalBinary/MarshalHex/MarshalBase64 (package level), not the EncodingBuffer."
+      }
     },
     {
       "key": "xdr/main.go:88:309f96920fb2",
@@ -669,7 +849,11 @@
       "line": 88,
       "mutation": "options.MaxInputLen = hex.DecodedLen(len(data)) -> _, _, _ = options.MaxInputLen, hex.DecodedLen, data",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "xdr.SafeUnmarshalHex is only called by txnbuild ClaimClaimableBalance/ClawbackClaimableBalance/RevokeSponsorship BuildXDR and Validate; TransactionFromXDR (balance_id) uses SafeUnmarshalBase64 and the ops' FromXDR use MarshalHex, the opposite direction."
+      }
     },
     {
       "key": "xdr/muxed_account.go:118:5b770f797ffb",
@@ -677,7 +861,11 @@
       "line": 118,
       "mutation": "return \"\", nil -> ",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "MuxedAccount.GetAddress is reached (decode_json sep51 MuxedAccount/MuxedAccountMed25519/MuxedEd25519Account renderers, txnbuild Address()), but every caller passes a non-nil receiver: sep51 calls it on a local value, txnbuild accountFromXDR checks for nil first, envelope sources are values. The removed return is only reached for m == nil."
+      }
     },
     {
       "key": "xdr/muxed_account.go:70:d8895a04fc0b",
@@ -700,7 +888,11 @@
       "line": 72,
       "mutation": "case 69: -> case 68:",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "balance_id: txnbuild.TransactionFromXDR sets sourceAccount.AccountID = SourceAccount().Address(), which for a KEY_TYPE_MUXED_ED25519 source is the 69 char M address; Transaction.ClaimableBalanceID then calls xdr.MustMuxedAddress(M) -> MuxedAccount.SetAddress, where len 69 hits case 69. With case 68 the M address falls to default ('invalid address length'), MustMuxedAddress panics. Every balance_id vector in the corpus has an unmuxed G source, so only the case 56 arm runs. Verified by calling v0.9.0 directly on that input. Killing input: op balance_id, TransactionEnvelope, TransactionEnvelope (ENVELOPE_TYPE_TX) base64 AAAAAgAAAQAAAAAAAAAAARERERERERERERERERERERERERERERERERERERERERERAAAAZAAAAAEAAAABAAAAAAAAAAAAAAABAAAAAAAAAA4AAAAAAAAAAACYloAAAAABAAAAAAAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAAAAAAAAAAAAAAA== , op_index 0, any network_passphrase. One CreateClaimableBalance (native, 1 XLM, one unconditional claimant 0x22*32) whose tx source is the muxed account KEY_TYPE_MUXED_ED25519 {id 1, ed25519 0x11*32} = MAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCAAAAAAAAAAAAE76M (69 chars). Core derives the id from the underlying account, so the expected answer equals that of the same tx with the plain source GAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCF6M; to be a corpus check it must be applied on a chain so anchors.rs emits it; unmodified: balance_id 000000001148bdf459d6efd2339e3de4ed0fabf5912ce9fa8c87786f60b7dd804c7b21be (same as for the plain G source); faulty: MustMuxedAddress panics with 'invalid address length': the testee answers error class panic."
+      }
     },
     {
       "key": "xdr/muxed_account.go:79:aceff5de3e1f",
@@ -708,7 +900,11 @@
       "line": 79,
       "mutation": "if err = muxed.Id.UnmarshalBinary(raw[32:]); err != nil { -> if err = muxed.Id.UnmarshalBinary(raw[31:]); err != nil {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "other",
+        "reason": "Reached by the same balance_id input as the case 69 mutant (muxed tx source), but unobservable by any op: Uint64.UnmarshalBinary does not refuse trailing bytes, so raw[31:] decodes without error and only the memo id changes (for id 1 it becomes 1224979098644774912, verified), and the only consumer, Transaction.ClaimableBalanceID, calls ToAccountId, which drops the id. The balance id is identical (000000001148bdf459d6efd2339e3de4ed0fabf5912ce9fa8c87786f60b7dd804c7b21be both ways). Not equivalent for a direct AddressToMuxedAccount caller, and not outside the op paths either: killing it needs an op that decodes an M address into an xdr.MuxedAccount and reports the id, which the go testee does not have (strkey_decode uses strkey.DecodeAny)."
+      }
     },
     {
       "key": "xdr/muxed_account.go:82:5b8790d5ea27",
@@ -716,7 +912,11 @@
       "line": 82,
       "mutation": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "balance_id with a muxed transaction source reaches MuxedAccount.SetAddress case 69. Without the assignment *m stays the zero MuxedAccount (Type KEY_TYPE_ED25519, Ed25519 nil) and err is nil, so MustMuxedAddress returns it and ClaimableBalanceID's ToAccountId calls MustEd25519 on a nil arm and panics (nil pointer dereference, verified on the zero value). No corpus balance_id vector has a muxed source. Killing input: op balance_id, TransactionEnvelope, TransactionEnvelope (ENVELOPE_TYPE_TX) base64 AAAAAgAAAQAAAAAAAAAAARERERERERERERERERERERERERERERERERERERERERERAAAAZAAAAAEAAAABAAAAAAAAAAAAAAABAAAAAAAAAA4AAAAAAAAAAACYloAAAAABAAAAAAAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAAAAAAAAAAAAAAA== , op_index 0, any network_passphrase. One CreateClaimableBalance (native, 1 XLM, one unconditional claimant 0x22*32) whose tx source is the muxed account KEY_TYPE_MUXED_ED25519 {id 1, ed25519 0x11*32} = MAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCAAAAAAAAAAAAE76M (69 chars). Core derives the id from the underlying account, so the expected answer equals that of the same tx with the plain source GAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCF6M; to be a corpus check it must be applied on a chain so anchors.rs emits it; unmodified: balance_id 000000001148bdf459d6efd2339e3de4ed0fabf5912ce9fa8c87786f60b7dd804c7b21be; faulty: ToAccountId dereferences a nil Ed25519 arm and panics: the testee answers error class panic."
+      }
     },
     {
       "key": "xdr/muxed_account_view.go:16:7d6818c99491",
@@ -724,7 +924,11 @@
       "line": 16,
       "mutation": "// MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. _ = v.MustEd2... -> _ = // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. v.MustEd2...",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "MuxedAccountView.ToAccountId is view api (statement removed: the MustEd25519 type check); no sdk package outside xdr uses MuxedAccountView and the testee never builds views (decode goes through UnmarshalWithOptions into generated structs)."
+      }
     },
     {
       "key": "xdr/operation_trace_result.go:16:5eaf88e86c84",
@@ -732,7 +936,11 @@
       "line": 16,
       "mutation": "operationTraceDescription = o.PaymentResult.Code.String() -> _, _ = operationTraceDescription, o.PaymentResult.Code.String",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "OperationResultTr.MapOperationResultTr has no non-test caller in the sdk and none in the testee."
+      }
     },
     {
       "key": "xdr/path_payment_result.go:33:02cb410248be",
@@ -740,7 +948,11 @@
       "line": 33,
       "mutation": "return 0 -> ",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "Removing 'return 0' falls through to 'return s.Last.Amount', and when GetSuccess reports !ok it returns the zero PathPaymentStrictSendResultSuccess (it only assigns result in the Success arm), whose Last.Amount is 0. Same value for every input. (The method is also only used by processors/token_transfer, not by any op.)"
+      }
     },
     {
       "key": "xdr/price.go:85:91866fdad06c",
@@ -748,7 +960,11 @@
       "line": 85,
       "mutation": "return fmt.Errorf(\"price denominator cannot be 0: %d/%d\", p.N, p.D) -> _, _, _ = fmt.Errorf, p.N, p.D",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Price.Validate is only called by Price.TryNormalize/TryInvert, which have no caller in the sdk or the testee; txnbuild price parsing has its own validation."
+      }
     },
     {
       "key": "xdr/price.go:87:380a2f8ca9f2",
@@ -756,7 +972,11 @@
       "line": 87,
       "mutation": "if p.N < 0 || p.D < 0 { -> if p.N < 0 || false {",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Price.Validate, not reached by any op (see above)."
+      }
     },
     {
       "key": "xdr/scval.go:117:fd361e4642ba",
@@ -780,7 +1000,11 @@
       "line": 151,
       "mutation": "*skey, err = NewSignerKey(keytype, signer) -> _, _, _, _, _ = skey, err, NewSignerKey, keytype, signer",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "SignerKey.SetAddress is only called by txnbuild SetOptions/RevokeSponsorship/Preconditions BuildXDR and validateStellarSignerKey; the FromXDR direction (balance_id) and decode_json use SignerKey.GetAddress."
+      }
     },
     {
       "key": "xdr/signer_key.go:52:7fe017297de6",
@@ -795,7 +1019,7 @@
         "cap40.signed-payload-signer.p28-extra-signer-payload-64-meta",
         "cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope"
       ],
-      "entries_changed": 33
+      "entries_changed": 36
     },
     {
       "key": "xdr/stellar_value.go:73:140fe5266cb7",
@@ -803,7 +1027,11 @@
       "line": 73,
       "mutation": "return 0, fmt.Errorf(\"close time out of range: %d\", uint64(t)) -> return 1, fmt.Errorf(\"close time out of range: %d\", uint64(t))",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "closeTimeSecondsToMs is only reached via StellarValue.CloseTimeMs / LedgerCloseMeta.LedgerCloseTimeMs, used by ingest; no op asks for a close time."
+      }
     },
     {
       "key": "xdr/stellar_value.go:75:054332cbfc6e",
@@ -811,7 +1039,11 @@
       "line": 75,
       "mutation": "return int64(t) * 1000, nil //nolint:gosec // bounded above -> return int64(t) * 999, nil //nolint:gosec // bounded above",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "closeTimeSecondsToMs, only reached via StellarValue.CloseTimeMs (ingest); no op calls it."
+      }
     },
     {
       "key": "xdr/transaction.go:64:70bda735ab5c",
@@ -827,7 +1059,11 @@
       "line": 119,
       "mutation": "return nil -> ",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "TransactionEnvelope.MinSeqNum is used by ingest only; txnbuild Preconditions.FromXDR reads the V2 fields directly, network hashing does not call it."
+      }
     },
     {
       "key": "xdr/transaction_envelope.go:179:8e4736a3be45",
@@ -851,7 +1087,11 @@
       "line": 42,
       "mutation": "return nil, nil -> ",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "TransactionMeta.GetDiagnosticEvents is used by ingest only; no op reads meta through helpers."
+      }
     },
     {
       "key": "xdr/transaction_meta.go:56:1da12edd4cb4",
@@ -867,7 +1107,11 @@
       "line": 41,
       "mutation": "panic(err) -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "TrustLineAsset.MustExtract has no caller on any op path (MustExtract is only used inside xdr/asset.go, trust_line_asset.go and go_string.go helpers); txnbuild FromXDR uses TrustLineAsset.ToAsset + assetFromXDR."
+      }
     },
     {
       "key": "xdr/trust_line_asset.go:69:030ac4849a11",
@@ -875,7 +1119,11 @@
       "line": 69,
       "mutation": "return err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "the discarded error comes from bytes.Buffer.Write, which always returns a nil error (it panics instead on overflow), so the return is dead. (The function, assetTrustlineCompressEncodeTo for ingest key compression, is also not on any op path.)"
+      }
     },
     {
       "key": "xdr/view_validate.go:14:4b28ad7cfb38",
@@ -883,7 +1131,11 @@
       "line": 14,
       "mutation": "return viewErrTrailingBytes(uint32(n), len(v)-n) //nolint:gosec // view offsets are uint32 throughout -> return viewErrTrailingBytes(uint32(n), len(v)+n) //nolint:gosec // view offsets are uint32 throughout",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "xdr.ValidateExact is only used by protocols/rpc; the testee decodes with UnmarshalWithOptions and never validates views. The change also only alters the byte count in the error message."
+      }
     },
     {
       "key": "xdr/xdrstream.go:270:71be6e67f6f7",
@@ -891,7 +1143,12 @@
       "line": 270,
       "mutation": "return err -> _ = err",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Stream.ResumeFrom is used by ingest checkpoint readers only; no op reads xdr streams."
+      }
     }
-  ]
+  ],
+  "lane": "3869 entries of candidate/manifest.json flagged format-vector"
 }

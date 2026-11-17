@@ -59,7 +59,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1; 620 entries change"
+      "evidence": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1; 1040 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:22:646e45815516",
@@ -72,7 +72,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'; 599 entries change"
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'; 901 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:22:f7628b188c6e",
@@ -85,7 +85,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'; 605 entries change"
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'; 907 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:232:a12b4368b622",
@@ -98,7 +98,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc; 615 entries change"
+      "evidence": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc; 1033 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:64:0ec00ab8df18",
@@ -535,7 +535,7 @@
         "entry:cap40.signed-payload-signer.p28-extra-signer-payload-64-meta",
         "entry:cap40.signed-payload-signer.p28-remove-signer-payload-1-envelope"
       ],
-      "evidence": "raw = append(raw, buffer[32:]...) -> _, _, _ = raw, raw, buffer; 33 entries change"
+      "evidence": "raw = append(raw, buffer[32:]...) -> _, _, _ = raw, raw, buffer; 36 entries change"
     },
     {
       "id": "seed:go@v0.9.0:xdr/stellar_value.go:73:140fe5266cb7",

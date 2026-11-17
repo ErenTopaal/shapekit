@@ -14,9 +14,9 @@
   "seed": 20261116,
   "sample": 40,
   "counts": {
-    "caught": 7,
+    "caught": 12,
     "timeout": 0,
-    "missed": 31,
+    "missed": 26,
     "unviable": 2
   },
   "faults": [
@@ -26,7 +26,11 @@
       "line": 1729,
       "mutation": "delete field max_length from struct schemars::schema::StringValidation expression in <impl schemars::JsonSchema for BytesM<MAX>>::json_schema",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "schemars JsonSchema for BytesM: JSON schema generation, which no testee op calls"
+      }
     },
     {
       "key": "src/generated.rs:2362:9: replace <impl TryFrom<StringM<MAX>> for [u8; N]>::try_from -> core::result::Result<Self, Self::Error> with Ok(Default::default())",
@@ -42,7 +46,11 @@
       "line": 96,
       "mutation": "replace <impl Name for AccountFlags>::name -> &'static str with \"\"",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Name/name() only feeds Display and the Name trait; the testee ops never format an xdr value with Display or call name(): decode_json/encode_json go through serde derives, errors are compared by class"
+      }
     },
     {
       "key": "src/generated/allow_trust_result_code.rs:76:17: replace < with ==",
@@ -50,7 +58,11 @@
       "line": 76,
       "mutation": "replace < with ==",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/asset.rs:101:9: replace <impl Name for Asset>::name -> &'static str with \"\"",
@@ -58,7 +70,11 @@
       "line": 101,
       "mutation": "replace <impl Name for Asset>::name -> &'static str with \"\"",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Name/name() only feeds Display and the Name trait; the testee ops never format an xdr value with Display or call name(): decode_json/encode_json go through serde derives, errors are compared by class"
+      }
     },
     {
       "key": "src/generated/claimable_balance_entry_ext.rs:101:9: replace <impl Variants<i32> for ClaimableBalanceEntryExt>::variants -> slice::Iter<'static, i32> with Iter::new(1)",
@@ -81,7 +97,7 @@
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta"
       ],
-      "entries_changed": 36
+      "entries_changed": 62
     },
     {
       "key": "src/generated/claimant.rs:65:9: replace Claimant::name -> &'static str with \"\"",
@@ -89,7 +105,11 @@
       "line": 65,
       "mutation": "replace Claimant::name -> &'static str with \"\"",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Name/name() only feeds Display and the Name trait; the testee ops never format an xdr value with Display or call name(): decode_json/encode_json go through serde derives, errors are compared by class"
+      }
     },
     {
       "key": "src/generated/clawback_result.rs:73:17: replace < with >",
@@ -97,7 +117,11 @@
       "line": 73,
       "mutation": "replace < with >",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/const/ledger_key_contract_code.rs:11:9: replace LedgerKeyContractCode::const_xdr_len -> usize with 1",
@@ -105,7 +129,11 @@
       "line": 11,
       "mutation": "replace LedgerKeyContractCode::const_xdr_len -> usize with 1",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/ledger_key_liquidity_pool.rs:30:9: replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N]",
@@ -113,7 +141,11 @@
       "line": 30,
       "mutation": "replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N]",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/node_id.rs:30:9: replace NodeId::const_to_xdr -> [u8; N] with [0; N]",
@@ -121,7 +153,11 @@
       "line": 30,
       "mutation": "replace NodeId::const_to_xdr -> [u8; N] with [0; N]",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/operation_result.rs:100:17: replace < with == in ConstWriter<'_>::write_type_vec_operation_result",
@@ -129,7 +165,11 @@
       "line": 100,
       "mutation": "replace < with == in ConstWriter<'_>::write_type_vec_operation_result",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/revoke_sponsorship_result_code.rs:11:9: replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1",
@@ -137,7 +177,11 @@
       "line": 11,
       "mutation": "replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/signer.rs:76:17: replace < with > in ConstWriter<'_>::write_type_vec_signer",
@@ -145,7 +189,11 @@
       "line": 76,
       "mutation": "replace < with > in ConstWriter<'_>::write_type_vec_signer",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/time_sliced_survey_response_message.rs:20:9: replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0",
@@ -153,7 +201,11 @@
       "line": 20,
       "mutation": "replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/const/transaction_history_entry.rs:54:9: replace ConstWriter<'_>::write_type_transaction_history_entry with ()",
@@ -161,7 +213,11 @@
       "line": 54,
       "mutation": "replace ConstWriter<'_>::write_type_transaction_history_entry with ()",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "the r#const module (const_xdr_len, const_to_xdr, ConstWriter) encodes values in const contexts for crate users; no testee op calls it, decode_encode uses ReadXdr/WriteXdr"
+      }
     },
     {
       "key": "src/generated/contract_executable_type.rs:120:9: replace <impl ReadXdr for ContractExecutableType>::read_xdr -> Result<Self, Error> with Ok(Default::default())",
@@ -176,15 +232,27 @@
         "cap73.sac-trust.p28-deploy-credit-sac-envelope",
         "cap73.sac-trust.p28-deploy-credit-sac-meta"
       ],
-      "entries_changed": 36
+      "entries_changed": 88
     },
     {
       "key": "src/generated/curve25519_public.rs:42:9: replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(())",
       "file": "src/generated/curve25519_public.rs",
       "line": 42,
       "mutation": "replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(())",
-      "status": "missed",
-      "entries_changed": 0
+      "status": "caught",
+      "entries": [
+        "candidate:format.xdr-grammar.authcert-distinct",
+        "candidate:format.xdr-grammar.authcert-smallest",
+        "candidate:format.xdr-grammar.curve25519public-distinct",
+        "candidate:format.xdr-grammar.curve25519public-smallest",
+        "candidate:format.xdr-grammar.hello-distinct"
+      ],
+      "entries_changed": 17,
+      "lane_only": true,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "decode_encode re-encodes through WriteXdr; with write_xdr a no-op a Curve25519Public (alone or inside SurveyRequestMessage and the survey types) re-encodes to nothing. The corpus has no value containing one; the candidate lane's format vectors format.xdr-grammar.curve25519public-* kill it"
+      }
     },
     {
       "key": "src/generated/encoded_ledger_key.rs:107:9: replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1])",
@@ -192,7 +260,11 @@
       "line": 107,
       "mutation": "replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1])",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "equivalent",
+        "reason": "the mutated as_ref is under cfg(not(feature = \"alloc\")); the build has alloc, so the mutated code is not compiled and the binary is the original"
+      }
     },
     {
       "key": "src/generated/end_sponsoring_future_reserves_result.rs:114:9: replace <impl ReadXdr for EndSponsoringFutureReservesResult>::read_xdr -> Result<Self, Error> with Ok(Default::default())",
@@ -207,7 +279,7 @@
         "cap33.sponsorship.p30-sponsored-account-meta",
         "cap33.sponsorship.p30-sponsored-claimable-balance-meta"
       ],
-      "entries_changed": 12
+      "entries_changed": 17
     },
     {
       "key": "src/generated/extend_footprint_ttl_result_code.rs:72:9: replace ExtendFootprintTtlResultCode::name -> &'static str with \"\"",
@@ -215,7 +287,11 @@
       "line": 72,
       "mutation": "replace ExtendFootprintTtlResultCode::name -> &'static str with \"\"",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "Name/name() only feeds Display and the Name trait; the testee ops never format an xdr value with Display or call name(): decode_json/encode_json go through serde derives, errors are compared by class"
+      }
     },
     {
       "key": "src/generated/host_function.rs:56:17: replace < with >",
@@ -223,7 +299,11 @@
       "line": 56,
       "mutation": "replace < with >",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/ledger_entry_changes.rs:72:9: replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default()",
@@ -231,7 +311,11 @@
       "line": 72,
       "mutation": "replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default()",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "From<LedgerEntryChanges> for Vec<LedgerEntryChange>, a conversion for crate users; ReadXdr, WriteXdr and serde do not use it"
+      }
     },
     {
       "key": "src/generated/ledger_entry_type.rs:138:9: replace <impl TryFrom<i32> for LedgerEntryType>::try_from -> Result<Self, Error> with Ok(Default::default())",
@@ -246,7 +330,7 @@
         "cap03.offer-liabilities.golden-12c04cf739c52eac-20",
         "cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
       ],
-      "entries_changed": 289
+      "entries_changed": 374
     },
     {
       "key": "src/generated/ledger_header_flags.rs:54:15: replace += with -=",
@@ -254,7 +338,11 @@
       "line": 54,
       "mutation": "replace += with -=",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/restore_footprint_result_code.rs:144:9: replace <impl WriteXdr for RestoreFootprintResultCode>::write_xdr -> Result<(), Error> with Ok(())",
@@ -269,15 +357,24 @@
         "soroban.invoke-basics.golden-04667ce620bffee7-26",
         "soroban.invoke-basics.golden-7b59aa36c1776fe1-32"
       ],
-      "entries_changed": 14
+      "entries_changed": 27
     },
     {
       "key": "src/generated/revoke_sponsorship_result_code.rs:127:13: delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from",
       "file": "src/generated/revoke_sponsorship_result_code.rs",
       "line": 127,
       "mutation": "delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from",
-      "status": "missed",
-      "entries_changed": 0
+      "status": "caught",
+      "entries": [
+        "candidate:format.xdr-grammar.revokesponsorshipresult-malformed",
+        "candidate:format.xdr-grammar.revokesponsorshipresultcode-malformed"
+      ],
+      "entries_changed": 2,
+      "lane_only": true,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "decoding a RevokeSponsorshipResult with code -5 (Malformed) is refused by the mutant; no corpus result carries -5; candidate format vectors format.xdr-grammar.revokesponsorshipresult-malformed and revokesponsorshipresultcode-malformed kill it"
+      }
     },
     {
       "key": "src/generated/sc_error_type.rs:139:13: delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from",
@@ -292,15 +389,27 @@
         "soroban.auth-trees.golden-57a486abce28859d-17",
         "soroban.auth-trees.golden-5f615b0f98ae09f3-11"
       ],
-      "entries_changed": 6
+      "entries_changed": 8
     },
     {
       "key": "src/generated/sc_spec_event_param_location_v0.rs:126:9: replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(())",
       "file": "src/generated/sc_spec_event_param_location_v0.rs",
       "line": 126,
       "mutation": "replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(())",
-      "status": "missed",
-      "entries_changed": 0
+      "status": "caught",
+      "entries": [
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-data",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-distinct",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-smallest",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-topic-list",
+        "candidate:format.xdr-grammar.scspeceventparamv0-distinct"
+      ],
+      "entries_changed": 12,
+      "lane_only": true,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "decode_encode of ScSpecEventParamLocationV0 or an ScSpecEventParamV0 re-encodes nothing for the location; no corpus entry holds a contract spec event; candidate format vectors format.xdr-grammar.scspeceventparamlocationv0-* kill it"
+      }
     },
     {
       "key": "src/generated/sc_val_type.rs:253:13: delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from",
@@ -315,7 +424,7 @@
         "cap73.sac-trust.p28-deploy-credit-sac-meta",
         "cap73.sac-trust.p28-deploy-xlm-sac-meta"
       ],
-      "entries_changed": 25
+      "entries_changed": 27
     },
     {
       "key": "src/generated/soroban_transaction_meta_ext.rs:81:9: replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()]",
@@ -323,7 +432,11 @@
       "line": 81,
       "mutation": "replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()]",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "SorobanTransactionMetaExt::variants(), a public helper no testee op or decode path calls"
+      }
     },
     {
       "key": "src/generated/survey_message_command_type.rs:37:15: replace += with -=",
@@ -331,7 +444,11 @@
       "line": 37,
       "mutation": "replace += with -=",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/transaction_ext.rs:55:17: replace < with >",
@@ -339,7 +456,11 @@
       "line": 55,
       "mutation": "replace < with >",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/transaction_result_ext.rs:52:17: replace < with <=",
@@ -347,15 +468,31 @@
       "line": 52,
       "mutation": "replace < with <=",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/transaction_result_set.rs:42:9: replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(())",
       "file": "src/generated/transaction_result_set.rs",
       "line": 42,
       "mutation": "replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(())",
-      "status": "missed",
-      "entries_changed": 0
+      "status": "caught",
+      "entries": [
+        "candidate:format.xdr-grammar.transactionhistoryresultentry-distinct",
+        "candidate:format.xdr-grammar.transactionhistoryresultentry-smallest",
+        "candidate:format.xdr-grammar.transactionresultset-distinct",
+        "candidate:format.xdr-grammar.transactionresultset-results-one",
+        "candidate:format.xdr-grammar.transactionresultset-smallest"
+      ],
+      "entries_changed": 5,
+      "lane_only": true,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "decode_encode of TransactionResultSet or TransactionHistoryResultEntry re-encodes without the results; no corpus entry has that type; candidate format vectors format.xdr-grammar.transactionresultset-* and transactionhistoryresultentry-* kill it"
+      }
     },
     {
       "key": "src/generated/type_enum.rs:1472:15: replace += with -=",
@@ -363,15 +500,31 @@
       "line": 1472,
       "mutation": "replace += with -=",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "a const block building VARIANTS or VARIANTS_STR; associated consts are only evaluated when referenced, and the mutant built although it would fail const evaluation (or fill the array with element 0) if referenced, so the testee binary never references it; the testee resolves type names through TypeVariant::from_str, a match"
+      }
     },
     {
       "key": "src/generated/type_enum.rs:3216:13: delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str",
       "file": "src/generated/type_enum.rs",
       "line": 3216,
       "mutation": "delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str",
-      "status": "missed",
-      "entries_changed": 0
+      "status": "caught",
+      "entries": [
+        "candidate:format.xdr-grammar.cryptokeytype-distinct",
+        "candidate:format.xdr-grammar.cryptokeytype-ed25519",
+        "candidate:format.xdr-grammar.cryptokeytype-ed25519-signed-payload",
+        "candidate:format.xdr-grammar.cryptokeytype-hash-x",
+        "candidate:format.xdr-grammar.cryptokeytype-muxed-ed25519"
+      ],
+      "entries_changed": 10,
+      "lane_only": true,
+      "class": {
+        "class": "corpus-gap",
+        "reason": "TypeVariant::from_str no longer knows CryptoKeyType, so a decode request naming that type is unsupported; the corpus has no CryptoKeyType entry; candidate format vectors format.xdr-grammar.cryptokeytype-* kill it"
+      }
     },
     {
       "key": "src/generated/upgrade_type.rs:87:9: replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default())",
@@ -379,7 +532,11 @@
       "line": 87,
       "mutation": "replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default())",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "TryFrom<&Vec<u8>> for UpgradeType; ReadXdr reads a BytesM and serde derives through BytesM, neither calls it"
+      }
     },
     {
       "key": "src/transaction_conversions.rs:76:9: replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default()",
@@ -387,7 +544,12 @@
       "line": 76,
       "mutation": "replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default()",
       "status": "missed",
-      "entries_changed": 0
+      "entries_changed": 0,
+      "class": {
+        "class": "outside-the-ops",
+        "reason": "From<&Uint256> for MuxedAccount; no testee op builds a MuxedAccount from a key (the testee's ed25519 helpers are stellar-strkey's)"
+      }
     }
-  ]
+  ],
+  "lane": "3869 entries of candidate/manifest.json flagged format-vector"
 }

@@ -40,7 +40,7 @@
         "entry:cap23.claimable-balances.p30-claim-through-depth-4-meta",
         "entry:cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta"
       ],
-      "evidence": "replace <impl WriteXdr for ClaimableBalanceId>::write_xdr -> Result<(), Error> with Ok(()); 36 entries change"
+      "evidence": "replace <impl WriteXdr for ClaimableBalanceId>::write_xdr -> Result<(), Error> with Ok(()); 62 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/claimant.rs:65:9: replace Claimant::name -> &'static str with \"\"",
@@ -123,14 +123,20 @@
         "entry:cap73.sac-trust.p28-deploy-credit-sac-envelope",
         "entry:cap73.sac-trust.p28-deploy-credit-sac-meta"
       ],
-      "evidence": "replace <impl ReadXdr for ContractExecutableType>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 36 entries change"
+      "evidence": "replace <impl ReadXdr for ContractExecutableType>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 88 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/curve25519_public.rs:42:9: replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(())",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+      "status": "met",
+      "witnesses": [
+        "candidate:format.xdr-grammar.authcert-distinct",
+        "candidate:format.xdr-grammar.authcert-smallest",
+        "candidate:format.xdr-grammar.curve25519public-distinct",
+        "candidate:format.xdr-grammar.curve25519public-smallest",
+        "candidate:format.xdr-grammar.hello-distinct"
+      ],
+      "evidence": "replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(()); 17 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/encoded_ledger_key.rs:107:9: replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1])",
@@ -150,7 +156,7 @@
         "entry:cap33.sponsorship.p30-sponsored-account-meta",
         "entry:cap33.sponsorship.p30-sponsored-claimable-balance-meta"
       ],
-      "evidence": "replace <impl ReadXdr for EndSponsoringFutureReservesResult>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 12 entries change"
+      "evidence": "replace <impl ReadXdr for EndSponsoringFutureReservesResult>::read_xdr -> Result<Self, Error> with Ok(Default::default()); 17 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/extend_footprint_ttl_result_code.rs:72:9: replace ExtendFootprintTtlResultCode::name -> &'static str with \"\"",
@@ -184,7 +190,7 @@
         "entry:cap03.offer-liabilities.golden-12c04cf739c52eac-20",
         "entry:cap03.offer-liabilities.golden-847b038d8a2ce1c2-7"
       ],
-      "evidence": "replace <impl TryFrom<i32> for LedgerEntryType>::try_from -> Result<Self, Error> with Ok(Default::default()); 289 entries change"
+      "evidence": "replace <impl TryFrom<i32> for LedgerEntryType>::try_from -> Result<Self, Error> with Ok(Default::default()); 374 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/ledger_header_flags.rs:54:15: replace += with -=",
@@ -204,14 +210,17 @@
         "entry:soroban.invoke-basics.golden-04667ce620bffee7-26",
         "entry:soroban.invoke-basics.golden-7b59aa36c1776fe1-32"
       ],
-      "evidence": "replace <impl WriteXdr for RestoreFootprintResultCode>::write_xdr -> Result<(), Error> with Ok(()); 14 entries change"
+      "evidence": "replace <impl WriteXdr for RestoreFootprintResultCode>::write_xdr -> Result<(), Error> with Ok(()); 27 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/revoke_sponsorship_result_code.rs:127:13: delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from; no entry changes"
+      "status": "met",
+      "witnesses": [
+        "candidate:format.xdr-grammar.revokesponsorshipresult-malformed",
+        "candidate:format.xdr-grammar.revokesponsorshipresultcode-malformed"
+      ],
+      "evidence": "delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from; 2 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/sc_error_type.rs:139:13: delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from",
@@ -224,14 +233,20 @@
         "entry:soroban.auth-trees.golden-57a486abce28859d-17",
         "entry:soroban.auth-trees.golden-5f615b0f98ae09f3-11"
       ],
-      "evidence": "delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from; 6 entries change"
+      "evidence": "delete match arm 8 in <impl TryFrom<i32> for ScErrorType>::try_from; 8 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/sc_spec_event_param_location_v0.rs:126:9: replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(())",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+      "status": "met",
+      "witnesses": [
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-data",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-distinct",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-smallest",
+        "candidate:format.xdr-grammar.scspeceventparamlocationv0-topic-list",
+        "candidate:format.xdr-grammar.scspeceventparamv0-distinct"
+      ],
+      "evidence": "replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(()); 12 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/sc_val_type.rs:253:13: delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from",
@@ -244,7 +259,7 @@
         "entry:cap73.sac-trust.p28-deploy-credit-sac-meta",
         "entry:cap73.sac-trust.p28-deploy-xlm-sac-meta"
       ],
-      "evidence": "delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from; 25 entries change"
+      "evidence": "delete match arm 19 in <impl TryFrom<i32> for ScValType>::try_from; 27 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/soroban_transaction_meta_ext.rs:81:9: replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()]",
@@ -277,9 +292,15 @@
     {
       "id": "seed:rust@30.0.0:src/generated/transaction_result_set.rs:42:9: replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(())",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(()); no entry changes"
+      "status": "met",
+      "witnesses": [
+        "candidate:format.xdr-grammar.transactionhistoryresultentry-distinct",
+        "candidate:format.xdr-grammar.transactionhistoryresultentry-smallest",
+        "candidate:format.xdr-grammar.transactionresultset-distinct",
+        "candidate:format.xdr-grammar.transactionresultset-results-one",
+        "candidate:format.xdr-grammar.transactionresultset-smallest"
+      ],
+      "evidence": "replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(()); 5 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/type_enum.rs:1472:15: replace += with -=",
@@ -291,9 +312,15 @@
     {
       "id": "seed:rust@30.0.0:src/generated/type_enum.rs:3216:13: delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str; no entry changes"
+      "status": "met",
+      "witnesses": [
+        "candidate:format.xdr-grammar.cryptokeytype-distinct",
+        "candidate:format.xdr-grammar.cryptokeytype-ed25519",
+        "candidate:format.xdr-grammar.cryptokeytype-ed25519-signed-payload",
+        "candidate:format.xdr-grammar.cryptokeytype-hash-x",
+        "candidate:format.xdr-grammar.cryptokeytype-muxed-ed25519"
+      ],
+      "evidence": "delete match arm \"CryptoKeyType\" in <impl core::str::FromStr for TypeVariant>::from_str; 10 entries change"
     },
     {
       "id": "seed:rust@30.0.0:src/generated/upgrade_type.rs:87:9: replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default())",
