@@ -42,6 +42,8 @@ pub struct Witness {
 
 struct Seed {
     ir: RecipeIr,
+    /// Reachable arms its chain holds: a seed with more state behind it is extended more often.
+    arms: usize,
 }
 
 struct State {
@@ -137,7 +139,8 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
             .filter(|s| s.ir.steps.len() <= MAX_SEED_STEPS)
             .collect();
         let spec = if !seeds.is_empty() && rng.chance(1, 2) {
-            let s = seeds[rng.below(seeds.len())];
+            let weights: Vec<u64> = seeds.iter().map(|s| 1 + s.arms as u64).collect();
+            let s = seeds[rng.weighted(&weights)];
             Spec {
                 id: s.ir.id.clone(),
                 protocol: s.ir.protocol,
@@ -246,11 +249,13 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                 kept.seconds
             );
         }
-        g.seeds.push(Seed { ir: kept.ir });
+        let arms = kept.arms.len();
+        g.seeds.push(Seed { ir: kept.ir, arms });
     } else if kept.new_paths > 0 || new_regions > 0 {
         let mut g = state.lock().expect("no worker panics holding the lock");
         if g.seeds.len() < 256 {
-            g.seeds.push(Seed { ir: kept.ir });
+            let arms = kept.arms.len();
+            g.seeds.push(Seed { ir: kept.ir, arms });
         }
     }
     Ok(())
