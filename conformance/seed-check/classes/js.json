@@ -307,7 +307,7 @@
   {
     "key": "lib/esm/xdr/values/bigint-parts.js:24:7-24:27:ConditionalExpression:fcbcf165",
     "class": "corpus-gap",
-    "reason": "assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}."
+    "reason": "needs encode_json on non-canonical JSON input; no entry kind carries JSON inputs. assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}."
   },
   {
     "key": "lib/esm/xdr/values/xdr-string.js:168:9-168:38:ConditionalExpression:fcbcf165",
@@ -317,7 +317,7 @@
   {
     "key": "lib/esm/xdr/values/xdr-string.js:174:40-174:54:ArithmeticOperator:2dfb1ddf",
     "class": "corpus-gap",
-    "reason": "hexDigit for uppercase A-F returns a negative number, so a \\x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\\\x escape \"\\\\xAB\"'}."
+    "reason": "needs encode_json on non-canonical JSON input; no entry kind carries JSON inputs. hexDigit for uppercase A-F returns a negative number, so a \\x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\\\x escape \"\\\\xAB\"'}."
   },
   {
     "key": "lib/esm/xdr/values/xdr-value.js:84:25-84:35:StringLiteral:12ae32cb",
