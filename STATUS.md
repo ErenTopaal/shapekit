@@ -16,7 +16,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `gate-side`: sides of stellar-core's protocol gates | 334 | 356 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
   | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
-  | `seed`: faults seeded into the SDKs | 54 | 160 | 214 |
+  | `seed`: faults seeded into the SDKs | 69 | 145 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
   envelope field in 1,179 attempts, each a valid transaction with one field changed. 178 of the 203
@@ -39,7 +39,8 @@ A dated public log of what has landed in shapekit. Newest entry first.
 - Seeded faults ([docs/seeded-faults.md](docs/seeded-faults.md)): of the sampled faults that
   build, the corpus catches 7 of 38 in stellar-xdr 30.0.0, 12 of 76 in go-stellar-sdk v0.9.0
   and 35 of 100 in `@stellar/stellar-sdk` 17.4.0, plus the three released js-stellar-sdk faults
-  it reproduces.
+  it reproduces. With the candidate lane's format vectors it catches 12 of 38, 12 of 76 and 45
+  of 100. Every missed fault carries a class; most are in code no testee op calls.
 - Fuzzing ([docs/differential-fuzzing.md](docs/differential-fuzzing.md)): a coverage-guided
   search across the three SDKs reaches more code in every SDK than the same budget without the
   feedback, in both seeds measured. Each SDK's own fuzzer (cargo-fuzz, `go test -fuzz`,

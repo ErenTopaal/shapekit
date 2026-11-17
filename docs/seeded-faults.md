@@ -10,6 +10,10 @@ shapekit conformance seed-check --sdk go --sample 100
 shapekit conformance seed-check --sdk rust --sample 40
 ```
 
+With `--candidate candidate/manifest.json --candidate-flag format-vector`, every probe also
+runs the candidate lane's format vectors (3,869 entries). A fault only they catch counts as
+caught by the lane, apart from the corpus.
+
 | SDK | Tool | Code the faults go into |
 |---|---|---|
 | rust | cargo-mutants | the published `stellar-xdr` crate with every feature on, without its command line (`src/bin`, `src/cli`) |
@@ -43,27 +47,45 @@ what the corpus checks, not a score of the SDK. A missed fault means one of two 
   messages;
 - an entry reaches the code, but nothing it checks depends on the change.
 
-Each missed fault is listed by file, line and mutation in
+Every fault the corpus alone misses carries a class, in
+`conformance/seed-check/classes/<sdk>.json`, with the reason for it:
+
+- `equivalent`: no input can tell it from the unmodified SDK;
+- `outside-the-ops`: the code is on no path a testee op takes;
+- `corpus-gap`: a testee op reaches it, but no corpus entry does;
+- `other`: none of the above.
+
+Each missed fault is listed by file, line, mutation and class in
 [conformance/seed-check/SEED-CHECK.md](../conformance/seed-check/SEED-CHECK.md). Each sampled
 fault is also a `seed` obligation in the obligation ledger
 (`conformance/seed-check/<sdk>.obligations.json`):
 
-- a caught fault is met, with up to five of the entries whose result it changed as witnesses
-  and the number of changed entries in its evidence (a fault that stops the run changes every
-  entry);
+- a caught fault is met, with up to five of the corpus or candidate entries whose result it
+  changed as witnesses and the number of changed entries in its evidence (a fault that stops
+  the run changes every entry);
 - a missed fault stays open.
 
-So each SDK has as many met `seed` obligations as caught faults.
+So each SDK has as many met `seed` obligations as faults the corpus and the lane catch.
 
 ## Measured
 
-| SDK | Version | Tool | Faults listed | Sampled | Caught | Missed | Did not build | Caught of those built |
-|---|---|---|---|---|---|---|---|---|
-| rust | 30.0.0 | cargo-mutants 27.1.0 | 11,776 | 40 | 7 | 31 | 2 | 7 of 38 (18.4%) |
-| go | v0.9.0 | go-mutesting v2.3.1 | 1,924 | 100 | 12 | 64 | 24 | 12 of 76 (15.8%) |
-| js | 17.4.0 | Stryker 10.1.1 | 16,456 | 100 | 35 | 65 | 0 | 35 of 100 (35.0%) |
+| SDK | Version | Tool | Faults listed | Sampled | Did not build | Caught by the corpus alone | Caught with the candidate lane |
+|---|---|---|---|---|---|---|---|
+| rust | 30.0.0 | cargo-mutants 27.1.0 | 11,776 | 40 | 2 | 7 of 38 (18.4%) | 12 of 38 (31.6%) |
+| go | v0.9.0 | go-mutesting v2.3.1 | 1,924 | 100 | 24 | 12 of 76 (15.8%) | 12 of 76 (15.8%) |
+| js | 17.4.0 | Stryker 10.1.1 | 16,456 | 100 | 0 | 35 of 100 (35.0%) | 45 of 100 (45.0%) |
 
-No sampled fault timed out.
+No sampled fault timed out. The faults the corpus alone misses, by class:
+
+| SDK | equivalent | outside-the-ops | corpus-gap | other | of which the candidate lane catches |
+|---|---|---|---|---|---|
+| rust | 1 | 25 | 5 | 0 | 5 |
+| go | 7 | 54 | 2 | 1 | 0 |
+| js | 5 | 40 | 13 | 7 | 10 |
+
+Most missed faults are in code no testee op calls (`outside-the-ops`), such as type names
+that only feed `Display`. The `corpus-gap` faults are the ones new entries can catch: 20 across
+the three SDKs, 15 of which the format vectors in the candidate lane already catch.
 
 The corpus also catches the three released js-stellar-sdk faults it has reproductions for:
 
