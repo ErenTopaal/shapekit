@@ -498,23 +498,18 @@ fn probe_compare(table: &Path, fields: &Path, verdicts: &Path, write: bool) -> R
                 } else {
                     "not-validated"
                 };
-                let names: Vec<String> = site
-                    .fields
-                    .iter()
-                    .map(|f| match &f.carrier {
-                        Some(c) => format!("{} [{c}]", f.path),
-                        None => f.path.clone(),
-                    })
-                    .collect();
+                let name = if site.carrier.is_empty() {
+                    site.field.clone()
+                } else {
+                    format!("{} [{}]", site.field, site.carrier)
+                };
                 println!(
-                    "    {:<64} {v}, {} ({} attempts)",
-                    names.join(", "),
-                    site.values,
-                    site.attempts
+                    "    {name:<64} {v}, {} ({} attempts)",
+                    site.values, site.attempts
                 );
             }
-            if let Some(reading) = &r.settled_by {
-                println!("    {reading}");
+            if let Some(x) = &r.settled_by {
+                println!("    {}", x.reading);
             }
         }
     }
@@ -523,10 +518,7 @@ fn probe_compare(table: &Path, fields: &Path, verdicts: &Path, write: bool) -> R
         rows.len(),
         rows.len() - settled - open - stale
     );
-    let file = shapekit_probe::compare::FieldVerdicts {
-        schema_version: 1,
-        rows,
-    };
+    let file = shapekit_probe::compare::field_verdicts(&rows, &table.display().to_string());
     let text = serde_json::to_string_pretty(&file)? + "\n";
     let current = if write {
         std::fs::write(verdicts, &text)
