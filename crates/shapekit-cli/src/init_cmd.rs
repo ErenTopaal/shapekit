@@ -77,8 +77,8 @@ pub struct TesteeArgs {
 }
 
 /// The Stellar SDK of each language a testee is written in: package, version, issues
-/// repository. The ts and go versions are the `current` of conformance/versions.toml (a test
-/// keeps them equal); the python version is PyPI's latest stable release on 2026-11-17.
+/// repository. Each version is the `current` of conformance/versions.toml (a test keeps them
+/// equal).
 pub const DEFAULT_SDKS: [(Lang, &str, &str, &str); 3] = [
     (
         Lang::Ts,
@@ -428,7 +428,7 @@ pub fn run(cmd: InitCommand) -> Result<bool> {
 mod tests {
     use super::*;
 
-    // the ts and go defaults follow the committed matrix's current versions
+    // the defaults follow the committed matrix's current versions
     #[test]
     fn default_sdks_follow_the_versions_file() {
         let file = shapekit_conformance::versions::VersionsFile::load(
@@ -439,7 +439,7 @@ mod tests {
             let key = match lang {
                 Lang::Ts => "js",
                 Lang::Go => "go",
-                Lang::Python => continue,
+                Lang::Python => "python",
             };
             let sdk = file.sdk(key).unwrap();
             assert_eq!(sdk.package, package);
