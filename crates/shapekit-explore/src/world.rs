@@ -52,7 +52,13 @@ impl AssetRef {
                 } else {
                     "credit_alphanum12"
                 };
-                serde_json::json!({ arm: { "asset_code": code, "issuer": format!("@account:{issuer}") } })
+                // a strkey issuer is an account that does not exist, written as it is
+                let issuer = if is_strkey(issuer) {
+                    issuer.clone()
+                } else {
+                    format!("@account:{issuer}")
+                };
+                serde_json::json!({ arm: { "asset_code": code, "issuer": issuer } })
             }
             _ => Value::String("native".into()),
         }
@@ -150,9 +156,16 @@ impl World {
         self.funded.push(role.to_owned());
     }
 
-    /// Every credit asset the issuers issue under the code pools, and native.
+    /// Every credit asset the issuers issue under the code pools, native, and one asset of
+    /// an issuer that does not exist.
     pub fn assets(&self) -> Vec<AssetRef> {
         let mut out = vec![AssetRef::native()];
+        if let Some(g) = self.ghosts.first() {
+            out.push(AssetRef {
+                code: Some(CODES4[0].to_owned()),
+                issuer: Some(g.clone()),
+            });
+        }
         for issuer in &self.issuers {
             for code in CODES4.iter().chain(CODES12) {
                 out.push(AssetRef {
@@ -168,14 +181,18 @@ impl World {
     pub fn xdr_asset(&self, a: &AssetRef) -> Result<Asset> {
         Ok(match (&a.code, &a.issuer) {
             (Some(code), Some(issuer)) => {
-                let key = if issuer == "root" {
+                let bytes = if issuer == "root" {
                     anyhow::bail!("root issues no asset")
+                } else if is_strkey(issuer) {
+                    stellar_strkey::ed25519::PublicKey::from_string(issuer)
+                        .map_err(|e| anyhow::anyhow!("{issuer}: {e}"))?
+                        .0
                 } else {
                     derive_key(&self.recipe_id, issuer)
+                        .verifying_key()
+                        .to_bytes()
                 };
-                let issuer = AccountId(PublicKey::PublicKeyTypeEd25519(Uint256(
-                    key.verifying_key().to_bytes(),
-                )));
+                let issuer = AccountId(PublicKey::PublicKeyTypeEd25519(Uint256(bytes)));
                 if code.len() <= 4 {
                     let mut b = [0u8; 4];
                     b[..code.len()].copy_from_slice(code.as_bytes());
@@ -432,6 +449,11 @@ impl World {
         }
         Ok(())
     }
+}
+
+/// Whether an issuer is a literal account strkey rather than a role name.
+fn is_strkey(s: &str) -> bool {
+    s.len() == 56 && s.starts_with('G')
 }
 
 /// Whether a value in recipe form still holds a contract strkey.
