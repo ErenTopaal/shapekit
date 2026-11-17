@@ -15,9 +15,9 @@
   "seed": 20261116,
   "sample": 100,
   "counts": {
-    "caught": 45,
+    "caught": 46,
     "timeout": 0,
-    "missed": 55,
+    "missed": 54,
     "unviable": 0
   },
   "faults": [
@@ -93,11 +93,11 @@
       "entries": [
         "cap03.offer-liabilities.synth-textual-offer-id-canonical",
         "cap23.claimable-balances.golden-3635a80135f66ca8-0",
-        "cap33.sponsorship.golden-3635a80135f66ca8-0",
-        "cap35.clawback.p30-create-clawback-enabled-balance",
-        "cap38.liquidity-pools.synth-assets-code-case"
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+        "cap33.sponsorship.golden-3635a80135f66ca8-0"
       ],
-      "entries_changed": 16
+      "entries_changed": 18
     },
     {
       "key": "lib/esm/base/memo.js:10:18-10:24:StringLiteral:12ae32cb",
@@ -127,12 +127,11 @@
       "file": "lib/esm/base/operation.js",
       "line": 441,
       "mutation": "StringLiteral -> \"\"",
-      "status": "missed",
-      "entries_changed": 0,
-      "class": {
-        "class": "corpus-gap",
-        "reason": "Reachable from tx_hash and balance_id: TransactionBuilder.fromXDR -> new Transaction -> Operation.fromXdrObject -> case revokeSponsorshipSigner -> convertXdrSignerKeyToObject. With the case label emptied a HashX signer key falls to the default arm and throws. No corpus envelope carries a RevokeSponsorship op whose signer key is a hash(x) key (coverage 0). Verified by running both builds. Killing input: op tx_hash, TransactionEnvelope (v1, one RevokeSponsorshipOp of type REVOKE_SPONSORSHIP_SIGNER with SignerKey SIGNER_KEY_TYPE_HASH_X, testnet passphrase), {'id': '1', 'op': 'tx_hash', 'network_passphrase': 'Test SDF Network ; September 2015', 'xdr': 'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAAGQAAAAAAAAAZQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAEgAAAAEAAAAAiojj3XQJ8ZX9UtstPLpdcspnCb8dlBIb83SIAbQPb1wAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqoAAAAAAAAAAA=='}; unmodified: {'hash': '538aec3e6ef243be170737ae0f97c70ee1144f8b6d012adfeff0ee6e2191eee4'}; faulty: {'rejected': 'Error: Unknown signerKey type: signerKeyTypeHashX'}."
-      }
+      "status": "caught",
+      "entries": [
+        "cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope"
+      ],
+      "entries_changed": 1
     },
     {
       "key": "lib/esm/base/operation.js:73:12-73:21:StringLiteral:12ae32cb",
@@ -371,7 +370,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 4581,
+      "entries_changed": 4585,
       "note": "the corpus run stopped: js@17.4.0: hello failed: testee exited (stdout closed; exit status: 1); stderr tail: file://<work>/js/node_modules/@stellar/js-xdr/dist/js-xdr.mjs:825\n      throw new XdrError(\n            ^\n\nXdrError: BumpSequenceResult: union needs at least one case or a default arm\n    at new UnionType (file://<work>/js/node_modules/@stellar/js-xdr/dist/js-xdr.mjs:825:13)\n    at union (file://<work>/js/node_modules/@stellar/js-xdr/dist/js-xdr.mjs:920:10)\n    at <static_initializer> (file://<work>/js/sdk/lib/esm/xdr/generated/bump-sequence-result.js:58:19)\n    at file://<work>/js/sdk/lib/esm/xdr/generated/bump-sequence-result.js:51:38\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async loadSdk (file://<work>/js/dist/sdk.js:55:20)\n    at async main (file://<work>/js/dist/main.js:11:25)\n    at async file://<work>/js/dist/main.js:19:1\n\nNode.js v26.13.1"
     },
     {
@@ -656,7 +655,7 @@
         "cap23.claimable-balances.p30-create-ten-claimants-depth-4-meta",
         "cap23.claimable-balances.p30-entry-ten-claimants-depth-4"
       ],
-      "entries_changed": 43
+      "entries_changed": 46
     },
     {
       "key": "lib/esm/xdr/generated/ledger-header-history-entry.js:13:5-17:6:ObjectLiteral:44136fa3",
@@ -671,7 +670,7 @@
         "cap01.bump-sequence.p30-bump-past-starting-sequence",
         "cap01.bump-sequence.p30-bump-to-i64-max"
       ],
-      "entries_changed": 451
+      "entries_changed": 453
     },
     {
       "key": "lib/esm/xdr/generated/ledger-key.js:262:17-264:4:BlockStatement:44136fa3",
@@ -838,7 +837,7 @@
         "cap01.bump-sequence.p30-bump-past-starting-sequence",
         "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta"
       ],
-      "entries_changed": 466
+      "entries_changed": 469
     },
     {
       "key": "lib/esm/xdr/generated/operation-type.js:25:5-25:28:StringLiteral:12ae32cb",
@@ -976,7 +975,7 @@
         "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
         "cap01.bump-sequence.p30-bump-to-i64-max"
       ],
-      "entries_changed": 387
+      "entries_changed": 390
     },
     {
       "key": "lib/esm/xdr/generated/scp-quorum-set.js:34:37-34:73:ArrowFunction:1193b7f1",
@@ -1191,7 +1190,7 @@
         "cap01.bump-sequence.p30-bump-past-starting-sequence",
         "cap01.bump-sequence.p30-bump-to-i64-max"
       ],
-      "entries_changed": 295
+      "entries_changed": 298
     },
     {
       "key": "lib/esm/xdr/generated/transaction-signature-payload-tagged-transaction.js:10:9-10:72:ConditionalExpression:fcbcf165",
@@ -1218,7 +1217,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 526
+      "entries_changed": 529
     },
     {
       "key": "lib/esm/xdr/generated/trust-line-entry-extension-v2-ext.js:30:7-30:58:StringLiteral:059b8502",
@@ -1241,11 +1240,11 @@
       "entries": [
         "cap03.offer-liabilities.synth-textual-offer-id-canonical",
         "cap23.claimable-balances.golden-3635a80135f66ca8-0",
-        "cap27.muxed-accounts.synth-textual-muxed-id-canonical",
-        "cap33.sponsorship.golden-3635a80135f66ca8-0",
-        "cap35.clawback.p30-create-clawback-enabled-balance"
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.synth-textual-muxed-id-canonical"
       ],
-      "entries_changed": 16
+      "entries_changed": 18
     },
     {
       "key": "lib/esm/xdr/values/bigint-parts.js:24:7-24:27:ConditionalExpression:fcbcf165",
@@ -1256,7 +1255,7 @@
       "entries_changed": 0,
       "class": {
         "class": "corpus-gap",
-        "reason": "assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}."
+        "reason": "needs encode_json on non-canonical JSON input; no entry kind carries JSON inputs. assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}."
       }
     },
     {
@@ -1272,7 +1271,7 @@
         "cap01.bump-sequence.p30-bump-then-merge-seqnum-too-far-meta",
         "cap01.bump-sequence.p30-bump-to-i64-max"
       ],
-      "entries_changed": 370
+      "entries_changed": 373
     },
     {
       "key": "lib/esm/xdr/values/bytes-value.js:42:17-44:4:BlockStatement:44136fa3",
@@ -1287,7 +1286,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 1224
+      "entries_changed": 1228
     },
     {
       "key": "lib/esm/xdr/values/to-json.js:228:13-228:33:EqualityOperator:3a2b1124",
@@ -1302,7 +1301,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 1576
+      "entries_changed": 1580
     },
     {
       "key": "lib/esm/xdr/values/to-json.js:350:10-353:4:ObjectLiteral:44136fa3",
@@ -1332,7 +1331,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 764
+      "entries_changed": 768
     },
     {
       "key": "lib/esm/xdr/values/xdr-string.js:168:9-168:38:ConditionalExpression:fcbcf165",
@@ -1355,7 +1354,7 @@
       "entries_changed": 0,
       "class": {
         "class": "corpus-gap",
-        "reason": "hexDigit for uppercase A-F returns a negative number, so a \\x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\\\x escape \"\\\\xAB\"'}."
+        "reason": "needs encode_json on non-canonical JSON input; no entry kind carries JSON inputs. hexDigit for uppercase A-F returns a negative number, so a \\x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\\\x escape \"\\\\xAB\"'}."
       }
     },
     {
@@ -1371,7 +1370,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 2967
+      "entries_changed": 2971
     },
     {
       "key": "lib/esm/xdr/values/xdr-value.js:84:25-84:35:StringLiteral:12ae32cb",

@@ -15,9 +15,9 @@
   "seed": 20261116,
   "sample": 100,
   "counts": {
-    "caught": 12,
+    "caught": 14,
     "timeout": 0,
-    "missed": 64,
+    "missed": 62,
     "unviable": 24
   },
   "faults": [
@@ -41,12 +41,12 @@
       "status": "caught",
       "entries": [
         "cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
         "cap33.sponsorship.golden-3635a80135f66ca8-0",
-        "cap35.clawback.p30-create-clawback-enabled-balance",
-        "cap67.unified-events.p22-backfill-create-claimable-balance",
-        "cap67.unified-events.p22-create-claimable-balance"
+        "cap35.clawback.p30-create-clawback-enabled-balance"
       ],
-      "entries_changed": 6
+      "entries_changed": 8
     },
     {
       "key": "strkey/main.go:162:e156280226f3",
@@ -94,7 +94,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 1040
+      "entries_changed": 1044
     },
     {
       "key": "strkey/main.go:22:646e45815516",
@@ -109,7 +109,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 901
+      "entries_changed": 905
     },
     {
       "key": "strkey/main.go:22:f7628b188c6e",
@@ -124,7 +124,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 907
+      "entries_changed": 911
     },
     {
       "key": "strkey/main.go:232:a12b4368b622",
@@ -139,7 +139,7 @@
         "cap01.bump-sequence.p30-bump-negative",
         "cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "entries_changed": 1033
+      "entries_changed": 1037
     },
     {
       "key": "strkey/main.go:273:a75f80b15c0f",
@@ -887,12 +887,12 @@
       "file": "xdr/muxed_account.go",
       "line": 72,
       "mutation": "case 69: -> case 68:",
-      "status": "missed",
-      "entries_changed": 0,
-      "class": {
-        "class": "corpus-gap",
-        "reason": "balance_id: txnbuild.TransactionFromXDR sets sourceAccount.AccountID = SourceAccount().Address(), which for a KEY_TYPE_MUXED_ED25519 source is the 69 char M address; Transaction.ClaimableBalanceID then calls xdr.MustMuxedAddress(M) -> MuxedAccount.SetAddress, where len 69 hits case 69. With case 68 the M address falls to default ('invalid address length'), MustMuxedAddress panics. Every balance_id vector in the corpus has an unmuxed G source, so only the case 56 arm runs. Verified by calling v0.9.0 directly on that input. Killing input: op balance_id, TransactionEnvelope, TransactionEnvelope (ENVELOPE_TYPE_TX) base64 AAAAAgAAAQAAAAAAAAAAARERERERERERERERERERERERERERERERERERERERERERAAAAZAAAAAEAAAABAAAAAAAAAAAAAAABAAAAAAAAAA4AAAAAAAAAAACYloAAAAABAAAAAAAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAAAAAAAAAAAAAAA== , op_index 0, any network_passphrase. One CreateClaimableBalance (native, 1 XLM, one unconditional claimant 0x22*32) whose tx source is the muxed account KEY_TYPE_MUXED_ED25519 {id 1, ed25519 0x11*32} = MAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCAAAAAAAAAAAAE76M (69 chars). Core derives the id from the underlying account, so the expected answer equals that of the same tx with the plain source GAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCF6M; to be a corpus check it must be applied on a chain so anchors.rs emits it; unmodified: balance_id 000000001148bdf459d6efd2339e3de4ed0fabf5912ce9fa8c87786f60b7dd804c7b21be (same as for the plain G source); faulty: MustMuxedAddress panics with 'invalid address length': the testee answers error class panic."
-      }
+      "status": "caught",
+      "entries": [
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1"
+      ],
+      "entries_changed": 2
     },
     {
       "key": "xdr/muxed_account.go:79:aceff5de3e1f",
@@ -911,12 +911,12 @@
       "file": "xdr/muxed_account.go",
       "line": 82,
       "mutation": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed",
-      "status": "missed",
-      "entries_changed": 0,
-      "class": {
-        "class": "corpus-gap",
-        "reason": "balance_id with a muxed transaction source reaches MuxedAccount.SetAddress case 69. Without the assignment *m stays the zero MuxedAccount (Type KEY_TYPE_ED25519, Ed25519 nil) and err is nil, so MustMuxedAddress returns it and ClaimableBalanceID's ToAccountId calls MustEd25519 on a nil arm and panics (nil pointer dereference, verified on the zero value). No corpus balance_id vector has a muxed source. Killing input: op balance_id, TransactionEnvelope, TransactionEnvelope (ENVELOPE_TYPE_TX) base64 AAAAAgAAAQAAAAAAAAAAARERERERERERERERERERERERERERERERERERERERERERAAAAZAAAAAEAAAABAAAAAAAAAAAAAAABAAAAAAAAAA4AAAAAAAAAAACYloAAAAABAAAAAAAAAAAiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIgAAAAAAAAAAAAAAAA== , op_index 0, any network_passphrase. One CreateClaimableBalance (native, 1 XLM, one unconditional claimant 0x22*32) whose tx source is the muxed account KEY_TYPE_MUXED_ED25519 {id 1, ed25519 0x11*32} = MAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCAAAAAAAAAAAAE76M (69 chars). Core derives the id from the underlying account, so the expected answer equals that of the same tx with the plain source GAIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCF6M; to be a corpus check it must be applied on a chain so anchors.rs emits it; unmodified: balance_id 000000001148bdf459d6efd2339e3de4ed0fabf5912ce9fa8c87786f60b7dd804c7b21be; faulty: ToAccountId dereferences a nil Ed25519 arm and panics: the testee answers error class panic."
-      }
+      "status": "caught",
+      "entries": [
+        "cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1"
+      ],
+      "entries_changed": 2
     },
     {
       "key": "xdr/muxed_account_view.go:16:7d6818c99491",

@@ -14,12 +14,12 @@
       "status": "met",
       "witnesses": [
         "entry:cap23.claimable-balances.golden-3635a80135f66ca8-0",
+        "entry:cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "entry:cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1",
         "entry:cap33.sponsorship.golden-3635a80135f66ca8-0",
-        "entry:cap35.clawback.p30-create-clawback-enabled-balance",
-        "entry:cap67.unified-events.p22-backfill-create-claimable-balance",
-        "entry:cap67.unified-events.p22-create-claimable-balance"
+        "entry:cap35.clawback.p30-create-clawback-enabled-balance"
       ],
-      "evidence": "payload := raw[1 : len(raw)-2] -> payload := raw[2 : len(raw)-2]; 6 entries change"
+      "evidence": "payload := raw[1 : len(raw)-2] -> payload := raw[2 : len(raw)-2]; 8 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:162:e156280226f3",
@@ -59,7 +59,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1; 1040 entries change"
+      "evidence": "rawSize := 1 + payloadSize + 2 -> rawSize := 1 + payloadSize + 1; 1044 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:22:646e45815516",
@@ -72,7 +72,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'; 901 entries change"
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 7 << 3 // Base32-encodes to 'G...'; 905 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:22:f7628b188c6e",
@@ -85,7 +85,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'; 907 entries change"
+      "evidence": "VersionByteAccountID VersionByte = 6 << 3 // Base32-encodes to 'G...' -> VersionByteAccountID VersionByte = 5 << 3 // Base32-encodes to 'G...'; 911 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:232:a12b4368b622",
@@ -98,7 +98,7 @@
         "entry:cap01.bump-sequence.p30-bump-negative",
         "entry:cap01.bump-sequence.p30-bump-past-starting-sequence"
       ],
-      "evidence": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc; 1033 entries change"
+      "evidence": "binary.LittleEndian.PutUint16(raw[1+payloadSize:], crc) -> _, _, _, _ = binary.LittleEndian.PutUint16, raw, payloadSize, crc; 1037 entries change"
     },
     {
       "id": "seed:go@v0.9.0:strkey/main.go:64:0ec00ab8df18",
@@ -464,9 +464,12 @@
     {
       "id": "seed:go@v0.9.0:xdr/muxed_account.go:72:8a1f8f9567d5",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "case 69: -> case 68:; no entry changes"
+      "status": "met",
+      "witnesses": [
+        "entry:cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "entry:cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1"
+      ],
+      "evidence": "case 69: -> case 68:; 2 entries change"
     },
     {
       "id": "seed:go@v0.9.0:xdr/muxed_account.go:79:aceff5de3e1f",
@@ -478,9 +481,12 @@
     {
       "id": "seed:go@v0.9.0:xdr/muxed_account.go:82:5b8790d5ea27",
       "kind": "seed",
-      "status": "open",
-      "witnesses": [],
-      "evidence": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed; no entry changes"
+      "status": "met",
+      "witnesses": [
+        "entry:cap27.muxed-accounts.p28-claimable-balance-tx-source-id-1",
+        "entry:cap27.muxed-accounts.p30-claimable-balance-tx-source-id-1"
+      ],
+      "evidence": "*m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed; 2 entries change"
     },
     {
       "id": "seed:go@v0.9.0:xdr/muxed_account_view.go:16:7d6818c99491",
