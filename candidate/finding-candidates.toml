@@ -157,3 +157,25 @@ evidence = "internal/indexer/processors/accounts.go at the commit reads account 
 #    open question: in wallet-backend's model a sponsor-only change is a sponsorship fact, while
 #    the oracle vocabulary also counts it as a data-entry update. intended; the difference is
 #    explained in docs/adapter-interface.md, the wallet-backend section.
+
+# soroban-sdk on the candidate lane (`shapekit conformance run --sdk soroban --all-versions
+# --manifest candidate/manifest.json`): 28.0.0 and 29.0.1 each pass 8 entries and diverge from
+# the network on 7 any/decode_encode checks. the testee reads ScVal bytes the way a contract
+# does (FromXdr, then the host), and all 7 are the host's rules for contract values, so none is
+# a candidate:
+#
+# 1. scval-contract-instance, scval-ledger-key-contract-instance, scval-ledger-key-nonce and
+#    scval-map (SCV_MAP with no map): ledger keys and entries, not contract values. the host's
+#    deserialize_from_bytes refuses every ScVal that Val::can_represent_scval_recursive refuses
+#    (soroban-env-host 29.0.1 src/host.rs:2597-2620), which are ContractInstance,
+#    LedgerKeyContractInstance, LedgerKeyNonce, Vec(None) and Map(None) (soroban-env-common
+#    29.0.1 src/val.rs:602-661). 28.0.0 links soroban-env-host 28.0.2 with the same rule.
+#    intended.
+# 2. scval-depth-scval-below and scval-depth-scval-at: vecs nested about 1000 deep. the host
+#    reads ScVal bytes under DEFAULT_XDR_RW_LIMITS, depth 500 (src/budget/limits.rs:12-31,
+#    src/host/metered_xdr.rs:40-46), and converts under DEFAULT_HOST_DEPTH_LIMIT, 100
+#    (src/budget/limits.rs:41), so no contract value nests that deep. intended.
+#
+# the other 21 failing checks are `error`, not divergences: probe.limits.* entries whose chain,
+# candidate/chains/probe.limits.p30, is not in the lane, so the runner cannot read the ledger
+# their testnet/tx_hash expectation comes from. that happens for every sdk.
