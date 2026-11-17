@@ -11,18 +11,20 @@ use std::fmt;
 /// | `candidate:<id>` | an entry of `candidate/manifest.json`, not promoted yet |
 /// | `chain:<id>` | a committed chain, `corpus/chains/<id>/` |
 /// | `recipe:<path>` | a recipe file, relative to the repository root |
+/// | `dataset:<path>` | a committed dataset run report (core's test metas through the sdks), relative to the repository root |
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum WitnessRef {
     Entry(String),
     Candidate(String),
     Chain(String),
     Recipe(String),
+    Dataset(String),
 }
 
 impl WitnessRef {
     pub fn parse(s: &str) -> Result<Self, String> {
         let (prefix, rest) = s.split_once(':').ok_or_else(|| {
-            format!("witness {s:?} has no prefix (entry:, candidate:, chain:, recipe:)")
+            format!("witness {s:?} has no prefix (entry:, candidate:, chain:, recipe:, dataset:)")
         })?;
         if rest.is_empty() || rest.chars().any(char::is_whitespace) {
             return Err(format!("witness {s:?} has an empty or spaced reference"));
@@ -33,8 +35,9 @@ impl WitnessRef {
             "candidate" => Ok(Self::Candidate(rest)),
             "chain" => Ok(Self::Chain(rest)),
             "recipe" => Ok(Self::Recipe(rest)),
+            "dataset" => Ok(Self::Dataset(rest)),
             _ => Err(format!(
-                "witness {s:?} has an unknown prefix {prefix:?} (entry:, candidate:, chain:, recipe:)"
+                "witness {s:?} has an unknown prefix {prefix:?} (entry:, candidate:, chain:, recipe:, dataset:)"
             )),
         }
     }
@@ -47,6 +50,7 @@ impl fmt::Display for WitnessRef {
             Self::Candidate(s) => write!(f, "candidate:{s}"),
             Self::Chain(s) => write!(f, "chain:{s}"),
             Self::Recipe(s) => write!(f, "recipe:{s}"),
+            Self::Dataset(s) => write!(f, "dataset:{s}"),
         }
     }
 }
@@ -76,6 +80,7 @@ mod tests {
             "candidate:probe.memo.p30-id-max",
             "chain:cap40.signed-payload-signer.p30",
             "recipe:corpus/recipes/cap01.bump-sequence/p30.json",
+            "dataset:conformance/dataset/dataset-report.json",
         ] {
             assert_eq!(WitnessRef::parse(s).unwrap().to_string(), s);
         }

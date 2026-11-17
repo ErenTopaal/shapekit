@@ -22,7 +22,8 @@ pub struct Obligation {
     pub id: String,
     pub kind: ObligationKind,
     pub status: ObligationStatus,
-    /// What meets it, as witness references (`entry:`, `candidate:`, `chain:`, `recipe:`).
+    /// What meets it, as witness references (`entry:`, `candidate:`, `chain:`, `recipe:`,
+    /// `dataset:`).
     /// Required for `met`, empty otherwise.
     #[serde(default)]
     pub witnesses: Vec<String>,

@@ -442,20 +442,38 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
     std::fs::write(opts.out.join("dataset-report.json"), text)?;
     std::fs::write(opts.out.join("DATASET.md"), render(&report))?;
     // one obligation per section, 29,691 for core 30: written compact, one line
-    let ledger = obligations(&report, &sections);
+    // the witness names the committed report, so the output has to sit inside the repository
+    let out_abs = if opts.out.is_absolute() {
+        opts.out.clone()
+    } else {
+        opts.root.join(&opts.out)
+    };
+    let rel = out_abs
+        .strip_prefix(&opts.root)
+        .with_context(|| {
+            format!(
+                "{} is outside the repository, so no witness can name its report",
+                opts.out.display()
+            )
+        })?
+        .join("dataset-report.json");
+    let witness = format!("dataset:{}", rel.display());
+    let ledger = obligations(&report, &sections, &witness);
     let mut text = serde_json::to_string(&ledger)?;
     text.push('\n');
     std::fs::write(opts.out.join("core-test-sections.obligations.json"), text)?;
     Ok(report)
 }
 
-/// One `core-test-section` obligation per section. A section's metas are not corpus entries,
-/// and the ledger's witnesses name corpus, candidate, chain or recipe entries only, so a
-/// section is left open with what the run showed: how many of its metas each sdk version
-/// round-trips.
+/// One `core-test-section` obligation per section. A section is met when every sdk version
+/// the run covered round-tripped every distinct meta of the section; its witness is the run's
+/// committed report (`witness`, `dataset:<path>`) and its evidence names those versions. A
+/// section some version fails stays open, and the evidence names the failing versions and
+/// how many of the section's metas they got through.
 pub fn obligations(
     report: &DatasetReport,
     sections: &BTreeMap<(String, String), BTreeSet<String>>,
+    witness: &str,
 ) -> ObligationLedger {
     let failing: Vec<(String, BTreeSet<&str>)> = report
         .targets
@@ -469,27 +487,55 @@ pub fn obligations(
         .collect();
     let mut out = Vec::new();
     for ((file, section), shas) in sections {
-        let per: Vec<String> = failing
-            .iter()
-            .map(|(k, f)| {
-                let bad = shas.iter().filter(|s| f.contains(s.as_str())).count();
-                format!("{k} {}/{}", shas.len() - bad, shas.len())
-            })
-            .collect();
-        out.push(Obligation {
-            id: Obligation::id_for(
-                ObligationKind::CoreTestSection,
-                &format!("{file}|{section}"),
-            ),
-            kind: ObligationKind::CoreTestSection,
-            status: ObligationStatus::Open,
-            witnesses: Vec::new(),
-            evidence: Some(format!(
-                "{} distinct metas of core's test dump; round-tripped: {}",
-                shas.len(),
-                per.join(", ")
-            )),
-        });
+        let mut passing = Vec::new();
+        let mut failed = Vec::new();
+        for (k, f) in &failing {
+            let bad = shas.iter().filter(|s| f.contains(s.as_str())).count();
+            if bad == 0 {
+                passing.push(k.as_str());
+            } else {
+                failed.push(format!("{k} {}/{}", shas.len() - bad, shas.len()));
+            }
+        }
+        let id = Obligation::id_for(
+            ObligationKind::CoreTestSection,
+            &format!("{file}|{section}"),
+        );
+        let ob = if failed.is_empty() && !passing.is_empty() {
+            Obligation {
+                id,
+                kind: ObligationKind::CoreTestSection,
+                status: ObligationStatus::Met,
+                witnesses: vec![witness.to_string()],
+                evidence: Some(format!(
+                    "{} distinct metas of core's test dump, every one round-tripped by {}",
+                    shas.len(),
+                    passing.join(", ")
+                )),
+            }
+        } else {
+            Obligation {
+                id,
+                kind: ObligationKind::CoreTestSection,
+                status: ObligationStatus::Open,
+                witnesses: Vec::new(),
+                evidence: Some(format!(
+                    "{} distinct metas of core's test dump; not round-tripped by {}{}",
+                    shas.len(),
+                    if failed.is_empty() {
+                        "any version: the run covered none".to_string()
+                    } else {
+                        failed.join(", ")
+                    },
+                    if passing.is_empty() {
+                        String::new()
+                    } else {
+                        format!("; every one round-tripped by {}", passing.join(", "))
+                    }
+                )),
+            }
+        };
+        out.push(ob);
     }
     out.sort_by(|a, b| a.id.cmp(&b.id));
     out.dedup_by(|a, b| a.id == b.id);
@@ -700,7 +746,7 @@ mod tests {
     }
 
     #[test]
-    fn every_section_gets_an_open_obligation() {
+    fn a_section_every_version_passes_is_met() {
         let mut sections = BTreeMap::new();
         sections.insert(
             ("F".to_string(), "a".to_string()),
@@ -734,15 +780,32 @@ mod tests {
                 }],
             }],
         };
-        let ledger = obligations(&report, &sections);
+        let w = "dataset:conformance/dataset/dataset-report.json";
+        let ledger = obligations(&report, &sections, w);
         assert_eq!(ledger.obligations.len(), 2);
-        assert_eq!(ledger.obligations[0].id, "core-test-section:F|a");
+        let a = &ledger.obligations[0];
+        assert_eq!(a.id, "core-test-section:F|a");
+        assert_eq!(a.status, ObligationStatus::Open);
+        assert!(a.evidence.as_deref().unwrap().contains("go@v1 1/2"));
+        let b = &ledger.obligations[1];
+        assert_eq!(b.status, ObligationStatus::Open);
+        assert!(b.witnesses.is_empty());
+        // without the failing meta both sections are met through the report
+        let mut clean = report.clone();
+        clean.targets[0].dropped.clear();
+        let ledger = obligations(&clean, &sections, w);
         assert!(
-            ledger.obligations[0]
+            ledger
+                .obligations
+                .iter()
+                .all(|o| o.status == ObligationStatus::Met && o.witnesses == [w])
+        );
+        assert!(
+            ledger.obligations[1]
                 .evidence
                 .as_deref()
                 .unwrap()
-                .contains("go@v1 1/2")
+                .ends_with("round-tripped by go@v1")
         );
         use shapekit_contracts::Contract as _;
         assert!(ledger.problems().is_empty());
