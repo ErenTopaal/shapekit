@@ -42,9 +42,40 @@ use crate::dump::Reader;
 use crate::pins::Image;
 use crate::{Error, RNG_SEED, Result, TX_TAG};
 
-/// The newest protocol stellar-core v30.0.0 tests (`Config::CURRENT_LEDGER_PROTOCOL_VERSION`);
-/// `--all-versions` runs 0 through this.
-pub const MAX_PROTOCOL: u32 = 30;
+/// The newest ledger protocol an image runs (`Config::CURRENT_LEDGER_PROTOCOL_VERSION`), which
+/// `--all-versions` runs up to: the first `ledger protocol version: N` line of `stellar-core
+/// version` (`main/StellarCoreVersion` and `runVersion` in stellar-core, printed before the
+/// per-host lines of the soroban hosts). A vnext build answers the next protocol.
+pub fn max_protocol(image: &Image) -> Result<u32> {
+    let out = Command::new("docker")
+        .args([
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "--memory",
+            "512m",
+            "--cpus",
+            "1",
+        ])
+        .arg(image.reference())
+        .arg("version")
+        .stderr(Stdio::null())
+        .output()
+        .map_err(|e| Error::Docker(format!("starting docker: {e}")))?;
+    if !out.status.success() {
+        return Err(Error::Docker(format!("version exited with {}", out.status)));
+    }
+    let text = String::from_utf8_lossy(&out.stdout);
+    parse_max_protocol(&text)
+        .ok_or_else(|| Error::Docker(format!("version printed no ledger protocol: {text}")))
+}
+
+fn parse_max_protocol(text: &str) -> Option<u32> {
+    text.lines()
+        .find_map(|l| l.strip_prefix("ledger protocol version: "))
+        .and_then(|v| v.trim().parse().ok())
+}
 
 /// Cases split by default: `create offer`, `pathpayment` and `revoke from pool` are killed by
 /// the kernel at 1.5 GB as one process (`pathpayment` also at 2 GB), and `txresults` and
@@ -64,6 +95,10 @@ pub struct Limits {
     pub cpus: String,
     /// docker `--memory`, also used as `--memory-swap` so a case cannot swap.
     pub memory: String,
+    /// A run the kernel killed for memory runs once more with this much; `None` keeps the kill
+    /// as the run's result. `pathpayment` and `revoke from pool` are killed at 1536m in some
+    /// protocol runs of the vnext image and pass at 3g.
+    pub retry_memory: Option<String>,
 }
 
 impl Default for Limits {
@@ -71,6 +106,7 @@ impl Default for Limits {
         Limits {
             cpus: "1".into(),
             memory: "1536m".into(),
+            retry_memory: Some("3g".into()),
         }
     }
 }
@@ -125,6 +161,13 @@ pub struct TestRun {
     /// Run as one job per protocol version.
     #[serde(default)]
     pub split: bool,
+    /// The memory the run's last attempt had.
+    #[serde(default)]
+    pub memory: String,
+    /// The kernel killed a first attempt for memory and the run was repeated at the retry
+    /// limit; `oom_killed` says how the repeat ended. For a split case, how many parts.
+    #[serde(default)]
+    pub oom_retried: usize,
 }
 
 impl TestRun {
@@ -145,15 +188,27 @@ pub struct Totals {
     pub meta_versions: BTreeMap<u32, u64>,
     pub wall_seconds: f64,
     pub test_seconds: f64,
+    /// Runs whose last attempt the kernel killed for memory; each one fails the run.
+    #[serde(default)]
+    pub oom_killed: usize,
+    /// Runs repeated at the retry limit after a memory kill (parts of split cases counted
+    /// one by one).
+    #[serde(default)]
+    pub oom_retried: usize,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Report {
     pub image: String,
+    /// The newest protocol the image runs, the top of every `--all-versions` and split run.
+    #[serde(default)]
+    pub max_protocol: u32,
     pub rng_seed: u32,
     pub shards: usize,
     pub cpus: String,
     pub memory: String,
+    #[serde(default)]
+    pub retry_memory: Option<String>,
     pub totals: Totals,
     pub tests: Vec<TestRun>,
 }
@@ -286,7 +341,60 @@ impl Job {
     }
 }
 
-fn run_one(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
+/// One job, repeated once at the retry limit when the kernel killed it for memory.
+fn run_job(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
+    let first = run_one(opts, owner, job, name, &opts.limits.memory);
+    match &opts.limits.retry_memory {
+        Some(more) if first.oom_killed => {
+            if let Err(e) = clear_job(opts, job) {
+                let mut r = first;
+                r.error = Some(format!("clearing the killed attempt for a retry: {e}"));
+                return r;
+            }
+            let mut again = run_one(opts, owner, job, name, more);
+            again.oom_retried = 1;
+            again.seconds += first.seconds;
+            again
+        }
+        _ => first,
+    }
+}
+
+/// Removes what an attempt of `job` left, so a retry starts from nothing.
+fn clear_job(opts: &Options, job: Job) -> Result<()> {
+    let tag = job.tag();
+    let rm_dir = |p: PathBuf| -> Result<()> {
+        if p.exists() {
+            std::fs::remove_dir_all(&p).map_err(|source| Error::Write {
+                path: p.display().to_string(),
+                source,
+            })?;
+        }
+        Ok(())
+    };
+    let rm_file = |p: PathBuf| -> Result<()> {
+        if p.exists() {
+            std::fs::remove_file(&p).map_err(|source| Error::Write {
+                path: p.display().to_string(),
+                source,
+            })?;
+        }
+        Ok(())
+    };
+    rm_dir(opts.out.join("work").join(&tag))?;
+    rm_dir(match job.version {
+        None => opts.out.join("baseline").join(&tag),
+        Some(v) => opts
+            .out
+            .join("baseline")
+            .join(format!("{:03}", job.case))
+            .join(format!("v{v:02}")),
+    })?;
+    rm_file(opts.out.join("dump").join(format!("{tag}.txt")))?;
+    rm_file(opts.out.join("log").join(format!("{tag}.log")))
+}
+
+fn run_one(opts: &Options, owner: &str, job: Job, name: &str, memory: &str) -> TestRun {
     let index = job.case;
     let mut run = TestRun {
         index,
@@ -295,6 +403,7 @@ fn run_one(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
             Some(v) => format!("{name} [protocol {v}]"),
         },
         split: job.version.is_some(),
+        memory: memory.to_owned(),
         ..TestRun::default()
     };
     let tag = job.tag();
@@ -326,8 +435,8 @@ fn run_one(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
         let status = Command::new("docker")
             .args(["run", "--name", &container, "--network", "none"])
             .args(["--cpus", &opts.limits.cpus])
-            .args(["--memory", &opts.limits.memory])
-            .args(["--memory-swap", &opts.limits.memory])
+            .args(["--memory", memory])
+            .args(["--memory-swap", memory])
             .args(["--user", owner, "-e", "HOME=/work", "-w", "/work"])
             .args(["-v", &mount(&work, "/work")])
             .args(["-v", &mount(&baseline, "/baseline")])
@@ -411,7 +520,7 @@ fn run_one(opts: &Options, owner: &str, job: Job, name: &str) -> TestRun {
 
 /// One case from the runs of its protocol versions: the parts' dumps concatenated in version
 /// order into the case's dump, which is then summarised as a whole.
-fn join_parts(out: &Path, case: usize, name: &str, parts: Vec<TestRun>) -> TestRun {
+fn join_parts(out: &Path, case: usize, name: &str, parts: Vec<TestRun>, max: u32) -> TestRun {
     let mut run = TestRun {
         index: case,
         name: name.to_owned(),
@@ -420,6 +529,11 @@ fn join_parts(out: &Path, case: usize, name: &str, parts: Vec<TestRun>) -> TestR
     };
     run.seconds = parts.iter().map(|p| p.seconds).sum();
     run.oom_killed = parts.iter().any(|p| p.oom_killed);
+    run.oom_retried = parts.iter().map(|p| p.oom_retried).sum();
+    let mut memories: Vec<&str> = parts.iter().map(|p| p.memory.as_str()).collect();
+    memories.sort();
+    memories.dedup();
+    run.memory = memories.join(", ");
     let failed: Vec<&TestRun> = parts.iter().filter(|p| !p.passed()).collect();
     if let Some(first) = failed.first() {
         run.exit_code = first.exit_code;
@@ -444,7 +558,7 @@ fn join_parts(out: &Path, case: usize, name: &str, parts: Vec<TestRun>) -> TestR
             path: path.display().to_string(),
             source,
         })?;
-        for v in 0..=MAX_PROTOCOL {
+        for v in 0..=max {
             let part = out.join("dump").join(format!("{case:03}-v{v:02}.txt"));
             let mut src = File::open(&part).map_err(|source| Error::Read {
                 path: part.display().to_string(),
@@ -522,12 +636,13 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
             )));
         }
     }
+    let max = max_protocol(&opts.image)?;
     let jobs: Vec<Job> = names
         .iter()
         .enumerate()
         .flat_map(|(case, name)| {
             if opts.split.contains(name) {
-                (0..=MAX_PROTOCOL)
+                (0..=max)
                     .map(|v| Job {
                         case,
                         version: Some(v),
@@ -554,7 +669,7 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
                     let Some(job) = jobs.get(j).copied() else {
                         break;
                     };
-                    let run = run_one(&opts, &owner, job, &names[job.case]);
+                    let run = run_job(&opts, &owner, job, &names[job.case]);
                     let n = done.fetch_add(1, Ordering::SeqCst) + 1;
                     progress(&run, n, jobs.len());
                     results
@@ -579,7 +694,7 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
         tests.push(if group.len() == 1 && !group[0].split {
             group.into_iter().next().expect("one part")
         } else {
-            join_parts(&out, case, &names[case], group)
+            join_parts(&out, case, &names[case], group, max)
         });
         i = end;
     }
@@ -592,6 +707,8 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
     };
     for t in &tests {
         totals.passed += usize::from(t.passed());
+        totals.oom_killed += usize::from(t.oom_killed);
+        totals.oom_retried += t.oom_retried;
         totals.tests_with_metas += usize::from(t.metas > 0);
         totals.metas += t.metas;
         totals.dump_bytes += t.dump_bytes;
@@ -606,10 +723,12 @@ pub fn run(opts: &Options, progress: &(dyn Fn(&TestRun, usize, usize) + Sync)) -
     }
     let report = Report {
         image: opts.image.reference(),
+        max_protocol: max,
         rng_seed: RNG_SEED,
         shards: opts.shards,
         cpus: opts.limits.cpus.clone(),
         memory: opts.limits.memory.clone(),
+        retry_memory: opts.limits.retry_memory.clone(),
         totals,
         tests,
     };
@@ -636,10 +755,12 @@ mod tests {
     fn earlier_seconds_order_longest_first_unknown_first() {
         let earlier = Report {
             image: String::new(),
+            max_protocol: 30,
             rng_seed: RNG_SEED,
             shards: 1,
             cpus: "1".into(),
             memory: "1g".into(),
+            retry_memory: None,
             totals: Totals::default(),
             tests: [("a", 5.0), ("b", 50.0), ("c", 1.0)]
                 .iter()
@@ -656,6 +777,13 @@ mod tests {
             .collect();
         order_by(&mut names, &earlier);
         assert_eq!(names, ["new", "b", "a", "c"]);
+    }
+
+    #[test]
+    fn reads_the_top_protocol_line_of_version() {
+        let v31 = "stellar-core 30.0.1.vnext (362dbc51)\nledger protocol version: 31\nrust version: x\nsoroban-env-host versions: \n    host[0]:\n        ledger protocol version: 21\n";
+        assert_eq!(parse_max_protocol(v31), Some(31));
+        assert_eq!(parse_max_protocol("stellar-core 30.0.0\n"), None);
     }
 
     #[test]

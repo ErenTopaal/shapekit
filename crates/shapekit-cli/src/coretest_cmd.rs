@@ -23,6 +23,10 @@ pub enum CoretestCommand {
         /// docker --memory for each container (no swap on top).
         #[arg(long, default_value = "1536m")]
         memory: String,
+        /// docker --memory for a second attempt of a run the kernel killed for memory; the
+        /// retry and how it ended are counted in run.json. `none` keeps the kill as the result.
+        #[arg(long, default_value = "3g")]
+        retry_memory: String,
         /// Output directory, absent or empty. The full dump is several gigabytes.
         #[arg(long)]
         out: PathBuf,
@@ -46,10 +50,14 @@ pub enum CoretestCommand {
         /// Directory written by `coretest run`.
         #[arg(long)]
         run: PathBuf,
-        /// A git checkout of stellar-core at the pinned commit, holding
-        /// test-tx-meta-baseline-current.
+        /// A git checkout of stellar-core at the commit --pins names, holding the baseline.
         #[arg(long)]
         core_src: PathBuf,
+        /// Which of core's baselines the dump is checked against: `current` for a release
+        /// image, `next` (test-tx-meta-baseline-next) for a vnext image, whose tests record
+        /// the next protocol's metas there.
+        #[arg(long, default_value = "current", value_parser = ["current", "next"])]
+        baseline: String,
         /// Output directory, absent or empty.
         #[arg(long)]
         out: PathBuf,
@@ -67,6 +75,7 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
             shards,
             cpus,
             memory,
+            retry_memory,
             out,
             tests,
             order_from,
@@ -82,7 +91,11 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
             let opts = Options {
                 image: Image::from_pins(&pins, shapekit_coretest::BUILDTESTS_IMAGE_PIN)?,
                 shards,
-                limits: Limits { cpus, memory },
+                limits: Limits {
+                    cpus,
+                    memory,
+                    retry_memory: (retry_memory != "none").then_some(retry_memory),
+                },
                 out,
                 tests,
                 order_from,
@@ -93,16 +106,17 @@ pub fn run(command: CoretestCommand) -> Result<bool> {
         CoretestCommand::Convert {
             run,
             core_src,
+            baseline,
             out,
             jobs,
             pins,
-        } => convert(&run, &core_src, &out, jobs, &pins),
+        } => convert(&run, &core_src, &baseline, &out, jobs, &pins),
     }
 }
 
 /// The baseline directory of a core checkout, required to be the pinned commit with no local
 /// change to the baseline.
-fn pinned_baseline(core_src: &Path, pins_path: &Path) -> Result<PathBuf> {
+fn pinned_baseline(core_src: &Path, pins_path: &Path, dir: &str) -> Result<PathBuf> {
     let text = std::fs::read_to_string(pins_path)
         .with_context(|| format!("reading {}", pins_path.display()))?;
     let pins = crate::pins::parse(&text)?;
@@ -135,17 +149,24 @@ fn pinned_baseline(core_src: &Path, pins_path: &Path) -> Result<PathBuf> {
         core_src.display()
     );
     ensure!(
-        git(&["status", "--porcelain", "--", BASELINE_DIR])?.is_empty(),
-        "{BASELINE_DIR} in {} has local changes",
+        git(&["status", "--porcelain", "--", dir])?.is_empty(),
+        "{dir} in {} has local changes",
         core_src.display()
     );
-    Ok(core_src.join(BASELINE_DIR))
+    Ok(core_src.join(dir))
 }
 
-const BASELINE_DIR: &str = "test-tx-meta-baseline-current";
-
-fn convert(run: &Path, core_src: &Path, out: &Path, jobs: usize, pins: &Path) -> Result<bool> {
-    let baseline = pinned_baseline(core_src, pins)?;
+fn convert(
+    run: &Path,
+    core_src: &Path,
+    which: &str,
+    out: &Path,
+    jobs: usize,
+    pins: &Path,
+) -> Result<bool> {
+    let dir = format!("test-tx-meta-baseline-{which}");
+    let baseline = pinned_baseline(core_src, pins, &dir)?;
+    println!("baseline {dir} of {}", core_src.display());
     let progress = |name: &str, done: usize, total: usize| {
         eprintln!("[{done}/{total}] {name}");
     };
@@ -206,7 +227,10 @@ fn run_tests(opts: &Options) -> Result<bool> {
     };
     let report = run::run(opts, &progress).context("running core's tests")?;
     let t = &report.totals;
-    println!("image {}", report.image);
+    println!(
+        "image {}, protocols 0 to {}",
+        report.image, report.max_protocol
+    );
     println!(
         "{} test cases, {} exit 0, {} dumped at least one meta",
         t.tests, t.passed, t.tests_with_metas
@@ -231,6 +255,12 @@ fn run_tests(opts: &Options) -> Result<bool> {
         .map(|(v, n)| format!("v{v} {n}"))
         .collect();
     println!("TransactionMeta arms: {}", arms.join(", "));
+    println!(
+        "{} runs killed for memory and repeated at {}, {} runs still killed for memory",
+        t.oom_retried,
+        report.retry_memory.as_deref().unwrap_or("no retry limit"),
+        t.oom_killed
+    );
     println!("report {}", opts.out.join("run.json").display());
     for failed in report.tests.iter().filter(|t| !t.passed()) {
         eprintln!(
