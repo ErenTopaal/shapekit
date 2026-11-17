@@ -12,6 +12,25 @@
     }
   ],
   "$defs": {
+    "AddressFromScvalRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "op": {
+          "const": "address_from_scval"
+        },
+        "xdr": {
+          "$ref": "#/$defs/Base64"
+        }
+      },
+      "required": [
+        "id",
+        "op",
+        "xdr"
+      ]
+    },
     "AssetOrderRequest": {
       "type": "object",
       "properties": {
@@ -369,6 +388,7 @@
               "map_validate",
               "id_parse",
               "to_native",
+              "address_from_scval",
               "tx_hash",
               "balance_id",
               "contract_id",
@@ -742,6 +762,9 @@
         },
         {
           "$ref": "#/$defs/ToNativeRequest"
+        },
+        {
+          "$ref": "#/$defs/AddressFromScvalRequest"
         },
         {
           "$ref": "#/$defs/TxHashRequest"

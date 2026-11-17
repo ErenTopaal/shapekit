@@ -6,8 +6,8 @@ data through the SDK's own decoder, encoder, strkey codec, ordering functions an
 projection, and compares what comes back with the network's answer (the corpus manifest) and
 with the other SDKs.
 
-Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id`, `contract_id`, `coverage_snapshot` and
-`coverage_new`
+Protocol version: **2**. Version 2 adds the ops `tx_hash`, `balance_id`, `contract_id`, `coverage_snapshot`,
+`coverage_new` and `address_from_scval`
 and changes nothing else, so the runner also accepts a version 1 testee; that testee cannot
 list the new ops, and their checks count as `unsupported`. The machine-readable form is
 [schema/testee-protocol.schema.json](../schema/testee-protocol.schema.json). This page and the
@@ -286,6 +286,17 @@ losslessly as a native value:
 
 Result: `native`.
 
+### address_from_scval
+
+Request: `xdr` (base64 of an `ScVal`).
+
+The testee hands the `ScVal` to the SDK's conversion into its address type, the type that
+holds the most kinds of address (soroban-sdk `MuxedAddress::try_from_val`), and writes the
+address it gets as a strkey with the SDK's own encoder. An `ScVal` that is not an address, or an
+address the type cannot hold, must come back as `rejected`; a crash is a `panic`.
+
+Result: `text` (the strkey).
+
 ### tx_hash
 
 Request: `xdr` (base64 XDR `TransactionEnvelope`), `network_passphrase` (string),
@@ -401,6 +412,7 @@ strkey). A case the runner cannot map is an `error` (a runner bug), never skippe
 | `strkey` | `strkey_decode`, and `strkey_encode` for valid strings | decode gives the expected kind and raw payload, or `rejected` for invalid strings; encode of that kind and payload gives back the text |
 | `textual-id` | `id_parse` | the ID equals `expected.id`, or `rejected` when the case expects a rejection. A case whose `expected` is `{"either": [{"id": ...}, {"reject": ...}]}` passes with exactly that ID or with `rejected`; any other ID diverges. This form is used where reading the exact ID and refusing are both correct: decimal text with leading zeros, integral JSON numbers written with a zero fraction, JSON numbers above 2^53-1, and negative offer IDs, which the XDR `int64` holds and stellar-core refuses only when it checks the operation. Such a case is judged against its own expectation even when the entry is `implementation-defined` |
 | `native-projection` | `to_native` | `rejected`, or a native map that keeps every entry of the input map |
+| `native-projection`, `address_from_scval` cases | `address_from_scval` | the strkey equals `expected.text`, or the answer is `rejected` when the case expects a rejection. `{"either": [{"text": ...}, {"reject": ...}]}` passes with that strkey or with `rejected`: an SDK's address type may or may not hold claimable balance and liquidity pool addresses |
 
 The runner derives each expected hash and ID with the law library (`crates/shapekit-laws`) and
 uses it only where the ledger confirms it: a derived transaction hash must be the hash core
@@ -612,6 +624,7 @@ path and nothing else:
 | `map_sort` | `Map::set` for each entry on an empty `Map<Val, Val>` |
 | `map_validate` | whether the host converts the `ScVal` map into a `Map` (`Val::try_from_val`) |
 | `to_native` | `Val::from_xdr`, then the first contract type that converts the value: integers, `Bytes`, `String`, `Symbol`, `Address`, `MuxedAddress`, `Vec<Val>`, `Map<Val, Val>` |
+| `address_from_scval` | `MuxedAddress::try_from_val` on the `ScVal`, then `MuxedAddress::to_strkey` |
 | `strkey_decode`, `strkey_encode` | `Address::from_string_bytes` and `Address::to_string` for G and C, `MuxedAddress::from_string_bytes` and `MuxedAddress::to_strkey` for M. Other kinds are `unsupported` |
 | `contract_id` | `Deployer::with_address` and `Deployer::with_stellar_asset`, then `deployed_address`, on a ledger whose network ID is set to the request's |
 

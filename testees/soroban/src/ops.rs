@@ -40,6 +40,7 @@ pub const OPS: &[&str] = &[
     "map_sort",
     "map_validate",
     "to_native",
+    "address_from_scval",
     "contract_id",
 ];
 
@@ -179,6 +180,7 @@ pub fn run(req: &Request) -> Outcome {
         "map_sort" => map_sort(req),
         "map_validate" => map_validate(req),
         "to_native" => to_native(req),
+        "address_from_scval" => address_from_scval(req),
         "contract_id" => contract_id(req),
         "decode_json" | "encode_json" => Err(Outcome::Unsupported(
             "soroban-sdk has no SEP-51 XDR-JSON reader or writer".into(),
@@ -312,6 +314,27 @@ fn to_native(req: &Request) -> Result<Value, Outcome> {
     let env = env();
     let val = read_val(&env, &bytes)?;
     Ok(json!({"native": native(&env, val)?}))
+}
+
+/// `MuxedAddress::try_from_val(&env, &ScVal)` (src/muxed_address.rs), the conversion a test or
+/// off-chain tool uses to turn an `ScVal` into the sdk's widest address type. Its signature
+/// promises a `ConversionError` for a value that is no address.
+fn address_from_scval(req: &Request) -> Result<Value, Outcome> {
+    let bytes = req.bytes("xdr")?;
+    let limits = Limits {
+        depth: DEFAULT_DEPTH,
+        len: bytes.len(),
+    };
+    let scval = <ScVal as ReadXdr>::from_xdr(&bytes, limits).map_err(rejected)?;
+    let env = env();
+    match host_result(|| MuxedAddress::try_from_val(&env, &scval)) {
+        Ok(Ok(m)) => match host_result(|| text_of(&m.to_strkey())) {
+            Ok(t) => Ok(json!({"text": t})),
+            Err(message) => Err(Outcome::Error(ErrorClass::Rejected, message)),
+        },
+        Ok(Err(e)) => Err(rejected(e)),
+        Err(message) => Err(Outcome::Error(ErrorClass::Rejected, message)),
+    }
 }
 
 fn object(class: &str, text: String) -> Value {

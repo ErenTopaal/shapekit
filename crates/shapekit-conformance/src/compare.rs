@@ -181,6 +181,7 @@ pub fn expected_view(expect: &Expect) -> Value {
         Expect::IdOrRejected(i) => json!({"either": [{"id": i}, "rejected"]}),
         Expect::Strkey { kind, payload } => json!({"kind": kind, "payload": payload}),
         Expect::Text(t) => json!({"text": t}),
+        Expect::TextOrRejected(t) => json!({"either": [{"text": t}, "rejected"]}),
         Expect::NoEntryLost { entries } => {
             json!({"native": "a map keeping all entries", "entries": entries})
         }
@@ -252,7 +253,10 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
     let Some(result) = result else {
         let message = rejected_message.unwrap_or_default();
         return match expect {
-            Expect::Rejected | Expect::NoEntryLost { .. } | Expect::IdOrRejected(_) => {
+            Expect::Rejected
+            | Expect::NoEntryLost { .. }
+            | Expect::IdOrRejected(_)
+            | Expect::TextOrRejected(_) => {
                 verdict(ResultClass::Pass, None, json!({"rejected": message}))
             }
             _ => verdict(
@@ -358,6 +362,13 @@ pub fn judge(expect: &Expect, answer: &Result<Reply, Failure>) -> Judged {
         }
         Expect::Text(t) => match member("text").and_then(Value::as_str) {
             Some(x) => compare(x == t, "the sdk encodes different text"),
+            None => missing("text"),
+        },
+        Expect::TextOrRejected(t) => match member("text").and_then(Value::as_str) {
+            Some(x) => compare(
+                x == t,
+                "the sdk gives a different address; it must give this one or refuse",
+            ),
             None => missing("text"),
         },
         Expect::NoEntryLost { entries } => match member("native") {

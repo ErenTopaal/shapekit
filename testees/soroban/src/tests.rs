@@ -74,3 +74,14 @@ fn host_errors_are_rejections_and_other_panics_are_not() {
     );
     assert_eq!(classify_panic("incorrect scval type"), ErrorClass::Panic);
 }
+
+#[test]
+fn an_account_scval_gives_its_strkey() {
+    // ScVal address, account GD777...73DB
+    let r = ask(json!({"id": "8", "op": "address_from_scval",
+        "xdr": "AAAAEgAAAAAAAAAA//////////////////////////////////////////8="}));
+    assert_eq!(
+        r["result"]["text"], "GD7777777777777777777777777777777777777777777777777773DB",
+        "{r}"
+    );
+}

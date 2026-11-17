@@ -49,6 +49,8 @@ pub enum Expect {
         payload: String,
     },
     Text(String),
+    /// Either this text or a refusal passes; any other text fails.
+    TextOrRejected(String),
     /// No map entry may disappear in the native projection: the native map holds this many
     /// entries.
     NoEntryLost {
@@ -309,6 +311,7 @@ pub fn case_checks(index: usize, case: &Value, source: &str) -> Vec<Check> {
         "strkey_decode" => return strkey(index, case, source),
         "id_parse" => id_parse(case),
         "to_native" => to_native(case),
+        "address_from_scval" => address_from_scval(case),
         other => Err(format!("unknown case op {other:?}")),
     };
     let op_name = if op.is_empty() { "unknown" } else { op };
@@ -524,6 +527,47 @@ fn to_native(case: &Value) -> Mapped {
     Ok((
         obj(json!({"op": "to_native", "xdr": xdr})),
         Expect::NoEntryLost { entries },
+    ))
+}
+
+/// `expected` is `{"text": <strkey>}`, a refusal, or `{"either": [{"text": ..}, {"reject": ..}]}`
+/// where an sdk's address type may or may not hold that kind of address.
+fn address_from_scval(case: &Value) -> Mapped {
+    let xdr = xdr_of(case.get("value"), "value")?;
+    let e = expected(case)?;
+    let text = |v: &Value| {
+        v.get("text")
+            .and_then(Value::as_str)
+            .map(str::to_string)
+            .ok_or_else(|| format!("address_from_scval expected {v} has no text"))
+    };
+    let expect = if let Some(either) = e.get("either") {
+        let alts = either
+            .as_array()
+            .ok_or("address_from_scval expected.either is not an array")?;
+        let texts: Vec<String> = alts
+            .iter()
+            .filter(|a| !is_reject(a))
+            .map(text)
+            .collect::<Result<_, _>>()?;
+        let rejects = alts.iter().filter(|a| is_reject(a)).count();
+        match (texts.as_slice(), rejects) {
+            ([t], 1) => Expect::TextOrRejected(t.clone()),
+            _ => {
+                return Err(format!(
+                    "address_from_scval expected.either must hold one text and one reject, has {} texts and {rejects} rejects",
+                    texts.len()
+                ));
+            }
+        }
+    } else if is_reject(e) {
+        Expect::Rejected
+    } else {
+        Expect::Text(text(e)?)
+    };
+    Ok((
+        obj(json!({"op": "address_from_scval", "xdr": xdr})),
+        expect,
     ))
 }
 

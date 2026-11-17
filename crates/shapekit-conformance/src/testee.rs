@@ -35,6 +35,7 @@ pub const OPS: &[&str] = &[
     "map_validate",
     "id_parse",
     "to_native",
+    "address_from_scval",
     "tx_hash",
     "balance_id",
     "contract_id",
