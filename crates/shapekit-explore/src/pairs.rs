@@ -252,10 +252,7 @@ pub fn run_candidate(
             seed: 0,
             setup: true,
         };
-        let mut menu = crate::action::OpMenu {
-            arms: Vec::new(),
-            novelty: Vec::new(),
-        };
+        let mut menu = crate::action::OpMenu::empty();
         runs.push(episode::run(env, &spec, &mut menu)?);
     }
     let last_ok = |ep: &episode::Episode| {

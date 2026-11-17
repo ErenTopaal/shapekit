@@ -122,7 +122,14 @@ fn regions(counts: &shapekit_twin::coverage::Counts) -> Vec<RegionKey> {
 fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: usize) -> Result<()> {
     let (mut spec, mut menu) = {
         let g = state.lock().expect("no worker panics holding the lock");
-        let menu = g.menu.clone();
+        let mut menu = g.menu.clone();
+        let missing: std::collections::BTreeSet<String> = opts
+            .targets
+            .iter()
+            .filter(|a| !g.witnesses.contains_key(*a))
+            .cloned()
+            .collect();
+        menu.aim(&missing);
         // seeds short enough to replay cheaply; longer ones still count as witnesses
         let seeds: Vec<&Seed> = g
             .seeds
@@ -194,10 +201,7 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
         if steps.len() * 4 <= kept.ir.steps.len() * 3 {
             spec.prefix = steps;
             spec.actions = 0;
-            let mut scratch = OpMenu {
-                arms: Vec::new(),
-                novelty: Vec::new(),
-            };
+            let mut scratch = OpMenu::empty();
             let ledgers_only = Env {
                 image: env.release,
                 coverage: false,

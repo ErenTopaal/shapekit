@@ -184,10 +184,7 @@ pub fn record(env: &Env<'_>, name: Option<(&str, &RecipeIr)>, protocol: u32) -> 
         seed: 0,
         setup: false,
     };
-    let mut menu = crate::action::OpMenu {
-        arms: Vec::new(),
-        novelty: Vec::new(),
-    };
+    let mut menu = crate::action::OpMenu::empty();
     let ep = episode::run(env, &spec, &mut menu)?;
     Ok(GateRun {
         kind,

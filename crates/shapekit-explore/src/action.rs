@@ -23,6 +23,8 @@ pub const CONTRACT_OPERATIONS: &[&str] = &[
 pub struct OpMenu {
     pub arms: Vec<String>,
     pub novelty: Vec<u64>,
+    /// Target arms not witnessed yet among each operation's results.
+    pub wanted: Vec<u64>,
 }
 
 impl OpMenu {
@@ -32,7 +34,37 @@ impl OpMenu {
             .filter(|a| contracts || !CONTRACT_OPERATIONS.contains(&a.as_str()))
             .collect();
         let novelty = vec![0; arms.len()];
-        Self { arms, novelty }
+        let wanted = vec![0; arms.len()];
+        Self {
+            arms,
+            novelty,
+            wanted,
+        }
+    }
+
+    /// A menu with no operations, for runs that draw none.
+    pub fn empty() -> Self {
+        Self {
+            arms: Vec::new(),
+            novelty: Vec::new(),
+            wanted: Vec::new(),
+        }
+    }
+
+    /// Points the draw at operations whose result union still has target arms nobody
+    /// witnessed: `PaymentResult:no_trust` missing makes `payment` likelier.
+    pub fn aim(&mut self, missing: &BTreeSet<String>) {
+        for (arm, w) in self.arms.iter().zip(self.wanted.iter_mut()) {
+            *w = missing
+                .iter()
+                .filter(|m| {
+                    let union = m.split(':').next().unwrap_or("");
+                    union
+                        .strip_suffix("Result")
+                        .is_some_and(|op| snake(op) == *arm)
+                })
+                .count() as u64;
+        }
     }
 
     /// An operation arm; arms that recently showed something new are drawn more often, and
@@ -43,12 +75,12 @@ impl OpMenu {
         let mut w: Vec<u64> = self
             .arms
             .iter()
-            .zip(&self.novelty)
-            .map(|(a, n)| {
+            .zip(self.novelty.iter().zip(&self.wanted))
+            .map(|(a, (n, want))| {
                 if skip.contains(a) {
                     0
                 } else {
-                    8 + (*n).min(40)
+                    8 + (*n).min(40) + 8 * (*want).min(5)
                 }
             })
             .collect();
@@ -63,6 +95,22 @@ impl OpMenu {
             self.novelty[i] = self.novelty[i] / 2 + amount;
         }
     }
+}
+
+/// `ManageSellOffer` to `manage_sell_offer`, the XDR-JSON spelling of an operation arm.
+fn snake(camel: &str) -> String {
+    let mut out = String::new();
+    for (i, c) in camel.char_indices() {
+        if c.is_ascii_uppercase() {
+            if i > 0 {
+                out.push('_');
+            }
+            out.push(c.to_ascii_lowercase());
+        } else {
+            out.push(c);
+        }
+    }
+    out
 }
 
 /// Roles an operation's `source_account` reference names.
