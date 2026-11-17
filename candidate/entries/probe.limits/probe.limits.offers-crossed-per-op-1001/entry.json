@@ -1,0 +1,44 @@
+{
+  "caps": [],
+  "expected": {
+    "decode": "must-accept",
+    "roundtrip": true,
+    "validity": "invalid-by-core"
+  },
+  "family": "probe.limits",
+  "fields_exercised": [],
+  "flags": [],
+  "id": "probe.limits.offers-crossed-per-op-1001",
+  "kind": "xdr",
+  "linked_issues": [],
+  "notes": "limit of PathPaymentStrictReceiveResultSuccess.offers, attempt \"offers one path payment crosses in a book of 1001 = 1001\": applied and failed, tx_failed",
+  "passphrase_dependent": true,
+  "protocol": {
+    "generated_at": 30,
+    "introduced": 0,
+    "valid_min": 30
+  },
+  "source": {
+    "chain": "probe.limits.p30",
+    "class": "local-core",
+    "core_rejection": {
+      "result_code": "tx_failed",
+      "result_xdr": "AAAAAAAAAGT/////AAAAAf////sAAAAA",
+      "stage": "apply"
+    },
+    "ledger_seq": 231,
+    "recipe": "probe.limits",
+    "tx_hash": "067502909ffd59c78c01d8a1865225e64a71240794490c0442400d847c42ba9f"
+  },
+  "synthetic": false,
+  "variants": {
+    "testnet": {
+      "expected_json_file": "entries/probe.limits/probe.limits.offers-crossed-per-op-1001/testnet.expected.json",
+      "expected_json_sha256": "f9437c58a9c2e012ecce028d40c7c7408c537afcb0a2f34344904396c83f0eef",
+      "network_passphrase": "Test SDF Network ; September 2015",
+      "xdr_file": "entries/probe.limits/probe.limits.offers-crossed-per-op-1001/testnet.xdr",
+      "xdr_sha256": "5477d85f752335cd8bc572d8f5060ef19f5d679d132b6f714cc845006ec8473b"
+    }
+  },
+  "xdr_type": "TransactionEnvelope"
+}

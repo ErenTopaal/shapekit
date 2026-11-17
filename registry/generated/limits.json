@@ -217,6 +217,23 @@
       ]
     },
     {
+      "path": "PathPaymentStrictReceiveResultSuccess.offers",
+      "measure": "offers one path payment crosses in a book of 1001",
+      "max_accepted": "1000",
+      "first_rejected": "1001",
+      "rejection": {
+        "stage": "apply",
+        "result_code": "op_exceeded_work_limit"
+      },
+      "network_settings": {},
+      "witnesses": [
+        "candidate:probe.limits.offers-crossed-per-op-1000",
+        "candidate:probe.limits.offers-crossed-per-op-1000-ledger",
+        "candidate:probe.limits.offers-crossed-per-op-1001",
+        "candidate:probe.limits.offers-crossed-per-op-1001-ledger"
+      ]
+    },
+    {
       "path": "PreconditionsV2.extraSigners",
       "measure": "extra signers, each signing",
       "max_accepted": "2",
