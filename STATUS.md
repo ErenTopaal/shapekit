@@ -26,15 +26,14 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `format`: XDR schema decision points | 3,869 | 0 | 3,869 |
   | `gap`: native type losses per language | 9 | 4 | 13 |
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
-  | `gate-side`: sides of stellar-core's protocol gates | 334 by branch count, 142 inferred from execution count | 214 | 690 |
+  | `gate-side`: sides of stellar-core's protocol gates | 353 by branch count, 129 inferred from execution count | 208 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
   | `sdk-version`: SDK versions the corpus runs against | 17 | 0 | 17 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
-  envelope field in 1,310 attempts, each a valid transaction with one field changed. 178 of the 203
-  fields
-  are validated and 25 are not (`registry/generated/validation.json`). `shapekit guide check`
+  envelope field in 1,310 attempts, each a valid transaction with one field changed. 178 of
+  the 203 fields are validated and 25 are not (`registry/generated/validation.json`). `shapekit guide check`
   compares each of the 88 rows of `registry/fields.toml` with these verdicts: 86 agree, and 2
   differ for a reason core's source shows, recorded with file and lines.
 - Limits: 20 bounded quantities measured on core by bisection
@@ -42,10 +41,10 @@ A dated public log of what has landed in shapekit. Newest entry first.
   value and where core refuses it. For example, the largest wasm module that uploads is 130,972
   bytes.
 - Protocol gates: `registry/generated/gates.json` lists the 345 protocol version comparisons in
-  stellar-core v30.0.0's source. The branch counts of corpus chains on an instrumented core
-  witness 334 of their 690 sides. For 142 more, a recipe run at a protocol that takes the side
-  executes the gate, so the side is inferred from the execution count. Each of the 214 open
-  sides carries its cause.
+  stellar-core v30.0.0's source. The branch counts of corpus and candidate chains on an
+  instrumented core witness 353 of their 690 sides. For 129 more, a recipe run at a protocol
+  that takes the side executes the gate, so the side is inferred from the execution count. Each
+  of the 208 open sides carries its cause.
 - Candidate lane: `candidate/` holds 6,229 entries that new runs wrote, such as probe witnesses
   and format vectors, apart from the release corpus; `shapekit corpus promote` moves an entry
   into the corpus. `registry/uncovered.toml` is checked against the lane: a probe refusal
