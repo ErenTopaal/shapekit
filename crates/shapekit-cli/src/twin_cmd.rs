@@ -120,6 +120,25 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// Mark each side of each protocol gate met when a measured chain takes it on the twin
+    /// (the gate's branch counts in `twin coverage` output), with the chain as witness, and
+    /// give every side left open the reason the data shows. Rewrites the gate list.
+    GateWitnesses {
+        /// `twin coverage` output directories of corpus chains.
+        #[arg(long = "chain-dir", num_args = 1.., required = true)]
+        chain_dirs: Vec<PathBuf>,
+        /// A stellar-core checkout at the gate list's commit.
+        #[arg(long)]
+        core_src: PathBuf,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        #[arg(long, default_value = "registry/generated/gates.json")]
+        gates: PathBuf,
+        /// `explore-gate-sides.json` from `shapekit explore gates`: recipe reruns whose
+        /// witnesses join the chains'.
+        #[arg(long)]
+        explore: Option<PathBuf>,
+    },
     /// Sort the regions of a core coverage summary that no chain and no core test reaches
     /// by cause: defensive checks, diagnostics, configuration or test-only code, protocol
     /// sides no chain runs, and ordinary code no chain builds yet. Static rules first, then
@@ -242,6 +261,19 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::GateWitnesses {
+            chain_dirs,
+            core_src,
+            twin_pins,
+            gates,
+            explore,
+        } => gate_witnesses(
+            &chain_dirs,
+            &core_src,
+            &twin_pins,
+            &gates,
+            explore.as_deref(),
+        ),
         TwinCommand::Classify {
             core_src,
             coverage,
@@ -518,7 +550,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
     }
 
     let export = cov::merge_and_export(&twin, &profiles)?;
-    let counts = cov::read_export(&export)?;
+    let (counts, branches) = cov::read_export_with_branches(&export)?;
     // the export and the raw profiles are large and fully represented by the
     // merged profile and the summary
     std::fs::remove_file(&export)?;
@@ -531,6 +563,7 @@ fn coverage(a: CoverageArgs) -> Result<bool> {
     let mut core = pinned_core(&a.pins)?;
     core.image = Some(cov::image_ref(&twin));
     cov::write_counts(&a.out.join("counts.json"), &counts)?;
+    cov::write_branches(&a.out.join("branches.json"), &branches)?;
     let summary = cov::summary(&counts, core, vec![format!("chain:{}", a.chain)], &[]);
     let file = a.out.join("core-coverage.json");
     shapekit_contracts::write(&file, &summary)?;
@@ -763,5 +796,149 @@ fn classify(
         println!("  decided by {k}: {v}");
     }
     println!("written to {}", out.display());
+    Ok(true)
+}
+
+fn gate_witnesses(
+    chain_dirs: &[PathBuf],
+    core_src: &Path,
+    twin_pins: &Path,
+    gates_path: &Path,
+    explore: Option<&Path>,
+) -> Result<bool> {
+    use shapekit_twin::coverage as cov;
+    use shapekit_twin::gate_sides;
+
+    let twin = twin_image(twin_pins)?;
+    let list: shapekit_contracts::GateList = shapekit_contracts::load(gates_path)?;
+    let head = checkout_commit(core_src)?;
+    if head != list.core.commit {
+        bail!(
+            "{} is at {head}, {} is for core {}",
+            core_src.display(),
+            gates_path.display(),
+            list.core.commit
+        );
+    }
+    let mut chains = Vec::new();
+    for d in chain_dirs {
+        let summary: shapekit_contracts::CoreCoverage =
+            shapekit_contracts::load(&d.join("core-coverage.json"))?;
+        if summary.core.image.as_ref().map(|i| &i.digest) != Some(&twin.digest) {
+            bail!(
+                "{} was measured on another image than {}",
+                d.display(),
+                twin.digest
+            );
+        }
+        if summary.core.commit != list.core.commit {
+            bail!(
+                "{} was measured on core {}",
+                d.display(),
+                summary.core.commit
+            );
+        }
+        let [chain] = summary.chains.as_slice() else {
+            bail!(
+                "{} measures {} chains, expected one",
+                d.display(),
+                summary.chains.len()
+            );
+        };
+        let protocol: u32 = chain
+            .rsplit_once(".p")
+            .and_then(|(_, n)| n.parse().ok())
+            .with_context(|| format!("{chain} names no protocol"))?;
+        chains.push((
+            chain.clone(),
+            protocol,
+            cov::read_branches(&d.join("branches.json"))?,
+        ));
+    }
+    let mut sources: std::collections::BTreeMap<String, Vec<String>> = Default::default();
+    let mut line_of = |file: &str, line: u32| -> Option<String> {
+        if !sources.contains_key(file) {
+            let text = std::fs::read_to_string(core_src.join(file)).ok()?;
+            sources.insert(file.to_owned(), text.lines().map(str::to_owned).collect());
+        }
+        sources[file].get(line as usize - 1).cloned()
+    };
+    let mut lines: std::collections::BTreeMap<(String, u32), Option<String>> = Default::default();
+    for g in &list.gates {
+        lines.insert((g.file.clone(), g.line), line_of(&g.file, g.line));
+    }
+    let explore = match explore {
+        Some(p) => {
+            let e: gate_sides::ExploreSides = serde_json::from_slice(
+                &std::fs::read(p).with_context(|| format!("reading {}", p.display()))?,
+            )
+            .with_context(|| format!("parsing {}", p.display()))?;
+            if e.schema_version != 1 {
+                bail!(
+                    "{} has schema_version {}, expected 1",
+                    p.display(),
+                    e.schema_version
+                );
+            }
+            if e.twin_image != twin.digest {
+                bail!(
+                    "{} was run on {}, the twin is {}",
+                    p.display(),
+                    e.twin_image,
+                    twin.digest
+                );
+            }
+            Some(e)
+        }
+        None => None,
+    };
+    let w = gate_sides::witness(&list, &chains, explore.as_ref(), |f, l| {
+        lines.get(&(f.to_owned(), l)).cloned().flatten()
+    });
+    shapekit_contracts::write(gates_path, &w.list)?;
+    let open_by: std::collections::BTreeMap<String, usize> = w
+        .list
+        .gates
+        .iter()
+        .flat_map(|g| &g.sides)
+        .filter(|s| s.status == shapekit_contracts::ObligationStatus::Open)
+        .filter_map(|s| s.evidence.as_deref())
+        .fold(Default::default(), |mut m, e| {
+            let kind = if e.starts_with("the gate's result") {
+                "no branch region"
+            } else if e.starts_with("needs a chain at") {
+                "needs a protocol no chain runs"
+            } else if e.starts_with("no chain evaluates") {
+                "condition never evaluated"
+            } else {
+                "condition evaluated, side never taken"
+            };
+            *m.entry(kind.to_owned()).or_default() += 1;
+            m
+        });
+    println!(
+        "{} gates, {} sides: {} met ({} by recipe reruns only), {} open; {} gates have no branch region",
+        w.list.gates.len(),
+        w.met + w.open,
+        w.met,
+        w.met_by_reruns_only,
+        w.open,
+        w.no_branch
+    );
+    for c in &w.conflicts {
+        println!(
+            "  CONFLICT {}:{}:{} {} side: {} claims it, {} evaluated the condition and never took it",
+            c.file,
+            c.line,
+            c.column,
+            c.branch.as_str(),
+            c.run,
+            c.chain
+        );
+    }
+    for (k, v) in open_by {
+        println!("  open, {k}: {v}");
+    }
+    println!("written to {}", gates_path.display());
     Ok(true)
 }

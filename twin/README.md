@@ -219,3 +219,39 @@ rule decides take a hand label from `twin/unknown-labels.toml` (by file, by
 function or by range, each with its reason), and the rest are `ordinary` with
 `decided_by: residual`, meaning nobody has shown they are anything else. A
 label that matches no remaining range is an error.
+
+## Gate sides witnessed
+
+```sh
+shapekit twin gate-witnesses --chain-dir <twin coverage dir> [--chain-dir ...] \
+    --core-src <checkout at the gate list's commit> [--explore <explore-gate-sides.json>]
+```
+
+clang's coverage mapping keeps a branch region for every condition, with how
+often it was true and how often false. A protocol gate tested as a condition
+therefore has its own true and false counts at the gate call's position. The
+command reads them from `twin coverage` output (`branches.json`) of corpus
+chains and rewrites the sides in `registry/generated/gates.json`. A side a
+chain takes is `met`, with `chain:<id>` as witness. A negated gate
+(`!protocolVersion...`) has its region on the `!`, so its counts swap.
+
+`--explore` adds the recipe reruns of `shapekit explore gates`. Those runs
+replay a recipe at other protocols and see that the gate call ran during the
+recipe's own steps at a protocol that takes the side; they infer the outcome
+from the protocol rather than read it. Their witnesses are written
+`recipe:<IR path>@p<protocol>` and join the chains'. For a gate with no branch
+region they are the only evidence. A side met before is never set back to
+open. When a rerun at a recipe's own protocol claims a side that the same
+recipe's committed chain evaluated and never took, the command prints a
+conflict instead of choosing one.
+
+Every met side's `evidence` says which kinds of witness it has. Every open
+side says why it is open:
+
+- the gate's result is stored, not tested, so coverage records no side;
+- it needs a protocol no chain runs;
+- no chain evaluates the condition;
+- chains evaluate it but never with this outcome.
+
+llvm-cov writes `i64::MAX` for branch counts it cannot compute. Such branches
+are left out; none of them is at a gate in core v30.0.0.

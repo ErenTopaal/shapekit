@@ -51,7 +51,14 @@ struct ExportFunction {
     /// `[line_start, column_start, line_end, column_end, count, file_id,
     /// expanded_file_id, kind]`.
     regions: Vec<Vec<u64>>,
+    /// `[line_start, column_start, line_end, column_end, true_count,
+    /// false_count, file_id, expanded_file_id, kind]`: one per condition.
+    #[serde(default)]
+    branches: Vec<Vec<u64>>,
 }
+
+/// Per file, every condition's span and how often it was true and false.
+pub type Branches = BTreeMap<String, BTreeMap<Span, (u64, u64)>>;
 
 /// One code region span and the most any copy of it ran.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -88,9 +95,51 @@ fn measured(path: &str) -> bool {
 /// Reads an `llvm-cov export -format=text` file into region counts of the
 /// measured files.
 pub fn read_export(path: &Path) -> Result<Counts> {
+    Ok(read_export_with_branches(path)?.0)
+}
+
+/// Region counts of the measured files, and the condition counts of every
+/// non-test source file (protocol gates sit outside the measured files too).
+pub fn read_export_with_branches(path: &Path) -> Result<(Counts, Branches)> {
     let file = std::fs::File::open(path).with_context(|| format!("opening {}", path.display()))?;
     let export: Export = serde_json::from_reader(std::io::BufReader::new(file))
         .with_context(|| format!("parsing {}", path.display()))?;
+    let mut branches = Branches::new();
+    for d in &export.data {
+        for f in &d.functions {
+            for b in &f.branches {
+                let [ls, cs, le, ce, t, fls, file_id, _expanded, _kind] = b.as_slice() else {
+                    bail!("branch {b:?} does not have the 9 fields of llvm-cov's export format");
+                };
+                let name = f.filenames.get(*file_id as usize).with_context(|| {
+                    format!("branch {b:?} names file {file_id}, not in its function")
+                })?;
+                let Some(p) = repo_path(name) else { continue };
+                if !p.starts_with("src/")
+                    || p.contains("/test/")
+                    || p.starts_with("src/protocol-curr/")
+                    || p.starts_with("src/rust/")
+                {
+                    continue;
+                }
+                // llvm-cov writes i64::MAX for a count it cannot compute (seen
+                // on switch branches in the generated XDR headers); such a
+                // branch says nothing, so it is left out
+                if *t >= i64::MAX as u64 || *fls >= i64::MAX as u64 {
+                    continue;
+                }
+                let span = Span {
+                    line_start: *ls as u32,
+                    column_start: *cs as u32,
+                    line_end: *le as u32,
+                    column_end: *ce as u32,
+                };
+                let e = branches.entry(p).or_default().entry(span).or_insert((0, 0));
+                e.0 = e.0.saturating_add(*t);
+                e.1 = e.1.saturating_add(*fls);
+            }
+        }
+    }
     let mut counts = Counts::new();
     for d in &export.data {
         for f in &d.functions {
@@ -119,7 +168,61 @@ pub fn read_export(path: &Path) -> Result<Counts> {
             }
         }
     }
-    Ok(counts)
+    Ok((counts, branches))
+}
+
+/// Writes branch counts as JSON: file to `[line_start, column_start,
+/// line_end, column_end, true_count, false_count]` rows.
+pub fn write_branches(path: &Path, branches: &Branches) -> Result<()> {
+    let rows: BTreeMap<&String, Vec<[u64; 6]>> = branches
+        .iter()
+        .map(|(f, m)| {
+            (
+                f,
+                m.iter()
+                    .map(|(s, (t, fl))| {
+                        [
+                            u64::from(s.line_start),
+                            u64::from(s.column_start),
+                            u64::from(s.line_end),
+                            u64::from(s.column_end),
+                            *t,
+                            *fl,
+                        ]
+                    })
+                    .collect(),
+            )
+        })
+        .collect();
+    std::fs::write(path, serde_json::to_vec(&rows)?)
+        .with_context(|| format!("writing {}", path.display()))
+}
+
+pub fn read_branches(path: &Path) -> Result<Branches> {
+    let rows: BTreeMap<String, Vec<[u64; 6]>> = serde_json::from_slice(
+        &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )
+    .with_context(|| format!("parsing {}", path.display()))?;
+    Ok(rows
+        .into_iter()
+        .map(|(f, v)| {
+            let m = v
+                .into_iter()
+                .map(|[a, b, c, d, t, fl]| {
+                    (
+                        Span {
+                            line_start: a as u32,
+                            column_start: b as u32,
+                            line_end: c as u32,
+                            column_end: d as u32,
+                        },
+                        (t, fl),
+                    )
+                })
+                .collect();
+            (f, m)
+        })
+        .collect())
 }
 
 /// The core coverage contract over region counts: per file the reached and
