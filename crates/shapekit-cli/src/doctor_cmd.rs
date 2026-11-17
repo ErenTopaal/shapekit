@@ -185,8 +185,9 @@ fn disk(r: &mut Report, dir: &Path) {
             .and_then(|l| l.split_whitespace().nth(3).map(str::to_owned))
             .and_then(|v| v.parse::<u64>().ok())
     });
-    // measured: the current-version testee builds take 276 MiB and the wallet-backend and
-    // timescaledb images 0.5 GB; the rest leaves room for the toolchains' own caches
+    // measured: the testee builds of every version in conformance/versions.toml take 1.3 GiB
+    // (276 MiB for rust 30.0.0 alone), the wallet-backend and timescaledb images 0.5 GB; the
+    // rest leaves room for the toolchains' own caches
     const WARN_GIB: u64 = 5;
     match free_kib {
         Some(k) if k / (1024 * 1024) >= WARN_GIB => r.ok(&format!(
