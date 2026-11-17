@@ -1,0 +1,37 @@
+# attempts already in the corpus that differ in one field core does not look at, each with
+# core's outcome. `shapekit harness free-field --groups` reads this file; the attempts of
+# registry/generated/validation.json come with --validation. the memo arms are in
+# classic.memo-arms.p30: one payment per ledger, accepted and applied whatever the memo
+# holds (registry/fields.toml tx.memo.id, tx.memo.hash, tx.memo.return).
+
+[[group]]
+field = "Memo.id"
+attempt = [
+  { label = "id 0", entries = ["classic.memo-arms.p30-memo-id-zero"], outcome = "applied succeeded" },
+  { label = "id 2^63", entries = ["classic.memo-arms.p30-memo-id-2-63"], outcome = "applied succeeded" },
+  { label = "id 2^64-1", entries = ["classic.memo-arms.p30-memo-id-max"], outcome = "applied succeeded" },
+]
+
+[[group]]
+field = "Memo.hash"
+attempt = [
+  { label = "all zero", entries = ["classic.memo-arms.p30-memo-hash-zero"], outcome = "applied succeeded" },
+  { label = "all ff", entries = ["classic.memo-arms.p30-memo-hash-ff"], outcome = "applied succeeded" },
+  { label = "a sha-256", entries = ["classic.memo-arms.p30-memo-hash-sha256"], outcome = "applied succeeded" },
+]
+
+[[group]]
+field = "Memo.retHash"
+attempt = [
+  { label = "all zero", entries = ["classic.memo-arms.p30-memo-return-zero"], outcome = "applied succeeded" },
+  { label = "all ff", entries = ["classic.memo-arms.p30-memo-return-ff"], outcome = "applied succeeded" },
+  { label = "a sha-256", entries = ["classic.memo-arms.p30-memo-return-sha256"], outcome = "applied succeeded" },
+]
+
+[[group]]
+field = "Memo (arm id, hash or return)"
+attempt = [
+  { label = "id 0", entries = ["classic.memo-arms.p30-memo-id-zero"], outcome = "applied succeeded" },
+  { label = "hash all zero", entries = ["classic.memo-arms.p30-memo-hash-zero"], outcome = "applied succeeded" },
+  { label = "return all zero", entries = ["classic.memo-arms.p30-memo-return-zero"], outcome = "applied succeeded" },
+]

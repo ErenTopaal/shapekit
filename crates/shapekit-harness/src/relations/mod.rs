@@ -2,6 +2,7 @@
 //! reads what the target stored (the adapter's `dump`) next to what the chain gave it.
 
 pub mod carry;
+pub mod free_field;
 pub mod known;
 pub mod replay;
 pub mod route;

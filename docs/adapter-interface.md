@@ -539,6 +539,28 @@ whose they are, reached by different operations. For every group and every mappe
 its kind, the rows the target keeps for the group's keys must be equal once the key columns
 are left out; a row stored for some of them and not the others is a difference too.
 
+## Free field inertness
+
+A field core does not validate can hold any value, and core treats the transaction the same
+whatever it holds. An indexer must too. `shapekit harness free-field --run <run out>` reads
+attempts that differ in one such field, each with core's outcome:
+
+- `--validation registry/generated/validation.json`: every field it records as
+  `not-validated`, with its attempts and their witness entries;
+- `--groups <toml>`: hand-written groups over entries already in a corpus,
+  `[[group]] field = "..."` with `attempt = [{ label, entries, outcome }]`.
+  `crates/shapekit-harness/free-field/corpus.toml` groups the memo arms of
+  classic.memo-arms.p30.
+
+Attempts with the same outcome in core are compared per network by what the run made of
+each: verdict, reason and the kinds of problems found (an attempt carried by an envelope
+and a ledger entry takes the more severe of the two). Attempts run on their own funded
+accounts, so their stored rows differ in keys and ledgers as well as in the field; the
+comparison is per attempt against core's meta, not between the attempts' rows. A difference
+means the value of a field core ignores changed what the indexer stored. Attempts the run
+did not judge are counted. The command exits non-zero on a difference; `--out` writes the
+report as JSON.
+
 ## Output
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):

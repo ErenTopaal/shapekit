@@ -33,6 +33,9 @@ pub enum HarnessCommand {
     /// (--control) are left out; the network variants are translated through the
     /// identifiers core wrote differently in the two chains.
     Relate(RelateArgs),
+    /// Free field inertness: attempts that differ in one field core does not validate, and
+    /// that core treated alike, must get the same verdict in a run.
+    FreeField(FreeFieldArgs),
     /// Compare the target's stored accounts, trustlines, asset contract balances and pools
     /// with core's final entries: infer the table mapping from runs, or check runs with it.
     #[command(subcommand)]
@@ -153,6 +156,22 @@ pub enum StateCommand {
         #[arg(long)]
         out: Option<PathBuf>,
     },
+}
+
+#[derive(Args)]
+pub struct FreeFieldArgs {
+    /// A `harness run --out` directory whose run judged the attempts' entries.
+    #[arg(long)]
+    run: PathBuf,
+    /// The not-validated fields of this table, with their witness entries.
+    #[arg(long)]
+    validation: Option<PathBuf>,
+    /// Hand-written groups over corpus entries.
+    #[arg(long)]
+    groups: Option<PathBuf>,
+    /// Write the report as JSON here.
+    #[arg(long)]
+    out: Option<PathBuf>,
 }
 
 #[derive(Args)]
@@ -392,6 +411,53 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             Ok(r.truncated == 0 && r.fabricated == 0)
         }
         HarnessCommand::State(c) => state(c),
+        HarnessCommand::FreeField(a) => {
+            use shapekit_harness::relations::free_field::{Groups, check};
+            let mut groups = Groups::default();
+            if let Some(p) = &a.validation {
+                groups.group.extend(Groups::from_validation(p)?.group);
+            }
+            if let Some(p) = &a.groups {
+                groups.group.extend(Groups::load(p)?.group);
+            }
+            if groups.group.is_empty() {
+                bail!("no groups: give --validation, --groups or both");
+            }
+            let rep = read_report(&a.run.join(report::REPORT_FILE))?;
+            let r = check(&rep.entries, &groups);
+            println!(
+                "{} groups, {} attempts judged, {} not in the run, {} sets of alike attempts compared, {} differences",
+                r.groups,
+                r.judged,
+                r.not_run,
+                r.compared,
+                r.differences.len()
+            );
+            for d in &r.differences {
+                println!("{} ({}, core: {}):", d.field, d.network, d.outcome);
+                for (label, j) in &d.attempts {
+                    println!(
+                        "  {label}: {}{}{}",
+                        j.verdict,
+                        j.reason
+                            .as_deref()
+                            .map(|x| format!(" ({x})"))
+                            .unwrap_or_default(),
+                        if j.problems.is_empty() {
+                            String::new()
+                        } else {
+                            format!(", {}", j.problems.join(", "))
+                        }
+                    );
+                }
+            }
+            if let Some(o) = &a.out {
+                let mut text = serde_json::to_string_pretty(&r)?;
+                text.push('\n');
+                std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
+            }
+            Ok(r.differences.is_empty())
+        }
         HarnessCommand::Relate(a) => {
             use shapekit_harness::dump::Dump;
             use shapekit_harness::relations::replay;
