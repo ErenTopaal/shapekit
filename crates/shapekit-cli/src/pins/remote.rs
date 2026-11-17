@@ -83,6 +83,20 @@ impl Http {
         Ok(Self { client })
     }
 
+    pub fn get_bytes(&self, url: &str) -> Result<Vec<u8>> {
+        with_retries(&format!("GET {url}"), http_transient, || {
+            let resp = self
+                .client
+                .get(url)
+                .send()
+                .with_context(|| format!("GET {url}"))?;
+            Ok(ensure_success(resp, url)?
+                .bytes()
+                .with_context(|| format!("reading body of {url}"))?
+                .to_vec())
+        })
+    }
+
     pub fn get_text(&self, url: &str) -> Result<String> {
         with_retries(&format!("GET {url}"), http_transient, || {
             let resp = self

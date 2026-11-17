@@ -279,7 +279,8 @@ pub const COVERAGE_TIMEOUT_MS: u64 = 120_000;
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
 /// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
 /// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,
-/// and the javascript and python testees started with `SHAPEKIT_COVERAGE=1`. The build steps
+/// the javascript and python testees started with `SHAPEKIT_COVERAGE=1`, and the java testee
+/// with that and the jacoco agent of its build. The build steps
 /// are the ones `conformance sync-versions` writes; a versions file whose steps have another
 /// shape is refused rather than guessed at. The per-request timeout is at least
 /// [`COVERAGE_TIMEOUT_MS`]: a snapshot runs the coverage tools over the whole binary.
@@ -350,6 +351,26 @@ pub fn coverage_target(t: &Target) -> Result<Target> {
                 .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
             return Ok(c);
         }
+        // the java testee needs the jacoco agent of its own build, loaded before any sdk class,
+        // instrumenting only the sdk
+        "java" => {
+            ensure!(
+                c.command.len() == 3 && c.command[0] == "java" && c.command[1] == "-jar",
+                "{}: the command is not java -jar <testee.jar>",
+                t.key()
+            );
+            let dir = c.command[2]
+                .strip_suffix("/testee.jar")
+                .with_context(|| format!("{}: the command does not run a testee.jar", t.key()))?
+                .to_string();
+            c.command.insert(
+                1,
+                format!("-javaagent:{dir}/jacocoagent.jar=output=none,includes=org.stellar.sdk.*"),
+            );
+            c.env
+                .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
+            return Ok(c);
+        }
         other => bail!("no coverage build for sdk {other}"),
     }
     let cmd = c.command.first_mut().context("the target has no command")?;
@@ -372,7 +393,7 @@ mod tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/versions.toml"),
         )
         .unwrap();
-        for sdk in ["rust", "go", "js", "python"] {
+        for sdk in ["rust", "go", "js", "python", "java"] {
             let t = file.target(sdk, &file.sdk(sdk).unwrap().current).unwrap();
             let c = coverage_target(&t).unwrap();
             match sdk {
@@ -395,6 +416,11 @@ mod tests {
                             .any(|a| a.contains("target/testees-cov/go/"))
                     );
                     assert!(c.command[0].starts_with("target/testees-cov/go/"));
+                }
+                "java" => {
+                    assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");
+                    assert!(c.command[1].starts_with("-javaagent:target/testees/java/"));
+                    assert_eq!(c.command[2..], t.command[1..]);
                 }
                 _ => {
                     assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");

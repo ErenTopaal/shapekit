@@ -4,8 +4,9 @@
 //! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1),
 //! soroban-sdk 29.0.1 has no reader for its strkey kind, and the Python stellar-sdk 17.0.1
 //! diverges on case 6 (a trailing =), a candidate-lane defect no finding in findings/triage.toml
-//! takes. So with python in the versions file the entry stays a candidate; the tests of the
-//! promotion itself use a versions file without python.
+//! takes, while java-stellar-sdk 6.0.0 passes it. So with python in the versions file the entry
+//! stays a candidate; the tests of the promotion itself use a versions file without python and
+//! java.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -55,7 +56,7 @@ fn copy_dir(from: &Path, to: &Path) {
 
 /// A repository layout with the entry in the candidate lane and an empty corpus, and the
 /// known-failures lines for the entry taken out, as before it was ever promoted. The versions
-/// file holds every sdk of the repository's, python only when `with_python`.
+/// file holds every sdk of the repository's, python and java only when `with_python`.
 fn layout() -> tempfile::TempDir {
     layout_with(false)
 }
@@ -77,7 +78,7 @@ fn layout_with(with_python: bool) -> tempfile::TempDir {
     let versions = if with_python {
         versions
     } else {
-        // python is the last sdk of the file
+        // python and java are the last sdks of the file
         let at = versions
             .find("\n[sdk.python]\n")
             .expect("the versions file has a python sdk");
@@ -164,7 +165,7 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
 fn a_python_divergence_no_finding_takes_keeps_the_entry_a_candidate() {
     let dir = layout_with(true);
     let d = dir.path();
-    let out = promote(d, &[], &["rust", "go", "js", "soroban", "python"]);
+    let out = promote(d, &[], &["rust", "go", "js", "soroban", "python", "java"]);
     assert_eq!(out.status.code(), Some(1), "{}", text(&out));
     assert!(
         text(&out).contains(

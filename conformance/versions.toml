@@ -1,6 +1,7 @@
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy, npm and pypi publish; `sync-versions --check` reports
+# crates.io, the go module proxy, npm, pypi and maven central publish; `sync-versions --check`
+# reports
 # whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
 # version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
@@ -30,8 +31,9 @@
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's Makefile at
-# the release tag, since pypi records no commit, and for soroban-sdk the xdr-version file of
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's and
+# java-stellar-sdk's Makefiles at the release tag, since pypi and maven central record no commit,
+# and for soroban-sdk the xdr-version file of
 # the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
 # release tag at that commit names a protocol, extended up to the
 # protocol before the next tag, because a protocol without a tag of its own changed no xdr
@@ -53,6 +55,10 @@
 # target/testees/python/<version>/venv, made with uv from the hash-locked
 # testees/python/versions/<version>/requirements.txt, so the sdk and every dependency it
 # imports (xdrlib3, pynacl) are pinned.
+# java: one source (testees/java/src) built by maven per version from
+# testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
+# are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
+# tree (gson above all) is pinned, not only the sdk version.
 
 schema = 1
 
@@ -308,4 +314,31 @@ build = [
   { argv = ["uv", "pip", "sync", "--quiet", "--require-hashes", "--python", "target/testees/python/17.0.1/venv/bin/python", "testees/python/versions/17.0.1/requirements.txt"] },
 ]
 command = ["target/testees/python/17.0.1/venv/bin/python", "-B", "-E", "-s", "testees/python/main.py"]
+max_protocol = 30
+
+[sdk.java]
+package = "network.lightsail:stellar-sdk"
+current = "6.0.0"
+issues_repo = "lightsail-network/java-stellar-sdk"
+timeout_ms = 15000
+memory = { resource = "data", mib = 4096 }
+
+# 5.0.0: newest 5.x release; named in known-failures/java.txt; xdr v28.0 (9c9c1459), protocols up to 29
+[[sdk.java.versions]]
+version = "5.0.0"
+build = [
+  { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/5.0.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/java/versions/5.0.0/lib.sha256"], dir = "target/testees/java/5.0.0/lib" },
+]
+command = ["java", "-jar", "target/testees/java/5.0.0/testee.jar"]
+max_protocol = 29
+
+# 6.0.0: newest 6.x release; named in known-failures/java.txt; xdr v30.0 (4f524bba), protocols up to 30
+[[sdk.java.versions]]
+version = "6.0.0"
+build = [
+  { argv = ["mvn", "-B", "-q", "-f", "testees/java/versions/6.0.0/pom.xml", "-DskipTests", "package"] },
+  { argv = ["sha256sum", "--check", "--strict", "--quiet", "../../../../../testees/java/versions/6.0.0/lib.sha256"], dir = "target/testees/java/6.0.0/lib" },
+]
+command = ["java", "-jar", "target/testees/java/6.0.0/testee.jar"]
 max_protocol = 30

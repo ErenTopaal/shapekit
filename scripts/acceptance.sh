@@ -11,7 +11,8 @@
 #                                        contracts rebuilt and the site built
 #
 # needs cargo, go, golangci-lint, node and npm on PATH, and network access once to fetch the python
-# testee's pinned uv and cpython into target/toolchains/; full mode also needs docker and network
+# and java testees' pinned uv, cpython, jdk and maven into target/toolchains/; full mode also
+# needs docker and network
 # access, and the wasm32v1-none rust target for the test contracts. runs from
 # the repository root wherever it is started, builds without debug info, and writes run
 # outputs to target/acceptance/.
@@ -23,7 +24,7 @@ case "${1:-}" in
   "" | --quick) ;;
   --full) mode=full ;;
   -h | --help)
-    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
   *)
@@ -110,6 +111,13 @@ python_testee() {
   "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
 }
 
+# the java testee's unit tests (maven surefire) at the current version
+java_testee() {
+  local v
+  v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
+  mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+}
+
 # quick mode
 
 step cargo fmt --all --check
@@ -155,6 +163,12 @@ echo "== $current"
 python_path=$(scripts/python-toolchain.sh)
 PATH="$python_path:$PATH" step "$shapekit" conformance run --sdk python --out "$out/conformance/python"
 step python_testee
+# the java testee's pinned jdk and maven, fetched once into target/toolchains/
+current="java toolchain"
+echo "== $current"
+java_path=$(scripts/java-toolchain.sh)
+PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk java --out "$out/conformance/java"
+PATH="$java_path:$PATH" step java_testee
 step "$shapekit" findings check
 step scripts/check-no-em-dash.sh
 step scripts/check-public-text.sh
@@ -175,6 +189,9 @@ step "$shapekit" conformance run --sdk soroban --all-versions --out "$out/confor
 PATH="$python_path:$PATH" step "$shapekit" conformance run --sdk python --all-versions --out "$out/conformance-all/python"
 # the type table of the python testee is what its generator writes from every version's venv
 unchanged testees/python sh -c "python3 -I testees/python/gentypes.py"
+PATH="$java_path:$PATH" step "$shapekit" conformance run --sdk java --all-versions --out "$out/conformance-all/java"
+# the type table of the java testee is what its generator writes from every version's jars
+unchanged testees/java sh -c "cd testees/java && python3 -I gentypes.py"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

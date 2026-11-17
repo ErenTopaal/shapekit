@@ -5,12 +5,14 @@
 #        scripts/pin.sh git <name>      commit sha of a [[git]] entry
 #        scripts/pin.sh tag <name>      tag of a [[git]] entry (ref without refs/tags/)
 #        scripts/pin.sh release <name>  "<version> <commit> <asset url> <sha256>" of a [[release]]
+#        scripts/pin.sh maven <artifact> "<version> <file url> <sha256>" of the one [[maven]] pin
+#                                       of that artifact
 #
 # needs python3 >= 3.11 for tomllib.
 set -euo pipefail
 
-kind=${1:?usage: scripts/pin.sh image|git|tag|release <name>}
-name=${2:?usage: scripts/pin.sh image|git|tag|release <name>}
+kind=${1:?usage: scripts/pin.sh image|git|tag|release|maven <name>}
+name=${2:?usage: scripts/pin.sh image|git|tag|release|maven <name>}
 
 python3 -I - "$(git rev-parse --show-toplevel)/pins.toml" "$kind" "$name" <<'PY'
 import sys, tomllib
@@ -19,10 +21,11 @@ path, kind, name = sys.argv[1:]
 with open(path, "rb") as f:
     pins = tomllib.load(f)
 
-table = {"image": "image", "git": "git", "tag": "git", "release": "release"}.get(kind)
+table = {"image": "image", "git": "git", "tag": "git", "release": "release", "maven": "maven"}.get(kind)
 if table is None:
-    sys.exit(f"unknown kind {kind}, expected image, git, tag or release")
-found = [e for e in pins.get(table, []) if e.get("name") == name]
+    sys.exit(f"unknown kind {kind}, expected image, git, tag, release or maven")
+key = "artifact" if kind == "maven" else "name"
+found = [e for e in pins.get(table, []) if e.get(key) == name]
 if len(found) != 1:
     sys.exit(f"pins.toml has {len(found)} [[{table}]] entries named {name}")
 e = found[0]
@@ -32,8 +35,12 @@ elif kind == "git":
     print(e["sha"])
 elif kind == "release":
     tag = e["tag"]
-    url = f'https://github.com/{e["repository"]}/releases/download/{tag}/{e["asset"]}'
+    url = f'https://github.com/{e["repository"]}/releases/download/{tag.replace("+", "%2B")}/{e["asset"]}'
     print(tag.removeprefix("v"), e["commit"], url, e["sha256"])
+elif kind == "maven":
+    group = e["group"].replace(".", "/")
+    url = f'https://repo1.maven.org/maven2/{group}/{e["artifact"]}/{e["version"]}/{e["file"]}'
+    print(e["version"], url, e["sha256"])
 else:
     ref = e.get("ref", "")
     if not ref.startswith("refs/tags/"):

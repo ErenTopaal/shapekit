@@ -171,13 +171,15 @@ jobs:
           path: ${{ runner.temp }}/bin
       - name: pinned uv and cpython for the python testee
         run: scripts/python-toolchain.sh >>"$GITHUB_PATH"
+      - name: pinned jdk and maven for the java testee
+        run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
       - name: conformance run, all versions, one matrix per sdk and one for disagreeing references
         # one output directory per sdk, the layout findings/triage.toml reads in the findings job
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           status=0
-          for sdk in rust go js soroban python; do
+          for sdk in rust go js soroban python java; do
             "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
               --out "target/conformance/$sdk" || status=1
           done
@@ -193,7 +195,7 @@ jobs:
       - name: matrices to the job summary
         if: ${{ !cancelled() }}
         run: |
-          for sdk in rust go js soroban python; do
+          for sdk in rust go js soroban python java; do
             f="target/conformance/$sdk/MATRIX.md"
             if [ -f "$f" ]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; fi
           done
@@ -239,6 +241,8 @@ jobs:
             --out candidate/findings --allow-draft
       - name: pinned uv and cpython for the python testee
         run: scripts/python-toolchain.sh >>"$GITHUB_PATH"
+      - name: pinned jdk and maven for the java testee
+        run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
       - name: candidates through the current sdks, and which can be promoted
         run: |
           set -uo pipefail
@@ -251,10 +255,10 @@ jobs:
           # candidate entries are in no known-failures list, so every failure is reported
           known="$RUNNER_TEMP/known-failures"
           mkdir -p "$known"
-          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"; : >"$known/soroban.txt"; : >"$known/python.txt"
+          : >"$known/rust.txt"; : >"$known/go.txt"; : >"$known/js.txt"; : >"$known/soroban.txt"; : >"$known/python.txt"; : >"$known/java.txt"
           matrices=()
           # promotion needs a result from every sdk in conformance/versions.toml
-          for sdk in rust go js soroban python; do
+          for sdk in rust go js soroban python java; do
             out="target/candidate/$sdk"
             "$shapekit" conformance run --sdk "$sdk" --manifest candidate/manifest.json \
               --known-failures "$known" --out "$out"

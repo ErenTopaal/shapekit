@@ -8,8 +8,8 @@
 
 A test kit for software that reads the Stellar ledger: a corpus of rare but valid XDR shapes,
 most of them recorded on a real stellar-core, a replay harness that feeds them to an indexer, a conformance
-runner that feeds them to the JavaScript, Go, Rust and Python SDKs and to soroban-sdk, the Rust
-contract SDK, a linter for Go indexer code, and an indexer-hardening guide.
+runner that feeds them to the JavaScript, Go, Rust, Python and Java SDKs and to soroban-sdk, the
+Rust contract SDK, a linter for Go indexer code, and an indexer-hardening guide.
 
 Indexers and SDKs keep breaking on shapes that are valid but rare: signed-payload signers, muxed
 accounts, deep Soroban authorization trees, trustlines created by the Stellar Asset Contract,
@@ -27,7 +27,7 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 | Corpus: XDR files plus a language-neutral manifest with expected decoded values, generated under both the testnet and mainnet passphrases, checked against stellar-core's `--check-lcm` goldens | `corpus/` | [coverage per CAP](corpus/coverage/COVERAGE.md), [adding a shape](docs/adding-a-shape.md) |
 | Generator: recipes recorded on a standalone stellar-core on a Docker network with no route off the host | `crates/shapekit-gen`, `crates/shapekit-core-driver` | [adding a shape](docs/adding-a-shape.md) |
 | Replay harness, the wallet-backend reference adapter, and adapters for stellar-etl and stellar-rpc | `crates/shapekit-harness`, `adapters/` | [adapter interface](docs/adapter-interface.md), [replay server](docs/replay-server.md), [running it in an indexer's CI](docs/indexer-ci.md) |
-| SDK conformance runner and the testees for the Rust, Go, JavaScript and Python SDKs and soroban-sdk | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
+| SDK conformance runner and the testees for the Rust, Go, JavaScript, Python and Java SDKs and soroban-sdk | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
 | Fuzzing: stellar-xdr against go-stellar-sdk, a coverage-guided search across the Rust, Go and JavaScript SDKs, and each SDK's own fuzzer checked by the encoding laws | `crates/shapekit-fuzz`, `testees/*/fuzz` | [differential fuzzing](docs/differential-fuzzing.md) |
 | Linter for Go indexers built on go-stellar-sdk | `lint/` | [indexerlint](docs/linter.md) |
 | Indexer-hardening guide, written for developers.stellar.org; a draft until a stellar-core or platform engineer has reviewed it (see the publication gate in [STATUS.md](STATUS.md)) | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
@@ -113,7 +113,8 @@ each SDK version and the reference indexer did with them, use the
 
 ### Run an SDK over the corpus
 
-Needs the toolchain of that SDK (cargo, go, node, or uv with CPython 3.15 for Python).
+Needs the toolchain of that SDK (cargo, go, node, uv with CPython 3.15 for Python, or JDK 27 and
+Maven for Java).
 
 ```sh
 shapekit check sdk --sdk js                  # current version, @stellar/stellar-sdk 17.4.0

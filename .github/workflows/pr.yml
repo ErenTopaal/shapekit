@@ -137,6 +137,35 @@ jobs:
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["python"]["current"])' conformance/versions.toml)
           "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
 
+  java:
+    # the java testee: its conformance run on the current version builds it with maven and checks
+    # the resolved jars against lib.sha256, then its unit tests run
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: testee-java-${{ hashFiles('testees/java/versions/*/pom.xml') }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pinned jdk and maven
+        run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
+      - name: conformance run on the current version
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk java --out target/conformance/java
+      - name: unit tests
+        run: |
+          set -euo pipefail
+          v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
+          mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+
   contracts:
     # the committed wasm is what `stellar contract build` from the pinned stellar-cli release
     # makes of the committed sources; a source, sdk, toolchain or stellar-cli change without

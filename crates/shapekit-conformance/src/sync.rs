@@ -1,6 +1,6 @@
 //! `shapekit conformance sync-versions`: derives the sdk version matrix in
 //! `conformance/versions.toml` and the per-version testee files under `testees/*/versions/`
-//! from what crates.io, the Go module proxy, npm and PyPI publish.
+//! from what crates.io, the Go module proxy, npm, PyPI and Maven Central publish.
 //!
 //! Which versions: for every release line (a major version; for 0.x a minor version) the
 //! newest stable release that is not yanked, deprecated or retracted and whose XDR knows
@@ -11,7 +11,8 @@
 //! A version's XDR is the stellar/stellar-xdr commit its code was generated from: the
 //! crate's `xdr-version` file, go-stellar-sdk's `xdr/xdr_commit_generated.txt`,
 //! js-stellar-sdk's Makefile, each at the commit the registry took the release from, and
-//! py-stellar-base's Makefile at the release tag (PyPI records no commit). The
+//! py-stellar-base's and java-stellar-sdk's Makefiles at the release tag (PyPI and Maven
+//! Central record no commit). The
 //! stellar-xdr release tag at that commit names a protocol, and `max_protocol` extends it to
 //! the protocol before the next tag, because a protocol without a tag of its own changed no
 //! XDR. A commit that is no release tag stops the command: there is then no protocol to
@@ -30,13 +31,20 @@ use crate::upstream::{self, Http, Published, XdrTag, utc_seconds};
 use crate::versions::{MemoryResource, Sdk, VersionsFile};
 
 /// The sdks the command knows how to discover and build, in file order.
-pub const SDKS: [&str; 5] = ["rust", "go", "js", "soroban", "python"];
+pub const SDKS: [&str; 6] = ["rust", "go", "js", "soroban", "python", "java"];
 
 /// The CPython every python testee venv is made with; pins.toml pins its build.
 pub const PYTHON: &str = "3.15.2";
 
 /// The file of py-stellar-base that declares a release's version, checked at the release tag.
 const PYTHON_VERSION_FILE: &str = "stellar_sdk/__version__.py";
+
+/// The file of java-stellar-sdk that declares a release's version, checked at the release tag.
+const JAVA_VERSION_FILE: &str = "build.gradle.kts";
+
+/// How many times a java testee pom names its sdk version: the dependency and the build
+/// directory.
+const JAVA_POM_VERSIONS: usize = 2;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct Semver {
@@ -339,6 +347,20 @@ pub fn discover(opts: &SyncOptions) -> Result<(VersionsFile, Vec<SdkPlan>)> {
                 let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
                 (p, c)
             }
+            "java" => {
+                let p = upstream::maven_published(&http, &s.package)?;
+                let mut f = |v: &str| -> Result<Xdr> {
+                    lookup(&mut cache, v, || {
+                        let repo = upstream::maven_repository(&http, &s.package, v)?;
+                        xdr_of_commit(
+                            &tags,
+                            &upstream::tagged_xdr_commit(&http, &repo, v, JAVA_VERSION_FILE)?,
+                        )
+                    })
+                };
+                let c = choose(&p, pins, floor_time, policy.min_protocol, &mut f)?;
+                (p, c)
+            }
             _ => unreachable!("checked against SDKS above"),
         };
         plans.push(SdkPlan {
@@ -366,7 +388,8 @@ fn lookup(
 const HEADER: &str = "\
 # the sdk version matrix of the conformance runner and how each testee is built and started.
 # `shapekit conformance sync-versions` writes this file and testees/*/versions/ from what
-# crates.io, the go module proxy, npm and pypi publish; `sync-versions --check` reports
+# crates.io, the go module proxy, npm, pypi and maven central publish; `sync-versions --check`
+# reports
 # whether they are up to date. change the per-sdk settings or [sync] here and run it again; the
 # version lists are not edited by hand. paths are relative to the repository root;
 # `shapekit conformance run` runs the build steps in order, then starts `command` and checks
@@ -396,8 +419,9 @@ const HEADER: &str = "\
 # an entry generated at a later protocol is reported as unsupported rather than as a
 # divergence. it comes from the stellar/stellar-xdr commit the version's code was generated
 # from (the crate's xdr-version file, go-stellar-sdk's xdr/xdr_commit_generated.txt,
-# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's Makefile at
-# the release tag, since pypi records no commit, and for soroban-sdk the xdr-version file of
+# js-stellar-sdk's Makefile at the commit npm records as gitHead, py-stellar-base's and
+# java-stellar-sdk's Makefiles at the release tag, since pypi and maven central record no commit,
+# and for soroban-sdk the xdr-version file of
 # the stellar-xdr release that its soroban-env-host's soroban-env-common pins with `=`): the
 # release tag at that commit names a protocol, extended up to the
 # protocol before the next tag, because a protocol without a tag of its own changed no xdr
@@ -419,6 +443,10 @@ const HEADER: &str = "\
 # target/testees/python/<version>/venv, made with uv from the hash-locked
 # testees/python/versions/<version>/requirements.txt, so the sdk and every dependency it
 # imports (xdrlib3, pynacl) are pinned.
+# java: one source (testees/java/src) built by maven per version from
+# testees/java/versions/<version>/pom.xml into target/testees/java/<version>/, whose lib/ jars
+# are checked against testees/java/versions/<version>/lib.sha256, so the resolved dependency
+# tree (gson above all) is pinned, not only the sdk version.
 ";
 
 fn quote(s: &str) -> String {
@@ -562,6 +590,37 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                 ],
             )
         }
+        "java" => {
+            let t = format!("target/testees/java/{v}");
+            (
+                vec![
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("mvn"),
+                            s("-B"),
+                            s("-q"),
+                            s("-f"),
+                            format!("testees/java/versions/{v}/pom.xml"),
+                            s("-DskipTests"),
+                            s("package"),
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {}, dir = {} }},",
+                        array(&[
+                            s("sha256sum"),
+                            s("--check"),
+                            s("--strict"),
+                            s("--quiet"),
+                            format!("../../../../../testees/java/versions/{v}/lib.sha256"),
+                        ]),
+                        quote(&format!("{t}/lib"))
+                    ),
+                ],
+                vec![s("java"), s("-jar"), format!("{t}/testee.jar")],
+            )
+        }
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
@@ -647,6 +706,10 @@ fn testee_files(sdk: &str, v: &str) -> Vec<String> {
         "python" => vec![
             format!("testees/python/versions/{v}/requirements.in"),
             format!("testees/python/versions/{v}/requirements.txt"),
+        ],
+        "java" => vec![
+            format!("testees/java/versions/{v}/pom.xml"),
+            format!("testees/java/versions/{v}/lib.sha256"),
         ],
         _ => unreachable!("only the sdks in SDKS have testees"),
     }
@@ -890,6 +953,19 @@ fn write_testee(root: &Path, sdk: &str, template_version: &str, v: &str) -> Resu
                 &dir,
                 &[],
             )
+        }
+        "java" => {
+            let from = root.join(format!("testees/java/versions/{template_version}/pom.xml"));
+            let text = std::fs::read_to_string(&from)
+                .with_context(|| format!("reading {}", from.display()))?;
+            let dir = root.join(format!("testees/java/versions/{v}"));
+            std::fs::create_dir_all(&dir)?;
+            std::fs::write(
+                dir.join("pom.xml"),
+                from_template(&text, template_version, v, JAVA_POM_VERSIONS)?,
+            )?;
+            // builds the version and writes lib.sha256 from the jars maven resolved
+            run_step(&["testees/java/lock.sh", v], root, &[])
         }
         _ => unreachable!("only the sdks in SDKS have testees"),
     }

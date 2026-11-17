@@ -664,6 +664,121 @@ pub fn pypi_repository(http: &Http, name: &str, version: &str) -> Result<String>
     github_repo(url)
 }
 
+// ---- maven central
+
+const MAVEN_CENTRAL: &str = "https://repo1.maven.org/maven2";
+
+fn maven_coordinate(coordinate: &str) -> Result<(&str, &str)> {
+    coordinate
+        .split_once(':')
+        .filter(|(g, a)| !g.is_empty() && !a.is_empty() && !a.contains(':'))
+        .with_context(|| format!("{coordinate} is not a groupId:artifactId coordinate"))
+}
+
+/// The text of one element of a Maven document, the first one when it repeats.
+fn xml_element<'a>(doc: &'a str, name: &str) -> Option<&'a str> {
+    let open = format!("<{name}>");
+    let close = format!("</{name}>");
+    let start = doc.find(&open)? + open.len();
+    let end = doc[start..].find(&close)? + start;
+    Some(doc[start..end].trim())
+}
+
+/// Every `<version>` of a `maven-metadata.xml`, and its `<release>`, the newest release the
+/// repository records. Maven Central withdraws nothing, so no release is marked withdrawn. The
+/// publish times come from Central's search index, which records when each version was
+/// uploaded; a version it does not list stops the command.
+pub fn maven_published(http: &Http, coordinate: &str) -> Result<Published> {
+    let (group, artifact) = maven_coordinate(coordinate)?;
+    let url = format!(
+        "{MAVEN_CENTRAL}/{}/{artifact}/maven-metadata.xml",
+        group.replace('.', "/")
+    );
+    let meta = http.get_text(&url)?;
+    let latest = xml_element(&meta, "release")
+        .with_context(|| format!("{url} has no <release>"))?
+        .to_string();
+    let versions_block =
+        xml_element(&meta, "versions").with_context(|| format!("{url} has no <versions>"))?;
+    let search = format!(
+        "https://central.sonatype.com/solrsearch/select?q=g:{group}+AND+a:{artifact}&core=gav&rows=1000&wt=json"
+    );
+    #[derive(Deserialize)]
+    struct Search {
+        response: Docs,
+    }
+    #[derive(Deserialize)]
+    struct Docs {
+        docs: Vec<Doc>,
+    }
+    #[derive(Deserialize)]
+    struct Doc {
+        v: String,
+        timestamp: i64,
+    }
+    let found: Search = serde_json::from_str(&http.get_text(&search)?)
+        .with_context(|| format!("parsing {search}"))?;
+    let times: BTreeMap<String, i64> = found
+        .response
+        .docs
+        .into_iter()
+        .map(|d| (d.v, d.timestamp))
+        .collect();
+    let mut releases = Vec::new();
+    for v in versions_block.split("<version>").skip(1) {
+        let v = v
+            .split("</version>")
+            .next()
+            .unwrap_or_default()
+            .trim()
+            .to_string();
+        let ms = times.get(&v).with_context(|| {
+            format!("Maven Central's search lists no upload time for {coordinate} {v}")
+        })?;
+        releases.push(Release {
+            published: rfc3339_utc(ms.div_euclid(1000)),
+            version: v,
+            withdrawn: None,
+        });
+    }
+    Ok(Published { releases, latest })
+}
+
+/// The GitHub repository a release's pom names in `<scm><url>`.
+pub fn maven_repository(http: &Http, coordinate: &str, version: &str) -> Result<String> {
+    let (group, artifact) = maven_coordinate(coordinate)?;
+    let url = format!(
+        "{MAVEN_CENTRAL}/{}/{artifact}/{version}/{artifact}-{version}.pom",
+        group.replace('.', "/")
+    );
+    let pom = http.get_text(&url)?;
+    let scm = xml_element(&pom, "scm").with_context(|| format!("{url} has no <scm>"))?;
+    let repo = xml_element(scm, "url").with_context(|| format!("{url} has no <scm><url>"))?;
+    github_repo(repo)
+}
+
+/// `YYYY-MM-DDTHH:MM:SSZ` of seconds since the epoch (the civil date algorithm of Howard
+/// Hinnant's `civil_from_days`), so a time a registry gives as a number compares with the rest.
+pub fn rfc3339_utc(secs: i64) -> String {
+    let days = secs.div_euclid(86_400);
+    let rem = secs.rem_euclid(86_400);
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = yoe + era * 400 + i64::from(m <= 2);
+    format!(
+        "{y:04}-{m:02}-{d:02}T{:02}:{:02}:{:02}Z",
+        rem / 3600,
+        rem % 3600 / 60,
+        rem % 60
+    )
+}
+
 // ---- release tags
 
 /// The definitions commit a release's Makefile names, read at the repository tag spelled like
@@ -789,6 +904,31 @@ mod tests {
             "9c9c145953e80990d6ff1ae3a6a973a0ce6d0694"
         );
         assert!(makefile_xdr_commit("all:\n\ttsc\n").is_err());
+    }
+
+    #[test]
+    fn epoch_seconds_render_as_utc_times() {
+        for t in [
+            "1970-01-01T00:00:00Z",
+            "2000-03-01T00:00:00Z",
+            "2026-10-28T08:49:31Z",
+        ] {
+            assert_eq!(rfc3339_utc(utc_seconds(t).unwrap()), t);
+        }
+    }
+
+    #[test]
+    fn maven_elements() {
+        let meta = "<metadata><versioning><release>6.0.0</release><versions>\n<version>5.0.0</version>\n<version>6.0.0</version></versions></versioning></metadata>";
+        assert_eq!(xml_element(meta, "release"), Some("6.0.0"));
+        let pom = "<project><scm><connection>x</connection><url>https://github.com/lightsail-network/java-stellar-sdk</url></scm></project>";
+        let scm = xml_element(pom, "scm").unwrap();
+        assert_eq!(
+            github_repo(xml_element(scm, "url").unwrap()).unwrap(),
+            "lightsail-network/java-stellar-sdk"
+        );
+        assert!(maven_coordinate("a.b:c").is_ok());
+        assert!(maven_coordinate("a.b").is_err());
     }
 
     #[test]

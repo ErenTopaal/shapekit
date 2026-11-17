@@ -1,0 +1,67 @@
+{
+  "check_summary": {
+    "java@6.0.0": {
+      "pass": 16
+    }
+  },
+  "corpus_version": "0.1.0",
+  "decode_depth": 1000,
+  "entries": [
+    {
+      "cells": {
+        "java@6.0.0": {
+          "counts": {
+            "pass": 16
+          },
+          "result": "pass"
+        }
+      },
+      "family": "cap23.claimable-balances",
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "kind": "strkey"
+    }
+  ],
+  "generator_stellar_xdr": "30.0.0",
+  "known_failure_problems": [],
+  "ledger_decode_depth": 1012,
+  "op_summary": {
+    "java@6.0.0": {
+      "strkey_decode": {
+        "pass": 16
+      }
+    }
+  },
+  "schema_version": 1,
+  "summary": {
+    "java@6.0.0": {
+      "pass": 1
+    }
+  },
+  "testees": [
+    {
+      "components": {
+        "com.google.code.gson:gson": "2.15.0",
+        "commons-codec:commons-codec": "1.23.0"
+      },
+      "decode_limits": "honoured",
+      "key": "java@6.0.0",
+      "ops": [
+        "decode_encode",
+        "decode_json",
+        "encode_json",
+        "strkey_decode",
+        "strkey_encode",
+        "asset_order",
+        "pool_id",
+        "map_sort",
+        "id_parse",
+        "tx_hash",
+        "balance_id",
+        "contract_id"
+      ],
+      "package": "network.lightsail:stellar-sdk",
+      "sdk": "java",
+      "version": "6.0.0"
+    }
+  ]
+}

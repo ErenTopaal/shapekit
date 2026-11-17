@@ -32,6 +32,8 @@ pub struct Pins {
     pub gomod: Vec<GoModPin>,
     #[serde(default)]
     pub pypi: Vec<PypiPin>,
+    #[serde(default)]
+    pub maven: Vec<MavenPin>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -125,6 +127,31 @@ pub struct PypiPin {
     pub file: String,
     pub sha256: String,
     pub purpose: String,
+}
+
+/// One file of a Maven Central release. Central publishes no sha256 for most files, so the pin
+/// holds the sha256 of the file itself and verification downloads it.
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MavenPin {
+    pub group: String,
+    pub artifact: String,
+    pub version: String,
+    pub file: String,
+    pub sha256: String,
+    pub purpose: String,
+}
+
+impl MavenPin {
+    pub fn url(&self) -> String {
+        format!(
+            "https://repo1.maven.org/maven2/{}/{}/{}/{}",
+            self.group.replace('.', "/"),
+            self.artifact,
+            self.version,
+            self.file
+        )
+    }
 }
 
 pub fn load(path: &Path) -> Result<Pins> {
@@ -297,6 +324,20 @@ fn validate(pins: &Pins) -> Result<()> {
             bail!("{what}: sha256 must be 64 lowercase hex characters");
         }
         require_purpose(&what, &p.purpose)?;
+    }
+
+    let mut seen = HashSet::new();
+    for m in &pins.maven {
+        let what = format!("maven {}:{}@{}", m.group, m.artifact, m.version);
+        require_unique(&mut seen, "maven", format!("{what} {}", m.file))?;
+        let plain = |s: &str| !s.is_empty() && !s.contains(['/', ':']);
+        if !plain(&m.group) || !plain(&m.artifact) || !plain(&m.version) || !plain(&m.file) {
+            bail!("{what}: group, artifact, version and file must be plain names");
+        }
+        if !is_lower_hex(&m.sha256, 64) {
+            bail!("{what}: sha256 must be 64 lowercase hex characters");
+        }
+        require_purpose(&what, &m.purpose)?;
     }
 
     Ok(())

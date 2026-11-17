@@ -112,7 +112,7 @@ Result members:
 | member | type | meaning |
 |---|---|---|
 | `protocol` | integer | `2` (the runner also accepts `1`) |
-| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK), `stellar-sdk` (Python) |
+| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK), `stellar-sdk` (Python), `network.lightsail:stellar-sdk` (Java) |
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose `sdk` or `sdk_version` differs from the `package` and `version` in the versions file |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. Can be empty |
 | `ops` | array of strings | the ops this build implements, excluding `hello`. The runner refuses a `hello` that lists an op this page does not define. It does not send unlisted ops and records their checks as `unsupported` |
@@ -215,7 +215,8 @@ Request: `a`, `b` (each base64 XDR of an `Asset`).
 The testee decodes both with the SDK's XDR decoder, turns them into the SDK's asset objects
 where the comparison lives on those objects (JS `Asset.fromOperation`), and calls the SDK's
 comparison (`Asset.compare` in JS, `xdr.Asset.LessThan` in Go, `Ord` in Rust,
-`LiquidityPoolAsset.is_valid_lexicographic_order` in Python, which is "less than").
+`LiquidityPoolAsset.is_valid_lexicographic_order` in Python, which is "less than",
+`Asset.compareTo` in Java).
 
 Result: `order` (`-1`, `0` or `1`). An SDK that only offers "less than" answers with
 `lt(a, b) ? -1 : lt(b, a) ? 1 : 0`.
@@ -238,7 +239,8 @@ Request: `entries`, an array of `{"key": <base64 ScVal>, "val": <base64 ScVal>}`
 order.
 
 The testee calls the SDK's sorted-map constructor (`scvSortedMap` in JS,
-`ScMap::sorted_from` in Rust, `scval.to_map` in Python). A constructor that takes a dictionary
+`ScMap::sorted_from` in Rust, `scval.to_map` in Python, `Scv.toMap` in Java). A constructor that
+takes a dictionary
 cannot be given two equal keys, so its testee answers `unsupported` for an input that repeats a
 key.
 
@@ -262,7 +264,9 @@ The testee hands `input` to the SDK API that takes a textual or numeric ID (JS `
 and `Operation.manageSellOffer`; in Rust the only textual path is the XDR-JSON reader of the
 `id` and `offer_id` fields; in Go the Horizon response types, `horizon.Offer.ID` and
 `horizon.Transaction.AccountMuxedID`, which read IDs from JSON strings only; in Python
-`MuxedAccount` and `ManageSellOffer`, which take integers only), in the JSON type
+`MuxedAccount` and `ManageSellOffer`, which take integers only; in Java the Horizon response
+types `OfferResponse.id` and `TransactionResponse.accountMuxedId`, read with the SDK's Gson), in
+the JSON type
 it arrived as. A testee must read numbers
 without going through a binary floating point type, unless that is what the SDK itself does
 with them. If the SDK has no API for the input's JSON type, answer `unsupported`.
@@ -356,12 +360,13 @@ build or mode does:
 | Go | built with `-cover -covermode=atomic -coverpkg=github.com/stellar/go-stellar-sdk/...,.`; `runtime/coverage` writes the counters on request and `go tool covdata textfmt` reads them | a statement block of a go-stellar-sdk file, `<package path>/<file>:<line>.<col>,<line>.<col>` |
 | JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
 | Python | started with `SHAPEKIT_COVERAGE=1`; coverage.py line coverage of the `stellar_sdk` package, started before the SDK is imported, read in the process with no data file | a line of a `stellar_sdk` source file that has run, `stellar_sdk/<path>.py:<line>` |
+| Java | started with `SHAPEKIT_COVERAGE=1` and the JaCoCo agent of its build (`-javaagent:.../jacocoagent.jar=output=none,includes=org.stellar.sdk.*`); the agent's execution data, analysed in the process with `org.jacoco.core` | a line of an SDK class where an instruction has run, `org/stellar/sdk/<path>.java:<line>` |
 
 Result: `tool` (what measured it), `ranges` (sorted strings, each range once), and for the
 JavaScript testee `uncovered` (the ranges V8 has reported with a count of 0 that have not run
 since the process started, in the same form). V8 resets its counters each time it is read, so
 the JavaScript testee folds every read into what it has seen before; every snapshot covers the
-whole process, as for Rust, Go and Python. V8
+whole process, as for Rust, Go, Python and Java. V8
 lists a nested block only while its count differs from the count of the block around it, so a
 block can be missing from both lists: it then ran exactly as often as its parent. To decide
 whether a range ran, look it up in `ranges`, then in `uncovered`, and otherwise take the
@@ -388,6 +393,7 @@ the process with no files and no external tool:
 | Go | a statement-block counter of an instrumented package, read from `runtime/coverage.WriteCounters` |
 | JavaScript | a range of the SDK package, folded exactly as `coverage_snapshot` folds it (the two ops share one fold, so neither loses what the other read) |
 | Python | a line of a `stellar_sdk` source file that has run, as `coverage_snapshot` lists it |
+| Java | a JaCoCo probe of an SDK class |
 
 The numbers are only compared within one process: they say whether coverage grew, not which
 code ran. Ask `coverage_snapshot` for the ranges themselves.
@@ -525,7 +531,8 @@ single-SDK run accepts a `diverges-from-peers` line whose check passes.
 
 `shapekit conformance sync-versions` writes the version lists of
 [conformance/versions.toml](../conformance/versions.toml) and the per-version testee files under
-`testees/*/versions/` from what crates.io, the Go module proxy, npm and PyPI publish. For each SDK it
+`testees/*/versions/` from what crates.io, the Go module proxy, npm, PyPI and Maven Central
+publish. For each SDK it
 picks:
 
 - for every release line (a major version, or a minor version below 1.0) the newest stable
@@ -540,7 +547,8 @@ stellar-xdr crate, `xdr/xdr_commit_generated.txt` in go-stellar-sdk, and the `XD
 of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. For
 py-stellar-base it is the `XDR_COMMIT` line of the Makefile at the repository tag named like
 the release (PyPI records no commit, so the tag is used only when its
-`stellar_sdk/__version__.py` declares that version). A
+`stellar_sdk/__version__.py` declares that version), and the same for java-stellar-sdk, whose
+pom names the repository and whose `build.gradle.kts` must declare the version. A
 soroban-sdk release pins `soroban-env-host` with `=`, which pins `soroban-env-common`, which
 pins `stellar-xdr`; the `xdr-version` file of that `stellar-xdr` release is the commit. The
 stellar-xdr release tag at that commit names a protocol. Protocols without a tag of their own
@@ -549,7 +557,7 @@ protocol 29. A commit that is not a release tag stops the command.
 
 For a newly picked version the command writes the testee files from those of the current
 version and resolves them with `cargo generate-lockfile`, `go mod tidy`,
-`npm install --package-lock-only` or `uv pip compile --generate-hashes`. For Python, run
+`npm install --package-lock-only`, `uv pip compile --generate-hashes` or `testees/java/lock.sh`. For Python, run
 `python3 -I testees/python/gentypes.py` after the new version's venv is built, so the type
 table covers it. It removes the files of versions it no longer picks and
 leaves the files of the other versions alone, since their lock files are the pins. The comment
@@ -611,7 +619,7 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
 
 1. Read requests line by line, answer each with exactly one line, flush after every line.
 2. Answer `hello` with versions read from the build (Go `debug.ReadBuildInfo`, the installed
-   package's `package.json`, Cargo's resolved dependency, Python's `importlib.metadata`) and
+   package's `package.json`, Cargo's resolved dependency, Python's `importlib.metadata`, the file name of the jar Java loaded the SDK from) and
    never from a constant.
 3. Implement each op against the SDK's public API only. Where the SDK has no API, answer
    `unsupported` with a reason. Never emulate an SDK feature inside the testee.
@@ -620,8 +628,8 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
    [conformance/versions.toml](../conformance/versions.toml). For the SDKs here,
    `shapekit conformance sync-versions` does this (see "The version matrix").
 
-Working testees are in `testees/rust`, `testees/go`, `testees/js`, `testees/soroban` and
-`testees/python`.
+Working testees are in `testees/rust`, `testees/go`, `testees/js`, `testees/soroban`,
+`testees/python` and `testees/java`.
 
 ## The soroban-sdk testee
 
@@ -673,3 +681,29 @@ is installed into its own venv under `target/testees/python/<version>/` from the
   the schema, the manifest and each version's `stellar_sdk/xdr` source, and keyed by the
   stellar-xdr crate's type names; a test of the conformance crate checks the keys against the
   crate.
+
+## The Java testee
+
+`testees/java` runs java-stellar-sdk (`network.lightsail:stellar-sdk` on Maven Central) on JDK
+27. Each version is built by Maven from `testees/java/versions/<version>/pom.xml` into
+`target/testees/java/<version>/`, and the jars Maven resolved are checked against
+`testees/java/versions/<version>/lib.sha256`, so the SDK's own dependencies (Gson above all) are
+pinned too. The build needs `java` and `mvn` on `PATH`; `scripts/java-toolchain.sh` fetches the
+pinned JDK and Maven.
+
+- `decode_limits` is `"honoured"`: the testee decodes with the generated `decode(stream,
+  maxDepth)` on an `XdrDataInputStream` whose `setMaxInputLen` is the request's `len_limit`, and
+  refuses unread bytes itself, since `fromXdrByteArray` does not.
+- `to_native` and `map_validate` answer `unsupported`: the SDK has only typed per-arm
+  converters (`Scv.fromX`), and its ScVal key comparator is not public.
+- `id_parse` reads the input as Horizon's JSON through the SDK's own Gson, into
+  `OfferResponse.id` and `TransactionResponse.accountMuxedId`, and reports the muxed ID that
+  `MuxedAccount` encodes.
+- `IOException`, `IllegalArgumentException`, `ArithmeticException`, the SDK's `SdkException`
+  and Gson's `JsonParseException` are rejections; any other throwable from the SDK
+  (`StackOverflowError`, `NullPointerException`, `ClassCastException` and the rest) is a
+  `panic`.
+- The type table `TypesGen.java` is generated by `testees/java/gentypes.py` from the schema, the
+  manifest and each version's jar, and keyed by the stellar-xdr crate's type names; a test of
+  the conformance crate checks the keys against the crate.
+

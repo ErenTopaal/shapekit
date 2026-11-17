@@ -2,6 +2,23 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: Java stellar-sdk conformance
+
+- `testees/java` runs java-stellar-sdk (`network.lightsail:stellar-sdk`) at 5.0.0 and 6.0.0,
+  the newest release of each line whose XDR knows protocol 29, on JDK 27, each version built by
+  Maven with its resolved jars checked against a committed hash list. It implements every op
+  except `to_native` and `map_validate`, for which the SDK has no API, and passes the runner's
+  decode limits to the SDK. `conformance sync-versions` derives its versions from Maven Central.
+- Corpus (716 entries): 6.0.0 passes 208, diverges from the network on 488 and cannot run 20;
+  5.0.0 passes 191, diverges on 106 and cannot run 419 (most are protocol 30 entries). Most
+  divergences are the SDK's XDR-JSON names, as in Python. Beyond them: `Asset.compareTo` still
+  orders issuers by text, so 6.0.0 refuses to read a change trust to a pool from a ledger core
+  closed; textual offer ids with a sign, whitespace or a fraction are read and one past the
+  int64 range is clamped; and on the candidate manifest a precondition V2 with no fields gives
+  a wrong transaction hash. Each cause is in `candidate/finding-candidates.toml` with source
+  lines; none is filed.
+- The `sdk-version` obligations grow from 19 to 21, both new ones met.
+
 ## 2026-11-17: Python stellar-sdk conformance
 
 - `testees/python` runs the Python `stellar-sdk` (py-stellar-base) at 16.1.1 and 17.0.1, the

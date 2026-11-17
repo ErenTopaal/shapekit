@@ -289,6 +289,124 @@ checks = "decode_json and encode_json"
 observed = "fixed-length opaque fields that are not a named hash type are written as hex where stellar-xdr writes a byte array, and a bare Int64 or Uint64 is written as a string where stellar-xdr writes a number"
 open = "both may be stellar-xdr's rendering rather than a python defect: not settled against SEP-51 text here, so not a defect claim yet"
 
+# java sdk (network.lightsail:stellar-sdk, java-stellar-sdk 5.0.0 and 6.0.0): divergences from
+#   shapekit conformance run --sdk java --all-versions                 (corpus, 716 entries)
+#   shapekit conformance run --sdk java --all-versions --manifest candidate/manifest.json
+# each triaged against the sdk source at the release tag (src/main/java/org/stellar/sdk/ paths
+# below are 6.0.0 unless named). conformance/known-failures/java.txt lists every corpus cell
+# under these causes. on the candidate manifest the same 42 probe.limits.* tx_hash runner errors
+# as for python occur, and 5.0.0 refuses protocol 30 values (27 entries); neither is a java
+# defect. java refuses the bool word 2 as go and js do, so it does not share RS-3 or CORE-1, and
+# it does not accept non-zero xdr padding (XdrDataInputStream.pad checks it).
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["corpus: 465 entries, every one whose json holds a transaction result code", "candidate: 1192 entries"]
+checks = "decode_json and encode_json"
+observed = "toJson writes enum values and union arms as the lowercased .x name without SEP-51's word breaks (txsuccess for tx_success, 8_bit for b8_bit, ipv6 for i_pv6), and fromJson refuses the SEP-51 names (\"Unknown JSON value\"); the same names py-stellar-base writes"
+evidence = "xdr/TransactionResultCode.java:154-159 (toJsonObject returns \"txsuccess\"), :206 (fromJsonObject matches only \"txsuccess\"); every generated enum has the same pair"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["corpus: 13 entries (AllowTrustOp)", "candidate: 42 entries"]
+checks = "decode_json, encode_json (ClassCastException, a crash)"
+observed = "AssetCode is written as {\"credit_alphanum4\": \"USD\"} where SEP-51 writes \"USD\", and fromJson casts the bare code to a Map"
+evidence = "xdr/AssetCode.java:121 (toJsonObject), :145-148 (fromJsonObject)"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = ["corpus: 6 entries (cap67 and cap84 muxed contract transfers)", "candidate: 35 entries; and 4 entries where MuxedAccountMed25519, MuxedContract or SignerKeyEd25519SignedPayload alone is written as an object instead of its strkey"]
+checks = "decode_json and encode_json"
+observed = "6.0.0 decodes SC_ADDRESS_TYPE_MUXED_CONTRACT but SCAddress.toJson throws \"Unknown SCAddress type\" and fromJson refuses the W strkey"
+evidence = "xdr/SCAddress.java:204"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["corpus: soroban.scval-shapes.synth-event-vec-absent, soroban.auth-trees.golden-5f615b0f98ae09f3-11", "candidate: 34 entries, including absent maps and the not predicate's absent inner ClaimPredicate"]
+checks = "decode_json and encode_json (NullPointerException, a crash)"
+observed = "an SCV_VEC or SCV_MAP with no value, or an absent optional ClaimPredicate, decodes, but toJson and fromJson throw NullPointerException"
+evidence = "xdr/SCVal.java:542 (vec.toJsonObject() with vec null)"
+
+[[candidate]]
+finding = "RS-2"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["corpus: 10 entries (deep auth trees, ScVals and events, among them soroban.auth-trees.synth-auth-depth-493-deepest-accepted)", "candidate: 30 entries"]
+checks = "encode_json"
+observed = "fromJson parses with gson, whose JsonReader stops at its default nesting limit of 255 (\"Nesting limit 255 reached\"), so json the sdk's own toJson wrote for deep values cannot be read back: the class of RS-2"
+evidence = "xdr/XdrElement.java:20-25 (the shared GsonBuilder sets no nesting limit, so gson's default applies)"
+
+[[candidate]]
+finding = "GO-4"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["soroban.auth-trees.p30-declared-depth-493", "soroban.auth-trees.synth-auth-depth-494-over-cap", "soroban.scval-shapes.synth-scmap-depth-198-over-cap", "soroban.scval-shapes.synth-scvec-depth-247-over-cap"]
+checks = "decode_encode"
+observed = "decode(stream, maxDepth) spends one level per named type, so at the runner's depth of 1000 it reads envelopes nested deeper than core accepts, as go-xdr does (GO-4)"
+evidence = "xdr/SCVal.java:348-352 (maxDepth -= 1 once per type); the default XdrDataInputStream.DEFAULT_MAX_DEPTH is 200, so fromXdrBase64 refuses the deep values core accepts instead"
+
+[[candidate]]
+finding = "GO-TEXTID"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical", "cap27.muxed-accounts.synth-textual-muxed-id-noncanonical"]
+checks = "case 0 and cases 7 to 10, 12 to 15 of the offer entry; cases 10, 12 and 16 of the muxed entry (id_parse)"
+observed = "the sdk's horizon response types read ids through gson: OfferResponse.id (Long) takes \" 16 \", \"16\\n\", \"+16\", \"-0\", \"16.0\" and \"1e1\" and clamps \"9223372036854775808\" to 9223372036854775807; TransactionResponse.accountMuxedId (BigInteger) takes \"+16\", \"-0\" and fullwidth digits. the class of GO-TEXTID and RS-1"
+evidence = "responses/OfferResponse.java:20-21 (Long id), responses/TransactionResponse.java:54 (BigInteger accountMuxedId), both read by the sdk's gson"
+
+[[candidate]]
+finding = "JS-1766"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["cap38.liquidity-pools.synth-assets-dotnet257", "cap38.liquidity-pools.synth-assets-js1766-issuers", "cap38.liquidity-pools.synth-assets-py1246-testnet-pool", "cap38.liquidity-pools.testnet-5521432", "cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope"]
+checks = "asset_order, pool_id, and tx_hash of the two envelopes"
+observed = "Asset.compareTo orders issuers as strkey text, not key bytes, so it orders some pairs against core, LiquidityPool refuses pairs core accepts, and AbstractTransaction.fromEnvelopeXdr refuses a change trust to such a pool from a ledger core closed. the defect JS-1766, GO-3 and py-stellar-base#1246 fixed; not fixed in 6.0.0"
+evidence = "AssetTypeCreditAlphaNum4.java:65-69 and AssetTypeCreditAlphaNum12.java:63-66 (getIssuer().compareTo); LiquidityPool.java:53-54"
+
+[[candidate]]
+finding = "GO-1"
+sdk = "java"
+versions = ["5.0.0"]
+entries = ["cap23.claimable-balances.synth-strkey-b-invalid"]
+checks = "case 13/strkey_decode, case 15/strkey_decode"
+observed = "5.0.0 StrKey.decodeClaimableBalance reads claimable balance ids of any type byte, GO-1's defect; 6.0.0 refuses them"
+evidence = "5.0.0 StrKey.java:292-294 (decodeCheck only)"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = ["probe.envelope-fields.transaction-cond-invoke-2", "probe.envelope-fields.transaction-cond-invoke-2-ledger", "probe.envelope-fields.transaction-cond-payment-2", "probe.envelope-fields.transaction-cond-payment-2-ledger"]
+checks = "testnet/tx_hash"
+observed = "a wrong transaction hash for a transaction core applied: fromEnvelopeXdr rebuilds the preconditions through TransactionPreconditions, and toXdr writes PRECOND_NONE for a PRECOND_V2 whose fields are all empty, so the sdk hashes other bytes than the envelope's"
+evidence = "TransactionPreconditions.java:105-111 (hasV2 is false when every v2 field is empty), :177-212 (toXdr then writes PRECOND_NONE)"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = ["probe.envelope-fields.revokesponsorshipopsigner-signerkey-5-ledger"]
+checks = "testnet/tx_hash 0"
+observed = "fromEnvelopeXdr refuses a transaction in a ledger core closed: a revoke sponsorship of a signed payload signer with an empty payload (\"Invalid payload length, must be between 1 and 64, got 0\"); CAP-40 allows 0 to 64 bytes in the xdr"
+evidence = "SignerKey.java:296-304"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["5.0.0", "6.0.0"]
+entries = ["candidate: 33 entries (Curve25519Public, HmacSha256Mac, ShortHashSeed and the types holding them)", "candidate: 4 entries (bare Int64 and Uint64)"]
+checks = "decode_json and encode_json"
+observed = "the same two renderings as python: fixed-length opaque fields written as hex where stellar-xdr writes a byte array (and fromJson crashes on the array, ClassCastException), and a bare Int64 or Uint64 written as a string"
+open = "may be stellar-xdr's rendering rather than a java defect: not settled against SEP-51 text here"
+
 # indexer state: `shapekit harness state check` on the wallet-backend reference run, against
 # core's final entries. a candidate here is a stored end state that differs from core's
 # entry; it has no corpus entry of its own, the chains below already carry it.

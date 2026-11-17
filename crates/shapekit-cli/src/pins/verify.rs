@@ -159,6 +159,16 @@ fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a
         ));
     }
 
+    for m in &pins.maven {
+        out.push((
+            "maven",
+            format!("{}:{}@{} {}", m.group, m.artifact, m.version, m.file),
+            Box::new(move || {
+                check::check_sha256(&net(http.get_bytes(&m.url()))?, &m.file, &m.sha256)
+            }),
+        ));
+    }
+
     out
 }
 

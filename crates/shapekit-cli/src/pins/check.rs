@@ -114,6 +114,17 @@ pub fn check_pypi(release_doc: &str, version: &str, file: &str, sha256: &str) ->
     }
 }
 
+/// Checks the bytes of a downloaded file against its pinned sha256.
+pub fn check_sha256(bytes: &[u8], file: &str, sha256: &str) -> Verdict {
+    use sha2::{Digest, Sha256};
+    let got = hex::encode(Sha256::digest(bytes));
+    if got == sha256 {
+        Ok(format!("{file}, sha256 matches"))
+    } else {
+        Err(format!("{file} has sha256 {got}, pinned {sha256}"))
+    }
+}
+
 /// Checks a Go module proxy `.info` document. The origin hash is the VCS commit
 /// the proxy recorded for the version.
 pub fn check_gomod(info: &str, version: &str, origin_hash: &str) -> Verdict {
@@ -409,6 +420,17 @@ mod tests {
     }
 
     const SDK_INFO: &str = r#"{"Version":"v0.8.0","Time":"2026-10-20T21:30:21Z","Origin":{"VCS":"git","URL":"https://github.com/stellar/go-stellar-sdk","Hash":"921a5b16af9a72d973ab9ba666e96ad8bf2f6ce4","Ref":"refs/tags/v0.8.0"}}"#;
+
+    #[test]
+    fn file_sha256() {
+        let empty = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        assert!(check_sha256(b"", "a.jar", empty).is_ok());
+        assert!(
+            check_sha256(b"x", "a.jar", empty)
+                .unwrap_err()
+                .contains("pinned")
+        );
+    }
 
     #[test]
     fn pypi_file_digest_and_yank() {
