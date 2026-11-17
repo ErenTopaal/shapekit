@@ -229,3 +229,22 @@ fn a_history_only_arm_nothing_covers_is_refused() {
         "{p:?}"
     );
 }
+
+#[test]
+fn a_chain_id_under_both_corpus_and_candidate_is_ambiguous() {
+    let dir = layout(&[], LISTED);
+    let root = dir.path();
+    let id = "cap01.bump-sequence.p30".to_string();
+    fs::create_dir_all(root.join("corpus/chains").join(&id)).unwrap();
+    let (_, before) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    assert!(before.is_empty(), "{before:#?}");
+    fs::create_dir_all(root.join("candidate/chains").join(&id)).unwrap();
+    fs::create_dir_all(root.join("candidate/chains/explore.only-here")).unwrap();
+    let (_, after) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    let text: Vec<String> = after.iter().map(|p| p.to_string()).collect();
+    assert_eq!(text.len(), 1, "{text:#?}");
+    assert!(
+        text[0].contains(&id) && text[0].contains("ambiguous"),
+        "{text:#?}"
+    );
+}

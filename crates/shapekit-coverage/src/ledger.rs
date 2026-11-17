@@ -236,6 +236,27 @@ pub fn build(
 ) -> Result<(ObligationLedger, Vec<Problem>), CoverageError> {
     let mut problems = Vec::new();
     let at = |what: &str| format!("obligations ({what})");
+    // a `chain:<id>` witness names a directory under corpus/chains or candidate/chains, so
+    // one id must not be in both
+    let chain_ids = |dir: PathBuf| -> Vec<String> {
+        std::fs::read_dir(dir)
+            .map(|rd| {
+                rd.filter_map(|e| e.ok())
+                    .filter(|e| e.path().is_dir())
+                    .filter_map(|e| e.file_name().into_string().ok())
+                    .collect()
+            })
+            .unwrap_or_default()
+    };
+    let candidate_chains = chain_ids(root.join("candidate/chains"));
+    for id in chain_ids(corpus.join("chains")) {
+        if candidate_chains.contains(&id) {
+            problems.push(Problem::new(
+                format!("chain {id}"),
+                "is under both corpus/chains and candidate/chains, so a chain: witness of it is ambiguous",
+            ));
+        }
+    }
     let sources_path = registry.join(SOURCES_FILE);
     let text = std::fs::read_to_string(&sources_path).map_err(io(&sources_path))?;
     let sources: SourcesFile = toml::from_str(&text).map_err(|e| parse(&sources_path, e))?;

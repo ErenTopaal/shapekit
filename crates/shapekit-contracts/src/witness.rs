@@ -9,7 +9,7 @@ use std::fmt;
 /// |---|---|
 /// | `entry:<id>` | an entry of `corpus/manifest.json` |
 /// | `candidate:<id>` | an entry of `candidate/manifest.json`, not promoted yet |
-/// | `chain:<id>` | a committed chain, `corpus/chains/<id>/` |
+/// | `chain:<id>` | a committed chain, `corpus/chains/<id>/` or `candidate/chains/<id>/`; an id names one directory in the two trees together |
 /// | `recipe:<path>` | a recipe file, relative to the repository root |
 /// | `dataset:<path>` | a committed dataset run report (core's test metas through the sdks), relative to the repository root |
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
