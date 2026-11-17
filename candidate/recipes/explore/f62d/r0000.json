@@ -1,0 +1,1452 @@
+{
+  "schema_version": 1,
+  "id": "explore.s41.e2",
+  "family": "explore",
+  "protocol": 30,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": true,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "210000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "999999599789999499",
+              "asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@account:e"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "signer": {
+                "account_id": "@account:root",
+                "signer_key": "PBLQGGQVMAYTIFBTM3QSVEGZN2ELMXG5LLDPABFCANXETSXJGUJWSAAAABAEFSWVXNWSOKFNMQPTST5VZ3M7V3U5NMG7BARWG24R7FWORCOMUSFHFBBZUJXRVU4AU2RQXGGZCYPOFXJPJOCHLTEWJUHAJDX2ONUX2VZ5S"
+              }
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "b",
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "label": "o2b",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "signer": {
+                "account_id": "@account:e",
+                "signer_key": "TAL3DGE2IZKDFXWQL3WGC2AMU2MOU7J5NAGBSPVAOWREYH7TNSOUPYWN"
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o2b"
+      ]
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": "native",
+              "destination": "@account:c"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "payment": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "dest_min": "7",
+              "destination": "@account:e",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_amount": "10000000",
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "label": "o3a",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "clawback_claimable_balance": {
+              "balance_id": "BAAJQYLCOEQM7K7HN2XB5TWCJ5LXZJSG4K6ZWBUTKE56QTJFOGJRUMFEGM"
+            }
+          },
+          "source_account": "@account:d"
+        },
+        {
+          "body": {
+            "create_account": {
+              "destination": "@account:a",
+              "starting_balance": "100000000000"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "allow_trust": {
+              "asset": "USD",
+              "authorize": 2,
+              "trustor": "@account:a"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "c",
+        "d"
+      ],
+      "fee": 10000,
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback_claimable_balance": "does_not_exist"
+              }
+            },
+            {
+              "op_inner": {
+                "create_account": "already_exist"
+              }
+            },
+            {
+              "op_inner": {
+                "allow_trust": "no_trust_line"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "tx",
+      "label": "o3b",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": null,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": null,
+              "master_weight": null,
+              "med_threshold": null,
+              "set_flags": 8,
+              "signer": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": {
+        "time": {
+          "max_time": "0",
+          "min_time": "0"
+        }
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "set_options": "auth_revocable_required"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o3a",
+        "o3b"
+      ]
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "key2",
+              "data_value": "8030f0429d2bf6f8534ed41a2e44bb0fd9b29f70d49c4cfb8f28b66fad9785da"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "1000000000",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "@account:b",
+                    "predicate": {
+                      "before_absolute_time": "9223372036854775807"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": "@muxed:a:1"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "manage_data": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "create_claimable_balance": {
+                  "success": "BAAOEBEGLZUOATDAGUNWR2U7NXXNCNXO35O7WPATB3G6PBIGUH4TMBUUX4"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_withdraw": {
+              "amount": "499999799999999750",
+              "liquidity_pool_id": "LCGUCK3WOTUGSGAM6TDFIPX4SDCRWTILQHZL4ZRQUGWMV3OIML4VQY45",
+              "min_amount_a": "209999999",
+              "min_amount_b": "999999799999999601"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_withdraw": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "signer": {
+                "account_id": "@account:d",
+                "signer_key": "XBF7YYGVNCNFJUFJLAI3YW2PBY7IODZILVCR4RU3NCANKJJSAQYZU5CS"
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "b"
+      ],
+      "memo": {
+        "text": "x"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "signer": {
+                "account_id": "@account:d",
+                "signer_key": "@account:d"
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "destination": "@account:c"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "key2",
+              "data_value": "8030f0429d2bf6f8534ed41a2e44bb0fd9b29f70d49c4cfb8f28b66fad9785da"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "1000000000",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "@account:b",
+                    "predicate": {
+                      "before_absolute_time": "9223372036854775807"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": "@muxed:a:1"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_data": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "create_claimable_balance": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": "native",
+              "destination": "@account:b"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "payment": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@muxed:b:18446744073709551615"
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "100009999400"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "allow_trust": {
+              "asset": "LONGASSET12",
+              "authorize": 0,
+              "trustor": "@account:e"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": "none",
+      "cond": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "allow_trust": "cant_revoke"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_deposit": {
+              "liquidity_pool_id": "LCUOFYSZ45WQUV4CLTDBNR7BMXQCS3MAEEMUKO3SEEJT75MC2NZ4WF3C",
+              "max_amount_a": "1",
+              "max_amount_b": "1000000000000",
+              "max_price": {
+                "d": 1,
+                "n": 7
+              },
+              "min_price": {
+                "d": 7,
+                "n": 1
+              }
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_deposit": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "99999999900",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "@account:b",
+                    "predicate": "unconditional"
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "k",
+              "data_value": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "create_claimable_balance": {
+                  "success": "BAAHYQ6TXEESRIXM67EFILII3VJTAFWQIDW2IVNTOK6JA4QWHTYKO7TYXQ"
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "manage_data": "name_not_found"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_withdraw": {
+              "amount": "7",
+              "liquidity_pool_id": "LDJLEP3WYCWVJZHJW2N5GKGKNH2FXWMJBUSXTGMHKG5VFP267JK5724I",
+              "min_amount_a": "7",
+              "min_amount_b": "0"
+            }
+          },
+          "source_account": "@account:b"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_withdraw": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "source_mux_id": "1",
+      "operations": [
+        {
+          "body": {
+            "clawback_claimable_balance": {
+              "balance_id": "BAAOEBEGLZUOATDAGUNWR2U7NXXNCNXO35O7WPATB3G6PBIGUH4TMBUUX4"
+            }
+          },
+          "source_account": "@account:e"
+        }
+      ],
+      "signers": [
+        "a",
+        "e"
+      ],
+      "memo": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback_claimable_balance": "not_issuer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": "end_sponsoring_future_reserves",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "end_sponsoring_future_reserves": "not_sponsored"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "199999998600",
+              "asset": "native",
+              "destination": "@account:c"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_destination"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": "native",
+              "destination": "@account:c"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_destination"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "ledger_entry": {
+                "account": {
+                  "account_id": "@account:d"
+                }
+              }
+            }
+          },
+          "source_account": "@muxed:d:0"
+        }
+      ],
+      "signers": [
+        "d"
+      ],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "ledger_entry": {
+                "account": {
+                  "account_id": "@account:d"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "not_sponsor"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "manage_buy_offer": {
+              "buy_amount": "7",
+              "buying": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "offer_id": "0",
+              "price": {
+                "d": 7,
+                "n": 3
+              },
+              "selling": "native"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "fee": 10000,
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_buy_offer": "buy_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": "native",
+              "destination": "@account:e"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "payment": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "flags": 2,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_withdraw": {
+              "amount": "999999999999999600",
+              "liquidity_pool_id": "LDDKWDK7PFS2BZHAGUIJYKA7XJRCRXJDLEJSPVD5ZLXS6VY22I7CISOC",
+              "min_amount_a": "0",
+              "min_amount_b": "99989999801"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "return": "fb9404b9a34934cd63be14cf5307a36d0b54d0fba1666e0f79e8d90fbbde22fb"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_withdraw": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "label": "o5a",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "49994999800",
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "destination": "@account:b",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_asset": "native",
+              "send_max": "220000001"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "a",
+        "d"
+      ],
+      "cond": {
+        "time": {
+          "max_time": "18446744073709551615",
+          "min_time": "1775347200"
+        }
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o5a"
+      ]
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "destination": "@account:e"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "1000000000",
+              "asset": "native",
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "@account:e",
+                    "predicate": "unconditional"
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "create_claimable_balance": {
+                  "success": "BAAJOFR2KVFYYF5BAPF7J6JUCYJAJLL3TGDD235X4BVTRRP3PJMT42WSUI"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "label": "o6b",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "bump_sequence": {
+              "bump_to": "1"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "bump_sequence": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o6b"
+      ]
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "dest_min": "100009999500",
+              "destination": "@account:b",
+              "path": [
+                "native",
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                }
+              ],
+              "send_amount": "199999998599",
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "10000000",
+              "asset": "native",
+              "destination": "@account:a"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "payment": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "base_fee": 1000,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "claim_claimable_balance": {
+              "balance_id": "BAAJOFR2KVFYYF5BAPF7J6JUCYJAJLL3TGDD235X4BVTRRP3PJMT42WSUI"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "fee": 1000,
+      "cond": {
+        "time": {
+          "max_time": "0",
+          "min_time": "0"
+        }
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "claim_claimable_balance": "cannot_claim"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

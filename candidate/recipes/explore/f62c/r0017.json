@@ -1,0 +1,602 @@
+{
+  "schema_version": 1,
+  "id": "explore.s40.e5",
+  "family": "explore",
+  "protocol": 19,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": false,
+    "emit_classic_events": false,
+    "backfill_stellar_asset_events": false
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "200000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_deposit": {
+              "liquidity_pool_id": "LCX266I4FJJX4HUK45HQDY2KGSIL22GI7GGJQ5TDSKNJ46Y5O32XE3YR",
+              "max_amount_a": "10000000",
+              "max_amount_b": "100",
+              "max_price": {
+                "d": 1,
+                "n": 2147483647
+              },
+              "min_price": {
+                "d": 1,
+                "n": 1
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": "none",
+      "cond": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_deposit": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "base_fee": 50,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": "end_sponsoring_future_reserves",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "10000000000",
+              "line": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": "@account:b"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "create_passive_sell_offer": {
+              "amount": "1000000000000",
+              "buying": "native",
+              "price": {
+                "d": 7,
+                "n": 7
+              },
+              "selling": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_sell_offer": "sell_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "clawback": {
+              "amount": "1000000000",
+              "asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "from": "@account:b"
+            }
+          },
+          "source_account": "@account:a"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "clawback": "not_clawback_enabled"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": null,
+              "home_domain": "",
+              "inflation_dest": null,
+              "low_threshold": null,
+              "master_weight": null,
+              "med_threshold": 1,
+              "set_flags": null,
+              "signer": null
+            }
+          },
+          "source_account": "@account:c"
+        },
+        {
+          "body": {
+            "clawback_claimable_balance": {
+              "balance_id": "BAALASA7H5J7DOWBJAYSYUR7FSLZE4B2BTAVZVBRVQN7HHGL6YBXPLZNCE"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "a",
+        "c"
+      ],
+      "memo": {
+        "hash": "5cce69581df8bb5d9a9733d89229f94e1dbc8179313a57f42041b1e132114946"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "set_options": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "clawback_claimable_balance": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "create_passive_sell_offer": {
+              "amount": "99999999700",
+              "buying": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "price": {
+                "d": 1,
+                "n": 2
+              },
+              "selling": "native"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "d",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "allow_trust": {
+              "asset": "LONGASSET12",
+              "authorize": 2,
+              "trustor": "@account:b"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "b",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "manage_buy_offer": {
+              "buy_amount": "99999999601",
+              "buying": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              },
+              "offer_id": "0",
+              "price": {
+                "d": 7,
+                "n": 1
+              },
+              "selling": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_buy_offer": "sell_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "manage_buy_offer": {
+              "buy_amount": "50000000000",
+              "buying": "native",
+              "offer_id": "0",
+              "price": {
+                "d": 7,
+                "n": 7
+              },
+              "selling": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "a"
+      ],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "manage_buy_offer": {
+                  "success": {
+                    "offer": {
+                      "created": {
+                        "amount": "50000000000",
+                        "buying": "native",
+                        "ext": "v0",
+                        "flags": 0,
+                        "offer_id": "1",
+                        "price": {
+                          "d": 7,
+                          "n": 7
+                        },
+                        "seller_id": "@account:a",
+                        "selling": {
+                          "credit_alphanum12": {
+                            "asset_code": "LONGASSET12",
+                            "issuer": "@account:a"
+                          }
+                        }
+                      }
+                    },
+                    "offers_claimed": []
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "source_mux_id": "1",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "9223372036854775807",
+              "line": {
+                "pool_share": {
+                  "liquidity_pool_constant_product": {
+                    "asset_a": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:a"
+                      }
+                    },
+                    "asset_b": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:b"
+                      }
+                    },
+                    "fee": 30
+                  }
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "manage_buy_offer": {
+              "buy_amount": "50000000000",
+              "buying": "native",
+              "offer_id": "999999599999999500",
+              "price": {
+                "d": 2,
+                "n": 7
+              },
+              "selling": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "a"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_buy_offer": "not_found"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "source_mux_id": "1",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "99999998600",
+              "line": {
+                "pool_share": {
+                  "liquidity_pool_constant_product": {
+                    "asset_a": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:a"
+                      }
+                    },
+                    "asset_b": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:b"
+                      }
+                    },
+                    "fee": 30
+                  }
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+# the explorer run these recipes come from
+run = "f62d"
+command = "shapekit explore run --budget 60 --protocol 30,30,30,22,19,17,14,12,10,9 --jobs 3 --actions 60 --coverage --seed 65"
+seed = 65
+twin_image = "sha256:50c420e6768f2e4df73ce2fed6339f485a159495eb59cb764e37ed6d33916a6f"
+load_average_at_start = "11.38, 13.64, 17.61"
+load_average_at_end = "19.69, 22.66, 25.18"
+episodes = 172
+recipes_written = 51
+classic_target_arms = 329
+classic_target_arms_witnessed = 253
+kept_here = "the recipes a greedy cover over this run's witnesses picked; the run's other recipes are not kept"
+
+[recipes.r0000]
+id = "explore.s41.e2"
+protocol = 30
+steps = 77
+arms_first_witnessed = ["AccountEntryExt:v0", "AccountEntryExt:v1", "AccountEntryExtensionV1Ext:v2", "AccountEntryExtensionV2Ext:v3", "AccountMergeResult:success", "AllowTrustResult:cant_revoke", "AllowTrustResult:no_trust_line", "Asset:credit_alphanum12", "Asset:credit_alphanum4", "Asset:native", "AssetCode:credit_alphanum12", "AssetCode:credit_alphanum4", "BumpSequenceResult:success", "ClaimClaimableBalanceResult:cannot_claim", "ClaimPredicate:before_absolute_time", "ClaimPredicate:unconditional", "ClaimableBalanceEntryExt:v0", "ClaimableBalanceId:claimable_balance_id_type_v0", "Claimant:claimant_type_v0", "ClawbackClaimableBalanceResult:does_not_exist", "ClawbackClaimableBalanceResult:not_issuer", "ContractEventBody:v0", "CreateAccountResult:already_exist", "CreateAccountResult:success", "CreateClaimableBalanceResult:no_trust", "CreateClaimableBalanceResult:success", "DataEntryExt:v0", "EndSponsoringFutureReservesResult:not_sponsored", "ExtensionPoint:v0", "FeeBumpTransactionExt:v0", "FeeBumpTransactionInnerTx:tx", "GeneralizedTransactionSet:v1", "InnerTransactionResultExt:v0", "InnerTransactionResultResult:tx_failed", "LedgerCloseMeta:v2", "LedgerCloseMetaExt:v0", "LedgerEntryChange:created", "LedgerEntryChange:removed", "LedgerEntryChange:state", "LedgerEntryChange:updated", "LedgerEntryData:account", "LedgerEntryData:claimable_balance", "LedgerEntryData:data", "LedgerEntryExt:v0", "LedgerEntryExt:v1", "LedgerEntryExtensionV1Ext:v0", "LedgerHeaderExt:v0", "LedgerHeaderExt:v1", "LedgerHeaderExtensionV1Ext:v0", "LedgerHeaderHistoryEntryExt:v0", "LedgerKey:account", "LedgerUpgrade:base_fee", "LedgerUpgrade:flags", "LiquidityPoolDepositResult:no_trust", "LiquidityPoolWithdrawResult:no_trust", "ManageBuyOfferResult:buy_no_trust", "ManageDataResult:name_not_found", "ManageDataResult:success", "Memo:id", "Memo:none", "Memo:return", "Memo:text", "MuxedAccount:ed25519", "MuxedAccount:muxed_ed25519", "OperationBody:account_merge", "OperationBody:allow_trust", "OperationBody:bump_sequence", "OperationBody:claim_claimable_balance", "OperationBody:clawback_claimable_balance", "OperationBody:create_account", "OperationBody:create_claimable_balance", "OperationBody:end_sponsoring_future_reserves", "OperationBody:liquidity_pool_deposit", "OperationBody:liquidity_pool_withdraw", "OperationBody:manage_buy_offer", "OperationBody:manage_data", "OperationBody:path_payment_strict_receive", "OperationBody:path_payment_strict_send", "OperationBody:payment", "OperationBody:revoke_sponsorship", "OperationBody:set_options", "OperationResult:op_inner", "OperationResultTr:account_merge", "OperationResultTr:allow_trust", "OperationResultTr:bump_sequence", "OperationResultTr:claim_claimable_balance", "OperationResultTr:clawback_claimable_balance", "OperationResultTr:create_account", "OperationResultTr:create_claimable_balance", "OperationResultTr:end_sponsoring_future_reserves", "OperationResultTr:liquidity_pool_deposit", "OperationResultTr:liquidity_pool_withdraw", "OperationResultTr:manage_buy_offer", "OperationResultTr:manage_data", "OperationResultTr:path_payment_strict_receive", "OperationResultTr:path_payment_strict_send", "OperationResultTr:payment", "OperationResultTr:revoke_sponsorship", "OperationResultTr:set_options", "PathPaymentStrictReceiveResult:no_trust", "PathPaymentStrictSendResult:src_no_trust", "PathPaymentStrictSendResult:too_few_offers", "PaymentResult:no_destination", "PaymentResult:no_trust", "PaymentResult:success", "Preconditions:none", "Preconditions:time", "PublicKey:public_key_type_ed25519", "RevokeSponsorshipOp:ledger_entry", "RevokeSponsorshipOp:signer", "RevokeSponsorshipResult:does_not_exist", "RevokeSponsorshipResult:not_sponsor", "RevokeSponsorshipResult:success", "ScAddress:account", "ScAddress:claimable_balance", "ScVal:address", "ScVal:i128", "ScVal:map", "ScVal:string", "ScVal:symbol", "ScVal:u64", "SetOptionsResult:auth_revocable_required", "SignerKey:ed25519", "SignerKey:ed25519_signed_payload", "SignerKey:hash_x", "SignerKey:pre_auth_tx", "StellarValueExt:signed_ms", "TransactionEnvelope:tx", "TransactionEnvelope:tx_fee_bump", "TransactionExt:v0", "TransactionMeta:v4", "TransactionPhase:v0", "TransactionPhase:v1", "TransactionResultExt:v0", "TransactionResultResult:tx_failed", "TransactionResultResult:tx_fee_bump_inner_failed", "TransactionResultResult:tx_success", "TxSetComponent:txset_comp_txs_maybe_discounted_fee"]
+
+[recipes.r0001]
+id = "explore.s41.e0"
+protocol = 12
+steps = 21
+arms_first_witnessed = ["ChangeTrustAsset:credit_alphanum12", "ChangeTrustAsset:credit_alphanum4", "ChangeTrustResult:success", "LedgerCloseMeta:v0", "LedgerEntryData:trustline", "LedgerUpgrade:max_tx_set_size", "ManageBuyOfferResult:sell_no_trust", "OperationBody:change_trust", "OperationResultTr:change_trust", "PathPaymentStrictReceiveResult:no_destination", "StellarValueExt:signed", "TransactionEnvelope:tx_v0", "TransactionMeta:v2", "TransactionV0Ext:v0", "TrustLineAsset:credit_alphanum12", "TrustLineAsset:credit_alphanum4", "TrustLineEntryExt:v0"]
+
+[recipes.r0002]
+id = "explore.s41.e1"
+protocol = 12
+steps = 47
+arms_first_witnessed = ["AllowTrustResult:self_not_allowed", "ChangeTrustResult:invalid_limit", "ChangeTrustResult:low_reserve", "LedgerKey:trustline", "LedgerUpgrade:base_reserve", "PathPaymentStrictReceiveResult:too_few_offers"]
+
+[recipes.r0003]
+id = "explore.s41.e3"
+protocol = 30
+steps = 40
+arms_first_witnessed = ["ChangeTrustAsset:pool_share", "ChangeTrustResult:trust_line_missing", "ClaimClaimableBalanceResult:does_not_exist", "LiquidityPoolParameters:liquidity_pool_constant_product", "Memo:hash", "PathPaymentStrictReceiveResult:success", "ScVal:bytes", "SetOptionsResult:low_reserve", "SetOptionsResult:success"]
+
+[recipes.r0004]
+id = "explore.s41.e4"
+protocol = 9
+steps = 23
+arms_first_witnessed = ["InflationResult:success", "LedgerUpgrade:version", "ManageSellOfferResult:not_found", "ManageSellOfferResult:sell_no_trust", "OperationBody:create_passive_sell_offer", "OperationBody:inflation", "OperationBody:manage_sell_offer", "OperationResultTr:inflation", "OperationResultTr:manage_sell_offer", "PathPaymentStrictReceiveResult:over_sendmax"]
+
+[recipes.r0007]
+id = "explore.s41.e8"
+protocol = 30
+steps = 39
+arms_first_witnessed = ["InnerTransactionResultResult:tx_success", "ManageDataResult:low_reserve", "ManageSellOfferResult:buy_no_trust", "ManageSellOfferResult:underfunded", "OperationBody:begin_sponsoring_future_reserves", "PathPaymentStrictReceiveResult:line_full", "PathPaymentStrictSendResult:under_destmin", "PathPaymentStrictSendResult:underfunded", "SetOptionsResult:invalid_inflation", "TransactionResultResult:tx_bad_sponsorship", "TransactionResultResult:tx_fee_bump_inner_success"]
+
+[recipes.r0008]
+id = "explore.s41.e9"
+protocol = 17
+steps = 63
+arms_first_witnessed = ["AccountEntryExtensionV2Ext:v0", "AccountMergeResult:immutable_set", "BeginSponsoringFutureReservesResult:success", "ClaimPredicate:before_relative_time", "ClawbackClaimableBalanceResult:not_clawback_enabled", "CreateClaimableBalanceResult:underfunded", "ManageOfferSuccessResultOffer:created", "ManageSellOfferResult:success", "OfferEntryExt:v0", "OperationResultTr:begin_sponsoring_future_reserves", "SetOptionsResult:cant_change"]
+
+[recipes.r0022]
+id = "explore.s41.e18"
+protocol = 30
+steps = 32
+arms_first_witnessed = ["ConfigSettingEntry:frozen_ledger_keys", "LedgerEntryData:config_setting", "LedgerUpgrade:config", "ManageBuyOfferResult:success"]
+
+[recipes.r0024]
+id = "explore.s41.e38"
+protocol = 30
+steps = 72
+arms_first_witnessed = ["ClaimClaimableBalanceResult:no_trust", "OperationBody:set_trust_line_flags", "OperationResultTr:set_trust_line_flags", "SetTrustLineFlagsResult:cant_revoke"]

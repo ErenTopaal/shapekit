@@ -1,0 +1,686 @@
+{
+  "schema_version": 1,
+  "id": "explore.s41.e3",
+  "family": "explore",
+  "protocol": 30,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": true,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "200000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": 4,
+              "high_threshold": 2,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": 1,
+              "master_weight": null,
+              "med_threshold": 1,
+              "set_flags": null,
+              "signer": null
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "a",
+        "d"
+      ],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "set_options": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "flags": 4,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "9223372036854775807",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "destination": "@account:a"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "payment": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "flags": 2,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "source_mux_id": "18446744073709551615",
+      "operations": [
+        {
+          "body": {
+            "bump_sequence": {
+              "bump_to": "@seq:d+5"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "bump_sequence": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "e",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": null,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": null,
+              "master_weight": null,
+              "med_threshold": null,
+              "set_flags": null,
+              "signer": {
+                "key": "XA4PHZ3H2VUNU25YAKOWAICESNQWUACZCM55SGJS32FP66IKREJ6AMAR",
+                "weight": 255
+              }
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": null,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": 1,
+              "master_weight": null,
+              "med_threshold": null,
+              "set_flags": null,
+              "signer": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed"
+      },
+      "fee_bump": {
+        "source": "d",
+        "signers": []
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "1000",
+              "line": {
+                "pool_share": {
+                  "liquidity_pool_constant_product": {
+                    "asset_a": {
+                      "credit_alphanum4": {
+                        "asset_code": "USD",
+                        "issuer": "@account:b"
+                      }
+                    },
+                    "asset_b": {
+                      "credit_alphanum12": {
+                        "asset_code": "LONGASSET12",
+                        "issuer": "@account:b"
+                      }
+                    },
+                    "fee": 30
+                  }
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "cond": {
+        "time": {
+          "max_time": "1774483200",
+          "min_time": "1773446400"
+        }
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "change_trust": "trust_line_missing"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "signer": {
+                "account_id": "@account:e",
+                "signer_key": "TBJJRTPKOWNBLMVKQO7A4YUW6W7LCZ72JLJ6D56HVPNPIT4ELA6VBILX"
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "label": "o3a",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "dest_min": "1000000000",
+              "destination": "@account:a",
+              "path": [
+                "native",
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                },
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:b"
+                  }
+                }
+              ],
+              "send_amount": "999999699999999600",
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": "@account:c"
+        }
+      ],
+      "signers": [
+        "a",
+        "c"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "src_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o3a"
+      ]
+    },
+    {
+      "step": "tx",
+      "label": "o4b",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": 10,
+              "home_domain": null,
+              "inflation_dest": "@account:a",
+              "low_threshold": null,
+              "master_weight": 0,
+              "med_threshold": 1,
+              "set_flags": 10,
+              "signer": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "set_options": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close",
+      "order": [
+        "o4b"
+      ]
+    },
+    {
+      "step": "upgrade",
+      "flags": 0,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "source_mux_id": "1",
+      "operations": [
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "k",
+              "data_value": "7e"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "claim_claimable_balance": {
+              "balance_id": "BAABKNHTL35SCD67YCLARCCNTVAOTO3NZO4NJWZSGSRDI4RIOUVGUF7IRY"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [
+        "d"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_data": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "claim_claimable_balance": "does_not_exist"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "allow_trust": {
+              "asset": "LONGASSET12",
+              "authorize": 0,
+              "trustor": "@account:d"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "c"
+      ],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "allow_trust": "cant_revoke"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "dest_min": "999999899999999599",
+              "destination": "@account:a",
+              "path": [
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_amount": "100",
+              "send_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "src_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "upgrade",
+      "base_reserve": 20000000,
+      "config": []
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "ledger_entry": {
+                "account": {
+                  "account_id": "@account:c"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "revoke_sponsorship": {
+              "ledger_entry": {
+                "account": {
+                  "account_id": "@account:c"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "revoke_sponsorship": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "100",
+              "dest_asset": "native",
+              "destination": "@account:e",
+              "path": [
+                "native"
+              ],
+              "send_asset": "native",
+              "send_max": "1000000000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "hash": "7e7f0614ef4680cc0eec73c121125b91fae6d0799cd55a3a3d43584916f76b4e"
+      },
+      "cond": {
+        "time": {
+          "max_time": "0",
+          "min_time": "0"
+        }
+      },
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": {
+                  "success": {
+                    "last": {
+                      "amount": "100",
+                      "asset": "native",
+                      "destination": "@account:e"
+                    },
+                    "offers": []
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    }
+  ]
+}
