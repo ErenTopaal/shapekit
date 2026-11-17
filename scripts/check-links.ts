@@ -1,16 +1,20 @@
-// checks that every link in the public text resolves: README.md, STATUS.md, SECURITY.md and
-// the pages under docs/, and, when it is given, the prerendered site.
+// checks that every link in the tracked markdown files resolves, and, when it is given, every
+// link of the prerendered site.
 //
 // usage: node scripts/check-links.ts [--site site/dist/client] [--offline]
 //
 // a relative link must name a tracked file or directory, and its #fragment a heading or an id
 // of the target; a root-relative link in docs/guide/ is a developers.stellar.org route, for
-// which the guide is written. a link to this repository on github (blob, tree or raw at main) is checked
-// against the working tree, because it resolves once this commit is published. an absolute
-// link on the site, or a shapekit.org link anywhere, must name a prerendered page or file, and
-// its fragment an id in it; without --site, shapekit.org links are fetched like the others,
-// from the site as it is published now. every other http(s) link is fetched, following redirects, and must answer 2xx; --offline skips
-// the fetches. exits 1 when a link does not resolve, and lists each with the files naming it.
+// which the guide is written. a link to this repository on github (blob, tree or raw at main,
+// or at the tag v<version> of the workspace Cargo.toml) is checked against the working tree,
+// because it resolves once this commit is published and tagged. an
+// absolute link on the site, or a shapekit.org link anywhere, must name a prerendered page or
+// file, and its fragment an id in it; without --site, shapekit.org links are fetched like the
+// others, from the site as it is published now. every other http(s) link is fetched, following
+// redirects, and must answer 2xx, and its fragment must be an id or name in the page, or for a
+// github blob a line of the file; --offline skips the fetches. a link that cannot be fetched
+// (429, 5xx, 401, 403, no answer) is listed as unchecked. exits 1 when a link does not resolve,
+// 3 when none is broken but some are unchecked, and lists each with the files naming it.
 
 import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
@@ -20,7 +24,13 @@ const repo = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "
 // the site itself: checked against the prerendered pages when --site is given, since the
 // published site is the previous release until this tree is deployed
 const ownSite = /^https:\/\/shapekit\.org(\/[^#?]*)?(?:\?[^#]*)?(#.*)?$/
-const ownRepo = /^https:\/\/(?:github\.com\/ErenTopaal\/shapekit\/(?:blob|tree|raw)\/main|raw\.githubusercontent\.com\/ErenTopaal\/shapekit\/main)\/([^#?]*)(#.*)?$/
+// this repository at main or at the tag of the version this tree declares, which exists once
+// the release of this commit is tagged
+const version = readFileSync(path.join(repo, "Cargo.toml"), "utf8").match(/^version = "([^"]+)"/m)![1]
+const ref = `(?:main|v${version.replace(/\./g, "\\.")})`
+const ownRepo = new RegExp(
+  `^https://(?:github\\.com/ErenTopaal/shapekit/(?:blob|tree|raw)/${ref}|raw\\.githubusercontent\\.com/ErenTopaal/shapekit/${ref})/([^#?]*)(#.*)?$`,
+)
 
 const args = process.argv.slice(2)
 const siteIdx = args.indexOf("--site")
@@ -159,9 +169,7 @@ function checkMarkdown(file: string) {
   }
 }
 
-const pages = [...tracked].filter(
-  (f) => ["README.md", "STATUS.md", "SECURITY.md"].includes(f) || (f.startsWith("docs/") && /\.mdx?$/.test(f)),
-)
+const pages = [...tracked].filter((f) => /\.mdx?$/.test(f))
 for (const f of pages) checkMarkdown(f)
 
 // the prerendered site: every html file's hrefs
@@ -239,7 +247,15 @@ if (site) {
   }
 }
 
-async function fetchOk(url: string): Promise<string | undefined> {
+// one fetch per distinct url. a github blob is fetched from raw.githubusercontent.com, which
+// answers for the same file and ref without the html page's rate limit, and lets a #L line
+// anchor be checked against the file's line count. an answer of 429, 5xx or 401/403, or no
+// answer at all, leaves the link unchecked: it is reported as such and never counted as passing
+type Answer = { ok: true; body?: string } | { ok: false; broken: boolean; why: string }
+
+const blob = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/
+
+async function get(url: string, wantBody: boolean): Promise<Answer> {
   let last = ""
   for (let attempt = 0; attempt < 6; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt))
@@ -249,40 +265,77 @@ async function fetchOk(url: string): Promise<string | undefined> {
         signal: AbortSignal.timeout(30000),
         headers: { "user-agent": "shapekit-link-check", accept: "text/html,*/*" },
       })
+      if (res.ok) {
+        if (wantBody) return { ok: true, body: await res.text() }
+        await res.body?.cancel()
+        return { ok: true }
+      }
       await res.body?.cancel()
-      if (res.ok) return undefined
       last = `HTTP ${res.status}`
-      if (res.status !== 429 && res.status < 500) return last
+      if (res.status === 401 || res.status === 403) return { ok: false, broken: false, why: `${last}, access refused` }
+      if (res.status !== 429 && res.status < 500) return { ok: false, broken: true, why: last }
     } catch (e) {
       last = String((e as Error).cause ?? e)
     }
   }
-  return last
+  return { ok: false, broken: false, why: `${last} after 6 tries` }
 }
 
+// does the fetched document have this fragment
+function hasFragment(url: string, body: string, fragment: string): boolean {
+  const line = fragment.match(/^L(\d+)(?:C\d+)?(?:-L(\d+)(?:C\d+)?)?$/)
+  if (blob.test(url) && line) {
+    const lines = body.endsWith("\n") ? body.split("\n").length - 1 : body.split("\n").length
+    return Number(line[2] ?? line[1]) <= lines
+  }
+  const f = fragment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  return new RegExp(`\\b(?:id|name)=["']?(?:user-content-)?${f}["'\\s>]`).test(body)
+}
+
+const unchecked: string[] = []
 let fetched = 0
 if (!offline) {
-  const urls = [...external.keys()].map((u) => u.split("#")[0]).filter((u, i, a) => a.indexOf(u) === i)
+  // url without fragment -> fragments linked, and who links each
+  const targets = new Map<string, Map<string, Set<string>>>()
+  for (const [link, from] of external) {
+    const [u, fragment = ""] = link.split("#", 2)
+    if (!targets.has(u)) targets.set(u, new Map())
+    const frags = targets.get(u)!
+    if (!frags.has(fragment)) frags.set(fragment, new Set())
+    for (const f of from) frags.get(fragment)!.add(f)
+  }
+  const urls = [...targets.keys()]
   let next = 0
   const workers = Array.from({ length: 3 }, async () => {
     while (next < urls.length) {
       const url = urls[next++]
-      const err = await fetchOk(url)
+      const frags = targets.get(url)!
+      const wantBody = [...frags.keys()].some((f) => f !== "")
+      const b = url.match(blob)
+      const answer = await get(b ? `https://raw.githubusercontent.com/${b[1]}/${b[2]}/${b[3]}` : url, wantBody)
       fetched++
-      if (err) {
-        const from = [...external.entries()]
-          .filter(([u]) => u.split("#")[0] === url)
-          .flatMap(([, f]) => [...f])
-        broken.push(`${[...new Set(from)].join(", ")}: ${url}: ${err}`)
+      const who = (fs: Iterable<Set<string>>) => [...new Set([...fs].flatMap((s) => [...s]))].sort().join(", ")
+      if (!answer.ok) {
+        ;(answer.broken ? broken : unchecked).push(`${who(frags.values())}: ${url}: ${answer.why}`)
+        continue
+      }
+      for (const [fragment, from] of frags) {
+        if (fragment && !hasFragment(url, answer.body!, decodeURIComponent(fragment))) {
+          broken.push(`${who([from])}: ${url}#${fragment}: no such anchor or line in the page`)
+        }
       }
     }
   })
   await Promise.all(workers)
 }
 
-broken.sort()
-for (const b of broken) console.log(`broken: ${b}`)
+const report = (kind: string, list: string[]) => {
+  for (const l of [...new Set(list)].sort()) console.log(`${kind}: ${l}`)
+}
+report("broken", broken)
+report("unchecked", unchecked)
 console.log(
-  `${pages.length} markdown files${site ? `, ${sitePages} site pages` : ""}; ${external.size} external links, ${offline ? "not fetched" : `${fetched} distinct urls fetched`}; ${broken.length} broken`,
+  `${pages.length} markdown files${site ? `, ${sitePages} site pages` : ""}; ${external.size} external links, ${offline ? "not fetched" : `${fetched} distinct urls fetched`}; ${new Set(broken).size} broken, ${new Set(unchecked).size} unchecked`,
 )
-process.exit(broken.length === 0 ? 0 : 1)
+// 1: a link does not resolve; 3: every answered link resolves, but some could not be fetched
+process.exit(broken.length > 0 ? 1 : unchecked.length > 0 ? 3 : 0)
