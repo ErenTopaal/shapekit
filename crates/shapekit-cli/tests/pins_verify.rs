@@ -43,42 +43,55 @@ fn registered_commands() {
         .lines()
         .filter_map(|l| l.split_whitespace().next())
         .collect();
+    assert_eq!(commands, ["check", "lint", "dev", "serve", "help"]);
+    // the internal commands are left out of --help but keep their paths; `shapekit dev`
+    // lists them, sorted
+    let out = shapekit(&["dev"]);
+    assert!(out.status.success());
+    let listing = String::from_utf8_lossy(&out.stdout);
+    let internal: Vec<&str> = listing
+        .lines()
+        .filter(|l| l.starts_with("  "))
+        .filter_map(|l| l.split_whitespace().next())
+        .collect();
     assert_eq!(
-        commands,
+        internal,
         [
-            "pins",
-            "registry",
-            "manifest",
-            "conformance",
-            "oracle",
-            "import",
-            "goldens",
+            "audit",
             "capture",
-            "gen",
-            "synth",
-            "guide",
-            "pack",
-            "serve",
-            "harness",
+            "conformance",
+            "contracts",
+            "coretest",
+            "corpus",
+            "coverage",
+            "explore",
             "findings",
             "fuzz",
-            "native-fuzz",
+            "gen",
+            "goldens",
+            "guide",
             "guided-fuzz",
-            "coverage",
-            "site",
-            "twin",
-            "explore",
+            "harness",
+            "import",
             "laws",
-            "vectors",
-            "audit",
-            "schema",
-            "contracts",
-            "corpus",
+            "manifest",
+            "native-fuzz",
+            "oracle",
+            "pack",
+            "pins",
             "probe",
-            "coretest",
-            "help",
+            "registry",
+            "schema",
+            "site",
+            "synth",
+            "twin",
+            "vectors",
         ]
     );
+    for name in internal {
+        let out = shapekit(&[name, "--help"]);
+        assert!(out.status.success(), "{name} --help failed");
+    }
 }
 
 #[test]
