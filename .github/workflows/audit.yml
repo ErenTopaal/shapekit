@@ -3,7 +3,8 @@ name: audit
 # the growing random audit: every night a new seed draws 3,000 ledgers from the whole pubnet
 # history in the public SEP-54 data lake. every law is checked on each of them in process,
 # and the same ledgers go through the current version of each sdk's testee. the seed is the
-# date, so any night's sample can be drawn again with the same command.
+# date and the bound is the newest ledger when the build job ran, both fixed once for every
+# job and written to the job summary, so any night's sample can be drawn again with them.
 
 on:
   schedule:
@@ -12,6 +13,9 @@ on:
     inputs:
       seed:
         description: seed to draw with (default the date as yyyymmdd)
+        required: false
+      below:
+        description: draw ledgers below this one (default one past the newest ledger in the lake)
         required: false
       n:
         description: ledgers to draw
@@ -35,6 +39,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       seed: ${{ steps.seed.outputs.seed }}
+      below: ${{ steps.below.outputs.below }}
     steps:
       - uses: actions/checkout@v7
       - name: the seed every job draws with
@@ -61,6 +66,20 @@ jobs:
         with:
           path: target/release/shapekit
           key: ${{ steps.bin.outputs.cache-primary-key }}
+      - name: the bound every job draws below
+        # each job reading the newest ledger itself would draw from a different range, since
+        # pubnet closes a ledger every few seconds
+        id: below
+        env:
+          BELOW: ${{ inputs.below }}
+          SEED: ${{ steps.seed.outputs.seed }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BELOW:-}" ]; then
+            BELOW=$(( $(target/release/shapekit audit newest --network pubnet) + 1 ))
+          fi
+          echo "below=$BELOW" >> "$GITHUB_OUTPUT"
+          echo "drawn with \`--seed $SEED --below $BELOW\`" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         with:
           name: shapekit-audit-bin
@@ -81,13 +100,14 @@ jobs:
       - name: draw and check
         env:
           SEED: ${{ needs.build.outputs.seed }}
+          BELOW: ${{ needs.build.outputs.below }}
           N: ${{ inputs.n || '3000' }}
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           mkdir -p audit
           "$RUNNER_TEMP/bin/shapekit" audit run --network pubnet --n "$N" --seed "$SEED" \
-            --out audit/laws.json
+            --below "$BELOW" --out audit/laws.json
       - name: job summary
         if: always() && hashFiles('audit/laws.json') != ''
         run: '"$RUNNER_TEMP/bin/shapekit" audit summary --report audit/laws.json >> "$GITHUB_STEP_SUMMARY"'
@@ -138,13 +158,14 @@ jobs:
         env:
           SDK: ${{ matrix.sdk }}
           SEED: ${{ needs.build.outputs.seed }}
+          BELOW: ${{ needs.build.outputs.below }}
           N: ${{ inputs.n || '3000' }}
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           mkdir -p audit
           "$RUNNER_TEMP/bin/shapekit" audit run --network pubnet --n "$N" --seed "$SEED" \
-            --sdk "$SDK" --version current --out "audit/$SDK.json"
+            --below "$BELOW" --sdk "$SDK" --version current --out "audit/$SDK.json"
       - name: job summary
         if: always() && hashFiles(format('audit/{0}.json', matrix.sdk)) != ''
         env:

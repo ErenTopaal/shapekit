@@ -120,6 +120,12 @@ pub enum AuditCommand {
         #[arg(long)]
         out: PathBuf,
     },
+    /// Print the newest ledger in the lake. A workflow that runs several `audit run` jobs
+    /// passes one past it to each as `--below`, so every job draws the same ledgers.
+    Newest {
+        #[command(flatten)]
+        lake: LakeArgs,
+    },
     /// Print an audit report as Markdown, for a CI job summary.
     Summary {
         #[arg(long)]
@@ -272,6 +278,10 @@ pub fn run(command: AuditCommand) -> Result<bool> {
             )?;
             println!("cursor moved to {}", last.ledger);
             Ok(held)
+        }
+        AuditCommand::Newest { lake } => {
+            println!("{}", open(&lake)?.newest()?);
+            Ok(true)
         }
         AuditCommand::Summary { report } => {
             let r: AuditReport = shapekit_contracts::load(&report)?;
