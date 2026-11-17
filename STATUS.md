@@ -2,6 +2,57 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: obligation ledger, what core validates, candidate lane
+
+- Obligation ledger: `corpus/coverage/obligations.json` lists everything the corpus owes a
+  witness for, and `shapekit coverage --check` fails on an obligation without a status. By
+  kind (met, open, total):
+
+  | Kind | Met | Open | Total |
+  |---|---|---|---|
+  | `format`: XDR schema decision points | 3,869 | 0 | 3,869 |
+  | `gap`: native type losses per language | 9 | 4 | 13 |
+  | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
+  | `gate-side`: sides of stellar-core's protocol gates | 334 | 356 | 690 |
+  | `field`: envelope fields asked of core | 203 | 0 | 203 |
+  | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
+  | `seed`: faults seeded into the SDKs | 54 | 160 | 214 |
+
+- Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
+  envelope field in 1,179 attempts, each a valid transaction with one field changed. 178 of the 203
+  fields
+  are validated and 25 are not (`registry/generated/validation.json`). `shapekit guide check`
+  compares each of the 88 rows of `registry/fields.toml` with these verdicts: 86 agree, and 2
+  differ for a reason core's source shows, recorded with file and lines.
+- Limits: 20 bounded quantities measured on core by bisection
+  (`registry/generated/limits.json`), each with the largest accepted value, the first refused
+  value and where core refuses it. For example, the largest wasm module that uploads is 130,972
+  bytes.
+- Protocol gates: `registry/generated/gates.json` lists the 345 protocol version comparisons in
+  stellar-core v30.0.0's source. Corpus chains witness 334 of their 690 sides, and each open
+  side carries its cause.
+- Candidate lane: `candidate/` holds 5,971 entries that new runs wrote, such as probe witnesses
+  and format vectors, apart from the release corpus; `shapekit corpus promote` moves an entry
+  into the corpus. `registry/uncovered.toml` is checked against the lane: a probe refusal
+  confirms 31 of the 47 union arms recorded as refused before any ledger, and no record is
+  contradicted.
+- Seeded faults ([docs/seeded-faults.md](docs/seeded-faults.md)): of the sampled faults that
+  build, the corpus catches 7 of 38 in stellar-xdr 30.0.0, 12 of 76 in go-stellar-sdk v0.9.0
+  and 35 of 100 in `@stellar/stellar-sdk` 17.4.0, plus the three released js-stellar-sdk faults
+  it reproduces.
+- Fuzzing ([docs/differential-fuzzing.md](docs/differential-fuzzing.md)): a coverage-guided
+  search across the three SDKs reaches more code in every SDK than the same budget without the
+  feedback, in both seeds measured. Each SDK's own fuzzer (cargo-fuzz, `go test -fuzz`,
+  jazzer.js) found no new class in one 600 second run each.
+- Protocol 31 rehearsal ([docs/maintenance.md](docs/maintenance.md#protocol-31-rehearsal)): on
+  core's next-protocol image all 144 transaction test cases pass at protocols 0 to 31, and all
+  452,555 metas they write match core's next baseline.
+- Findings: 24 findings covering 504 failures, 0 unmapped, unchanged. Three new findings wait
+  in the candidate lane as drafts (two for stellar-etl, one for go-stellar-sdk); nothing new
+  is filed.
+- `scripts/acceptance.sh` is the gate every change to `main` passes, in a quick and a full
+  mode ([docs/maintenance.md](docs/maintenance.md#acceptance-gate)).
+
 ## 2026-11-15: 0.1.0 released, findings filed upstream
 
 - shapekit 0.1.0 is released from a signed tag:
