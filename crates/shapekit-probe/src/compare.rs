@@ -131,9 +131,18 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "signer_key.signed_payload.payload",
-            vec![at("SignerKeyEd25519SignedPayload.payload")],
+            vec![
+                only("SignerKeyEd25519SignedPayload.payload", "", "empty"),
+                except("SignerKeyEd25519SignedPayload.payload", "", "empty"),
+            ],
         ),
-        ("tx.memo.type", vec![via("Transaction.memo", "invoke")]),
+        (
+            "tx.memo.type",
+            vec![
+                via("Transaction.memo", "invoke"),
+                via("Transaction.memo", "payment"),
+            ],
+        ),
         (
             "tx.memo.text",
             vec![only("Transaction.memo", "payment", "arm text")],
@@ -170,8 +179,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         (
             "tx.soroban.footprint",
             vec![
-                via("LedgerFootprint.readOnly", "echo"),
-                via("LedgerFootprint.readWrite", "echo"),
+                except("LedgerFootprint.readOnly", "echo", "never touches"),
+                only("LedgerFootprint.readOnly", "echo", "never touches"),
+                except("LedgerFootprint.readWrite", "echo", "never touches"),
+                only("LedgerFootprint.readWrite", "echo", "never touches"),
             ],
         ),
         (
@@ -213,7 +224,13 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
             "op.payment.destination.mux_id",
             vec![via("MuxedAccountMed25519.id", "payment")],
         ),
-        ("op.payment.asset", vec![at("PaymentOp.asset")]),
+        (
+            "op.payment.asset",
+            vec![
+                via("PaymentOp.asset", "native"),
+                only("PaymentOp.asset", "credit", "issuer no longer exists"),
+            ],
+        ),
         ("op.payment.amount", vec![at("PaymentOp.amount")]),
         (
             "op.path_payment.destination",
@@ -238,8 +255,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         (
             "op.path_payment.path",
             vec![
-                at("PathPaymentStrictReceiveOp.path"),
-                at("PathPaymentStrictSendOp.path"),
+                only("PathPaymentStrictReceiveOp.path", "", "code is empty"),
+                except("PathPaymentStrictReceiveOp.path", "", "code is empty"),
+                only("PathPaymentStrictSendOp.path", "", "code is empty"),
+                except("PathPaymentStrictSendOp.path", "", "code is empty"),
             ],
         ),
         (
@@ -270,7 +289,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "op.set_options.home_domain",
-            vec![at("SetOptionsOp.homeDomain")],
+            vec![
+                except("SetOptionsOp.homeDomain", "", "printable ascii"),
+                only("SetOptionsOp.homeDomain", "", "printable ascii"),
+            ],
         ),
         (
             "op.set_options.inflation_dest",
@@ -315,7 +337,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "op.manage_data.data_name",
-            vec![at("ManageDataOp.dataName")],
+            vec![
+                except("ManageDataOp.dataName", "", "printable ascii"),
+                only("ManageDataOp.dataName", "", "printable ascii"),
+            ],
         ),
         // the row is about the bytes of a value; an absent value is the delete arm, which
         // the row describes on its own (null deletes the entry)
@@ -370,7 +395,11 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "op.begin_sponsoring.sponsored_id",
-            vec![at("BeginSponsoringFutureReservesOp.sponsoredID")],
+            vec![
+                via("BeginSponsoringFutureReservesOp.sponsoredID", "peer"),
+                bases("BeginSponsoringFutureReservesOp.sponsoredID", "peer"),
+                bases("BeginSponsoringFutureReservesOp.sponsoredID", "create"),
+            ],
         ),
         (
             "op.revoke_sponsorship",
@@ -420,7 +449,10 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "op.invoke_host_function.invoke_contract.args",
-            vec![at("InvokeContractArgs.args")],
+            vec![
+                except("InvokeContractArgs.args", "", "which echo takes"),
+                only("InvokeContractArgs.args", "", "which echo takes"),
+            ],
         ),
         (
             "op.invoke_host_function.upload_wasm",
@@ -445,7 +477,18 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "op.invoke_host_function.auth",
-            vec![via("InvokeHostFunctionOp.auth", "auth")],
+            vec![
+                except(
+                    "InvokeHostFunctionOp.auth",
+                    "auth",
+                    "first element repeated",
+                ),
+                only(
+                    "InvokeHostFunctionOp.auth",
+                    "auth",
+                    "first element repeated",
+                ),
+            ],
         ),
         (
             "auth.credentials.source_account",
@@ -453,30 +496,65 @@ pub fn sites() -> Vec<(&'static str, Vec<Site>)> {
         ),
         (
             "auth.credentials.address.address",
-            vec![at("SorobanAddressCredentials.address")],
+            vec![
+                via("SorobanAddressCredentials.address", "matched"),
+                only("SorobanAddressCredentials.address", "unmatched", "same arm"),
+            ],
         ),
         (
             "auth.credentials.address.nonce",
-            vec![at("SorobanAddressCredentials.nonce")],
+            vec![
+                via("SorobanAddressCredentials.nonce", "matched"),
+                via("SorobanAddressCredentials.nonce", "unmatched"),
+            ],
         ),
         (
             "auth.credentials.address.signature_expiration_ledger",
-            vec![at("SorobanAddressCredentials.signatureExpirationLedger")],
+            vec![
+                via(
+                    "SorobanAddressCredentials.signatureExpirationLedger",
+                    "matched",
+                ),
+                via(
+                    "SorobanAddressCredentials.signatureExpirationLedger",
+                    "unmatched",
+                ),
+            ],
         ),
         (
             "auth.credentials.address.signature",
-            vec![at("SorobanAddressCredentials.signature")],
+            vec![
+                via("SorobanAddressCredentials.signature", "matched"),
+                only(
+                    "SorobanAddressCredentials.signature",
+                    "unmatched",
+                    "same arm, present",
+                ),
+            ],
         ),
         (
             "auth.credentials.address_with_delegates.delegates",
-            vec![at("SorobanAddressCredentialsWithDelegates.delegates")],
+            vec![
+                via(
+                    "SorobanAddressCredentialsWithDelegates.delegates",
+                    "matched",
+                ),
+                except(
+                    "SorobanAddressCredentialsWithDelegates.delegates",
+                    "unmatched",
+                    "first element repeated",
+                ),
+            ],
         ),
         (
             "auth.root_invocation",
             vec![
                 via("SorobanAuthorizationEntry.rootInvocation", "address"),
-                at("SorobanAuthorizedInvocation.function"),
-                at("SorobanAuthorizedInvocation.subInvocations"),
+                via("SorobanAuthorizationEntry.rootInvocation", "unmatched"),
+                via("SorobanAuthorizedInvocation.function", "matched"),
+                via("SorobanAuthorizedInvocation.function", "unmatched"),
+                via("SorobanAuthorizedInvocation.subInvocations", "matched"),
+                via("SorobanAuthorizedInvocation.subInvocations", "unmatched"),
             ],
         ),
         (
@@ -505,9 +583,9 @@ pub struct Resolution {
     pub reading: &'static str,
 }
 
-/// Every disagreement the source explains. A `partial` row whose sites all measure validated
-/// is settled as mixed by the reading of what core leaves unchecked at the same site, which
-/// the probe's values did not reach. A resolution for a row that agrees is stale and
+/// Every disagreement the source explains. A `partial` row is settled as mixed only when the
+/// unchecked part needs state or a context the probe cannot build; the reading says which
+/// core lines show the missing check and why the probe cannot reach it. A resolution for a row that agrees is stale and
 /// fails the comparison.
 pub fn resolutions() -> Vec<Resolution> {
     vec![
@@ -526,146 +604,8 @@ pub fn resolutions() -> Vec<Resolution> {
         Resolution {
             row: "tx.signatures.hint",
             verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/SignatureUtils.cpp:38-46; src/transactions/SignatureUtils.cpp:127-136",
-            reading: "the hint only filters which signer core tries (SignatureUtils::doesHintMatch): a hint that matches no signer leaves the signature unused, which the probe's changed hints measured, but any hint matching a signer's last four bytes passes, and four bytes do not identify the signer",
-        },
-        Resolution {
-            row: "signer_key.signed_payload.payload",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:1285-1293; src/transactions/SetOptionsOpFrame.cpp:308-315; src/transactions/SignatureUtils.cpp:48-61",
-            reading: "core refuses an empty payload (txMALFORMED among extra signers), which the probe measured, and the signature must cover the payload, but the content of a payload of 1 to 64 bytes is never checked",
-        },
-        Resolution {
-            row: "tx.memo.type",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:340-369; src/transactions/TransactionFrame.cpp:1315-1328",
-            reading: "from protocol 25 a soroban invocation must carry MEMO_NONE (validateSorobanMemo), which the probe's invoke carrier measured; a classic transaction accepts every memo type, which its payment carrier measured under the memo arm rows",
-        },
-        Resolution {
-            row: "tx.soroban.footprint",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/TransactionFrame.cpp:792-907; rs-soroban-env v30.0.0 soroban-env-host/src/e2e_invoke.rs:470-578",
-            reading: "core checks key types, key sizes, entry counts and repeats (checkSorobanResources), which the probe measured, but not that a key exists or that the call touches it; the host only enforces that accesses stay inside the footprint",
-        },
-        Resolution {
-            row: "op.payment.asset",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/PaymentOpFrame.cpp:138-152; src/util/types.cpp:147-214; src/transactions/PathPaymentOpFrameBase.cpp:76-90",
-            reading: "isAssetValid refuses malformed codes, which the probe measured, but from protocol 13 the issuer of a well-formed asset is not checked for existence",
-        },
-        Resolution {
-            row: "op.path_payment.path",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/PathPaymentStrictReceiveOpFrame.cpp:155-179; src/transactions/PathPaymentStrictSendOpFrame.cpp:148-172",
-            reading: "each path asset must pass isAssetValid, which the probe measured with an empty asset code, but repeated assets and assets with no order book are not refused",
-        },
-        Resolution {
-            row: "op.set_options.home_domain",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/SetOptionsOpFrame.cpp:318-325; src/util/types.cpp:105-116",
-            reading: "every byte must be printable ascii (isStringValid), which the probe measured, but the value is not checked to be a domain name",
-        },
-        Resolution {
-            row: "op.manage_data.data_name",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/ManageDataOpFrame.cpp:104-122; src/util/types.cpp:105-116",
-            reading: "the name must be at least one byte of printable ascii (isStringValid), which the probe measured; its content is not otherwise checked",
-        },
-        Resolution {
-            row: "op.begin_sponsoring.sponsored_id",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/BeginSponsoringFutureReservesOpFrame.cpp:105-115; src/transactions/BeginSponsoringFutureReservesOpFrame.cpp:64-103",
-            reading: "the sponsored id must differ from the source and not be in a sponsorship already, which the probe measured, but the account is not loaded, so an id of no existing account passes",
-        },
-        Resolution {
-            row: "op.revoke_sponsorship",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/RevokeSponsorshipOpFrame.cpp:402-456",
-            reading: "doCheckValid refuses ledger key types and malformed keys, and apply needs the entry and its sponsorship, which the probe measured; the signer arm is not checked statically",
-        },
-        Resolution {
-            row: "op.invoke_host_function.invoke_contract.contract_address",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp:1440-1470; rs-soroban-env v30.0.0 soroban-env-host/src/e2e_invoke.rs:517-541",
-            reading: "core validation does not read the address; the host fails the call at execution when the contract is missing or outside the footprint, which the probe measured, and the failed transaction is still in the ledger",
-        },
-        Resolution {
-            row: "op.invoke_host_function.invoke_contract.function_name",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-common/src/symbol.rs:60-85",
-            reading: "core checks only the xdr length; the host refuses characters outside [a-zA-Z0-9_] and calls of functions the contract lacks at execution, which the probe measured as failed operations",
-        },
-        Resolution {
-            row: "op.invoke_host_function.invoke_contract.args",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/TransactionUtils.cpp:1349-1380; rs-soroban-env v30.0.0 soroban-env-host/src/host/metered_map.rs:324-346",
-            reading: "core checks only the envelope's decode depth and size; the host refuses arguments it cannot convert or the contract does not take, at execution, which the probe measured as failed operations",
-        },
-        Resolution {
-            row: "op.invoke_host_function.upload_wasm",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp:1446-1456",
-            reading: "core checks only the size at validation; the host decides at execution whether the bytes are a valid module, which the probe measured as failed uploads",
-        },
-        Resolution {
-            row: "op.invoke_host_function.create_contract.preimage",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp:1457-1468; rs-soroban-env v30.0.0 soroban-env-host/src/host/lifecycle.rs:208-271",
-            reading: "core checks only an asset preimage with isAssetValid; the host requires the preimage address to authorize the creation at execution, which the probe measured as failed operations",
-        },
-        Resolution {
-            row: "op.invoke_host_function.create_contract_v2.constructor_args",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp:1440-1470; rs-soroban-env v30.0.0 soroban-env-host/src/host/lifecycle.rs:208-271",
-            reading: "core validation does not read the arguments; the host passes them to the constructor, which refuses ones it does not take at execution, as the probe measured",
-        },
-        Resolution {
-            row: "op.invoke_host_function.auth",
-            verdict: Measured::Mixed,
-            citation: "stellar-core v30.0.0 src/transactions/InvokeHostFunctionOpFrame.cpp:664-712; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:1227-1295",
-            reading: "core never inspects auth entries; the host checks only entries a require_auth call matches, so a missing entry fails the call, as the probe measured, while unmatched entries are never checked",
-        },
-        Resolution {
-            row: "auth.credentials.source_account",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2348-2410; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2665-2720",
-            reading: "source account credentials bind the entry to the operation source and carry no signature, nonce or expiration; other credentials in their place are checked when matched, which the probe measured",
-        },
-        Resolution {
-            row: "auth.credentials.address.address",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2665-2720; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2348-2410",
-            reading: "the address is checked only when a require_auth call matches the entry, which the probe's matched entry measured; core never checks it and an unmatched entry's address is never authenticated",
-        },
-        Resolution {
-            row: "auth.credentials.address.nonce",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2586-2626; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2958-3014",
-            reading: "the nonce is consumed and checked only when the entry is matched, which the probe measured; an unmatched entry consumes nothing",
-        },
-        Resolution {
-            row: "auth.credentials.address.signature_expiration_ledger",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2586-2626",
-            reading: "the expiration is checked only when the entry is matched, which the probe measured; an unmatched entry's expiration is never read",
-        },
-        Resolution {
-            row: "auth.credentials.address.signature",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/builtin_contracts/account_contract.rs:175-263; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2631-2662",
-            reading: "the signature is converted up front but verified only when the entry is matched, which the probe measured; an unmatched entry's signature is never verified",
-        },
-        Resolution {
-            row: "auth.credentials.address_with_delegates.delegates",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:2093-2149",
-            reading: "the host decodes every entry's delegates and refuses unordered or repeated addresses up front, but delegate signatures are used only when the entry is matched; the probe measured a matched entry",
-        },
-        Resolution {
-            row: "auth.root_invocation",
-            verdict: Measured::Mixed,
-            citation: "rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:813-826; rs-soroban-env v30.0.0 soroban-env-host/src/auth.rs:769-789",
-            reading: "the host converts the whole tree up front and compares only the nodes a require_auth call matches, which the probe measured; declared subtrees that never match are not compared with anything",
+            citation: "stellar-core v30.0.0 src/transactions/SignatureUtils.cpp:38-45; src/transactions/SignatureUtils.cpp:127-136",
+            reading: "SignatureUtils::verify compares only the last four bytes of the signer's key with the hint (doesHintMatch, a memcmp of 4 bytes) before it verifies the signature, so a hint that equals another signer's last four bytes passes the filter and the signature counts for whichever signer it verifies against: the hint does not identify the signer. the probe cannot reach it, because it needs two signer keys sharing their last four bytes, a search of about 2^32 key generations",
         },
     ]
 }
@@ -738,7 +678,21 @@ pub struct SiteVerdict {
     pub attempts: usize,
 }
 
-/// `registry/generated/field-verdicts.json`, in the format the consumers agreed on.
+/// The carrier name of a struct probed in only one transaction, whose attempts carry no
+/// carrier id in validation.json.
+pub const SINGLE: &str = "single";
+
+/// `registry/generated/field-verdicts.json`, in the format the consumers agreed on:
+///
+/// - `rows` sorted by `id`, one per `registry/fields.toml` row;
+/// - `measured` is `validated` when every site validates, `not-validated` when none does and
+///   `mixed` when the sites disagree;
+/// - a site is one struct field in one carrier transaction. `carrier` is the carrier id the
+///   probe gave that transaction, or `single` for a struct it probed in only one; it is never
+///   empty. A row on every carrier of a field lists one site per carrier;
+/// - `settled_by_source` is set when core's source settles a row the measurement disagrees
+///   with: its `verdict` (`validated`, `not-validated` or `mixed`) and the `file:lines` the
+///   reading rests on.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FieldVerdicts {
@@ -793,7 +747,11 @@ pub fn field_verdicts(rows: &[Compared], source: &str) -> FieldVerdicts {
                 .iter()
                 .map(|s| SiteRecord {
                     field: s.field.clone(),
-                    carrier: s.carrier.clone(),
+                    carrier: if s.carrier.is_empty() {
+                        SINGLE.to_owned()
+                    } else {
+                        s.carrier.clone()
+                    },
                     verdict: verdict_of(s.validated),
                 })
                 .collect(),
@@ -899,16 +857,16 @@ pub fn compare(table: &ValidationTable, fields: &toml::Table) -> Result<Vec<Comp
             }
         }
         if !pooled.is_empty() {
-            ensure!(
-                measured.iter().all(|m| m.values == "the base transactions") && pooled.len() >= 2,
-                "{id}: a row compares bases only, two or more"
-            );
+            ensure!(pooled.len() >= 2, "{id}: a row compares two bases or more");
             // bases of different envelope types succeed under different codes (a fee bump's
             // is tx_fee_bump_inner_success), so they compare by whether core applied them
             let mut ends: Vec<_> = pooled.iter().map(|a| (a.submission, a.applied)).collect();
             ends.sort();
             ends.dedup();
-            for m in &mut measured {
+            for m in measured
+                .iter_mut()
+                .filter(|m| m.values == "the base transactions")
+            {
                 m.validated = ends.len() > 1;
                 m.attempts = pooled.len();
             }

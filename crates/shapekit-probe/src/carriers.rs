@@ -70,9 +70,14 @@ pub struct Carrier {
     pub extra: Extra,
 }
 
-pub type Extra = fn(&World, &Subject, &str) -> Result<Vec<Replacement>>;
+pub type Extra = fn(&World, &Subject, &str, &serde_json::Value) -> Result<Vec<Replacement>>;
 
-pub fn no_extra(_: &World, _: &Subject, _: &str) -> Result<Vec<Replacement>> {
+pub fn no_extra(
+    _: &World,
+    _: &Subject,
+    _: &str,
+    _: &serde_json::Value,
+) -> Result<Vec<Replacement>> {
     Ok(Vec::new())
 }
 
@@ -382,7 +387,7 @@ fn clawback_setup(w: &mut World, s: &Subject) -> Result<SigningKey> {
 }
 
 /// A path holding one asset that is not valid: an alphanumeric code of zero bytes.
-fn path_extra(w: &World, _: &Subject, f: &str) -> Result<Vec<Replacement>> {
+fn path_extra(w: &World, _: &Subject, f: &str, _: &serde_json::Value) -> Result<Vec<Replacement>> {
     Ok(match f {
         "path" => vec![extra(
             "one asset whose four letter code is empty",
@@ -453,7 +458,70 @@ pub fn classic() -> Vec<Carrier> {
                 Ok(b)
             })
         },
-        c("PaymentOp", "a native payment", pay_base),
+        Carrier {
+            id: "native",
+            ..c("PaymentOp", "a native payment", pay_base)
+        },
+        Carrier {
+            id: "credit",
+            extra: |_, s, f, _| {
+                Ok(match f {
+                    "asset" => vec![extra(
+                        "an asset whose issuer no longer exists",
+                        json!({"credit_alphanum4": {
+                            "asset_code": "DEAD",
+                            "issuer": account_strkey(&s.fresh("dead-issuer").verifying_key()),
+                        }}),
+                    )],
+                    _ => Vec::new(),
+                })
+            },
+            ..c(
+                "PaymentOp",
+                "a payment of the shared credit, the source also holding an asset whose issuer merged away",
+                |w, s| {
+                    let src = s.source.clone();
+                    let peer = s.peers[0].clone();
+                    hold_credit(w, &src, 100 * XLM)?;
+                    let prb = w.credit4();
+                    w.classic_ok(&peer, vec![change_trust(&prb)], &[])?;
+                    // an issuer that pays the source and the peer can then hold its asset, and
+                    // merges away: a payment of that asset needs no living issuer
+                    let dead = s.fresh("dead-issuer");
+                    let asset = Asset::CreditAlphanum4(stellar_xdr::AlphaNum4 {
+                        asset_code: AssetCode4(*b"DEAD"),
+                        issuer: acc(&dead),
+                    });
+                    w.classic_ok(
+                        &src,
+                        vec![create(&dead, 100 * XLM), change_trust(&asset)],
+                        &[],
+                    )?;
+                    w.classic_ok(&peer, vec![change_trust(&asset)], &[])?;
+                    w.classic_ok(
+                        &dead,
+                        vec![
+                            OperationBody::Payment(PaymentOp {
+                                destination: muxed_account(&src.verifying_key()),
+                                asset: asset.clone(),
+                                amount: 100 * XLM,
+                            }),
+                            OperationBody::AccountMerge(muxed_account(&s.peers[2].verifying_key())),
+                        ],
+                        &[],
+                    )?;
+                    simple(
+                        w,
+                        s,
+                        OperationBody::Payment(PaymentOp {
+                            destination: muxed_account(&peer.verifying_key()),
+                            asset: prb,
+                            amount: 10 * XLM,
+                        }),
+                    )
+                },
+            )
+        },
         c(
             "AlphaNum4",
             "a payment of the shared four letter credit to a peer that trusts it",
@@ -587,7 +655,7 @@ pub fn classic() -> Vec<Carrier> {
             )
         },
         Carrier {
-            extra: |_, _, f| {
+            extra: |_, _, f, _| {
                 Ok(match f {
                     "maxTime" => vec![extra("a close time already past, 1", json!("1"))],
                     _ => Vec::new(),
@@ -610,7 +678,7 @@ pub fn classic() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |w, _, f| {
+            extra: |w, _, f, _| {
                 Ok(match f {
                     "maxLedger" => {
                         let next = w.driver.last_closed() + 1;
@@ -696,7 +764,7 @@ pub fn classic() -> Vec<Carrier> {
             )
         },
         Carrier {
-            extra: |_, s, f| {
+            extra: |_, s, f, _| {
                 Ok(match f {
                     "destination" => vec![
                         extra(
@@ -815,11 +883,15 @@ pub fn classic() -> Vec<Carrier> {
             },
         ),
         Carrier {
-            extra: |_, s, f| {
+            extra: |_, s, f, _| {
                 Ok(match f {
                     "signer" => vec![extra(
                         "the source's own key, weight 1",
                         json!({"key": account_strkey(&s.source.verifying_key()), "weight": 1}),
+                    )],
+                    "homeDomain" => vec![extra(
+                        "printable ascii that is no domain name",
+                        json!("no domain, just text!"),
                     )],
                     _ => Vec::new(),
                 })
@@ -925,16 +997,27 @@ pub fn classic() -> Vec<Carrier> {
                 )
             },
         ),
-        c("ManageDataOp", "a new data entry", |w, s| {
-            simple(
-                w,
-                s,
-                OperationBody::ManageData(ManageDataOp {
-                    data_name: stellar_xdr::String64("probe".try_into()?),
-                    data_value: Some(vec![1u8].try_into()?),
-                }),
-            )
-        }),
+        Carrier {
+            extra: |_, _, f, _| {
+                Ok(match f {
+                    "dataName" => vec![extra(
+                        "printable ascii of any content",
+                        json!("a name, with spaces & signs?"),
+                    )],
+                    _ => Vec::new(),
+                })
+            },
+            ..c("ManageDataOp", "a new data entry", |w, s| {
+                simple(
+                    w,
+                    s,
+                    OperationBody::ManageData(ManageDataOp {
+                        data_name: stellar_xdr::String64("probe".try_into()?),
+                        data_value: Some(vec![1u8].try_into()?),
+                    }),
+                )
+            })
+        },
         c(
             "BumpSequenceOp",
             "a bump of the source's sequence number by 10",
@@ -956,7 +1039,7 @@ pub fn classic() -> Vec<Carrier> {
         ),
         Carrier {
             id: "two",
-            extra: |_, s, f| {
+            extra: |_, s, f, _| {
                 Ok(match f {
                     "destination" => vec![extra(
                         "the other claimant's destination",
@@ -1062,32 +1145,60 @@ pub fn classic() -> Vec<Carrier> {
                 )
             },
         ),
-        c(
-            "BeginSponsoringFutureReservesOp",
-            "the source sponsoring a data entry of a peer",
-            |w, s| {
-                let peer = &s.peers[0];
-                let tx = w.tx(
-                    &s.source,
-                    vec![
-                        (None, begin(peer)),
-                        (
-                            Some(peer),
-                            OperationBody::ManageData(ManageDataOp {
-                                data_name: stellar_xdr::String64("sponsored".try_into()?),
-                                data_value: Some(vec![1u8].try_into()?),
-                            }),
+        Carrier {
+            id: "create",
+            ..c(
+                "BeginSponsoringFutureReservesOp",
+                "the source sponsoring an account the same transaction creates, which does not exist when core checks the operation",
+                |w, s| {
+                    let fresh = s.fresh("sponsored");
+                    let tx = w.tx(
+                        &s.source,
+                        vec![
+                            (None, begin(&fresh)),
+                            (None, create(&fresh, 100 * XLM)),
+                            (Some(&fresh), OperationBody::EndSponsoringFutureReserves),
+                        ],
+                    )?;
+                    Ok(Base {
+                        env: World::unsigned(tx),
+                        plan: plan(&[&s.source, &fresh]),
+                        at: Some(
+                            "/tx/tx/operations/0/body/begin_sponsoring_future_reserves".into(),
                         ),
-                        (Some(peer), OperationBody::EndSponsoringFutureReserves),
-                    ],
-                )?;
-                Ok(Base {
-                    env: World::unsigned(tx),
-                    plan: plan(&[&s.source, peer]),
-                    at: None,
-                })
-            },
-        ),
+                    })
+                },
+            )
+        },
+        Carrier {
+            id: "peer",
+            ..c(
+                "BeginSponsoringFutureReservesOp",
+                "the source sponsoring a data entry of a peer",
+                |w, s| {
+                    let peer = &s.peers[0];
+                    let tx = w.tx(
+                        &s.source,
+                        vec![
+                            (None, begin(peer)),
+                            (
+                                Some(peer),
+                                OperationBody::ManageData(ManageDataOp {
+                                    data_name: stellar_xdr::String64("sponsored".try_into()?),
+                                    data_value: Some(vec![1u8].try_into()?),
+                                }),
+                            ),
+                            (Some(peer), OperationBody::EndSponsoringFutureReserves),
+                        ],
+                    )?;
+                    Ok(Base {
+                        env: World::unsigned(tx),
+                        plan: plan(&[&s.source, peer]),
+                        at: None,
+                    })
+                },
+            )
+        },
         c(
             "RevokeSponsorshipOpSigner",
             "the sponsor of a peer's signer revoking the sponsorship",

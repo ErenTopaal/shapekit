@@ -24,9 +24,11 @@ use stellar_xdr::{
     UInt256Parts, Uint256, WriteXdr,
 };
 
-use crate::carriers::{Base, BaseOutcome, Carrier, XLM, no_extra};
+use crate::carriers::{Base, BaseOutcome, Carrier, XLM, extra, no_extra};
 use crate::sign::{AuthSigner, SignPlan};
 use crate::world::{ARCHIVAL_MIN_PERSISTENT_TTL, ECHO_WASM, Subject, World, WorldKind};
+use serde_json::json;
+use shapekit_core_driver::keys::account_strkey;
 
 /// Ledgers an authorization signature stays valid.
 const AUTH_VALID_FOR: u32 = 100;
@@ -304,6 +306,90 @@ fn delegated_auth(w: &mut World, s: &Subject) -> Result<Base> {
     )
 }
 
+/// `auth_tree.guarded(signer, false)`, which never calls `require_auth`, with an auth entry for
+/// `credentials` declared anyway: the host converts the entry and never matches it.
+fn unmatched(
+    w: &World,
+    s: &Subject,
+    credentials: SorobanCredentials,
+    plan: SignPlan,
+) -> Result<Base> {
+    let c = w.contracts()?;
+    let signer = match &credentials {
+        SorobanCredentials::Address(a) => a.address.clone(),
+        SorobanCredentials::AddressWithDelegates(d) => d.address_credentials.address.clone(),
+        _ => bail!("unmatched credentials name an address"),
+    };
+    let args = InvokeContractArgs {
+        contract_address: ScAddress::Contract(c.auth_tree.clone()),
+        function_name: ScSymbol("guarded".try_into()?),
+        args: vec![ScVal::Address(signer), ScVal::Bool(false)].try_into()?,
+    };
+    let hf = HostFunction::InvokeContract(args.clone());
+    let data = spare(simulated(w, s, hf.clone())?);
+    let entry = SorobanAuthorizationEntry {
+        credentials,
+        root_invocation: stellar_xdr::SorobanAuthorizedInvocation {
+            function: stellar_xdr::SorobanAuthorizedFunction::ContractFn(args),
+            sub_invocations: Default::default(),
+        },
+    };
+    let mut b = assemble(w, s, hf, data, vec![entry], plan)?;
+    b.at = None;
+    Ok(b)
+}
+
+fn unmatched_auth(w: &mut World, s: &Subject) -> Result<Base> {
+    let creds = SorobanCredentials::Address(SorobanAddressCredentials {
+        address: account_address(&s.peers[0].verifying_key()),
+        nonce: subject_nonce(s),
+        signature_expiration_ledger: w.driver.last_closed() + AUTH_VALID_FOR,
+        signature: ScVal::Void,
+    });
+    let plan = SignPlan {
+        tx: vec![s.source.clone()],
+        auth: vec![AuthSigner {
+            entry: format!("{OP}/auth/0"),
+            keys: vec![s.peers[0].clone()],
+            delegates: Vec::new(),
+        }],
+        ..Default::default()
+    };
+    unmatched(w, s, creds, plan)
+}
+
+fn unmatched_delegated(w: &mut World, s: &Subject) -> Result<Base> {
+    let c = w.contracts()?;
+    let delegate = c.delegate.clone();
+    let creds = SorobanCredentials::AddressWithDelegates(SorobanAddressCredentialsWithDelegates {
+        address_credentials: SorobanAddressCredentials {
+            address: ScAddress::Contract(c.delegating.clone()),
+            nonce: subject_nonce(s),
+            signature_expiration_ledger: w.driver.last_closed() + AUTH_VALID_FOR,
+            signature: ScVal::Void,
+        },
+        delegates: vec![SorobanDelegateSignature {
+            address: account_address(&delegate.verifying_key()),
+            signature: ScVal::Void,
+            nested_delegates: Default::default(),
+        }]
+        .try_into()?,
+    });
+    let plan = SignPlan {
+        tx: vec![s.source.clone()],
+        auth: vec![AuthSigner {
+            entry: format!("{OP}/auth/0"),
+            keys: Vec::new(),
+            delegates: vec![(
+                format!("{OP}/auth/0/credentials/address_with_delegates/delegates/0"),
+                delegate,
+            )],
+        }],
+        ..Default::default()
+    };
+    unmatched(w, s, creds, plan)
+}
+
 fn subject_nonce(s: &Subject) -> i64 {
     let h: [u8; 32] = Sha256::digest(format!("shapekit.probe/{}/nonce", s.tag)).into();
     i64::from_be_bytes(h[..8].try_into().expect("eight bytes")) & i64::MAX
@@ -475,7 +561,24 @@ pub fn carriers() -> Vec<Carrier> {
                 Ok(at(echo_u32(w, s)?, "/tx/tx/operations/0"))
             })
         },
-        c("InvokeContractArgs", "a call of echo(7)", echo_u32),
+        Carrier {
+            extra: |_, _, f, _| {
+                Ok(match f {
+                    "args" => vec![
+                        extra(
+                            "a value of another type, which echo takes",
+                            json!([{"symbol": "other"}]),
+                        ),
+                        extra(
+                            "a value of another type, which echo takes, i64",
+                            json!([{"i64": "-5"}]),
+                        ),
+                    ],
+                    _ => Vec::new(),
+                })
+            },
+            ..c("InvokeContractArgs", "a call of echo(7)", echo_u32)
+        },
         c("SorobanTransactionData", "a call of echo(7)", |w, s| {
             Ok(at(echo_u32(w, s)?, DATA))
         }),
@@ -484,6 +587,26 @@ pub fn carriers() -> Vec<Carrier> {
         }),
         Carrier {
             id: "echo",
+            extra: |w, _, f, base| {
+                // a key no part of the call touches: core requires footprint keys to be of an
+                // allowed type and size, not to exist or be read
+                let c = w.contracts()?;
+                let untouched =
+                    serde_json::to_value(LedgerKey::ContractData(LedgerKeyContractData {
+                        contract: ScAddress::Contract(c.echo.clone()),
+                        key: sym("untouched")?,
+                        durability: ContractDataDurability::Persistent,
+                    }))?;
+                let mut more = base.as_array().cloned().unwrap_or_default();
+                more.push(untouched);
+                Ok(match f {
+                    "readOnly" | "readWrite" => vec![extra(
+                        "an extra key the call never touches",
+                        serde_json::Value::Array(more),
+                    )],
+                    _ => Vec::new(),
+                })
+            },
             ..c("LedgerFootprint", "a call of echo(7)", echo_u32)
         },
         Carrier {
@@ -650,31 +773,83 @@ pub fn carriers() -> Vec<Carrier> {
                 },
             )
         },
-        c(
-            "SorobanAuthorizedInvocation",
-            "the root invocation a peer authorizes",
-            address_auth,
-        ),
-        c(
-            "SorobanAddressCredentials",
-            "a peer's address credentials for one require_auth",
-            address_auth,
-        ),
+        Carrier {
+            id: "unmatched",
+            ..c(
+                "SorobanAuthorizationEntry",
+                "a peer's address credentials for a call that never requires them",
+                unmatched_auth,
+            )
+        },
+        Carrier {
+            id: "matched",
+            ..c(
+                "SorobanAuthorizedInvocation",
+                "the root invocation a peer authorizes",
+                address_auth,
+            )
+        },
+        Carrier {
+            id: "unmatched",
+            ..c(
+                "SorobanAuthorizedInvocation",
+                "the root invocation of credentials no require_auth matches",
+                unmatched_auth,
+            )
+        },
+        Carrier {
+            id: "matched",
+            ..c(
+                "SorobanAddressCredentials",
+                "a peer's address credentials for one require_auth",
+                address_auth,
+            )
+        },
+        Carrier {
+            id: "unmatched",
+            ..c(
+                "SorobanAddressCredentials",
+                "a peer's address credentials for a call that never requires them",
+                unmatched_auth,
+            )
+        },
         c(
             "SCNonceKey",
             "the nonce key of a peer's credentials in the read-write footprint",
             address_auth,
         ),
-        c(
-            "SorobanAddressCredentialsWithDelegates",
-            "a delegating account authorizing through its one delegate",
-            delegated_auth,
-        ),
-        c(
-            "SorobanDelegateSignature",
-            "the delegate's signature for a delegating account",
-            delegated_auth,
-        ),
+        Carrier {
+            id: "matched",
+            ..c(
+                "SorobanAddressCredentialsWithDelegates",
+                "a delegating account authorizing through its one delegate",
+                delegated_auth,
+            )
+        },
+        Carrier {
+            id: "unmatched",
+            ..c(
+                "SorobanAddressCredentialsWithDelegates",
+                "a delegating account's credentials for a call that never requires them",
+                unmatched_delegated,
+            )
+        },
+        Carrier {
+            id: "matched",
+            ..c(
+                "SorobanDelegateSignature",
+                "the delegate's signature for a delegating account",
+                delegated_auth,
+            )
+        },
+        Carrier {
+            id: "unmatched",
+            ..c(
+                "SorobanDelegateSignature",
+                "the delegate's signature in credentials no require_auth matches",
+                unmatched_delegated,
+            )
+        },
         c(
             "CreateContractArgs",
             "a create contract of echo from the source",
@@ -690,11 +865,22 @@ pub fn carriers() -> Vec<Carrier> {
                 ))
             },
         ),
-        c(
-            "CreateContractArgsV2",
-            "a create contract of the factory, constructor argument the source",
-            |w, s| Ok(at(factory(w, s)?, &format!("{HF}/create_contract_v2"))),
-        ),
+        Carrier {
+            extra: |_, s, f, _| {
+                Ok(match f {
+                    "constructorArgs" => vec![extra(
+                        "another owner, which the constructor takes",
+                        json!([{"address": account_strkey(&s.peers[0].verifying_key())}]),
+                    )],
+                    _ => Vec::new(),
+                })
+            },
+            ..c(
+                "CreateContractArgsV2",
+                "a create contract of the factory, constructor argument the source",
+                |w, s| Ok(at(factory(w, s)?, &format!("{HF}/create_contract_v2"))),
+            )
+        },
         c(
             "ContractExecutableExternalRef",
             "a create contract whose executable is the exec_ref contract's tag echo",
