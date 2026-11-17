@@ -1,0 +1,1207 @@
+{
+  "corpus_version": "0.1.0",
+  "testees": [
+    {
+      "key": "dart@3.12.0",
+      "sdk": "dart",
+      "package": "stellar_flutter_sdk",
+      "version": "3.12.0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "cap03.offer-liabilities.synth-negative-offer-id",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap03.offer-liabilities.synth-negative-offer-id.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk's XDR-JSON differs from the expected value"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrUint64 holds -16, outside the range of a uint64"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap03.offer-liabilities.synth-textual-offer-id-noncanonical",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md",
+          "checks": [
+            {
+              "check": "case 0/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 1/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 4/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 7/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 8/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 9/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 10/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 12/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 13/id_parse",
+              "op": "id_parse",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "ManageSellOfferOperationBuilder.setOfferId takes text only"
+            },
+            {
+              "check": "case 20/id_parse",
+              "op": "id_parse",
+              "result": "unsupported",
+              "detail": "ManageSellOfferOperationBuilder.setOfferId takes text only"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap21.preconditions.synth-extra-signers-3",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap23.claimable-balances.synth-claimants-11",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap26.inflation.p11-inflation-not-time",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap26.inflation.p11-inflation-payout",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap26.inflation.p11-inflation-payout.md",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: _Exception: Exception: Unknown operation body OperationType.9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.p28-extra-signer-empty-payload",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.p28-set-options-empty-payload",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.p30-extra-signer-empty-payload",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.p30-set-options-empty-payload",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-empty-payload-signer",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-cap40.signed-payload-signer.synth-empty-payload-signer.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSignedPayload carries an empty payload, which has no strkey rendering"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-payload-65-bytes",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap71.credentials.golden-e25799a2e2e9eea2-17",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrInvokeContractArgs key \"function_name\" resolves to bytes that are not valid UTF-8: \"tree_fn\\\\xff\""
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-data-value-65-bytes",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-memo-text-29-bytes",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-path-6-assets",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-signature-65-bytes",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-tx-101-operations",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-tx-21-signatures",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-above-max-code-point",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xf4\\\\x90\\\\x80\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xf4\\\\x90\\\\x80\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Out of unicode range (at offset 1)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-ff",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xff\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xff\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-lone-continuation",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-overlong-nul",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xc0\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xc0\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 0)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-surrogate",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Encoded surrogate (at offset 1)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-truncated-sequence-28",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"shapekit memo cut at byte \\\\xe2\\\\x82\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrMemo key \"text\" resolves to bytes that are not valid UTF-8: \"shapekit memo cut at byte \\\\xe2\\\\x82\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unfinished UTF-8 octet sequence (at offset 28)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-57a486abce28859d-17",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrInvokeContractArgs key \"function_name\" resolves to bytes that are not valid UTF-8: \"tree_fn\\\\xff\""
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrInvokeContractArgs key \"function_name\" resolves to bytes that are not valid UTF-8: \"tree_fn\\\\xff\""
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Invalid UTF-8 byte (at offset 7)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-493",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-494-over-cap",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.invoke-basics.synth-ghsa-3xhm-spec-outputs-2",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-errors-auth-crypto-events-meta",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-string-not-utf8-envelope",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-string-not-utf8-meta",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"string\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-symbol-not-utf8",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.memo-bytes.p30-memo-ff.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"symbol\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: XDR-JSON XdrSCVal key \"symbol\" resolves to bytes that are not valid UTF-8: \"\\\\x80shapekit\\\\xff\\\\xc3(\\\\xed\\\\xa0\\\\x80\""
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: FormatException: FormatException: Unexpected extension byte (at offset 0)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-198-over-cap",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-247-over-cap",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-soroban.auth-trees.synth-auth-depth-494-over-cap.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-symbol-33-bytes",
+      "cells": {
+        "dart@3.12.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dart-classic.max-length.synth-tx-101-operations.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "known_failure_problems": []
+}
