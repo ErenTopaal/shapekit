@@ -115,6 +115,21 @@ pub struct World {
     pub protocol: u32,
     /// The ledger's base fee, from the last header.
     pub base_fee: u32,
+    /// The ledger's base reserve, from the last header.
+    pub base_reserve: u32,
+    /// Native balance of each role's account.
+    pub native: BTreeMap<String, i64>,
+    /// Account flags of each role's account.
+    pub account_flags: BTreeMap<String, u32>,
+    /// Trustlines of roles: (role, asset XDR-JSON text) to balance, limit and flags.
+    pub lines: BTreeMap<(String, String), (i64, i64, u32)>,
+    /// Asset (XDR-JSON in recipe form) and claimant roles of each live claimable balance,
+    /// by id text.
+    pub balance_assets: BTreeMap<String, (Value, Vec<String>)>,
+    /// The header's inflation sequence: how many inflations ran.
+    pub inflation_seq: u32,
+    /// Roles added since the episode started, so a new one gets a name not used before.
+    pub added: usize,
 }
 
 impl World {
@@ -147,6 +162,13 @@ impl World {
             last_closed: 0,
             protocol,
             base_fee: 100,
+            base_reserve: 100_000_000,
+            native: BTreeMap::new(),
+            account_flags: BTreeMap::new(),
+            lines: BTreeMap::new(),
+            balance_assets: BTreeMap::new(),
+            inflation_seq: 0,
+            added: 0,
         }
     }
 
@@ -154,6 +176,17 @@ impl World {
         let strkey = account_strkey(&derive_key(&self.recipe_id, role).verifying_key());
         self.roles_by_strkey.insert(strkey, role.to_owned());
         self.funded.push(role.to_owned());
+        self.added += 1;
+    }
+
+    /// A role name no fund step of this recipe used yet.
+    pub fn fresh_role(&self, offset: usize) -> String {
+        format!("n{}", self.added + offset)
+    }
+
+    /// The minimum balance of an account with `subentries` subentries and no sponsorships.
+    pub fn min_balance(&self, subentries: i64) -> i64 {
+        (2 + subentries) * i64::from(self.base_reserve)
     }
 
     /// Every credit asset the issuers issue under the code pools, native, and one asset of
@@ -317,11 +350,14 @@ impl World {
     /// Takes in what a closed ledger changed.
     pub fn observe(&mut self, lcm: &LedgerCloseMeta, seq: u32) -> Result<()> {
         self.last_closed = seq;
-        self.base_fee = match lcm {
-            LedgerCloseMeta::V0(m) => m.ledger_header.header.base_fee,
-            LedgerCloseMeta::V1(m) => m.ledger_header.header.base_fee,
-            LedgerCloseMeta::V2(m) => m.ledger_header.header.base_fee,
+        let header = match lcm {
+            LedgerCloseMeta::V0(m) => &m.ledger_header.header,
+            LedgerCloseMeta::V1(m) => &m.ledger_header.header,
+            LedgerCloseMeta::V2(m) => &m.ledger_header.header,
         };
+        self.base_fee = header.base_fee;
+        self.base_reserve = header.base_reserve;
+        self.inflation_seq = header.inflation_seq;
         for list in change_lists(lcm) {
             for c in list.iter() {
                 let key = change_key(c);
@@ -357,6 +393,20 @@ impl World {
                                 {
                                     self.funded.retain(|r| r != role);
                                     self.issuers.retain(|r| r != role);
+                                    self.native.remove(role);
+                                }
+                            }
+                            LedgerKey::Trustline(t) => {
+                                let asset = self.recipe_form(serde_json::to_value(&t.asset)?);
+                                let holder = self.recipe_form(serde_json::to_value(&t.account_id)?);
+                                if let Some(role) =
+                                    holder.as_str().and_then(|s| s.strip_prefix("@account:"))
+                                {
+                                    let text = serde_json::to_string(&asset)?;
+                                    if let Some(h) = self.holders.get_mut(&text) {
+                                        h.remove(role);
+                                    }
+                                    self.lines.remove(&(role.to_owned(), text));
                                 }
                             }
                             LedgerKey::Offer(o) => {
@@ -367,9 +417,10 @@ impl World {
                                 }
                             }
                             LedgerKey::ClaimableBalance(b) => {
-                                self.balances.remove(&serde_json::to_string(
-                                    &serde_json::to_value(&b.balance_id)?,
-                                )?);
+                                let id =
+                                    serde_json::to_string(&serde_json::to_value(&b.balance_id)?)?;
+                                self.balances.remove(&id);
+                                self.balance_assets.remove(&id);
                             }
                             LedgerKey::LiquidityPool(p) => {
                                 self.pools.remove(&hex::encode(p.liquidity_pool_id.0.0));
@@ -394,6 +445,15 @@ impl World {
                                 self.funded.retain(|r| r != role);
                             }
                         }
+                        if let LedgerEntryData::Account(a) = &e.data {
+                            let id = self.recipe_form(serde_json::to_value(&a.account_id)?);
+                            if let Some(role) =
+                                id.as_str().and_then(|s| s.strip_prefix("@account:"))
+                            {
+                                self.native.insert(role.to_owned(), a.balance);
+                                self.account_flags.insert(role.to_owned(), a.flags);
+                            }
+                        }
                         match &e.data {
                             LedgerEntryData::Trustline(t) => {
                                 let asset = self.recipe_form(serde_json::to_value(&t.asset)?);
@@ -401,8 +461,13 @@ impl World {
                                 if let Some(role) =
                                     holder.as_str().and_then(|s| s.strip_prefix("@account:"))
                                 {
+                                    let text = serde_json::to_string(&asset)?;
+                                    self.lines.insert(
+                                        (role.to_owned(), text.clone()),
+                                        (t.balance, t.limit, t.flags),
+                                    );
                                     self.holders
-                                        .entry(serde_json::to_string(&asset)?)
+                                        .entry(text)
                                         .or_default()
                                         .insert(role.to_owned());
                                 }
@@ -429,9 +494,22 @@ impl World {
                                 }
                             }
                             LedgerEntryData::ClaimableBalance(b) => {
-                                self.balances.insert(serde_json::to_string(
-                                    &serde_json::to_value(&b.balance_id)?,
-                                )?);
+                                let id =
+                                    serde_json::to_string(&serde_json::to_value(&b.balance_id)?)?;
+                                let asset = self.recipe_form(serde_json::to_value(&b.asset)?);
+                                let claimants = b
+                                    .claimants
+                                    .iter()
+                                    .filter_map(|c| {
+                                        let stellar_xdr::Claimant::ClaimantTypeV0(c) = c;
+                                        let d = self.recipe_form(
+                                            serde_json::to_value(&c.destination).ok()?,
+                                        );
+                                        d.as_str()?.strip_prefix("@account:").map(str::to_owned)
+                                    })
+                                    .collect();
+                                self.balance_assets.insert(id.clone(), (asset, claimants));
+                                self.balances.insert(id);
                             }
                             LedgerEntryData::LiquidityPool(p) => {
                                 let LiquidityPoolEntryBody::LiquidityPoolConstantProduct(cp) =

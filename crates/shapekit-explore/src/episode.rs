@@ -515,6 +515,33 @@ impl<'e, 'a> Live<'e, 'a> {
         Ok(Pushed::Applied(new))
     }
 
+    /// Runs one phase of a setup move.
+    fn phase(&mut self, phase: crate::directed::Phase) -> Result<()> {
+        use crate::directed::Phase;
+        match phase {
+            Phase::Step(s @ Step::Fund { .. }) => {
+                if let Step::Fund { roles, .. } = &s {
+                    // named before the ledger is read, so its strkeys read as the roles
+                    for r in roles {
+                        self.world.add_role(r);
+                    }
+                }
+                self.transaction(s)?;
+            }
+            Phase::Step(s @ Step::Upgrade { .. }) => self.exact(s)?,
+            Phase::Step(s) => {
+                self.transaction(s)?;
+            }
+            Phase::Pair(a, b) => {
+                let b = *b;
+                if shapekit_gen::recipe::ir_run::orderable_after(self.ctx.driver().last_meta()) {
+                    self.ordered_pair(a, b)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Submits a new transaction step and closes the ledger it goes into.
     fn transaction(&mut self, step: Step) -> Result<Pushed> {
         let before = self.steps.len();
@@ -660,11 +687,31 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
         Ok(())
     })();
     let prefix_len = live.steps.len();
+    let mut directed: Option<crate::directed::Move> = None;
     let outcome = outcome.and_then(|()| {
         for _ in 0..spec.actions {
             if live.world.funded.is_empty() {
                 // every role was merged away
                 break;
+            }
+            // a setup move now and then, for arms that need a state ordinary steps rarely
+            // build; its phases come one per action
+            if directed.is_none() && !spec.contracts && rng.chance(1, 5) {
+                let orderable =
+                    shapekit_gen::recipe::ir_run::orderable_after(live.ctx.driver().last_meta());
+                let freeze =
+                    live.world.protocol >= FROZEN_KEYS_PROTOCOL && spec.node.soroban_limits;
+                directed =
+                    crate::directed::start(&live.world, &mut rng, &menu.missing, orderable, freeze);
+            }
+            if let Some(m) = directed.as_mut() {
+                match m.next(&live.world, &mut rng) {
+                    Some(p) => {
+                        live.phase(p)?;
+                        continue;
+                    }
+                    None => directed = None,
+                }
             }
             if rng.chance(1, 25) {
                 // frozen keys need the high Soroban limits the config upgrade's writer

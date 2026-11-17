@@ -25,6 +25,8 @@ pub struct OpMenu {
     pub novelty: Vec<u64>,
     /// Target arms not witnessed yet among each operation's results.
     pub wanted: Vec<u64>,
+    /// Target arms not witnessed yet, which setup moves are drawn by.
+    pub missing: BTreeSet<String>,
 }
 
 impl OpMenu {
@@ -39,6 +41,7 @@ impl OpMenu {
             arms,
             novelty,
             wanted,
+            missing: BTreeSet::new(),
         }
     }
 
@@ -48,12 +51,14 @@ impl OpMenu {
             arms: Vec::new(),
             novelty: Vec::new(),
             wanted: Vec::new(),
+            missing: BTreeSet::new(),
         }
     }
 
     /// Points the draw at operations whose result union still has target arms nobody
     /// witnessed: `PaymentResult:no_trust` missing makes `payment` likelier.
     pub fn aim(&mut self, missing: &BTreeSet<String>) {
+        self.missing = missing.clone();
         for (arm, w) in self.arms.iter().zip(self.wanted.iter_mut()) {
             *w = missing
                 .iter()
@@ -336,8 +341,12 @@ pub fn freeze(world: &World, rng: &mut Rng) -> Option<Step> {
     if keys.is_empty() {
         return None;
     }
-    let key = rng.pick(&keys).clone();
-    Some(Step::Upgrade {
+    Some(freeze_key(rng.pick(&keys).clone()))
+}
+
+/// A config upgrade freezing one ledger key, given as hex XDR.
+pub fn freeze_key(key: String) -> Step {
+    Step::Upgrade {
         label: None,
         protocol_version: None,
         base_fee: None,
@@ -348,7 +357,7 @@ pub fn freeze(world: &World, rng: &mut Rng) -> Option<Step> {
         config: vec![serde_json::json!({
             "frozen_ledger_keys_delta": { "keys_to_freeze": [key], "keys_to_unfreeze": [] }
         })],
-    })
+    }
 }
 
 /// A ledger upgrade within what this protocol allows to be armed.
