@@ -1,0 +1,64 @@
+{
+ "schema_version": 1,
+ "id": "pairs.sac-trust",
+ "family": "explore",
+ "protocol": 28,
+ "node": {
+  "soroban_limits": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "issuer",
+    "holder"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "host-function",
+   "label": "sac",
+   "source": "issuer",
+   "function": {
+    "create_contract": {
+     "contract_id_preimage": {
+      "asset": {
+       "credit_alphanum4": {
+        "asset_code": "USD",
+        "issuer": "@account:issuer"
+       }
+      }
+     },
+     "executable": "stellar_asset"
+    }
+   }
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "invoke",
+   "label": "trust",
+   "source": "holder",
+   "contract": "@contract:sac",
+   "function": "trust",
+   "args": [
+    {
+     "address": "@account:holder"
+    }
+   ],
+   "auth": {
+    "mode": "record",
+    "signers": {
+     "holder": []
+    }
+   }
+  },
+  {
+   "step": "close"
+  }
+ ]
+}
