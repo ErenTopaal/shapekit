@@ -1,0 +1,167 @@
+{
+ "schema_version": 1,
+ "id": "contracts.eviction",
+ "family": "explore",
+ "protocol": 30,
+ "node": {
+  "soroban_limits": true
+ },
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "owner"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upload",
+   "label": "echo",
+   "source": "owner",
+   "wasm": "contracts/wasm/echo.wasm",
+   "sha256": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "deploy",
+   "label": "e",
+   "source": "owner",
+   "code": "echo",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000005"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "upgrade",
+   "config": [
+    {
+     "state_archival": {
+      "eviction_scan_size": 10000000,
+      "live_soroban_state_size_window_sample_period": 64,
+      "live_soroban_state_size_window_sample_size": 30,
+      "max_entries_to_archive": 1000,
+      "max_entry_ttl": 6307200,
+      "min_persistent_ttl": 10,
+      "min_temporary_ttl": 16,
+      "persistent_rent_rate_denominator": "1215",
+      "starting_eviction_scan_level": 1,
+      "temp_rent_rate_denominator": "2430"
+     }
+    }
+   ]
+  },
+  {
+   "step": "invoke",
+   "source": "owner",
+   "contract": "e",
+   "function": "put_temp",
+   "args": [
+    {
+     "symbol": "k"
+    },
+    {
+     "u32": 1
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "close"
+  }
+ ]
+}

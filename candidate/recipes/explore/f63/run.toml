@@ -87,7 +87,7 @@ contract_arms_first_witnessed = ["SorobanCredentials:address_v2"]
 [recipes."p28-r0000"]
 id = "explore.s1c.e0"
 protocol = 28
-steps = 41
+steps = 39
 contract_arms_first_witnessed = []
 
 [recipes."p29-r0003"]
@@ -146,3 +146,19 @@ id = "contracts.soroban-tx-set-size-upgrade"
 protocol = 30
 steps = 4
 contract_arms_first_witnessed = ["LedgerUpgrade:max_soroban_tx_set_size"]
+
+[recipes."pool-deposit-events"]
+id = "contracts.pool-deposit-events"
+protocol = 30
+steps = 12
+# the pool id is written out: it hashes the pool's parameters, whose issuer key comes from the
+# recipe id and role, so it is the same under both passphrases
+contract_arms_first_witnessed = ["ScAddress:liquidity_pool"]
+
+[recipes."eviction"]
+id = "contracts.eviction"
+protocol = 30
+steps = 39
+# a state_archival upgrade starts the eviction scan at level 1; a temporary entry with the
+# 16-ledger minimum lifetime is then evicted with its ttl key
+contract_arms_first_witnessed = ["LedgerKey:ttl"]

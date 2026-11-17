@@ -1,0 +1,144 @@
+{
+ "schema_version": 1,
+ "id": "contracts.pool-deposit-events",
+ "family": "explore",
+ "protocol": 30,
+ "steps": [
+  {
+   "step": "fund",
+   "roles": [
+    "issuer",
+    "lp"
+   ],
+   "balance": "100000000000"
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "tx",
+   "source": "lp",
+   "operations": [
+    {
+     "source_account": null,
+     "body": {
+      "change_trust": {
+       "line": {
+        "credit_alphanum4": {
+         "asset_code": "USD",
+         "issuer": "@account:issuer"
+        }
+       },
+       "limit": "9223372036854775807"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "tx",
+   "source": "issuer",
+   "operations": [
+    {
+     "source_account": null,
+     "body": {
+      "payment": {
+       "destination": "@account:lp",
+       "asset": {
+        "credit_alphanum4": {
+         "asset_code": "USD",
+         "issuer": "@account:issuer"
+        }
+       },
+       "amount": "1000000000"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "tx",
+   "source": "lp",
+   "operations": [
+    {
+     "source_account": null,
+     "body": {
+      "change_trust": {
+       "line": {
+        "pool_share": {
+         "liquidity_pool_constant_product": {
+          "asset_a": "native",
+          "asset_b": {
+           "credit_alphanum4": {
+            "asset_code": "USD",
+            "issuer": "@account:issuer"
+           }
+          },
+          "fee": 30
+         }
+        }
+       },
+       "limit": "9223372036854775807"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "tx",
+   "source": "lp",
+   "operations": [
+    {
+     "source_account": null,
+     "body": {
+      "liquidity_pool_deposit": {
+       "liquidity_pool_id": "LDA6OGZC6Z3DD6M3FVO6WMVP6TXL4XZ56PJFQKXZXELSVVVDZ2XJ3CY4",
+       "max_amount_a": "100000000",
+       "max_amount_b": "100000000",
+       "min_price": {
+        "n": 1,
+        "d": 2
+       },
+       "max_price": {
+        "n": 2,
+        "d": 1
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  },
+  {
+   "step": "tx",
+   "source": "lp",
+   "operations": [
+    {
+     "source_account": null,
+     "body": {
+      "liquidity_pool_withdraw": {
+       "liquidity_pool_id": "LDA6OGZC6Z3DD6M3FVO6WMVP6TXL4XZ56PJFQKXZXELSVVVDZ2XJ3CY4",
+       "amount": "10000000",
+       "min_amount_a": "1",
+       "min_amount_b": "1"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "step": "close"
+  }
+ ]
+}
