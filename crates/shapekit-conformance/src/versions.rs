@@ -279,8 +279,10 @@ pub const COVERAGE_TIMEOUT_MS: u64 = 120_000;
 /// The variant of a target whose testee answers `coverage_snapshot`: the rust testee built
 /// with `-C instrument-coverage --cfg shapekit_coverage`, the go testee built with `-cover` over
 /// the sdk's packages, both into `target/testees-cov/` so the plain builds stay as they are,
-/// the javascript and python testees started with `SHAPEKIT_COVERAGE=1`, and the java testee
-/// with that and the jacoco agent of its build. The build steps
+/// the javascript and python testees started with `SHAPEKIT_COVERAGE=1`, the java and kmp
+/// testees with that and the jacoco agent of their build, and the stellar-cli testee with that
+/// and a stellar binary built with `-C instrument-coverage` from the crate source of its version
+/// into `target/testees-cov/`. The build steps
 /// are the ones `conformance sync-versions` writes; a versions file whose steps have another
 /// shape is refused rather than guessed at. The per-request timeout is at least
 /// [`COVERAGE_TIMEOUT_MS`]: a snapshot runs the coverage tools over the whole binary.
@@ -351,9 +353,14 @@ pub fn coverage_target(t: &Target) -> Result<Target> {
                 .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
             return Ok(c);
         }
-        // the java testee needs the jacoco agent of its own build, loaded before any sdk class,
-        // instrumenting only the sdk
-        "java" => {
+        // the java and kmp testees need the jacoco agent of their own build, loaded before any
+        // sdk class, instrumenting only the sdk
+        "java" | "kmp" => {
+            let includes = if t.sdk == "java" {
+                "org.stellar.sdk.*"
+            } else {
+                "com.soneso.stellar.sdk.*"
+            };
             ensure!(
                 c.command.len() == 3 && c.command[0] == "java" && c.command[1] == "-jar",
                 "{}: the command is not java -jar <testee.jar>",
@@ -365,8 +372,59 @@ pub fn coverage_target(t: &Target) -> Result<Target> {
                 .to_string();
             c.command.insert(
                 1,
-                format!("-javaagent:{dir}/jacocoagent.jar=output=none,includes=org.stellar.sdk.*"),
+                format!("-javaagent:{dir}/jacocoagent.jar=output=none,includes={includes}"),
             );
+            c.env
+                .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
+            return Ok(c);
+        }
+        // the stellar-cli testee runs an instrumented stellar binary built from the crate source of
+        // the pinned version (the release binaries carry no counters); each run writes its counters
+        // into the testee's profile directory, which coverage_snapshot merges
+        "stellar-cli" => {
+            let n = c.build.len();
+            let fetch = c
+                .build
+                .iter()
+                .position(|s| {
+                    s.argv.first().map(String::as_str) == Some("testees/stellar-cli/fetch.sh")
+                })
+                .with_context(|| format!("{}: no testees/stellar-cli/fetch.sh step", t.key()))?;
+            ensure!(
+                n == 2 && c.command.len() == 2,
+                "{}: the build steps or command do not have the shape sync-versions writes",
+                t.key()
+            );
+            let root = format!("target/testees-cov/stellar-cli/{}", t.version);
+            let mut env = BTreeMap::new();
+            env.insert(
+                "RUSTFLAGS".to_string(),
+                "-C instrument-coverage".to_string(),
+            );
+            // build scripts are instrumented too and would write their counters into the tree
+            env.insert("LLVM_PROFILE_FILE".to_string(), "/dev/null".to_string());
+            c.build[fetch] = Step {
+                argv: vec![
+                    "cargo".to_string(),
+                    "install".to_string(),
+                    "--locked".to_string(),
+                    "--quiet".to_string(),
+                    // the default additional-libs feature adds wasm-opt, the os keyring (which
+                    // links the system's libdbus) and ledger support, none of which the xdr,
+                    // strkey and tx hash commands use
+                    "--no-default-features".to_string(),
+                    "--root".to_string(),
+                    root.clone(),
+                    "--target-dir".to_string(),
+                    "target/testees-cov/stellar-cli/build".to_string(),
+                    "--version".to_string(),
+                    t.version.clone(),
+                    "stellar-cli".to_string(),
+                ],
+                dir: None,
+                env,
+            };
+            c.command[1] = format!("{root}/bin/stellar");
             c.env
                 .insert("SHAPEKIT_COVERAGE".to_string(), "1".to_string());
             return Ok(c);
@@ -393,7 +451,7 @@ mod tests {
             &Path::new(env!("CARGO_MANIFEST_DIR")).join("../../conformance/versions.toml"),
         )
         .unwrap();
-        for sdk in ["rust", "go", "js", "python", "java"] {
+        for sdk in ["rust", "go", "js", "python", "java", "kmp", "stellar-cli"] {
             let t = file.target(sdk, &file.sdk(sdk).unwrap().current).unwrap();
             let c = coverage_target(&t).unwrap();
             match sdk {
@@ -417,10 +475,17 @@ mod tests {
                     );
                     assert!(c.command[0].starts_with("target/testees-cov/go/"));
                 }
-                "java" => {
+                "java" | "kmp" => {
                     assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");
-                    assert!(c.command[1].starts_with("-javaagent:target/testees/java/"));
+                    assert!(c.command[1].starts_with(&format!("-javaagent:target/testees/{sdk}/")));
                     assert_eq!(c.command[2..], t.command[1..]);
+                }
+                "stellar-cli" => {
+                    assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");
+                    assert_eq!(c.build[1].argv[1], "install");
+                    assert!(c.build[1].env["RUSTFLAGS"].contains("instrument-coverage"));
+                    assert!(c.command[1].starts_with("target/testees-cov/stellar-cli/"));
+                    assert_eq!(c.command[0], t.command[0]);
                 }
                 _ => {
                     assert_eq!(c.env["SHAPEKIT_COVERAGE"], "1");

@@ -15,6 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.version>2.4.21</kotlin.version>
     <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
+    <jacoco.version>0.8.16</jacoco.version>
   </properties>
   <dependencies>
     <dependency>
@@ -39,6 +40,21 @@
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
       <version>${kotlin.version}</version>
+    </dependency>
+    <!-- reads the counters the agent collects; the agent itself is started by -javaagent -->
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.core</artifactId>
+      <version>${jacoco.version}</version>
+    </dependency>
+    <!-- the agent's public api (org.jacoco.agent.rt.RT), compiled against only: at run time it
+         comes from the -javaagent jar -->
+    <dependency>
+      <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.agent</artifactId>
+      <version>${jacoco.version}</version>
+      <classifier>runtime</classifier>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -117,6 +133,25 @@
             <configuration>
               <includeScope>runtime</includeScope>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>agent</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.jacoco</groupId>
+                  <artifactId>org.jacoco.agent</artifactId>
+                  <version>${jacoco.version}</version>
+                  <classifier>runtime</classifier>
+                  <destFileName>jacocoagent.jar</destFileName>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}</outputDirectory>
             </configuration>
           </execution>
         </executions>

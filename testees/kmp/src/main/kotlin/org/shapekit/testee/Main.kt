@@ -71,6 +71,12 @@ val OPS = listOf(
     "tx_hash", "balance_id", "contract_id",
 )
 
+/** The JaCoCo agent's coverage when the testee runs as a coverage build, null otherwise. */
+val coverage: Coverage? = Coverage.start()
+
+const val NO_COVERAGE =
+    "coverage is collected only when the testee runs with the jacoco agent and SHAPEKIT_COVERAGE=1"
+
 fun main() {
     // deep values recurse through the sdk's decoders, so requests run on a thread with a large
     // stack
@@ -152,8 +158,11 @@ fun run(op: String, req: JsonObject): JsonElement = when (op) {
         put("protocol", PROTOCOL)
         put("sdk", "com.soneso.stellar:stellar-sdk-jvm")
         put("sdk_version", sdkVersion())
-        put("components", buildJsonObject {})
-        put("ops", JsonArray(OPS.map { JsonPrimitive(it) }))
+        put("components", buildJsonObject {
+            if (coverage != null) put("org.jacoco:org.jacoco.core", Coverage.version)
+        })
+        val ops = if (coverage != null) OPS + listOf("coverage_snapshot", "coverage_new") else OPS
+        put("ops", JsonArray(ops.map { JsonPrimitive(it) }))
         // XdrReader takes no limits
         put("decode_limits", "ignored")
     }
@@ -198,7 +207,8 @@ fun run(op: String, req: JsonObject): JsonElement = when (op) {
         "the kmp sdk has no ScMap validation: it orders keys the host way (Scv.toMap, " +
             "compareScValHostOrder in scval/ScValHostOrder.kt) but offers no check of a map it is given",
     )
-    "coverage_snapshot", "coverage_new" -> throw Unsupported("the kmp testee has no coverage build")
+    "coverage_snapshot" -> (coverage ?: throw Unsupported(NO_COVERAGE)).snapshot()
+    "coverage_new" -> (coverage ?: throw Unsupported(NO_COVERAGE)).fresh()
     else -> throw BadRequest("unknown op $op")
 }
 

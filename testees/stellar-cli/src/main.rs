@@ -3,6 +3,8 @@
 //! `stellar xdr decode|encode`, `stellar strkey decode|encode` and `stellar tx hash`, once per
 //! request. The binary's path is the first argument.
 
+mod coverage;
+
 use std::io::{BufRead, Write};
 use std::process::{Command, ExitCode, Stdio};
 
@@ -40,7 +42,11 @@ fn main() -> ExitCode {
         .stack_size(512 << 20)
         .spawn(move || serve(&cli))
         .expect("starting the request thread");
-    worker.join().unwrap_or(ExitCode::FAILURE)
+    let code = worker.join().unwrap_or(ExitCode::FAILURE);
+    if let Some(d) = coverage::dir() {
+        let _ = std::fs::remove_dir_all(d);
+    }
+    code
 }
 
 fn parse(text: &str) -> serde_json::Result<Value> {
@@ -86,6 +92,23 @@ fn handle(cli: &str, line: &str) -> Value {
         "strkey_decode" => strkey_decode(cli, &req),
         "strkey_encode" => strkey_encode(cli, &req),
         "tx_hash" => tx_hash(cli, &req),
+        "coverage_snapshot" => match coverage::dir() {
+            Some(d) => match coverage::snapshot(d, cli) {
+                Ok(v) => Outcome::Ok(v),
+                Err(e) => Outcome::Error("internal", e),
+            },
+            None => Outcome::Unsupported(
+                "coverage is collected only for a coverage build (SHAPEKIT_COVERAGE=1 and a stellar \
+                 binary built with -C instrument-coverage)"
+                    .into(),
+            ),
+        },
+        "coverage_new" => Outcome::Unsupported(
+            "the counters are in the profile files the stellar binary writes when each run \
+             exits, readable only by merging them with llvm-profdata, too slow to ask after \
+             every input"
+                .into(),
+        ),
         "" => bad("request has no op"),
         other if is_known_op(other) => Outcome::Unsupported(format!(
             "stellar-cli has no command for {other}: its xdr commands are decode, encode, \
@@ -112,8 +135,6 @@ fn is_known_op(op: &str) -> bool {
             | "address_from_scval"
             | "balance_id"
             | "contract_id"
-            | "coverage_snapshot"
-            | "coverage_new"
     )
 }
 
@@ -130,6 +151,11 @@ fn run(cli: &str, args: &[&str], input: &[u8]) -> Result<String, Outcome> {
         .env("STELLAR_CONFIG_HOME", std::env::temp_dir())
         .env("XDG_CONFIG_HOME", std::env::temp_dir())
         .env("STELLAR_NO_CACHE", "true")
+        // a coverage build's binary adds its counters to this process's profile files
+        .env(
+            "LLVM_PROFILE_FILE",
+            coverage::dir().map_or_else(|| "/dev/null".into(), coverage::profile_file),
+        )
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -177,12 +203,16 @@ fn hello(cli: &str) -> Outcome {
         .and_then(|l| l.split_whitespace().next())
         .unwrap_or("")
         .to_string();
+    let mut ops = OPS.to_vec();
+    if coverage::dir().is_some() {
+        ops.push("coverage_snapshot");
+    }
     Outcome::Ok(json!({
         "protocol": 2,
         "sdk": "stellar-cli",
         "sdk_version": version,
         "components": {"stellar-xdr": xdr},
-        "ops": OPS,
+        "ops": ops,
         // the xdr commands take no limits
         "decode_limits": "ignored",
     }))

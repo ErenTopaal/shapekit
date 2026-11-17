@@ -361,6 +361,8 @@ build or mode does:
 | JavaScript | started with `SHAPEKIT_COVERAGE=1`; V8 precise block coverage through the inspector, started before the SDK is imported | a function or block range of a file of the installed package, `<path>:<start offset>-<end offset>` |
 | Python | started with `SHAPEKIT_COVERAGE=1`; coverage.py line coverage of the `stellar_sdk` package, started before the SDK is imported, read in the process with no data file | a line of a `stellar_sdk` source file that has run, `stellar_sdk/<path>.py:<line>` |
 | Java | started with `SHAPEKIT_COVERAGE=1` and the JaCoCo agent of its build (`-javaagent:.../jacocoagent.jar=output=none,includes=org.stellar.sdk.*`); the agent's execution data, analysed in the process with `org.jacoco.core` | a line of an SDK class where an instruction has run, `org/stellar/sdk/<path>.java:<line>` |
+| KMP | the same as Java, with `includes=com.soneso.stellar.sdk.*` | a line of an SDK class where an instruction has run, `com/soneso/stellar/sdk/<path>.kt:<line>` |
+| stellar-cli | started with `SHAPEKIT_COVERAGE=1` and a `stellar` binary built with `-C instrument-coverage` from the crate source of the version (`cargo install --locked --no-default-features`: the default feature only adds wasm-opt, the OS keyring and Ledger support, which the measured commands do not use, and the keyring needs the system's libdbus); every run of the binary adds its counters to the testee's profile files, which llvm-profdata merges and llvm-cov export reads | a code region of a `stellar-xdr`, `stellar-strkey` or `soroban-cli` source file, `<crate>-<version>/<path>:<line>:<col>-<line>:<col>` |
 
 Result: `tool` (what measured it), `ranges` (sorted strings, each range once), and for the
 JavaScript testee `uncovered` (the ranges V8 has reported with a count of 0 that have not run
@@ -382,7 +384,9 @@ Request: no members besides `op`.
 
 The cheap form of `coverage_snapshot`, for a fuzzer that asks after every input whether the
 input reached code nothing before it reached. A testee lists it exactly when it lists
-`coverage_snapshot`. Result: `new`, how many coverage units have run for the first time since
+`coverage_snapshot`, except the stellar-cli testee: its counters are only in the profile files
+each run of the binary writes when it exits, which take an llvm-profdata merge to read, so it
+answers `unsupported`. Result: `new`, how many coverage units have run for the first time since
 the previous `coverage_new` request (since the process started, for the first one), and
 `total`, how many have run since the process started. The units are the tool's own, read in
 the process with no files and no external tool:
@@ -393,13 +397,13 @@ the process with no files and no external tool:
 | Go | a statement-block counter of an instrumented package, read from `runtime/coverage.WriteCounters` |
 | JavaScript | a range of the SDK package, folded exactly as `coverage_snapshot` folds it (the two ops share one fold, so neither loses what the other read) |
 | Python | a line of a `stellar_sdk` source file that has run, as `coverage_snapshot` lists it |
-| Java | a JaCoCo probe of an SDK class |
+| Java, KMP | a JaCoCo probe of an SDK class |
 
 The numbers are only compared within one process: they say whether coverage grew, not which
 code ran. Ask `coverage_snapshot` for the ranges themselves.
 
-`shapekit conformance run --coverage` builds and starts these variants (the Rust and Go builds
-go to `target/testees-cov/`), runs the selection, asks each testee for one snapshot at the end
+`shapekit conformance run --coverage` builds and starts these variants (the Rust, Go and
+stellar-cli builds go to `target/testees-cov/`), runs the selection, asks each testee for one snapshot at the end
 and writes `coverage.json` next to the matrix, with the number of processes each testee needed.
 
 ## How the runner uses the ops
@@ -558,7 +562,8 @@ and survey types have no class and answer `unsupported`.
 | `contract_id` | `Address.deriveContractId` and `Asset.getContractId` |
 
 `map_validate` is `unsupported`: the SDK orders map keys but has no check of a map it is given.
-`decode_limits` is `"ignored"`: `XdrReader` takes no limits. `XdrReader` keeps its position in
+A coverage build starts the testee with the JaCoCo agent its Maven build copies next to the jar,
+as for Java. `decode_limits` is `"ignored"`: `XdrReader` takes no limits. `XdrReader` keeps its position in
 a private field, which the testee reads to refuse bytes left after a value; the decode itself is
 the SDK's. A `StackOverflowError`, `OutOfMemoryError`, `NullPointerException`,
 `ClassCastException` or `IndexOutOfBoundsException` is reported as `panic` with the SDK frame it
@@ -586,6 +591,8 @@ pool, balance or contract ids or converts contract values. A type the binary doe
 `unsupported`, a non-zero exit with the command's error line is a rejection, and a Rust panic
 or a death by signal is a `panic`. `decode_limits` is `"ignored"`: the xdr commands take no
 limits. `hello` reports the version and the stellar-xdr crate that `stellar version` prints.
+A coverage build runs a `stellar` binary built with `-C instrument-coverage` from the crate
+source of the version instead of the release binary, and answers `coverage_snapshot`.
 
 ## The version matrix
 

@@ -2,6 +2,26 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: candidate-lane triage closed, libsodium pinned, coverage for KMP and stellar-cli
+
+- Every failing candidate-lane check of the PHP and .NET SDKs is attributed in
+  `candidate/finding-candidates.toml`: to a finding, to stellar-xdr's own rendering of fixed
+  opaques, or to a candidate with source lines. New PHP candidates: config setting ledger keys
+  without their struct in XDR-JSON, host functions rebuilt as another version or refused,
+  default-only PRECOND_V2 preconditions rebuilt as PRECOND_NONE, tx advert and demand vectors
+  read as strings, and a non-optional sponsorship descriptor. New .NET candidates: the same
+  preconditions rebuild, and an invoke whose contract address is a claimable balance or pool
+  refused; the 57369500 and price-d-3 hashes are the price candidate (`Price.FromString` turns
+  1/2147483647 into 0/1). The PHP testee's type table now maps DataValue to the SDK's
+  `XdrDataValueMandatory`; its four DataValue vectors pass.
+- The stellar-etl harness input of the candidate lane was recorded against an older corpus
+  manifest; it is regenerated, and the candidate findings check now reports only drafts.
+- `pins.toml` pins libsodium 1.0.22, which PHP's sodium extension builds on: `pins verify`
+  checks the tarball's sha256 and its minisign signature by libsodium's published key.
+- `shapekit corpus promote` is tested with a fixture matrix for every SDK of the versions file.
+- `conformance run --coverage` covers the KMP testee (JaCoCo, as for Java) and the stellar-cli
+  testee (a `stellar` binary built with `-C instrument-coverage` from the crate source).
+
 ## 2026-11-17: stellar-cli conformance
 
 - `testees/stellar-cli` checks the `stellar xdr decode|encode`, `stellar strkey` and `stellar tx
