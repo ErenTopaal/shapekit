@@ -1,0 +1,237 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "e7214f0aea4b34f3f85d74a1eea4638f00e2344796315623d18358c9b804072b",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "8b32895abaf4d05fc04d7f1c3e0f4cf134d15691cf11c35d2ef528719ca613b3",
+        "ext": "v0",
+        "fee_pool": "1100",
+        "id_pool": "0",
+        "inflation_seq": 0,
+        "ledger_seq": 69,
+        "ledger_version": 19,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "ed182f81321ad5916d3144f28a31b6c66a8fbbb99ffe573f411c7e5712ff4a4e",
+        "scp_value": {
+          "close_time": "1773187200",
+          "ext": {
+            "signed": {
+              "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+              "signature": "054108236bd3977d58ceffe2ddd52e945be31de9e068eaeaf18ddf09afe8b696f4653a80d64f160213dadd8e1f7082e9b1f5ee0c270a951bea00f0f6036c320d"
+            }
+          },
+          "tx_set_hash": "5560ff9c94b9714eb0fac0650d917b52535e3952d7e9e283234a76cc0d5771b7",
+          "upgrades": []
+        },
+        "skip_list": [
+          "1942acec0f7118d77a5ac53ba9f0172b81fd57249623420ee214b138f0074e91",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "1af89f17b46f1f3dd8c0960bf2f37d0cd81ac593a83851f25d450b6fbf9b57a6"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [
+      {
+        "fee_processing": [
+          {
+            "state": {
+              "data": {
+                "account": {
+                  "account_id": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ",
+                  "balance": "100000000000",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "274877906944",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 64
+            }
+          },
+          {
+            "updated": {
+              "data": {
+                "account": {
+                  "account_id": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ",
+                  "balance": "99999999800",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "274877906944",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 69
+            }
+          }
+        ],
+        "result": {
+          "result": {
+            "ext": "v0",
+            "fee_charged": "200",
+            "result": {
+              "tx_failed": [
+                {
+                  "op_inner": {
+                    "path_payment_strict_send": "too_few_offers"
+                  }
+                },
+                {
+                  "op_inner": {
+                    "set_trust_line_flags": "cant_revoke"
+                  }
+                }
+              ]
+            }
+          },
+          "transaction_hash": "d42614107f72a05a59fd375ba7627f09c1832f4010004e046c55182b6a03ac4d"
+        },
+        "tx_apply_processing": {
+          "v2": {
+            "operations": [],
+            "tx_changes_after": [],
+            "tx_changes_before": [
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ",
+                      "balance": "99999999800",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906944",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 69
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ",
+                      "balance": "99999999800",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": {
+                                "v3": {
+                                  "ext": "v0",
+                                  "seq_ledger": 69,
+                                  "seq_time": "1773187200"
+                                }
+                              },
+                              "num_sponsored": 0,
+                              "num_sponsoring": 0,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906945",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 69
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "tx_set": {
+      "previous_ledger_hash": "ed182f81321ad5916d3144f28a31b6c66a8fbbb99ffe573f411c7e5712ff4a4e",
+      "txs": [
+        {
+          "tx": {
+            "signatures": [
+              {
+                "hint": "984c5d3b",
+                "signature": "7449dc6e80d0c1417a68265eb5419ddf3c895e9d4b3b14e2edaa0ee4ca212b23e004bee0f89e87d7523108a0a70bfb64c68afa4bbccc2a98edabdea674346d02"
+              }
+            ],
+            "tx": {
+              "cond": "none",
+              "ext": "v0",
+              "fee": 200,
+              "memo": "none",
+              "operations": [
+                {
+                  "body": {
+                    "path_payment_strict_send": {
+                      "dest_asset": {
+                        "credit_alphanum12": {
+                          "asset_code": "LONGASSET12",
+                          "issuer": "GAAXQIPQMSUEEDTTVFMOEZVIP4MVY7RJKTXF3WSQV3NKTO2CO2N24A2T"
+                        }
+                      },
+                      "dest_min": "1",
+                      "destination": "GB4TT24EH2FZV3IBQYTAIG5YG56HBHXIH3C3TT4DNK7QC6M2NHGWQHUC",
+                      "path": [],
+                      "send_amount": "100",
+                      "send_asset": "native"
+                    }
+                  },
+                  "source_account": null
+                },
+                {
+                  "body": {
+                    "set_trust_line_flags": {
+                      "asset": {
+                        "credit_alphanum12": {
+                          "asset_code": "LONGASSET12",
+                          "issuer": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ"
+                        }
+                      },
+                      "clear_flags": 1,
+                      "set_flags": 0,
+                      "trustor": "GAAXQIPQMSUEEDTTVFMOEZVIP4MVY7RJKTXF3WSQV3NKTO2CO2N24A2T"
+                    }
+                  },
+                  "source_account": null
+                }
+              ],
+              "seq_num": "274877906945",
+              "source_account": "GAERA4AVSTEIL2EF6GMBKUXM6AF5SH7BQYAT7IO4H2Z7JRUYJROTWVUQ"
+            }
+          }
+        }
+      ]
+    },
+    "upgrades_processing": []
+  }
+}

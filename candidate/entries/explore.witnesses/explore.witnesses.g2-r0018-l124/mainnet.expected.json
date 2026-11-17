@@ -1,0 +1,521 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "c162436b3207d1f7be6173aeabccfbe03b5f49effb0cb5e672c7837443f68eb6",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "85fa9cf06889d0dba77bd348d279aa6ee2efeea702b173b63a65c1558e2e34e7",
+        "ext": "v0",
+        "fee_pool": "19300",
+        "id_pool": "3",
+        "inflation_seq": 0,
+        "ledger_seq": 124,
+        "ledger_version": 20,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "1a7163ed8a49682adc789a75b6dab3f8bb1311d19395426bb6e309b235f258ea",
+        "scp_value": {
+          "close_time": "1777939200",
+          "ext": {
+            "signed": {
+              "node_id": "GDZ3C5SA7QH74NJ7YML2AZC47IR25BR7MUVZNUWE77OJL5OQDDMPCIMS",
+              "signature": "b003dc8d13c3b5e9206ba8f4284ea7438d8e2fc60a4eddcd68114ba395ee7307a57608f4192217bbad0c056a0c318a0b04b208c7a3d140d828f23d9d6423f905"
+            }
+          },
+          "tx_set_hash": "307ba675ac715953ad025d6fc9e4fdfe45574c2af77956ae25a1a8558aa4563b",
+          "upgrades": [
+            "0000000100000014"
+          ]
+        },
+        "skip_list": [
+          "5acbfaf1a73754b5b1380f59acafa60ef39498539d0781f90894cf7e65afd642",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [],
+    "tx_set": {
+      "previous_ledger_hash": "1a7163ed8a49682adc789a75b6dab3f8bb1311d19395426bb6e309b235f258ea",
+      "txs": []
+    },
+    "upgrades_processing": [
+      {
+        "changes": [
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_max_size_bytes": 2000
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_compute_v0": {
+                    "fee_rate_per_instructions_increment": "100",
+                    "ledger_max_instructions": "2500000",
+                    "tx_max_instructions": "2500000",
+                    "tx_memory_limit": 2000000
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_ledger_cost_v0": {
+                    "fee_disk_read1_kb": "1000",
+                    "fee_disk_read_ledger_entry": "5000",
+                    "fee_write_ledger_entry": "20000",
+                    "ledger_max_disk_read_bytes": 3200,
+                    "ledger_max_disk_read_entries": 3,
+                    "ledger_max_write_bytes": 3200,
+                    "ledger_max_write_ledger_entries": 2,
+                    "rent_fee1_kb_soroban_state_size_high": "10000",
+                    "rent_fee1_kb_soroban_state_size_low": "1000",
+                    "soroban_state_rent_fee_growth_factor": 1,
+                    "soroban_state_target_size_bytes": "32212254720",
+                    "tx_max_disk_read_bytes": 3200,
+                    "tx_max_disk_read_entries": 3,
+                    "tx_max_write_bytes": 3200,
+                    "tx_max_write_ledger_entries": 2
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_historical_data_v0": {
+                    "fee_historical1_kb": "100"
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_events_v0": {
+                    "fee_contract_events1_kb": "200",
+                    "tx_max_contract_events_size_bytes": 200
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_bandwidth_v0": {
+                    "fee_tx_size1_kb": "2000",
+                    "ledger_max_txs_size_bytes": 10000,
+                    "tx_max_size_bytes": 10000
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_cost_params_cpu_instructions": [
+                    {
+                      "const_term": "4",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "434",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "42",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "44",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "310",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "61",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "230",
+                      "ext": "v0",
+                      "linear_term": "29"
+                    },
+                    {
+                      "const_term": "59052",
+                      "ext": "v0",
+                      "linear_term": "4001"
+                    },
+                    {
+                      "const_term": "3738",
+                      "ext": "v0",
+                      "linear_term": "7012"
+                    },
+                    {
+                      "const_term": "40253",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "377524",
+                      "ext": "v0",
+                      "linear_term": "4068"
+                    },
+                    {
+                      "const_term": "451626",
+                      "ext": "v0",
+                      "linear_term": "45405"
+                    },
+                    {
+                      "const_term": "451626",
+                      "ext": "v0",
+                      "linear_term": "45405"
+                    },
+                    {
+                      "const_term": "1948",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "3766",
+                      "ext": "v0",
+                      "linear_term": "5969"
+                    },
+                    {
+                      "const_term": "710",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "2315295",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4404",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4947",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4911",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4286",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "913",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "1058",
+                      "ext": "v0",
+                      "linear_term": "501"
+                    }
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_cost_params_memory_bytes": [
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "16",
+                      "ext": "v0",
+                      "linear_term": "128"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "242",
+                      "ext": "v0",
+                      "linear_term": "384"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "384"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "130065",
+                      "ext": "v0",
+                      "linear_term": "5064"
+                    },
+                    {
+                      "const_term": "130065",
+                      "ext": "v0",
+                      "linear_term": "5064"
+                    },
+                    {
+                      "const_term": "14",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "181",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    }
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_data_key_size_bytes": 200
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_data_entry_size_bytes": 2000
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "state_archival": {
+                    "eviction_scan_size": 100000,
+                    "live_soroban_state_size_window_sample_period": 64,
+                    "live_soroban_state_size_window_sample_size": 30,
+                    "max_entries_to_archive": 100,
+                    "max_entry_ttl": 1054080,
+                    "min_persistent_ttl": 4096,
+                    "min_temporary_ttl": 16,
+                    "persistent_rent_rate_denominator": "252480",
+                    "starting_eviction_scan_level": 6,
+                    "temp_rent_rate_denominator": "2524800"
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_execution_lanes": {
+                    "ledger_max_tx_count": 1
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "live_soroban_state_size_window": [
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300",
+                    "8300"
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "eviction_iterator": {
+                    "bucket_file_offset": "0",
+                    "bucket_list_level": 6,
+                    "is_curr_bucket": true
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 124
+            }
+          }
+        ],
+        "upgrade": {
+          "version": 20
+        }
+      }
+    ]
+  }
+}

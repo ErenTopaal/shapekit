@@ -1,0 +1,600 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "3b51e0d31f8e04e4bf8a92c1f14715f338a0a81299122bbcac698ff73352ae65",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "8c98ff8d3f7f6b10af37ff845215c58b1cf16f803a3bee90d9cd13708a7aee76",
+        "ext": "v0",
+        "fee_pool": "5400",
+        "id_pool": "1",
+        "inflation_seq": 0,
+        "ledger_seq": 94,
+        "ledger_version": 19,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "c6569eb1e3e21f610b0761403f0fbe2b7fd28b3bcc319111eca6372b24543418",
+        "scp_value": {
+          "close_time": "1775347200",
+          "ext": {
+            "signed": {
+              "node_id": "GDZ3C5SA7QH74NJ7YML2AZC47IR25BR7MUVZNUWE77OJL5OQDDMPCIMS",
+              "signature": "84757b77b32681aae1e187cfbee6c48ae56089953ac7aeca8c37f8eb201a2107b92a766d3747f402ba95ff98fb4c06e7f86ec5e62402d6fdab6bff6886531807"
+            }
+          },
+          "tx_set_hash": "e8fe991939e7312105593e1123e0eee234adf1bd9df38ede76248b9321d83c91",
+          "upgrades": []
+        },
+        "skip_list": [
+          "8134f41ac32877255718cf0cea12d2906203913c9a6efea1e34f3aed14739209",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "13bc12135d149267531cd133c072c091a1c9c2f09e5bbc05036c05f58acaa6eb"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [
+      {
+        "fee_processing": [
+          {
+            "state": {
+              "data": {
+                "account": {
+                  "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                  "balance": "9999998800",
+                  "ext": {
+                    "v1": {
+                      "ext": {
+                        "v2": {
+                          "ext": {
+                            "v3": {
+                              "ext": "v0",
+                              "seq_ledger": 93,
+                              "seq_time": "1775260800"
+                            }
+                          },
+                          "num_sponsored": 0,
+                          "num_sponsoring": 0,
+                          "signer_sponsoring_i_ds": []
+                        }
+                      },
+                      "liabilities": {
+                        "buying": "0",
+                        "selling": "0"
+                      }
+                    }
+                  },
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 4,
+                  "seq_num": "360777252869",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 93
+            }
+          },
+          {
+            "updated": {
+              "data": {
+                "account": {
+                  "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                  "balance": "9999998700",
+                  "ext": {
+                    "v1": {
+                      "ext": {
+                        "v2": {
+                          "ext": {
+                            "v3": {
+                              "ext": "v0",
+                              "seq_ledger": 93,
+                              "seq_time": "1775260800"
+                            }
+                          },
+                          "num_sponsored": 0,
+                          "num_sponsoring": 0,
+                          "signer_sponsoring_i_ds": []
+                        }
+                      },
+                      "liabilities": {
+                        "buying": "0",
+                        "selling": "0"
+                      }
+                    }
+                  },
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 4,
+                  "seq_num": "360777252869",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 94
+            }
+          }
+        ],
+        "result": {
+          "result": {
+            "ext": "v0",
+            "fee_charged": "100",
+            "result": {
+              "tx_success": [
+                {
+                  "op_inner": {
+                    "liquidity_pool_withdraw": "success"
+                  }
+                }
+              ]
+            }
+          },
+          "transaction_hash": "3f647114886292a3762e4a34e7c9ace34ad5243626457ad45a55f1d3bc0a38d4"
+        },
+        "tx_apply_processing": {
+          "v4": {
+            "diagnostic_events": [],
+            "events": [
+              {
+                "event": {
+                  "body": {
+                    "v0": {
+                      "data": {
+                        "i128": "100"
+                      },
+                      "topics": [
+                        {
+                          "symbol": "fee"
+                        },
+                        {
+                          "address": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI"
+                        }
+                      ]
+                    }
+                  },
+                  "contract_id": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+                  "ext": "v0",
+                  "type": "contract"
+                },
+                "stage": "before_all_txs"
+              }
+            ],
+            "ext": "v0",
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "state": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                            }
+                          },
+                          "balance": "999000000000",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": "v0",
+                                  "liquidity_pool_use_count": 1
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 89
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "credit_alphanum4": {
+                              "asset_code": "USD",
+                              "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                            }
+                          },
+                          "balance": "999000001000",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": "v0",
+                                  "liquidity_pool_use_count": 1
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 94
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "credit_alphanum12": {
+                              "asset_code": "LONGASSET12",
+                              "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                            }
+                          },
+                          "balance": "999000000000",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": "v0",
+                                  "liquidity_pool_use_count": 1
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 89
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "credit_alphanum12": {
+                              "asset_code": "LONGASSET12",
+                              "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                            }
+                          },
+                          "balance": "999000001000",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": "v0",
+                                  "liquidity_pool_use_count": 1
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 1,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 94
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "pool_share": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                          },
+                          "balance": "1000000000",
+                          "ext": "v0",
+                          "flags": 0,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 89
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "trustline": {
+                          "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                          "asset": {
+                            "pool_share": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                          },
+                          "balance": "999999000",
+                          "ext": "v0",
+                          "flags": 0,
+                          "limit": "9223372036854775807"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 94
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "liquidity_pool": {
+                          "body": {
+                            "liquidity_pool_constant_product": {
+                              "params": {
+                                "asset_a": {
+                                  "credit_alphanum4": {
+                                    "asset_code": "USD",
+                                    "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                                  }
+                                },
+                                "asset_b": {
+                                  "credit_alphanum12": {
+                                    "asset_code": "LONGASSET12",
+                                    "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                                  }
+                                },
+                                "fee": 30
+                              },
+                              "pool_shares_trust_line_count": "3",
+                              "reserve_a": "1000000000",
+                              "reserve_b": "1000000000",
+                              "total_pool_shares": "1000000000"
+                            }
+                          },
+                          "liquidity_pool_id": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 89
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "liquidity_pool": {
+                          "body": {
+                            "liquidity_pool_constant_product": {
+                              "params": {
+                                "asset_a": {
+                                  "credit_alphanum4": {
+                                    "asset_code": "USD",
+                                    "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                                  }
+                                },
+                                "asset_b": {
+                                  "credit_alphanum12": {
+                                    "asset_code": "LONGASSET12",
+                                    "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                                  }
+                                },
+                                "fee": 30
+                              },
+                              "pool_shares_trust_line_count": "3",
+                              "reserve_a": "999999000",
+                              "reserve_b": "999999000",
+                              "total_pool_shares": "999999000"
+                            }
+                          },
+                          "liquidity_pool_id": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 94
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "body": {
+                      "v0": {
+                        "data": {
+                          "i128": "1000"
+                        },
+                        "topics": [
+                          {
+                            "symbol": "transfer"
+                          },
+                          {
+                            "address": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                          },
+                          {
+                            "address": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI"
+                          },
+                          {
+                            "string": "USD:GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                          }
+                        ]
+                      }
+                    },
+                    "contract_id": "CC4GWULCUAZAG3GYK3ABDSAJ3XSFZVKVJQMTPLSI7AIVBXQGHG7BL2ZR",
+                    "ext": "v0",
+                    "type": "contract"
+                  },
+                  {
+                    "body": {
+                      "v0": {
+                        "data": {
+                          "i128": "1000"
+                        },
+                        "topics": [
+                          {
+                            "symbol": "transfer"
+                          },
+                          {
+                            "address": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB"
+                          },
+                          {
+                            "address": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI"
+                          },
+                          {
+                            "string": "LONGASSET12:GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                          }
+                        ]
+                      }
+                    },
+                    "contract_id": "CDZ2RDE5BD7MZS23FTWPMAJHNJHPPZLELRC2L6EM6RPO4H4VZIUP3LFW",
+                    "ext": "v0",
+                    "type": "contract"
+                  }
+                ],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": null,
+            "tx_changes_after": [],
+            "tx_changes_before": [
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                      "balance": "9999998700",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": {
+                                "v3": {
+                                  "ext": "v0",
+                                  "seq_ledger": 93,
+                                  "seq_time": "1775260800"
+                                }
+                              },
+                              "num_sponsored": 0,
+                              "num_sponsoring": 0,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 4,
+                      "seq_num": "360777252869",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 94
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI",
+                      "balance": "9999998700",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": {
+                                "v3": {
+                                  "ext": "v0",
+                                  "seq_ledger": 94,
+                                  "seq_time": "1775347200"
+                                }
+                              },
+                              "num_sponsored": 0,
+                              "num_sponsoring": 0,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 4,
+                      "seq_num": "360777252870",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 94
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "tx_set": {
+      "previous_ledger_hash": "c6569eb1e3e21f610b0761403f0fbe2b7fd28b3bcc319111eca6372b24543418",
+      "txs": [
+        {
+          "tx": {
+            "signatures": [
+              {
+                "hint": "20072f34",
+                "signature": "d9d29eb9645d42f1182849da097b2ef7a8418a1af3b6727ed60fddc8257d20b683288489dfbe17fc5a5c698d9b0d7ec47000d2372c731182f96b243ad22e9507"
+              }
+            ],
+            "tx": {
+              "cond": "none",
+              "ext": "v0",
+              "fee": 100,
+              "memo": "none",
+              "operations": [
+                {
+                  "body": {
+                    "liquidity_pool_withdraw": {
+                      "amount": "1000",
+                      "liquidity_pool_id": "LDALYXXZYBCKHETJSSGOJJ6RK4S4OMXG6D2CCPGXCK4A3UEZKH2MIORB",
+                      "min_amount_a": "1",
+                      "min_amount_b": "1"
+                    }
+                  },
+                  "source_account": null
+                }
+              ],
+              "seq_num": "360777252870",
+              "source_account": "GBZKJRYKPBYBRWHVY3KI76STJN7HOOFF257PUMB4WHFGK7BAA4XTJIBI"
+            }
+          }
+        }
+      ]
+    },
+    "upgrades_processing": []
+  }
+}

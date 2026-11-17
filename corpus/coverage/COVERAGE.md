@@ -18,7 +18,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | Arms covered by a core-emitted entry | 436 (87.4%) |
 | Arms uncovered | 63 |
 | Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
-| Family fragments covered | 312 of 322 in 39 families |
+| Family fragments covered | 318 of 328 in 41 families |
 | Fields core does not fully validate, exercised | 29 of 29 |
 
 ## Blockers
@@ -833,6 +833,28 @@ Expected source classes with no entry: local-core, local-core-refused, synthetic
 | Fragment | Core-emitted entries | Gap |
 |---|---|---|
 | `TransactionEnvelope:tx` | 447: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 444 more |  |
+
+### `explore.witnesses`
+
+Ledgers of recipes the explorer found, one per union arm they first hold. CAPs: . Entries: none.
+Expected source classes with no entry: local-core.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `LedgerCloseMeta:v0` | 19: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 16 more |  |
+| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
+| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
+
+### `explore.pairs`
+
+The two ledgers of a recipe pair that name the same account in two ways. CAPs: . Entries: none.
+Expected source classes with no entry: local-core.
+
+| Fragment | Core-emitted entries | Gap |
+|---|---|---|
+| `LedgerCloseMeta:v0` | 19: `cap03.offer-liabilities.mainnet-25000000`, `cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0`, `cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0` and 16 more |  |
+| `LedgerCloseMeta:v1` | 39: `cap42.generalized-txset.golden-27003f6cc5cdecc2-5`, `cap46.config-upgrades.golden-27003f6cc5cdecc2-5`, `cap63.parallel-txset.golden-308caf2d0fc09c95-12` and 36 more |  |
+| `LedgerCloseMeta:v2` | 356: `cap01.bump-sequence.golden-b71da06f9ce2dec8-2`, `cap01.bump-sequence.p30-bump-behind`, `cap01.bump-sequence.p30-bump-forward` and 353 more |  |
 
 ## Obligations
 

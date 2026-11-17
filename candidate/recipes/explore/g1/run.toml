@@ -1,0 +1,37 @@
+# the explorer run these recipes come from
+run = "g1"
+command = "shapekit explore run --budget 60 --protocol 30,30,30,22,19,17,14,12,10,9 --jobs 3 --actions 60 --coverage --seed 201"
+seed = 201
+load_average_at_start = "9.69, 9.07, 11.05"
+load_average_at_end = "8.71, 10.52, 11.22"
+episodes = 260
+recipes_written = 54
+classic_target_arms = 327
+classic_target_arms_witnessed = 322
+left_out_history_only = ["StellarValueExt:basic"]
+kept_here = "the four recipes that hold the classic arms no other committed run holds: ClaimAtom:v0, LedgerKey:liquidity_pool, LiquidityPoolDepositResult:underfunded and PathPaymentStrictReceiveResult:underfunded; the run's other recipes are not kept"
+verified = "explore verify --repeat 2 over these four recipes: each recorded twice under each passphrase, every one byte for byte with its credited arms"
+
+[recipes.r0004]
+id = "explore.sc9.e0"
+protocol = 12
+steps = 166
+arms_first_witnessed = ["AccountMergeResult:has_sub_entries", "AllowTrustResult:self_not_allowed", "ChangeTrustResult:invalid_limit", "ClaimAtom:v0", "CreateAccountResult:already_exist", "LedgerUpgrade:base_reserve", "ManageBuyOfferResult:low_reserve", "ManageDataResult:low_reserve", "ManageOfferSuccessResultOffer:deleted", "ManageSellOfferResult:low_reserve", "PathPaymentStrictReceiveResult:too_few_offers"]
+
+[recipes.r0016]
+id = "explore.sc9.e18"
+protocol = 22
+steps = 22
+arms_first_witnessed = ["LiquidityPoolDepositResult:no_trust", "PathPaymentStrictReceiveResult:underfunded"]
+
+[recipes.r0043]
+id = "explore.sc9.e79"
+protocol = 30
+steps = 58
+arms_first_witnessed = ["LedgerKey:liquidity_pool"]
+
+[recipes.r0047]
+id = "explore.sc9.e108"
+protocol = 19
+steps = 12
+arms_first_witnessed = ["LiquidityPoolDepositResult:underfunded"]

@@ -1,0 +1,385 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "4a5937394977b0d466458e1989feb873cf6e41465aa875b931fcd4a91de4724a",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "b82de22cee414f676f9327272a0a0838918efcbd15c4dc640f4f2d4af25f6dd1",
+        "ext": "v0",
+        "fee_pool": "1200",
+        "id_pool": "1",
+        "inflation_seq": 0,
+        "ledger_seq": 71,
+        "ledger_version": 19,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "7ec8cf74d6bc9ce4a69eee97ce5bce7d3c3930c6aa3e95795cc9f873e08b0cf7",
+        "scp_value": {
+          "close_time": "1773360000",
+          "ext": {
+            "signed": {
+              "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+              "signature": "cdf76eb12181eff9690dc12721460596f0ec5aef3faafa737c068ea73dbeade36448d589b82289dbf54cb684f54adfa30fcf142b965c18d0747caff4bf53ba03"
+            }
+          },
+          "tx_set_hash": "dfa67e2b7d8b89f83ecea0e119c5610061f043611e835cda87e89a82498632c4",
+          "upgrades": []
+        },
+        "skip_list": [
+          "1942acec0f7118d77a5ac53ba9f0172b81fd57249623420ee214b138f0074e91",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "58b2122b23da3227ae0a813c5c489e168cf966fe2e1d8756528ddb09bc8af077"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [
+      {
+        "fee_processing": [
+          {
+            "state": {
+              "data": {
+                "account": {
+                  "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                  "balance": "100000000000",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "274877906944",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 64
+            }
+          },
+          {
+            "updated": {
+              "data": {
+                "account": {
+                  "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                  "balance": "99999999900",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "274877906944",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 71
+            }
+          }
+        ],
+        "result": {
+          "result": {
+            "ext": "v0",
+            "fee_charged": "100",
+            "result": {
+              "tx_success": [
+                {
+                  "op_inner": {
+                    "manage_sell_offer": {
+                      "success": {
+                        "offer": {
+                          "created": {
+                            "amount": "9223371935854775807",
+                            "buying": "native",
+                            "ext": "v0",
+                            "flags": 0,
+                            "offer_id": "1",
+                            "price": {
+                              "d": 1,
+                              "n": 1
+                            },
+                            "seller_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                            "selling": {
+                              "credit_alphanum12": {
+                                "asset_code": "LONGASSET12",
+                                "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                              }
+                            }
+                          }
+                        },
+                        "offers_claimed": []
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "transaction_hash": "3581876551f5091206dadc8a6e811455b7ebdc15ec06bf71f5d6b7a36facae9e"
+        },
+        "tx_apply_processing": {
+          "v4": {
+            "diagnostic_events": [],
+            "events": [
+              {
+                "event": {
+                  "body": {
+                    "v0": {
+                      "data": {
+                        "i128": "100"
+                      },
+                      "topics": [
+                        {
+                          "symbol": "fee"
+                        },
+                        {
+                          "address": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                        }
+                      ]
+                    }
+                  },
+                  "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                  "ext": "v0",
+                  "type": "contract"
+                },
+                "stage": "before_all_txs"
+              }
+            ],
+            "ext": "v0",
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "state": {
+                      "data": {
+                        "account": {
+                          "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                          "balance": "99999999900",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": {
+                                    "v3": {
+                                      "ext": "v0",
+                                      "seq_ledger": 71,
+                                      "seq_time": "1773360000"
+                                    }
+                                  },
+                                  "num_sponsored": 0,
+                                  "num_sponsoring": 0,
+                                  "signer_sponsoring_i_ds": []
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 0,
+                          "seq_num": "274877906945",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "account": {
+                          "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                          "balance": "99999999900",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": {
+                                    "v3": {
+                                      "ext": "v0",
+                                      "seq_ledger": 71,
+                                      "seq_time": "1773360000"
+                                    }
+                                  },
+                                  "num_sponsored": 0,
+                                  "num_sponsoring": 0,
+                                  "signer_sponsoring_i_ds": []
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "9223371935854775807",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 1,
+                          "seq_num": "274877906945",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  },
+                  {
+                    "created": {
+                      "data": {
+                        "offer": {
+                          "amount": "9223371935854775807",
+                          "buying": "native",
+                          "ext": "v0",
+                          "flags": 0,
+                          "offer_id": "1",
+                          "price": {
+                            "d": 1,
+                            "n": 1
+                          },
+                          "seller_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                          "selling": {
+                            "credit_alphanum12": {
+                              "asset_code": "LONGASSET12",
+                              "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 71
+                    }
+                  }
+                ],
+                "events": [],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": null,
+            "tx_changes_after": [],
+            "tx_changes_before": [
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                      "balance": "99999999900",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906944",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 71
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V",
+                      "balance": "99999999900",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": {
+                                "v3": {
+                                  "ext": "v0",
+                                  "seq_ledger": 71,
+                                  "seq_time": "1773360000"
+                                }
+                              },
+                              "num_sponsored": 0,
+                              "num_sponsoring": 0,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906945",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 71
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "tx_set": {
+      "previous_ledger_hash": "7ec8cf74d6bc9ce4a69eee97ce5bce7d3c3930c6aa3e95795cc9f873e08b0cf7",
+      "txs": [
+        {
+          "tx": {
+            "signatures": [
+              {
+                "hint": "13af29fd",
+                "signature": "49e859aa3a98eb983b8c3a17c6ea850c4be72447d428684d8cd31c6b512fa72fc1ed30a1ce62c7bfcb514226076cdd27cd1b70de14d4810b442127ddef826d0c"
+              }
+            ],
+            "tx": {
+              "cond": "none",
+              "ext": "v0",
+              "fee": 100,
+              "memo": "none",
+              "operations": [
+                {
+                  "body": {
+                    "manage_sell_offer": {
+                      "amount": "9223371935854775807",
+                      "buying": "native",
+                      "offer_id": "0",
+                      "price": {
+                        "d": 1,
+                        "n": 1
+                      },
+                      "selling": {
+                        "credit_alphanum12": {
+                          "asset_code": "LONGASSET12",
+                          "issuer": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+                        }
+                      }
+                    }
+                  },
+                  "source_account": null
+                }
+              ],
+              "seq_num": "274877906945",
+              "source_account": "GAJTFU7NJSXNAQRNDUWOCAAWQR3MCSTBW7YOM3VPKADAR5ITV4U72A4V"
+            }
+          }
+        }
+      ]
+    },
+    "upgrades_processing": []
+  }
+}

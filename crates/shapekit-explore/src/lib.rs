@@ -9,6 +9,7 @@ pub mod arms;
 pub mod contract;
 pub mod coverage;
 pub mod directed;
+pub mod entries;
 pub mod episode;
 pub mod explore;
 pub mod feedback;

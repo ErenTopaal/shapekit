@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "id": "explore.sc9.e108",
+  "family": "explore",
+  "protocol": 19,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": false,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "200000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "1",
+              "line": {
+                "pool_share": {
+                  "liquidity_pool_constant_product": {
+                    "asset_a": "native",
+                    "asset_b": {
+                      "credit_alphanum4": {
+                        "asset_code": "USD",
+                        "issuer": "@account:a"
+                      }
+                    },
+                    "fee": 30
+                  }
+                }
+              }
+            }
+          },
+          "source_account": "@muxed:a:18446744073709551615"
+        }
+      ],
+      "signers": [
+        "b",
+        "a"
+      ],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "bump_sequence": {
+              "bump_to": "@seq:a+5"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "key1",
+              "data_value": "96e1f04e07d01c24e3503871a08e7949476df1e5bc076b212251bd2736ddcf88"
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": 12,
+              "high_threshold": null,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": null,
+              "master_weight": 1,
+              "med_threshold": null,
+              "set_flags": null,
+              "signer": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [
+        "a"
+      ],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "bump_sequence": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "manage_data": "success"
+              }
+            },
+            {
+              "op_inner": {
+                "set_options": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_deposit": {
+              "liquidity_pool_id": "LCGBMUVBIVSMV5IE2N2HSKKPARHTZZNVF6RJRJ5ZR5ITEYIHDDRD64E5",
+              "max_amount_a": "100",
+              "max_amount_b": "999999599799999500",
+              "max_price": {
+                "d": 1,
+                "n": 2147483647
+              },
+              "min_price": {
+                "d": 3,
+                "n": 2
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_deposit": "bad_price"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "liquidity_pool_deposit": {
+              "liquidity_pool_id": "LCGBMUVBIVSMV5IE2N2HSKKPARHTZZNVF6RJRJ5ZR5ITEYIHDDRD64E5",
+              "max_amount_a": "99999999199",
+              "max_amount_b": "99999989300",
+              "max_price": {
+                "d": 2147483647,
+                "n": 2147483647
+              },
+              "min_price": {
+                "d": 2147483647,
+                "n": 2147483647
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "text": "shapekit"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "liquidity_pool_deposit": "underfunded"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

@@ -321,6 +321,22 @@ shapekit manifest build --corpus candidate
 shapekit manifest validate --file candidate/manifest.json
 ```
 
+The recipe explorer (`shapekit explore run`) writes recipes, not entries. You record a kept
+recipe under both passphrases with `shapekit explore record --recipe <file> --out
+candidate/chains/<chain>`, and turn the chain into entries with
+
+```sh
+shapekit explore entries --chain candidate/chains/<chain> --recipe <file> \
+  --run <run.toml> --slug <slug> --about "<where the recipe comes from>"
+```
+
+The command picks the fewest ledgers of the chain that together hold the union arms the run
+credited to the recipe (`--run`), or every arm the chain holds, and writes each picked ledger
+as a `LedgerCloseMeta` entry of the `explore.witnesses` family with the bytes of both
+passphrases. Its notes name the arms the ledger was picked for. `shapekit explore witnessed
+--chain <dir> ...` counts the core-witnessed arms of `corpus/coverage/coverage.json` that a set
+of chains holds.
+
 Pull request checks never run the candidate lane. The `candidate` job of the nightly
 workflow runs it through the current version of each SDK and writes, per entry, whether it
 can be promoted. A divergence there is a finding to triage, so it is listed in the job

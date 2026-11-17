@@ -1,0 +1,741 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "a3f023b804551ec1f218a0e6ac2ff13ac2fb2f466cee396ebb81bec7e5898e60",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "51adf8c9940283fade91c255a862048ee7ca7fee0170cb1bc6429c2a2fb84439",
+        "ext": "v0",
+        "fee_pool": "0",
+        "id_pool": "0",
+        "inflation_seq": 0,
+        "ledger_seq": 2,
+        "ledger_version": 21,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "39c2a3cd4141b2853e70d84601faa44744660334b48f3228e0309342e3f4eb48",
+        "scp_value": {
+          "close_time": "1767398400",
+          "ext": {
+            "signed": {
+              "node_id": "GDZ3C5SA7QH74NJ7YML2AZC47IR25BR7MUVZNUWE77OJL5OQDDMPCIMS",
+              "signature": "4d469058b128bde24c5cf8f93e564cec76a4fd0bf5d47667690952fdeff11181dfbdefedc3923400b693364fba25a904066fd3b42b3f91dcc87bcb8fe549cc03"
+            }
+          },
+          "tx_set_hash": "cd48ebfdfa05dd9bb54a797b808517506aa1a14246dadcd429b3683c0b058691",
+          "upgrades": [
+            "0000000100000015"
+          ]
+        },
+        "skip_list": [
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [],
+    "tx_set": {
+      "previous_ledger_hash": "39c2a3cd4141b2853e70d84601faa44744660334b48f3228e0309342e3f4eb48",
+      "txs": []
+    },
+    "upgrades_processing": [
+      {
+        "changes": [
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_max_size_bytes": 128000
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_compute_v0": {
+                    "fee_rate_per_instructions_increment": "100",
+                    "ledger_max_instructions": "25000000000",
+                    "tx_max_instructions": "250000000",
+                    "tx_memory_limit": 200000000
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_ledger_cost_v0": {
+                    "fee_disk_read1_kb": "1000",
+                    "fee_disk_read_ledger_entry": "5000",
+                    "fee_write_ledger_entry": "20000",
+                    "ledger_max_disk_read_bytes": 320000000,
+                    "ledger_max_disk_read_entries": 30000,
+                    "ledger_max_write_bytes": 320000000,
+                    "ledger_max_write_ledger_entries": 20000,
+                    "rent_fee1_kb_soroban_state_size_high": "10000",
+                    "rent_fee1_kb_soroban_state_size_low": "1000",
+                    "soroban_state_rent_fee_growth_factor": 1,
+                    "soroban_state_target_size_bytes": "32212254720",
+                    "tx_max_disk_read_bytes": 3200000,
+                    "tx_max_disk_read_entries": 300,
+                    "tx_max_write_bytes": 3200000,
+                    "tx_max_write_ledger_entries": 200
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_historical_data_v0": {
+                    "fee_historical1_kb": "100"
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_events_v0": {
+                    "fee_contract_events1_kb": "200",
+                    "tx_max_contract_events_size_bytes": 4000
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_bandwidth_v0": {
+                    "fee_tx_size1_kb": "2000",
+                    "ledger_max_txs_size_bytes": 50000000,
+                    "tx_max_size_bytes": 500000
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_cost_params_cpu_instructions": [
+                    {
+                      "const_term": "4",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "434",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "42",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "44",
+                      "ext": "v0",
+                      "linear_term": "16"
+                    },
+                    {
+                      "const_term": "310",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "61",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "230",
+                      "ext": "v0",
+                      "linear_term": "29"
+                    },
+                    {
+                      "const_term": "59052",
+                      "ext": "v0",
+                      "linear_term": "4001"
+                    },
+                    {
+                      "const_term": "3738",
+                      "ext": "v0",
+                      "linear_term": "7012"
+                    },
+                    {
+                      "const_term": "40253",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "377524",
+                      "ext": "v0",
+                      "linear_term": "4068"
+                    },
+                    {
+                      "const_term": "451626",
+                      "ext": "v0",
+                      "linear_term": "45405"
+                    },
+                    {
+                      "const_term": "41142",
+                      "ext": "v0",
+                      "linear_term": "634"
+                    },
+                    {
+                      "const_term": "1948",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "3766",
+                      "ext": "v0",
+                      "linear_term": "5969"
+                    },
+                    {
+                      "const_term": "710",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "2315295",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4404",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4947",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4911",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "4286",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "913",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "1058",
+                      "ext": "v0",
+                      "linear_term": "501"
+                    },
+                    {
+                      "const_term": "73077",
+                      "ext": "v0",
+                      "linear_term": "25410"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "540752"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "176363"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "29989"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "1061449"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "237336"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "328476"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "701845"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "429383"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "28"
+                    },
+                    {
+                      "const_term": "43030",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "7556"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "10711"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "3300"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "23038"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "42488"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "828974"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "297100"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "14"
+                    },
+                    {
+                      "const_term": "1882",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "3000906",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    }
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_cost_params_memory_bytes": [
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "16",
+                      "ext": "v0",
+                      "linear_term": "128"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "242",
+                      "ext": "v0",
+                      "linear_term": "384"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "384"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "130065",
+                      "ext": "v0",
+                      "linear_term": "5064"
+                    },
+                    {
+                      "const_term": "69472",
+                      "ext": "v0",
+                      "linear_term": "1217"
+                    },
+                    {
+                      "const_term": "14",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "181",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "99",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "17564",
+                      "ext": "v0",
+                      "linear_term": "6457"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "47464"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "13420"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "6285"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "64670"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "29074"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "48095"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "103229"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "36394"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "257"
+                    },
+                    {
+                      "const_term": "70704",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "14613"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "6833"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "1025"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "129632"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "13665"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "97637"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "9176"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "126"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    },
+                    {
+                      "const_term": "0",
+                      "ext": "v0",
+                      "linear_term": "0"
+                    }
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_data_key_size_bytes": 200000
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_data_entry_size_bytes": 2000000
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "state_archival": {
+                    "eviction_scan_size": 100000,
+                    "live_soroban_state_size_window_sample_period": 64,
+                    "live_soroban_state_size_window_sample_size": 30,
+                    "max_entries_to_archive": 100,
+                    "max_entry_ttl": 6307200,
+                    "min_persistent_ttl": 4096,
+                    "min_temporary_ttl": 16,
+                    "persistent_rent_rate_denominator": "252480",
+                    "starting_eviction_scan_level": 6,
+                    "temp_rent_rate_denominator": "2524800"
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "contract_execution_lanes": {
+                    "ledger_max_tx_count": 100
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "live_soroban_state_size_window": [
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100",
+                    "100"
+                  ]
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          },
+          {
+            "created": {
+              "data": {
+                "config_setting": {
+                  "eviction_iterator": {
+                    "bucket_file_offset": "0",
+                    "bucket_list_level": 6,
+                    "is_curr_bucket": true
+                  }
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 2
+            }
+          }
+        ],
+        "upgrade": {
+          "version": 21
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "v0": {
+    "ledger_header": {
+      "ext": "v0",
+      "hash": "f7c198739809101a56ce115b985c3d367b360f3a60f6105865d0e193dd9992a9",
+      "header": {
+        "base_fee": 100,
+        "base_reserve": 100000000,
+        "bucket_list_hash": "02fadf41e9391aee858a411e20cd46e2693b18154c9d37d3a7c9673e1efe94c5",
+        "ext": "v0",
+        "fee_pool": "2900",
+        "id_pool": "0",
+        "inflation_seq": 0,
+        "ledger_seq": 84,
+        "ledger_version": 17,
+        "max_tx_set_size": 100,
+        "previous_ledger_hash": "8e11ec086f3cce1193793742468b888214f994b29796cc6a2792cecca9895f44",
+        "scp_value": {
+          "close_time": "1774483200",
+          "ext": {
+            "signed": {
+              "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
+              "signature": "ad48c018aac894045e6b0e1bbca5ea8bfb270007234b0c3e6d4a930753c61a1ef7d39f638b4050cd6a23be535e92e0c3c29678a4d335931c9b3393e56b84400e"
+            }
+          },
+          "tx_set_hash": "126b66e7ec0ffe43c8ea2a64515c0d023d04e8f40b7723cede7f8930f7a55860",
+          "upgrades": []
+        },
+        "skip_list": [
+          "f0dbf292bc20fd51a022d7b18dc5f63a8a448ade503449c30961b334892840f3",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "total_coins": "1000000000000000000",
+        "tx_set_result_hash": "4bc36905bc657359737b08e0862a52cef571679794ae618cfe47b599ff3f4a3e"
+      }
+    },
+    "scp_info": [],
+    "tx_processing": [
+      {
+        "fee_processing": [
+          {
+            "state": {
+              "data": {
+                "account": {
+                  "account_id": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                  "balance": "209999800",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "279172874240",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 70
+            }
+          },
+          {
+            "updated": {
+              "data": {
+                "account": {
+                  "account_id": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                  "balance": "209999500",
+                  "ext": "v0",
+                  "flags": 0,
+                  "home_domain": "",
+                  "inflation_dest": null,
+                  "num_sub_entries": 0,
+                  "seq_num": "279172874240",
+                  "signers": [],
+                  "thresholds": "01000000"
+                }
+              },
+              "ext": "v0",
+              "last_modified_ledger_seq": 84
+            }
+          }
+        ],
+        "result": {
+          "result": {
+            "ext": "v0",
+            "fee_charged": "300",
+            "result": {
+              "tx_fee_bump_inner_failed": {
+                "result": {
+                  "ext": "v0",
+                  "fee_charged": "200",
+                  "result": {
+                    "tx_failed": [
+                      {
+                        "op_inner": {
+                          "begin_sponsoring_future_reserves": "success"
+                        }
+                      },
+                      {
+                        "op_inner": {
+                          "clawback_claimable_balance": "not_clawback_enabled"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "transaction_hash": "d41d118fa3d31812caa046ad91bda8d2d69f0edca91708d37f8a31f1d64a5058"
+              }
+            }
+          },
+          "transaction_hash": "58e541db40b9019f39add80e199ae611f3e35eb8891087207a713c3021815ff6"
+        },
+        "tx_apply_processing": {
+          "v4": {
+            "diagnostic_events": [],
+            "events": [
+              {
+                "event": {
+                  "body": {
+                    "v0": {
+                      "data": {
+                        "i128": "300"
+                      },
+                      "topics": [
+                        {
+                          "symbol": "fee"
+                        },
+                        {
+                          "address": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP"
+                        }
+                      ]
+                    }
+                  },
+                  "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                  "ext": "v0",
+                  "type": "contract"
+                },
+                "stage": "before_all_txs"
+              }
+            ],
+            "ext": "v0",
+            "operations": [],
+            "soroban_meta": null,
+            "tx_changes_after": [],
+            "tx_changes_before": [
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+                      "balance": "99999998500",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": "v0",
+                              "num_sponsored": 0,
+                              "num_sponsoring": 8,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 6,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906960",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 83
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF",
+                      "balance": "99999998500",
+                      "ext": {
+                        "v1": {
+                          "ext": {
+                            "v2": {
+                              "ext": "v0",
+                              "num_sponsored": 0,
+                              "num_sponsoring": 8,
+                              "signer_sponsoring_i_ds": []
+                            }
+                          },
+                          "liabilities": {
+                            "buying": "0",
+                            "selling": "0"
+                          }
+                        }
+                      },
+                      "flags": 6,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "274877906961",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 84
+                }
+              },
+              {
+                "state": {
+                  "data": {
+                    "account": {
+                      "account_id": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                      "balance": "209999500",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "279172874240",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 84
+                }
+              },
+              {
+                "updated": {
+                  "data": {
+                    "account": {
+                      "account_id": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+                      "balance": "209999500",
+                      "ext": "v0",
+                      "flags": 0,
+                      "home_domain": "",
+                      "inflation_dest": null,
+                      "num_sub_entries": 0,
+                      "seq_num": "279172874240",
+                      "signers": [],
+                      "thresholds": "01000000"
+                    }
+                  },
+                  "ext": "v0",
+                  "last_modified_ledger_seq": 84
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "tx_set": {
+      "previous_ledger_hash": "8e11ec086f3cce1193793742468b888214f994b29796cc6a2792cecca9895f44",
+      "txs": [
+        {
+          "tx_fee_bump": {
+            "signatures": [
+              {
+                "hint": "e77b7b42",
+                "signature": "8fe9dc0bffef864d805df521544d7e8d33988bdbf75764672cc44022caf7162aa11130811fa7446ee5369f1be288fce0dea016bfe3342d963affd0dfaa84a50a"
+              }
+            ],
+            "tx": {
+              "ext": "v0",
+              "fee": "300",
+              "fee_source": "GDLX32CN3P6YLIFQIUFPIIYXMNOZQCYEVZWSR7LC56FICT7HPN5UEEDP",
+              "inner_tx": {
+                "tx": {
+                  "signatures": [
+                    {
+                      "hint": "463406fd",
+                      "signature": "3348f945c770e3802e16bdd84386acac0ac860d7f1f28437f3c5c1920402145a2270cc38bf98c6328bbb11f2ed1fc83c33c0c547627d1e8c0d498ce17a105501"
+                    }
+                  ],
+                  "tx": {
+                    "cond": "none",
+                    "ext": "v0",
+                    "fee": 200,
+                    "memo": "none",
+                    "operations": [
+                      {
+                        "body": {
+                          "begin_sponsoring_future_reserves": {
+                            "sponsored_id": "GDNSNO7P67EBSR4F6HHJNWWOWZVUZSGN43XEGT4535HC4TCBSYKLKH6B"
+                          }
+                        },
+                        "source_account": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF"
+                      },
+                      {
+                        "body": {
+                          "clawback_claimable_balance": {
+                            "balance_id": "BAAPLJ3SUGMBX6RK467CTJFJ5BOAE7K4UIQ3CIGG42C2WVAJW2SFPTWJRA"
+                          }
+                        },
+                        "source_account": null
+                      }
+                    ],
+                    "seq_num": "274877906961",
+                    "source_account": "GBDEBVRJ4YZSVSGXYOKSE5NFHDRFOMD5QNT66N5ODAFFIMCGGQDP2VSF"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "upgrades_processing": []
+  }
+}

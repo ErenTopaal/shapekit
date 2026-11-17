@@ -8,6 +8,7 @@ use anyhow::{Context, Result, bail};
 use clap::Subcommand;
 use shapekit_core_driver::config::CoreImage;
 use shapekit_explore::arms::{self, is_contract_arm};
+use shapekit_explore::entries;
 use shapekit_explore::episode::Env;
 use shapekit_explore::explore::{self, Options, RECIPES, REPORT};
 use shapekit_explore::feedback::Seen;
@@ -123,6 +124,56 @@ pub enum ExploreCommand {
         out: PathBuf,
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+    },
+    /// Entries for a recorded explorer chain in a candidate lane: the fewest ledgers that
+    /// together hold every union arm the chain holds, one `LedgerCloseMeta` entry each with
+    /// both passphrases' bytes. Entries this command wrote for the chain before are replaced.
+    Entries {
+        /// The committed chain directory (holding `testnet/` and `mainnet/`); its name is the
+        /// chain id.
+        #[arg(long)]
+        chain: PathBuf,
+        /// The chain id the entries name, when it is not the directory's name (a pair side's
+        /// directory is `a` or `b`).
+        #[arg(long)]
+        chain_id: Option<String>,
+        /// The recipe the chain was recorded from, relative to the repository root.
+        #[arg(long)]
+        recipe: String,
+        #[arg(long, default_value = "explore.witnesses")]
+        family: String,
+        /// What the entry ids start with after the family; `-l<ledger>` follows.
+        #[arg(long)]
+        slug: String,
+        /// Where the recipe came from, in one sentence: the start of every entry's notes.
+        #[arg(long)]
+        about: String,
+        /// Also an entry for the chain's last ledger, for a pair's compared ledger.
+        #[arg(long)]
+        last: bool,
+        /// The run.toml beside the recipe: cover only the arms it credits to the recipe
+        /// (`arms_first_witnessed` or `contract_arms_first_witnessed` of `[recipes.<file
+        /// stem>]`), or every arm the chain holds when it credits none. Without it, every arm
+        /// the chain holds.
+        #[arg(long, conflicts_with = "arm")]
+        run: Option<PathBuf>,
+        /// Cover only these arms; repeatable.
+        #[arg(long)]
+        arm: Vec<String>,
+        #[arg(long, default_value = "candidate")]
+        out: PathBuf,
+    },
+    /// The core-witnessed arms of the coverage report that committed chains hold: the union
+    /// over every chain directory given, with the arms none of them holds.
+    Witnessed {
+        /// Committed chain directories (each holding `testnet/` and `mainnet/`); repeatable.
+        #[arg(long = "chain", required = true)]
+        chains: Vec<PathBuf>,
+        #[arg(long, default_value = "corpus/coverage/coverage.json")]
+        coverage_report: PathBuf,
+        /// The registry whose `uncovered.toml` names the arms only network history holds.
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
     },
     /// Record every recipe of a run again under both passphrases, twice each, and check the
     /// streams repeat and the credited arms are there.
@@ -292,7 +343,178 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             jobs,
             pins,
         } => verify_dir(&dir, repeat, jobs, &pins),
+        ExploreCommand::Entries {
+            chain,
+            chain_id: id,
+            recipe,
+            family,
+            slug,
+            about,
+            last,
+            run,
+            arm,
+            out,
+        } => {
+            let id = match id {
+                Some(id) => id,
+                None => chain_id(&chain)?,
+            };
+            let credited = match &run {
+                Some(run) => credited(run, &recipe)?,
+                None if !arm.is_empty() => Some(arm.into_iter().collect()),
+                None => None,
+            };
+            chain_entries(
+                &chain,
+                id,
+                recipe,
+                family,
+                slug,
+                about,
+                credited.as_ref(),
+                last,
+                &out,
+            )
+        }
+        ExploreCommand::Witnessed {
+            chains,
+            coverage_report,
+            registry,
+        } => witnessed(&chains, &coverage_report, &registry),
     }
+}
+
+fn chain_id(chain: &Path) -> Result<String> {
+    Ok(chain
+        .file_name()
+        .and_then(|n| n.to_str())
+        .with_context(|| format!("{} has no directory name", chain.display()))?
+        .to_owned())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn chain_entries(
+    chain: &Path,
+    id: String,
+    recipe: String,
+    family: String,
+    slug: String,
+    about: String,
+    credited: Option<&BTreeSet<String>>,
+    last: bool,
+    out: &Path,
+) -> Result<bool> {
+    let reachable = arms::reachable()?;
+    let ledgers = entries::read_chain(chain, &reachable)?;
+    let src = entries::ChainSource {
+        chain_id: id,
+        recipe,
+        family,
+        slug,
+        about,
+    };
+    let removed = entries::remove_chain_entries(out, &src.family, &src.chain_id)?;
+    let picks = entries::cover(&ledgers, credited, last)?;
+    let held: BTreeSet<&String> = ledgers.iter().flat_map(|l| &l.arms).collect();
+    for p in &picks {
+        let e = entries::entry(&src, p);
+        let id = e.id.clone();
+        entries::write(out, e, p)?;
+        println!("{id}: {} arms", p.credited.len());
+    }
+    println!(
+        "{}: {} ledgers hold {} arms; {} entries written, {} replaced",
+        src.chain_id,
+        ledgers.len(),
+        held.len(),
+        picks.len(),
+        removed
+    );
+    Ok(true)
+}
+
+/// The arms `run` (a run.toml) credits to the recipe file `recipe`, `None` when it credits
+/// none.
+fn credited(run: &Path, recipe: &str) -> Result<Option<BTreeSet<String>>> {
+    let text =
+        std::fs::read_to_string(run).with_context(|| format!("reading {}", run.display()))?;
+    let doc: toml::Value =
+        toml::from_str(&text).with_context(|| format!("parsing {}", run.display()))?;
+    let key = Path::new(recipe)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .with_context(|| format!("{recipe} has no file name"))?;
+    let table = doc
+        .get("recipes")
+        .and_then(|r| r.get(key))
+        .with_context(|| format!("{} has no [recipes.{key}]", run.display()))?;
+    let mut arms = BTreeSet::new();
+    for field in ["arms_first_witnessed", "contract_arms_first_witnessed"] {
+        if let Some(list) = table.get(field) {
+            let list = list.as_array().with_context(|| {
+                format!("{}: recipes.{key}.{field} is not a list", run.display())
+            })?;
+            for a in list {
+                arms.insert(
+                    a.as_str()
+                        .with_context(|| format!("{}: recipes.{key}.{field}", run.display()))?
+                        .to_owned(),
+                );
+            }
+        }
+    }
+    Ok((!arms.is_empty()).then_some(arms))
+}
+
+fn witnessed(chains: &[PathBuf], coverage_report: &Path, registry: &Path) -> Result<bool> {
+    let reachable = arms::reachable()?;
+    let targets = arms::core_witnessed(coverage_report)?;
+    let uncovered = shapekit_coverage::uncovered::UncoveredFile::load(registry)
+        .with_context(|| format!("reading the uncovered arms of {}", registry.display()))?;
+    let history_only: BTreeSet<String> = uncovered
+        .history_only_arms
+        .iter()
+        .map(|r| r.arm.clone())
+        .collect();
+    let mut held = BTreeSet::new();
+    for c in chains {
+        for l in entries::read_chain(c, &reachable)? {
+            held.extend(l.arms);
+        }
+    }
+    let hit = targets.intersection(&held).count();
+    let classic = targets.iter().filter(|a| !is_contract_arm(a)).count();
+    let classic_hit = targets
+        .iter()
+        .filter(|a| !is_contract_arm(a) && held.contains(*a))
+        .count();
+    println!(
+        "{} chains hold {hit} of the {} core-witnessed arms of {} ({classic_hit} of {classic} classic, {} of {} contract)",
+        chains.len(),
+        targets.len(),
+        coverage_report.display(),
+        hit - classic_hit,
+        targets.len() - classic
+    );
+    for a in targets.difference(&held) {
+        let why = if history_only.contains(a) {
+            " (network history only)"
+        } else {
+            ""
+        };
+        println!("not held: {a}{why}");
+    }
+    let beyond: Vec<&String> = held.difference(&targets).collect();
+    println!(
+        "{} arms beyond the core-witnessed ones: {}",
+        beyond.len(),
+        beyond
+            .iter()
+            .map(|a| a.as_str())
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    Ok(true)
 }
 
 fn scratch() -> Result<PathBuf> {
