@@ -7,6 +7,7 @@ mod conformance_cmd;
 mod contracts_cmd;
 mod coretest_cmd;
 mod coverage_cmd;
+mod doctor_cmd;
 mod explore_cmd;
 mod findings_cmd;
 mod fuzz_cmd;
@@ -67,6 +68,9 @@ enum Command {
         #[command(subcommand)]
         command: init_cmd::InitCommand,
     },
+    /// Check that docker, the toolchains, disk space and network access are there for check
+    /// sdk, check indexer and lint, and say how to install what is missing.
+    Doctor(doctor_cmd::DoctorArgs),
     /// List the internal commands: the corpus generator, its checks and the maintenance tools.
     Dev,
     /// Work with pins.toml, the list of every pinned upstream reference.
@@ -739,6 +743,7 @@ fn main() -> ExitCode {
         Command::Check { command } => check_cmd::run(command),
         Command::Lint(args) => lint_cmd::run(args),
         Command::Init { command } => init_cmd::run(command),
+        Command::Doctor(args) => doctor_cmd::run(args),
         Command::Dev => {
             print!("{}", dev_listing());
             Ok(true)
@@ -773,7 +778,10 @@ mod tests {
             .filter(|c| !c.is_hide_set())
             .map(|c| c.get_name())
             .collect();
-        assert_eq!(visible, ["check", "lint", "report", "init", "dev", "serve"]);
+        assert_eq!(
+            visible,
+            ["check", "lint", "report", "init", "doctor", "dev", "serve"]
+        );
         let internal = [
             "twin",
             "explore",

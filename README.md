@@ -69,6 +69,19 @@ repository at the release tag, with `shapekit` and `indexerlint` on `PATH` and t
 `adapters/bin/wb-adapter`. Their default paths (`corpus/`, `registry/`, `conformance/`,
 `testees/`, `pins.toml`) are relative to that root.
 
+### Check your setup
+
+```sh
+shapekit doctor                 # everything check sdk, check indexer and lint need
+shapekit doctor sdk --sdk js    # only what check sdk --sdk js needs
+```
+
+`doctor` looks for every program the SDK build steps in `conformance/versions.toml` start,
+compares Rust, Go and Node.js with the versions in `pins.toml`, checks that the Docker daemon
+answers, that `indexerlint` and the corpus are there and how much disk is free, and that the
+package registries the SDK builds fetch from can be reached (`--offline` skips that). For
+each missing piece it prints how to install it, and it exits 1 while anything is missing.
+
 ## Quick start
 
 ### Check the corpus
