@@ -188,7 +188,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `format`: XDR schema decision points | 3,869 | 0 | 3,869 |
   | `gap`: native type losses per language | 9 | 4 | 13 |
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
-  | `gate-side`: sides of stellar-core's protocol gates | 375 by branch count, 128 inferred from execution count | 187 | 690 |
+  | `gate-side`: sides of stellar-core's protocol gates | 375 by branch count, 130 inferred from execution count | 185 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
   | `sdk-version`: SDK versions the corpus runs against | 28 | 0 | 28 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
@@ -204,9 +204,9 @@ A dated public log of what has landed in shapekit. Newest entry first.
   bytes.
 - Protocol gates: `registry/generated/gates.json` lists the 345 protocol version comparisons in
   stellar-core v30.0.0's source. The branch counts of corpus and candidate chains on an
-  instrumented core witness 375 of their 690 sides. For 128 more, a recipe run at a protocol
+  instrumented core witness 375 of their 690 sides. For 130 more, a recipe run at a protocol
   that takes the side executes the gate, so the side is inferred from the execution count. Each
-  of the 187 open sides carries its cause.
+  of the 185 open sides carries its cause.
 - Candidate lane: `candidate/` holds 6,229 entries that new runs wrote, such as probe witnesses
   and format vectors, apart from the release corpus; `shapekit corpus promote` moves an entry
   into the corpus. `registry/uncovered.toml` is checked against the lane: a probe refusal
