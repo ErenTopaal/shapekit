@@ -141,8 +141,10 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
 - Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
   runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
   sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on
-  wallet-backend at the pinned commit with its committed baseline, `findings check
-  --allow-draft`, every chain regenerated under both passphrases
+  wallet-backend at the pinned commit with its committed baseline, the stellar-rpc adapter
+  over every chain of both networks once per `--events-from` method, checked against
+  `crates/shapekit-harness/expect/stellar-rpc.toml`, `findings check --allow-draft`, every
+  chain regenerated under both passphrases
   (`gen verify-repro`), the test contracts rebuilt with the pinned stellar-cli and compared
   with the committed wasm, and the site built as `site.yml` builds it. It also needs docker,
   network access and the `wasm32v1-none` Rust target. The last lines of its

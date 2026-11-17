@@ -866,6 +866,123 @@ and `--builder` names the buildx builder the image is built with.
   strings as written, numbers as written, booleans as `true` and `false`, objects and arrays
   as compact JSON.
 
+## The stellar-rpc adapter
+
+`adapters/stellarrpc` (Go), command `adapters/stellarrpc/cmd/rpc-adapter`:
+
+```sh
+(cd adapters && go build -o bin/rpc-adapter ./stellarrpc/cmd/rpc-adapter)
+shapekit harness run --adapter "adapters/bin/rpc-adapter --cpus 2"
+```
+
+The adapter runs the stellar-rpc v30.0.1 release image, `stellar/stellar-rpc:30.0.1` by the
+digest in `pins.toml`. When the first process answers, the adapter checks that
+`getVersionInfo` reports `30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d`, the commit of
+the `v30.0.1` tag, and stops the chain with a `target` error otherwise. The image carries the
+stellar-core 30.0.0 build that its captive core runs. `--cpus` passes docker's `--cpus` to
+the container. `--events-from` names the method the export reads events from: `events`
+(`getEvents`, the default), `transactions` (`getTransactions`) or `ledgers` (`getLedgers`).
+Run the harness once with each to check all three methods.
+
+- **Delivery.** `sep54-filesystem`: stellar-rpc reads a filesystem datastore
+  (`[datastore_config]`, `type = "Filesystem"`) in a directory of the work directory. `start`
+  copies the lake's `.config.json` and every batch up to the bootstrap ledger into it from
+  `delivery.lake.path`, and each `advance` copies the batches up to the new head.
+- **Ingestion.** stellar-rpc ingests from a datastore only through its backfill
+  (`BACKFILL = true`, which needs `SERVE_LEDGERS_FROM_DATASTORE = true`). The backfill runs
+  when the process starts, before the HTTP server, and then hands over to live ingestion,
+  which runs captive core and follows the network over SCP. The harness network has no
+  validators, so captive core never ingests a ledger, and stellar-rpc logs
+  `could not run ingestion. Retrying`. The captive core configuration only has to pass
+  stellar-rpc's checks: the archive URL from `start` and a quorum of one key that the adapter
+  generates and that signs nothing. Two settings follow from the backfill's source
+  (`cmd/stellar-rpc/internal/rpcv1/ingest/backfill.go` at v30.0.1):
+  - The frontfill stops at the newest checkpoint at or below the datastore's newest ledger
+    (`PrevCheckpoint`). `CHECKPOINT_FREQUENCY = 1` makes every ledger a checkpoint, so the
+    backfill reaches the newest released ledger. Apart from the backfill, the setting reaches
+    only captive core and its archive reads, and captive core ingests no ledger here.
+  - The frontfill fills only when its first ledger is below its last
+    (`if bounds.frontfill.First < bounds.frontfill.Last`). On a database at ledger `H`, a
+    restart with one new ledger in the datastore fills nothing. So every `advance` replaces
+    the container: a new stellar-rpc process on an empty database, whose backfill ingests
+    every released ledger. The process that answers `export` and `dump` has ingested the
+    whole chain in one backfill.
+
+  The backfill writes each ledger with the function that live ingestion uses too
+  (`ingestLedgerCloseMeta` in `rpcv1/ingest/service.go`: the ledger, its transactions and its
+  events). Only the fee statistics behind `getFeeStats` are left out, and the harness does
+  not read them.
+- **Bootstrap.** `checkpoint`. On an empty database, live ingestion starts at the archive's
+  newest checkpoint (`getNextLedgerSequence` in `rpcv1/ingest/service.go`), and the backfill
+  ends on a checkpoint.
+- **Status.** `last_ingested_ledger` is the `sequence` that `getLatestLedger` answers, which
+  stellar-rpc reads from its database. While a new process backfills, the value stays at the
+  newest one an earlier process of the chain answered. `health` is `starting` until the
+  first process answers, `crashed` when the container exited, and `oom` when docker reports
+  an OOM kill. `last_error` is the newest log line at level `error` or `fatal`, or a
+  `panic:` line. Lines of the live ingestion path, which cannot run here (the retry above
+  and captive core's own log), are left out. Peak memory is the container's cgroup
+  `memory.peak`, sampled at every `status`, across all the containers of the chain.
+- **Protocols.** 1 to 30.
+- **Claims.** The consensus events that the three methods serve. `token-event`: `event`,
+  `stage`, `contract`, `from`, `to`, `spender`, `amount`, `to_muxed_id`, `authorized`,
+  `live_until_ledger` and `asset_topic`. `contract-event`: `contract`, `stage`,
+  `topics_xdr` and `data_xdr`. An event maps to a `token-event` when its topics and data
+  have the shape the oracle reads as one (`token_event` in
+  `crates/shapekit-oracle/src/interpret.rs`, ported to Go in `adapters/stellarrpc/events.go`),
+  and to a `contract-event` otherwise. `go test ./stellarrpc` checks the port: it maps the
+  events of core's own meta in every corpus chain and compares them with the committed oracle
+  files. The asset of a token event is not claimed, because the oracle proves it from the
+  assets of the ledger's entries, and none of the three methods serves those. Participants
+  and entry changes are not claimed: stellar-rpc derives no participants, and serves entry
+  changes only inside the meta XDR.
+- **Read-back.** `export` reads the transactions of the range from `getTransactions` (the
+  ledger and `txHash`, which is the outer hash of a fee bump) and their events from the
+  chosen method.
+  - From `getEvents` (no filters, `endLedger` one past the range), it takes `type`,
+    `contractId`, `topic` and `value` as served, and the stage from where the event's id puts
+    it, as `StageSentinels` (`cmd/stellar-rpc/internal/store/event.go`) writes it: transaction
+    index 0 with operation index 0 is a fee event before all transactions, transaction index
+    1048575 is after all transactions, operation index 4095 is after the transaction, and
+    any other id belongs to its operation. An event whose `txHash` names no served
+    transaction is an `unattributed` row.
+  - From `getTransactions`, it takes `events.transactionEventsXdr` (each `TransactionEvent`
+    with its stage) and `events.contractEventsXdr` (one list per operation).
+  - From `getLedgers`, it decodes `metadataXdr` and reads each transaction's events from its
+    meta as the oracle does.
+
+  Diagnostic events are `unmapped` rows: the vocabulary records consensus events only.
+- **Dump.** Six tables. `ledgers`, `transactions` and `events` hold the items that
+  `getLedgers`, `getTransactions` and `getEvents` serve in their default base64 form, one
+  row per item, with nested members as compact JSON. `ledgers_json`, `transactions_json`
+  and `events_json` hold the same answers with `xdrFormat: json`, one row per JSON leaf
+  (`key`, `path`, `value`), so the carry check reads every address that stellar-rpc's XDR to
+  JSON conversion wrote. Every table covers the ledgers from `oldestLedger` to
+  `latestLedger`.
+
+What the adapter cannot check, with the reason in stellar-rpc's source:
+
+- **`getLedgerEntries`.** stellar-rpc answers it from captive core's query server, at the
+  newest ledger in its database (`coreLedgerEntryGetter` in
+  `cmd/stellar-rpc/internal/ledgerentries/ledgerentries.go`). Captive core holds a ledger's
+  state only after it has applied the ledger, and it applies ledgers only through SCP. With a
+  datastore and no network, every call fails. At the bootstrap ledger captive core runs but
+  holds the archive's state, not the database's newest ledger
+  (`could not query captive core: http request failed with non-200 status code (404)`).
+  A few ledgers after the bootstrap ledger, the database is more than two checkpoints
+  past the archive's newest one (a checkpoint is one ledger at `CHECKPOINT_FREQUENCY = 1`), so
+  captive core does not start (`trying to start online mode too far ... only two checkpoints in the future
+  allowed`), and the call cannot reach it (`could not query captive core: ... connection
+  refused`). There is no stored state to compare, so `harness state` and the route check do
+  not apply.
+- **`getHealth`.** It reports an error when the newest ledger closed more than
+  `MAX_HEALTHY_LEDGER_LATENCY` (30 s) ago. The chains carry the close times they were
+  recorded with, so a replayed chain is never healthy. The adapter does not call it.
+- **Retention.** `HISTORY_RETENTION_WINDOW` keeps its default of 120,960 ledgers, longer than
+  every chain, so no ledger of a chain leaves the window. Each method scans at most 10,000
+  ledgers per call (`LedgerScanLimit`), and the adapter refuses a longer range with an
+  `unsupported` error rather than read a short page as the end of the data.
+
 ## Oracle vocabulary
 
 What the oracle says each transaction changed, read only from `LedgerCloseMeta`, in

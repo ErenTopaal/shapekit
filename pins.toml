@@ -87,6 +87,13 @@ tag = "1.56.1"
 digest = "sha256:797ce226d62f947c009dc40246b30cfb456b8473d8241407f9d6f2c04e4d69ef"
 purpose = "gcs emulator for the stellar-etl adapter"
 
+[[image]]
+name = "stellar-rpc"
+repository = "stellar/stellar-rpc"
+tag = "30.0.1"
+digest = "sha256:b6d41d3148087adf5d6856380a40854bd1e25b29d62a7ae484258e290e73b096"
+purpose = "stellar-rpc v30.0.1 release image the stellar-rpc adapter runs (adapters/stellarrpc/adapter.go, Image)"
+
 # base images of wallet-backend's own Dockerfile. the adapter builds each FROM on these digests
 # through buildx named contexts (adapters/walletbackend/docker.go, BaseImages)
 
@@ -163,7 +170,7 @@ name = "stellar-rpc"
 url = "https://github.com/stellar/stellar-rpc"
 ref = "refs/tags/v30.0.1"
 sha = "6b6ec60c8bde5a93984b6290065d3882d384b25d"
-purpose = "rpc method shapes served by the replay rpc (release image stellar/stellar-rpc:30.0.1, sha256:b6d41d3148087adf5d6856380a40854bd1e25b29d62a7ae484258e290e73b096)"
+purpose = "rpc method shapes served by the replay rpc, and the source the stellar-rpc adapter reads; the release image is the stellar-rpc [[image]]"
 
 [[git]]
 name = "stellar-etl"

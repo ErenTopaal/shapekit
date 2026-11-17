@@ -1,8 +1,8 @@
 name: nightly
 
 # the full tier: every chain regenerated under both passphrases, the whole sdk matrix and its
-# reproductions, the wallet-backend reproductions, both delivery modes, memory bounds, core's
-# own golden check, the docker-backed tests and coverage. what pr.yml samples, this runs whole.
+# reproductions, the wallet-backend reproductions, both delivery modes, memory bounds, the
+# stellar-rpc runs, core's own golden check, the docker-backed tests and coverage. what pr.yml samples, this runs whole.
 
 on:
   schedule:
@@ -404,6 +404,51 @@ jobs:
         with:
           name: harness-reproduce
           path: harness-reproduce/
+          retention-days: 30
+
+  harness-stellar-rpc:
+    # every chain of both networks through the stellar-rpc adapter, once per method the export
+    # reads events from; each run must give the verdicts of the committed expectations file
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        events-from: [events, transactions, ledgers]
+    name: harness stellar-rpc (${{ matrix.events-from }})
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pull the pinned image by digest
+        run: docker pull --quiet "$(scripts/pin.sh image stellar-rpc)"
+      - run: cd adapters && go build -o bin/rpc-adapter ./stellarrpc/cmd/rpc-adapter
+      - name: harness run
+        env:
+          EVENTS_FROM: ${{ matrix.events-from }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" harness run \
+            --adapter "adapters/bin/rpc-adapter --cpus 2 --events-from $EVENTS_FROM" \
+            --network both --expect crates/shapekit-harness/expect/stellar-rpc.toml \
+            --out harness-out
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: harness-stellar-rpc-${{ matrix.events-from }}
+          path: harness-out/
           retention-days: 30
 
   fuzz:

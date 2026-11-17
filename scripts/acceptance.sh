@@ -5,7 +5,8 @@
 #        scripts/acceptance.sh --full    quick mode, then the nightly checks: pins against the
 #                                        live sources, every sdk version and the upstream
 #                                        sightings, the wallet-backend reproductions and linter
-#                                        baseline, findings with drafts allowed, every chain
+#                                        baseline, the stellar-rpc harness runs, findings with
+#                                        drafts allowed, every chain
 #                                        regenerated under both passphrases, the test
 #                                        contracts rebuilt and the site built
 #
@@ -21,7 +22,7 @@ case "${1:-}" in
   "" | --quick) ;;
   --full) mode=full ;;
   -h | --help)
-    sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
   *)
@@ -190,6 +191,16 @@ current="indexerlint -baseline lint/baselines/wallet-backend.json on wallet-back
 echo "== $current"
 # the checkout sits under this repository, whose go.work must not claim it
 (cd "$wb" && GOWORK=off "$OLDPWD/$out/bin/indexerlint" -baseline "$OLDPWD/lint/baselines/wallet-backend.json" ./...)
+
+# the stellar-rpc adapter over every chain of both networks, once per method the export reads
+# events from, with the verdicts of the committed expectations file
+step docker pull --quiet "$(scripts/pin.sh image stellar-rpc)"
+step go build -C adapters -o "$root/$out/bin/rpc-adapter" ./stellarrpc/cmd/rpc-adapter
+for src in events transactions ledgers; do
+  step "$shapekit" harness run --adapter "$out/bin/rpc-adapter --cpus 2 --events-from $src" \
+    --network both --expect crates/shapekit-harness/expect/stellar-rpc.toml \
+    --out "$out/harness-stellar-rpc/$src"
+done
 
 step "$shapekit" findings check --allow-draft
 step "$shapekit" gen verify-repro --jobs 2

@@ -179,3 +179,27 @@ evidence = "internal/indexer/processors/accounts.go at the commit reads account 
 # the other 21 failing checks are `error`, not divergences: probe.limits.* entries whose chain,
 # candidate/chains/probe.limits.p30, is not in the lane, so the runner cannot read the ledger
 # their testnet/tx_hash expectation comes from. that happens for every sdk.
+
+# stellar-rpc v30.0.1 (release image stellar/stellar-rpc:30.0.1, commit 6b6ec60c), datastore
+# backfill (BACKFILL, SERVE_LEDGERS_FROM_DATASTORE, a Filesystem datastore holding a corpus
+# chain's lake). both are found while setting up the adapter, not by a verdict: the adapter runs
+# a new process on an empty database for every released ledger, which neither touches. each
+# reproduces with the release image and one chain's lake, as the observed lines say.
+
+[[candidate]]
+finding = "new"
+target = "stellar-rpc"
+versions = ["30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d"]
+chains = ["cap01.bump-sequence.p30"]
+checks = "stellar-rpc --backfill on a Filesystem datastore holding ledgers 2 to 40 of the testnet lake, CHECKPOINT_FREQUENCY 64 (the default), empty database"
+observed = "the process exits with status 1 at startup: `level=fatal msg=\"failed to backfill ledgers\" error=\"frontfill failed: couldn't fill chunk [2, 63]: ... ledger object containing sequence 41 is missing\"`. the log says the tip is 40 and then `Frontfilling to the most recent checkpoint ledger in datastore, ledgers [2 -> 63]`, a range past the datastore's newest ledger. a datastore younger than the first checkpoint (a new network, a local quickstart network with galexie) cannot be backfilled, and the node does not start"
+evidence = "cmd/stellar-rpc/internal/rpcv1/ingest/backfill.go at 6b6ec60c, runFrontfill: `bounds.frontfill.Last = bounds.checkpointAligner.PrevCheckpoint(currentTipLedger)`. go-stellar-sdk v0.9.0 historyarchive/range.go, PrevCheckpoint: `if i < freq { return freq - 1 }`, so every tip below 63 gives 63, a checkpoint after the tip. the backend then asks the datastore for ledger 41 and the frontfill fails (frontfillChunks), which MustNew turns into a fatal log"
+
+[[candidate]]
+finding = "new"
+target = "stellar-rpc"
+versions = ["30.0.1-6b6ec60c8bde5a93984b6290065d3882d384b25d"]
+chains = ["cap01.bump-sequence.p30"]
+checks = "stellar-rpc --backfill with CHECKPOINT_FREQUENCY 1 on a database holding ledgers 2 to 69, restarted with ledger 70 added to the datastore"
+observed = "the restarted process logs `Current tip ledger in cloud datastore is 70, going to backfill 1 ledgers`, then `No extra filling needed, local DB head already at most recent checkpoint in datastore` and `Backfill process complete, ledgers [2 -> 69]`; getLatestLedger answers 69. the one ledger between the database head and the datastore's newest checkpoint is never filled by the backfill. with the default frequency the same happens when the database head is one ledger before the newest checkpoint (a restart at ledger 126 with the datastore past 127): live ingestion through captive core then starts at that ledger and fills it, so a node that reaches the network loses nothing, but the backfill does not end at the checkpoint the changelog promises (`Backfill always ends at checkpoint aligned ledger`, #610)"
+evidence = "cmd/stellar-rpc/internal/rpcv1/ingest/backfill.go at 6b6ec60c: setBounds counts the ledger (`fillCount = currentTipLedger - maxDbSeq`, logged as `going to backfill 1 ledgers`), and runFrontfill fills only `if bounds.frontfill.First < bounds.frontfill.Last`; with First = maxDbSeq + 1 = Last the range [Last, Last] is skipped. frontfillChunks itself handles a one-ledger range (`lChunkBound <= rBound`)"
