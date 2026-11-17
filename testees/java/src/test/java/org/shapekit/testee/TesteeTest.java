@@ -43,7 +43,16 @@ class TesteeTest {
     for (String bad : List.of("01", "{'a':1}", "[1,]", "{\"a\":1,\"a\":2}", "1 2", "\"\t\"", "NaN")) {
       assertThrows(Json.ParseError.class, () -> Json.parse(bad), bad);
     }
-    assertThrows(Json.ParseError.class, () -> Json.parse("[".repeat(3000) + "]".repeat(3000)));
+    // the limit, not the thread stack, decides: every depth up to it reads and writes back, one
+    // past it is a parse error however small the stack
+    int max = Json.MAX_NESTING;
+    String deepest = "[".repeat(max) + "]".repeat(max);
+    assertEquals(deepest, Json.write(Json.parse(deepest)));
+    String deepObjects = "{\"a\":".repeat(max) + "1" + "}".repeat(max);
+    assertEquals(deepObjects, Json.write(Json.parse(deepObjects)));
+    for (int n : List.of(max + 1, 3000, 100000)) {
+      assertThrows(Json.ParseError.class, () -> Json.parse("[".repeat(n) + "]".repeat(n)), "nesting " + n);
+    }
   }
 
   @Test

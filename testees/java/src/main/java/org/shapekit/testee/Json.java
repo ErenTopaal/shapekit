@@ -31,7 +31,7 @@ final class Json {
   static Object parse(String text) throws ParseError {
     Reader r = new Reader(text);
     r.space();
-    Object v = r.value(0);
+    Object v = r.value();
     r.space();
     if (r.pos != text.length()) {
       throw new ParseError("text after the json value", r.pos);
@@ -39,11 +39,18 @@ final class Json {
     return v;
   }
 
+  /**
+   * the most arrays and objects one value nests. the deepest request the runner sends holds an
+   * expected xdr-json of 1010 levels (a quorum set ledger at the ledger depth limit, the deepest
+   * in corpus/ and candidate/) inside the request object, 1011 levels, and the sdk's toJson of a
+   * value decoded at the runner's depth limit of 1012 nests no deeper than that limit; 2048 is
+   * room above both. the reader and the writer keep their own stack of open containers instead
+   * of recursing, so this limit, not the size of the thread stack, decides how deep a value can
+   * be.
+   */
+  static final int MAX_NESTING = 2048;
+
   private static final class Reader {
-    // the testee runs on java's default thread stack, as an sdk caller does, and 5000 levels
-    // of this reader overflow it. the deepest expected xdr-json in corpus/ and candidate/
-    // nests 1010 levels (a quorum set ledger at the depth limit), so twice that is room enough
-    private static final int MAX_NESTING = 2048;
     private final String s;
     int pos;
 
@@ -61,19 +68,101 @@ final class Json {
       }
     }
 
-    Object value(int depth) throws ParseError {
-      if (depth > MAX_NESTING) {
-        throw new ParseError("json nested deeper than " + MAX_NESTING, pos);
+    /** an open array or object and, for an object, the member name its next value goes to. */
+    private static final class Open {
+      final List<Object> list;
+      final Map<String, Object> map;
+      String key;
+
+      Open(List<Object> list, Map<String, Object> map) {
+        this.list = list;
+        this.map = map;
       }
-      if (pos >= s.length()) {
-        throw new ParseError("unexpected end", pos);
+
+      Object container() {
+        return list != null ? list : map;
       }
-      char c = s.charAt(pos);
+    }
+
+    Object value() throws ParseError {
+      List<Open> stack = new ArrayList<>();
+      while (true) {
+        // read one value; an array or object is opened and its first member read on the next turn
+        Object v;
+        boolean opened = false;
+        if (pos >= s.length()) {
+          throw new ParseError("unexpected end", pos);
+        }
+        char c = s.charAt(pos);
+        if (c == '[' || c == '{') {
+          if (stack.size() >= MAX_NESTING) {
+            throw new ParseError("json nested deeper than " + MAX_NESTING, pos);
+          }
+          pos++;
+          space();
+          Open o = c == '[' ? new Open(new ArrayList<>(), null) : new Open(null, new LinkedHashMap<>());
+          char close = c == '[' ? ']' : '}';
+          if (pos < s.length() && s.charAt(pos) == close) {
+            pos++;
+            v = o.container();
+          } else {
+            stack.add(o);
+            if (o.map != null) {
+              memberName(o);
+            }
+            opened = true;
+            v = null;
+          }
+        } else {
+          v = scalar(c);
+        }
+        if (opened) {
+          continue;
+        }
+        // put the value into the open containers, closing every one that ends here
+        while (true) {
+          if (stack.isEmpty()) {
+            return v;
+          }
+          Open top = stack.get(stack.size() - 1);
+          if (top.list != null) {
+            top.list.add(v);
+          } else {
+            top.map.put(top.key, v);
+          }
+          space();
+          if (pos < s.length() && s.charAt(pos) == ',') {
+            pos++;
+            space();
+            if (top.map != null) {
+              memberName(top);
+            }
+            break;
+          }
+          expect(top.list != null ? ']' : '}');
+          stack.remove(stack.size() - 1);
+          v = top.container();
+        }
+      }
+    }
+
+    private void memberName(Open o) throws ParseError {
+      space();
+      if (pos >= s.length() || s.charAt(pos) != '"') {
+        throw new ParseError("expected a member name", pos);
+      }
+      String key = string();
+      space();
+      expect(':');
+      space();
+      if (o.map.containsKey(key)) {
+        throw new ParseError("duplicate member " + key, pos);
+      }
+      o.key = key;
+    }
+
+    private Object scalar(char c) throws ParseError {
       switch (c) {
-        case '{':
-          return object(depth);
-        case '[':
-          return array(depth);
         case '"':
           return string();
         case 't':
@@ -96,58 +185,6 @@ final class Json {
       }
       pos += word.length();
       return v;
-    }
-
-    Map<String, Object> object(int depth) throws ParseError {
-      Map<String, Object> m = new LinkedHashMap<>();
-      pos++;
-      space();
-      if (pos < s.length() && s.charAt(pos) == '}') {
-        pos++;
-        return m;
-      }
-      while (true) {
-        space();
-        if (pos >= s.length() || s.charAt(pos) != '"') {
-          throw new ParseError("expected a member name", pos);
-        }
-        String key = string();
-        space();
-        expect(':');
-        space();
-        if (m.containsKey(key)) {
-          throw new ParseError("duplicate member " + key, pos);
-        }
-        m.put(key, value(depth + 1));
-        space();
-        if (pos < s.length() && s.charAt(pos) == ',') {
-          pos++;
-          continue;
-        }
-        expect('}');
-        return m;
-      }
-    }
-
-    List<Object> array(int depth) throws ParseError {
-      List<Object> l = new ArrayList<>();
-      pos++;
-      space();
-      if (pos < s.length() && s.charAt(pos) == ']') {
-        pos++;
-        return l;
-      }
-      while (true) {
-        space();
-        l.add(value(depth + 1));
-        space();
-        if (pos < s.length() && s.charAt(pos) == ',') {
-          pos++;
-          continue;
-        }
-        expect(']');
-        return l;
-      }
     }
 
     void expect(char c) throws ParseError {
@@ -241,14 +278,58 @@ final class Json {
 
   static String write(Object v) {
     StringBuilder b = new StringBuilder();
-    write(b, v);
-    return b.toString();
+    // each open array or object is an iterator over what is left of it, with its closing
+    // character, so the writer needs no recursion either
+    List<java.util.Iterator<?>> open = new ArrayList<>();
+    List<Character> close = new ArrayList<>();
+    List<Boolean> first = new ArrayList<>();
+    Object next = v;
+    boolean pending = true;
+    while (true) {
+      if (pending) {
+        if (next instanceof List<?> l) {
+          b.append('[');
+          open.add(l.iterator());
+          close.add(']');
+          first.add(true);
+        } else if (next instanceof Map<?, ?> m) {
+          b.append('{');
+          open.add(m.entrySet().iterator());
+          close.add('}');
+          first.add(true);
+        } else {
+          scalar(b, next);
+        }
+        pending = false;
+      }
+      if (open.isEmpty()) {
+        return b.toString();
+      }
+      int top = open.size() - 1;
+      java.util.Iterator<?> it = open.get(top);
+      if (!it.hasNext()) {
+        b.append(close.get(top));
+        open.remove(top);
+        close.remove(top);
+        first.remove(top);
+        continue;
+      }
+      if (!first.get(top)) {
+        b.append(',');
+      }
+      first.set(top, false);
+      Object item = it.next();
+      if (item instanceof Map.Entry<?, ?> e) {
+        quote(b, (String) e.getKey());
+        b.append(':');
+        item = e.getValue();
+      }
+      next = item;
+      pending = true;
+    }
   }
 
-  // every value written was read by the parser above or built by the testee, so it nests no
-  // deeper than MAX_NESTING
-  @SuppressWarnings("unchecked")
-  private static void write(StringBuilder b, Object v) {
+  private static void scalar(StringBuilder b, Object v) {
     if (v == NULL) {
       b.append("null");
     } else if (v instanceof Boolean x) {
@@ -259,30 +340,9 @@ final class Json {
       b.append(v);
     } else if (v instanceof String x) {
       quote(b, x);
-    } else if (v instanceof List<?> l) {
-      b.append('[');
-      for (int i = 0; i < l.size(); i++) {
-        if (i > 0) {
-          b.append(',');
-        }
-        write(b, l.get(i));
-      }
-      b.append(']');
-    } else if (v instanceof Map<?, ?> m) {
-      b.append('{');
-      boolean first = true;
-      for (Map.Entry<String, Object> e : ((Map<String, Object>) m).entrySet()) {
-        if (!first) {
-          b.append(',');
-        }
-        first = false;
-        quote(b, e.getKey());
-        b.append(':');
-        write(b, e.getValue());
-      }
-      b.append('}');
     } else {
-      throw new IllegalArgumentException("no json form for " + v.getClass().getName());
+      throw new IllegalArgumentException(
+          "no json form for " + (v == null ? "a java null" : v.getClass().getName()));
     }
   }
 
