@@ -1,0 +1,3405 @@
+{
+  "corpus_version": "0.1.0",
+  "testees": [
+    {
+      "key": "dotnet@16.0.0",
+      "sdk": "dotnet",
+      "package": "stellar-dotnet-sdk",
+      "version": "16.0.0"
+    },
+    {
+      "key": "dotnet@17.0.0",
+      "sdk": "dotnet",
+      "package": "stellar-dotnet-sdk",
+      "version": "17.0.0"
+    }
+  ],
+  "entries": [
+    {
+      "id": "cap18.maintain-liabilities.golden-3f24be68a9962089-4",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap23.claimable-balances.synth-strkey-b-invalid",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 13/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap26.inflation.p11-inflation-not-time",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap26.inflation.p11-inflation-payout",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: InflationOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap27.muxed-accounts.synth-strkey-m-invalid",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 11/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: IndexOutOfRangeException: Index was outside the bounds of the array. at StellarDotnetSdk.StrKey.DecodeVersionByte(String encoded)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Asset A must be < Asset B (Lexicographic Order)."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Asset A must be < Asset B (Lexicographic Order)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-dotnet257",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-js1766-issuers",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.synth-assets-py1246-testnet-pool",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md",
+          "checks": [
+            {
+              "check": "case 0/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 1/asset_order",
+              "op": "asset_order",
+              "result": "diverges-from-network",
+              "detail": "the sdk orders the pair differently from core"
+            },
+            {
+              "check": "case 2/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 3/pool_id",
+              "op": "pool_id",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Invalid Liquidity Pool ID"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap38.liquidity-pools.testnet-5521432",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 2",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "testnet/tx_hash 3",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Asset A must be < Asset B (Lexicographic Order)."
+            },
+            {
+              "check": "testnet/tx_hash 8",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 2",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "testnet/tx_hash 3",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: Asset A must be < Asset B (Lexicographic Order)."
+            },
+            {
+              "check": "testnet/tx_hash 8",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap40.signed-payload-signer.synth-strkey-p-invalid",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md",
+          "checks": [
+            {
+              "check": "case 3/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 15/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            },
+            {
+              "check": "case 19/strkey_decode",
+              "op": "strkey_decode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap71.credentials.golden-e25799a2e2e9eea2-17",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.golden-504393015a71bc7a-8",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.golden-a8df5d4dbdc85ac8-2",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.p28-deploy-credit-sac-envelope",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.p28-deploy-xlm-sac-envelope",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.p30-deploy-credit-sac-envelope",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cap73.sac-trust.p30-deploy-xlm-sac-envelope",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.failed-tx.p12-allow-trust-self-not-allowed",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.failed-tx.p12-allow-trust-trust-not-required",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.failed-tx.p30-allow-trust-cant-revoke",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.failed-tx.p30-allow-trust-low-reserve",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.failed-tx.p30-allow-trust-no-trust-line",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: NotSupportedException: AllowTrustOperation is no longer supported."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.max-length.synth-memo-text-29-bytes",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk accepted a value the network refuses"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-above-max-code-point",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-ff",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-lone-continuation",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-overlong-nul",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-surrogate",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "classic.memo-bytes.p30-memo-truncated-sequence-28",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: MemoTooLongException: text must be <= 28 bytes. length=29"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk's bytes differ from the expected bytes"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: MemoTooLongException: text must be <= 28 bytes. length=29"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-27003f6cc5cdecc2-3",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-57a486abce28859d-17",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-5f615b0f98ae09f3-11",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.golden-5f615b0f98ae09f3-11.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: ArgumentException: SCV_VEC with an absent vector body (Parameter 'xdrVal')"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-a8df5d4dbdc85ac8-2",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.golden-e0d0e3f38b2d55e0-17",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-245",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-246",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-declared-depth-492",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.ContractIdAddressPreimage.FromContractIdPreimageXdr(ContractIDPreimage xdrContractIdPreimage)"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.ContractIdAddressPreimage.FromContractIdPreimageXdr(ContractIDPreimage xdrContractIdPreimage)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.ContractIdAddressPreimage.FromContractIdPreimageXdr(ContractIDPreimage xdrContractIdPreimage)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.ContractIdAddressPreimage.FromContractIdPreimageXdr(ContractIDPreimage xdrContractIdPreimage)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.auth-trees.synth-auth-depth-493-deepest-accepted",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding Hash"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "unsupported",
+              "detail": "the entry is from protocol 30 and dotnet@16.0.0 knows protocols up to 29 (diverges-from-network: the sdk refused a value the network accepts: InvalidDataException: Unknown enum value: 3)"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "any/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.invoke-basics.p30-create-contract-v1-envelope",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk crashed instead of answering: NullReferenceException: Object reference not set to an instance of an object. at StellarDotnetSdk.Operations.CreateContractOperation.FromXdr(InvokeHostFunctionOp invokeHostFunctionOp)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-envelope",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-max-meta",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-depth-over",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCSymbol"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCSymbol"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-map-mixed-keys-sorted-meta",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCMapEntry"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCMapEntry"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-string-not-utf8-envelope",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-symbol-not-utf8",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md",
+          "checks": [
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk's hash differs from the one the network wrote"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-envelope",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-max-meta",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.p30-vec-depth-over",
+      "cells": {
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "testnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "testnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "mainnet/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "mainnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-event-vec-depth-101",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVec"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted",
+      "cells": {
+        "dotnet@16.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement encode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "diverges-from-network",
+          "known_issue": "candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: InvalidDataException: Maximum decoding depth reached while decoding SCVal"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            },
+            {
+              "check": "any/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement encode_json"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "known_failure_problems": []
+}

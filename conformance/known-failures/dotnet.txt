@@ -1,0 +1,61 @@
+# known failures of stellar-dotnet-sdk (dotnet testee), one line per entry and version; the drafts are in the candidate
+# lane (candidate/findings/triage.toml), not filed
+cap18.maintain-liabilities.golden-3f24be68a9962089-4 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md any/tx_hash 0
+cap18.maintain-liabilities.p30-allow-trust-authorize-alphanum4 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap18.maintain-liabilities.p30-allow-trust-authorized-to-maintain-alphanum4 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap18.maintain-liabilities.p30-allow-trust-maintain-to-revoked-alphanum4 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap18.maintain-liabilities.p30-allow-trust-unauthorized-to-maintain-alphanum12 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap18.maintain-liabilities.p30-set-flags-and-allow-trust-maintain 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap23.claimable-balances.synth-strkey-b-invalid * diverges-from-network candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md case 13/strkey_decode, case 15/strkey_decode
+cap26.inflation.p11-inflation-not-time * diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap26.inflation.p11-inflation-payout * diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+cap27.muxed-accounts.synth-strkey-m-invalid 16.0.0 diverges-from-network candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md case 11/strkey_decode
+cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md mainnet/tx_hash, testnet/tx_hash
+cap38.liquidity-pools.synth-assets-dotnet257 * diverges-from-network candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-js1766-issuers * diverges-from-network candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool * diverges-from-network candidate/findings/issues/dotnet-cap38.liquidity-pools.p30-change-trust-pool-byte-order-envelope.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.testnet-5521432 * diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md testnet/tx_hash 2, testnet/tx_hash 3, testnet/tx_hash 8
+cap40.signed-payload-signer.synth-strkey-p-invalid * diverges-from-network candidate/findings/issues/dotnet-cap23.claimable-balances.synth-strkey-b-invalid.md case 3/strkey_decode, case 15/strkey_decode, case 19/strkey_decode
+cap71.credentials.golden-e25799a2e2e9eea2-17 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md any/tx_hash 0
+cap73.sac-trust.golden-504393015a71bc7a-8 * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md any/tx_hash 0
+cap73.sac-trust.golden-a8df5d4dbdc85ac8-2 * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md any/tx_hash 0
+cap73.sac-trust.p28-deploy-credit-sac-envelope * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash, testnet/tx_hash
+cap73.sac-trust.p28-deploy-xlm-sac-envelope * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash, testnet/tx_hash
+cap73.sac-trust.p30-deploy-credit-sac-envelope * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash, testnet/tx_hash
+cap73.sac-trust.p30-deploy-xlm-sac-envelope * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash, testnet/tx_hash
+classic.failed-tx.p12-allow-trust-self-not-allowed * diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p12-allow-trust-trust-not-required * diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p30-allow-trust-cant-revoke 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p30-allow-trust-low-reserve 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+classic.failed-tx.p30-allow-trust-no-trust-line 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap18.maintain-liabilities.golden-3f24be68a9962089-4.md mainnet/tx_hash 0, testnet/tx_hash 0
+classic.max-length.synth-memo-text-29-bytes * diverges-from-network candidate/findings/issues/dotnet-classic.max-length.synth-memo-text-29-bytes.md any/decode_encode
+classic.memo-bytes.p30-memo-above-max-code-point 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-ff 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-lone-continuation 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-overlong-nul 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-surrogate 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+classic.memo-bytes.p30-memo-truncated-sequence-28 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.auth-trees.golden-27003f6cc5cdecc2-3 * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md any/tx_hash 0
+soroban.auth-trees.golden-57a486abce28859d-17 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md any/tx_hash 0
+soroban.auth-trees.golden-5f615b0f98ae09f3-11 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.golden-5f615b0f98ae09f3-11.md any/tx_hash 0
+soroban.auth-trees.golden-a8df5d4dbdc85ac8-2 * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md any/tx_hash 0
+soroban.auth-trees.golden-e0d0e3f38b2d55e0-17 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md any/tx_hash 0
+soroban.auth-trees.p30-declared-depth-245 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-246 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.auth-trees.p30-declared-depth-492 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.auth-trees.synth-auth-depth-493-deepest-accepted * diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md any/decode_encode
+soroban.invoke-basics.golden-a8df5d4dbdc85ac8-2 * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md any/tx_hash 0
+soroban.invoke-basics.p30-create-contract-v1-envelope * diverges-from-network candidate/findings/issues/dotnet-cap73.sac-trust.golden-504393015a71bc7a-8.md mainnet/tx_hash, testnet/tx_hash
+soroban.scval-shapes.p30-map-depth-max-envelope 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash, testnet/decode_encode, testnet/tx_hash
+soroban.scval-shapes.p30-map-depth-max-meta 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, testnet/decode_encode
+soroban.scval-shapes.p30-map-depth-over 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.scval-shapes.p30-map-mixed-keys-sorted-meta 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, testnet/decode_encode
+soroban.scval-shapes.p30-string-not-utf8-envelope 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/tx_hash, testnet/tx_hash
+soroban.scval-shapes.p30-symbol-not-utf8 17.0.0 diverges-from-network candidate/findings/issues/dotnet-cap71.credentials.golden-e25799a2e2e9eea2-17.md mainnet/tx_hash 0, testnet/tx_hash 0
+soroban.scval-shapes.p30-vec-depth-max-envelope 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash, testnet/decode_encode, testnet/tx_hash
+soroban.scval-shapes.p30-vec-depth-max-meta 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, testnet/decode_encode
+soroban.scval-shapes.p30-vec-depth-over 17.0.0 diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md mainnet/decode_encode, mainnet/tx_hash 0, testnet/decode_encode, testnet/tx_hash 0
+soroban.scval-shapes.synth-event-vec-depth-101 * diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md any/decode_encode
+soroban.scval-shapes.synth-scmap-depth-197-deepest-accepted * diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-246-deepest-accepted * diverges-from-network candidate/findings/issues/dotnet-soroban.auth-trees.p30-declared-depth-245.md any/decode_encode
