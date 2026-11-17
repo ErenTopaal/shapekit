@@ -96,7 +96,7 @@ takes about 12 seconds on a 10-core machine.
 | | `/docs/install` | `README.md`: "Install" and "Building and checking" |
 | | `/docs/quick-start` | `README.md`: "Quick start" |
 | Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the dashboard's coverage page) |
-| Harness | `/docs/harness/adapter-interface`, `/docs/harness/replay-server`, `/docs/harness/indexer-ci` | `docs/adapter-interface.md`, `docs/replay-server.md`, `docs/indexer-ci.md` |
+| Harness | `/docs/harness/adapter-interface`, `/docs/harness/mapping-adapter`, `/docs/harness/replay-server`, `/docs/harness/indexer-ci` | `docs/adapter-interface.md`, `docs/mapping-adapter.md`, `docs/replay-server.md`, `docs/indexer-ci.md` |
 | SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci` | `docs/testee-protocol.md`, `docs/sdk-ci.md` |
 | Results | `/docs/results/report` | `docs/report.md` |
 | Linter | `/docs/linter/indexerlint` | `docs/linter.md` |

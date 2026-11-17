@@ -18,6 +18,10 @@ pub enum HarnessCommand {
     /// Replay the selected chains into the target behind an adapter and write
     /// harness-report.json and HARNESS.md.
     Run(RunArgs),
+    /// The mapped adapter: speaks the adapter protocol on stdin and stdout for a PostgreSQL
+    /// indexer described by a mapping file (docs/mapping-adapter.md). `harness run --mapping`
+    /// starts it for you.
+    Adapter(MappedAdapterArgs),
     /// Run a reproductions table: pairs of target builds over named chains, with the verdicts
     /// named entries must get.
     Reproduce(ReproduceArgs),
@@ -89,9 +93,8 @@ pub struct Common {
 
 #[derive(Args)]
 pub struct RunArgs {
-    /// The adapter command line, split on whitespace; quote an argument with ' or ".
-    #[arg(long)]
-    pub(crate) adapter: String,
+    #[command(flatten)]
+    pub(crate) adapter: AdapterChoice,
     /// Only entries of this family; repeatable.
     #[arg(long)]
     pub(crate) family: Vec<String>,
@@ -302,6 +305,19 @@ fn report_expectations(
 pub struct ReproduceArgs {
     #[arg(long)]
     table: PathBuf,
+    /// Run every case through the mapped adapter with this mapping file instead of the
+    /// table's adapter command; each case's commit is passed as `--var commit=<commit>`.
+    #[arg(long)]
+    mapping: Option<PathBuf>,
+    /// A mapping variable for every case, as NAME=VALUE; repeatable.
+    #[arg(long = "var", value_name = "NAME=VALUE", requires = "mapping")]
+    vars: Vec<String>,
+    /// docker's --cpus for every container the mapped adapter starts.
+    #[arg(long, requires = "mapping")]
+    cpus: Option<String>,
+    /// The buildx builder the mapped adapter builds images with.
+    #[arg(long, requires = "mapping")]
+    builder: Option<String>,
     /// Only the reproduction with this id; repeatable.
     #[arg(long)]
     only: Vec<String>,
@@ -309,6 +325,113 @@ pub struct ReproduceArgs {
     out: PathBuf,
     #[command(flatten)]
     common: Common,
+}
+
+/// Which adapter a run talks to: a program, or the mapped adapter with a mapping file.
+#[derive(Args, Clone)]
+pub struct AdapterChoice {
+    /// The adapter command line, split on whitespace; quote an argument with ' or ".
+    #[arg(long, required_unless_present = "mapping", conflicts_with = "mapping")]
+    pub(crate) adapter: Option<String>,
+    /// Connect a PostgreSQL indexer through a mapping file instead of an adapter program
+    /// (docs/mapping-adapter.md), for example adapters/walletbackend/adapter.toml.
+    #[arg(long)]
+    pub(crate) mapping: Option<PathBuf>,
+    /// A variable the mapping file defines, as NAME=VALUE; repeatable.
+    #[arg(long = "var", value_name = "NAME=VALUE", requires = "mapping")]
+    pub(crate) vars: Vec<String>,
+    /// docker's --cpus for every container the mapped adapter starts.
+    #[arg(long, requires = "mapping")]
+    pub(crate) cpus: Option<String>,
+    /// The buildx builder the mapped adapter builds images with.
+    #[arg(long, requires = "mapping")]
+    pub(crate) builder: Option<String>,
+}
+
+impl AdapterChoice {
+    pub(crate) fn command(&self) -> Result<Vec<String>> {
+        match (&self.adapter, &self.mapping) {
+            (Some(a), None) => split_command(a),
+            (None, Some(m)) => {
+                mapped_command(m, &self.vars, self.cpus.as_deref(), self.builder.as_deref())
+            }
+            _ => bail!("give exactly one of --adapter and --mapping"),
+        }
+    }
+}
+
+/// The command line that runs this binary's mapped adapter on `mapping`. The mapping is
+/// checked here, so a broken file fails before any chain runs.
+fn mapped_command(
+    mapping: &std::path::Path,
+    vars: &[String],
+    cpus: Option<&str>,
+    builder: Option<&str>,
+) -> Result<Vec<String>> {
+    shapekit_mapped::mapping::Mapping::load(mapping)?;
+    let exe = std::env::current_exe().context("locating the shapekit binary")?;
+    let path = std::fs::canonicalize(mapping)
+        .with_context(|| format!("resolving {}", mapping.display()))?;
+    let mut cmd = vec![
+        exe.to_string_lossy().into_owned(),
+        "harness".into(),
+        "adapter".into(),
+        "--mapping".into(),
+        path.to_string_lossy().into_owned(),
+    ];
+    for v in vars {
+        if !v.contains('=') {
+            bail!("--var {v:?} is not NAME=VALUE");
+        }
+        cmd.push("--var".into());
+        cmd.push(v.clone());
+    }
+    if let Some(c) = cpus {
+        cmd.extend(["--cpus".into(), c.into()]);
+    }
+    if let Some(b) = builder {
+        cmd.extend(["--builder".into(), b.into()]);
+    }
+    Ok(cmd)
+}
+
+#[derive(Args)]
+pub struct MappedAdapterArgs {
+    /// The mapping file.
+    #[arg(long)]
+    mapping: PathBuf,
+    /// A variable the mapping file defines, as NAME=VALUE; repeatable.
+    #[arg(long = "var", value_name = "NAME=VALUE")]
+    vars: Vec<String>,
+    /// docker's --cpus for every container the adapter starts; no limit when absent.
+    #[arg(long)]
+    cpus: Option<String>,
+    /// The buildx builder to build images with; the current one when absent.
+    #[arg(long)]
+    builder: Option<String>,
+}
+
+fn serve_mapped(a: MappedAdapterArgs) -> Result<bool> {
+    use shapekit_mapped::adapter::{Adapter, Options};
+    let mapping = shapekit_mapped::mapping::Mapping::load(&a.mapping)?;
+    let mut vars = std::collections::BTreeMap::new();
+    for v in &a.vars {
+        let (k, val) = v
+            .split_once('=')
+            .with_context(|| format!("--var {v:?} is not NAME=VALUE"))?;
+        vars.insert(k.to_owned(), val.to_owned());
+    }
+    let mut adapter = Adapter::new(Options {
+        mapping,
+        vars,
+        cpus: a.cpus,
+        builder: a.builder,
+    })?;
+    let stdin = std::io::stdin();
+    let mut input = stdin.lock();
+    let mut out = std::io::stdout().lock();
+    shapekit_mapped::serve::serve(&mut adapter, &mut input, &mut out)?;
+    Ok(true)
 }
 
 /// Splits a command line on whitespace, honouring ' and " quotes. No escapes, no expansion.
@@ -653,7 +776,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             if sel.jobs.is_empty() {
                 bail!("the selection has no chain with an evaluable entry");
             }
-            let opts = options(&a.common, split_command(&a.adapter)?, a.out.join("logs"))?;
+            let opts = options(&a.common, a.adapter.command()?, a.out.join("logs"))?;
             let rep = report::run(
                 &sel,
                 &opts,
@@ -688,9 +811,16 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             };
             Ok(rep.ok() && met)
         }
+        HarnessCommand::Adapter(a) => serve_mapped(a),
         HarnessCommand::Reproduce(a) => {
             linux_docker_host(&a.common)?;
-            let table = reproduce::load(&a.table)?;
+            let mut table = reproduce::load(&a.table)?;
+            if let Some(m) = &a.mapping {
+                let mut vars = a.vars.clone();
+                vars.push("commit={commit}".into());
+                table.adapter.command =
+                    mapped_command(m, &vars, a.cpus.as_deref(), a.builder.as_deref())?;
+            }
             let base = options(&a.common, Vec::new(), a.out.join("logs"))?;
             let results = reproduce::run(&table, &a.only, &a.common.corpus, &base, &a.out)?;
             reproduce::write(&results, &a.out)?;

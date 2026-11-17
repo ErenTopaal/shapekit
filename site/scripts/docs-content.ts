@@ -59,6 +59,7 @@ const groups: Group[] = [
     dir: "harness",
     docs: [
       { source: "docs/adapter-interface.md", slug: "adapter-interface" },
+      { source: "docs/mapping-adapter.md", slug: "mapping-adapter" },
       { source: "docs/replay-server.md", slug: "replay-server" },
       { source: "docs/indexer-ci.md", slug: "indexer-ci" },
     ],

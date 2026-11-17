@@ -12,7 +12,9 @@ generated from `crates/shapekit-harness/src/protocol.rs` together with the vocab
 at the end of this page (`shapekit harness schema --write`; `cargo test -p shapekit-harness`
 fails when either is stale).
 
-The reference adapter is `adapters/walletbackend` (wallet-backend, Go).
+The reference adapter is `adapters/walletbackend` (wallet-backend, Go). An indexer that runs in
+Docker and stores in PostgreSQL needs no adapter program: shapekit's mapped adapter runs it from a
+mapping file ([mapping-adapter.md](mapping-adapter.md)).
 
 ## What the harness does with an adapter
 

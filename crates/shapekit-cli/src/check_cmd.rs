@@ -55,10 +55,10 @@ pub struct SdkArgs {
 
 #[derive(Args)]
 pub struct IndexerArgs {
-    /// The adapter command line, split on whitespace; quote an argument with ' or ".
-    /// docs/adapter-interface.md describes what an adapter does.
-    #[arg(long)]
-    adapter: String,
+    /// The adapter program (`--adapter`, docs/adapter-interface.md) or the mapping file of a
+    /// PostgreSQL indexer (`--mapping`, docs/mapping-adapter.md).
+    #[command(flatten)]
+    adapter: harness_cmd::AdapterChoice,
     /// Only entries of this family; repeatable.
     #[arg(long)]
     family: Vec<String>,

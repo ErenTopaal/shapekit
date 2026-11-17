@@ -26,7 +26,7 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 |---|---|---|
 | Corpus: XDR files plus a language-neutral manifest with expected decoded values, generated under both the testnet and mainnet passphrases, checked against stellar-core's `--check-lcm` goldens | `corpus/` | [coverage per CAP](corpus/coverage/COVERAGE.md), [adding a shape](docs/adding-a-shape.md) |
 | Generator: recipes recorded on a standalone stellar-core on a Docker network with no route off the host | `crates/shapekit-gen`, `crates/shapekit-core-driver` | [adding a shape](docs/adding-a-shape.md) |
-| Replay harness, the wallet-backend reference adapter, and adapters for stellar-etl and stellar-rpc | `crates/shapekit-harness`, `adapters/` | [adapter interface](docs/adapter-interface.md), [replay server](docs/replay-server.md), [running it in an indexer's CI](docs/indexer-ci.md) |
+| Replay harness, the wallet-backend reference adapter, adapters for stellar-etl and stellar-rpc, and the mapped adapter for PostgreSQL indexers | `crates/shapekit-harness`, `crates/shapekit-mapped`, `adapters/` | [adapter interface](docs/adapter-interface.md), [mapping file](docs/mapping-adapter.md), [replay server](docs/replay-server.md), [running it in an indexer's CI](docs/indexer-ci.md) |
 | SDK conformance runner and the testees for the Rust, Go, JavaScript, Python, Java, Dart, PHP, .NET and Kotlin Multiplatform SDKs and soroban-sdk | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
 | Fuzzing: stellar-xdr against go-stellar-sdk, a coverage-guided search across the Rust, Go and JavaScript SDKs, and each SDK's own fuzzer checked by the encoding laws | `crates/shapekit-fuzz`, `testees/*/fuzz` | [differential fuzzing](docs/differential-fuzzing.md) |
 | Linter for Go indexers built on go-stellar-sdk | `lint/` | [indexerlint](docs/linter.md) |
@@ -154,7 +154,18 @@ docker pull "$(scripts/pin.sh image stellar-rpc)"
 shapekit check indexer --adapter "adapters/bin/rpc-adapter --events-from events" --network both
 ```
 
-To put another indexer behind the harness, write an adapter as described in
+An indexer that runs in Docker and stores in PostgreSQL connects through a mapping file, with no
+adapter code: the file says how to build and start it, how ledgers reach it, and which tables
+and columns hold which facts. wallet-backend's is `adapters/walletbackend/adapter.toml`:
+
+```sh
+shapekit check indexer --mapping adapters/walletbackend/adapter.toml \
+  --var commit=$(scripts/pin.sh git wallet-backend) --chain cap40.signed-payload-signer.p30
+```
+
+[docs/mapping-adapter.md](docs/mapping-adapter.md) describes the file.
+
+For any other indexer, write an adapter as described in
 [docs/adapter-interface.md](docs/adapter-interface.md). To replay the corpus in an indexer
 repository's own CI, see [docs/indexer-ci.md](docs/indexer-ci.md).
 
