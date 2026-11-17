@@ -9,14 +9,15 @@ are fixed and how many are unchanged, and it can write the same numbers as a sho
 summary for a pull request comment.
 
 ```sh
-shapekit conformance run --sdk go --out target/conformance/go
+shapekit check sdk --sdk go --out target/conformance/go
 shapekit report target/conformance/go --known-failures conformance/known-failures
 
-shapekit harness run --adapter "adapters/bin/wb-adapter --commit <commit>" --out harness-out
+shapekit check indexer --adapter "adapters/bin/wb-adapter --commit <commit>"
 shapekit report harness-out --baseline previous-run/harness-report.json
 ```
 
-The first argument is a run directory (what `--out` of either command names) or the
+The first argument is a run directory (what `--out` of either command names, also of
+`shapekit conformance run` and `shapekit harness run`) or the
 `harness-report.json` or `divergence-matrix.json` in one. Without `--out` the page is written
 as `report.html` next to that file. Run the command from a shapekit checkout, or point
 `--root` at one: the report reads the findings triage and the registry from it.
@@ -58,9 +59,9 @@ conformance cell whose result is neither `pass` nor `unsupported`.
 
 - **Smallest entry.** The finding's own minimal entry when the triage names one and this run
   shows it, otherwise the group's entry with the smallest file.
-- **Reproduce.** For a harness run, `shapekit harness run --chain <chain> --network
+- **Reproduce.** For a harness run, `shapekit check indexer --chain <chain> --network
   <network> --adapter <the run's adapter command>` for that entry's chain (testnet when the
-  entry ran on both). For a conformance run, `shapekit conformance run --sdk <sdk> --version
+  entry ran on both). For a conformance run, `shapekit check sdk --sdk <sdk> --version
   <newest failing version> --entry <entry>`.
 - **Recorded by.** The recipe file or chain that produced the entry on a local core, when
   there is one.

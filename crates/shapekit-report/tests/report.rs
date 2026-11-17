@@ -61,7 +61,7 @@ fn harness_groups_are_the_findings_record() {
         let m = g.minimal_entry.as_deref().unwrap();
         assert!(g.entries.iter().any(|e| e == m), "{}: {m}", g.id);
         let cmd = g.reproduce.as_deref().unwrap();
-        assert!(cmd.starts_with("shapekit harness run --chain "), "{cmd}");
+        assert!(cmd.starts_with("shapekit check indexer --chain "), "{cmd}");
         assert!(g.page.as_deref().unwrap().ends_with(&format!("#{}", g.id)));
     }
     // every group whose entries name a field links the field table, and the checklist items
@@ -99,7 +99,7 @@ fn conformance_against_its_known_failures() {
             g.reproduce
                 .as_deref()
                 .unwrap()
-                .starts_with("shapekit conformance run --sdk go --version ")
+                .starts_with("shapekit check sdk --sdk go --version ")
         );
     }
 }

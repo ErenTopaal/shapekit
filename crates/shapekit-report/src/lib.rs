@@ -379,7 +379,7 @@ impl Ctx<'_> {
             RunKind::Harness => {
                 let (chain, network) = self.harness_runs.get(entry)?;
                 Some(format!(
-                    "shapekit harness run --chain {} --network {network} --adapter {}",
+                    "shapekit check indexer --chain {} --network {network} --adapter {}",
                     shell_quote(chain),
                     shell_quote(&self.adapter)
                 ))
@@ -393,7 +393,7 @@ impl Ctx<'_> {
                     .clone();
                 let (sdk, version) = on.split_once('@')?;
                 Some(format!(
-                    "shapekit conformance run --sdk {sdk} --version {} --entry {}",
+                    "shapekit check sdk --sdk {sdk} --version {} --entry {}",
                     shell_quote(version),
                     shell_quote(entry)
                 ))

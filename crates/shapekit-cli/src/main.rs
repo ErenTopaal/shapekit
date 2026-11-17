@@ -58,6 +58,9 @@ enum Command {
     },
     /// Run indexerlint over a Go indexer built on go-stellar-sdk.
     Lint(lint_cmd::LintArgs),
+    /// Write a self-contained HTML report of a harness or conformance run: failures grouped
+    /// by finding, each with its smallest entry, the guide section and a reproduce command.
+    Report(report_cmd::ReportArgs),
     /// List the internal commands: the corpus generator, its checks and the maintenance tools.
     Dev,
     /// Work with pins.toml, the list of every pinned upstream reference.
@@ -144,9 +147,6 @@ enum Command {
         #[command(subcommand)]
         command: harness_cmd::HarnessCommand,
     },
-    /// Write a self-contained HTML report of a harness or conformance run: failures grouped
-    /// by finding, each with its smallest entry, the guide section and a reproduce command.
-    Report(report_cmd::ReportArgs),
     /// Findings: every harness, conformance and linter failure mapped to a triaged root cause
     /// with its upstream status.
     #[command(hide = true)]
@@ -766,7 +766,7 @@ mod tests {
             .filter(|c| !c.is_hide_set())
             .map(|c| c.get_name())
             .collect();
-        assert_eq!(visible, ["check", "lint", "dev", "serve"]);
+        assert_eq!(visible, ["check", "lint", "report", "dev", "serve"]);
         let internal = [
             "twin",
             "explore",

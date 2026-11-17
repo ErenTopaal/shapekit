@@ -43,7 +43,10 @@ fn registered_commands() {
         .lines()
         .filter_map(|l| l.split_whitespace().next())
         .collect();
-    assert_eq!(commands, ["check", "lint", "dev", "serve", "help"]);
+    assert_eq!(
+        commands,
+        ["check", "lint", "report", "dev", "serve", "help"]
+    );
     // the internal commands are left out of --help but keep their paths; `shapekit dev`
     // lists them, sorted
     let out = shapekit(&["dev"]);
