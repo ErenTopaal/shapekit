@@ -189,10 +189,22 @@ func readVerdicts(src []byte) (map[string]verdictRow, error) {
 			errs = append(errs, fmt.Errorf("field-verdicts.json: row %s is not after %s; rows are sorted by id, each once", r.ID, v.Rows[i-1].ID))
 		}
 
-		switch r.Measured {
-		case "validated", "not-validated", "mixed":
-		default:
+		if !isVerdict(r.Measured) {
 			errs = append(errs, fmt.Errorf("field-verdicts.json: row %s measured %q is not validated, not-validated or mixed", r.ID, r.Measured))
+		}
+
+		if r.Settled != nil && !isVerdict(normal(r.Settled.Verdict)) {
+			errs = append(errs, fmt.Errorf("field-verdicts.json: row %s settled verdict %q is not validated, not-validated or mixed", r.ID, r.Settled.Verdict))
+		}
+
+		for _, st := range r.Sites {
+			if st.Carrier == "" {
+				errs = append(errs, fmt.Errorf("field-verdicts.json: row %s site %s has no carrier", r.ID, st.Field))
+			}
+
+			if st.Verdict != "validated" && st.Verdict != "not-validated" {
+				errs = append(errs, fmt.Errorf("field-verdicts.json: row %s site %s verdict %q is not validated or not-validated", r.ID, st.Field, st.Verdict))
+			}
 		}
 
 		byID[r.ID] = r
@@ -203,9 +215,9 @@ func readVerdicts(src []byte) (map[string]verdictRow, error) {
 
 // agree checks every fields.toml row against its measured verdict. A row
 // fails when it says something else than was measured and no reading of
-// core's source settles it, when it says something else than the reading
-// settles, and when core was measured both ways over its sites with no
-// reading saying which the row means.
+// core's source settles it, and when it says something else than the reading
+// settles. A row measured both ways over its sites must say partial; one that
+// says yes or no fails with the sites listed.
 func agree(rows []row, byID map[string]verdictRow) error {
 	var errs []error
 
@@ -227,8 +239,8 @@ func agree(rows []row, byID map[string]verdictRow) error {
 			if said != normal(v.Settled.Verdict) {
 				errs = append(errs, fmt.Errorf("row %s: validated_by_core %q, the source reading %s settles %q", r.ID, r.ValidatedByCore, v.Settled.Reading, v.Settled.Verdict))
 			}
-		case v.Measured == "mixed":
-			errs = append(errs, fmt.Errorf("row %s: core was measured both ways and no source reading settles it: %s", r.ID, sites(v.Sites)))
+		case v.Measured == "mixed" && said != "mixed":
+			errs = append(errs, fmt.Errorf("row %s: validated_by_core %q, core was measured both ways and no source reading settles it: %s", r.ID, r.ValidatedByCore, sites(v.Sites)))
 		case said != v.Measured:
 			errs = append(errs, fmt.Errorf("row %s: validated_by_core %q, measured %s on core: %s", r.ID, r.ValidatedByCore, v.Measured, sites(v.Sites)))
 		}
@@ -243,16 +255,15 @@ func agree(rows []row, byID map[string]verdictRow) error {
 	return errors.Join(errs...)
 }
 
+func isVerdict(v string) bool {
+	return v == "validated" || v == "not-validated" || v == "mixed"
+}
+
 func sites(ss []site) string {
 	parts := make([]string, 0, len(ss))
 
 	for _, s := range ss {
-		p := s.Field
-		if s.Carrier != "" {
-			p += " [" + s.Carrier + "]"
-		}
-
-		parts = append(parts, p+" "+s.Verdict)
+		parts = append(parts, s.Field+" ["+s.Carrier+"] "+s.Verdict)
 	}
 
 	return strings.Join(parts, "; ")

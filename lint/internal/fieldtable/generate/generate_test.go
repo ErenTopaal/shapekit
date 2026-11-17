@@ -42,9 +42,9 @@ func verdictsWith(a, b, c string) []byte {
 }
 
 const (
-	validated    = `"measured": "validated", "sites": [{"field": "A.x", "carrier": "", "verdict": "validated"}], "settled_by_source": null`
+	validated    = `"measured": "validated", "sites": [{"field": "A.x", "carrier": "pay", "verdict": "validated"}], "settled_by_source": null`
 	notValidated = `"measured": "not-validated", "sites": [{"field": "B.y", "carrier": "pay", "verdict": "not-validated"}], "settled_by_source": null`
-	mixed        = `"measured": "mixed", "sites": [{"field": "C.z", "carrier": "", "verdict": "validated"}, {"field": "C.w", "carrier": "", "verdict": "not-validated"}], "settled_by_source": null`
+	mixed        = `"measured": "mixed", "sites": [{"field": "C.z", "carrier": "pay", "verdict": "validated"}, {"field": "C.w", "carrier": "pay", "verdict": "not-validated"}], "settled_by_source": null`
 	mixedSettled = `"measured": "mixed", "sites": [], "settled_by_source": {"verdict": "partial", "reading": "src/x.cpp:1-2"}`
 )
 
@@ -68,7 +68,7 @@ func TestDisagreementsFail(t *testing.T) {
 	}{
 		{"measured otherwise, unsettled", notValidated, notValidated, mixedSettled, `row a.yes: validated_by_core "yes", measured not-validated`},
 		{"settled otherwise", validated, `"measured": "validated", "sites": [], "settled_by_source": {"verdict": "yes", "reading": "src/y.cpp:3"}`, mixedSettled, `row b.no: validated_by_core "no", the source reading src/y.cpp:3 settles "yes"`},
-		{"mixed, unsettled", validated, notValidated, mixed, "row c.partial: core was measured both ways and no source reading settles it: C.z validated; C.w not-validated"},
+		{"mixed, unsettled, on a yes row", mixed, notValidated, mixedSettled, `row a.yes: validated_by_core "yes", core was measured both ways and no source reading settles it: C.z [pay] validated; C.w [pay] not-validated`},
 	}
 	for _, c := range cases {
 		_, err := Generate([]byte(fields), verdictsWith(c.a, c.b, c.c))
@@ -92,6 +92,21 @@ func TestEveryRowOnceAndSorted(t *testing.T) {
 	unsorted := []byte(`{"schema": 1, "source": "s", "rows": [{"id": "b.no", ` + notValidated + `}, {"id": "a.yes", ` + validated + `}, {"id": "c.partial", ` + mixedSettled + `}]}`)
 	if _, err := Generate([]byte(fields), unsorted); err == nil || !strings.Contains(err.Error(), "is not after") {
 		t.Errorf("unsorted rows: %v", err)
+	}
+
+	// a partial row measured both ways agrees without a settlement
+	if _, err := Generate([]byte(fields), verdictsWith(validated, notValidated, mixed)); err != nil {
+		t.Errorf("partial measured mixed: %v", err)
+	}
+
+	noCarrier := verdictsWith(`"measured": "validated", "sites": [{"field": "A.x", "carrier": "", "verdict": "validated"}], "settled_by_source": null`, notValidated, mixed)
+	if _, err := Generate([]byte(fields), noCarrier); err == nil || !strings.Contains(err.Error(), "site A.x has no carrier") {
+		t.Errorf("empty carrier: %v", err)
+	}
+
+	badSettle := verdictsWith(validated, notValidated, `"measured": "mixed", "sites": [], "settled_by_source": {"verdict": "maybe", "reading": "x:1"}`)
+	if _, err := Generate([]byte(fields), badSettle); err == nil || !strings.Contains(err.Error(), `settled verdict "maybe"`) {
+		t.Errorf("unknown settled verdict: %v", err)
 	}
 
 	unknown := []byte(`{"schema": 1, "source": "s", "rows": [], "later": 1}`)
