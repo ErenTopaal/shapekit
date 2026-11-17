@@ -49,7 +49,9 @@ same tag, so the workflow and the corpus come from one release.
 
 | input | required | meaning |
 |---|---|---|
-| `adapter` | yes | the adapter command line, run from the root of your repository |
+| `adapter` | one of `adapter` and `mapping` | the adapter command line, run from the root of your repository |
+| `mapping` | one of `adapter` and `mapping` | path, in your repository, of a mapping file that connects a PostgreSQL indexer with no adapter program ([mapping-adapter.md](mapping-adapter.md)); needs a shapekit release that has `--mapping` |
+| `vars` | no | variables of the mapping file, `NAME=VALUE` separated by spaces, for example `commit=<full commit hash>` |
 | `setup` | no | shell commands run from the root of your repository before the replay: build the adapter, build or pull the images the indexer needs |
 | `shapekit-tag`, `corpus-asset`, `corpus-sha256`, `shapekit-sha256` | yes | the pinned release |
 | `chains` | no | chain ids to replay, separated by spaces; every chain of the corpus when empty |
@@ -73,6 +75,9 @@ shapekit check indexer --adapter "<adapter>" --corpus <corpus> --network <networ
   --out "$RUNNER_TEMP/harness" [--chain <id>]... [--family <family>]... \
   [--delivery <mode>] [--expect <expect>]
 ```
+
+With `mapping`, `--adapter "<adapter>"` is `--mapping <mapping>` followed by one
+`--var NAME=VALUE` for each of `vars`.
 
 The runner is `ubuntu-24.04`, which has Docker. The harness creates an internal Docker network
 for each chain and the adapter attaches the indexer's containers to it, as

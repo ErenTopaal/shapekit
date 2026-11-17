@@ -9,9 +9,20 @@ on:
   workflow_call:
     inputs:
       adapter:
-        description: "adapter command line, run from the root of the calling repository, for example `bin/my-adapter`"
-        required: true
+        description: "adapter command line, run from the root of the calling repository, for example `bin/my-adapter`; set this or mapping"
+        required: false
         type: string
+        default: ""
+      mapping:
+        description: "path, in the calling repository, of a mapping file that connects a postgresql indexer without an adapter program (docs/mapping-adapter.md); set this or adapter"
+        required: false
+        type: string
+        default: ""
+      vars:
+        description: "variables of the mapping file, NAME=VALUE separated by spaces, for example `commit=<full hash>`"
+        required: false
+        type: string
+        default: ""
       setup:
         description: "shell commands run from the root of the calling repository before the replay: build the adapter, pull the images the target needs"
         required: false
@@ -186,6 +197,8 @@ jobs:
         working-directory: indexer
         env:
           ADAPTER: ${{ inputs.adapter }}
+          MAPPING: ${{ inputs.mapping }}
+          VARS: ${{ inputs.vars }}
           CHAINS: ${{ inputs.chains }}
           FAMILIES: ${{ inputs.families }}
           NETWORK: ${{ inputs.network }}
@@ -193,7 +206,16 @@ jobs:
           EXPECT: ${{ inputs.expect }}
         run: |
           set -euo pipefail
-          args=(--adapter "$ADAPTER" --corpus "$CORPUS_DIR" --network "$NETWORK" --out "$RUNNER_TEMP/harness")
+          if [ -n "$ADAPTER" ] && [ -z "$MAPPING" ]; then
+            args=(--adapter "$ADAPTER")
+          elif [ -z "$ADAPTER" ] && [ -n "$MAPPING" ]; then
+            args=(--mapping "$MAPPING")
+            for v in $VARS; do args+=(--var "$v"); done
+          else
+            echo "set exactly one of the adapter and mapping inputs" >&2
+            exit 1
+          fi
+          args+=(--corpus "$CORPUS_DIR" --network "$NETWORK" --out "$RUNNER_TEMP/harness")
           for c in $CHAINS; do args+=(--chain "$c"); done
           for f in $FAMILIES; do args+=(--family "$f"); done
           if [ -n "$DELIVERY" ]; then args+=(--delivery "$DELIVERY"); fi
