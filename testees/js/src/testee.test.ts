@@ -173,6 +173,11 @@ for (const r of releases) {
       const trailing = Buffer.concat([Buffer.from(ASSET_ABCD, "base64"), Buffer.alloc(4)]).toString("base64");
       assert.equal(errorClass(await ask(r.program, { ...req, xdr: trailing })), "rejected");
       assert.equal(errorClass(await ask(r.program, { ...req, xdr: "not base64!" })), "bad-request");
+      assert.equal(errorClass(await ask(r.program, { ...req, xdr: "QUJD=Q==" })), "bad-request");
+      assert.equal(errorClass(await ask(r.program, { ...req, xdr: "QUJDRA" })), "bad-request");
+      // a ledger's worth of base64 (pubnet ledger 64783972 is 3.7 MB) is read, not refused
+      const large = Buffer.concat([Buffer.from(ASSET_ABCD, "base64"), Buffer.alloc(4 << 20)]).toString("base64");
+      assert.equal(errorClass(await ask(r.program, { ...req, xdr: large })), "rejected");
       const unknown = await ask(r.program, { ...req, type: "NoSuchType", xdr: ASSET_ABCD });
       assert.equal(unknown.status, "unsupported");
     });

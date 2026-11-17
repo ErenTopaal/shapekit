@@ -44,10 +44,23 @@ function str(req: Request, name: string): string {
   return v;
 }
 
-const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+// standard base64 with padding: groups of four alphabet characters, the last group may end in
+// "=" or "==". checked in one pass because a backtracking regex over the base64 of a large
+// ledger (about 5 MB) runs out of stack in v8
+function isBase64(text: string): boolean {
+  if (text.length % 4 !== 0) return false;
+  const padding = text.endsWith("==") ? 2 : text.endsWith("=") ? 1 : 0;
+  for (let i = 0; i < text.length - padding; i++) {
+    const c = text.charCodeAt(i);
+    const alphabet =
+      (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c === 43 || c === 47;
+    if (!alphabet) return false;
+  }
+  return true;
+}
 
 function base64(text: string, what: string): Buffer {
-  if (!BASE64.test(text)) {
+  if (!isBase64(text)) {
     throw new BadRequest(`${what} is not standard base64`);
   }
   return Buffer.from(text, "base64");
