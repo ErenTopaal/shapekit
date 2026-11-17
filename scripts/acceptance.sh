@@ -89,6 +89,17 @@ js_testee() {
   (cd testees/js && npm ci --no-audit --no-fund && npx tsc --noEmit && npx tsc && node --test "dist/**/*.test.js")
 }
 
+# a testee outside the workspace, at the sdk's current version: rustfmt, clippy and its unit
+# tests, in the target directory its conformance build uses
+cargo_testee() {
+  local sdk=$1 version
+  version=$(sed -n "/^\[sdk\.$sdk\]/,/^current/s/^current = \"\(.*\)\"/\1/p" conformance/versions.toml)
+  local manifest="testees/$sdk/versions/$version/Cargo.toml" target="target/testees/$sdk/$version"
+  rustfmt --edition 2024 --check "testees/$sdk"/src/*.rs "testees/$sdk"/*.rs
+  cargo clippy --locked --all-targets --manifest-path "$manifest" --target-dir "$target" -- -D warnings
+  cargo test --locked --manifest-path "$manifest" --target-dir "$target"
+}
+
 # quick mode
 
 step cargo fmt --all --check
@@ -107,6 +118,7 @@ current="indexerlint over adapters/"
 echo "== $current"
 (cd adapters && "$root/$out/bin/indexerlint" ./...)
 step js_testee
+step cargo_testee soroban
 step "$shapekit" registry check
 step "$shapekit" manifest validate --file corpus/manifest.json --registry registry
 unchanged corpus sh -c "\"$shapekit\" synth build && \"$shapekit\" manifest build"
@@ -143,6 +155,7 @@ step "$shapekit" pins verify
 for sdk in rust go js; do
   step "$shapekit" conformance run --sdk "$sdk" --all-versions --out "$out/conformance-all/$sdk"
 done
+step "$shapekit" conformance run --sdk soroban --all-versions --out "$out/conformance-all/soroban"
 # the all-versions runs above built every testee the reproductions use
 step "$shapekit" conformance reproduce --no-build
 

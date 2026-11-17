@@ -288,10 +288,11 @@ jobs:
           name: shapekit
           path: ${{ runner.temp }}/bin
       - name: conformance run on rust 30.0.0, go v0.9.0, js 17.4.0
+        # the sdks with their own jobs below are left out, so their toolchains are not needed here
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
-          "$RUNNER_TEMP/bin/shapekit" conformance run
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk rust --sdk go --sdk js
       - name: matrix to the job summary
         if: ${{ !cancelled() }}
         run: |
@@ -302,6 +303,45 @@ jobs:
           name: conformance
           path: target/conformance/
           retention-days: 14
+
+  soroban:
+    # the soroban-sdk testee at its current version: rustfmt, clippy, unit tests, then the corpus
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt, clippy
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/testees/soroban/29.0.1
+          key: testee-soroban-29.0.1-${{ hashFiles('testees/soroban/versions/29.0.1/Cargo.lock') }}
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: rustfmt, clippy and unit tests of the soroban testee
+        run: |
+          set -euo pipefail
+          m=testees/soroban/versions/29.0.1/Cargo.toml
+          t=target/testees/soroban/29.0.1
+          rustfmt --edition 2024 --check testees/soroban/src/*.rs testees/soroban/*.rs
+          cargo clippy --locked --all-targets --manifest-path "$m" --target-dir "$t" -- -D warnings
+          cargo test --locked --manifest-path "$m" --target-dir "$t"
+      - name: conformance run on soroban-sdk 29.0.1
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk soroban --out target/conformance-soroban
+      - name: matrix to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f target/conformance-soroban/MATRIX.md ]; then cat target/conformance-soroban/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
 
   harness:
     # the wallet-backend reference adapter at the current pin, testnet variant, on the chains

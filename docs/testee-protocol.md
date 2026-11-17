@@ -112,7 +112,7 @@ Result members:
 | member | type | meaning |
 |---|---|---|
 | `protocol` | integer | `2` (the runner also accepts `1`) |
-| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS) |
+| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK) |
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose `sdk` or `sdk_version` differs from the `package` and `version` in the versions file |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. Can be empty |
 | `ops` | array of strings | the ops this build implements, excluding `hello`. The runner refuses a `hello` that lists an op this page does not define. It does not send unlisted ops and records their checks as `unsupported` |
@@ -519,7 +519,9 @@ picks:
 The registry's latest stable release becomes `current`. A version's `max_protocol` comes from
 the stellar/stellar-xdr commit its code was generated from: the `xdr-version` file in the
 stellar-xdr crate, `xdr/xdr_commit_generated.txt` in go-stellar-sdk, and the `XDR_COMMIT` line
-of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. The
+of js-stellar-sdk's Makefile at the commit npm records as the release's `gitHead`. A
+soroban-sdk release pins `soroban-env-host` with `=`, which pins `soroban-env-common`, which
+pins `stellar-xdr`; the `xdr-version` file of that `stellar-xdr` release is the commit. The
 stellar-xdr release tag at that commit names a protocol. Protocols without a tag of their own
 changed no XDR, so `max_protocol` runs up to the protocol before the next tag: `v28.0` covers
 protocol 29. A commit that is not a release tag stops the command.
@@ -591,7 +593,31 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
    `unsupported` with a reason. Never emulate an SDK feature inside the testee.
 4. Catch every exception or panic around SDK calls and classify it.
 5. Add the testee's build and run command per SDK version to
-   [conformance/versions.toml](../conformance/versions.toml). For the three SDKs here,
+   [conformance/versions.toml](../conformance/versions.toml). For the SDKs here,
    `shapekit conformance sync-versions` does this (see "The version matrix").
 
-Working testees for all three SDKs are in `testees/rust`, `testees/go` and `testees/js`.
+Working testees are in `testees/rust`, `testees/go`, `testees/js` and `testees/soroban`.
+
+## The soroban-sdk testee
+
+`testees/soroban` wraps `soroban-sdk`, the SDK contracts are written with, built with its
+`testutils` feature so that the Soroban host runs inside the testee process. A contract reads
+and writes XDR only as contract values: `FromXdr` and `ToXdr` hand `ScVal` bytes to the host,
+and every contract type converts to and from `ScVal` through the host. The testee runs that
+path and nothing else:
+
+| op | what it calls |
+|---|---|
+| `decode_encode` | `Val::from_xdr`, then `ToXdr::to_xdr`, for type `ScVal`. Other types are `unsupported`: the crate reads them only through its re-export of `stellar-xdr`, which the Rust testee tests |
+| `map_sort` | `Map::set` for each entry on an empty `Map<Val, Val>` |
+| `map_validate` | whether the host converts the `ScVal` map into a `Map` (`Val::try_from_val`) |
+| `to_native` | `Val::from_xdr`, then the first contract type that converts the value: integers, `Bytes`, `String`, `Symbol`, `Address`, `MuxedAddress`, `Vec<Val>`, `Map<Val, Val>` |
+| `strkey_decode`, `strkey_encode` | `Address::from_string_bytes` and `Address::to_string` for G and C, `MuxedAddress::from_string_bytes` and `MuxedAddress::to_strkey` for M. Other kinds are `unsupported` |
+| `contract_id` | `Deployer::with_address` and `Deployer::with_stellar_asset`, then `deployed_address`, on a ledger whose network ID is set to the request's |
+
+Each request runs in a new `Env` with the budget lifted (`reset_unlimited`), so a value is
+never refused only for lack of budget. `decode_limits` is `"ignored"`: the host reads under its
+own XDR limits (depth 500) and converts under its own depth limit (100). A host function that
+fails escalates its `HostError` into a panic whose message starts with `HostError:`; that is the
+SDK's documented error path in native tests, so the testee reports it as `rejected`. Every other
+panic is reported as `panic`.

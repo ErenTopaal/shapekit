@@ -8,8 +8,8 @@
 
 A test kit for software that reads the Stellar ledger: a corpus of rare but valid XDR shapes,
 most of them recorded on a real stellar-core, a replay harness that feeds them to an indexer, a conformance
-runner that feeds them to the JavaScript, Go and Rust SDKs, a linter for Go indexer code, and an
-indexer-hardening guide.
+runner that feeds them to the JavaScript, Go and Rust SDKs and to soroban-sdk, the Rust contract
+SDK, a linter for Go indexer code, and an indexer-hardening guide.
 
 Indexers and SDKs keep breaking on shapes that are valid but rare: signed-payload signers, muxed
 accounts, deep Soroban authorization trees, trustlines created by the Stellar Asset Contract,
@@ -27,7 +27,7 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 | Corpus: XDR files plus a language-neutral manifest with expected decoded values, generated under both the testnet and mainnet passphrases, checked against stellar-core's `--check-lcm` goldens | `corpus/` | [coverage per CAP](corpus/coverage/COVERAGE.md), [adding a shape](docs/adding-a-shape.md) |
 | Generator: recipes recorded on a standalone stellar-core on a Docker network with no route off the host | `crates/shapekit-gen`, `crates/shapekit-core-driver` | [adding a shape](docs/adding-a-shape.md) |
 | Replay harness and the wallet-backend reference adapter | `crates/shapekit-harness`, `adapters/` | [adapter interface](docs/adapter-interface.md), [replay server](docs/replay-server.md) |
-| SDK conformance runner and the Rust, Go and JavaScript testees | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
+| SDK conformance runner and the testees for the Rust, Go and JavaScript SDKs and soroban-sdk | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
 | Fuzzing: stellar-xdr against go-stellar-sdk, a coverage-guided search across the Rust, Go and JavaScript SDKs, and each SDK's own fuzzer checked by the encoding laws | `crates/shapekit-fuzz`, `testees/*/fuzz` | [differential fuzzing](docs/differential-fuzzing.md) |
 | Linter for Go indexers built on go-stellar-sdk | `lint/` | [indexerlint](docs/linter.md) |
 | Indexer-hardening guide, written for developers.stellar.org; a draft until a stellar-core or platform engineer has reviewed it (see the publication gate in [STATUS.md](STATUS.md)) | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
@@ -202,6 +202,11 @@ cargo test --workspace
 
 # in each module listed in go.work; adapters/ needs SHAPEKIT_BIN or target/debug/shapekit
 go vet ./... && go test ./... && golangci-lint run ./...
+
+# the soroban-sdk testee, outside the workspace, at its current version
+m=testees/soroban/versions/29.0.1/Cargo.toml t=target/testees/soroban/29.0.1
+cargo clippy --locked --all-targets --manifest-path $m --target-dir $t -- -D warnings
+cargo test --locked --manifest-path $m --target-dir $t
 
 # node 26; testees/js/.npmrc sets engine-strict, so npm ci fails on an older node
 cd testees/js && npm ci && npx tsc --noEmit && npx tsc && node --test "dist/**/*.test.js"

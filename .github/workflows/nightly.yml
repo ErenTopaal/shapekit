@@ -175,13 +175,14 @@ jobs:
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           status=0
-          for sdk in rust go js; do
+          for sdk in rust go js soroban; do
             "$RUNNER_TEMP/bin/shapekit" conformance run --sdk "$sdk" --all-versions \
               --out "target/conformance/$sdk" || status=1
           done
-          # implementation-defined entries diverge only next to the other sdks' answers
-          "$RUNNER_TEMP/bin/shapekit" conformance run --all-versions --no-build \
-            --flag references-disagree --out target/conformance/peers || status=1
+          # implementation-defined entries diverge only next to the other sdks' answers; the
+          # peers are the three sdks the findings read
+          "$RUNNER_TEMP/bin/shapekit" conformance run --sdk rust --sdk go --sdk js --all-versions \
+            --no-build --flag references-disagree --out target/conformance/peers || status=1
           exit "$status"
       - name: conformance reproduce
         # the run above built every version, so the reproductions reuse those builds
@@ -190,7 +191,7 @@ jobs:
       - name: matrices to the job summary
         if: ${{ !cancelled() }}
         run: |
-          for sdk in rust go js; do
+          for sdk in rust go js soroban; do
             f="target/conformance/$sdk/MATRIX.md"
             if [ -f "$f" ]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; fi
           done

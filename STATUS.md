@@ -2,6 +2,19 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: soroban-sdk conformance
+
+- `testees/soroban` runs `soroban-sdk`, the SDK contracts are written with, at 28.0.0 and
+  29.0.1, the newest release of each line whose XDR knows protocol 29. It reads `ScVal` bytes
+  as a contract does, through `FromXdr` and the Soroban host, and checks map sorting and
+  validation, the native projection, address strkeys and contract IDs; the SDK has no API for
+  the other ops. `conformance sync-versions` derives its versions from crates.io.
+- Corpus: both versions pass 27 entries; the other 689 need ops or types the SDK does not
+  have. Candidate lane: both pass 8 entries and refuse 7 `ScVal`s the network accepts, each
+  by a documented host rule (ledger-only `ScVal` arms, and nesting past the host's depth
+  limits), recorded with source lines in `candidate/finding-candidates.toml`.
+- The `sdk-version` obligations grow from 15 to 17, both new ones met.
+
 ## 2026-11-17: obligation ledger, what core validates, candidate lane
 
 - Obligation ledger: `corpus/coverage/obligations.json` lists everything the corpus owes a
@@ -15,7 +28,7 @@ A dated public log of what has landed in shapekit. Newest entry first.
   | `core-test-section`: stellar-core's own transaction test sections | 29,691 | 0 | 29,691 |
   | `gate-side`: sides of stellar-core's protocol gates | 334 by branch count, 142 inferred from execution count | 214 | 690 |
   | `field`: envelope fields asked of core | 203 | 0 | 203 |
-  | `sdk-version`: SDK versions the corpus runs against | 15 | 0 | 15 |
+  | `sdk-version`: SDK versions the corpus runs against | 17 | 0 | 17 |
   | `seed`: faults seeded into the SDKs | 72 | 142 | 214 |
 
 - Envelope fields: `shapekit probe all` asks a standalone stellar-core v30.0.0 about every
