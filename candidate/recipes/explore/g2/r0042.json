@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "id": "explore.sca.e180",
+  "family": "explore",
+  "protocol": 14,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": false,
+    "emit_classic_events": false,
+    "backfill_stellar_asset_events": false
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "210000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "create_claimable_balance": {
+              "amount": "999999999999999600",
+              "asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              },
+              "claimants": [
+                {
+                  "claimant_type_v0": {
+                    "destination": "@account:d",
+                    "predicate": {
+                      "before_absolute_time": "9223372036854775807"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "create_claimable_balance": {
+                  "success": "BAAP5HXHTCXP3CPZCYYQTDHFZKUMBRIMINBXDLTPWOSZFGRLT474JIIR7A"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "k",
+              "data_value": null
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "claim_claimable_balance": {
+              "balance_id": "BAAP5HXHTCXP3CPZCYYQTDHFZKUMBRIMINBXDLTPWOSZFGRLT474JIIR7A"
+            }
+          },
+          "source_account": "@account:d"
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_data": "name_not_found"
+              }
+            },
+            {
+              "op_inner": {
+                "claim_claimable_balance": "no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

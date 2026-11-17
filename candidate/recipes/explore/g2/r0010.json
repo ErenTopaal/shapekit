@@ -1,0 +1,8465 @@
+{
+  "schema_version": 1,
+  "id": "explore.sca.e12",
+  "family": "explore",
+  "protocol": 9,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": false,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "200000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "manage_data": {
+              "data_name": "key2",
+              "data_value": null
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_data": "name_not_found"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "10000000",
+              "dest_asset": "native",
+              "destination": "@account:root",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_asset": "native",
+              "send_max": "10000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "id": "18446744073709551615"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "payment": {
+              "amount": "99999969901",
+              "asset": "native",
+              "destination": "@account:e"
+            }
+          },
+          "source_account": "@account:e"
+        }
+      ],
+      "signers": [
+        "a",
+        "e"
+      ],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "payment": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "set_options": {
+              "clear_flags": null,
+              "high_threshold": 255,
+              "home_domain": null,
+              "inflation_dest": null,
+              "low_threshold": null,
+              "master_weight": null,
+              "med_threshold": 2,
+              "set_flags": null,
+              "signer": null
+            }
+          },
+          "source_account": "@account:e"
+        }
+      ],
+      "signers": [
+        "a",
+        "e"
+      ],
+      "memo": {
+        "id": "1000"
+      },
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "set_options": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "9223372036854775807",
+              "line": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "change_trust": "success"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@account:c"
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "99999999900"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "50000000000",
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "destination": "@account:a",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:b"
+                  }
+                }
+              ],
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "send_max": "50000000000"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": {
+        "return": "3577d4bae2678355db59d84b55e7bdf4da87ee2dbe40d9d9c362da852054962f"
+      },
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_receive": "too_few_offers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@account:c"
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "99999937400"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "c",
+      "operations": [
+        {
+          "body": {
+            "account_merge": "@account:e"
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "memo": "none",
+      "expect": {
+        "outcome": "success",
+        "result": {
+          "tx_success": [
+            {
+              "op_inner": {
+                "account_merge": {
+                  "success": "299999931800"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "e",
+      "operations": [
+        {
+          "body": {
+            "create_passive_sell_offer": {
+              "amount": "200000000",
+              "buying": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "GB2HHDY35TFOKQPQUQ2MCHGNIHOWUBTVV4GIJNAEYDR3Q4UUXIZZFUD5"
+                }
+              },
+              "price": {
+                "d": 3,
+                "n": 3
+              },
+              "selling": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": "@account:a"
+        }
+      ],
+      "signers": [
+        "e",
+        "a"
+      ],
+      "fee": 10000,
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_sell_offer": "buy_no_issuer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "a",
+      "operations": [
+        {
+          "body": {
+            "change_trust": {
+              "limit": "9223372036854775807",
+              "line": "native"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": "tx_internal_error"
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "e",
+      "operations": [
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        },
+        {
+          "body": "inflation",
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": {
+                  "success": []
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "inflation": "not_time"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}

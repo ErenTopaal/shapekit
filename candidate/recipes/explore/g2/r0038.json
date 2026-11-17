@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "id": "explore.sca.e94",
+  "family": "explore",
+  "protocol": 12,
+  "node": {
+    "soroban_settings": false,
+    "soroban_limits": false,
+    "emit_classic_events": true,
+    "backfill_stellar_asset_events": true
+  },
+  "below_protocol_valid": false,
+  "steps": [
+    {
+      "step": "fund",
+      "roles": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "balance": "100000000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "fund",
+      "roles": [
+        "e"
+      ],
+      "balance": "250000000"
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "d",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                }
+              },
+              "dest_min": "1000000000000",
+              "destination": "@account:d",
+              "path": [
+                {
+                  "credit_alphanum12": {
+                    "asset_code": "LONGASSET12",
+                    "issuer": "@account:b"
+                  }
+                },
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "@account:a"
+                  }
+                }
+              ],
+              "send_amount": "999999799999999600",
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:a"
+                }
+              }
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": "src_no_trust"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "manage_buy_offer": {
+              "buy_amount": "49999999950",
+              "buying": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                }
+              },
+              "offer_id": "99999",
+              "price": {
+                "d": 2147483647,
+                "n": 2147483647
+              },
+              "selling": "native"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "manage_buy_offer": "buy_no_issuer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    },
+    {
+      "step": "tx",
+      "source": "b",
+      "operations": [
+        {
+          "body": {
+            "path_payment_strict_send": {
+              "dest_asset": {
+                "credit_alphanum12": {
+                  "asset_code": "LONGASSET12",
+                  "issuer": "@account:b"
+                }
+              },
+              "dest_min": "9223372036854775807",
+              "destination": "@account:d",
+              "path": [
+                "native",
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                  }
+                }
+              ],
+              "send_amount": "1000000000000",
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                }
+              }
+            }
+          },
+          "source_account": null
+        },
+        {
+          "body": {
+            "path_payment_strict_receive": {
+              "dest_amount": "999999999999999599",
+              "dest_asset": "native",
+              "destination": "@account:d",
+              "path": [
+                "native",
+                "native",
+                {
+                  "credit_alphanum4": {
+                    "asset_code": "USD",
+                    "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                  }
+                }
+              ],
+              "send_asset": {
+                "credit_alphanum4": {
+                  "asset_code": "USD",
+                  "issuer": "@account:b"
+                }
+              },
+              "send_max": "7"
+            }
+          },
+          "source_account": null
+        }
+      ],
+      "signers": [],
+      "cond": "none",
+      "expect": {
+        "outcome": "failed",
+        "result": {
+          "tx_failed": [
+            {
+              "op_inner": {
+                "path_payment_strict_send": {
+                  "no_issuer": {
+                    "credit_alphanum4": {
+                      "asset_code": "USD",
+                      "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "op_inner": {
+                "path_payment_strict_receive": {
+                  "no_issuer": {
+                    "credit_alphanum4": {
+                      "asset_code": "USD",
+                      "issuer": "GDSG2NTEKNRVGH43K6PDEHCJMQDRGR6ACHH4AVXWFWX4KVM7RQYJSU37"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "close"
+    }
+  ]
+}
