@@ -418,6 +418,9 @@ pub struct RunOptions {
 pub struct RunOutcome {
     pub matrix: Matrix,
     pub ok: bool,
+    /// Testee keys (`<sdk>@<version>`) a known-failures problem is about. A problem that names
+    /// no version counts against every version of its sdk the run covered.
+    pub failing: BTreeSet<String>,
     /// Peak resident set of the runner after each pass, KiB.
     pub peak_rss_kib: Vec<i64>,
 }
@@ -582,6 +585,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
 
     let all_ids: BTreeSet<String> = manifest.entries.iter().map(|e| e.id.clone()).collect();
     let mut problems = Vec::new();
+    let mut failing: BTreeSet<String> = BTreeSet::new();
     // distinct sdks, not versions: only another sdk gives a peer vote
     let sdks: BTreeSet<&str> = targets.iter().map(|t| t.sdk.as_str()).collect();
     let other_sdks = sdks.len() > 1;
@@ -614,6 +618,12 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
             .map(|v| v.version.clone())
             .collect();
         for p in known::evaluate(&lines, &results, &all_ids, &all_versions, other_sdks) {
+            match p.version() {
+                Some(v) => {
+                    failing.insert(format!("{sdk}@{v}"));
+                }
+                None => failing.extend(targets.iter().filter(|t| t.sdk == sdk).map(Target::key)),
+            }
             problems.push(format!(
                 "{}: {p}",
                 known::path(&opts.known_dir, sdk).display()
@@ -660,6 +670,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     }
     Ok(RunOutcome {
         ok: matrix.known_failure_problems.is_empty(),
+        failing,
         matrix,
         peak_rss_kib,
     })

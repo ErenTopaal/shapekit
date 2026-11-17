@@ -539,6 +539,14 @@ The weekly `upstream-drift` workflow runs the check and opens a tracking issue w
 difference. A new version then still goes through `conformance run --all-versions`,
 `conformance reproduce` and triage before it is merged.
 
+Each version in `versions.toml` is an `sdk-version` obligation in the ledger
+(`corpus/coverage/obligations.json`). `conformance run --sdk <sdk> --all-versions --obligations`
+writes `conformance/sdk-versions/<sdk>.obligations.json`: a version is met when the whole
+corpus ran against it and its known-failures list held, with the entries every check of which
+passed as witnesses; otherwise it stays open and the evidence says why. A test fails while a
+fragment names other versions than `versions.toml`, so after `sync-versions` rerun it for the
+sdk and then `shapekit coverage`.
+
 ## Datasets outside the corpus
 
 `shapekit conformance run --dataset <dir>` runs a set of `TransactionMeta` that is too large

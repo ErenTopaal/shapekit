@@ -837,7 +837,7 @@ Every obligation the corpus owes a witness for, from `corpus/coverage/obligation
 | `core-test-section` | 0 | 0 | 29691 | 29691 |
 | `gate-side` | 0 | 0 | 690 | 690 |
 | `field` | 203 | 0 | 0 | 203 |
-| `sdk-version` | 0 | 0 | 0 | 0 |
+| `sdk-version` | 15 | 0 | 0 | 15 |
 | `seed` | 54 | 0 | 160 | 214 |
 
 ## Uncovered records against the candidate lane

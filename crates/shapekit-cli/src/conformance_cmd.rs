@@ -49,6 +49,10 @@ pub enum ConformanceCommand {
         /// coverage.json next to the matrix.
         #[arg(long)]
         coverage: bool,
+        /// With --all-versions over the whole corpus: write each sdk's `sdk-version` obligations
+        /// to conformance/sdk-versions/<sdk>.obligations.json.
+        #[arg(long, requires = "all_versions", conflicts_with_all = ["entries", "kinds", "flags", "linked_issues", "coverage", "versions"])]
+        obligations: bool,
         /// Run the selection this many times in one invocation and require equal results.
         #[arg(long, default_value_t = 1)]
         passes: u32,
@@ -245,6 +249,7 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             dataset,
             candidate,
             coverage,
+            obligations,
             passes,
             manifest,
             versions_file,
@@ -272,8 +277,10 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 );
                 return Ok(true);
             }
+            let versions_path = versions_file.clone();
+            let run_sdks = sdks.clone();
             let outcome = runner::run(&runner::RunOptions {
-                root,
+                root: root.clone(),
                 manifest,
                 versions: versions_file,
                 known_dir: known_failures,
@@ -320,6 +327,35 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                 out.join("divergence-matrix.json").display(),
                 out.join("MATRIX.md").display()
             );
+            if obligations {
+                let file = shapekit_conformance::versions::VersionsFile::load(&versions_path)?;
+                let sdks: Vec<String> = if run_sdks.is_empty() {
+                    file.sdk.keys().cloned().collect()
+                } else {
+                    run_sdks
+                };
+                for sdk in &sdks {
+                    let ledger =
+                        shapekit_conformance::sdk_versions::obligations(&outcome, &file, sdk)?;
+                    let path = root.join(shapekit_conformance::sdk_versions::fragment_path(sdk));
+                    if let Some(dir) = path.parent() {
+                        std::fs::create_dir_all(dir)?;
+                    }
+                    seed::write_json(&path, &ledger)?;
+                    let met = ledger
+                        .obligations
+                        .iter()
+                        .filter(|o| {
+                            o.status == shapekit_contracts::obligations::ObligationStatus::Met
+                        })
+                        .count();
+                    println!(
+                        "{sdk}: {met} of {} versions met; wrote {}",
+                        ledger.obligations.len(),
+                        path.display()
+                    );
+                }
+            }
             Ok(outcome.ok)
         }
         ConformanceCommand::Crosscheck {

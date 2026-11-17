@@ -200,6 +200,20 @@ pub enum Problem {
     },
 }
 
+impl Problem {
+    /// The sdk version the problem is about; `None` for a line that names no version.
+    pub fn version(&self) -> Option<&str> {
+        match self {
+            Problem::Unlisted { version, .. }
+            | Problem::WrongResult { version, .. }
+            | Problem::NoLongerFails { version, .. }
+            | Problem::UnknownCheck { version, .. }
+            | Problem::UnknownVersion { version, .. } => Some(version),
+            Problem::UnknownEntry { .. } => None,
+        }
+    }
+}
+
 impl std::fmt::Display for Problem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {

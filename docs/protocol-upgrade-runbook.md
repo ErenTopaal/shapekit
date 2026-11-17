@@ -267,9 +267,10 @@ Let the registries decide the versions:
 
 ```sh
 shapekit conformance sync-versions
-shapekit conformance run --all-versions
+for sdk in rust go js; do shapekit conformance run --sdk $sdk --all-versions --obligations; done
 shapekit conformance reproduce
 shapekit conformance draft-issues
+shapekit coverage
 ```
 
 `sync-versions` reads crates.io, npm and the Go module proxy and writes
