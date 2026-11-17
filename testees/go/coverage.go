@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -123,12 +124,15 @@ func coverageNew(request) (map[string]any, error) {
 			p++
 			v |= uint64(c&0x7f) << shift
 			if c&0x80 == 0 {
+				if v > math.MaxUint32 {
+					return 0, internal("the counter data holds a value past 32 bits")
+				}
 				return uint32(v), nil
 			}
 		}
 	}
 	added := 0
-	for f := uint64(0); f < funcs; f++ {
+	for range funcs {
 		n, err := read()
 		if err != nil {
 			return nil, err
@@ -141,7 +145,7 @@ func coverageNew(request) (map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
-		for i := uint32(0); i < n; i++ {
+		for i := range n {
 			c, err := read()
 			if err != nil {
 				return nil, err
