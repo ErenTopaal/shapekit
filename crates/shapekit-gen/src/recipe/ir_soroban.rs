@@ -7,13 +7,16 @@ use std::collections::BTreeMap;
 
 use anyhow::{Context, Result, bail};
 use ed25519_dalek::SigningKey;
-use shapekit_core_driver::keys::account_id;
+use shapekit_core_driver::keys::{account_address, account_id};
 use shapekit_core_driver::sim::AuthMode;
-use shapekit_core_driver::tx::sign_authorization_entry;
+use shapekit_core_driver::tx::{
+    account_signature, authorization_payload, sign_authorization_entry,
+};
 use stellar_xdr::{
-    AccountId, ExtendFootprintTtlOp, ExtensionPoint, HostFunction, LedgerKey, OperationBody,
-    RestoreFootprintOp, ScAddress, SorobanAuthorizationEntry, SorobanCredentials,
-    SorobanTransactionData, TransactionEnvelope,
+    AccountId, ExtendFootprintTtlOp, ExtensionPoint, HostFunction, LedgerFootprint, LedgerKey,
+    OperationBody, RestoreFootprintOp, ScAddress, ScVal, SorobanAddressCredentialsWithDelegates,
+    SorobanAuthorizationEntry, SorobanCredentials, SorobanDelegateSignature, SorobanResources,
+    SorobanTransactionData, SorobanTransactionDataExt, TransactionEnvelope,
 };
 
 use super::ChainCtx;
@@ -31,6 +34,9 @@ pub enum Auth {
         allow_non_root: bool,
         address_v2: bool,
         signers: BTreeMap<AccountId, Vec<SigningKey>>,
+        /// Every entry for an account here gets with-delegates credentials whose delegates
+        /// are these keys' accounts, each signing the entry's payload.
+        delegates: BTreeMap<AccountId, Vec<SigningKey>>,
     },
     /// These entries, each address-credential entry for an account in `signers` signed by its
     /// keys, then simulated in enforcing mode.
@@ -140,6 +146,7 @@ pub fn invoke(
             allow_non_root,
             address_v2,
             signers,
+            delegates,
         } => {
             let r = sim.simulate_invoke(
                 function.clone(),
@@ -149,7 +156,9 @@ pub fn invoke(
                 },
                 &source_id,
             )?;
-            let signed = sign_all(ctx, r.auth, &signers)?;
+            let entries = with_delegates(r.auth, &delegates)?;
+            let signed = sign_all(ctx, entries, &signers)?;
+            let signed = sign_delegates(ctx, signed, &delegates)?;
             // signature checks cost instructions the recording run did not spend
             let r = sim
                 .simulate_invoke(
@@ -173,6 +182,124 @@ pub fn invoke(
         }
     };
     resources.apply(&mut data);
+    Ok(ctx
+        .driver()
+        .soroban_with_at(source, function, data, entries, seq)?)
+}
+
+/// Entries recorded for an account `delegates` names, turned into with-delegates credentials
+/// (CAP-71) whose delegates are the accounts of its keys in address order, signatures empty
+/// until [`sign_delegates`].
+fn with_delegates(
+    entries: Vec<SorobanAuthorizationEntry>,
+    delegates: &BTreeMap<AccountId, Vec<SigningKey>>,
+) -> Result<Vec<SorobanAuthorizationEntry>> {
+    let mut out = Vec::with_capacity(entries.len());
+    for e in entries {
+        let keys = credential_account(&e).and_then(|a| delegates.get(a));
+        let Some(keys) = keys.filter(|k| !k.is_empty()) else {
+            out.push(e);
+            continue;
+        };
+        let creds = match e.credentials {
+            SorobanCredentials::Address(c) | SorobanCredentials::AddressV2(c) => c,
+            other => bail!("delegates need recorded address credentials, got {other:?}"),
+        };
+        let mut list: Vec<SorobanDelegateSignature> = keys
+            .iter()
+            .map(|k| SorobanDelegateSignature {
+                address: account_address(&k.verifying_key()),
+                signature: ScVal::Void,
+                nested_delegates: Default::default(),
+            })
+            .collect();
+        // the host refuses delegates out of address order
+        list.sort_by(|a, b| a.address.cmp(&b.address));
+        out.push(SorobanAuthorizationEntry {
+            credentials: SorobanCredentials::AddressWithDelegates(
+                SorobanAddressCredentialsWithDelegates {
+                    address_credentials: creds,
+                    delegates: list.try_into()?,
+                },
+            ),
+            root_invocation: e.root_invocation,
+        });
+    }
+    Ok(out)
+}
+
+/// Each delegate of a with-delegates entry signs the entry's payload, which covers the
+/// expiration ledger the primary signature set but not the delegates themselves.
+fn sign_delegates(
+    ctx: &mut ChainCtx,
+    entries: Vec<SorobanAuthorizationEntry>,
+    delegates: &BTreeMap<AccountId, Vec<SigningKey>>,
+) -> Result<Vec<SorobanAuthorizationEntry>> {
+    let network = ctx.network_id();
+    let mut out = Vec::with_capacity(entries.len());
+    for mut e in entries {
+        let keys = credential_account(&e)
+            .and_then(|a| delegates.get(a))
+            .cloned();
+        if let (Some(keys), true) = (
+            keys,
+            matches!(e.credentials, SorobanCredentials::AddressWithDelegates(_)),
+        ) {
+            let payload = authorization_payload(&e, &network)?;
+            if let SorobanCredentials::AddressWithDelegates(w) = &mut e.credentials {
+                let mut list = w.delegates.to_vec();
+                for d in &mut list {
+                    let k = keys
+                        .iter()
+                        .find(|k| account_address(&k.verifying_key()) == d.address)
+                        .context("a delegate without its key")?;
+                    d.signature = account_signature(&payload, &[k])?;
+                }
+                w.delegates = list.try_into()?;
+            }
+        }
+        out.push(e);
+    }
+    Ok(out)
+}
+
+/// A signed invoke-host-function transaction built without simulation: the footprint and
+/// all four resources come from the recipe. Source authorization sends no entries; given
+/// entries are signed as written.
+pub fn invoke_unsimulated(
+    ctx: &mut ChainCtx,
+    source: &SigningKey,
+    seq: i64,
+    function: HostFunction,
+    auth: Auth,
+    footprint: LedgerFootprint,
+    resources: &Resources,
+) -> Result<TransactionEnvelope> {
+    let entries = match auth {
+        Auth::Source => Vec::new(),
+        Auth::Entries { entries, signers } => sign_all(ctx, entries, &signers)?,
+        Auth::Record { .. } => {
+            bail!("auth mode record writes its entries by simulation, so it needs simulate: true")
+        }
+    };
+    let (Some(instructions), Some(disk_read_bytes), Some(write_bytes), Some(resource_fee)) = (
+        resources.instructions,
+        resources.disk_read_bytes,
+        resources.write_bytes,
+        resources.resource_fee,
+    ) else {
+        bail!("simulate: false needs all four resources in the step");
+    };
+    let data = SorobanTransactionData {
+        ext: SorobanTransactionDataExt::V0,
+        resources: SorobanResources {
+            footprint,
+            instructions,
+            disk_read_bytes,
+            write_bytes,
+        },
+        resource_fee,
+    };
     Ok(ctx
         .driver()
         .soroban_with_at(source, function, data, entries, seq)?)

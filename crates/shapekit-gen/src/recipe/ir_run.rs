@@ -59,19 +59,6 @@ use stellar_xdr::{
 
 use super::{ChainCtx, Recipe, Selector, Spec, ir_soroban};
 
-/// The recipe IR can describe a step that skips simulation; this interpreter does not build
-/// one yet, so it says so instead of simulating anyway.
-fn unsimulated_unsupported(
-    simulate: bool,
-    footprint: Option<&shapekit_contracts::recipe_ir::Footprint>,
-) -> Result<()> {
-    ensure!(
-        simulate && footprint.is_none(),
-        "simulate: false with an explicit footprint is in the recipe IR, but this interpreter does not build such a transaction yet"
-    );
-    Ok(())
-}
-
 fn resources_of(r: &Option<ResourceOverride>) -> ir_soroban::Resources {
     match r {
         None => ir_soroban::Resources::default(),
@@ -866,7 +853,6 @@ impl<'a> Session<'a> {
                 footprint,
                 expect,
             } => {
-                unsimulated_unsupported(*simulate, footprint.as_ref())?;
                 let key = key_of(ctx, source);
                 let deployed = match SymRef::parse(contract) {
                     None => contract.clone(),
@@ -890,7 +876,8 @@ impl<'a> Session<'a> {
                 });
                 let seq = self.next_seq(ctx, source)?;
                 let plan = self.auth(ctx, auth)?;
-                let env = ir_soroban::invoke(ctx, &key, seq, hf, plan, &resources_of(resources))?;
+                let env =
+                    self.soroban_tx(ctx, &key, seq, hf, plan, resources, *simulate, footprint)?;
                 self.queue(ctx, (source, seq), label, &env, expect, Kind::Tx)
             }
             Step::HostFunction {
@@ -903,7 +890,6 @@ impl<'a> Session<'a> {
                 footprint,
                 expect,
             } => {
-                unsimulated_unsupported(*simulate, footprint.as_ref())?;
                 let key = key_of(ctx, source);
                 let hf: HostFunction = self.typed(ctx, function, "function")?;
                 let seq = self.next_seq(ctx, source)?;
@@ -912,7 +898,8 @@ impl<'a> Session<'a> {
                     hf,
                     HostFunction::CreateContract(_) | HostFunction::CreateContractV2(_)
                 );
-                let env = ir_soroban::invoke(ctx, &key, seq, hf, plan, &resources_of(resources))?;
+                let env =
+                    self.soroban_tx(ctx, &key, seq, hf, plan, resources, *simulate, footprint)?;
                 let kind = if creates { Kind::Create } else { Kind::Tx };
                 self.queue(ctx, (source, seq), label, &env, expect, kind)
             }
@@ -1022,6 +1009,37 @@ impl<'a> Session<'a> {
             .collect()
     }
 
+    /// The transaction of an invoke or host-function step: simulated, or with the step's
+    /// footprint and resources as written.
+    #[allow(clippy::too_many_arguments)]
+    fn soroban_tx(
+        &self,
+        ctx: &mut ChainCtx,
+        key: &SigningKey,
+        seq: i64,
+        hf: HostFunction,
+        plan: ir_soroban::Auth,
+        resources: &Option<ResourceOverride>,
+        simulate: bool,
+        footprint: &Option<shapekit_contracts::recipe_ir::Footprint>,
+    ) -> Result<TransactionEnvelope> {
+        if simulate {
+            ensure!(
+                footprint.is_none(),
+                "a footprint is only written for a step with simulate: false"
+            );
+            return ir_soroban::invoke(ctx, key, seq, hf, plan, &resources_of(resources));
+        }
+        let f = footprint
+            .as_ref()
+            .context("simulate: false needs the step's footprint")?;
+        let footprint = stellar_xdr::LedgerFootprint {
+            read_only: self.keys(ctx, &f.read_only)?.try_into()?,
+            read_write: self.keys(ctx, &f.read_write)?.try_into()?,
+        };
+        ir_soroban::invoke_unsimulated(ctx, key, seq, hf, plan, footprint, &resources_of(resources))
+    }
+
     /// An auth mode with its roles turned into keys and its entries into XDR.
     fn auth(&self, ctx: &mut ChainCtx, spec: &AuthSpec) -> Result<ir_soroban::Auth> {
         let signers_of = |ctx: &ChainCtx, pairs: Vec<(String, Vec<String>)>| {
@@ -1042,10 +1060,6 @@ impl<'a> Session<'a> {
                 signers,
                 delegates,
             } => {
-                ensure!(
-                    delegates.values().all(Vec::is_empty),
-                    "auth mode record with delegates (address_with_delegates credentials) is in the recipe IR, but this interpreter does not build them yet"
-                );
                 ir_soroban::Auth::Record {
                     allow_non_root: *allow_non_root,
                     address_v2: *address_v2,
@@ -1056,6 +1070,17 @@ impl<'a> Session<'a> {
                             .map(|(k, v)| (k.clone(), v.clone()))
                             .collect(),
                     ),
+                    // a delegate list names the signing roles itself, never the role alone
+                    delegates: delegates
+                        .iter()
+                        .filter(|(_, by)| !by.is_empty())
+                        .map(|(role, by)| {
+                            (
+                                account_id(&key_of(ctx, role).verifying_key()),
+                                by.iter().map(|r| key_of(ctx, r)).collect(),
+                            )
+                        })
+                        .collect(),
                 }
             }
             AuthSpec::Entries { entries, sign } => {
