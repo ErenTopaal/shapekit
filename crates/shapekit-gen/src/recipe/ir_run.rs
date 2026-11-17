@@ -359,9 +359,19 @@ impl<'a> Session<'a> {
                     .get(label)
                     .with_context(|| format!("no deploy step labelled {label} has run"))?,
             ),
-            SymRef::MuxedContract { .. } => bail!(
-                "{r} is in the recipe IR, but this interpreter does not resolve muxed contract addresses yet"
-            ),
+            SymRef::MuxedContract { label, id } => {
+                let c = self
+                    .contracts
+                    .get(label)
+                    .with_context(|| format!("no deploy step labelled {label} has run"))?;
+                stellar_strkey::MuxedContract {
+                    contract_id: c.0.0,
+                    id: *id,
+                }
+                .to_string()
+                .as_str()
+                .to_owned()
+            }
             SymRef::Wasm(label) => hex::encode(
                 self.wasm
                     .get(label)
