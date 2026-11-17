@@ -113,17 +113,18 @@ finding = "new"
 sdk = "rust"
 versions = ["30.0.0"]
 entries = [
-  "format.xdr-grammar.curve25519public-*", "format.xdr-grammar.curve25519secret-*",
+  "format.xdr-grammar.authcert-*", "format.xdr-grammar.authenticatedmessage*",
+  "format.xdr-grammar.binaryfusefiltertype-*", "format.xdr-grammar.curve25519public-*",
+  "format.xdr-grammar.curve25519secret-*", "format.xdr-grammar.hello-*",
   "format.xdr-grammar.hmacsha256key-*", "format.xdr-grammar.hmacsha256mac-*",
-  "format.xdr-grammar.shorthashseed-*", "format.xdr-grammar.authcert-*",
-  "format.xdr-grammar.authenticatedmessage*", "format.xdr-grammar.hello-*",
-  "format.xdr-grammar.serializedbinaryfusefilter-*", "format.xdr-grammar.*surveyrequestmessage-*",
-  "format.xdr-grammar.stellarmessage-*", "format.xdr-grammar.int64-*", "format.xdr-grammar.uint64-*",
+  "format.xdr-grammar.int64-*", "format.xdr-grammar.uint64-*", "format.xdr-grammar.peeraddress*",
+  "format.xdr-grammar.serializedbinaryfusefilter-*", "format.xdr-grammar.shorthashseed-*",
+  "format.xdr-grammar.*surveyrequestmessage-*", "format.xdr-grammar.stellarmessage-*",
 ]
-checks = "the expected_json of these 37 candidate entries, which the corpus generator writes with stellar-xdr 30.0.0"
-observed = "stellar-xdr writes a fixed-length opaque field that is not a typedef (Curve25519Public.key, HmacSha256Mac.mac, ShortHashSeed.seed and the rest) as a JSON array of byte numbers, and a bare Int64 or Uint64 value as a JSON number. SEP-51 v2.0.1 requires a hexadecimal string for fixed-length opaque data (\"The XDR fixed-length opaque data type ([RFC 4506 Section 4.9]) are represented as a hexadecimal string.\", ecosystem/sep-0051.md lines 204-207 at stellar-protocol ced008c3) and a base-10 string for hyper and unsigned hyper (\"maps to JSON strings, with the number base10 encoded as a simple integer\", lines 106-109 and 140-143). py-stellar-base and java-stellar-sdk write the SEP-51 forms, so their divergences on these entries are stellar-xdr's rendering, not theirs; this replaces the two open python and java rendering candidates"
-evidence = "stellar-xdr 30.0.0 src/generated/curve25519_public.rs:24-26 (pub key: [u8; 32] with no serde_as hex attribute, so serde writes an array) against fields such as AccountEntry.balance, account_entry.rs:50-54 (serde_as(as = \"NumberOrString\")); src/generated/int64.rs:10 and uint64.rs:10 (pub type Int64 = i64 and Uint64 = u64, so a bare value serializes as a JSON number)"
-open = "on these entries the rust testee is the reference rendering, so the conformance run marks python and java as diverging; a corrected expected_json needs a stellar-xdr release that follows SEP-51 here or a generator change, which is not done"
+checks = "any/decode_json and any/encode_json on all 50 entries (rust 30.0.0 and stellar-cli 30.0.1, which renders with the same crate)"
+observed = "the expected XDR-JSON now follows SEP-51 v2.0.1 (crates/shapekit-manifest/src/sep51.rs, `shapekit manifest rerender`), and stellar-xdr departs from it in three ways: a fixed-length opaque field that is not a typedef is written as an array of byte numbers, where SEP-51 requires \"a hexadecimal string\" (ecosystem/sep-0051.md lines 204-207 at stellar-protocol ced008c3); a bare Int64, Uint64, TimePoint or Duration is written as a JSON number, where hyper and unsigned hyper map \"to JSON strings, with the number base10 encoded as a simple integer\" (lines 106-109, 140-143); and the BinaryFuseFilterType values are b8_bit, b16_bit and b32_bit, where the enum string is the identifier \"modified to be snake_case, and truncated removing any shared prefix\" (lines 384-387), so 8_bit, 16_bit and 32_bit. the crate's reader refuses the SEP-51 forms, so encode_json fails too. on these 50 entries the other sdks that render json agree with the corrected values (dart 3.12.0 and php 1.18.0 on every one but the 8 PeerAddress entries below, python 17.0.1 and java 6.0.0 on 42)"
+evidence = "stellar-xdr 30.0.0 src/generated/curve25519_public.rs:24-26 (pub key: [u8; 32], no hex serde_as) against account_entry.rs:50-54 (serde_as(as = \"NumberOrString\")); src/generated/int64.rs:10 and uint64.rs:10 (bare i64 and u64); the generator keeps the prefix's first letter before a digit (mirrored in crates/shapekit-schema/src/names.rs strip_prefix)"
+open = "two enum names are left as stellar-xdr writes them because SEP-51's rule does not settle them: IPAddrType's IPv4 and IPv6 (stellar-xdr i_pv4, i_pv6; python, java, dart, php, kmp and go write ipv4, ipv6; the text does not define snake_case for a mixed-case identifier, and the two identifiers share the prefix IPv only below word level), and the transaction and operation result codes such as txSUCCESS (stellar-xdr tx_success; read literally, removing the prefix tx that every member shares would give success, but the text does not say whether a prefix must end at a word boundary). 8 PeerAddress entries diverge on every other sdk because of the first; changing either would rename values in hundreds of corpus files on an interpretation, so it waits for a decision"
 
 # python sdk (stellar-sdk, py-stellar-base 16.1.1 and 17.0.1): divergences from
 #   shapekit conformance run --sdk python --all-versions                 (corpus, 716 entries)
@@ -140,7 +141,7 @@ sdk = "python"
 versions = ["16.1.1", "17.0.1"]
 entries = ["corpus: 465 entries, every one whose json holds a transaction or operation result code", "candidate: 1186 entries"]
 checks = "decode_json and encode_json"
-observed = "to_json writes enum values and union arms as the lowercased .x name without SEP-51's word breaks: txsuccess for tx_success, txfee_bump_inner_success, opinner for op_inner, opbad_auth, memalloc for mem_alloc, ipv6 for i_pv6, 8_bit for b8_bit. from_json reads only its own spelling and raises KeyError, not ValueError, on the SEP-51 name"
+observed = "to_json writes enum values and union arms as the lowercased .x name without SEP-51's word breaks: txsuccess for tx_success, txfee_bump_inner_success, opinner for op_inner, opbad_auth, memalloc for mem_alloc. from_json reads only its own spelling and raises KeyError, not ValueError, on the SEP-51 name. its 8_bit (stellar-xdr b8_bit) is the SEP-51 form, and its ipv6 (stellar-xdr i_pv6) is one of the names SEP-51 leaves open (the rust rendering candidate)"
 evidence = "stellar_sdk/xdr/transaction_result_code.py:11-30 (_TRANSACTION_RESULT_CODE_MAP), :154-155 (from_json_dict indexes _TRANSACTION_RESULT_CODE_REVERSE_MAP); every generated enum has the same pair. java-stellar-sdk 6.0.0 writes the same names (see the java candidates)"
 
 [[candidate]]
@@ -314,7 +315,7 @@ sdk = "java"
 versions = ["5.0.0", "6.0.0"]
 entries = ["corpus: 465 entries, every one whose json holds a transaction result code", "candidate: 1192 entries"]
 checks = "decode_json and encode_json"
-observed = "toJson writes enum values and union arms as the lowercased .x name without SEP-51's word breaks (txsuccess for tx_success, 8_bit for b8_bit, ipv6 for i_pv6), and fromJson refuses the SEP-51 names (\"Unknown JSON value\"); the same names py-stellar-base writes"
+observed = "toJson writes enum values and union arms as the lowercased .x name without SEP-51's word breaks (txsuccess for tx_success, opinner for op_inner), and fromJson refuses the SEP-51 names (\"Unknown JSON value\"); the same names py-stellar-base writes. its 8_bit is the SEP-51 form and its ipv6 one SEP-51 leaves open (the rust rendering candidate)"
 evidence = "xdr/TransactionResultCode.java:154-159 (toJsonObject returns \"txsuccess\"), :206 (fromJsonObject matches only \"txsuccess\"); every generated enum has the same pair"
 
 [[candidate]]
@@ -604,8 +605,8 @@ evidence = "lib/src/xdr/xdr_allow_trust_op.dart L24-L36: authorize is an int rea
 # - 6 PHP-SIGNEDPAYLOAD-JSON.
 # - 82 checks on the fixed-opaque overlay and survey types (Curve25519Public,
 #   HmacSha256Mac, ShortHashSeed, PeerAddress and the types holding them): the sdk writes and
-#   reads the SEP-51 hex form, the expected_json is stellar-xdr's byte array, so these are the
-#   rust SEP-51 candidate above, not a php defect.
+#   reads the SEP-51 hex form, which the expected_json now has too (the rust SEP-51 candidate
+#   above), so these pass; not a php defect.
 # - 63 transaction hashes on the setoptionsop-* probes: the set options candidate
 #   below; each envelope was round tripped through the sdk and compared field by field.
 # - 93 config setting ledger keys, 7 host function rebuilds, 4 preconditions, 24 tx advert and
@@ -892,8 +893,8 @@ evidence = "StellarDotnetSdk/Operations/InvokeHostFunctionOperation.cs L464-L468
 # nesting cap of 128 (KMP-JSON-DEPTH), 18 refusals at the per-type decode caps (below), 16
 # transaction hashes (12 KMP-MUXED-SOURCE, 4 below), 13 transaction-object refusals (below), 6
 # KMP-SIGNEDPAYLOAD-JSON, and 30 checks on the 17 fixed-opaque and bare Int64 and Uint64
-# entries, where kmp writes the SEP-51 forms and the expected_json is stellar-xdr's rendering
-# (the rust SEP-51 candidate above), so they are no kmp defect.
+# entries, where kmp writes the SEP-51 forms; the expected_json now has them too (the rust
+# SEP-51 candidate above), so these pass; no kmp defect.
 
 [[candidate]]
 finding = "new"

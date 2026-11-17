@@ -397,6 +397,16 @@ enum ManifestCommand {
         #[arg(long, default_value = env!("CARGO_PKG_VERSION"))]
         corpus_version: String,
     },
+    /// Rewrite every entry's expected XDR-JSON file from its XDR file as `to_xdr_json` renders
+    /// it now, and the sha256 in the entry file. Run `manifest build` afterwards.
+    Rerender {
+        /// The corpus directory (corpus or candidate).
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        /// List the files that would change without writing them.
+        #[arg(long)]
+        dry_run: bool,
+    },
     /// Write the manifest JSON Schema generated from the manifest types.
     Schema {
         #[arg(long, default_value = "schema/manifest.schema.json")]
@@ -570,6 +580,9 @@ fn main() -> ExitCode {
                 corpus_version,
             } => manifest_cmd::build_file(&corpus, &pins, &corpus_version),
             ManifestCommand::Schema { out } => manifest_cmd::write_schema(&out),
+            ManifestCommand::Rerender { corpus, dry_run } => {
+                manifest_cmd::rerender(&corpus, dry_run)
+            }
         },
         Command::Oracle { command } => match command {
             OracleCommand::Run { corpus } => oracle_cmd::run(&corpus),

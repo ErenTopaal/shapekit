@@ -477,13 +477,19 @@ downgraded this way: crashing on unknown XDR is a robustness defect, not a missi
 ### The reference testee and the cross-check
 
 Every `expected_json` in the corpus is the XDR-JSON rendering of the stellar-xdr version the
-generator links (`generated_with.stellar_xdr` in the manifest). The Rust testee at that version
-renders with the same library, so its `decode_json` and `encode_json` checks agreeing with
+generator links (`generated_with.stellar_xdr` in the manifest), put right where it departs from
+SEP-51 v2.0.1 (`crates/shapekit-manifest/src/sep51.rs` cites the lines): a fixed-length opaque
+field that is not a typedef becomes a hexadecimal string instead of an array of byte numbers, a
+bare `Int64`, `Uint64`, `TimePoint` or `Duration` becomes a decimal string instead of a JSON
+number, and the `BinaryFuseFilterType` names lose the letter stellar-xdr keeps in front of a
+digit (`8_bit`, not `b8_bit`). `shapekit manifest rerender --corpus <dir>` rewrites the expected
+files after a change to these rules. The Rust testee at that version renders with the same
+library, so on every other value its `decode_json` and `encode_json` checks agreeing with
 `expected_json` prove nothing beyond the library agreeing with itself. The matrix marks that
 testee as the reference for `expected_json` (`reference_for` in `testees`) and counts those
 checks as `reference` (listed in the cell's `reference_checks`), never as `pass`. A reference
-check that disagrees is still a failure: it means the library cannot read back its own
-rendering. In the entry summary, a passing cell with reference checks is counted under
+check that disagrees is still a failure: either the library cannot read back its own
+rendering, or the value is one of the three above, where the library departs from SEP-51. In the entry summary, a passing cell with reference checks is counted under
 `reference`.
 
 `shapekit conformance crosscheck` supplies the independent evidence: it sends every

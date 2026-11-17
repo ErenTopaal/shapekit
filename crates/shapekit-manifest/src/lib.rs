@@ -5,6 +5,7 @@ mod depth;
 pub mod framing;
 mod model;
 pub mod paths;
+pub mod sep51;
 pub mod signature;
 mod validate;
 pub mod xdr;

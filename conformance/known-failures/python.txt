@@ -6,7 +6,7 @@
 
 # to_json writes enum values and union arms as the lowercased .x name without the word breaks
 # SEP-51 has: txsuccess for tx_success, txfee_bump_inner_success for tx_fee_bump_inner_success,
-# opinner for op_inner, memalloc for mem_alloc, ipv6 for i_pv6, 8_bit for b8_bit. from_json reads
+# opinner for op_inner, memalloc for mem_alloc. from_json reads
 # only its own spelling and raises KeyError (a crash, not a ValueError) on the SEP-51 one.
 # java-stellar-sdk writes the same names. new
 cap01.bump-sequence.golden-b71da06f9ce2dec8-2 17.0.1 diverges-from-network candidate/finding-candidates.toml any/decode_json, any/encode_json

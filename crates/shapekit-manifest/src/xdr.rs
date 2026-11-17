@@ -59,7 +59,9 @@ pub fn roundtrip_check(type_name: &str, bytes: &[u8], limits: Limits) -> Result<
     })
 }
 
-/// The SEP-51 XDR-JSON value of a decoded value, through the crate's serde support.
+/// The JSON value the crate's serde support writes for a decoded value. It is SEP-51 except
+/// for fixed opaque fields and bare 64-bit values, which [`to_xdr_json`] puts right through
+/// [`crate::sep51::normalize`].
 pub fn json_value(value: &Type) -> Result<Value, ToolkitError> {
     serde_json::to_value(value).map_err(ToolkitError::Json)
 }
@@ -68,7 +70,8 @@ pub fn json_value(value: &Type) -> Result<Value, ToolkitError> {
 /// Sorting keeps the text independent of struct field order and of serde_json's map backend.
 pub fn to_xdr_json(type_name: &str, bytes: &[u8], limits: Limits) -> Result<String, ToolkitError> {
     let value = decode(type_name, bytes, limits)?;
-    let json = json_value(&value)?;
+    let mut json = json_value(&value)?;
+    crate::sep51::normalize(type_name, &mut json)?;
     Ok(render_json(&json))
 }
 

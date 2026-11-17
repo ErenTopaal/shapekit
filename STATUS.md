@@ -2,6 +2,23 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: expected XDR-JSON follows SEP-51
+
+- The expected XDR-JSON of the corpus and candidate lanes now follows SEP-51 v2.0.1 where
+  stellar-xdr departs from it: a fixed-length opaque field that is not a typedef is a
+  hexadecimal string, not an array of byte numbers; a bare `Int64`, `Uint64`, `TimePoint` or
+  `Duration` is a decimal string, not a JSON number; and `BinaryFuseFilterType` values are
+  `8_bit`, `16_bit` and `32_bit`, not `b8_bit` and the rest. `shapekit manifest rerender` rewrote
+  the affected files.
+- Corpus: no expected file changes, so no corpus count changes.
+- Candidate lane: 50 `format.xdr-grammar` entries change. On them rust 30.0.0 and stellar-cli
+  30.0.1, which render with stellar-xdr, now diverge from the network on all 50
+  (`decode_json` and `encode_json`), recorded as the rust SEP-51 candidate. The SDKs that write
+  SEP-51 match the corrected values on these entries instead of diverging: python 17.0.1, java
+  6.0.0 and dart 3.12.0 pass 42 of the 50 and php 1.18.0 passes 38. The 8 PeerAddress entries still diverge on every other SDK:
+  stellar-xdr's `i_pv4` and `i_pv6` against their `ipv4` and `ipv6`, a name SEP-51's rule does
+  not settle, so it stays stellar-xdr's until decided.
+
 ## 2026-11-17: candidate-lane triage closed, libsodium pinned, coverage for KMP and stellar-cli
 
 - Every failing candidate-lane check of the PHP and .NET SDKs is attributed in
