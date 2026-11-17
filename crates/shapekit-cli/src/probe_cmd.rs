@@ -68,6 +68,16 @@ pub enum ProbeCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
+    /// Run the probe again in a scratch directory and compare its recorded chains (canonical
+    /// hashes, ledger range, lake), the table and the witness entries with the committed ones.
+    VerifyRepro {
+        #[arg(long, default_value = "registry/generated/validation.json")]
+        out: PathBuf,
+        #[arg(long, default_value = "candidate")]
+        candidate: PathBuf,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+    },
     /// Write the `field` obligations of a validation table beside it, as
     /// <table stem>.obligations.json; probe all writes them too.
     Obligations {
@@ -82,6 +92,13 @@ pub enum ProbeCommand {
         table: PathBuf,
         #[arg(long, default_value = "registry/fields.toml")]
         fields: PathBuf,
+        /// The per-row verdict file: one record per fields.toml row with the measured verdict,
+        /// its sites and the source reading that settles it, if any.
+        #[arg(long, default_value = "registry/generated/field-verdicts.json")]
+        verdicts: PathBuf,
+        /// Write the verdict file; without it the committed file is checked to be current.
+        #[arg(long)]
+        write: bool,
     },
 }
 
@@ -108,7 +125,17 @@ pub fn run(command: ProbeCommand) -> Result<bool> {
             scratch.as_deref(),
             &pins,
         ),
-        ProbeCommand::Compare { table, fields } => probe_compare(&table, &fields),
+        ProbeCommand::Compare {
+            table,
+            fields,
+            verdicts,
+            write,
+        } => probe_compare(&table, &fields, &verdicts, write),
+        ProbeCommand::VerifyRepro {
+            out,
+            candidate,
+            pins,
+        } => probe_verify_repro(&out, &candidate, &pins),
         ProbeCommand::Obligations { table } => {
             let t: ValidationTable = shapekit_contracts::load(&table)
                 .with_context(|| format!("reading {}", table.display()))?;
@@ -198,6 +225,20 @@ fn probe_all(
     scratch: Option<&Path>,
     pins: &Path,
 ) -> Result<bool> {
+    // where the table, the witnesses and the chains go, decided before the run: each world's
+    // chain is recorded when the probe is done with it
+    let target = match (only.is_empty(), scratch) {
+        (true, None) => Some((out.to_owned(), candidate.to_owned())),
+        (_, Some(dir)) => {
+            std::fs::create_dir_all(dir)?;
+            Some((dir.join("validation.json"), dir.join("candidate")))
+        }
+        (false, None) => None,
+    };
+    let chains = target.as_ref().map(|(_, c)| c.join("chains"));
+    if let Some(dir) = &chains {
+        clear_chains(dir)?;
+    }
     let schema = shapekit_schema::Schema::pinned();
     let fields = shapekit_probe::run::selected(&schema, only)?;
     let image = CoreImage::from_pins(pins)
@@ -211,6 +252,7 @@ fn probe_all(
         &fields,
         |protocol| shapekit_probe::node_config(TESTNET_PASSPHRASE, image.clone(), protocol),
         work.path(),
+        chains.as_deref(),
         |r| {
             println!(
                 "{:<56} {:<14} {} attempts",
@@ -239,21 +281,13 @@ fn probe_all(
         let v: Vec<_> = runs.iter().map(|r| &r.verdict).collect();
         std::fs::write(d, serde_json::to_string_pretty(&v)? + "\n")?;
     }
-    let (out, candidate) = match (only.is_empty(), scratch) {
-        (true, None) => (out.to_owned(), candidate.to_owned()),
-        (false, Some(dir)) => {
-            std::fs::create_dir_all(dir)?;
-            (dir.join("validation.json"), dir.join("candidate"))
-        }
-        (false, None) => {
-            println!(
-                "partial run: {} and {} left as they are",
-                out.display(),
-                candidate.display()
-            );
-            return Ok(true);
-        }
-        (true, Some(_)) => bail!("--scratch is for runs with --only"),
+    let Some((out, candidate)) = target else {
+        println!(
+            "partial run: {} and {} left as they are",
+            out.display(),
+            candidate.display()
+        );
+        return Ok(true);
     };
     let mut runs = runs;
     shapekit_probe::witness::clear(&candidate, shapekit_probe::witness::FAMILY)?;
@@ -285,6 +319,125 @@ fn probe_all(
     crate::manifest_cmd::build_file(&candidate, pins, &version)
 }
 
+/// Removes the probe's recorded chains under `chains`, which a run records again.
+fn clear_chains(chains: &Path) -> Result<()> {
+    if !chains.is_dir() {
+        return Ok(());
+    }
+    let prefix = format!("{}.", shapekit_probe::witness::FAMILY);
+    for e in std::fs::read_dir(chains)? {
+        let p = e?.path();
+        let name = p.file_name().and_then(|n| n.to_str()).unwrap_or_default();
+        if name.starts_with(&prefix) {
+            std::fs::remove_dir_all(&p).with_context(|| format!("removing {}", p.display()))?;
+        }
+    }
+    Ok(())
+}
+
+/// The probe's chains under `chains`, by directory name relative to it.
+fn probe_chains(chains: &Path) -> Result<Vec<PathBuf>> {
+    let prefix = format!("{}.", shapekit_probe::witness::FAMILY);
+    let mut out = Vec::new();
+    for e in std::fs::read_dir(chains).with_context(|| format!("reading {}", chains.display()))? {
+        let p = e?.path();
+        let name = p.file_name().and_then(|n| n.to_str()).unwrap_or_default();
+        if !name.starts_with(&prefix) {
+            continue;
+        }
+        for n in std::fs::read_dir(&p)? {
+            out.push(n?.path().strip_prefix(chains)?.to_path_buf());
+        }
+    }
+    out.sort();
+    Ok(out)
+}
+
+/// chain.json without what records core's raw output, whose change order differs between
+/// runs (the same rule as `gen verify-repro`).
+fn reproducible_chain_json(path: &Path) -> Result<serde_json::Value> {
+    let mut v: serde_json::Value = serde_json::from_slice(
+        &std::fs::read(path).with_context(|| format!("reading {}", path.display()))?,
+    )?;
+    let obj = v.as_object_mut().context("chain.json is not an object")?;
+    obj.remove("stream_sha256");
+    if let Some(serde_json::Value::Array(ledgers)) = obj.get_mut("ledgers") {
+        for l in ledgers {
+            if let Some(o) = l.as_object_mut() {
+                o.remove("raw_sha256");
+            }
+        }
+    }
+    Ok(v)
+}
+
+/// Runs the probe again into a scratch directory and compares its chains, table and witness
+/// manifest entries with the committed ones.
+fn probe_verify_repro(out: &Path, candidate: &Path, pins: &Path) -> Result<bool> {
+    let fresh = tempfile::Builder::new()
+        .prefix("shapekit-probe-repro-")
+        .tempdir()
+        .context("creating the regeneration directory")?;
+    // an empty scratch lane: only the probe's own entries are compared
+    let all: Vec<String> = Vec::new();
+    let fresh_out = fresh.path().join("validation.json");
+    let fresh_candidate = fresh.path().join("candidate");
+    std::fs::create_dir_all(&fresh_candidate)?;
+    if !probe_all(&all, &fresh_out, &fresh_candidate, None, None, pins)? {
+        bail!("the regenerating run failed");
+    }
+    let mut diffs = Vec::new();
+    let committed_chains = candidate.join("chains");
+    let fresh_chains = fresh_candidate.join("chains");
+    let a = probe_chains(&committed_chains)?;
+    let b = probe_chains(&fresh_chains)?;
+    if a != b {
+        diffs.push(format!("chains differ: committed {a:?}, regenerated {b:?}"));
+    }
+    for rel in &a {
+        if !b.contains(rel) {
+            continue;
+        }
+        let (x, y) = (committed_chains.join(rel), fresh_chains.join(rel));
+        if reproducible_chain_json(&x.join("chain.json"))?
+            != reproducible_chain_json(&y.join("chain.json"))?
+        {
+            diffs.push(format!(
+                "{}: chain.json differs in canonical hashes or ledger range",
+                rel.display()
+            ));
+        }
+        if shapekit_pack::lake_digest(&x.join("ledgers"))?
+            != shapekit_pack::lake_digest(&y.join("ledgers"))?
+        {
+            diffs.push(format!("{}: ledger lake differs", rel.display()));
+        }
+        println!("compared {}", rel.display());
+    }
+    if std::fs::read(out)? != std::fs::read(&fresh_out)? {
+        diffs.push(format!(
+            "{} differs from the regenerated table",
+            out.display()
+        ));
+    }
+    let entries = |root: &Path| -> Result<Vec<serde_json::Value>> {
+        let m = shapekit_manifest::build::load(&root.join("manifest.json"))?;
+        Ok(m.entries
+            .iter()
+            .filter(|e| e.family == shapekit_probe::witness::FAMILY)
+            .map(serde_json::to_value)
+            .collect::<std::result::Result<_, _>>()?)
+    };
+    if entries(candidate)? != entries(&fresh_candidate)? {
+        diffs.push("the witness entries differ from the regenerated ones".into());
+    }
+    for d in &diffs {
+        println!("DIFF {d}");
+    }
+    println!("{} chains compared, {} differences", a.len(), diffs.len());
+    Ok(diffs.is_empty())
+}
+
 /// The pinned core release and the image the probe ran.
 fn core_ref(pins_path: &Path, image: &CoreImage) -> Result<CoreRef> {
     let p = crate::pins::load(pins_path)?;
@@ -312,7 +465,7 @@ fn core_ref(pins_path: &Path, image: &CoreImage) -> Result<CoreRef> {
     })
 }
 
-fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
+fn probe_compare(table: &Path, fields: &Path, verdicts: &Path, write: bool) -> Result<bool> {
     let t: ValidationTable =
         shapekit_contracts::load(table).with_context(|| format!("reading {}", table.display()))?;
     let f: toml::Table = std::fs::read_to_string(fields)
@@ -322,7 +475,7 @@ fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
     let rows = shapekit_probe::compare::compare(&t, &f)?;
     let (mut open, mut settled, mut stale) = (0, 0, 0);
     for r in &rows {
-        let state = match (r.agrees, r.resolved) {
+        let state = match (r.agrees, &r.settled_by) {
             (true, None) => "agrees",
             (false, Some(_)) => {
                 settled += 1;
@@ -338,12 +491,29 @@ fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
             }
         };
         println!("{:<60} {:<8} {state}", r.row, r.registry);
-        if !r.agrees || r.resolved.is_some() {
-            for (site, yes, n) in &r.sites {
-                let v = if *yes { "validated" } else { "not-validated" };
-                println!("    {site:<64} {v} ({n} attempts)");
+        if !r.agrees || r.settled_by.is_some() {
+            for site in &r.sites {
+                let v = if site.validated {
+                    "validated"
+                } else {
+                    "not-validated"
+                };
+                let names: Vec<String> = site
+                    .fields
+                    .iter()
+                    .map(|f| match &f.carrier {
+                        Some(c) => format!("{} [{c}]", f.path),
+                        None => f.path.clone(),
+                    })
+                    .collect();
+                println!(
+                    "    {:<64} {v}, {} ({} attempts)",
+                    names.join(", "),
+                    site.values,
+                    site.attempts
+                );
             }
-            if let Some(reading) = r.resolved {
+            if let Some(reading) = &r.settled_by {
                 println!("    {reading}");
             }
         }
@@ -353,7 +523,28 @@ fn probe_compare(table: &Path, fields: &Path) -> Result<bool> {
         rows.len(),
         rows.len() - settled - open - stale
     );
-    Ok(open == 0 && stale == 0)
+    let file = shapekit_probe::compare::FieldVerdicts {
+        schema_version: 1,
+        rows,
+    };
+    let text = serde_json::to_string_pretty(&file)? + "\n";
+    let current = if write {
+        std::fs::write(verdicts, &text)
+            .with_context(|| format!("writing {}", verdicts.display()))?;
+        println!("wrote {} with {} rows", verdicts.display(), file.rows.len());
+        true
+    } else {
+        let committed = std::fs::read_to_string(verdicts).unwrap_or_default();
+        let same = committed == text;
+        if !same {
+            println!(
+                "{} is not current; run shapekit probe compare --write",
+                verdicts.display()
+            );
+        }
+        same
+    };
+    Ok(open == 0 && stale == 0 && current)
 }
 
 fn probe_limits(

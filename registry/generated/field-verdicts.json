@@ -1,0 +1,2459 @@
+{
+  "schema_version": 1,
+  "rows": [
+    {
+      "row": "tx.envelope.type",
+      "registry": "yes",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "TransactionV0Envelope.tx",
+              "carrier": "p12"
+            },
+            {
+              "path": "TransactionV0Envelope.tx",
+              "carrier": "p30"
+            },
+            {
+              "path": "TransactionV1Envelope.tx",
+              "carrier": null
+            },
+            {
+              "path": "FeeBumpTransactionEnvelope.tx",
+              "carrier": null
+            }
+          ],
+          "values": "the base transactions",
+          "validated": false,
+          "attempts": 4
+        }
+      ],
+      "agrees": false,
+      "settled_by": "core refuses a v0 envelope from protocol 13 in TransactionFrame::commonValidPreSeqNum (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1257-1265), which envelopes from peers reach unchanged (src/overlay/Peer.cpp 183-185). the probe submits through core's tx endpoint, which first turns a v0 envelope into the equivalent v1 envelope (src/main/CommandHandler.cpp 1074-1084, src/transactions/TransactionBridge.cpp 18-47), so the v0 base applies at protocol 30 too and the ledger holds its v1 form. the refusal is out of the endpoint's reach, not absent; the row now says so"
+    },
+    {
+      "row": "tx.v0.source_account_ed25519",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "TransactionV0.sourceAccountEd25519",
+              "carrier": "p12"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.signatures",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "TransactionV1Envelope.signatures",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.signatures.hint",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "DecoratedSignature.hint",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.signatures.signature",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "DecoratedSignature.signature",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.source_account",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.sourceAccount",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.source_account.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "tx-source"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.fee",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.fee",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.seq_num",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.seqNum",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.type",
+      "registry": "yes",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.cond",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 3
+        }
+      ],
+      "agrees": false,
+      "settled_by": "the only check of the precondition type is the protocol 19 gate: PRECOND_V2 before protocol 19 is txNOT_SUPPORTED (stellar-core v30.0.0 src/transactions/TransactionFrame.cpp 1266-1272). at protocol 30, where the probe runs, every arm is accepted; the values inside an arm are checked under their own rows (time bounds, ledger bounds, minimum sequence fields, extra signers)"
+    },
+    {
+      "row": "tx.cond.time_bounds",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "TimeBounds.minTime",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "TimeBounds.maxTime",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.ledger_bounds",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LedgerBounds.minLedger",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerBounds.maxLedger",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.min_seq_num",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PreconditionsV2.minSeqNum",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 7
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.min_seq_age",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PreconditionsV2.minSeqAge",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.min_seq_ledger_gap",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PreconditionsV2.minSeqLedgerGap",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.cond.extra_signers",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PreconditionsV2.extraSigners",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "signer_key.signed_payload.payload",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SignerKeyEd25519SignedPayload.payload",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.memo.type",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.memo",
+              "carrier": "invoke"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.memo.text",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.memo",
+              "carrier": "payment"
+            }
+          ],
+          "values": "values named \"arm text\"",
+          "validated": false,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.memo.id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.memo",
+              "carrier": "payment"
+            }
+          ],
+          "values": "values named \"arm id\"",
+          "validated": false,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.memo.hash",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.memo",
+              "carrier": "payment"
+            }
+          ],
+          "values": "values named \"arm hash\"",
+          "validated": false,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.memo.return",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.memo",
+              "carrier": "payment"
+            }
+          ],
+          "values": "values named \"arm return\"",
+          "validated": false,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.operations",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.operations",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.ext",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Transaction.ext",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.soroban.resource_fee",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanTransactionData.resourceFee",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.soroban.resources.limits",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanResources.instructions",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        },
+        {
+          "fields": [
+            {
+              "path": "SorobanResources.diskReadBytes",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        },
+        {
+          "fields": [
+            {
+              "path": "SorobanResources.writeBytes",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.soroban.footprint",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LedgerFootprint.readOnly",
+              "carrier": "echo"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerFootprint.readWrite",
+              "carrier": "echo"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "tx.soroban.ext.archived_soroban_entries",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanResourcesExtV0.archivedSorobanEntries",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "feebump.fee_source",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "FeeBumpTransaction.feeSource",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "feebump.fee_source.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "fee-source"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "feebump.fee",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "FeeBumpTransaction.fee",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "feebump.signatures",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "FeeBumpTransactionEnvelope.signatures",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "feebump.inner_tx",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "FeeBumpTransaction.innerTx",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.source_account",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Operation.sourceAccount",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.source_account.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "op-source"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.create_account.destination",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "CreateAccountOp.destination",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.create_account.starting_balance",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "CreateAccountOp.startingBalance",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.payment.destination",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PaymentOp.destination",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.payment.destination.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "payment"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.payment.asset",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PaymentOp.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.payment.amount",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PaymentOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.path_payment.destination",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictReceiveOp.destination",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictSendOp.destination",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.path_payment.destination.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "path-payment"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.path_payment.amounts",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictReceiveOp.sendMax",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictReceiveOp.destAmount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictSendOp.sendAmount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictSendOp.destMin",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.path_payment.path",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictReceiveOp.path",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "PathPaymentStrictSendOp.path",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.manage_offer.offer_id",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ManageSellOfferOp.offerID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageBuyOfferOp.offerID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.manage_offer.assets_amount_price",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ManageSellOfferOp.selling",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageSellOfferOp.buying",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageSellOfferOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageSellOfferOp.price",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageBuyOfferOp.selling",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageBuyOfferOp.buying",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageBuyOfferOp.buyAmount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "ManageBuyOfferOp.price",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "CreatePassiveSellOfferOp.selling",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "CreatePassiveSellOfferOp.buying",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "CreatePassiveSellOfferOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "CreatePassiveSellOfferOp.price",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "Price.n",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "Price.d",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.set_options.home_domain",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.homeDomain",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.set_options.inflation_dest",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.inflationDest",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.set_options.signer",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.signer",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "Signer.key",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "Signer.weight",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.set_options.thresholds_and_flags",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.clearFlags",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.setFlags",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.masterWeight",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.lowThreshold",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.medThreshold",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SetOptionsOp.highThreshold",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.change_trust.line",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ChangeTrustOp.line",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.change_trust.line.liquidity_pool",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolConstantProductParameters.assetA",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolConstantProductParameters.assetB",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolConstantProductParameters.fee",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.change_trust.limit",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ChangeTrustOp.limit",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.allow_trust",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "AllowTrustOp.trustor",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "AllowTrustOp.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "AllowTrustOp.authorize",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.manage_data.data_name",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ManageDataOp.dataName",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.manage_data.data_value",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ManageDataOp.dataValue",
+              "carrier": null
+            }
+          ],
+          "values": "values not named \"absent\"",
+          "validated": false,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.bump_sequence.bump_to",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "BumpSequenceOp.bumpTo",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.create_claimable_balance.claimants.destination",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClaimantV0.destination",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 7
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.create_claimable_balance.claimants.predicate",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClaimantV0.predicate",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 12
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.create_claimable_balance.asset_amount",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "CreateClaimableBalanceOp.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "CreateClaimableBalanceOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.claim_claimable_balance.balance_id",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClaimClaimableBalanceOp.balanceID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.clawback.from",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClawbackOp.from",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.clawback.from.mux_id",
+      "registry": "no",
+      "measured": "no",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "MuxedAccountMed25519.id",
+              "carrier": "clawback"
+            }
+          ],
+          "values": "every value",
+          "validated": false,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.clawback.asset_amount",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClawbackOp.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "ClawbackOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.clawback_claimable_balance.balance_id",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ClawbackClaimableBalanceOp.balanceID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.set_trust_line_flags",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SetTrustLineFlagsOp.trustor",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "SetTrustLineFlagsOp.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SetTrustLineFlagsOp.clearFlags",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "SetTrustLineFlagsOp.setFlags",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.begin_sponsoring.sponsored_id",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "BeginSponsoringFutureReservesOp.sponsoredID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.revoke_sponsorship",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "RevokeSponsorshipOpSigner.accountID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "RevokeSponsorshipOpSigner.signerKey",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyAccount.accountID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyTrustLine.accountID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyTrustLine.asset",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyOffer.sellerID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyOffer.offerID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyData.accountID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyData.dataName",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerKeyClaimableBalance.balanceID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.account_merge.destination",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "Operation.body",
+              "carrier": "merge"
+            }
+          ],
+          "values": "values named \"same arm\"",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.liquidity_pool_deposit",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolDepositOp.liquidityPoolID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolDepositOp.maxAmountA",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolDepositOp.maxAmountB",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolDepositOp.minPrice",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolDepositOp.maxPrice",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.liquidity_pool_withdraw",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolWithdrawOp.liquidityPoolID",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolWithdrawOp.amount",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolWithdrawOp.minAmountA",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        },
+        {
+          "fields": [
+            {
+              "path": "LiquidityPoolWithdrawOp.minAmountB",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.invoke_contract.contract_address",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "InvokeContractArgs.contractAddress",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 8
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.invoke_contract.function_name",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "InvokeContractArgs.functionName",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.invoke_contract.args",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "InvokeContractArgs.args",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.upload_wasm",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "InvokeHostFunctionOp.hostFunction",
+              "carrier": "upload"
+            }
+          ],
+          "values": "values named \"same arm\"",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.create_contract.preimage",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "CreateContractArgs.contractIDPreimage",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "CreateContractArgsV2.contractIDPreimage",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        },
+        {
+          "fields": [
+            {
+              "path": "ContractIDPreimageFromAddress.address",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 8
+        },
+        {
+          "fields": [
+            {
+              "path": "ContractIDPreimageFromAddress.salt",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.create_contract_v2.constructor_args",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "CreateContractArgsV2.constructorArgs",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.invoke_host_function.auth",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "InvokeHostFunctionOp.auth",
+              "carrier": "auth"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.source_account",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAuthorizationEntry.credentials",
+              "carrier": "source"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.address.address",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAddressCredentials.address",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 8
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.address.nonce",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAddressCredentials.nonce",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 6
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.address.signature_expiration_ledger",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAddressCredentials.signatureExpirationLedger",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.address.signature",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAddressCredentials.signature",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 26
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.credentials.address_with_delegates.delegates",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAddressCredentialsWithDelegates.delegates",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "auth.root_invocation",
+      "registry": "partial",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "SorobanAuthorizationEntry.rootInvocation",
+              "carrier": "address"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "SorobanAuthorizedInvocation.function",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 4
+        },
+        {
+          "fields": [
+            {
+              "path": "SorobanAuthorizedInvocation.subInvocations",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.extend_footprint_ttl.extend_to",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "ExtendFootprintTTLOp.extendTo",
+              "carrier": null
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 5
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    },
+    {
+      "row": "op.restore_footprint",
+      "registry": "yes",
+      "measured": "yes",
+      "sites": [
+        {
+          "fields": [
+            {
+              "path": "LedgerFootprint.readOnly",
+              "carrier": "restore"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 2
+        },
+        {
+          "fields": [
+            {
+              "path": "LedgerFootprint.readWrite",
+              "carrier": "restore"
+            }
+          ],
+          "values": "every value",
+          "validated": true,
+          "attempts": 3
+        }
+      ],
+      "agrees": true,
+      "settled_by": null
+    }
+  ]
+}

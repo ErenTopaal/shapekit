@@ -35,6 +35,21 @@ pub fn all_carriers() -> Result<BTreeMap<&'static str, Vec<Carrier>>> {
     Ok(out)
 }
 
+/// The directory a world's chain is recorded in: `<chains>/<family>.<chain>/<network>`.
+pub fn chain_dir(chains: &Path, kind: WorldKind) -> std::path::PathBuf {
+    chains
+        .join(format!("{}.{}", crate::witness::FAMILY, kind.chain()))
+        .join("testnet")
+}
+
+fn finish(w: World, kind: WorldKind, chains: Option<&Path>) -> Result<()> {
+    match chains {
+        Some(dir) => w.finish(&chain_dir(dir, kind)),
+        // dropping the world stops its node
+        None => Ok(()),
+    }
+}
+
 /// The fields `only` selects (struct names or `Struct.field` paths), all when empty.
 pub fn selected(schema: &Schema, only: &[String]) -> Result<Vec<Field>> {
     let fields = envelope_fields(schema)?;
@@ -55,6 +70,7 @@ pub fn run(
     fields: &[Field],
     config: impl Fn(u32) -> NodeConfig,
     workdir: &Path,
+    chains: Option<&Path>,
     mut progress: impl FnMut(&FieldRun),
 ) -> Result<Vec<FieldRun>> {
     let schema = Schema::pinned();
@@ -82,8 +98,10 @@ pub fn run(
     let mut current: Option<(WorldKind, World)> = None;
     for (fi, ci, c) in jobs {
         if current.as_ref().is_none_or(|(k, _)| *k != c.world) {
-            // the previous world is done; dropping it stops its node
-            drop(current.take());
+            // the previous world is done: its chain is recorded, or the node just stopped
+            if let Some((k, w)) = current.take() {
+                finish(w, k, chains)?;
+            }
             let dir = workdir.join(format!("{:?}", c.world).to_ascii_lowercase());
             std::fs::create_dir_all(&dir)?;
             let w = World::start(c.world, config(c.world.protocol()), &dir)
@@ -97,7 +115,9 @@ pub fn run(
         progress(&r);
         runs.insert((fi, ci), r);
     }
-    drop(current);
+    if let Some((k, w)) = current.take() {
+        finish(w, k, chains)?;
+    }
     let mut out = Vec::with_capacity(fields.len());
     let mut it = runs.into_iter().peekable();
     while let Some(((fi, _), first)) = it.next() {

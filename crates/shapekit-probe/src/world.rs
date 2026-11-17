@@ -31,6 +31,10 @@ const BANKS: usize = 1;
 
 const BANK_BALANCE: i64 = 1_000_000_000_000_000;
 
+/// Ledgers per history archive checkpoint (`HistoryManager::getCheckpointFrequency`, 64 when
+/// not accelerated).
+const CHECKPOINT_FREQUENCY: u32 = 64;
+
 /// Starting balance of every attempt account, 1,000 XLM.
 pub const BALANCE: i64 = 10_000_000_000;
 
@@ -185,7 +189,24 @@ impl World {
         if let Some(writer) = writer {
             w.contracts = Some(w.deploy_contracts(deployer, delegate, &writer)?);
         }
+        // the first attempt comes after a checkpoint, so an indexer can start the recorded
+        // chain from the history archive and ingest every attempt's ledger from the lake
+        let checkpoint = w.driver.last_closed() | (CHECKPOINT_FREQUENCY - 1);
+        while w.driver.last_closed() < checkpoint {
+            w.driver.close_empty()?;
+        }
         Ok(w)
+    }
+
+    /// Stops the node and writes the chain it closed to `target` in the committed form: the
+    /// canonical ledgers as a SEP-54 lake, the history archive as a tar, and chain.json.
+    pub fn finish(self, target: &Path) -> Result<()> {
+        self.driver
+            .finish(target)
+            .with_context(|| format!("recording the chain to {}", target.display()))?;
+        shapekit_pack::pack_chain(target, shapekit_pack::Layout::default())
+            .with_context(|| format!("packing the chain in {}", target.display()))?;
+        Ok(())
     }
 
     fn deploy_contracts(

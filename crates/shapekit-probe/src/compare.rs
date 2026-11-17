@@ -543,13 +543,65 @@ fn differ(attempts: &[&ProbeAttempt]) -> bool {
 }
 
 /// One row of the comparison.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Compared {
+    /// The `registry/fields.toml` row id.
     pub row: String,
+    /// What the row says: `yes`, `partial` or `no`.
     pub registry: String,
-    /// `validated` or `not-validated` per site, in the row's order.
-    pub sites: Vec<(String, bool, usize)>,
+    /// What the probe measured, in the row's words: `yes` when every site is validated, `no`
+    /// when none is, `partial` when some are.
+    pub measured: String,
+    /// Each site and what core answered there, in the row's order.
+    pub sites: Vec<SiteVerdict>,
     pub agrees: bool,
-    pub resolved: Option<&'static str>,
+    /// The source reading that settles a disagreement, when one does.
+    pub settled_by: Option<String>,
+}
+
+/// One place a row's question was put to core.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct SiteVerdict {
+    /// The struct fields and carriers whose attempts answer it; several for a row that
+    /// compares the base transactions of several carriers.
+    pub fields: Vec<SiteField>,
+    /// Which of the attempts count: `every value`, `values named "<text>"`, `values not named
+    /// "<text>"` or `the base transactions`.
+    pub values: String,
+    /// Whether those attempts end in more than one way.
+    pub validated: bool,
+    pub attempts: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct SiteField {
+    /// The `validation.json` path.
+    pub path: String,
+    /// The carrier, absent for every carrier of the path.
+    pub carrier: Option<String>,
+}
+
+/// `registry/generated/field-verdicts.json`.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct FieldVerdicts {
+    pub schema_version: u32,
+    pub rows: Vec<Compared>,
+}
+
+fn site_field(s: &Site) -> SiteField {
+    SiteField {
+        path: s.path.to_owned(),
+        carrier: (!s.carrier.is_empty()).then(|| s.carrier.to_owned()),
+    }
+}
+
+fn values(s: &Site) -> String {
+    match (s.bases, s.only, s.except) {
+        (true, _, _) => "the base transactions".into(),
+        (false, Some(o), _) => format!("values named \"{o}\""),
+        (false, None, Some(x)) => format!("values not named \"{x}\""),
+        (false, None, None) => "every value".into(),
+    }
 }
 
 /// Compares every row of `fields` with the table.
@@ -601,38 +653,54 @@ pub fn compare(table: &ValidationTable, fields: &toml::Table) -> Result<Vec<Comp
                 p.len(),
                 label(s)
             );
-            measured.push((label(s), differ(&p), p.len()));
+            measured.push(SiteVerdict {
+                fields: vec![site_field(s)],
+                values: values(s),
+                validated: differ(&p),
+                attempts: p.len(),
+            });
         }
         if !pooled.is_empty() {
             ensure!(
                 measured.is_empty() && pooled.len() >= 2,
                 "{id}: a row compares bases only, two or more"
             );
-            let names: Vec<String> = ss.iter().map(label).collect();
             // bases of different envelope types succeed under different codes (a fee bump's
             // is tx_fee_bump_inner_success), so they compare by whether core applied them
             let mut ends: Vec<_> = pooled.iter().map(|a| (a.submission, a.applied)).collect();
             ends.sort();
             ends.dedup();
-            measured.push((
-                format!("the bases of {}", names.join(", ")),
-                ends.len() > 1,
-                pooled.len(),
-            ));
+            measured.push(SiteVerdict {
+                fields: ss.iter().map(site_field).collect(),
+                values: "the base transactions".into(),
+                validated: ends.len() > 1,
+                attempts: pooled.len(),
+            });
         }
+        let all = measured.iter().all(|m| m.validated);
+        let none = !measured.iter().any(|m| m.validated);
         let agrees = match said {
-            "yes" => measured.iter().all(|m| m.1),
-            "no" => measured.iter().all(|m| !m.1),
-            "partial" => measured.iter().any(|m| m.1),
+            "yes" => all,
+            "no" => none,
+            "partial" => !none,
             other => bail!("{id}: validated_by_core {other:?}"),
         };
-        let resolved = resolutions.iter().find(|x| x.row == id).map(|x| x.reading);
+        let settled_by = resolutions
+            .iter()
+            .find(|x| x.row == id)
+            .map(|x| x.reading.to_owned());
         out.push(Compared {
             row: id.to_owned(),
             registry: said.to_owned(),
+            measured: match (all, none) {
+                (true, _) => "yes",
+                (_, true) => "no",
+                _ => "partial",
+            }
+            .to_owned(),
             sites: measured,
             agrees,
-            resolved,
+            settled_by,
         });
     }
     for id in sites.keys() {

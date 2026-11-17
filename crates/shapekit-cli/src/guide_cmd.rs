@@ -203,7 +203,7 @@ fn measured_rows(args: &GuideArgs) -> Result<Vec<shapekit_guide::MeasuredRow>> {
         .map(|c| shapekit_guide::MeasuredRow {
             row: c.row,
             agrees: c.agrees,
-            settled: c.resolved.is_some(),
+            settled: c.settled_by.is_some(),
         })
         .collect())
 }
