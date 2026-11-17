@@ -120,6 +120,28 @@ fn verify(a: VerifyArgs) -> Result<bool> {
 
 #[derive(clap::Subcommand)]
 pub enum TwinCommand {
+    /// `twin coverage` for a recipe IR file whose committed chain is outside
+    /// corpus/chains (candidate chains): record it under both passphrases on the twin the
+    /// way `explore record` committed it, check the canonical hashes against the committed
+    /// chain directory, and write the same outputs as `twin coverage`.
+    CoverageIr {
+        /// The recipe IR file.
+        #[arg(long)]
+        ir: PathBuf,
+        /// The committed chain directory (holding `testnet/` and `mainnet/`).
+        #[arg(long)]
+        committed: PathBuf,
+        /// How the chain is named as a witness, `chain:<...>`.
+        #[arg(long)]
+        label: String,
+        #[arg(long, default_value = "pins.toml")]
+        pins: PathBuf,
+        #[arg(long, default_value = "twin/pins.toml")]
+        twin_pins: PathBuf,
+        /// Output directory; must not exist.
+        #[arg(long)]
+        out: PathBuf,
+    },
     /// How many of the `ordinary` unknown ranges (the explorer's targets) a set of runs
     /// reaches: `twin coverage` output directories or `explore gates` run counts.
     Targets {
@@ -271,6 +293,14 @@ pub enum TwinCommand {
 
 pub fn run(command: TwinCommand) -> Result<bool> {
     match command {
+        TwinCommand::CoverageIr {
+            ir,
+            committed,
+            label,
+            pins,
+            twin_pins,
+            out,
+        } => coverage_ir(&ir, &committed, &label, &pins, &twin_pins, &out),
         TwinCommand::Targets { unknown, counts } => targets(&unknown, &counts),
         TwinCommand::GateWitnesses {
             chain_dirs,
@@ -856,10 +886,18 @@ fn gate_witnesses(
                 summary.chains.len()
             );
         };
-        let protocol: u32 = chain
-            .rsplit_once(".p")
-            .and_then(|(_, n)| n.parse().ok())
-            .with_context(|| format!("{chain} names no protocol"))?;
+        // `twin coverage-ir` writes the protocol beside chains whose id
+        // does not end in .p<N>
+        let protocol: u32 = match std::fs::read_to_string(d.join("protocol")) {
+            Ok(t) => t
+                .trim()
+                .parse()
+                .with_context(|| format!("{} holds no protocol", d.join("protocol").display()))?,
+            Err(_) => chain
+                .rsplit_once(".p")
+                .and_then(|(_, n)| n.parse().ok())
+                .with_context(|| format!("{chain} names no protocol"))?,
+        };
         chains.push((
             chain.clone(),
             protocol,
@@ -1003,5 +1041,83 @@ fn targets(unknown: &Path, counts: &[PathBuf]) -> Result<bool> {
         targets.len(),
         runs.len()
     );
+    Ok(true)
+}
+
+fn coverage_ir(
+    ir_path: &Path,
+    committed: &Path,
+    label: &str,
+    pins_path: &Path,
+    twin_pins: &Path,
+    out: &Path,
+) -> Result<bool> {
+    use shapekit_gen::recipe::Network;
+    use shapekit_gen::recipe::ir_run::IrRecipe;
+    use shapekit_twin::coverage as cov;
+
+    if !label.starts_with("chain:") {
+        bail!("--label must be a chain: reference");
+    }
+    if out.exists() {
+        bail!("{} already exists", out.display());
+    }
+    let mut twin = twin_image(twin_pins)?;
+    let profiles = out.join("profiles");
+    std::fs::create_dir_all(&profiles)?;
+    let profiles = profiles.canonicalize()?;
+    twin.profile_dir = Some(profiles.clone());
+    let root = std::env::current_dir()?;
+    let ir = IrRecipe::load(ir_path, &root)?;
+    let work = out.join("work");
+    std::fs::create_dir_all(&work)?;
+    for n in Network::BOTH {
+        let target = out.join("chain").join(n.name());
+        let started = std::time::Instant::now();
+        let (hash, _) = shapekit_explore::verify::record_into(&ir, n, &twin, &work, &target)
+            .with_context(|| {
+                format!("recording {} ({}) on the twin", ir_path.display(), n.name())
+            })?;
+        let file = committed.join(n.name()).join("chain.json");
+        let v: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(&file).with_context(|| format!("reading {}", file.display()))?,
+        )?;
+        if v["canonical_stream_sha256"].as_str() != Some(hash.as_str()) {
+            bail!(
+                "the twin's chain ({}) differs from {} ({}); its coverage would not describe the committed chain",
+                n.name(),
+                file.display(),
+                v["canonical_stream_sha256"]
+            );
+        }
+        println!(
+            "{} ({}) on the twin in {:.1}s, canonical stream {hash}, equal to the committed chain",
+            ir_path.display(),
+            n.name(),
+            started.elapsed().as_secs_f64()
+        );
+    }
+    std::fs::remove_dir_all(&work)?;
+    std::fs::remove_dir_all(out.join("chain"))?;
+    let export = cov::merge_and_export(&twin, &profiles)?;
+    let (counts, branches) = cov::read_export_with_branches(&export)?;
+    std::fs::remove_file(&export)?;
+    for e in std::fs::read_dir(&profiles)? {
+        let e = e?;
+        if e.file_name().to_string_lossy().ends_with(".profraw") {
+            std::fs::remove_file(e.path())?;
+        }
+    }
+    cov::write_counts(&out.join("counts.json"), &counts)?;
+    cov::write_branches(&out.join("branches.json"), &branches)?;
+    // the chain id need not end in .p<N>, so the protocol is kept beside it
+    std::fs::write(out.join("protocol"), format!("{}\n", ir.ir().protocol))?;
+    let mut core = pinned_core(pins_path)?;
+    core.image = Some(cov::image_ref(&twin));
+    let summary = cov::summary(&counts, core, vec![label.to_owned()], &[]);
+    shapekit_contracts::write(&out.join("core-coverage.json"), &summary)?;
+    let reached: u64 = summary.files.iter().map(|f| f.regions_reached).sum();
+    let missed: u64 = summary.files.iter().map(|f| f.regions_unreached).sum();
+    println!("{label}: {reached} of {} regions reached", reached + missed);
     Ok(true)
 }
