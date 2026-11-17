@@ -216,6 +216,93 @@ fn own_count(gate: &Gate, run: &GateRun, refs: &BTreeMap<(RunKind, u32), &GateRu
     at(run).saturating_sub(base.map_or(0, |b| at(b)))
 }
 
+/// One run that executed a gate call where the comparison takes the side.
+#[derive(Debug, Clone, Serialize)]
+pub struct SideRun {
+    /// `<recipe>@p<N>` or `empty-ledgers@p<N>`.
+    pub run: String,
+    pub kind: RunKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipe: Option<String>,
+    pub protocol: u32,
+    /// Executions of the call's innermost region in this run.
+    pub count: u64,
+    /// The same in the run it is measured against: the padded empty chain for a recipe, the
+    /// genesis-only node for the padded chain.
+    pub reference_count: u64,
+}
+
+/// The runs that witness one side of one gate.
+#[derive(Debug, Clone, Serialize)]
+pub struct SideWitnesses {
+    pub file: String,
+    pub line: u32,
+    pub column: u32,
+    pub branch: Branch,
+    pub runs: Vec<SideRun>,
+}
+
+/// `explore-gate-sides.json`: the gate sides recipe runs on the twin witness. An input for
+/// the gate list, which a side here never downgrades.
+#[derive(Debug, Clone, Serialize)]
+pub struct GateSides {
+    pub schema_version: u32,
+    pub core: shapekit_contracts::CoreRef,
+    /// Twin image the runs were recorded on, as docker names it.
+    pub twin_image: String,
+    pub protocols: Vec<u32>,
+    pub recipes: Vec<String>,
+    /// Every side with at least one witnessing run, in gate list order.
+    pub sides: Vec<SideWitnesses>,
+    /// Per gate version N, recipes whose answers differ between their runs at N-1 and N.
+    pub differences: Vec<GateDifference>,
+}
+
+/// The witnessing runs of every gate side.
+pub fn side_witnesses(list: &GateList, runs: &[GateRun]) -> Vec<SideWitnesses> {
+    let refs: BTreeMap<(RunKind, u32), &GateRun> = runs
+        .iter()
+        .filter(|r| r.kind != RunKind::Recipe)
+        .map(|r| ((r.kind, r.protocol), r))
+        .collect();
+    let mut out = Vec::new();
+    for gate in &list.gates {
+        for branch in [Branch::True, Branch::False] {
+            let at =
+                |r: &GateRun| count_at(&r.counts, &gate.file, gate.line, gate.column).unwrap_or(0);
+            let mut side_runs: Vec<SideRun> = runs
+                .iter()
+                .filter(|r| r.kind != RunKind::Genesis && takes(gate, branch, r.protocol))
+                .filter_map(|r| {
+                    let own = own_count(gate, r, &refs);
+                    (own > 0).then(|| {
+                        let count = at(r);
+                        SideRun {
+                            run: r.name(),
+                            kind: r.kind,
+                            recipe: r.recipe.clone(),
+                            protocol: r.protocol,
+                            count,
+                            reference_count: count - own,
+                        }
+                    })
+                })
+                .collect();
+            side_runs.sort_by(|a, b| a.run.cmp(&b.run));
+            if !side_runs.is_empty() {
+                out.push(SideWitnesses {
+                    file: gate.file.clone(),
+                    line: gate.line,
+                    column: gate.column,
+                    branch,
+                    runs: side_runs,
+                });
+            }
+        }
+    }
+    out
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct GateDifference {
     pub file: String,

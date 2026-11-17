@@ -70,9 +70,10 @@ pub enum ExploreCommand {
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
-    /// Witness both sides of core's protocol gates: every recipe on the coverage twin at
-    /// every protocol, beside empty reference chains, and write the gate list with each
-    /// side's status and the output difference each gate's version makes.
+    /// Witness sides of core's protocol gates: every recipe on the coverage twin at every
+    /// protocol, beside empty reference chains. Writes `explore-gate-sides.json` (each
+    /// witnessed side with its runs, counts and reference counts, and the output difference
+    /// each gate's version makes), an input to the gate list; the gate list is not rewritten.
     Gates {
         /// The gate list `shapekit twin gates` wrote, all sides open.
         #[arg(long)]
@@ -668,28 +669,37 @@ fn gates_cmd(
         }
     });
     let runs = gates::load_all(&runs_dir)?;
+    let sides = gates::side_witnesses(&list, &runs);
+    // the counts below describe what these runs alone show; the gate list itself is written
+    // by `twin gates` and its owner, which take this file as one input
     let (summary, diffs) = gates::statuses(&mut list, &runs);
+    let file = gates::GateSides {
+        schema_version: 1,
+        core: list.core.clone(),
+        twin_image: twin.reference(),
+        protocols: protocols.clone(),
+        recipes: recipes.iter().map(|(n, _)| n.clone()).collect(),
+        sides,
+        differences: diffs,
+    };
     std::fs::write(
-        out.join("gates.json"),
-        serde_json::to_string_pretty(&list)? + "\n",
-    )?;
-    std::fs::write(
-        out.join("differences.json"),
-        serde_json::to_string_pretty(&diffs)? + "\n",
+        out.join("explore-gate-sides.json"),
+        serde_json::to_string_pretty(&file)? + "\n",
     )?;
     std::fs::write(
         out.join("summary.json"),
         serde_json::to_string_pretty(&summary)? + "\n",
     )?;
     println!(
-        "{} gates, {} sides: {} met, {} unmeetable, {} open ({} of them at calls the coverage mapping has no region for); {} gates show an output difference between N-1 and N",
+        "{} gates, {} sides; these runs alone: {} sides witnessed, {} no protocol takes, {} not shown ({} of them at calls the coverage mapping has no region for); {} gates show an output difference between N-1 and N; sides written to {}",
         summary.gates,
         summary.sides,
         summary.met,
         summary.unmeetable,
         summary.open,
         summary.open_unmeasured,
-        summary.gates_with_difference
+        summary.gates_with_difference,
+        out.join("explore-gate-sides.json").display()
     );
     let failures = failures
         .into_inner()
