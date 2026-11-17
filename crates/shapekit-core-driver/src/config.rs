@@ -252,6 +252,9 @@ pub struct NodeConfig {
     /// extension with the Soroban write fee (`LedgerCloseMetaFrame::setNetworkConfiguration`,
     /// v30.0.0). Off by default in core and for recorded chains.
     pub emit_ledger_close_meta_ext_v1: bool,
+    /// `EMIT_SOROBAN_TRANSACTION_META_EXT_V1`: Soroban transaction meta carries the extension
+    /// with the transaction's fee breakdown. Off by default in core and for recorded chains.
+    pub emit_soroban_transaction_meta_ext_v1: bool,
     /// Docker resource limits of the node's containers. They bound how much of the host a
     /// node may take and never change what it writes.
     pub limits: ContainerLimits,
@@ -378,6 +381,9 @@ impl NodeConfig {
         if self.emit_ledger_close_meta_ext_v1 {
             line("EMIT_LEDGER_CLOSE_META_EXT_V1=true".into());
         }
+        if self.emit_soroban_transaction_meta_ext_v1 {
+            line("EMIT_SOROBAN_TRANSACTION_META_EXT_V1=true".into());
+        }
         line(format!(
             "BACKFILL_STELLAR_ASSET_EVENTS={}",
             self.backfill_stellar_asset_events
@@ -464,6 +470,7 @@ mod tests {
             min_persistent_ttl: None,
             invariant_checks: false,
             emit_ledger_close_meta_ext_v1: false,
+            emit_soroban_transaction_meta_ext_v1: false,
             limits: ContainerLimits::default(),
         }
     }
@@ -477,6 +484,22 @@ mod tests {
             c.render()
                 .unwrap()
                 .contains("\nINVARIANT_CHECKS=[\".*\"]\n")
+        );
+    }
+
+    #[test]
+    fn soroban_transaction_meta_ext_v1_renders_only_when_asked() {
+        let mut c = sample("Test SDF Network ; September 2015");
+        assert!(
+            !c.render()
+                .unwrap()
+                .contains("EMIT_SOROBAN_TRANSACTION_META_EXT_V1")
+        );
+        c.emit_soroban_transaction_meta_ext_v1 = true;
+        assert!(
+            c.render()
+                .unwrap()
+                .contains("\nEMIT_SOROBAN_TRANSACTION_META_EXT_V1=true\n")
         );
     }
 

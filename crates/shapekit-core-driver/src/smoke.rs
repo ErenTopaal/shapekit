@@ -65,6 +65,7 @@ pub fn node_config(passphrase: &str, image: CoreImage) -> NodeConfig {
         min_persistent_ttl: None,
         invariant_checks: false,
         emit_ledger_close_meta_ext_v1: false,
+        emit_soroban_transaction_meta_ext_v1: false,
         limits: Default::default(),
     }
 }

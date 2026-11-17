@@ -116,6 +116,11 @@ pub trait Recipe: Send + Sync {
     fn emit_ledger_close_meta_ext_v1(&self) -> bool {
         false
     }
+    /// `EMIT_SOROBAN_TRANSACTION_META_EXT_V1`: Soroban transaction meta carries the extension
+    /// with the fee breakdown. Off by default, as in core.
+    fn emit_soroban_transaction_meta_ext_v1(&self) -> bool {
+        false
+    }
     fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()>;
 }
 

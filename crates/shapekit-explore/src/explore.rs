@@ -170,6 +170,7 @@ fn one(env: &Env<'_>, opts: &Options, state: &Mutex<State>, rng: &mut Rng, n: us
                     min_persistent_ttl: (opts.contracts && rng.chance(1, 3)).then_some(10),
                     // the close meta extension exists from protocol 20
                     emit_ledger_close_meta_ext_v1: protocol >= 20 && rng.chance(1, 4),
+                    emit_soroban_transaction_meta_ext_v1: false,
                 },
                 prefix: Vec::new(),
                 actions: opts.actions,

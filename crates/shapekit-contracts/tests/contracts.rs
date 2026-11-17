@@ -12,7 +12,9 @@ use shapekit_contracts::core_coverage::{FileCoverage, Region, RegionClass};
 use shapekit_contracts::gates::{Branch, Comparison, Gate, GateSide};
 use shapekit_contracts::limits::{Limit, LimitRejection};
 use shapekit_contracts::obligations::Obligation;
-use shapekit_contracts::recipe_ir::{NodeOptions, Outcome, Selection, Step, SymRef, TxExpect};
+use shapekit_contracts::recipe_ir::{
+    AuthSpec, Footprint, NodeOptions, Outcome, ResourceOverride, Selection, Step, SymRef, TxExpect,
+};
 use shapekit_contracts::validation::{
     ApplyStatus, FieldVerdict, ProbeAttempt, SubmitStatus, Verdict,
 };
@@ -520,6 +522,8 @@ fn recipe() -> RecipeIr {
                 args: vec![json!({"address": "@muxed:alice:7"})],
                 auth: Default::default(),
                 resources: None,
+                simulate: true,
+                footprint: None,
                 expect: TxExpect::default(),
             },
             Step::Close {
@@ -868,8 +872,6 @@ fn outcomes_compare_within_a_carrier() {
 
 #[test]
 fn soroban_auth_modes_and_footprint_steps() {
-    use shapekit_contracts::recipe_ir::{AuthSpec, ResourceOverride};
-    use std::collections::BTreeMap;
     let mut r = recipe();
     // the invoke at step 10 gets hand-written entries and resource overrides
     if let Step::Invoke {
@@ -898,8 +900,11 @@ fn soroban_auth_modes_and_footprint_steps() {
                 allow_non_root: true,
                 address_v2: true,
                 signers: BTreeMap::from([("alice".into(), vec![]), ("bob".into(), vec!["alice".into()])]),
+                delegates: BTreeMap::new(),
             },
             resources: None,
+            simulate: true,
+            footprint: None,
             expect: TxExpect::default(),
         },
     );
@@ -947,6 +952,7 @@ fn soroban_auth_modes_and_footprint_steps() {
             allow_non_root: false,
             address_v2: false,
             signers: BTreeMap::from([("carol".into(), vec![])]),
+            delegates: BTreeMap::new(),
         };
     }
     has_problem(&bad, "role carol is used before a fund step");
@@ -1106,6 +1112,9 @@ fn committed_recipes_round_trip_unchanged() {
             assert_eq!(back, r, "{}", item.path().display());
             assert_eq!(render(&back), written, "{}", item.path().display());
             assert!(!written.contains("emit_ledger_close_meta_ext_v1"));
+            assert!(!written.contains("emit_soroban_transaction_meta_ext_v1"));
+            assert!(!written.contains("\"simulate\""));
+            assert!(!written.contains("\"delegates\""));
             n += 1;
         }
     }
@@ -1129,6 +1138,8 @@ fn a_contract_reference_names_a_deploy_or_a_creating_host_function() {
         function,
         auth: Default::default(),
         resources: None,
+        simulate: true,
+        footprint: None,
         expect: TxExpect::default(),
     };
     let calling = |contract: &str| Step::Invoke {
@@ -1139,6 +1150,8 @@ fn a_contract_reference_names_a_deploy_or_a_creating_host_function() {
         args: vec![],
         auth: Default::default(),
         resources: None,
+        simulate: true,
+        footprint: None,
         expect: TxExpect::default(),
     };
     let with = |steps: Vec<Step>| {
@@ -1163,5 +1176,166 @@ fn a_contract_reference_names_a_deploy_or_a_creating_host_function() {
     has_problem(
         &with(vec![host("uploaded", upload), calling("uploaded")]),
         "uploaded is not a deploy step or a host-function step that creates a contract",
+    );
+}
+
+#[test]
+fn soroban_transaction_meta_ext_v1_is_written_only_when_set() {
+    let mut r = recipe();
+    assert!(!render(&r).contains("emit_soroban_transaction_meta_ext_v1"));
+    r.node.emit_soroban_transaction_meta_ext_v1 = true;
+    holds(&r);
+    assert!(render(&r).contains("\"emit_soroban_transaction_meta_ext_v1\": true"));
+}
+
+/// The recipe with `step` inserted before its last two steps.
+fn recipe_with(step: Step) -> RecipeIr {
+    let mut r = recipe();
+    let at = r.steps.len() - 2;
+    r.steps.insert(at, step);
+    r
+}
+
+fn invoke(
+    simulate: bool,
+    footprint: Option<Footprint>,
+    resources: Option<ResourceOverride>,
+    auth: AuthSpec,
+) -> Step {
+    Step::Invoke {
+        label: None,
+        source: "bob".into(),
+        contract: "echo-1".into(),
+        function: "echo".into(),
+        args: vec![json!({"u32": 7})],
+        auth,
+        resources,
+        simulate,
+        footprint,
+        expect: TxExpect::default(),
+    }
+}
+
+fn full_resources() -> ResourceOverride {
+    ResourceOverride {
+        instructions: Some(1),
+        disk_read_bytes: Some(0),
+        write_bytes: Some(0),
+        resource_fee: Some(100),
+    }
+}
+
+fn footprint() -> Footprint {
+    Footprint {
+        read_only: vec![
+            json!({"contract_data": {"contract": "@contract:echo-1", "key": "ledger_key_contract_instance", "durability": "persistent"}}),
+        ],
+        read_write: vec![],
+    }
+}
+
+#[test]
+fn a_step_that_does_not_simulate_says_its_footprint_and_every_resource() {
+    let ok = recipe_with(invoke(
+        false,
+        Some(footprint()),
+        Some(full_resources()),
+        AuthSpec::Source,
+    ));
+    holds(&ok);
+    assert!(render(&ok).contains("\"simulate\": false"));
+    // simulate: true is the default and is not written
+    let simulated = recipe_with(invoke(true, None, None, AuthSpec::Source));
+    holds(&simulated);
+    assert!(!render(&simulated).contains("\"simulate\""));
+
+    has_problem(
+        &recipe_with(invoke(
+            false,
+            None,
+            Some(full_resources()),
+            AuthSpec::Source,
+        )),
+        "simulate: false needs an explicit footprint",
+    );
+    let partial = ResourceOverride {
+        resource_fee: None,
+        ..full_resources()
+    };
+    has_problem(
+        &recipe_with(invoke(
+            false,
+            Some(footprint()),
+            Some(partial),
+            AuthSpec::Source,
+        )),
+        "needs instructions, disk_read_bytes, write_bytes and resource_fee",
+    );
+    has_problem(
+        &recipe_with(invoke(false, Some(footprint()), None, AuthSpec::Source)),
+        "needs instructions, disk_read_bytes, write_bytes and resource_fee",
+    );
+    has_problem(
+        &recipe_with(invoke(true, Some(footprint()), None, AuthSpec::Source)),
+        "a footprint is only written with simulate: false",
+    );
+    let record = AuthSpec::Record {
+        allow_non_root: false,
+        address_v2: false,
+        signers: BTreeMap::new(),
+        delegates: BTreeMap::new(),
+    };
+    has_problem(
+        &recipe_with(invoke(
+            false,
+            Some(footprint()),
+            Some(full_resources()),
+            record,
+        )),
+        "auth mode record writes its entries by simulation",
+    );
+    // the same rules hold on a host-function step
+    let host = Step::HostFunction {
+        label: None,
+        source: "bob".into(),
+        function: json!({"upload_contract_wasm": "00"}),
+        auth: AuthSpec::Source,
+        resources: None,
+        simulate: false,
+        footprint: None,
+        expect: TxExpect::default(),
+    };
+    has_problem(
+        &recipe_with(host),
+        "simulate: false needs an explicit footprint",
+    );
+}
+
+#[test]
+fn record_mode_delegates_name_existing_roles() {
+    let with = |delegates: BTreeMap<String, Vec<String>>| {
+        recipe_with(invoke(
+            true,
+            None,
+            None,
+            AuthSpec::Record {
+                allow_non_root: false,
+                address_v2: false,
+                signers: BTreeMap::from([("bob".into(), vec![])]),
+                delegates,
+            },
+        ))
+    };
+    let ok = with(BTreeMap::from([("bob".into(), vec!["alice".into()])]));
+    holds(&ok);
+    assert!(render(&ok).contains("\"delegates\""));
+    assert!(!render(&with(BTreeMap::new())).contains("\"delegates\""));
+    has_problem(
+        &with(BTreeMap::from([("bob".into(), vec!["carol".into()])])),
+        "role carol is used before a fund step",
+    );
+    has_problem(
+        &with(BTreeMap::from([("carol".into(), vec!["alice".into()])])),
+        "role carol is used before a fund step",
     );
 }

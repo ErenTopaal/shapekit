@@ -31,6 +31,16 @@
               "description": "Record entries for authorizations that are not at the root of the call tree.",
               "type": "boolean"
             },
+            "delegates": {
+              "additionalProperties": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "description": "The role whose address appears in an entry, mapped to the roles that sign as its\ndelegates. A role with a non-empty list gets `address_with_delegates` credentials.",
+              "type": "object"
+            },
             "mode": {
               "const": "record",
               "type": "string"
@@ -112,6 +122,25 @@
       ],
       "type": "object"
     },
+    "Footprint": {
+      "additionalProperties": false,
+      "description": "A Soroban transaction's footprint, written out instead of simulated.",
+      "properties": {
+        "read_only": {
+          "default": [],
+          "description": "XDR-JSON `LedgerKey` values.",
+          "items": true,
+          "type": "array"
+        },
+        "read_write": {
+          "default": [],
+          "description": "XDR-JSON `LedgerKey` values.",
+          "items": true,
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "NodeOptions": {
       "additionalProperties": false,
       "description": "How the standalone core is configured before the first step.",
@@ -128,6 +157,10 @@
         },
         "emit_ledger_close_meta_ext_v1": {
           "description": "`EMIT_LEDGER_CLOSE_META_EXT_V1`: core writes `LedgerCloseMetaExt` v1 only with it, and\ncore v30.0.0 leaves it off.",
+          "type": "boolean"
+        },
+        "emit_soroban_transaction_meta_ext_v1": {
+          "description": "`EMIT_SOROBAN_TRANSACTION_META_EXT_V1`: core writes `SorobanTransactionMetaExt` v1 only\nwith it, and core v30.0.0 leaves it off.",
           "type": "boolean"
         },
         "min_persistent_ttl": {
@@ -596,6 +629,17 @@
                 "outcome": "success"
               }
             },
+            "footprint": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Footprint"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The footprint, required with `simulate: false` and refused otherwise."
+            },
             "function": {
               "type": "string"
             },
@@ -614,7 +658,11 @@
                   "type": "null"
                 }
               ],
-              "description": "Replaces simulated resource values."
+              "description": "Replaces simulated resource values; with `simulate: false`, every value."
+            },
+            "simulate": {
+              "description": "Simulate to find the footprint and resources. With `false` the transaction is\nbuilt from `footprint` and `resources` alone, so core sees exactly what the recipe\nsays, for example too few instructions for the call.",
+              "type": "boolean"
             },
             "source": {
               "type": "string"
@@ -645,6 +693,16 @@
                 "outcome": "success"
               }
             },
+            "footprint": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Footprint"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "function": {
               "description": "XDR-JSON `HostFunction`."
             },
@@ -663,6 +721,10 @@
                   "type": "null"
                 }
               ]
+            },
+            "simulate": {
+              "description": "As for `invoke`.",
+              "type": "boolean"
             },
             "source": {
               "type": "string"

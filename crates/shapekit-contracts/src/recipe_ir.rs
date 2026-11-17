@@ -77,10 +77,18 @@ pub struct NodeOptions {
     /// core v30.0.0 leaves it off.
     #[serde(default, skip_serializing_if = "is_false")]
     pub emit_ledger_close_meta_ext_v1: bool,
+    /// `EMIT_SOROBAN_TRANSACTION_META_EXT_V1`: core writes `SorobanTransactionMetaExt` v1 only
+    /// with it, and core v30.0.0 leaves it off.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub emit_soroban_transaction_meta_ext_v1: bool,
 }
 
 fn is_false(b: &bool) -> bool {
     !*b
+}
+
+fn is_true(b: &bool) -> bool {
+    *b
 }
 
 fn yes() -> bool {
@@ -96,6 +104,7 @@ impl Default for NodeOptions {
             emit_classic_events: true,
             backfill_stellar_asset_events: true,
             emit_ledger_close_meta_ext_v1: false,
+            emit_soroban_transaction_meta_ext_v1: false,
         }
     }
 }
@@ -207,9 +216,17 @@ pub enum Step {
         /// How the call is authorized; the source account alone when absent.
         #[serde(default, skip_serializing_if = "AuthSpec::is_source")]
         auth: AuthSpec,
-        /// Replaces simulated resource values.
+        /// Replaces simulated resource values; with `simulate: false`, every value.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         resources: Option<ResourceOverride>,
+        /// Simulate to find the footprint and resources. With `false` the transaction is
+        /// built from `footprint` and `resources` alone, so core sees exactly what the recipe
+        /// says, for example too few instructions for the call.
+        #[serde(default = "yes", skip_serializing_if = "is_true")]
+        simulate: bool,
+        /// The footprint, required with `simulate: false` and refused otherwise.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        footprint: Option<Footprint>,
         #[serde(default)]
         expect: TxExpect,
     },
@@ -225,6 +242,11 @@ pub enum Step {
         auth: AuthSpec,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         resources: Option<ResourceOverride>,
+        /// As for `invoke`.
+        #[serde(default = "yes", skip_serializing_if = "is_true")]
+        simulate: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        footprint: Option<Footprint>,
         #[serde(default)]
         expect: TxExpect,
     },
@@ -310,6 +332,10 @@ pub enum AuthSpec {
         /// an empty list means the role itself.
         #[serde(default)]
         signers: BTreeMap<String, Vec<String>>,
+        /// The role whose address appears in an entry, mapped to the roles that sign as its
+        /// delegates. A role with a non-empty list gets `address_with_delegates` credentials.
+        #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+        delegates: BTreeMap<String, Vec<String>>,
     },
     /// The entries as written, simulated in enforce mode.
     Entries {
@@ -325,6 +351,18 @@ impl AuthSpec {
     pub fn is_source(&self) -> bool {
         *self == AuthSpec::Source
     }
+}
+
+/// A Soroban transaction's footprint, written out instead of simulated.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct Footprint {
+    /// XDR-JSON `LedgerKey` values.
+    #[serde(default)]
+    pub read_only: Vec<Value>,
+    /// XDR-JSON `LedgerKey` values.
+    #[serde(default)]
+    pub read_write: Vec<Value>,
 }
 
 /// Resource values that replace what simulation found.
@@ -575,8 +613,10 @@ impl Checker<'_> {
     fn auth(&mut self, at: &str, auth: &AuthSpec) {
         match auth {
             AuthSpec::Source => {}
-            AuthSpec::Record { signers, .. } => {
-                for (role, by) in signers {
+            AuthSpec::Record {
+                signers, delegates, ..
+            } => {
+                for (role, by) in signers.iter().chain(delegates) {
                     self.role(at, role, false);
                     for s in by {
                         self.role(at, s, false);
@@ -593,6 +633,50 @@ impl Checker<'_> {
                 }
                 self.values(at, entries);
             }
+        }
+    }
+
+    /// A step that does not simulate must say everything simulation would have found.
+    fn unsimulated(
+        &mut self,
+        at: &str,
+        simulate: bool,
+        footprint: Option<&Footprint>,
+        r: Option<&ResourceOverride>,
+        auth: &AuthSpec,
+    ) {
+        if simulate {
+            if footprint.is_some() {
+                self.out.push(format!(
+                    "{at}: a footprint is only written with simulate: false; simulation finds it otherwise"
+                ));
+            }
+            return;
+        }
+        match footprint {
+            None => self
+                .out
+                .push(format!("{at}: simulate: false needs an explicit footprint")),
+            Some(f) => {
+                self.values(at, &f.read_only);
+                self.values(at, &f.read_write);
+            }
+        }
+        let full = r.is_some_and(|r| {
+            r.instructions.is_some()
+                && r.disk_read_bytes.is_some()
+                && r.write_bytes.is_some()
+                && r.resource_fee.is_some()
+        });
+        if !full {
+            self.out.push(format!(
+                "{at}: simulate: false needs instructions, disk_read_bytes, write_bytes and resource_fee in resources"
+            ));
+        }
+        if matches!(auth, AuthSpec::Record { .. }) {
+            self.out.push(format!(
+                "{at}: auth mode record writes its entries by simulation, so it needs simulate: true"
+            ));
         }
     }
 
@@ -839,11 +923,14 @@ impl Contract for RecipeIr {
                     args,
                     auth,
                     resources,
+                    simulate,
+                    footprint,
                     expect,
                 } => {
                     c.role(&at, source, false);
                     c.auth(&at, auth);
                     c.resources(&at, resources.as_ref());
+                    c.unsimulated(&at, *simulate, footprint.as_ref(), resources.as_ref(), auth);
                     match SymRef::parse(contract) {
                         Some(_) => c.values(&at, [&Value::String(contract.clone())]),
                         None => {
@@ -871,12 +958,15 @@ impl Contract for RecipeIr {
                     function,
                     auth,
                     resources,
+                    simulate,
+                    footprint,
                     expect,
                 } => {
                     c.role(&at, source, false);
                     c.values(&at, [function]);
                     c.auth(&at, auth);
                     c.resources(&at, resources.as_ref());
+                    c.unsimulated(&at, *simulate, footprint.as_ref(), resources.as_ref(), auth);
                     c.define(
                         &at,
                         i,

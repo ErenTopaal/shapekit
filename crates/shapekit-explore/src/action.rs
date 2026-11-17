@@ -427,6 +427,7 @@ pub fn invoke(
             allow_non_root: rng.chance(1, 2),
             address_v2: world.protocol >= 27 && rng.chance(1, 2),
             signers: named.iter().map(|r| (r.clone(), Vec::new())).collect(),
+            delegates: Default::default(),
         }
     } else {
         AuthSpec::Source
@@ -459,6 +460,8 @@ pub fn invoke(
         args,
         auth,
         resources,
+        simulate: true,
+        footprint: None,
         expect: TxExpect::default(),
     })
 }
@@ -498,6 +501,8 @@ pub fn host_function(
         function,
         auth: AuthSpec::Source,
         resources: None,
+        simulate: true,
+        footprint: None,
         expect: TxExpect::default(),
     }
 }
