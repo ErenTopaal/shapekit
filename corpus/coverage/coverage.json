@@ -22310,90 +22310,6 @@
       "xdr_path": "BeginSponsoringFutureReservesOp.sponsoredID"
     },
     {
-      "core_emitted_entries": 9,
-      "entries": [
-        "cap33.sponsorship.p30-revoke-hash-x-signer-sponsorship-envelope",
-        "cap33.sponsorship.p30-revoke-signer-sponsorship-envelope",
-        "cap33.sponsorship.p30-revoke-trustline-sponsorship-envelope",
-        "cap40.signed-payload-signer.p28-revoke-sponsorship-payload-64-envelope",
-        "cap40.signed-payload-signer.p30-revoke-sponsorship-payload-64-envelope",
-        "classic.failed-tx.p30-revoke-does-not-exist",
-        "classic.failed-tx.p30-revoke-low-reserve",
-        "classic.failed-tx.p30-revoke-not-sponsor",
-        "classic.failed-tx.p30-revoke-only-transferable"
-      ],
-      "entries_by_source_class": {
-        "local-core": 9
-      },
-      "id": "op.revoke_sponsorship",
-      "validated_by_core": "partial",
-      "xdr_path": "RevokeSponsorshipOp.ledgerKey | RevokeSponsorshipOp.signer"
-    },
-    {
-      "core_emitted_entries": 21,
-      "entries": [
-        "cap73.sac-trust.p28-trust-again",
-        "cap73.sac-trust.p28-trust-envelope",
-        "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
-        "cap73.sac-trust.p30-trust-again",
-        "cap73.sac-trust.p30-trust-envelope",
-        "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
-        "cap85.executable-tag.p30-contract-deploys-external-ref-envelope",
-        "cap85.executable-tag.p30-echo-executable-tag-value-envelope",
-        "cap85.executable-tag.p30-publish-executable-tag",
-        "cap85.executable-tag.p30-update-to-external-ref-envelope",
-        "sep41.muxed-addresses.p28-credit-mint-to-muxed",
-        "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
-        "sep41.muxed-addresses.p28-xlm-transfer-to-muxed",
-        "sep41.muxed-addresses.p30-credit-mint-to-muxed",
-        "sep41.muxed-addresses.p30-credit-transfer-to-muxed",
-        "sep41.muxed-addresses.p30-xlm-transfer-to-muxed",
-        "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
-        "soroban.invoke-basics.p30-failed-events-discarded-envelope",
-        "soroban.invoke-basics.p30-failed-trapped-envelope",
-        "soroban.invoke-basics.p30-invoke-restored-contract-envelope",
-        "soroban.invoke-basics.p30-invoke-temporary-entry-envelope"
-      ],
-      "entries_by_source_class": {
-        "local-core": 21
-      },
-      "id": "op.invoke_host_function.invoke_contract.contract_address",
-      "validated_by_core": "partial",
-      "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.contractAddress"
-    },
-    {
-      "core_emitted_entries": 21,
-      "entries": [
-        "cap73.sac-trust.p28-trust-again",
-        "cap73.sac-trust.p28-trust-envelope",
-        "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
-        "cap73.sac-trust.p30-trust-again",
-        "cap73.sac-trust.p30-trust-envelope",
-        "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
-        "cap85.executable-tag.p30-contract-deploys-external-ref-envelope",
-        "cap85.executable-tag.p30-echo-executable-tag-value-envelope",
-        "cap85.executable-tag.p30-publish-executable-tag",
-        "cap85.executable-tag.p30-update-to-external-ref-envelope",
-        "sep41.muxed-addresses.p28-credit-mint-to-muxed",
-        "sep41.muxed-addresses.p28-credit-transfer-to-muxed",
-        "sep41.muxed-addresses.p28-xlm-transfer-to-muxed",
-        "sep41.muxed-addresses.p30-credit-mint-to-muxed",
-        "sep41.muxed-addresses.p30-credit-transfer-to-muxed",
-        "sep41.muxed-addresses.p30-xlm-transfer-to-muxed",
-        "soroban.invoke-basics.p30-contract-deploys-with-constructor-envelope",
-        "soroban.invoke-basics.p30-failed-events-discarded-envelope",
-        "soroban.invoke-basics.p30-failed-trapped-envelope",
-        "soroban.invoke-basics.p30-invoke-restored-contract-envelope",
-        "soroban.invoke-basics.p30-invoke-temporary-entry-envelope"
-      ],
-      "entries_by_source_class": {
-        "local-core": 21
-      },
-      "id": "op.invoke_host_function.invoke_contract.function_name",
-      "validated_by_core": "partial",
-      "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.functionName"
-    },
-    {
       "core_emitted_entries": 40,
       "entries": [
         "cap67.unified-events.p30-sac-issuer-transfer-to-muxed-contract",
@@ -22465,49 +22381,6 @@
       "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.args"
     },
     {
-      "core_emitted_entries": 1,
-      "entries": [
-        "soroban.invoke-basics.p30-upload-wasm"
-      ],
-      "entries_by_source_class": {
-        "local-core": 1
-      },
-      "id": "op.invoke_host_function.upload_wasm",
-      "validated_by_core": "partial",
-      "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM).wasm"
-    },
-    {
-      "core_emitted_entries": 8,
-      "entries": [
-        "cap73.sac-trust.p28-deploy-credit-sac-envelope",
-        "cap73.sac-trust.p28-deploy-xlm-sac-envelope",
-        "cap73.sac-trust.p30-deploy-credit-sac-envelope",
-        "cap73.sac-trust.p30-deploy-xlm-sac-envelope",
-        "cap85.executable-tag.p30-create-external-ref-envelope",
-        "cap85.executable-tag.p30-create-external-ref-missing-tag",
-        "soroban.invoke-basics.p30-create-contract-v1-envelope",
-        "soroban.invoke-basics.p30-create-contract-v2-constructor-envelope"
-      ],
-      "entries_by_source_class": {
-        "local-core": 8
-      },
-      "id": "op.invoke_host_function.create_contract.preimage",
-      "validated_by_core": "partial",
-      "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage"
-    },
-    {
-      "core_emitted_entries": 1,
-      "entries": [
-        "soroban.invoke-basics.p30-create-contract-v2-constructor-envelope"
-      ],
-      "entries_by_source_class": {
-        "local-core": 1
-      },
-      "id": "op.invoke_host_function.create_contract_v2.constructor_args",
-      "validated_by_core": "partial",
-      "xdr_path": "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).createContractV2.constructorArgs"
-    },
-    {
       "core_emitted_entries": 19,
       "entries": [
         "cap71.credentials.p30-address-v2",
@@ -22541,21 +22414,6 @@
       "id": "op.invoke_host_function.auth",
       "validated_by_core": "partial",
       "xdr_path": "InvokeHostFunctionOp.auth"
-    },
-    {
-      "core_emitted_entries": 4,
-      "entries": [
-        "soroban.auth-trees.p30-source-account-credentials",
-        "soroban.auth-trees.p30-unmatched-create-claimable-balance-deployer",
-        "soroban.auth-trees.p30-unmatched-create-failed-tx",
-        "soroban.auth-trees.p30-unmatched-create-success"
-      ],
-      "entries_by_source_class": {
-        "local-core": 4
-      },
-      "id": "auth.credentials.source_account",
-      "validated_by_core": "partial",
-      "xdr_path": "SorobanAuthorizationEntry.credentials(SOROBAN_CREDENTIALS_SOURCE_ACCOUNT)"
     },
     {
       "core_emitted_entries": 13,
@@ -22780,8 +22638,8 @@
       "testnet-history": 3
     },
     "families": 39,
-    "fields_not_fully_validated": 36,
-    "fields_not_fully_validated_exercised": 36,
+    "fields_not_fully_validated": 29,
+    "fields_not_fully_validated_exercised": 29,
     "fragments": 322,
     "fragments_covered": 312,
     "fragments_uncovered": 10
@@ -22963,7 +22821,7 @@
         "probe.envelope-fields.alphanum4-assetcode-2",
         "probe.envelope-fields.operation-body-merge-5"
       ],
-      "candidate_entry_count": 8,
+      "candidate_entry_count": 12,
       "standing": "confirmed-by-refusal",
       "subject": "arm PaymentResult:malformed"
     },

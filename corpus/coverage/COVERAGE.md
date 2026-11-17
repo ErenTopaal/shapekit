@@ -19,7 +19,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | Arms uncovered | 63 |
 | Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
 | Family fragments covered | 312 of 322 in 39 families |
-| Fields core does not fully validate, exercised | 36 of 36 |
+| Fields core does not fully validate, exercised | 29 of 29 |
 
 ## Blockers
 
@@ -870,7 +870,7 @@ Records of `registry/uncovered.toml` that entries of `candidate/manifest.json` s
 | arm OperationResult:op_not_supported | `refused-before-ledger` | confirmed-by-refusal | 2 (`probe.envelope-fields.operation-body-merge-12`, `probe.envelope-fields.operation-body-payment-10`) |
 | arm PathPaymentStrictReceiveResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 11 (`probe.envelope-fields.operation-body-merge-6`, `probe.envelope-fields.operation-body-payment-3`, `probe.envelope-fields.pathpaymentstrictreceiveop-destamount-1`) |
 | arm PathPaymentStrictSendResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 11 (`probe.envelope-fields.operation-body-merge-16`, `probe.envelope-fields.operation-body-payment-14`, `probe.envelope-fields.pathpaymentstrictsendop-destasset-1`) |
-| arm PaymentResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 8 (`probe.envelope-fields.alphanum12-assetcode-2`, `probe.envelope-fields.alphanum4-assetcode-2`, `probe.envelope-fields.operation-body-merge-5`) |
+| arm PaymentResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 12 (`probe.envelope-fields.alphanum12-assetcode-2`, `probe.envelope-fields.alphanum4-assetcode-2`, `probe.envelope-fields.operation-body-merge-5`) |
 | arm RestoreFootprintResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 1 (`probe.envelope-fields.operation-body-invoke-27`) |
 | arm RevokeSponsorshipResult:malformed | `refused-before-ledger` | confirmed-by-refusal | 12 (`probe.envelope-fields.ledgerkeydata-dataname-1`, `probe.envelope-fields.ledgerkeydata-dataname-3`, `probe.envelope-fields.ledgerkeyliquiditypool-liquiditypoolid-0`) |
 | arm SetOptionsResult:bad_signer | `refused-before-ledger` | confirmed-by-refusal | 3 (`probe.envelope-fields.setoptionsop-signer-3`, `probe.envelope-fields.signer-key-5`, `probe.envelope-fields.signer-weight-2`) |
@@ -915,15 +915,8 @@ Records of `registry/uncovered.toml` that entries of `candidate/manifest.json` s
 | `op.create_claimable_balance.claimants.destination` | `CreateClaimableBalanceOp.claimants[].v0.destination` | partial | 8 | 7 | local-core 7, synthetic 1 |
 | `op.clawback.from.mux_id` | `ClawbackOp.from(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 2 | 2 | local-core 2 |
 | `op.begin_sponsoring.sponsored_id` | `BeginSponsoringFutureReservesOp.sponsoredID` | partial | 5 | 5 | local-core 5 |
-| `op.revoke_sponsorship` | `RevokeSponsorshipOp.ledgerKey \| RevokeSponsorshipOp.signer` | partial | 9 | 9 | local-core 9 |
-| `op.invoke_host_function.invoke_contract.contract_address` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.contractAddress` | partial | 21 | 21 | local-core 21 |
-| `op.invoke_host_function.invoke_contract.function_name` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.functionName` | partial | 21 | 21 | local-core 21 |
 | `op.invoke_host_function.invoke_contract.args` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.args` | partial | 59 | 40 | local-core 40, synthetic 19 |
-| `op.invoke_host_function.upload_wasm` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_UPLOAD_CONTRACT_WASM).wasm` | partial | 1 | 1 | local-core 1 |
-| `op.invoke_host_function.create_contract.preimage` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT\|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage` | partial | 8 | 8 | local-core 8 |
-| `op.invoke_host_function.create_contract_v2.constructor_args` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).createContractV2.constructorArgs` | partial | 1 | 1 | local-core 1 |
 | `op.invoke_host_function.auth` | `InvokeHostFunctionOp.auth` | partial | 22 | 19 | local-core 19, local-core-refused 1, synthetic 2 |
-| `auth.credentials.source_account` | `SorobanAuthorizationEntry.credentials(SOROBAN_CREDENTIALS_SOURCE_ACCOUNT)` | partial | 4 | 4 | local-core 4 |
 | `auth.credentials.address.address` | `SorobanAddressCredentials.address` | partial | 14 | 13 | local-core 13, local-core-refused 1 |
 | `auth.credentials.address.nonce` | `SorobanAddressCredentials.nonce` | partial | 14 | 13 | local-core 13, local-core-refused 1 |
 | `auth.credentials.address.signature_expiration_ledger` | `SorobanAddressCredentials.signatureExpirationLedger` | partial | 14 | 13 | local-core 13, local-core-refused 1 |
