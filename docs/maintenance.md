@@ -106,7 +106,13 @@ outputs under `target/acceptance/`. It stops at the first failing check and name
 - Quick mode, `scripts/acceptance.sh`, is the gate for every change: formatting, clippy and
   the workspace tests; the registry, the corpus and candidate manifests, the contract schemas,
   coverage, the guide, golden agreement and the committed chains; the current version of each
-  SDK over the corpus; the findings record; and the em dash check.
+  SDK over the corpus; the findings record; the em dash check; and
+  `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
+  directory, a scratch or worktree directory name, a private or tailnet address, the build
+  machine's name, or a name from the pattern file. That file names people, so it is not
+  tracked: the script reads `info/text-patterns` in the clone's git directory, or the file
+  `SHAPEKIT_TEXT_PATTERNS` names, one perl regex per line, and stops with exit status 2 when
+  neither exists.
 - Full mode, `scripts/acceptance.sh --full`, runs quick mode and then what the nightly tier
   runs: `shapekit pins verify` against the live sources, every SDK version and the upstream
   sightings (`conformance reproduce`), the wallet-backend reproductions table, the linter on

@@ -75,6 +75,7 @@ for sdk in rust go js; do
 done
 step "$shapekit" findings check
 step scripts/check-no-em-dash.sh
+step scripts/check-public-text.sh
 
 if [ "$mode" = quick ]; then
   trap - ERR

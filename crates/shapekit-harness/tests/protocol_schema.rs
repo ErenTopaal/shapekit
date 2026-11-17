@@ -45,10 +45,10 @@ fn harness_requests_follow_the_schema() {
         protocol: 28,
         delivery: Delivery {
             mode: DeliveryMode::Rpc,
-            rpc_url: "http://192.168.64.1:41000/rpc".into(),
-            archive_url: "http://192.168.64.1:41000/archive".into(),
+            rpc_url: "http://192.0.2.1:41000/rpc".into(),
+            archive_url: "http://192.0.2.1:41000/archive".into(),
             lake: Lake {
-                url: "http://192.168.64.1:41000/ledgers".into(),
+                url: "http://192.0.2.1:41000/ledgers".into(),
                 path: "/corpus/chains/x/testnet/ledgers".into(),
                 ledgers_per_batch: 1,
                 batches_per_partition: 64000,
