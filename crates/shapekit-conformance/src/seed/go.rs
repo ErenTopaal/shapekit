@@ -302,12 +302,16 @@ pub fn check(ctx: &Context) -> Result<Report> {
     std::fs::write(
         &hook,
         format!(
-            "#!/bin/sh\nexec '{}' conformance seed-go-exec --root '{}' --manifest '{}' --versions-file '{}' --known-failures '{}' --setup '{}'\n",
+            "#!/bin/sh\nexec '{}' conformance seed-go-exec --root '{}' --manifest '{}' --versions-file '{}' --known-failures '{}'{} --setup '{}'\n",
             ctx.exe.display(),
             ctx.paths.root.display(),
             ctx.paths.manifest.display(),
             ctx.paths.versions.display(),
             ctx.paths.known_dir.display(),
+            ctx.lane_args()
+                .iter()
+                .map(|a| format!(" '{a}'"))
+                .collect::<String>(),
             setup_file.display()
         ),
     )?;
@@ -408,6 +412,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
         counts: counts(&faults),
         faults,
         real_faults: Vec::new(),
+        lane: None,
     })
 }
 

@@ -1,117 +1,134 @@
 # Seeded faults
 
-Written by `shapekit conformance seed-check`. Each sdk's mutation tool seeds faults into the sdk's encoding and helper code; a sample of them is run against the corpus. A fault is caught when the corpus run on the faulty build differs from the run on the unmodified build.
+Written by `shapekit conformance seed-check`. Each sdk's mutation tool seeds faults into the sdk's encoding and helper code; a sample of them is run against the corpus, and where a candidate lane is named, against those candidate entries too. A fault is caught when the run on the faulty build differs from the run on the unmodified build.
 
-| sdk | version | tool | faults generated | sampled | caught | timed out | missed | did not build | caught of those that built |
-|---|---|---|---|---|---|---|---|---|---|
-| rust | 30.0.0 | cargo-mutants 27.1.0 | 11776 | 40 | 7 | 0 | 31 | 2 | 7 of 38 (18.4%) |
-| go | v0.9.0 | go-mutesting v2.3.1 | 1924 | 100 | 12 | 0 | 64 | 24 | 12 of 76 (15.8%) |
-| js | 17.4.0 | stryker 10.1.1 | 16456 | 100 | 35 | 0 | 65 | 0 | 35 of 100 (35.0%) |
+| sdk | version | tool | faults generated | sampled | caught | timed out | missed | did not build | caught by the corpus alone | caught with the candidate lane |
+|---|---|---|---|---|---|---|---|---|---|---|
+| rust | 30.0.0 | cargo-mutants 27.1.0 | 11776 | 40 | 7 | 0 | 31 | 2 | 7 of 38 (18.4%) | no lane run |
+| go | v0.9.0 | go-mutesting v2.3.1 | 1924 | 100 | 12 | 0 | 64 | 24 | 12 of 76 (15.8%) | no lane run |
+| js | 17.4.0 | stryker 10.1.1 | 16456 | 100 | 45 | 0 | 55 | 0 | 35 of 100 (35.0%) | 45 of 100 (45.0%) |
 
-## Missed in rust 30.0.0
+js 17.4.0: the candidate lane was 3869 entries of candidate/manifest.json flagged format-vector.
 
-| file | line | mutation |
-|---|---|---|
-| src/generated.rs | 1729 | delete field max_length from struct schemars::schema::StringValidation expression in <impl schemars::JsonSchema for BytesM<MAX>>::json_schema |
-| src/generated/account_flags.rs | 96 | replace <impl Name for AccountFlags>::name -> &'static str with "" |
-| src/generated/allow_trust_result_code.rs | 76 | replace < with == |
-| src/generated/asset.rs | 101 | replace <impl Name for Asset>::name -> &'static str with "" |
-| src/generated/claimant.rs | 65 | replace Claimant::name -> &'static str with "" |
-| src/generated/clawback_result.rs | 73 | replace < with > |
-| src/generated/const/ledger_key_contract_code.rs | 11 | replace LedgerKeyContractCode::const_xdr_len -> usize with 1 |
-| src/generated/const/ledger_key_liquidity_pool.rs | 30 | replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N] |
-| src/generated/const/node_id.rs | 30 | replace NodeId::const_to_xdr -> [u8; N] with [0; N] |
-| src/generated/const/operation_result.rs | 100 | replace < with == in ConstWriter<'_>::write_type_vec_operation_result |
-| src/generated/const/revoke_sponsorship_result_code.rs | 11 | replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1 |
-| src/generated/const/signer.rs | 76 | replace < with > in ConstWriter<'_>::write_type_vec_signer |
-| src/generated/const/time_sliced_survey_response_message.rs | 20 | replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0 |
-| src/generated/const/transaction_history_entry.rs | 54 | replace ConstWriter<'_>::write_type_transaction_history_entry with () |
-| src/generated/curve25519_public.rs | 42 | replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(()) |
-| src/generated/encoded_ledger_key.rs | 107 | replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1]) |
-| src/generated/extend_footprint_ttl_result_code.rs | 72 | replace ExtendFootprintTtlResultCode::name -> &'static str with "" |
-| src/generated/host_function.rs | 56 | replace < with > |
-| src/generated/ledger_entry_changes.rs | 72 | replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default() |
-| src/generated/ledger_header_flags.rs | 54 | replace += with -= |
-| src/generated/revoke_sponsorship_result_code.rs | 127 | delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from |
-| src/generated/sc_spec_event_param_location_v0.rs | 126 | replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(()) |
-| src/generated/soroban_transaction_meta_ext.rs | 81 | replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()] |
-| src/generated/survey_message_command_type.rs | 37 | replace += with -= |
-| src/generated/transaction_ext.rs | 55 | replace < with > |
-| src/generated/transaction_result_ext.rs | 52 | replace < with <= |
-| src/generated/transaction_result_set.rs | 42 | replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(()) |
-| src/generated/type_enum.rs | 1472 | replace += with -= |
-| src/generated/type_enum.rs | 3216 | delete match arm "CryptoKeyType" in <impl core::str::FromStr for TypeVariant>::from_str |
-| src/generated/upgrade_type.rs | 87 | replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default()) |
-| src/transaction_conversions.rs | 76 | replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default() |
+## Why the corpus alone misses a fault
 
-## Missed in go v0.9.0
+Every fault the corpus alone misses is classified in `conformance/seed-check/classes/<sdk>.json`:
 
-| file | line | mutation |
-|---|---|---|
-| strkey/main.go | 118 | if len(raw) < 3 { -> if len(raw) < 4 { |
-| strkey/main.go | 64 | const maxEncodedSize = (maxRawSize*8 + 4) / 5 // (8n+4)/5 is the EncodedLen for no padding -> const maxEncodedSize = (maxRawSize*8 + 3) / 5 // (8n+4)/5 is the EncodedLen for no padding |
-| strkey/muxed_account.go | 65 | raw = append(raw, b.Bytes()...) -> _, _, _ = raw, raw, b.Bytes |
-| strkey/muxed_contract.go | 50 | binary.BigEndian.PutUint64(raw[32:], m.id) -> _, _, _ = binary.BigEndian.PutUint64, raw, m.id |
-| strkey/muxed_contract.go | 50 | binary.BigEndian.PutUint64(raw[32:], m.id) -> binary.BigEndian.PutUint64(raw[33:], m.id) |
-| xdr/account_entry.go | 44 | if account.Ext.V1 != nil && account.Ext.V1.Ext.V2 != nil { -> if account.Ext.V1 != nil && true { |
-| xdr/account_flags.go | 18 | return (accountFlags & AccountFlagsAuthImmutableFlag) != 0 -> return (accountFlags \| AccountFlagsAuthImmutableFlag) != 0 |
-| xdr/account_id.go | 101 | return nil ->  |
-| xdr/account_id.go | 14 | panic(err) -> _ = err |
-| xdr/account_thresholds.go | 8 | return t[1] -> return t[0] |
-| xdr/asset.go | 153 | if len(parts) != 2 { -> if len(parts) != 3 { |
-| xdr/asset.go | 193 | case length >= 1 && length <= 4: -> case length >= 0 && length <= 4: |
-| xdr/asset.go | 193 | case length >= 1 && length <= 4: -> case length >= 1 && length <= 5: |
-| xdr/asset.go | 231 | case length >= 1 && length <= 4: -> case length >= 1 && length <= 5: |
-| xdr/asset.go | 234 | copy(bytecode[:], byteArray[0:length]) -> _, _, _ = bytecode, byteArray, length |
-| xdr/asset.go | 249 | a.MustExtract(&t, &c, &i) -> _, _, _, _ = a.MustExtract, t, c, i |
-| xdr/asset.go | 393 | panic(fmt.Errorf("Cannot transform type %v to Asset", a.Type)) -> _, _ = fmt.Errorf, a.Type |
-| xdr/asset.go | 481 | return [32]byte{}, err -> _ = err |
-| xdr/asset.go | 59 | case length >= 5 && length <= 12: -> case length >= 6 && length <= 12: |
-| xdr/claimable_balance_id.go | 56 | return fmt.Errorf("invalid claimable balance id type: %v", payload[0]) -> return fmt.Errorf("invalid claimable balance id type: %v", payload[1]) |
-| xdr/db.go | 37 | return errors.New("Invalid value for xdr.AssetType") -> _ = errors.New |
-| xdr/db.go | 68 | return errors.New("Invalid value for xdr.Int64") -> _ = errors.New |
-| xdr/decorated_signature.go | 31 | hint[i] ^= keyHint[i] -> hint[i] = keyHint[i] |
-| xdr/go_string.go | 157 | sb.WriteString(fmt.Sprintf("InflationDest: xdr.MustAddressPtr(%#v),", s.InflationDest.Address())) -> _, _, _ = sb.WriteString, fmt.Sprintf, s.InflationDest.Address |
-| xdr/go_string.go | 250 | sb.WriteString("(unknown)") -> _ = sb.WriteString |
-| xdr/hash.go | 13 | for i := 0; i < len(s); i++ { -> for i := -1; i < len(s); i++ { |
-| xdr/json.go | 138 | parts[i] = converted -> _, _, _ = parts, i, converted |
-| xdr/json.go | 162 | payload.AbsBeforeEpoch = &absBeforeEpoch -> _, _ = payload.AbsBeforeEpoch, absBeforeEpoch |
-| xdr/json.go | 175 | return nil, err -> _ = err |
-| xdr/json.go | 64 | return &iso8601Time{time.Unix(epoch, 0).UTC()} -> return &iso8601Time{time.Unix(epoch, 1).UTC()} |
-| xdr/ledger_close_meta_batch.go | 33 | lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-1].LedgerSequence() -> lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-0].LedgerSequence() |
-| xdr/ledger_close_meta_view.go | 160 | return 0, err -> _ = err |
-| xdr/ledger_entry.go | 106 | if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == 1 { |
-| xdr/ledger_entry.go | 106 | if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == -1 { |
-| xdr/ledger_entry.go | 170 | return key, err -> _, _ = key, err |
-| xdr/ledger_entry.go | 44 | Selling: 0, -> Selling: 1, |
-| xdr/ledger_entry.go | 50 | accountEntry.Ext.V1.Ext.V = 2 -> _ = accountEntry.Ext.V1.Ext.V |
-| xdr/ledger_entry.go | 88 | if trustLineEntry.Ext.V == 0 { -> if trustLineEntry.Ext.V == 1 { |
-| xdr/ledger_entry.go | 93 | Selling: 0, -> Selling: 1, |
-| xdr/ledger_key.go | 111 | *key = nkey -> _, _ = key, nkey |
-| xdr/ledger_key.go | 122 | return err -> _ = err |
-| xdr/ledger_key.go | 171 | *key = nkey -> _, _ = key, nkey |
-| xdr/ledger_key.go | 35 | return l.AccountId.Equals(r.AccountId) && l.Asset.Equals(r.Asset) -> return true && l.Asset.Equals(r.Asset) |
-| xdr/ledger_key.go | 72 | *key = nkey -> _, _ = key, nkey |
-| xdr/main.go | 200 | return nil, err -> _ = err |
-| xdr/main.go | 88 | options.MaxInputLen = hex.DecodedLen(len(data)) -> _, _, _ = options.MaxInputLen, hex.DecodedLen, data |
-| xdr/muxed_account.go | 118 | return "", nil ->  |
-| xdr/muxed_account.go | 72 | case 69: -> case 68: |
-| xdr/muxed_account.go | 79 | if err = muxed.Id.UnmarshalBinary(raw[32:]); err != nil { -> if err = muxed.Id.UnmarshalBinary(raw[31:]); err != nil { |
-| xdr/muxed_account.go | 82 | *m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed |
-| xdr/muxed_account_view.go | 16 | // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. _ = v.MustEd2... -> _ = // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. v.MustEd2... |
-| xdr/operation_trace_result.go | 16 | operationTraceDescription = o.PaymentResult.Code.String() -> _, _ = operationTraceDescription, o.PaymentResult.Code.String |
-| xdr/path_payment_result.go | 33 | return 0 ->  |
-| xdr/price.go | 85 | return fmt.Errorf("price denominator cannot be 0: %d/%d", p.N, p.D) -> _, _, _ = fmt.Errorf, p.N, p.D |
-| xdr/price.go | 87 | if p.N < 0 \|\| p.D < 0 { -> if p.N < 0 \|\| false { |
-| xdr/signer_key.go | 151 | *skey, err = NewSignerKey(keytype, signer) -> _, _, _, _, _ = skey, err, NewSignerKey, keytype, signer |
-| xdr/stellar_value.go | 73 | return 0, fmt.Errorf("close time out of range: %d", uint64(t)) -> return 1, fmt.Errorf("close time out of range: %d", uint64(t)) |
-| xdr/stellar_value.go | 75 | return int64(t) * 1000, nil //nolint:gosec // bounded above -> return int64(t) * 999, nil //nolint:gosec // bounded above |
-| xdr/transaction_envelope.go | 119 | return nil ->  |
-| xdr/transaction_meta.go | 42 | return nil, nil ->  |
-| xdr/trust_line_asset.go | 41 | panic(err) -> _ = err |
-| xdr/trust_line_asset.go | 69 | return err -> _ = err |
-| xdr/view_validate.go | 14 | return viewErrTrailingBytes(uint32(n), len(v)-n) //nolint:gosec // view offsets are uint32 throughout -> return viewErrTrailingBytes(uint32(n), len(v)+n) //nolint:gosec // view offsets are uint32 throughout |
-| xdr/xdrstream.go | 270 | return err -> _ = err |
+- `equivalent`: no input can tell it from the unmodified sdk
+- `outside-the-ops`: the code is on no path a testee op takes
+- `corpus-gap`: a testee op reaches it, but no corpus entry does
+- `other`: none of the above
+
+| sdk | version | equivalent | outside-the-ops | corpus-gap | other | unclassified | of which the candidate lane catches |
+|---|---|---|---|---|---|---|---|
+| rust | 30.0.0 | 0 | 0 | 0 | 0 | 31 | 0 |
+| go | v0.9.0 | 0 | 0 | 0 | 0 | 64 | 0 |
+| js | 17.4.0 | 5 | 40 | 13 | 7 | 0 | 10 |
+
+## Missed by the corpus alone in rust 30.0.0
+
+| file | line | mutation | class | why | candidate lane |
+|---|---|---|---|---|---|
+| src/generated.rs | 1729 | delete field max_length from struct schemars::schema::StringValidation expression in <impl schemars::JsonSchema for BytesM<MAX>>::json_schema | unclassified |  | not run |
+| src/generated/account_flags.rs | 96 | replace <impl Name for AccountFlags>::name -> &'static str with "" | unclassified |  | not run |
+| src/generated/allow_trust_result_code.rs | 76 | replace < with == | unclassified |  | not run |
+| src/generated/asset.rs | 101 | replace <impl Name for Asset>::name -> &'static str with "" | unclassified |  | not run |
+| src/generated/claimant.rs | 65 | replace Claimant::name -> &'static str with "" | unclassified |  | not run |
+| src/generated/clawback_result.rs | 73 | replace < with > | unclassified |  | not run |
+| src/generated/const/ledger_key_contract_code.rs | 11 | replace LedgerKeyContractCode::const_xdr_len -> usize with 1 | unclassified |  | not run |
+| src/generated/const/ledger_key_liquidity_pool.rs | 30 | replace LedgerKeyLiquidityPool::const_to_xdr -> [u8; N] with [1; N] | unclassified |  | not run |
+| src/generated/const/node_id.rs | 30 | replace NodeId::const_to_xdr -> [u8; N] with [0; N] | unclassified |  | not run |
+| src/generated/const/operation_result.rs | 100 | replace < with == in ConstWriter<'_>::write_type_vec_operation_result | unclassified |  | not run |
+| src/generated/const/revoke_sponsorship_result_code.rs | 11 | replace RevokeSponsorshipResultCode::const_xdr_len -> usize with 1 | unclassified |  | not run |
+| src/generated/const/signer.rs | 76 | replace < with > in ConstWriter<'_>::write_type_vec_signer | unclassified |  | not run |
+| src/generated/const/time_sliced_survey_response_message.rs | 20 | replace TimeSlicedSurveyResponseMessage::const_xdr_len -> usize with 0 | unclassified |  | not run |
+| src/generated/const/transaction_history_entry.rs | 54 | replace ConstWriter<'_>::write_type_transaction_history_entry with () | unclassified |  | not run |
+| src/generated/curve25519_public.rs | 42 | replace <impl WriteXdr for Curve25519Public>::write_xdr -> Result<(), Error> with Ok(()) | unclassified |  | not run |
+| src/generated/encoded_ledger_key.rs | 107 | replace <impl AsRef<[u8]> for EncodedLedgerKey>::as_ref -> &[u8] with Vec::leak(vec![1]) | unclassified |  | not run |
+| src/generated/extend_footprint_ttl_result_code.rs | 72 | replace ExtendFootprintTtlResultCode::name -> &'static str with "" | unclassified |  | not run |
+| src/generated/host_function.rs | 56 | replace < with > | unclassified |  | not run |
+| src/generated/ledger_entry_changes.rs | 72 | replace <impl From<LedgerEntryChanges> for Vec<LedgerEntryChange>>::from -> Self with Default::default() | unclassified |  | not run |
+| src/generated/ledger_header_flags.rs | 54 | replace += with -= | unclassified |  | not run |
+| src/generated/revoke_sponsorship_result_code.rs | 127 | delete match arm -5 in <impl TryFrom<i32> for RevokeSponsorshipResultCode>::try_from | unclassified |  | not run |
+| src/generated/sc_spec_event_param_location_v0.rs | 126 | replace <impl WriteXdr for ScSpecEventParamLocationV0>::write_xdr -> Result<(), Error> with Ok(()) | unclassified |  | not run |
+| src/generated/soroban_transaction_meta_ext.rs | 81 | replace SorobanTransactionMetaExt::variants -> [i32; Self::_VARIANTS.len()] with [-1; Self::_VARIANTS.len()] | unclassified |  | not run |
+| src/generated/survey_message_command_type.rs | 37 | replace += with -= | unclassified |  | not run |
+| src/generated/transaction_ext.rs | 55 | replace < with > | unclassified |  | not run |
+| src/generated/transaction_result_ext.rs | 52 | replace < with <= | unclassified |  | not run |
+| src/generated/transaction_result_set.rs | 42 | replace <impl WriteXdr for TransactionResultSet>::write_xdr -> Result<(), Error> with Ok(()) | unclassified |  | not run |
+| src/generated/type_enum.rs | 1472 | replace += with -= | unclassified |  | not run |
+| src/generated/type_enum.rs | 3216 | delete match arm "CryptoKeyType" in <impl core::str::FromStr for TypeVariant>::from_str | unclassified |  | not run |
+| src/generated/upgrade_type.rs | 87 | replace <impl TryFrom<&Vec<u8>> for UpgradeType>::try_from -> Result<Self, Error> with Ok(Default::default()) | unclassified |  | not run |
+| src/transaction_conversions.rs | 76 | replace <impl From<&Uint256> for MuxedAccount>::from -> Self with Default::default() | unclassified |  | not run |
+
+## Missed by the corpus alone in go v0.9.0
+
+| file | line | mutation | class | why | candidate lane |
+|---|---|---|---|---|---|
+| strkey/main.go | 118 | if len(raw) < 3 { -> if len(raw) < 4 { | unclassified |  | not run |
+| strkey/main.go | 64 | const maxEncodedSize = (maxRawSize*8 + 4) / 5 // (8n+4)/5 is the EncodedLen for no padding -> const maxEncodedSize = (maxRawSize*8 + 3) / 5 // (8n+4)/5 is the EncodedLen for no padding | unclassified |  | not run |
+| strkey/muxed_account.go | 65 | raw = append(raw, b.Bytes()...) -> _, _, _ = raw, raw, b.Bytes | unclassified |  | not run |
+| strkey/muxed_contract.go | 50 | binary.BigEndian.PutUint64(raw[32:], m.id) -> _, _, _ = binary.BigEndian.PutUint64, raw, m.id | unclassified |  | not run |
+| strkey/muxed_contract.go | 50 | binary.BigEndian.PutUint64(raw[32:], m.id) -> binary.BigEndian.PutUint64(raw[33:], m.id) | unclassified |  | not run |
+| xdr/account_entry.go | 44 | if account.Ext.V1 != nil && account.Ext.V1.Ext.V2 != nil { -> if account.Ext.V1 != nil && true { | unclassified |  | not run |
+| xdr/account_flags.go | 18 | return (accountFlags & AccountFlagsAuthImmutableFlag) != 0 -> return (accountFlags \| AccountFlagsAuthImmutableFlag) != 0 | unclassified |  | not run |
+| xdr/account_id.go | 101 | return nil ->  | unclassified |  | not run |
+| xdr/account_id.go | 14 | panic(err) -> _ = err | unclassified |  | not run |
+| xdr/account_thresholds.go | 8 | return t[1] -> return t[0] | unclassified |  | not run |
+| xdr/asset.go | 153 | if len(parts) != 2 { -> if len(parts) != 3 { | unclassified |  | not run |
+| xdr/asset.go | 193 | case length >= 1 && length <= 4: -> case length >= 0 && length <= 4: | unclassified |  | not run |
+| xdr/asset.go | 193 | case length >= 1 && length <= 4: -> case length >= 1 && length <= 5: | unclassified |  | not run |
+| xdr/asset.go | 231 | case length >= 1 && length <= 4: -> case length >= 1 && length <= 5: | unclassified |  | not run |
+| xdr/asset.go | 234 | copy(bytecode[:], byteArray[0:length]) -> _, _, _ = bytecode, byteArray, length | unclassified |  | not run |
+| xdr/asset.go | 249 | a.MustExtract(&t, &c, &i) -> _, _, _, _ = a.MustExtract, t, c, i | unclassified |  | not run |
+| xdr/asset.go | 393 | panic(fmt.Errorf("Cannot transform type %v to Asset", a.Type)) -> _, _ = fmt.Errorf, a.Type | unclassified |  | not run |
+| xdr/asset.go | 481 | return [32]byte{}, err -> _ = err | unclassified |  | not run |
+| xdr/asset.go | 59 | case length >= 5 && length <= 12: -> case length >= 6 && length <= 12: | unclassified |  | not run |
+| xdr/claimable_balance_id.go | 56 | return fmt.Errorf("invalid claimable balance id type: %v", payload[0]) -> return fmt.Errorf("invalid claimable balance id type: %v", payload[1]) | unclassified |  | not run |
+| xdr/db.go | 37 | return errors.New("Invalid value for xdr.AssetType") -> _ = errors.New | unclassified |  | not run |
+| xdr/db.go | 68 | return errors.New("Invalid value for xdr.Int64") -> _ = errors.New | unclassified |  | not run |
+| xdr/decorated_signature.go | 31 | hint[i] ^= keyHint[i] -> hint[i] = keyHint[i] | unclassified |  | not run |
+| xdr/go_string.go | 157 | sb.WriteString(fmt.Sprintf("InflationDest: xdr.MustAddressPtr(%#v),", s.InflationDest.Address())) -> _, _, _ = sb.WriteString, fmt.Sprintf, s.InflationDest.Address | unclassified |  | not run |
+| xdr/go_string.go | 250 | sb.WriteString("(unknown)") -> _ = sb.WriteString | unclassified |  | not run |
+| xdr/hash.go | 13 | for i := 0; i < len(s); i++ { -> for i := -1; i < len(s); i++ { | unclassified |  | not run |
+| xdr/json.go | 138 | parts[i] = converted -> _, _, _ = parts, i, converted | unclassified |  | not run |
+| xdr/json.go | 162 | payload.AbsBeforeEpoch = &absBeforeEpoch -> _, _ = payload.AbsBeforeEpoch, absBeforeEpoch | unclassified |  | not run |
+| xdr/json.go | 175 | return nil, err -> _ = err | unclassified |  | not run |
+| xdr/json.go | 64 | return &iso8601Time{time.Unix(epoch, 0).UTC()} -> return &iso8601Time{time.Unix(epoch, 1).UTC()} | unclassified |  | not run |
+| xdr/ledger_close_meta_batch.go | 33 | lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-1].LedgerSequence() -> lastSequence := s.LedgerCloseMetas[len(s.LedgerCloseMetas)-0].LedgerSequence() | unclassified |  | not run |
+| xdr/ledger_close_meta_view.go | 160 | return 0, err -> _ = err | unclassified |  | not run |
+| xdr/ledger_entry.go | 106 | if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == 1 { | unclassified |  | not run |
+| xdr/ledger_entry.go | 106 | if claimableBalanceEntry.Ext.V == 0 { -> if claimableBalanceEntry.Ext.V == -1 { | unclassified |  | not run |
+| xdr/ledger_entry.go | 170 | return key, err -> _, _ = key, err | unclassified |  | not run |
+| xdr/ledger_entry.go | 44 | Selling: 0, -> Selling: 1, | unclassified |  | not run |
+| xdr/ledger_entry.go | 50 | accountEntry.Ext.V1.Ext.V = 2 -> _ = accountEntry.Ext.V1.Ext.V | unclassified |  | not run |
+| xdr/ledger_entry.go | 88 | if trustLineEntry.Ext.V == 0 { -> if trustLineEntry.Ext.V == 1 { | unclassified |  | not run |
+| xdr/ledger_entry.go | 93 | Selling: 0, -> Selling: 1, | unclassified |  | not run |
+| xdr/ledger_key.go | 111 | *key = nkey -> _, _ = key, nkey | unclassified |  | not run |
+| xdr/ledger_key.go | 122 | return err -> _ = err | unclassified |  | not run |
+| xdr/ledger_key.go | 171 | *key = nkey -> _, _ = key, nkey | unclassified |  | not run |
+| xdr/ledger_key.go | 35 | return l.AccountId.Equals(r.AccountId) && l.Asset.Equals(r.Asset) -> return true && l.Asset.Equals(r.Asset) | unclassified |  | not run |
+| xdr/ledger_key.go | 72 | *key = nkey -> _, _ = key, nkey | unclassified |  | not run |
+| xdr/main.go | 200 | return nil, err -> _ = err | unclassified |  | not run |
+| xdr/main.go | 88 | options.MaxInputLen = hex.DecodedLen(len(data)) -> _, _, _ = options.MaxInputLen, hex.DecodedLen, data | unclassified |  | not run |
+| xdr/muxed_account.go | 118 | return "", nil ->  | unclassified |  | not run |
+| xdr/muxed_account.go | 72 | case 69: -> case 68: | unclassified |  | not run |
+| xdr/muxed_account.go | 79 | if err = muxed.Id.UnmarshalBinary(raw[32:]); err != nil { -> if err = muxed.Id.UnmarshalBinary(raw[31:]); err != nil { | unclassified |  | not run |
+| xdr/muxed_account.go | 82 | *m, err = NewMuxedAccount(CryptoKeyTypeKeyTypeMuxedEd25519, muxed) -> _, _, _, _, _ = m, err, NewMuxedAccount, CryptoKeyTypeKeyTypeMuxedEd25519, muxed | unclassified |  | not run |
+| xdr/muxed_account_view.go | 16 | // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. _ = v.MustEd2... -> _ = // MustEd25519 rejects any other key type. KEY_TYPE_ED25519 and // PUBLIC_KEY_TYPE_ED25519 are both 0, so the account's XDR is the // AccountId's. v.MustEd2... | unclassified |  | not run |
+| xdr/operation_trace_result.go | 16 | operationTraceDescription = o.PaymentResult.Code.String() -> _, _ = operationTraceDescription, o.PaymentResult.Code.String | unclassified |  | not run |
+| xdr/path_payment_result.go | 33 | return 0 ->  | unclassified |  | not run |
+| xdr/price.go | 85 | return fmt.Errorf("price denominator cannot be 0: %d/%d", p.N, p.D) -> _, _, _ = fmt.Errorf, p.N, p.D | unclassified |  | not run |
+| xdr/price.go | 87 | if p.N < 0 \|\| p.D < 0 { -> if p.N < 0 \|\| false { | unclassified |  | not run |
+| xdr/signer_key.go | 151 | *skey, err = NewSignerKey(keytype, signer) -> _, _, _, _, _ = skey, err, NewSignerKey, keytype, signer | unclassified |  | not run |
+| xdr/stellar_value.go | 73 | return 0, fmt.Errorf("close time out of range: %d", uint64(t)) -> return 1, fmt.Errorf("close time out of range: %d", uint64(t)) | unclassified |  | not run |
+| xdr/stellar_value.go | 75 | return int64(t) * 1000, nil //nolint:gosec // bounded above -> return int64(t) * 999, nil //nolint:gosec // bounded above | unclassified |  | not run |
+| xdr/transaction_envelope.go | 119 | return nil ->  | unclassified |  | not run |
+| xdr/transaction_meta.go | 42 | return nil, nil ->  | unclassified |  | not run |
+| xdr/trust_line_asset.go | 41 | panic(err) -> _ = err | unclassified |  | not run |
+| xdr/trust_line_asset.go | 69 | return err -> _ = err | unclassified |  | not run |
+| xdr/view_validate.go | 14 | return viewErrTrailingBytes(uint32(n), len(v)-n) //nolint:gosec // view offsets are uint32 throughout -> return viewErrTrailingBytes(uint32(n), len(v)+n) //nolint:gosec // view offsets are uint32 throughout | unclassified |  | not run |
+| xdr/xdrstream.go | 270 | return err -> _ = err | unclassified |  | not run |
 
 ## Released js faults
 
@@ -121,72 +138,72 @@ Written by `shapekit conformance seed-check`. Each sdk's mutation tool seeds fau
 | https://github.com/stellar/js-stellar-sdk/issues/1789 | js-1789-colliding-map-keys | yes |
 | https://github.com/stellar/js-stellar-sdk/pull/1766 | js-1766-issuer-order, js-1766-map-key-order | yes |
 
-## Missed in js 17.4.0
+## Missed by the corpus alone in js 17.4.0
 
-| file | line | mutation |
-|---|---|---|
-| lib/esm/base/asset.js | 142 | BlockStatement -> {} |
-| lib/esm/base/auth.js | 468 | ConditionalExpression -> case "public_key": |
-| lib/esm/base/claimant.js | 43 | ConditionalExpression -> true |
-| lib/esm/base/invocation.js | 32 | EqualityOperator -> preimage.type !== "contractIdPreimageFromAddress" |
-| lib/esm/base/memo.js | 10 | StringLiteral -> "" |
-| lib/esm/base/operation.js | 441 | StringLiteral -> "" |
-| lib/esm/base/operations/invoke_host_function.js | 89 | ConditionalExpression -> true |
-| lib/esm/base/operations/set_options.js | 74 | ConditionalExpression -> true |
-| lib/esm/base/operations/set_trustline_flags.js | 29 | ConditionalExpression -> false |
-| lib/esm/base/transaction.js | 163 | StringLiteral -> "" |
-| lib/esm/base/transaction_base.js | 180 | BooleanLiteral -> keypair.verify(this.hash(), signatureBytes) |
-| lib/esm/base/transaction_base.js | 209 | EqualityOperator -> preimage.length >= 64 |
-| lib/esm/base/transaction_builder.js | 117 | ObjectLiteral -> {} |
-| lib/esm/base/transaction_builder.js | 156 | StringLiteral -> `` |
-| lib/esm/base/transaction_builder.js | 372 | BlockStatement -> {} |
-| lib/esm/base/transaction_builder.js | 55 | ArrayDeclaration -> [] |
-| lib/esm/base/transaction_builder.js | 601 | ObjectLiteral -> {} |
-| lib/esm/base/transaction_builder.js | 809 | ObjectLiteral -> {} |
-| lib/esm/base/util/continued_fraction.js | 53 | BlockStatement -> {} |
-| lib/esm/base/util/operations.js | 19 | BlockStatement -> {} |
-| lib/esm/base/util/operations.js | 60 | StringLiteral -> "" |
-| lib/esm/xdr/generated/asset-type.js | 28 | StringLiteral -> "" |
-| lib/esm/xdr/generated/bucket-entry.js | 96 | ObjectLiteral -> {} |
-| lib/esm/xdr/generated/change-trust-result.js | 19 | StringLiteral -> "" |
-| lib/esm/xdr/generated/claim-claimable-balance-result.js | 15 | StringLiteral -> "" |
-| lib/esm/xdr/generated/contract-cost-type.js | 213 | StringLiteral -> "" |
-| lib/esm/xdr/generated/contract-event-type.js | 8 | StringLiteral -> "" |
-| lib/esm/xdr/generated/create-account-result.js | 34 | BlockStatement -> {} |
-| lib/esm/xdr/generated/end-sponsoring-future-reserves-result-code.js | 14 | StringLiteral -> "" |
-| lib/esm/xdr/generated/end-sponsoring-future-reserves-result.js | 10 | StringLiteral -> "" |
-| lib/esm/xdr/generated/error-code.js | 26 | BlockStatement -> {} |
-| lib/esm/xdr/generated/extend-footprint-ttl-result.js | 79 | UnaryOperator -> +1 |
-| lib/esm/xdr/generated/hash-id-preimage.js | 141 | ObjectLiteral -> {} |
-| lib/esm/xdr/generated/ledger-entry-change-type.js | 6 | StringLiteral -> "" |
-| lib/esm/xdr/generated/ledger-key.js | 262 | BlockStatement -> {} |
-| lib/esm/xdr/generated/liquidity-pool-withdraw-result.js | 33 | BlockStatement -> {} |
-| lib/esm/xdr/generated/manage-buy-offer-result.js | 149 | StringLiteral -> "" |
-| lib/esm/xdr/generated/manage-sell-offer-result.js | 177 | BlockStatement -> {} |
-| lib/esm/xdr/generated/manage-sell-offer-result.js | 34 | StringLiteral -> "" |
-| lib/esm/xdr/generated/memo.js | 32 | BlockStatement -> {} |
-| lib/esm/xdr/generated/operation-result-tr.js | 226 | BlockStatement -> {} |
-| lib/esm/xdr/generated/operation-type.js | 25 | StringLiteral -> "" |
-| lib/esm/xdr/generated/path-payment-strict-receive-result-code.js | 54 | StringLiteral -> "" |
-| lib/esm/xdr/generated/persisted-scp-state.js | 29 | BlockStatement -> {} |
-| lib/esm/xdr/generated/restore-footprint-result.js | 20 | StringLiteral -> "" |
-| lib/esm/xdr/generated/sc-meta-kind.js | 10 | StringLiteral -> "" |
-| lib/esm/xdr/generated/sc-spec-entry.js | 160 | BlockStatement -> {} |
-| lib/esm/xdr/generated/sc-spec-type-def.js | 409 | StringLiteral -> "" |
-| lib/esm/xdr/generated/sc-spec-udt-union-case-v0.js | 10 | ConditionalExpression -> false |
-| lib/esm/xdr/generated/scp-quorum-set.js | 34 | ArrowFunction -> () => undefined |
-| lib/esm/xdr/generated/scp-statement-confirm.js | 30 | BlockStatement -> {} |
-| lib/esm/xdr/generated/scp-statement-pledges.js | 19 | StringLiteral -> "" |
-| lib/esm/xdr/generated/scp-statement-pledges.js | 86 | BlockStatement -> {} |
-| lib/esm/xdr/generated/scp-statement-type.js | 6 | StringLiteral -> "" |
-| lib/esm/xdr/generated/send-more-extended.js | 25 | BlockStatement -> {} |
-| lib/esm/xdr/generated/soroban-transaction-meta-ext.js | 20 | StringLiteral -> "" |
-| lib/esm/xdr/generated/stellar-value-type.js | 46 | BlockStatement -> {} |
-| lib/esm/xdr/generated/stored-transaction-set.js | 76 | StringLiteral -> "" |
-| lib/esm/xdr/generated/survey-message-response-type.js | 12 | BlockStatement -> {} |
-| lib/esm/xdr/generated/transaction-signature-payload-tagged-transaction.js | 10 | ConditionalExpression -> false |
-| lib/esm/xdr/generated/trust-line-entry-extension-v2-ext.js | 30 | StringLiteral -> `` |
-| lib/esm/xdr/values/bigint-parts.js | 24 | ConditionalExpression -> false |
-| lib/esm/xdr/values/xdr-string.js | 168 | ConditionalExpression -> false |
-| lib/esm/xdr/values/xdr-string.js | 174 | ArithmeticOperator -> code - 65 - 10 |
-| lib/esm/xdr/values/xdr-value.js | 84 | StringLiteral -> "" |
+| file | line | mutation | class | why | candidate lane |
+|---|---|---|---|---|---|
+| lib/esm/base/asset.js | 142 | BlockStatement -> {} | outside-the-ops | Asset.toTrustLineXDRObject (a deprecated alias) has no call site in the package (grep finds only its definition) and the testee never calls it; asset ops use Asset.fromOperation, Asset.compare, getLiquidityPoolId and contractId. Coverage over the full corpus run: never called. | missed |
+| lib/esm/base/auth.js | 468 | ConditionalExpression -> case "public_key": | outside-the-ops | parseEd25519Signatures in base/auth.js is used only by inspectAuthEntry/checkAuthEntryReadiness, auth helpers the testee never calls (no op touches authorization entries beyond decode/encode). Coverage: 0. | missed |
+| lib/esm/base/claimant.js | 43 | ConditionalExpression -> true | outside-the-ops | Claimant.predicateOr argument check: a claim predicate builder. The testee builds no claimants; Operation.fromXdrObject (tx_hash/balance_id path) converts decoded predicates without calling predicateAnd/Or. Coverage: 0. | missed |
+| lib/esm/base/invocation.js | 32 | EqualityOperator -> preimage.type !== "contractIdPreimageFromAddress" | outside-the-ops | buildInvocationTree in base/invocation.js is only exported (index.js re-exports it); nothing in transaction parsing, scValToNative or the testee calls it. Coverage: 0. | missed |
+| lib/esm/base/memo.js | 10 | StringLiteral -> "" | outside-the-ops | The base MemoHash constant is used consistently by the base Memo class (constructor switch, Memo.hash, toXdrObject), so the change is self-consistent and only visible to a caller comparing memo.type with "hash". The base Memo class is reached only from TransactionBuilder.addMemo/user code: Transaction keeps tx.memo as the raw xdr Memo and tx_hash hashes the xdr, so no op constructs a base Memo. | missed |
+| lib/esm/base/operation.js | 441 | StringLiteral -> "" | corpus-gap | Reachable from tx_hash and balance_id: TransactionBuilder.fromXDR -> new Transaction -> Operation.fromXdrObject -> case revokeSponsorshipSigner -> convertXdrSignerKeyToObject. With the case label emptied a HashX signer key falls to the default arm and throws. No corpus envelope carries a RevokeSponsorship op whose signer key is a hash(x) key (coverage 0). Verified by running both builds. Killing input: op tx_hash, TransactionEnvelope (v1, one RevokeSponsorshipOp of type REVOKE_SPONSORSHIP_SIGNER with SignerKey SIGNER_KEY_TYPE_HASH_X, testnet passphrase), {'id': '1', 'op': 'tx_hash', 'network_passphrase': 'Test SDF Network ; September 2015', 'xdr': 'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAAGQAAAAAAAAAZQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAEgAAAAEAAAAAiojj3XQJ8ZX9UtstPLpdcspnCb8dlBIb83SIAbQPb1wAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqoAAAAAAAAAAA=='}; unmodified: {'hash': '538aec3e6ef243be170737ae0f97c70ee1144f8b6d012adfeff0ee6e2191eee4'}; faulty: {'rejected': 'Error: Unknown signerKey type: signerKeyTypeHashX'}. | missed |
+| lib/esm/base/operations/invoke_host_function.js | 89 | ConditionalExpression -> true | outside-the-ops | Operation.createCustomContract (invoke_host_function.js) is an operation builder; the only builder the testee calls is Operation.manageSellOffer (id_parse offer). Coverage: 0. | missed |
+| lib/esm/base/operations/set_options.js | 74 | ConditionalExpression -> true | outside-the-ops | Operation.setOptions signer handling is a builder path; the testee never builds a SetOptions op (decoded SetOptions ops go through Operation.fromXdrObject, not setOptions()). Coverage: 0. | missed |
+| lib/esm/base/operations/set_trustline_flags.js | 29 | ConditionalExpression -> false | outside-the-ops | Operation.setTrustLineFlags is a builder; not called by any op. Coverage: 0. | missed |
+| lib/esm/base/transaction.js | 163 | StringLiteral -> "" | outside-the-ops | Setter of Transaction.timeBounds that throws "Transaction is immutable"; the testee never assigns to a Transaction property (it only calls hash(), getClaimableBalanceId and reads innerTransaction). Coverage: 0. | missed |
+| lib/esm/base/transaction_base.js | 180 | BooleanLiteral -> keypair.verify(this.hash(), signatureBytes) | outside-the-ops | TransactionBase.addSignature (signature verification) is never called; tx_hash only calls hash(). Coverage: 0. | missed |
+| lib/esm/base/transaction_base.js | 209 | EqualityOperator -> preimage.length >= 64 | outside-the-ops | TransactionBase.signHashX is never called by any op. Coverage: 0. | missed |
+| lib/esm/base/transaction_builder.js | 117 | ObjectLiteral -> {} | outside-the-ops | TransactionBuilder constructor (opts.ledgerbounds copy); the testee uses only the static TransactionBuilder.fromXDR, which constructs Transaction/FeeBumpTransaction directly, never a builder. Coverage: 0. | missed |
+| lib/esm/base/transaction_builder.js | 156 | StringLiteral -> `` | outside-the-ops | TransactionBuilder.cloneFrom error message; cloneFrom is never called. Coverage: 0. | missed |
+| lib/esm/base/transaction_builder.js | 372 | BlockStatement -> {} | outside-the-ops | TransactionBuilder.setLedgerbounds validation block; builder method never called. Coverage: 0. | missed |
+| lib/esm/base/transaction_builder.js | 55 | ArrayDeclaration -> [] | outside-the-ops | SOROBAN_OPERATION_TYPES is read only in TransactionBuilder.build() (line 735); the module-level Set is created at load, but build() is never called by any op. | missed |
+| lib/esm/base/transaction_builder.js | 601 | ObjectLiteral -> {} | outside-the-ops | TransactionBuilder.addSacTransferOperation footprint construction; never called. Coverage: 0. | missed |
+| lib/esm/base/transaction_builder.js | 809 | ObjectLiteral -> {} | outside-the-ops | TransactionBuilder.build() transaction assembly; never called (the testee parses envelopes, it does not build them). Coverage: 0. | missed |
+| lib/esm/base/util/continued_fraction.js | 53 | BlockStatement -> {} | outside-the-ops | best_r fallback block runs only when the continued-fraction result has a zero numerator or denominator. best_r is reached from ops only through id_parse offer -> Operation.manageSellOffer, and the testee always passes price "1" (exact 1/1, block never entered); transaction parsing uses fromXdrPrice, not best_r. Coverage: 0. | missed |
+| lib/esm/base/util/operations.js | 19 | BlockStatement -> {} | outside-the-ops | checkUnsignedIntValue is used only by Operation.setOptions (builder); not called by any op. Coverage: 0. | missed |
+| lib/esm/base/util/operations.js | 60 | StringLiteral -> "" | other | only the text of a rejection message changes: toXdrOfferId's "offerId must be a string of decimal digits" becomes "". It is reached (18 times in the corpus run) by id_parse kind offer with a non-digit string, e.g. {"op":"id_parse","kind":"offer","input":"12a"}, which the corpus expects rejected. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/asset-type.js | 28 | StringLiteral -> "" | outside-the-ops | AssetType.fromName: the class name is used only in the error message of enumFromName, and fromName has no call site in the package (to-json and decoding use fromValue / schema names). Coverage: 0. | missed |
+| lib/esm/xdr/generated/bucket-entry.js | 96 | ObjectLiteral -> {} | corpus-gap | BucketEntry INITENTRY arm toXdrObject returns {} so encoding and decode_json (toJson walks toXdrObject()) fail. decode_encode/decode_json accept any exported xdr type; the corpus has no BucketEntry entry (its xdr types are LedgerCloseMeta, TransactionEnvelope, TransactionResultMeta(V1), LedgerEntry, ScVal, ContractEvent, Asset, SignerKey, SorobanAuthorizationEntry, ScSpecFunctionV0). Verified. Killing input: op decode_encode, BucketEntry (INITENTRY wrapping a DATA LedgerEntry), {'id': '1', 'op': 'decode_encode', 'type': 'BucketEntry', 'xdr': 'AAAAAgAAAAEAAAADAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAWEAAAAAAAABYgAAAAAAAAAAAAAA'}; unmodified: {'xdr': 'AAAAAgAAAAEAAAADAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAWEAAAAAAAABYgAAAAAAAAAAAAAA'}; faulty: {'rejected': 'XdrError: BucketEntry: expected union object with type discriminator'}. | caught by candidate:format.xdr-grammar.bucketentry-distinct, candidate:format.xdr-grammar.bucketentry-initentry |
+| lib/esm/xdr/generated/change-trust-result.js | 19 | StringLiteral -> "" | equivalent | Union case name of a void arm. The name is used only as (1) the key into unionCaseNames, whose JSON name comes from the switch enum member (so "" still maps to "success" both ways), (2) a uniqueness check, and (3) the reader/writer path string handed to the void arm, which reads nothing and throws nothing. fromXdrObject switches on the numeric code. Verified: decode_encode, decode_json and encode_json of ChangeTrustResult success are identical. | missed |
+| lib/esm/xdr/generated/claim-claimable-balance-result.js | 15 | StringLiteral -> "" | other | only the text of a rejection message changes: the union's schema name "ClaimClaimableBalanceResult" becomes "" and appears only in root error paths (e.g. decode of code 5: "ClaimClaimableBalanceResult.code: unknown enum value 5" vs ".code: unknown enum value 5"); schema.name is otherwise used only for the OVERRIDES lookup, which has no entry for this type. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/contract-cost-type.js | 213 | StringLiteral -> "" | outside-the-ops | the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ContractCostType code 70 (decode_encode and decode_json identical) give identical results. | missed |
+| lib/esm/xdr/generated/contract-event-type.js | 8 | StringLiteral -> "" | other | only the text of a rejection message changes: enumType name "ContractEventType" becomes "" and appears only in error text at the root ("ContractEventType: unknown enum value 9" vs ": unknown enum value 9"); nested in ContractEvent the path is built from the parent's field names. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/create-account-result.js | 34 | BlockStatement -> {} | outside-the-ops | CreateAccountResult.createAccountUnderfunded() is an arm factory for user code; decoding builds arms with `new` in fromXdrObject, and no op builds results. Coverage: 0. | missed |
+| lib/esm/xdr/generated/end-sponsoring-future-reserves-result-code.js | 14 | StringLiteral -> "" | other | only the text of a rejection message changes: enumType name "EndSponsoringFutureReservesResultCode" becomes "" and appears only in root error text (decode of 7). The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/end-sponsoring-future-reserves-result.js | 10 | StringLiteral -> "" | outside-the-ops | Error message of the guard in EndSponsoringFutureReservesResultBase's constructor, thrown only for `new xdr.EndSponsoringFutureReservesResult(...)` in user code; decoding constructs arm subclasses. Coverage: 0. | missed |
+| lib/esm/xdr/generated/error-code.js | 26 | BlockStatement -> {} | corpus-gap | ErrorCode.fromXdrObject returns undefined, so decoding ErrorCode (or the overlay Error struct, whose code field becomes undefined) yields no value to encode or render. The corpus has no overlay types. Verified (also type Error, xdr AAAAAAAAAAF4AAAA). Killing input: op decode_encode, ErrorCode (ERR_MISC = 0), {'id': '1', 'op': 'decode_encode', 'type': 'ErrorCode', 'xdr': 'AAAAAA=='}; unmodified: {'xdr': 'AAAAAA=='}; faulty: {'rejected': "TypeError: Cannot read properties of undefined (reading 'toXdr')"}. | caught by candidate:format.xdr-grammar.errorcode-auth, candidate:format.xdr-grammar.errorcode-conf, candidate:format.xdr-grammar.errorcode-data, candidate:format.xdr-grammar.errorcode-distinct, candidate:format.xdr-grammar.errorcode-load |
+| lib/esm/xdr/generated/extend-footprint-ttl-result.js | 79 | UnaryOperator -> +1 | corpus-gap | ExtendFootprintTtlResultMalformed.toXdrObject returns code +1, which has no case, so re-encoding and toJson fail. Corpus results contain only the success arm of this union (coverage 0 for this arm). Verified. A TransactionResultMeta/LedgerCloseMeta holding a failed ExtendFootprintTTL op with code -1 would catch it too. Killing input: op decode_encode, ExtendFootprintTtlResult (EXTEND_FOOTPRINT_TTL_MALFORMED = -1), {'id': '1', 'op': 'decode_encode', 'type': 'ExtendFootprintTtlResult', 'xdr': '/////w=='}; unmodified: {'xdr': '/////w=='}; faulty: {'rejected': 'XdrError: ExtendFootprintTtlResult: no case for union discriminator 1'}. | caught by candidate:format.xdr-grammar.extendfootprintttlresult-distinct, candidate:format.xdr-grammar.extendfootprintttlresult-malformed |
+| lib/esm/xdr/generated/hash-id-preimage.js | 141 | ObjectLiteral -> {} | corpus-gap | HashIdPreimage ENVELOPE_TYPE_POOL_REVOKE_OP_ID arm toXdrObject returns {}. contract_id only builds the CONTRACT_ID arm and balance_id the OP_ID arm, but decode_encode/decode_json take HashIdPreimage directly; no corpus entry has it. Verified. Killing input: op decode_encode, HashIdPreimage (type 7, revokeId), {'id': '1', 'op': 'decode_encode', 'type': 'HashIdPreimage', 'xdr': 'AAAABwAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAABAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAAAAA=='}; unmodified: {'xdr': 'AAAABwAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAABAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAAAAA=='}; faulty: {'rejected': 'XdrError: HashIdPreimage: expected union object with type discriminator'}. | caught by candidate:format.xdr-grammar.hashidpreimage-distinct, candidate:format.xdr-grammar.hashidpreimage-pool-revoke-op-id |
+| lib/esm/xdr/generated/ledger-entry-change-type.js | 6 | StringLiteral -> "" | outside-the-ops | the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of LedgerEntryChangeType 0 (identical) give identical results. | missed |
+| lib/esm/xdr/generated/ledger-key.js | 262 | BlockStatement -> {} | corpus-gap | LedgerKey CONFIG_SETTING arm toXdrObject returns undefined. No corpus value contains a config-setting LedgerKey (coverage 0), though LedgerCloseMeta footprints/evicted keys could carry one. Verified. Killing input: op decode_encode, LedgerKey (CONFIG_SETTING, CONFIG_SETTING_CONTRACT_MAX_SIZE_BYTES), {'id': '1', 'op': 'decode_encode', 'type': 'LedgerKey', 'xdr': 'AAAACAAAAAA='}; unmodified: {'xdr': 'AAAACAAAAAA='}; faulty: {'rejected': 'XdrError: LedgerKey: expected union object with type discriminator'}. | caught by candidate:format.xdr-grammar.bucketentry-deadentry, candidate:format.xdr-grammar.bucketentry-smallest, candidate:format.xdr-grammar.hotarchivebucketentry-live, candidate:format.xdr-grammar.hotarchivebucketentry-smallest, candidate:format.xdr-grammar.ledgerclosemeta-distinct |
+| lib/esm/xdr/generated/liquidity-pool-withdraw-result.js | 33 | BlockStatement -> {} | outside-the-ops | LiquidityPoolWithdrawResult.liquidityPoolWithdrawMalformed() is an arm factory for user code; decoding uses `new` in fromXdrObject. Coverage: 0. | missed |
+| lib/esm/xdr/generated/manage-buy-offer-result.js | 149 | StringLiteral -> "" | outside-the-ops | the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ManageBuyOfferResult code -2 (identical) give identical results. | missed |
+| lib/esm/xdr/generated/manage-sell-offer-result.js | 177 | BlockStatement -> {} | outside-the-ops | The `value` getter of ManageSellOfferResultBuyNotAuthorized (a void arm) returns undefined instead of null. No op reads `.value` of a result union: encoding uses toXdrObject and decode_json walkToJson. Verified: decode_encode/decode_json of ManageSellOfferResult -4 identical. | missed |
+| lib/esm/xdr/generated/manage-sell-offer-result.js | 34 | StringLiteral -> "" | equivalent | Void-arm union case name, same reasoning as the changeTrustSuccess case: JSON names come from the ManageSellOfferResultCode member, fromXdrObject switches on the number, and the path string goes to a void arm that never uses it. Verified: decode_encode, decode_json, encode_json("buy_no_issuer") identical. | missed |
+| lib/esm/xdr/generated/memo.js | 32 | BlockStatement -> {} | outside-the-ops | xdr.Memo.memoId() factory: called from base Memo.toXdrObject (builder path) and user code; decoding builds MemoId with `new` in fromXdrObject. No op calls it. Coverage: 0. | missed |
+| lib/esm/xdr/generated/operation-result-tr.js | 226 | BlockStatement -> {} | outside-the-ops | OperationResultTr.accountMerge() factory; decoding uses `new` in fromXdrObject. No op calls it. Coverage: 0. | missed |
+| lib/esm/xdr/generated/operation-type.js | 25 | StringLiteral -> "" | outside-the-ops | the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of OperationType 13 (identical); base/operation.js dispatches on the body union's `type` string, not on OperationType.name give identical results. | missed |
+| lib/esm/xdr/generated/path-payment-strict-receive-result-code.js | 54 | StringLiteral -> "" | outside-the-ops | the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of PathPaymentStrictReceiveResultCode -12 (identical) give identical results. | missed |
+| lib/esm/xdr/generated/persisted-scp-state.js | 29 | BlockStatement -> {} | outside-the-ops | PersistedScpState.v1() factory; decoding uses `new` in fromXdrObject. No op calls it. Coverage: 0. | missed |
+| lib/esm/xdr/generated/restore-footprint-result.js | 20 | StringLiteral -> "" | equivalent | Void-arm union case name (restoreFootprintMalformed), same reasoning as mutant changeTrustSuccess. Verified: decode_encode, decode_json, encode_json("malformed") identical. | missed |
+| lib/esm/xdr/generated/sc-meta-kind.js | 10 | StringLiteral -> "" | equivalent | The class name passed to enumFromValue appears only in the error thrown when schema.nameByValue lacks the value. Every value reaching ScMetaKind.fromValue from an op has already passed the schema's decode (or fromJson) validation, so that error cannot fire. Verified: ScMetaKind 0 identical, ScMetaKind 1 rejected identically by the schema reader. | missed |
+| lib/esm/xdr/generated/sc-spec-entry.js | 160 | BlockStatement -> {} | outside-the-ops | The `value` getter of ScSpecEntryUdtEnumV0; no op reads `.value` (toXdrObject uses this.udtEnumV0 directly). Verified: ScSpecEntry UDT_ENUM_V0 decode_encode/decode_json identical. | missed |
+| lib/esm/xdr/generated/sc-spec-type-def.js | 409 | StringLiteral -> "" | outside-the-ops | the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ScSpecTypeDef OPTION(bool) (identical); `.type` of ScSpecTypeDef is read by contract/spec.js and bindings/utils.js only give identical results. | missed |
+| lib/esm/xdr/generated/sc-spec-udt-union-case-v0.js | 10 | ConditionalExpression -> false | outside-the-ops | The guard `new.target === ScSpecUdtUnionCaseV0Base` only matters for `new xdr.ScSpecUdtUnionCaseV0(...)` in user code; decoding constructs the arm subclasses. Coverage: 0. | missed |
+| lib/esm/xdr/generated/scp-quorum-set.js | 34 | ArrowFunction -> () => undefined | corpus-gap | ScpQuorumSet.fromXdrObject maps innerSets with () => undefined, so any quorum set with a non-empty innerSets fails to encode/render. Corpus quorum sets (if any) have no inner sets (coverage 0). Verified. An LCM whose scpInfo carries a nested quorum set would catch it too. Killing input: op decode_encode, ScpQuorumSet (threshold 1, no validators, one inner set), {'id': '1', 'op': 'decode_encode', 'type': 'ScpQuorumSet', 'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAAAAAAA'}; unmodified: {'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAAAAAAA'}; faulty: {'rejected': "TypeError: Cannot read properties of undefined (reading 'toXdrObject')"}. | caught by candidate:format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-at, candidate:format.xdr-grammar.ledgerclosemeta-depth-scpquorumset-below, candidate:format.xdr-grammar.ledgerclosemetav0-distinct, candidate:format.xdr-grammar.ledgerclosemetav1-distinct, candidate:format.xdr-grammar.ledgerclosemetav2-distinct |
+| lib/esm/xdr/generated/scp-statement-confirm.js | 30 | BlockStatement -> {} | corpus-gap | ScpStatementConfirm.toXdrObject returns undefined. No corpus value contains an SCP CONFIRM statement (coverage 0). Verified. Killing input: op decode_encode, ScpStatementConfirm, {'id': '1', 'op': 'decode_encode', 'type': 'ScpStatementConfirm', 'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAEiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=='}; unmodified: {'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAEiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=='}; faulty: {'rejected': 'XdrError: ScpStatementConfirm: expected plain object'}. | caught by candidate:format.xdr-grammar.scphistoryentry-distinct, candidate:format.xdr-grammar.scphistoryentryv0-distinct, candidate:format.xdr-grammar.scpstatementconfirm-distinct, candidate:format.xdr-grammar.scpstatementconfirm-smallest, candidate:format.xdr-grammar.scpstatementpledges-confirm |
+| lib/esm/xdr/generated/scp-statement-pledges.js | 19 | StringLiteral -> "" | other | only the text of a rejection message changes: union schema name "ScpStatementPledges" becomes ""; only root error paths change ("ScpStatementPledges.type: unknown enum value 7" vs ".type: unknown enum value 7"); valid values decode, encode and render identically. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/scp-statement-pledges.js | 86 | BlockStatement -> {} | outside-the-ops | The `value` getter of ScpStatementPledgesPrepare; no op reads `.value`. Verified: ScpStatementPledges PREPARE decode_encode/decode_json identical. | missed |
+| lib/esm/xdr/generated/scp-statement-type.js | 6 | StringLiteral -> "" | outside-the-ops | the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ScpStatementType 1 (identical) give identical results. | missed |
+| lib/esm/xdr/generated/send-more-extended.js | 25 | BlockStatement -> {} | corpus-gap | SendMoreExtended.fromXdrObject returns undefined. Overlay message type, absent from the corpus. Verified. Killing input: op decode_encode, SendMoreExtended (numMessages 1, numBytes 1), {'id': '1', 'op': 'decode_encode', 'type': 'SendMoreExtended', 'xdr': 'AAAAAQAAAAE='}; unmodified: {'xdr': 'AAAAAQAAAAE='}; faulty: {'rejected': "TypeError: Cannot read properties of undefined (reading 'toXdr')"}. | caught by candidate:format.xdr-grammar.sendmoreextended-distinct, candidate:format.xdr-grammar.sendmoreextended-smallest, candidate:format.xdr-grammar.stellarmessage-send-more-extended |
+| lib/esm/xdr/generated/soroban-transaction-meta-ext.js | 20 | StringLiteral -> "" | other | only the text of a rejection message changes: the case name "v1" of SorobanTransactionMetaExt (int switch, so the JSON name is v1 from the discriminant either way, and the payload field keeps its own name "v1") only enters the path of errors inside the arm, e.g. a truncated arm gives "SorobanTransactionMetaExt.v1.v1.totalRefundableResourceFeeCharged: incomplete XDR data..." vs "SorobanTransactionMetaExt..v1....". Valid values and encode_json are identical (verified). The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |
+| lib/esm/xdr/generated/stellar-value-type.js | 46 | BlockStatement -> {} | corpus-gap | StellarValueType.fromXdrObject returns undefined. Decoding StellarValue does not call it (its ext union switches on the number; coverage 0 over 413 LedgerCloseMeta entries), so only StellarValueType decoded on its own reaches it. Verified. Killing input: op decode_encode, StellarValueType (STELLAR_VALUE_BASIC = 0), {'id': '1', 'op': 'decode_encode', 'type': 'StellarValueType', 'xdr': 'AAAAAA=='}; unmodified: {'xdr': 'AAAAAA=='}; faulty: {'rejected': "TypeError: Cannot read properties of undefined (reading 'toXdr')"}. | caught by candidate:format.xdr-grammar.stellarvaluetype-basic, candidate:format.xdr-grammar.stellarvaluetype-distinct, candidate:format.xdr-grammar.stellarvaluetype-empty-tx-set, candidate:format.xdr-grammar.stellarvaluetype-empty-tx-set-ms, candidate:format.xdr-grammar.stellarvaluetype-signed |
+| lib/esm/xdr/generated/stored-transaction-set.js | 76 | StringLiteral -> "" | outside-the-ops | the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of StoredTransactionSet generalized arm (identical) give identical results. | missed |
+| lib/esm/xdr/generated/survey-message-response-type.js | 12 | BlockStatement -> {} | corpus-gap | SurveyMessageResponseType.fromValue returns undefined, so fromXdrObject yields nothing. Overlay type, absent from the corpus. Verified. Killing input: op decode_encode, SurveyMessageResponseType (SURVEY_TOPOLOGY_RESPONSE_V2 = 2), {'id': '1', 'op': 'decode_encode', 'type': 'SurveyMessageResponseType', 'xdr': 'AAAAAg=='}; unmodified: {'xdr': 'AAAAAg=='}; faulty: {'rejected': "TypeError: Cannot read properties of undefined (reading 'toXdr')"}. | caught by candidate:format.xdr-grammar.surveymessageresponsetype-smallest, candidate:format.xdr-grammar.surveymessageresponsetype-survey-topology-response-v2 |
+| lib/esm/xdr/generated/transaction-signature-payload-tagged-transaction.js | 10 | ConditionalExpression -> false | outside-the-ops | The guard `new.target === TransactionSignaturePayloadTaggedTransactionBase` only fires for `new xdr.TransactionSignaturePayloadTaggedTransaction(...)`; tx_hash constructs the arm subclasses (constructor runs 935 times in the corpus), so turning the guard off changes nothing an op does. | missed |
+| lib/esm/xdr/generated/trust-line-entry-extension-v2-ext.js | 30 | StringLiteral -> `` | equivalent | The message is thrown by TrustLineEntryExtensionV2Ext.fromXdrObject only for a wire.v other than 0, but the schema (no default arm) already rejects any other v during decode and fromJson, so the throw is dead code from every op. Verified: v=0 identical, v=1 rejected identically by the schema reader. | missed |
+| lib/esm/xdr/values/bigint-parts.js | 24 | ConditionalExpression -> false | corpus-gap | assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}. | missed |
+| lib/esm/xdr/values/xdr-string.js | 168 | ConditionalExpression -> false | outside-the-ops | XdrString.equals is never called by any op (the only .equals call sites in base are Asset/LiquidityPoolAsset equality, not reached by asset_order/pool_id with XdrStrings). Coverage: 0. | missed |
+| lib/esm/xdr/values/xdr-string.js | 174 | ArithmeticOperator -> code - 65 - 10 | corpus-gap | hexDigit for uppercase A-F returns a negative number, so a \x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\x escape "\\xAB"'}. | missed |
+| lib/esm/xdr/values/xdr-value.js | 84 | StringLiteral -> "" | other | only the text of a rejection message changes: assertXdrType's function name "fromJson" becomes "" in the TypeError thrown for a type with no schema. Every generated type has a schema; the only exports reaching it through encode_json are the base classes XdrValue, EnumValue, BigIntValue and BytesValue (e.g. type "XdrValue": "TypeError: fromJson: XdrValue has no static schema..." vs "TypeError: : XdrValue has no static schema..."), which are not .x types, so no corpus entry can name them; the check would also be a rejection either way. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct. | missed |

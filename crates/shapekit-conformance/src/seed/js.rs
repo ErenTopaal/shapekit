@@ -328,6 +328,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
         counts: counts(&faults),
         faults: faults_sorted(faults),
         real_faults: real,
+        lane: None,
     })
 }
 

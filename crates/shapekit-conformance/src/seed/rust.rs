@@ -219,9 +219,17 @@ pub fn check(ctx: &Context) -> Result<Report> {
     let capture = ctx.capture()?;
     let mut faults = Vec::new();
     for (i, m) in chosen.iter().enumerate() {
-        let record = records.join(format!("{i}.json"));
+        // the run also tries the file's struct-field mutants (see --file below), each through
+        // the probe, so records are numbered in run order and matched to the outcomes by place
+        let record_dir = records.join(i.to_string());
+        if record_dir.exists() {
+            std::fs::remove_dir_all(&record_dir)?;
+        }
         let mut probe = ctx.probe_argv(&[], &baseline);
-        probe.extend(["--record".to_string(), record.display().to_string()]);
+        probe.extend([
+            "--record-next".to_string(),
+            record_dir.display().to_string(),
+        ]);
         let out_dir = work.join(format!("out/{i}"));
         std::fs::create_dir_all(&out_dir)?;
         let argv = vec![
@@ -265,17 +273,38 @@ pub fn check(ctx: &Context) -> Result<Report> {
             .with_context(|| format!("starting {}", argv.join(" ")))?;
         let outcomes: Outcomes = read_json(&out_dir.join("mutants.out/outcomes.json"))
             .with_context(|| format!("cargo-mutants exited with {status}"))?;
-        let mine: Vec<&Outcome> = outcomes
+        let mutants: Vec<&Outcome> = outcomes
             .outcomes
             .iter()
-            .filter(|o| {
-                o.scenario
-                    .get("Mutant")
-                    .and_then(|x| x.get("name"))
-                    .and_then(serde_json::Value::as_str)
-                    == Some(m.name.as_str())
-            })
+            .filter(|o| o.scenario.get("Mutant").is_some())
             .collect();
+        let name = |o: &Outcome| {
+            o.scenario
+                .get("Mutant")
+                .and_then(|x| x.get("name"))
+                .and_then(serde_json::Value::as_str)
+                .map(str::to_string)
+        };
+        let mine: Vec<&Outcome> = mutants
+            .iter()
+            .copied()
+            .filter(|o| name(o).as_deref() == Some(m.name.as_str()))
+            .collect();
+        // an unviable mutant never reaches the probe, so only the viable ones before it count
+        let place = mutants
+            .iter()
+            .take_while(|o| name(o).as_deref() != Some(m.name.as_str()))
+            .filter(|o| o.summary != "Unviable")
+            .count();
+        let record = record_dir.join(format!("{place}.json"));
+        let probed = mutants.iter().filter(|o| o.summary != "Unviable").count();
+        let written = std::fs::read_dir(&record_dir).map_or(0, |d| d.count());
+        ensure!(
+            written == probed,
+            "{} mutants reached the probe for {} but {written} records were written, so records and outcomes cannot be matched",
+            probed,
+            m.name
+        );
         ensure!(
             mine.len() == 1,
             "cargo-mutants reports {} outcomes for {}",
@@ -343,6 +372,7 @@ pub fn check(ctx: &Context) -> Result<Report> {
         counts: counts(&faults),
         faults,
         real_faults: Vec::new(),
+        lane: None,
     })
 }
 

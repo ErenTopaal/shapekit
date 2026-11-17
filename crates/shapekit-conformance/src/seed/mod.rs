@@ -37,7 +37,21 @@ pub struct Paths {
     pub manifest: PathBuf,
     pub versions: PathBuf,
     pub known_dir: PathBuf,
+    /// The candidate lane run beside the corpus, if any.
+    pub lane: Option<Lane>,
 }
+
+/// Candidate lane entries every probe also runs: those of `manifest` carrying one of `flags`
+/// (the format vectors, say). Their ids are kept as `candidate:<id>`, which is also their
+/// witness reference, so a fault the corpus alone misses shows as caught by the lane.
+#[derive(Debug, Clone)]
+pub struct Lane {
+    pub manifest: PathBuf,
+    pub flags: Vec<String>,
+}
+
+/// The id prefix of a candidate lane entry in a fingerprint and in a fault's entries.
+pub const LANE_PREFIX: &str = "candidate:";
 
 impl Paths {
     pub fn new(root: &Path, manifest: &Path, versions: &Path, known_dir: &Path) -> Result<Paths> {
@@ -54,43 +68,79 @@ impl Paths {
             manifest: abs(manifest)?,
             versions: abs(versions)?,
             known_dir: abs(known_dir)?,
+            lane: None,
         })
+    }
+
+    /// Adds a candidate lane, resolved against the root like the other paths.
+    pub fn with_lane(mut self, manifest: Option<&Path>, flags: &[String]) -> Result<Paths> {
+        if let Some(m) = manifest {
+            let m = if m.is_absolute() {
+                m.to_path_buf()
+            } else {
+                self.root.join(m)
+            };
+            ensure!(
+                !flags.is_empty(),
+                "a candidate lane needs at least one --candidate-flag"
+            );
+            self.lane = Some(Lane {
+                manifest: std::fs::canonicalize(&m)
+                    .with_context(|| format!("resolving {}", m.display()))?,
+                flags: flags.to_vec(),
+            });
+        }
+        Ok(self)
     }
 }
 
 /// The cells of one sdk version in one corpus run, by entry id.
 pub type Fingerprint = BTreeMap<String, Cell>;
 
-/// Runs the whole corpus on one version with `command` as its testee and returns its cells.
+/// Runs the whole corpus (and the candidate lane, if any) on one version with `command` as its
+/// testee and returns its cells.
 pub fn corpus_cells(
     paths: &Paths,
     sdk: &str,
     version: &str,
     command: &[String],
 ) -> Result<Fingerprint> {
-    let outcome = runner::run(&RunOptions {
-        root: paths.root.clone(),
-        manifest: paths.manifest.clone(),
-        versions: paths.versions.clone(),
-        known_dir: paths.known_dir.clone(),
-        sdks: vec![sdk.to_string()],
-        only_versions: vec![version.to_string()],
-        all_versions: false,
-        selection: Selection::default(),
-        build: false,
-        out: None,
-        passes: 1,
-        command: Some(command.to_vec()),
-        coverage: false,
-    })?;
-    let key = format!("{sdk}@{version}");
     let mut out = Fingerprint::new();
-    for row in outcome.matrix.entries {
-        let cell = row
-            .cells
-            .get(&key)
-            .with_context(|| format!("{} has no cell for {key}", row.id))?;
-        out.insert(row.id, cell.clone());
+    let mut runs = vec![(paths.manifest.clone(), Selection::default(), "")];
+    if let Some(lane) = &paths.lane {
+        runs.push((
+            lane.manifest.clone(),
+            Selection {
+                flags: lane.flags.clone(),
+                ..Selection::default()
+            },
+            LANE_PREFIX,
+        ));
+    }
+    for (manifest, selection, prefix) in runs {
+        let outcome = runner::run(&RunOptions {
+            root: paths.root.clone(),
+            manifest,
+            versions: paths.versions.clone(),
+            known_dir: paths.known_dir.clone(),
+            sdks: vec![sdk.to_string()],
+            only_versions: vec![version.to_string()],
+            all_versions: false,
+            selection,
+            build: false,
+            out: None,
+            passes: 1,
+            command: Some(command.to_vec()),
+            coverage: false,
+        })?;
+        let key = format!("{sdk}@{version}");
+        for row in outcome.matrix.entries {
+            let cell = row
+                .cells
+                .get(&key)
+                .with_context(|| format!("{} has no cell for {key}", row.id))?;
+            out.insert(format!("{prefix}{}", row.id), cell.clone());
+        }
     }
     Ok(out)
 }
@@ -237,7 +287,95 @@ pub struct Fault {
     pub entries_changed: usize,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
+    /// Caught, but only by candidate lane entries: the corpus alone misses it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub lane_only: bool,
+    /// For a fault the corpus alone misses: why, from the committed classification.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub class: Option<Classified>,
 }
+
+impl Fault {
+    /// Built, and no corpus entry changed: missed, timed out, or caught by the lane only.
+    pub fn corpus_misses(&self) -> bool {
+        match self.status {
+            Status::Missed | Status::Timeout => true,
+            Status::Caught => self.lane_only,
+            Status::Unviable => false,
+        }
+    }
+}
+
+/// One row of `conformance/seed-check/classes/<sdk>.json`.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ClassRow {
+    pub key: String,
+    pub class: String,
+    pub reason: String,
+}
+
+/// Attaches the committed classification to every fault the corpus alone misses and returns
+/// how many of those have none. A class name outside [`CLASSES`] is an error; rows for faults
+/// the corpus now catches are left out of the report.
+pub fn classify(report: &mut Report, dir: &Path) -> Result<usize> {
+    let path = dir.join(format!("{}.json", report.sdk));
+    let rows: Vec<ClassRow> = if path.is_file() {
+        read_json(&path)?
+    } else {
+        Vec::new()
+    };
+    let mut by_key = BTreeMap::new();
+    for r in rows {
+        ensure!(
+            CLASSES.iter().any(|(c, _)| *c == r.class),
+            "{}: {} has class {:?}, not one of {:?}",
+            path.display(),
+            r.key,
+            r.class,
+            CLASSES.map(|(c, _)| c)
+        );
+        by_key.insert(r.key.clone(), r);
+    }
+    let mut unclassified = 0;
+    for f in &mut report.faults {
+        f.class = None;
+        if !f.corpus_misses() {
+            continue;
+        }
+        match by_key.get(&f.key) {
+            Some(r) => {
+                f.class = Some(Classified {
+                    class: r.class.clone(),
+                    reason: r.reason.clone(),
+                })
+            }
+            None => unclassified += 1,
+        }
+    }
+    Ok(unclassified)
+}
+
+/// Why the corpus misses a fault, one of four classes (`conformance/seed-check/classes/`).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Classified {
+    /// `equivalent`, `outside-the-ops`, `corpus-gap` or `other`.
+    pub class: String,
+    pub reason: String,
+}
+
+/// The four classes of a fault the corpus misses.
+pub const CLASSES: [(&str, &str); 4] = [
+    ("equivalent", "no input can tell it from the unmodified sdk"),
+    (
+        "outside-the-ops",
+        "the code is on no path a testee op takes",
+    ),
+    (
+        "corpus-gap",
+        "a testee op reaches it, but no corpus entry does",
+    ),
+    ("other", "none of the above"),
+];
 
 /// How many changed entries a fault lists.
 pub const WITNESS_LIMIT: usize = 5;
@@ -275,6 +413,9 @@ pub struct Report {
     /// corpus catches each.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub real_faults: Vec<RealFault>,
+    /// The candidate lane every probe also ran, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub lane: Option<String>,
 }
 
 impl Report {
@@ -285,6 +426,29 @@ impl Report {
         let get = |s| self.counts.get(&s).copied().unwrap_or(0);
         let caught = get(Status::Caught);
         (caught, caught + get(Status::Timeout) + get(Status::Missed))
+    }
+
+    /// Like [`Report::rate`], counting only the faults a corpus entry caught.
+    pub fn corpus_rate(&self) -> (usize, usize) {
+        let alone = self
+            .faults
+            .iter()
+            .filter(|f| f.status == Status::Caught && !f.lane_only)
+            .count();
+        (alone, self.rate().1)
+    }
+
+    /// The faults the corpus alone misses, by class (unclassified ones under `unclassified`).
+    pub fn class_counts(&self) -> BTreeMap<String, usize> {
+        let mut out = BTreeMap::new();
+        for f in self.faults.iter().filter(|f| f.corpus_misses()) {
+            let c = f
+                .class
+                .as_ref()
+                .map_or("unclassified".to_string(), |c| c.class.clone());
+            *out.entry(c).or_insert(0) += 1;
+        }
+        out
     }
 }
 
@@ -364,12 +528,24 @@ pub fn fault_from(
     capture: &Capture,
 ) -> Fault {
     let (scrub, corpus_ids) = (&capture.scrub, capture.corpus_ids.as_slice());
+    let mut lane_only = false;
     let (entries, changed, note) = match probe {
-        Some(ProbeOutcome::Changed { entries }) => (
-            entries.iter().take(WITNESS_LIMIT).cloned().collect(),
-            entries.len(),
-            None,
-        ),
+        Some(ProbeOutcome::Changed { entries }) => {
+            // corpus entries first, so a fault both catch is witnessed by the corpus
+            let (lane, corpus): (Vec<&String>, Vec<&String>) =
+                entries.iter().partition(|e| e.starts_with(LANE_PREFIX));
+            lane_only = corpus.is_empty() && !lane.is_empty();
+            (
+                corpus
+                    .into_iter()
+                    .chain(lane)
+                    .take(WITNESS_LIMIT)
+                    .cloned()
+                    .collect(),
+                entries.len(),
+                None,
+            )
+        }
         Some(ProbeOutcome::Failed { message }) => (
             if status == Status::Caught {
                 corpus_ids.iter().take(WITNESS_LIMIT).cloned().collect()
@@ -394,6 +570,8 @@ pub fn fault_from(
         entries,
         entries_changed: changed,
         note,
+        lane_only,
+        class: None,
     }
 }
 
@@ -413,7 +591,16 @@ pub fn obligations(report: &Report) -> ObligationLedger {
         let (status, witnesses, evidence) = match f.status {
             Status::Caught if !f.entries.is_empty() => (
                 ObligationStatus::Met,
-                f.entries.iter().map(|e| format!("entry:{e}")).collect(),
+                f.entries
+                    .iter()
+                    .map(|e| {
+                        if e.starts_with(LANE_PREFIX) {
+                            e.clone()
+                        } else {
+                            format!("entry:{e}")
+                        }
+                    })
+                    .collect(),
                 Some(format!(
                     "{}; {} entries change",
                     f.mutation, f.entries_changed
@@ -446,25 +633,28 @@ pub fn obligations(report: &Report) -> ObligationLedger {
 }
 
 pub fn render_md(reports: &[Report]) -> String {
+    let pct = |c: usize, n: usize| {
+        if n == 0 {
+            "none built".to_string()
+        } else {
+            format!("{c} of {n} ({:.1}%)", 100.0 * c as f64 / n as f64)
+        }
+    };
     let mut out = String::from(
         "# Seeded faults\n\n\
          Written by `shapekit conformance seed-check`. Each sdk's mutation tool seeds faults \
-         into the sdk's encoding and helper code; a sample of them is run against the corpus. \
-         A fault is caught when the corpus run on the faulty build differs from the run on the \
-         unmodified build.\n\n\
-         | sdk | version | tool | faults generated | sampled | caught | timed out | missed | did not build | caught of those that built |\n\
-         |---|---|---|---|---|---|---|---|---|---|\n",
+         into the sdk's encoding and helper code; a sample of them is run against the corpus, \
+         and where a candidate lane is named, against those candidate entries too. A fault is \
+         caught when the run on the faulty build differs from the run on the unmodified build.\n\n\
+         | sdk | version | tool | faults generated | sampled | caught | timed out | missed | did not build | caught by the corpus alone | caught with the candidate lane |\n\
+         |---|---|---|---|---|---|---|---|---|---|---|\n",
     );
     for r in reports {
         let g = |s| r.counts.get(&s).copied().unwrap_or(0);
         let (c, n) = r.rate();
-        let pct = if n == 0 {
-            "none built".to_string()
-        } else {
-            format!("{c} of {n} ({:.1}%)", 100.0 * c as f64 / n as f64)
-        };
+        let (alone, _) = r.corpus_rate();
         out.push_str(&format!(
-            "| {} | {} | {} {} | {} | {} | {} | {} | {} | {} | {pct} |\n",
+            "| {} | {} | {} {} | {} | {} | {} | {} | {} | {} | {} | {} |\n",
             r.sdk,
             r.version,
             r.tool.name,
@@ -474,7 +664,49 @@ pub fn render_md(reports: &[Report]) -> String {
             g(Status::Caught),
             g(Status::Timeout),
             g(Status::Missed),
-            g(Status::Unviable)
+            g(Status::Unviable),
+            pct(alone, n),
+            if r.lane.is_some() {
+                pct(c, n)
+            } else {
+                "no lane run".to_string()
+            }
+        ));
+    }
+    for r in reports {
+        if let Some(lane) = &r.lane {
+            out.push_str(&format!(
+                "\n{} {}: the candidate lane was {lane}.\n",
+                r.sdk, r.version
+            ));
+        }
+    }
+    out.push_str(
+        "\n## Why the corpus alone misses a fault\n\n\
+         Every fault the corpus alone misses is classified in `conformance/seed-check/classes/<sdk>.json`:\n\n",
+    );
+    for (c, what) in CLASSES {
+        out.push_str(&format!("- `{c}`: {what}\n"));
+    }
+    out.push_str("\n| sdk | version |");
+    for (c, _) in CLASSES {
+        out.push_str(&format!(" {c} |"));
+    }
+    out.push_str(" unclassified | of which the candidate lane catches |\n|---|---|");
+    for _ in CLASSES {
+        out.push_str("---|");
+    }
+    out.push_str("---|---|\n");
+    for r in reports {
+        let counts = r.class_counts();
+        out.push_str(&format!("| {} | {} |", r.sdk, r.version));
+        for (c, _) in CLASSES {
+            out.push_str(&format!(" {} |", counts.get(c).copied().unwrap_or(0)));
+        }
+        out.push_str(&format!(
+            " {} | {} |\n",
+            counts.get("unclassified").copied().unwrap_or(0),
+            r.faults.iter().filter(|f| f.lane_only).count()
         ));
     }
     for r in reports {
@@ -492,22 +724,33 @@ pub fn render_md(reports: &[Report]) -> String {
                 ));
             }
         }
-        let missed: Vec<&Fault> = r
-            .faults
-            .iter()
-            .filter(|f| f.status == Status::Missed)
-            .collect();
-        out.push_str(&format!("\n## Missed in {} {}\n\n", r.sdk, r.version));
+        let missed: Vec<&Fault> = r.faults.iter().filter(|f| f.corpus_misses()).collect();
+        out.push_str(&format!(
+            "\n## Missed by the corpus alone in {} {}\n\n",
+            r.sdk, r.version
+        ));
         if missed.is_empty() {
             out.push_str("None.\n");
         } else {
-            out.push_str("| file | line | mutation |\n|---|---|---|\n");
+            out.push_str("| file | line | mutation | class | why | candidate lane |\n|---|---|---|---|---|---|\n");
+            let cell = |t: &str| t.replace('|', "\\|").replace('\n', " ");
             for f in missed {
+                let (class, why) = f.class.as_ref().map_or(("unclassified", ""), |c| {
+                    (c.class.as_str(), c.reason.as_str())
+                });
                 out.push_str(&format!(
-                    "| {} | {} | {} |\n",
+                    "| {} | {} | {} | {class} | {} | {} |\n",
                     f.file,
                     f.line,
-                    f.mutation.replace('|', "\\|").replace('\n', " ")
+                    cell(&f.mutation),
+                    cell(why),
+                    if f.lane_only {
+                        format!("caught by {}", f.entries.join(", "))
+                    } else if r.lane.is_some() {
+                        "missed".to_string()
+                    } else {
+                        "not run".to_string()
+                    }
                 ));
             }
         }
@@ -641,11 +884,47 @@ impl Context {
         Scrub::new(self.work.parent().unwrap_or(&self.work), &self.paths.root)
     }
 
-    /// The scrubber and the ids of every corpus entry a probe runs, sorted.
+    /// The candidate lane entries a probe runs, as `candidate:<id>`, sorted.
+    pub fn lane_ids(&self) -> Result<Vec<String>> {
+        let Some(lane) = &self.paths.lane else {
+            return Ok(Vec::new());
+        };
+        let (manifest, _) = runner::load_manifest(&lane.manifest)?;
+        let mut ids: Vec<String> = manifest
+            .entries
+            .into_iter()
+            .filter(|e| e.flags.iter().any(|f| lane.flags.contains(f)))
+            .map(|e| format!("{LANE_PREFIX}{}", e.id))
+            .collect();
+        ids.sort();
+        Ok(ids)
+    }
+
+    /// What the report says about the candidate lane, if one ran.
+    pub fn lane_note(&self) -> Result<Option<String>> {
+        let Some(lane) = &self.paths.lane else {
+            return Ok(None);
+        };
+        let manifest = lane
+            .manifest
+            .strip_prefix(&self.paths.root)
+            .unwrap_or(&lane.manifest)
+            .display()
+            .to_string();
+        Ok(Some(format!(
+            "{} entries of {manifest} flagged {}",
+            self.lane_ids()?.len(),
+            lane.flags.join(" or ")
+        )))
+    }
+
+    /// The scrubber and the ids of every entry a probe runs: the corpus's sorted, then the
+    /// candidate lane's.
     pub fn capture(&self) -> Result<Capture> {
         let (manifest, _) = runner::load_manifest(&self.paths.manifest)?;
         let mut corpus_ids: Vec<String> = manifest.entries.into_iter().map(|e| e.id).collect();
         corpus_ids.sort();
+        corpus_ids.extend(self.lane_ids()?);
         Ok(Capture {
             scrub: self.scrub(),
             corpus_ids,
@@ -690,9 +969,24 @@ impl Context {
             "--baseline".to_string(),
             baseline.display().to_string(),
         ];
+        v.extend(self.lane_args());
         for c in command {
             v.push("--command".to_string());
             v.push(c.clone());
+        }
+        v
+    }
+
+    /// The `--candidate` and `--candidate-flag` arguments that carry the lane to a callback.
+    pub fn lane_args(&self) -> Vec<String> {
+        let mut v = Vec::new();
+        if let Some(lane) = &self.paths.lane {
+            v.push("--candidate".to_string());
+            v.push(lane.manifest.display().to_string());
+            for f in &lane.flags {
+                v.push("--candidate-flag".to_string());
+                v.push(f.clone());
+            }
         }
         v
     }
@@ -801,6 +1095,8 @@ mod tests {
             entries: entries.iter().map(|s| s.to_string()).collect(),
             entries_changed: entries.len(),
             note: note.map(str::to_string),
+            lane_only: false,
+            class: None,
         };
         let report = Report {
             schema: REPORT_SCHEMA,
@@ -823,6 +1119,7 @@ mod tests {
                 mk("d", Status::Caught, vec![], Some("did not start")),
             ],
             real_faults: vec![],
+            lane: None,
         };
         let ledger = obligations(&report);
         let got: Vec<(&str, ObligationStatus, usize)> = ledger
@@ -881,5 +1178,113 @@ mod tests {
             f.note.as_deref(),
             Some("the corpus run stopped: hello failed: <work>/js/a.js")
         );
+    }
+
+    #[test]
+    fn a_fault_only_the_lane_catches_is_witnessed_by_the_lane() {
+        let capture = Capture {
+            scrub: Scrub::new(Path::new("/w"), Path::new("/r")),
+            corpus_ids: vec![],
+        };
+        let changed = |entries: &[&str]| ProbeOutcome::Changed {
+            entries: entries.iter().map(|e| e.to_string()).collect(),
+        };
+        let mk = |p: &ProbeOutcome| {
+            fault_from(
+                "k".to_string(),
+                "f".to_string(),
+                1,
+                "m".to_string(),
+                Status::Caught,
+                Some(p),
+                &capture,
+            )
+        };
+        let both = mk(&changed(&["candidate:format.a", "cap01.x"]));
+        assert!(!both.lane_only);
+        assert_eq!(both.entries, ["cap01.x", "candidate:format.a"]);
+        let mut lane = mk(&changed(&["candidate:format.a"]));
+        lane.key = "l".to_string();
+        assert!(lane.lane_only && lane.corpus_misses());
+        let report = Report {
+            schema: REPORT_SCHEMA,
+            sdk: "rust".to_string(),
+            package: "p".to_string(),
+            version: "1".to_string(),
+            tool: Tool {
+                name: "t".to_string(),
+                version: "1".to_string(),
+            },
+            scope: vec![],
+            population: 2,
+            seed: 1,
+            sample: 2,
+            counts: counts(&[both.clone(), lane.clone()]),
+            faults: vec![both, lane],
+            real_faults: vec![],
+            lane: Some("lane".to_string()),
+        };
+        assert_eq!(report.rate(), (2, 2));
+        assert_eq!(report.corpus_rate(), (1, 2));
+        let ledger = obligations(&report);
+        assert_eq!(ledger.obligations[1].witnesses, ["candidate:format.a"]);
+    }
+
+    #[test]
+    fn classes_attach_to_what_the_corpus_misses() {
+        let dir = std::env::temp_dir().join(format!("seed-classes-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("go.json"),
+            r#"[{"key":"a","class":"outside-the-ops","reason":"builder"},{"key":"c","class":"corpus-gap","reason":"r"}]"#,
+        )
+        .unwrap();
+        let mk = |key: &str, status| Fault {
+            key: key.to_string(),
+            file: "f".to_string(),
+            line: 1,
+            mutation: "m".to_string(),
+            status,
+            entries: vec![],
+            entries_changed: 0,
+            note: None,
+            lane_only: false,
+            class: None,
+        };
+        let mut report = Report {
+            schema: REPORT_SCHEMA,
+            sdk: "go".to_string(),
+            package: "p".to_string(),
+            version: "1".to_string(),
+            tool: Tool {
+                name: "t".to_string(),
+                version: "1".to_string(),
+            },
+            scope: vec![],
+            population: 3,
+            seed: 1,
+            sample: 3,
+            counts: BTreeMap::new(),
+            faults: vec![
+                mk("a", Status::Missed),
+                mk("b", Status::Missed),
+                mk("c", Status::Caught),
+            ],
+            real_faults: vec![],
+            lane: None,
+        };
+        assert_eq!(classify(&mut report, &dir).unwrap(), 1);
+        assert_eq!(
+            report.faults[0].class.as_ref().unwrap().class,
+            "outside-the-ops"
+        );
+        assert!(report.faults[2].class.is_none());
+        std::fs::write(
+            dir.join("go.json"),
+            r#"[{"key":"a","class":"x","reason":"r"}]"#,
+        )
+        .unwrap();
+        assert!(classify(&mut report, &dir).is_err());
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 }

@@ -1,0 +1,327 @@
+[
+  {
+    "key": "lib/esm/base/asset.js:142:26-144:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "Asset.toTrustLineXDRObject (a deprecated alias) has no call site in the package (grep finds only its definition) and the testee never calls it; asset ops use Asset.fromOperation, Asset.compare, getLiquidityPoolId and contractId. Coverage over the full corpus run: never called."
+  },
+  {
+    "key": "lib/esm/base/auth.js:468:9-470:17:ConditionalExpression:59772994",
+    "class": "outside-the-ops",
+    "reason": "parseEd25519Signatures in base/auth.js is used only by inspectAuthEntry/checkAuthEntryReadiness, auth helpers the testee never calls (no op touches authorization entries beyond decode/encode). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/claimant.js:43:9-43:43:ConditionalExpression:b5bea41b",
+    "class": "outside-the-ops",
+    "reason": "Claimant.predicateOr argument check: a claim predicate builder. The testee builds no claimants; Operation.fromXdrObject (tx_hash/balance_id path) converts decoded predicates without calling predicateAnd/Or. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/invocation.js:32:53-32:102:EqualityOperator:3b1b1591",
+    "class": "outside-the-ops",
+    "reason": "buildInvocationTree in base/invocation.js is only exported (index.js re-exports it); nothing in transaction parsing, scValToNative or the testee calls it. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/memo.js:10:18-10:24:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "The base MemoHash constant is used consistently by the base Memo class (constructor switch, Memo.hash, toXdrObject), so the change is self-consistent and only visible to a caller comparing memo.type with \"hash\". The base Memo class is reached only from TransactionBuilder.addMemo/user code: Transaction keeps tx.memo as the raw xdr Memo and tx_hash hashes the xdr, so no op constructs a base Memo."
+  },
+  {
+    "key": "lib/esm/base/operation.js:441:10-441:30:StringLiteral:12ae32cb",
+    "class": "corpus-gap",
+    "reason": "Reachable from tx_hash and balance_id: TransactionBuilder.fromXDR -> new Transaction -> Operation.fromXdrObject -> case revokeSponsorshipSigner -> convertXdrSignerKeyToObject. With the case label emptied a HashX signer key falls to the default arm and throws. No corpus envelope carries a RevokeSponsorship op whose signer key is a hash(x) key (coverage 0). Verified by running both builds. Killing input: op tx_hash, TransactionEnvelope (v1, one RevokeSponsorshipOp of type REVOKE_SPONSORSHIP_SIGNER with SignerKey SIGNER_KEY_TYPE_HASH_X, testnet passphrase), {'id': '1', 'op': 'tx_hash', 'network_passphrase': 'Test SDF Network ; September 2015', 'xdr': 'AAAAAgAAAACKiOPddAnxlf1S2y08ul1yymcJvx2UEhvzdIgBtA9vXAAAAGQAAAAAAAAAZQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAEgAAAAEAAAAAiojj3XQJ8ZX9UtstPLpdcspnCb8dlBIb83SIAbQPb1wAAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqoAAAAAAAAAAA=='}; unmodified: {'hash': '538aec3e6ef243be170737ae0f97c70ee1144f8b6d012adfeff0ee6e2191eee4'}; faulty: {'rejected': 'Error: Unknown signerKey type: signerKeyTypeHashX'}."
+  },
+  {
+    "key": "lib/esm/base/operations/invoke_host_function.js:89:9-89:61:ConditionalExpression:b5bea41b",
+    "class": "outside-the-ops",
+    "reason": "Operation.createCustomContract (invoke_host_function.js) is an operation builder; the only builder the testee calls is Operation.manageSellOffer (id_parse offer). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/operations/set_options.js:74:11-74:52:ConditionalExpression:b5bea41b",
+    "class": "outside-the-ops",
+    "reason": "Operation.setOptions signer handling is a builder path; the testee never builds a SetOptions op (decoded SetOptions ops go through Operation.fromXdrObject, not setOptions()). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/operations/set_trustline_flags.js:29:9-29:75:ConditionalExpression:fcbcf165",
+    "class": "outside-the-ops",
+    "reason": "Operation.setTrustLineFlags is a builder; not called by any op. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction.js:163:21-163:47:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "Setter of Transaction.timeBounds that throws \"Transaction is immutable\"; the testee never assigns to a Transaction property (it only calls hash(), getClaimableBalanceId and reads innerTransaction). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_base.js:180:9-180:53:BooleanLiteral:98cc60dc",
+    "class": "outside-the-ops",
+    "reason": "TransactionBase.addSignature (signature verification) is never called; tx_hash only calls hash(). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_base.js:209:9-209:29:EqualityOperator:aa12cbd2",
+    "class": "outside-the-ops",
+    "reason": "TransactionBase.signHashX is never called by any op. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:117:27-117:51:ObjectLiteral:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "TransactionBuilder constructor (opts.ledgerbounds copy); the testee uses only the static TransactionBuilder.fromXDR, which constructs Transaction/FeeBumpTransaction directly, never a builder. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:156:27-156:73:StringLiteral:059b8502",
+    "class": "outside-the-ops",
+    "reason": "TransactionBuilder.cloneFrom error message; cloneFrom is never called. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:372:37-376:6:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "TransactionBuilder.setLedgerbounds validation block; builder method never called. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:55:57-59:2:ArrayDeclaration:4f53cda1",
+    "class": "outside-the-ops",
+    "reason": "SOROBAN_OPERATION_TYPES is read only in TransactionBuilder.build() (line 735); the module-level Set is created at load, but build() is never called by any op."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:601:37-605:12:ObjectLiteral:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "TransactionBuilder.addSacTransferOperation footprint construction; never called. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/transaction_builder.js:809:35-812:6:ObjectLiteral:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "TransactionBuilder.build() transaction assembly; never called (the testee parses envelopes, it does not build them). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/util/continued_fraction.js:53:25-74:6:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "best_r fallback block runs only when the continued-fraction result has a zero numerator or denominator. best_r is reached from ops only through id_parse offer -> Operation.manageSellOffer, and the testee always passes price \"1\" (exact 1/1, block never entered); transaction parsing uses fromXdrPrice, not best_r. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/util/operations.js:19:37-21:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "checkUnsignedIntValue is used only by Operation.setOptions (builder); not called by any op. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/base/util/operations.js:60:23-60:67:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: toXdrOfferId's \"offerId must be a string of decimal digits\" becomes \"\". It is reached (18 times in the corpus run) by id_parse kind offer with a non-digit string, e.g. {\"op\":\"id_parse\",\"kind\":\"offer\",\"input\":\"12a\"}, which the corpus expects rejected. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/asset-type.js:28:25-28:36:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "AssetType.fromName: the class name is used only in the error message of enumFromName, and fromName has no call site in the package (to-json and decoding use fromValue / schema names). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/bucket-entry.js:96:12-96:64:ObjectLiteral:44136fa3",
+    "class": "corpus-gap",
+    "reason": "BucketEntry INITENTRY arm toXdrObject returns {} so encoding and decode_json (toJson walks toXdrObject()) fail. decode_encode/decode_json accept any exported xdr type; the corpus has no BucketEntry entry (its xdr types are LedgerCloseMeta, TransactionEnvelope, TransactionResultMeta(V1), LedgerEntry, ScVal, ContractEvent, Asset, SignerKey, SorobanAuthorizationEntry, ScSpecFunctionV0). Verified. Killing input: op decode_encode, BucketEntry (INITENTRY wrapping a DATA LedgerEntry), {'id': '1', 'op': 'decode_encode', 'type': 'BucketEntry', 'xdr': 'AAAAAgAAAAEAAAADAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAWEAAAAAAAABYgAAAAAAAAAAAAAA'}; unmodified: {'xdr': 'AAAAAgAAAAEAAAADAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAWEAAAAAAAABYgAAAAAAAAAAAAAA'}; faulty: {'rejected': 'XdrError: BucketEntry: expected union object with type discriminator'}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/change-trust-result.js:19:15-19:35:StringLiteral:12ae32cb",
+    "class": "equivalent",
+    "reason": "Union case name of a void arm. The name is used only as (1) the key into unionCaseNames, whose JSON name comes from the switch enum member (so \"\" still maps to \"success\" both ways), (2) a uniqueness check, and (3) the reader/writer path string handed to the void arm, which reads nothing and throws nothing. fromXdrObject switches on the numeric code. Verified: decode_encode, decode_json and encode_json of ChangeTrustResult success are identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/claim-claimable-balance-result.js:15:5-15:34:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: the union's schema name \"ClaimClaimableBalanceResult\" becomes \"\" and appears only in root error paths (e.g. decode of code 5: \"ClaimClaimableBalanceResult.code: unknown enum value 5\" vs \".code: unknown enum value 5\"); schema.name is otherwise used only for the OVERRIDES lookup, which has no entry for this type. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/contract-cost-type.js:213:47-213:62:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ContractCostType code 70 (decode_encode and decode_json identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/contract-event-type.js:8:28-8:47:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: enumType name \"ContractEventType\" becomes \"\" and appears only in error text at the root (\"ContractEventType: unknown enum value 9\" vs \": unknown enum value 9\"); nested in ContractEvent the path is built from the parent's field names. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/create-account-result.js:34:37-36:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "CreateAccountResult.createAccountUnderfunded() is an arm factory for user code; decoding builds arms with `new` in fromXdrObject, and no op builds results. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/end-sponsoring-future-reserves-result-code.js:14:14-14:53:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: enumType name \"EndSponsoringFutureReservesResultCode\" becomes \"\" and appears only in root error text (decode of 7). The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/end-sponsoring-future-reserves-result.js:10:9-10:238:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "Error message of the guard in EndSponsoringFutureReservesResultBase's constructor, thrown only for `new xdr.EndSponsoringFutureReservesResult(...)` in user code; decoding constructs arm subclasses. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/error-code.js:26:30-28:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "ErrorCode.fromXdrObject returns undefined, so decoding ErrorCode (or the overlay Error struct, whose code field becomes undefined) yields no value to encode or render. The corpus has no overlay types. Verified (also type Error, xdr AAAAAAAAAAF4AAAA). Killing input: op decode_encode, ErrorCode (ERR_MISC = 0), {'id': '1', 'op': 'decode_encode', 'type': 'ErrorCode', 'xdr': 'AAAAAA=='}; unmodified: {'xdr': 'AAAAAA=='}; faulty: {'rejected': \"TypeError: Cannot read properties of undefined (reading 'toXdr')\"}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/extend-footprint-ttl-result.js:79:20-79:22:UnaryOperator:c59dc4e4",
+    "class": "corpus-gap",
+    "reason": "ExtendFootprintTtlResultMalformed.toXdrObject returns code +1, which has no case, so re-encoding and toJson fail. Corpus results contain only the success arm of this union (coverage 0 for this arm). Verified. A TransactionResultMeta/LedgerCloseMeta holding a failed ExtendFootprintTTL op with code -1 would catch it too. Killing input: op decode_encode, ExtendFootprintTtlResult (EXTEND_FOOTPRINT_TTL_MALFORMED = -1), {'id': '1', 'op': 'decode_encode', 'type': 'ExtendFootprintTtlResult', 'xdr': '/////w=='}; unmodified: {'xdr': '/////w=='}; faulty: {'rejected': 'XdrError: ExtendFootprintTtlResult: no case for union discriminator 1'}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/hash-id-preimage.js:141:12-141:62:ObjectLiteral:44136fa3",
+    "class": "corpus-gap",
+    "reason": "HashIdPreimage ENVELOPE_TYPE_POOL_REVOKE_OP_ID arm toXdrObject returns {}. contract_id only builds the CONTRACT_ID arm and balance_id the OP_ID arm, but decode_encode/decode_json take HashIdPreimage directly; no corpus entry has it. Verified. Killing input: op decode_encode, HashIdPreimage (type 7, revokeId), {'id': '1', 'op': 'decode_encode', 'type': 'HashIdPreimage', 'xdr': 'AAAABwAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAABAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAAAAA=='}; unmodified: {'xdr': 'AAAABwAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAABAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiAAAAAA=='}; faulty: {'rejected': 'XdrError: HashIdPreimage: expected union object with type discriminator'}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/ledger-entry-change-type.js:6:5-6:25:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of LedgerEntryChangeType 0 (identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/ledger-key.js:262:17-264:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "LedgerKey CONFIG_SETTING arm toXdrObject returns undefined. No corpus value contains a config-setting LedgerKey (coverage 0), though LedgerCloseMeta footprints/evicted keys could carry one. Verified. Killing input: op decode_encode, LedgerKey (CONFIG_SETTING, CONFIG_SETTING_CONTRACT_MAX_SIZE_BYTES), {'id': '1', 'op': 'decode_encode', 'type': 'LedgerKey', 'xdr': 'AAAACAAAAAA='}; unmodified: {'xdr': 'AAAACAAAAAA='}; faulty: {'rejected': 'XdrError: LedgerKey: expected union object with type discriminator'}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/liquidity-pool-withdraw-result.js:33:43-35:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "LiquidityPoolWithdrawResult.liquidityPoolWithdrawMalformed() is an arm factory for user code; decoding uses `new` in fromXdrObject. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/manage-buy-offer-result.js:149:10-149:37:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ManageBuyOfferResult code -2 (identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/manage-sell-offer-result.js:177:15-179:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "The `value` getter of ManageSellOfferResultBuyNotAuthorized (a void arm) returns undefined instead of null. No op reads `.value` of a result union: encoding uses toXdrObject and decode_json walkToJson. Verified: decode_encode/decode_json of ManageSellOfferResult -4 identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/manage-sell-offer-result.js:34:15-34:43:StringLiteral:12ae32cb",
+    "class": "equivalent",
+    "reason": "Void-arm union case name, same reasoning as the changeTrustSuccess case: JSON names come from the ManageSellOfferResultCode member, fromXdrObject switches on the number, and the path string goes to a void arm that never uses it. Verified: decode_encode, decode_json, encode_json(\"buy_no_issuer\") identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/memo.js:32:21-34:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "xdr.Memo.memoId() factory: called from base Memo.toXdrObject (builder path) and user code; decoding builds MemoId with `new` in fromXdrObject. No op calls it. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/operation-result-tr.js:226:43-228:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "OperationResultTr.accountMerge() factory; decoding uses `new` in fromXdrObject. No op calls it. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/operation-type.js:25:5-25:28:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of OperationType 13 (identical); base/operation.js dispatches on the body union's `type` string, not on OperationType.name give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/path-payment-strict-receive-result-code.js:54:5-54:42:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of PathPaymentStrictReceiveResultCode -12 (identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/persisted-scp-state.js:29:17-31:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "PersistedScpState.v1() factory; decoding uses `new` in fromXdrObject. No op calls it. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/restore-footprint-result.js:20:15-20:42:StringLiteral:12ae32cb",
+    "class": "equivalent",
+    "reason": "Void-arm union case name (restoreFootprintMalformed), same reasoning as mutant changeTrustSuccess. Verified: decode_encode, decode_json, encode_json(\"malformed\") identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/sc-meta-kind.js:10:26-10:38:StringLiteral:12ae32cb",
+    "class": "equivalent",
+    "reason": "The class name passed to enumFromValue appears only in the error thrown when schema.nameByValue lacks the value. Every value reaching ScMetaKind.fromValue from an op has already passed the schema's decode (or fromJson) validation, so that error cannot fire. Verified: ScMetaKind 0 identical, ScMetaKind 1 rejected identically by the schema reader."
+  },
+  {
+    "key": "lib/esm/xdr/generated/sc-spec-entry.js:160:15-162:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "The `value` getter of ScSpecEntryUdtEnumV0; no op reads `.value` (toXdrObject uses this.udtEnumV0 directly). Verified: ScSpecEntry UDT_ENUM_V0 decode_encode/decode_json identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/sc-spec-type-def.js:409:10-409:28:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ScSpecTypeDef OPTION(bool) (identical); `.type` of ScSpecTypeDef is read by contract/spec.js and bindings/utils.js only give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/sc-spec-udt-union-case-v0.js:10:9-10:48:ConditionalExpression:fcbcf165",
+    "class": "outside-the-ops",
+    "reason": "The guard `new.target === ScSpecUdtUnionCaseV0Base` only matters for `new xdr.ScSpecUdtUnionCaseV0(...)` in user code; decoding constructs the arm subclasses. Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/generated/scp-quorum-set.js:34:37-34:73:ArrowFunction:1193b7f1",
+    "class": "corpus-gap",
+    "reason": "ScpQuorumSet.fromXdrObject maps innerSets with () => undefined, so any quorum set with a non-empty innerSets fails to encode/render. Corpus quorum sets (if any) have no inner sets (coverage 0). Verified. An LCM whose scpInfo carries a nested quorum set would catch it too. Killing input: op decode_encode, ScpQuorumSet (threshold 1, no validators, one inner set), {'id': '1', 'op': 'decode_encode', 'type': 'ScpQuorumSet', 'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAAAAAAA'}; unmodified: {'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAAAAAAA'}; faulty: {'rejected': \"TypeError: Cannot read properties of undefined (reading 'toXdrObject')\"}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/scp-statement-confirm.js:30:17-38:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "ScpStatementConfirm.toXdrObject returns undefined. No corpus value contains an SCP CONFIRM statement (coverage 0). Verified. Killing input: op decode_encode, ScpStatementConfirm, {'id': '1', 'op': 'decode_encode', 'type': 'ScpStatementConfirm', 'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAEiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=='}; unmodified: {'xdr': 'AAAAAQAAAAAAAAABAAAAAQAAAAEiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg=='}; faulty: {'rejected': 'XdrError: ScpStatementConfirm: expected plain object'}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/scp-statement-pledges.js:19:5-19:26:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: union schema name \"ScpStatementPledges\" becomes \"\"; only root error paths change (\"ScpStatementPledges.type: unknown enum value 7\" vs \".type: unknown enum value 7\"); valid values decode, encode and render identically. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/scp-statement-pledges.js:86:15-88:4:BlockStatement:44136fa3",
+    "class": "outside-the-ops",
+    "reason": "The `value` getter of ScpStatementPledgesPrepare; no op reads `.value`. Verified: ScpStatementPledges PREPARE decode_encode/decode_json identical."
+  },
+  {
+    "key": "lib/esm/xdr/generated/scp-statement-type.js:6:46-6:60:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `name` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of ScpStatementType 1 (identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/send-more-extended.js:25:30-30:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "SendMoreExtended.fromXdrObject returns undefined. Overlay message type, absent from the corpus. Verified. Killing input: op decode_encode, SendMoreExtended (numMessages 1, numBytes 1), {'id': '1', 'op': 'decode_encode', 'type': 'SendMoreExtended', 'xdr': 'AAAAAQAAAAE='}; unmodified: {'xdr': 'AAAAAQAAAAE='}; faulty: {'rejected': \"TypeError: Cannot read properties of undefined (reading 'toXdr')\"}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/soroban-transaction-meta-ext.js:20:15-20:19:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: the case name \"v1\" of SorobanTransactionMetaExt (int switch, so the JSON name is v1 from the discriminant either way, and the payload field keeps its own name \"v1\") only enters the path of errors inside the arm, e.g. a truncated arm gives \"SorobanTransactionMetaExt.v1.v1.totalRefundableResourceFeeCharged: incomplete XDR data...\" vs \"SorobanTransactionMetaExt..v1....\". Valid values and encode_json are identical (verified). The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  },
+  {
+    "key": "lib/esm/xdr/generated/stellar-value-type.js:46:30-48:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "StellarValueType.fromXdrObject returns undefined. Decoding StellarValue does not call it (its ext union switches on the number; coverage 0 over 413 LedgerCloseMeta entries), so only StellarValueType decoded on its own reaches it. Verified. Killing input: op decode_encode, StellarValueType (STELLAR_VALUE_BASIC = 0), {'id': '1', 'op': 'decode_encode', 'type': 'StellarValueType', 'xdr': 'AAAAAA=='}; unmodified: {'xdr': 'AAAAAA=='}; faulty: {'rejected': \"TypeError: Cannot read properties of undefined (reading 'toXdr')\"}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/stored-transaction-set.js:76:10-76:28:StringLiteral:12ae32cb",
+    "class": "outside-the-ops",
+    "reason": "the mutated value is the `type` of an object the decode path builds, but nothing an op calls reads that field: encoding goes through toXdrObject() and decode_json through walkToJson on the schema, both of which use numeric discriminants and the schema's own names. Only user code reading the field (or contract/spec.js and bindings, which the testee never loads) sees it. Confirmed by running the mutant: decode_encode and decode_json of StoredTransactionSet generalized arm (identical) give identical results."
+  },
+  {
+    "key": "lib/esm/xdr/generated/survey-message-response-type.js:12:27-19:4:BlockStatement:44136fa3",
+    "class": "corpus-gap",
+    "reason": "SurveyMessageResponseType.fromValue returns undefined, so fromXdrObject yields nothing. Overlay type, absent from the corpus. Verified. Killing input: op decode_encode, SurveyMessageResponseType (SURVEY_TOPOLOGY_RESPONSE_V2 = 2), {'id': '1', 'op': 'decode_encode', 'type': 'SurveyMessageResponseType', 'xdr': 'AAAAAg=='}; unmodified: {'xdr': 'AAAAAg=='}; faulty: {'rejected': \"TypeError: Cannot read properties of undefined (reading 'toXdr')\"}."
+  },
+  {
+    "key": "lib/esm/xdr/generated/transaction-signature-payload-tagged-transaction.js:10:9-10:72:ConditionalExpression:fcbcf165",
+    "class": "outside-the-ops",
+    "reason": "The guard `new.target === TransactionSignaturePayloadTaggedTransactionBase` only fires for `new xdr.TransactionSignaturePayloadTaggedTransaction(...)`; tx_hash constructs the arm subclasses (constructor runs 935 times in the corpus), so turning the guard off changes nothing an op does."
+  },
+  {
+    "key": "lib/esm/xdr/generated/trust-line-entry-extension-v2-ext.js:30:7-30:58:StringLiteral:059b8502",
+    "class": "equivalent",
+    "reason": "The message is thrown by TrustLineEntryExtensionV2Ext.fromXdrObject only for a wire.v other than 0, but the schema (no default arm) already rejects any other v during decode and fromJson, so the throw is dead code from every op. Verified: v=0 identical, v=1 rejected identically by the schema reader."
+  },
+  {
+    "key": "lib/esm/xdr/values/bigint-parts.js:24:7-24:27:ConditionalExpression:fcbcf165",
+    "class": "corpus-gap",
+    "reason": "assertDecimalDigitBudget never rejects with the condition forced false, so encode_json of an int64 written with more than 22 characters (leading zeros) is accepted. encode_json is the only op reaching it (from json), and the plan builds encode_json requests only from canonical expected JSON, which never has leading zeros. Verified. Note: catching this needs a JSON-rejection vector, which plan.rs has no check kind for today. Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'i64': '0000000000000000000000001'}}; unmodified: {'rejected': 'XdrError: int64: decimal string length 25 exceeds the 22-character budget for a 64-bit integer'}; faulty: {'xdr': 'AAAABgAAAAAAAAAB'}."
+  },
+  {
+    "key": "lib/esm/xdr/values/xdr-string.js:168:9-168:38:ConditionalExpression:fcbcf165",
+    "class": "outside-the-ops",
+    "reason": "XdrString.equals is never called by any op (the only .equals call sites in base are Asset/LiquidityPoolAsset equality, not reached by asset_order/pool_id with XdrStrings). Coverage: 0."
+  },
+  {
+    "key": "lib/esm/xdr/values/xdr-string.js:174:40-174:54:ArithmeticOperator:2dfb1ddf",
+    "class": "corpus-gap",
+    "reason": "hexDigit for uppercase A-F returns a negative number, so a \\x escape written in uppercase is refused by XdrString.fromJson. Reached by encode_json of any string field. Corpus expected JSON is rendered by stellar-xdr with lowercase hex, so uppercase never reaches it. Verified. Catching it needs an encode_json input that is not the canonical rendering (plan.rs only sends canonical JSON). Killing input: op encode_json, ScVal, {'id': '0', 'op': 'encode_json', 'type': 'ScVal', 'json': {'string': '\\\\xAB'}}; unmodified: {'xdr': 'AAAADgAAAAGrAAAA'}; faulty: {'rejected': 'XdrError: XdrString: invalid \\\\x escape \"\\\\xAB\"'}."
+  },
+  {
+    "key": "lib/esm/xdr/values/xdr-value.js:84:25-84:35:StringLiteral:12ae32cb",
+    "class": "other",
+    "reason": "only the text of a rejection message changes: assertXdrType's function name \"fromJson\" becomes \"\" in the TypeError thrown for a type with no schema. Every generated type has a schema; the only exports reaching it through encode_json are the base classes XdrValue, EnumValue, BigIntValue and BytesValue (e.g. type \"XdrValue\": \"TypeError: fromJson: XdrValue has no static schema...\" vs \"TypeError: : XdrValue has no static schema...\"), which are not .x types, so no corpus entry can name them; the check would also be a rejection either way. The seed probe compares cells, and a cell records an actual value only for checks that do not pass; every input that reaches this text is one the corpus expects rejected (or would be, as a must-reject entry), so the check passes on both builds. Only a check that already fails (the sdk wrongly rejecting a valid value along this path) could expose it, so no corpus vector can catch it while the sdk is correct."
+  }
+]

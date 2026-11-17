@@ -143,6 +143,13 @@ pub enum ConformanceCommand {
         /// Where <sdk>.json, <sdk>.obligations.json and SEED-CHECK.md go.
         #[arg(long, default_value = "conformance/seed-check")]
         out: PathBuf,
+        /// Also run these candidate lane entries in every probe (with --candidate-flag): a
+        /// fault only they catch counts as caught by the lane, apart from the corpus.
+        #[arg(long)]
+        candidate: Option<PathBuf>,
+        /// Flag the candidate lane entries must carry; repeatable.
+        #[arg(long = "candidate-flag")]
+        candidate_flags: Vec<String>,
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
         #[arg(long, default_value = "conformance/versions.toml")]
@@ -158,6 +165,13 @@ pub enum ConformanceCommand {
         root: PathBuf,
         #[arg(long)]
         manifest: PathBuf,
+        /// Also run these candidate lane entries in every probe (with --candidate-flag): a
+        /// fault only they catch counts as caught by the lane, apart from the corpus.
+        #[arg(long)]
+        candidate: Option<PathBuf>,
+        /// Flag the candidate lane entries must carry; repeatable.
+        #[arg(long = "candidate-flag")]
+        candidate_flags: Vec<String>,
         #[arg(long)]
         versions_file: PathBuf,
         #[arg(long)]
@@ -177,6 +191,10 @@ pub enum ConformanceCommand {
         /// Record directory; the file is named by the environment variable --label-env.
         #[arg(long, requires = "label_env")]
         record_dir: Option<PathBuf>,
+        /// Record directory whose records are numbered in the order the probes run:
+        /// `<n>.json`, n the count of records already there.
+        #[arg(long, conflicts_with_all = ["record", "record_dir"])]
+        record_next: Option<PathBuf>,
         #[arg(long)]
         label_env: Option<String>,
     },
@@ -187,6 +205,13 @@ pub enum ConformanceCommand {
         root: PathBuf,
         #[arg(long)]
         manifest: PathBuf,
+        /// Also run these candidate lane entries in every probe (with --candidate-flag): a
+        /// fault only they catch counts as caught by the lane, apart from the corpus.
+        #[arg(long)]
+        candidate: Option<PathBuf>,
+        /// Flag the candidate lane entries must carry; repeatable.
+        #[arg(long = "candidate-flag")]
+        candidate_flags: Vec<String>,
         #[arg(long)]
         versions_file: PathBuf,
         #[arg(long)]
@@ -473,11 +498,14 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             no_build,
             work,
             out,
+            candidate,
+            candidate_flags,
             manifest,
             versions_file,
             known_failures,
         } => {
-            let paths = seed::Paths::new(&root, &manifest, &versions_file, &known_failures)?;
+            let paths = seed::Paths::new(&root, &manifest, &versions_file, &known_failures)?
+                .with_lane(candidate.as_deref(), &candidate_flags)?;
             let ctx = seed::Context::new(
                 paths,
                 &sdk,
@@ -490,8 +518,10 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                     jobs,
                 },
             )?;
-            let report = seed::check(&ctx)?;
+            let mut report = seed::check(&ctx)?;
+            report.lane = ctx.lane_note()?;
             let out = root.join(out);
+            let unclassified = seed::classify(&mut report, &out.join("classes"))?;
             seed::write_json(&out.join(format!("{sdk}.json")), &report)?;
             seed::write_json(
                 &out.join(format!("{sdk}.obligations.json")),
@@ -518,6 +548,17 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             for (s, n) in &report.counts {
                 println!("  {s:?}: {n}");
             }
+            let (alone, _) = report.corpus_rate();
+            println!("  caught by the corpus alone: {alone}");
+            for (class, n) in report.class_counts() {
+                println!("  missed by the corpus alone, {class}: {n}");
+            }
+            if unclassified > 0 {
+                println!(
+                    "  {unclassified} faults the corpus alone misses have no class in {}",
+                    out.join("classes").display()
+                );
+            }
             for f in &report.real_faults {
                 println!(
                     "  released fault {}: {}",
@@ -530,6 +571,8 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
         }
         ConformanceCommand::SeedProbe {
             root: probe_root,
+            candidate,
+            candidate_flags,
             manifest,
             versions_file,
             known_failures,
@@ -539,29 +582,45 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
             baseline,
             record,
             record_dir,
+            record_next,
             label_env,
         } => {
-            let paths = seed::Paths::new(&probe_root, &manifest, &versions_file, &known_failures)?;
+            let paths = seed::Paths::new(&probe_root, &manifest, &versions_file, &known_failures)?
+                .with_lane(candidate.as_deref(), &candidate_flags)?;
             let record = match (record, record_dir, label_env) {
+                _ if record_next.is_some() => {
+                    let dir = record_next.expect("checked");
+                    std::fs::create_dir_all(&dir)?;
+                    let n = std::fs::read_dir(&dir)?
+                        .filter_map(|e| e.ok())
+                        .filter(|e| e.path().extension().is_some_and(|x| x == "json"))
+                        .count();
+                    dir.join(format!("{n}.json"))
+                }
                 (Some(r), _, _) => r,
                 (None, Some(dir), Some(var)) => {
                     // stryker's dry run sets no mutant; it must find the build unchanged
                     let label = std::env::var(&var).ok().filter(|v| !v.is_empty());
                     dir.join(format!("{}.json", label.as_deref().unwrap_or("unmodified")))
                 }
-                _ => anyhow::bail!("seed-probe needs --record or --record-dir with --label-env"),
+                _ => anyhow::bail!(
+                    "seed-probe needs --record, --record-next, or --record-dir with --label-env"
+                ),
             };
             let outcome = seed::probe(&paths, &sdk, &version, &command, &baseline, &record)?;
             Ok(!outcome.caught())
         }
         ConformanceCommand::SeedGoExec {
             root: exec_root,
+            candidate,
+            candidate_flags,
             manifest,
             versions_file,
             known_failures,
             setup,
         } => {
-            let paths = seed::Paths::new(&exec_root, &manifest, &versions_file, &known_failures)?;
+            let paths = seed::Paths::new(&exec_root, &manifest, &versions_file, &known_failures)?
+                .with_lane(candidate.as_deref(), &candidate_flags)?;
             let code = seed::go::exec(&paths, &setup)?;
             std::process::exit(code);
         }
