@@ -736,6 +736,34 @@ pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
             let orderable =
                 shapekit_gen::recipe::ir_run::orderable_after(live.ctx.driver().last_meta());
             let pushed = if orderable && rng.chance(1, 8) {
+                // the first works on another account, which the second then comes from, so
+                // the first can change what the second meets at apply
+                if let Step::Tx {
+                    source,
+                    operations,
+                    signers,
+                    ..
+                } = &mut s
+                {
+                    let others: Vec<String> = live
+                        .world
+                        .funded
+                        .iter()
+                        .filter(|r| *r != source)
+                        .cloned()
+                        .collect();
+                    if !others.is_empty() && !operations.is_empty() {
+                        let other = rng.pick(&others).clone();
+                        operations[0]["source_account"] =
+                            serde_json::Value::String(format!("@account:{other}"));
+                        if signers.is_empty() {
+                            signers.push(source.clone());
+                        }
+                        if !signers.contains(&other) {
+                            signers.push(other);
+                        }
+                    }
+                }
                 let (b, more) = action::follower(
                     env.schema,
                     &live.world,

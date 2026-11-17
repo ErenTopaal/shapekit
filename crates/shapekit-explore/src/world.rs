@@ -92,6 +92,8 @@ pub struct World {
     /// Amounts the ledgers hold (balances, limits, offer and claimable balance amounts, pool
     /// reserves), the latest last.
     pub amounts: Vec<i64>,
+    /// Roles holding a trustline, by the asset's XDR-JSON in recipe form.
+    pub holders: BTreeMap<String, BTreeSet<String>>,
     /// Credit assets some account holds a trustline to.
     pub trusted: BTreeSet<AssetRef>,
     /// Contract strkey to the deploy label that created it.
@@ -130,6 +132,7 @@ impl World {
             balances: BTreeSet::new(),
             pools: BTreeMap::new(),
             amounts: Vec::new(),
+            holders: BTreeMap::new(),
             trusted: BTreeSet::new(),
             contract_labels: BTreeMap::new(),
             soroban_keys: BTreeMap::new(),
@@ -377,6 +380,15 @@ impl World {
                         match &e.data {
                             LedgerEntryData::Trustline(t) => {
                                 let asset = self.recipe_form(serde_json::to_value(&t.asset)?);
+                                let holder = self.recipe_form(serde_json::to_value(&t.account_id)?);
+                                if let Some(role) =
+                                    holder.as_str().and_then(|s| s.strip_prefix("@account:"))
+                                {
+                                    self.holders
+                                        .entry(serde_json::to_string(&asset)?)
+                                        .or_default()
+                                        .insert(role.to_owned());
+                                }
                                 if let Some(a) = asset_ref_of(&asset) {
                                     self.trusted.insert(a);
                                 }

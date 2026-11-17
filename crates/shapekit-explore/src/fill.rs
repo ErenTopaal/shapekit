@@ -29,6 +29,8 @@ pub struct Filler<'a> {
     /// operations (a sponsorship and the operations it sponsors) meet.
     pub named: Vec<String>,
     depth: u32,
+    /// A role the filled operation works best from: one that holds what it sells.
+    pub source_hint: Option<String>,
 }
 
 const AMOUNTS: &[i64] = &[
@@ -53,6 +55,7 @@ impl<'a> Filler<'a> {
             source: source.to_owned(),
             named: vec![source.to_owned()],
             depth: 0,
+            source_hint: None,
         }
     }
 
@@ -75,6 +78,7 @@ impl<'a> Filler<'a> {
             let amount = self.int64(Some("amount"));
             match arm {
                 "manage_sell_offer" | "create_passive_sell_offer" | "manage_buy_offer" => {
+                    self.source_hint = self.holder_of(&o.buying, &o.selling, &o.seller);
                     let (n, d) = o.price;
                     let price = serde_json::json!({ "n": d, "d": n });
                     let mut body = serde_json::json!({
@@ -92,6 +96,7 @@ impl<'a> Filler<'a> {
                     return Some(serde_json::json!({ arm: body }));
                 }
                 "path_payment_strict_send" | "path_payment_strict_receive" => {
+                    self.source_hint = self.holder_of(&o.buying, &o.selling, &o.seller);
                     let dest = self.muxed();
                     let (send, dest_amount_key, send_key, bound_key) = if arm.ends_with("send") {
                         ("send_asset", "dest_min", "send_amount", "dest_min")
@@ -135,6 +140,51 @@ impl<'a> Filler<'a> {
             }
         }
         None
+    }
+
+    /// A role other than `not` that can sell `selling` and receive `buying`: the issuer of a
+    /// credit asset sold, or an account holding it, with a trustline to a credit asset bought.
+    fn holder_of(&mut self, selling: &Value, buying: &Value, not: &str) -> Option<String> {
+        let roles = |a: &Value| -> Vec<String> {
+            let mut out: Vec<String> = serde_json::to_string(a)
+                .ok()
+                .and_then(|k| self.world.holders.get(&k))
+                .map(|h| h.iter().cloned().collect())
+                .unwrap_or_default();
+            if let Some(i) = a
+                .as_object()
+                .and_then(|m| m.values().next())
+                .and_then(|v| v.get("issuer"))
+                .and_then(|v| v.as_str())
+                .and_then(|s| s.strip_prefix("@account:"))
+            {
+                out.push(i.to_owned());
+            }
+            out
+        };
+        let native = |a: &Value| a.as_str() == Some("native");
+        let can_sell: Vec<String> = if native(selling) {
+            self.world.funded.clone()
+        } else {
+            roles(selling)
+        };
+        let can_buy: Vec<String> = if native(buying) {
+            self.world.funded.clone()
+        } else {
+            roles(buying)
+        };
+        let both: Vec<String> = can_sell
+            .into_iter()
+            .filter(|r| {
+                can_buy.contains(r)
+                    && format!("@account:{r}") != not
+                    && self.world.funded.contains(r)
+            })
+            .collect();
+        if both.is_empty() {
+            return None;
+        }
+        Some(self.rng.pick(&both).clone())
     }
 
     /// The XDR-JSON names of a union's arms.

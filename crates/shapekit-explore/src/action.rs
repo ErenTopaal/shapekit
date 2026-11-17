@@ -140,8 +140,13 @@ pub fn transaction(
         .then(|| f.def("Preconditions"))
         .filter(|c| world.protocol >= 13 || c.get("v2").is_none());
     let named = f.named.clone();
-    // a quarter of the time the transaction comes from a role its operations name
-    if f.rng.chance(1, 4) {
+    let hint = f.source_hint.take();
+    if let Some(h) = hint
+        && f.rng.chance(4, 5)
+    {
+        source = h;
+    } else if f.rng.chance(1, 4) {
+        // a quarter of the time the transaction comes from a role its operations name
         let cands: Vec<&String> = named.iter().filter(|r| world.funded.contains(*r)).collect();
         if !cands.is_empty() {
             source = (*f.rng.pick(&cands)).clone();
