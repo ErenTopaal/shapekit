@@ -188,21 +188,36 @@ func (s *store) transaction(ctx context.Context, m *mapper, toID int64, hash []b
 	return rec, nil
 }
 
+// unattributedWindow is how many ledgers one unattributed query reads.
+const unattributedWindow = 64
+
 // unattributed reports state change and participant rows whose transaction
 // was not stored, per ledger.
 func (s *store) unattributed(ctx context.Context, from, to uint32, emit func(any) error) (uint64, error) {
-	orphans, err := s.rows(ctx, `SELECT * FROM state_changes s WHERE s.ledger_number BETWEEN $1 AND $2
-		AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = s.to_id)
-		ORDER BY s.to_id, s.operation_id, s.state_change_id`, int64(from), int64(to))
-	if err != nil {
-		return 0, fmt.Errorf("reading unattributed state changes: %w", err)
-	}
-	// a toid keeps the ledger in its upper 32 bits
-	parts, err := s.rows(ctx, `SELECT * FROM transactions_accounts a WHERE a.tx_to_id >= $1 AND a.tx_to_id < $2
-		AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = a.tx_to_id)
-		ORDER BY a.tx_to_id`, int64(from)<<32, (int64(to)+1)<<32)
-	if err != nil {
-		return 0, fmt.Errorf("reading unattributed participants: %w", err)
+	var orphans, parts []row
+	// read a window of ledgers at a time, with the transaction lookup held to the same
+	// ledgers: on a long chain one query over every hypertable chunk at once takes more
+	// locks than postgres has room for (out of shared memory, SQLSTATE 53200)
+	for lo := from; lo <= to; lo += unattributedWindow {
+		hi := min(to, lo+unattributedWindow-1)
+		o, err := s.rows(ctx, `SELECT * FROM state_changes s WHERE s.ledger_number BETWEEN $1 AND $2
+			AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = s.to_id AND t.ledger_number BETWEEN $1 AND $2)
+			ORDER BY s.to_id, s.operation_id, s.state_change_id`, int64(lo), int64(hi))
+		if err != nil {
+			return 0, fmt.Errorf("reading unattributed state changes of ledgers %d to %d: %w", lo, hi, err)
+		}
+		orphans = append(orphans, o...)
+		// a toid keeps the ledger in its upper 32 bits
+		p, err := s.rows(ctx, `SELECT * FROM transactions_accounts a WHERE a.tx_to_id >= $1 AND a.tx_to_id < $2
+			AND NOT EXISTS (SELECT 1 FROM transactions t WHERE t.to_id = a.tx_to_id AND t.to_id >= $1 AND t.to_id < $2)
+			ORDER BY a.tx_to_id`, int64(lo)<<32, (int64(hi)+1)<<32)
+		if err != nil {
+			return 0, fmt.Errorf("reading unattributed participants of ledgers %d to %d: %w", lo, hi, err)
+		}
+		parts = append(parts, p...)
+		if hi == to {
+			break
+		}
 	}
 	byLedger := map[uint32][]wire.Unmapped{}
 	var ledgers []uint32
