@@ -24,7 +24,7 @@ pub fn smoke(network: &str, out: &Path, pins: &Path) -> Result<bool> {
     }
     let image = CoreImage::from_pins(pins)
         .with_context(|| format!("reading the core image pin from {}", pins.display()))?;
-    let work = shapekit_pack::scratch::scratch_dir("shapekit-smoke-")
+    let work = shapekit_process::scratch::scratch_dir("shapekit-smoke-")
         .context("creating the node workdir")?;
     let chain = smoke::record(smoke::node_config(passphrase, image), work.path(), out)
         .context("recording the smoke chain")?;
@@ -257,7 +257,7 @@ pub fn checkpoints(
     let mut cfg = smoke::node_config(passphrase, image);
     cfg.protocol = protocol;
     cfg.soroban_high_limits = false;
-    let work = shapekit_pack::scratch::scratch_dir("shapekit-checkpoints-")
+    let work = shapekit_process::scratch::scratch_dir("shapekit-checkpoints-")
         .context("creating the node workdir")?;
     let node = CoreNode::start(cfg, work.path()).context("starting core")?;
     let mut rec = ChainRecorder::new(&node);

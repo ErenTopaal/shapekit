@@ -93,7 +93,7 @@ pub struct Replay {
     pub first_close_time: u64,
     txs: HashMap<[u8; 32], TxLocation>,
     archive: ArchiveIndex,
-    archive_dir: shapekit_pack::scratch::Scratch,
+    archive_dir: shapekit_process::scratch::Scratch,
     state: Mutex<LedgerState>,
 }
 
@@ -150,7 +150,7 @@ impl Replay {
             *archive.states.keys().next_back().ok_or_else(|| {
                 ServeError::Chain(format!("{} has no history state", tar.display()))
             })?;
-        let archive_dir = shapekit_pack::scratch::scratch_dir("shapekit-serve-archive-")
+        let archive_dir = shapekit_process::scratch::scratch_dir("shapekit-serve-archive-")
             .map_err(|e| ServeError::Io(format!("creating the archive directory: {e}")))?;
         archive_at(&tar, newest, &archive_dir.path().join("a"))?;
 

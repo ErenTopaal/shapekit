@@ -177,9 +177,7 @@ pub fn record_all(
             if target.exists() {
                 bail!("{} already exists", target.display());
             }
-            let work = tempfile::Builder::new()
-                .prefix("shapekit-twin-smoke-")
-                .tempdir()
+            let work = shapekit_process::scratch::scratch_dir("shapekit-twin-smoke-")
                 .context("creating the node workdir")?;
             let started = Instant::now();
             let chain = smoke::record(

@@ -251,7 +251,8 @@ pub fn ls_remote(url: &str, git_ref: &str) -> Result<String> {
 /// Confirms a bare commit exists on the remote by fetching just that commit.
 /// ls-remote only lists ref tips, so a commit in the middle of history needs this.
 pub fn commit_exists(url: &str, sha: &str) -> Result<()> {
-    let dir = tempfile::tempdir().context("creating a scratch git directory")?;
+    let dir = shapekit_process::scratch::scratch_dir("shapekit-pins-git-")
+        .context("creating a scratch git directory")?;
     git(&["init", "--quiet"], Some(dir.path()))?;
     let args = ["fetch", "--quiet", "--depth=1", "--filter=tree:0", url, sha];
     with_retries(&format!("git fetch {url} {sha}"), git_transient, || {

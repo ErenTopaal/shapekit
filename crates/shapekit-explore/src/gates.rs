@@ -161,9 +161,7 @@ pub fn lowest_protocol(ir: &RecipeIr, root: &Path) -> Result<u32> {
 
 /// Records a node that closes only ledger 2 on the twin and reads its counts.
 pub fn genesis(env: &Env<'_>, protocol: u32) -> Result<Counts> {
-    let work = tempfile::Builder::new()
-        .prefix("explore-genesis-")
-        .tempdir_in(env.work)?;
+    let work = shapekit_process::scratch::scratch_in(env.work, "explore-genesis-")?;
     let profiles = work.path().join("profiles");
     std::fs::create_dir_all(&profiles)?;
     let mut image = env.image.clone();

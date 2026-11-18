@@ -135,6 +135,12 @@ fn no_such_container(e: &NodeError) -> bool {
     matches!(e, NodeError::Docker { stderr, .. } if stderr.contains("No such container"))
 }
 
+/// Whether docker refused because the network does not exist: one recorded before its
+/// create failed was never made, and is no error to release.
+fn no_such_network(e: &NodeError) -> bool {
+    matches!(e, NodeError::Docker { stderr, .. } if stderr.contains("not found"))
+}
+
 fn tail(s: &str, lines: usize) -> String {
     let all: Vec<&str> = s.lines().collect();
     let start = all.len().saturating_sub(lines);
@@ -177,16 +183,16 @@ impl DockerResources {
             {
                 failures.push(e.to_string());
             }
-            if let Err(e) = docker_ok(&["rm", "-f", "-v", &c])
-                && !no_such_container(&e)
-            {
-                failures.push(e.to_string());
+            match docker_ok(&["rm", "-f", "-v", &c]) {
+                Err(e) if !no_such_container(&e) => failures.push(e.to_string()),
+                _ => shapekit_process::cleanup::container_gone(&c),
             }
         }
-        if let Some(n) = self.network.take()
-            && let Err(e) = docker_ok(&["network", "rm", &n])
-        {
-            failures.push(e.to_string());
+        if let Some(n) = self.network.take() {
+            match docker_ok(&["network", "rm", &n]) {
+                Err(e) if !no_such_network(&e) => failures.push(e.to_string()),
+                _ => shapekit_process::cleanup::network_removed(&n),
+            }
         }
         if failures.is_empty() {
             Ok(())
@@ -393,6 +399,10 @@ impl CoreNode {
 
         let mut res = DockerResources::default();
         let network = unique_name("net");
+        // recorded before the create, as the container below: a signal removes what the
+        // record names, and removing one that was never created is no error
+        shapekit_process::cleanup::network_created(&network);
+        res.network = Some(network.clone());
         docker_ok(&[
             "network",
             "create",
@@ -401,7 +411,6 @@ impl CoreNode {
             "org.shapekit.core-driver=1",
             &network,
         ])?;
-        res.network = Some(network.clone());
         let internal = docker_ok(&["network", "inspect", "--format", "{{.Internal}}", &network])?;
         if internal != "true" {
             return Err(NodeError::NetworkNotInternal(network));
@@ -464,6 +473,7 @@ impl CoreNode {
         // and a container that exists must be removed; one that was never created is no
         // error to release (see `no_such_container`)
         res.container = Some(container.clone());
+        shapekit_process::cleanup::container_started(&container);
         docker_ok(&refs)?;
 
         let node = Self {
@@ -1061,6 +1071,13 @@ mod tests {
         )));
         assert!(!no_such_container(&docker_err(
             "Cannot connect to the Docker daemon at unix:///var/run/docker.sock."
+        )));
+        // a network recorded before its create failed
+        assert!(no_such_network(&docker_err(
+            "Error response from daemon: network shapekit-core-net-1-0 not found"
+        )));
+        assert!(!no_such_network(&docker_err(
+            "Error response from daemon: error while removing network: network shapekit-core-net-1-0 has active endpoints"
         )));
     }
 

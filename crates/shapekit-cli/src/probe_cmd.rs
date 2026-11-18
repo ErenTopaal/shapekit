@@ -289,9 +289,7 @@ fn probe_run(fields: &[String], network: &str, out: Option<&Path>, pins: &Path) 
     cfg.soroban_high_limits = false;
     // whatever core applies must pass every invariant, or the node stops
     cfg.invariant_checks = true;
-    let work = tempfile::Builder::new()
-        .prefix("shapekit-probe-")
-        .tempdir()
+    let work = shapekit_process::scratch::scratch_dir("shapekit-probe-")
         .context("creating the node workdir")?;
     let mut probe = Probe::start(cfg, work.path(), chosen.len())?;
     let started = std::time::Instant::now();
@@ -352,9 +350,7 @@ fn probe_all(
     let schema = shapekit_schema::Schema::pinned();
     let fields = shapekit_probe::run::selected(&schema, only)?;
     let image = core_image(pins, profile_dir)?;
-    let work = tempfile::Builder::new()
-        .prefix("shapekit-probe-all-")
-        .tempdir()
+    let work = shapekit_process::scratch::scratch_dir("shapekit-probe-all-")
         .context("creating the node workdir")?;
     let started = std::time::Instant::now();
     let runs = shapekit_probe::run::run(
@@ -490,9 +486,7 @@ fn probe_verify_repro(
     limits: Option<&Path>,
     source_pins: &Path,
 ) -> Result<bool> {
-    let fresh = tempfile::Builder::new()
-        .prefix("shapekit-probe-repro-")
-        .tempdir()
+    let fresh = shapekit_process::scratch::scratch_dir("shapekit-probe-repro-")
         .context("creating the regeneration directory")?;
     // an empty scratch lane: only the probe's own entries are compared
     let all: Vec<String> = Vec::new();
@@ -769,9 +763,7 @@ fn probe_limits(
         clear_chains(&c.join("chains"), shapekit_probe::witness::LIMITS_FAMILY)?;
     }
     let image = core_image(pins, profile_dir)?;
-    let work = tempfile::Builder::new()
-        .prefix("shapekit-probe-limits-")
-        .tempdir()?;
+    let work = shapekit_process::scratch::scratch_dir("shapekit-probe-limits-")?;
     let schema = shapekit_schema::Schema::pinned();
     let typer = shapekit_probe::edit::Typer::new(&schema);
     let mut worlds = std::collections::BTreeMap::new();

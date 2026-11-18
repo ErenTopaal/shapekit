@@ -38,9 +38,7 @@ pub fn record(
     reachable: &BTreeSet<String>,
     work: &Path,
 ) -> Result<Recorded> {
-    let dir = tempfile::Builder::new()
-        .prefix("explore-verify-")
-        .tempdir_in(work)?;
+    let dir = shapekit_process::scratch::scratch_in(work, "explore-verify-")?;
     let node = dir.path().join("node");
     std::fs::create_dir_all(&node)?;
     let mut ctx = start_chain(recipe, network, image, &node)?;
@@ -212,9 +210,7 @@ pub fn record_into(
     work: &Path,
     target: &Path,
 ) -> Result<(String, stellar_xdr::LedgerCloseMeta)> {
-    let dir = tempfile::Builder::new()
-        .prefix("explore-record-")
-        .tempdir_in(work)?;
+    let dir = shapekit_process::scratch::scratch_in(work, "explore-record-")?;
     let mut ctx = start_chain(recipe, network, image, dir.path())?;
     if let Err(e) = recipe.run(&mut ctx) {
         return Err(stopped(e, ctx.stop()));

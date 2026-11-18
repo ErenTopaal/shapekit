@@ -511,7 +511,7 @@ fn drive_adapter(
     })
     .with_context(|| format!("serving {}", job.dir.display()))?;
     let base = server.url();
-    let workdir = shapekit_pack::scratch::scratch_dir("shapekit-harness-")
+    let workdir = shapekit_process::scratch::scratch_dir("shapekit-harness-")
         .context("creating the adapter work directory")?;
     let lake_dir = job.dir.join(&chain.lake.dir);
     let lake_path = std::fs::canonicalize(&lake_dir)

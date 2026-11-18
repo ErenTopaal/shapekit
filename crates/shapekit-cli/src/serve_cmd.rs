@@ -61,14 +61,42 @@ pub fn run(args: ServeArgs) -> Result<bool> {
             signal(SignalKind::hangup()).context("handling SIGHUP")?,
         )
     };
-    let server = start(ServeConfig {
+    let config = ServeConfig {
         chain_dir: dir.clone(),
         listen: args.listen,
         head: args.head,
         cache_bytes: args.cache_bytes,
         log_requests: args.log_requests,
-    })
-    .with_context(|| format!("serving {}", dir.display()))?;
+    };
+    // starting copies and indexes the archive, which takes a while on a long chain; a
+    // signal then stops the process at once, removing the scratch directory the start is
+    // filling, instead of waiting for a server only to stop it
+    let (started_tx, started_rx) = tokio::sync::oneshot::channel();
+    std::thread::Builder::new()
+        .name("serve-start".into())
+        .spawn(move || {
+            let _ = started_tx.send(start(config));
+        })
+        .context("starting the server thread")?;
+    let started = rt.block_on(async {
+        tokio::select! {
+            r = started_rx => Ok(r),
+            _ = int.recv() => Err(130),
+            _ = term.recv() => Err(143),
+            _ = hup.recv() => Err(129),
+        }
+    });
+    let server = match started {
+        Ok(r) => r
+            .context("the server thread ended without a result")?
+            .with_context(|| format!("serving {}", dir.display()))?,
+        Err(code) => {
+            for f in shapekit_process::cleanup::stop() {
+                eprintln!("shapekit: {f}");
+            }
+            std::process::exit(code);
+        }
+    };
     // the harness reads this line to learn the bound address
     println!("serving {} at {}", dir.display(), server.url());
     rt.block_on(async {

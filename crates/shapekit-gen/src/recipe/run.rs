@@ -108,7 +108,7 @@ pub fn start_chain(
 
 fn run_job(recipe: &dyn Recipe, network: Network, image: &CoreImage, target: &Path) -> JobResult {
     let started = Instant::now();
-    let work = shapekit_pack::scratch::scratch_dir("shapekit-gen-")
+    let work = shapekit_process::scratch::scratch_dir("shapekit-gen-")
         .context("creating the node workdir")?;
     let mut ctx = start_chain(recipe, network, image, work.path())?;
     recipe.run(&mut ctx)?;
@@ -390,7 +390,7 @@ pub fn verify_repro_on(
     opts: &GenOptions<'_>,
     networks: &[Network],
 ) -> Result<Repro> {
-    let fresh = shapekit_pack::scratch::scratch_dir("shapekit-repro-")
+    let fresh = shapekit_process::scratch::scratch_dir("shapekit-repro-")
         .context("creating the regeneration directory")?;
     let fresh_opts = GenOptions {
         corpus: fresh.path().to_path_buf(),

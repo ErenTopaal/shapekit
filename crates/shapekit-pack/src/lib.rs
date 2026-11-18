@@ -9,7 +9,6 @@ pub mod archive;
 pub mod chain;
 pub mod lake;
 pub mod layout;
-pub mod scratch;
 
 use std::path::Path;
 

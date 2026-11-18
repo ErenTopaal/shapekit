@@ -631,9 +631,7 @@ pub fn setup(rng: &mut Rng) -> Vec<Step> {
 pub fn run(env: &Env<'_>, spec: &Spec, menu: &mut OpMenu) -> Result<Episode> {
     let started = Instant::now();
     let mut rng = Rng::new(spec.seed);
-    let work = tempfile::Builder::new()
-        .prefix("explore-node-")
-        .tempdir_in(env.work)
+    let work = shapekit_process::scratch::scratch_in(env.work, "explore-node-")
         .context("creating the node workdir")?;
     let mut image = env.image.clone();
     let profiles = if env.coverage {

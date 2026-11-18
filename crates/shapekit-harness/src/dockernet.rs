@@ -31,6 +31,9 @@ pub struct Network {
 
 impl Network {
     pub fn create(name: &str) -> Result<Network> {
+        // recorded before the create: a signal removes the network with what is attached,
+        // and one that was never created is no error to remove
+        shapekit_process::cleanup::network_created(name);
         docker(&[
             "network",
             "create",
@@ -81,6 +84,7 @@ impl Network {
             docker(&args)?;
         }
         docker(&["network", "rm", &self.name])?;
+        shapekit_process::cleanup::network_removed(&self.name);
         self.removed = true;
         Ok(())
     }
