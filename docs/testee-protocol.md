@@ -538,6 +538,13 @@ check passing fails the run, so remove the line.
   runtimes that reserve large `PROT_NONE` regions up front (Node's V8 cage), where an
   address-space cap would kill the process before it touches the data. The resource and size
   are set per SDK in `versions.toml` (`memory = { resource = "as" | "data", mib = <n> }`).
+  On macOS neither rlimit can be set: the kernel refuses a limit below the process's current
+  virtual size, and an arm64 process maps hundreds of GiB before it starts. There the runner
+  reads the physical footprint of the testee and of every process it started every 10 ms, and
+  kills a process with `SIGKILL` once its own footprint passes `mib`, for both resources. The
+  stderr tail of the failure says which process was killed and at what footprint. A process
+  that allocates faster than the sampling can pass `mib` by what it allocates in 10 ms before
+  it is killed.
 
 ## The KMP testee
 
