@@ -141,14 +141,16 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   the findings record; the em dash
   check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
-  directory, a scratch or worktree directory name, a private or tailnet address, the build
-  machine's name, or a name from the pattern file. That file names people, so it is not
-  tracked: the script reads `info/text-patterns` in the clone's git directory, or the file
-  `SHAPEKIT_TEXT_PATTERNS` names, one perl regex per line, and stops with exit status 2 when
-  neither exists. Last, `scripts/check-links.ts --offline` checks that every relative link and
-  anchor in every tracked markdown file names a tracked file and a heading in it. A link to
-  this repository on GitHub, at `main` or at the tag of the version in `Cargo.toml`, is checked
-  against the working tree, and a link to `shapekit.org` against the built site when one is
+  directory, a private or tailnet address, or a match of a pattern in the maintainers' pattern
+  file. That file names people, machines and local directories, so it is not tracked: the
+  script reads `info/text-patterns` in the clone's git directory, or the file
+  `SHAPEKIT_TEXT_PATTERNS` names, one perl regex per line. Without either, as in a fresh clone,
+  it checks the home directories and addresses only and prints that the pattern file was not
+  read; a `SHAPEKIT_TEXT_PATTERNS` that names a missing file stops it with exit status 2.
+  Last, `scripts/check-links.ts --offline` checks that every relative link and anchor in every
+  tracked markdown file names a tracked file and a heading in it. A link to this repository
+  on GitHub, at `main` or at the tag of the version in `Cargo.toml`, is checked against the
+  working tree, and a link to `shapekit.org` against the built site when one is
   given, since each resolves once this commit is tagged, published and deployed. Run without
   `--offline`, the script also fetches every external link and checks its fragment: an id or
   name in the page, or a line of a GitHub file. A link that answers 404 is broken; one that

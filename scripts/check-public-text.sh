@@ -1,34 +1,42 @@
 #!/usr/bin/env bash
 # fails if a tracked file holds text that belongs to the machine it was made on rather than to
-# the project: absolute home directories, scratch and worktree directory names, private and
-# tailnet addresses, the build machine's name, or a name from the private pattern file.
+# the project: absolute home directories and private or tailnet addresses, and every pattern of
+# the private pattern file.
 #
-# the private patterns name people, so they are not tracked: one perl regex per line ('#'
-# starts a comment) in the file $SHAPEKIT_TEXT_PATTERNS, by default info/text-patterns in the
-# repository's git directory, which every worktree of the clone shares.
+# the private patterns name people, machines and local directories, so they are not tracked:
+# one perl regex per line ('#' starts a comment) in the file $SHAPEKIT_TEXT_PATTERNS, by default
+# info/text-patterns in the repository's git directory, which every worktree of the clone
+# shares. a clone without that file, such as a fresh one, is checked against the generic
+# patterns only, and the script says so; a pattern file that is named but missing, or that
+# holds no pattern, is an error.
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
-
-patterns_file=${SHAPEKIT_TEXT_PATTERNS:-$(git rev-parse --path-format=absolute --git-common-dir)/info/text-patterns}
-if [ ! -f "$patterns_file" ]; then
-  echo "no private pattern file at $patterns_file; create it or point SHAPEKIT_TEXT_PATTERNS at one" >&2
-  exit 2
-fi
 
 # github's runner home is the one absolute home path a workflow has to name
 generic=(
   '/home/(?!runner\b)'
   '/Users/'
-  'shapekit-(tmp|wt)\b'
-  '(?i)\boffice\b'
   '\b192\.168\.[0-9]{1,3}\.[0-9]{1,3}\b'
   '\b100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3}\b'
 )
-mapfile -t private < <(grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$patterns_file")
-if [ "${#private[@]}" -eq 0 ]; then
-  echo "$patterns_file holds no pattern" >&2
-  exit 2
+
+private=()
+if [ -n "${SHAPEKIT_TEXT_PATTERNS:-}" ]; then
+  patterns_file=$SHAPEKIT_TEXT_PATTERNS
+  if [ ! -f "$patterns_file" ]; then
+    echo "SHAPEKIT_TEXT_PATTERNS names $patterns_file, which does not exist" >&2
+    exit 2
+  fi
+else
+  patterns_file=$(git rev-parse --path-format=absolute --git-common-dir)/info/text-patterns
+fi
+if [ -f "$patterns_file" ]; then
+  mapfile -t private < <(grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$patterns_file")
+  if [ "${#private[@]}" -eq 0 ]; then
+    echo "$patterns_file holds no pattern" >&2
+    exit 2
+  fi
 fi
 
 args=()
@@ -51,4 +59,9 @@ if [ -n "$hits" ]; then
   echo "$hits" | cut -c1-200 >&2
   exit 1
 fi
-echo "no machine-specific or personal text in $(git ls-files | wc -l) tracked files"
+files=$(git ls-files | wc -l)
+if [ "${#private[@]}" -eq 0 ]; then
+  echo "no home directory or private address in $files tracked files; the private patterns were not checked, there is no pattern file at $patterns_file"
+else
+  echo "no machine-specific or personal text in $files tracked files (${#private[@]} private patterns)"
+fi
