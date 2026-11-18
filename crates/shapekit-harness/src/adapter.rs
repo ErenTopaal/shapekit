@@ -100,13 +100,19 @@ impl Adapter {
             .split_first()
             .ok_or_else(|| spawn_err(std::io::Error::other("the adapter command is empty")))?;
         let log = File::create(stderr_log).map_err(spawn_err)?;
-        let mut child = Process::new(program)
-            .args(args)
+        let mut cmd = Process::new(program);
+        cmd.args(args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::from(log))
-            .spawn()
-            .map_err(spawn_err)?;
+            .stderr(Stdio::from(log));
+        // the adapter and what it starts (docker clients, builds) form a process group of
+        // their own, recorded so a signal that stops the harness kills all of it; the
+        // containers it started are on the chain's network, which the same cleanup removes
+        // with what is attached
+        #[cfg(unix)]
+        std::os::unix::process::CommandExt::process_group(&mut cmd, 0);
+        let mut child = cmd.spawn().map_err(spawn_err)?;
+        shapekit_process::cleanup::group_started(child.id());
         let stdout = child.stdout.take().expect("stdout is piped");
         let stdin = child.stdin.take();
         // bounded, so a chatty adapter waits for the harness instead of filling memory
@@ -509,6 +515,8 @@ impl Adapter {
 
 impl Drop for Adapter {
     fn drop(&mut self) {
+        // reaped by now or below, so the group's id may be reused: no longer the harness's
+        shapekit_process::cleanup::group_gone(self.child.id());
         if self.reader.is_some() {
             // finish was not called: an error path; never leave the process behind
             self.stdin = None;
