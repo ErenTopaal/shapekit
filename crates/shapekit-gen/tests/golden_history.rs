@@ -264,6 +264,17 @@ fn scan_import_and_verify_a_golden_tree() {
     let again = golden::import(&mut set, &registry, &out).unwrap();
     assert_eq!(again.removed.len(), selections.len());
 
+    // an import that fails part way, here on a golden file not named <hash>.xdr, removes
+    // none of the entries already there and leaves nothing staged
+    let entries_before = list_tree(&out.join("entries"));
+    // the first file is the one the selections come from
+    let path = set.files[0].path.clone();
+    set.files[0].path = path.replace(".xdr", ".bin");
+    let e = golden::import(&mut set, &registry, &out).unwrap_err();
+    assert!(e.to_string().contains("is not named <hash>.xdr"), "{e}");
+    assert_eq!(list_tree(&out.join("entries")), entries_before);
+    set.files[0].path = path;
+
     // with the family's range above the ledgers' protocol 30 nothing of it is imported; each
     // fragment is reported with the reason instead
     let mut raised = registry.clone();
@@ -581,4 +592,21 @@ fn captures_write_valid_entries_and_refuse_the_wrong_family() {
     .err()
     .unwrap();
     assert!(format!("{err:#}").contains("matches none"), "{err:#}");
+}
+
+/// Every path under `dir`, relative to it, sorted.
+fn list_tree(dir: &std::path::Path) -> Vec<String> {
+    let mut out: Vec<String> = walkdir::WalkDir::new(dir)
+        .into_iter()
+        .map(|e| {
+            e.unwrap()
+                .path()
+                .strip_prefix(dir)
+                .unwrap()
+                .display()
+                .to_string()
+        })
+        .collect();
+    out.sort();
+    out
 }

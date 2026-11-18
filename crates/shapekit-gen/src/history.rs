@@ -82,34 +82,18 @@ pub struct LakeConfig {
 }
 
 /// The object key of the batch holding `seq`, relative to the lake prefix, in the layout
-/// go-stellar-sdk's datastore writes (SEP-54): partition and batch directories are named by
-/// `u32::MAX - start` in upper hex, then the decimal range.
+/// go-stellar-sdk's datastore writes (SEP-54), as [`shapekit_pack::Layout`] gives it: one
+/// formula for the lakes shapekit writes and the ones it reads. A partition directory is
+/// there only when a partition holds more than one batch, the sdk's rule.
 pub fn lake_object_key(cfg: &LakeConfig, seq: u32) -> Result<String> {
-    ensure!(cfg.ledgers_per_batch > 0, "ledgersPerBatch is 0");
-    ensure!(cfg.batches_per_partition > 0, "batchesPerPartition is 0");
-    let ext = match cfg.compression.as_str() {
-        "zstd" => "zst",
-        other => bail!("unsupported lake compression {other}"),
-    };
-    let per_batch = u64::from(cfg.ledgers_per_batch);
-    let per_partition = per_batch * u64::from(cfg.batches_per_partition);
-    let seq = u64::from(seq);
-    let range = |start: u64, size: u64| -> (u64, u64) { (start, start + size - 1) };
-    let mut key = String::new();
-    if per_partition > 1 {
-        let (start, end) = range(seq / per_partition * per_partition, per_partition);
-        key.push_str(&format!(
-            "{:08X}--{start}-{end}/",
-            u64::from(u32::MAX) - start
-        ));
-    }
-    let (start, end) = range(seq / per_batch * per_batch, per_batch);
-    key.push_str(&format!("{:08X}--{start}", u64::from(u32::MAX) - start));
-    if end != start {
-        key.push_str(&format!("-{end}"));
-    }
-    key.push_str(&format!(".xdr.{ext}"));
-    Ok(key)
+    // the layout's object names end in .xdr.zst, the only compression SEP-54 defines
+    ensure!(
+        cfg.compression == shapekit_pack::lake::COMPRESSION,
+        "unsupported lake compression {}",
+        cfg.compression
+    );
+    let layout = shapekit_pack::Layout::new(cfg.ledgers_per_batch, cfg.batches_per_partition)?;
+    Ok(layout.object_key(seq))
 }
 
 /// A captured ledger and how it was obtained.
@@ -706,6 +690,15 @@ mod tests {
         let mut flat = cfg();
         flat.batches_per_partition = 1;
         assert_eq!(lake_object_key(&flat, 7).unwrap(), "FFFFFFF8--7.xdr.zst");
+        // one batch per partition has no partition directory, however many ledgers a batch
+        // holds, as the sdk lays it out
+        let mut wide = cfg();
+        wide.ledgers_per_batch = 64;
+        wide.batches_per_partition = 1;
+        assert_eq!(
+            lake_object_key(&wide, 130).unwrap(),
+            "FFFFFF7F--128-191.xdr.zst"
+        );
     }
 
     #[test]

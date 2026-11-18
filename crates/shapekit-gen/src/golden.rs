@@ -12,6 +12,7 @@ use std::process::Command;
 use anyhow::{Context, Result, bail, ensure};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use shapekit_manifest::build::ENTRIES_DIR;
 use shapekit_manifest::framing::FramedReader;
 use shapekit_manifest::signature::XdrSchema;
 use shapekit_manifest::xdr::{self, render_json};
@@ -458,14 +459,15 @@ pub fn caps_at(family: &Family, registry: &Registry, protocol: u32) -> Result<Ve
     Ok(caps)
 }
 
-pub fn entry_id(family: &str, file: &GoldenFile, record: usize) -> String {
-    let hash = file
-        .path
-        .rsplit('/')
-        .next()
-        .and_then(|n| n.strip_suffix(".xdr"))
-        .unwrap_or_default();
-    format!("{family}.golden-{hash}-{record}")
+/// `<family>.golden-<hash>-<record>`, where `<hash>` is the golden file's name without its
+/// `.xdr`. A file named otherwise would give ids that collide, so it is an error.
+pub fn entry_id(family: &str, file: &GoldenFile, record: usize) -> Result<String> {
+    let name = file.path.rsplit('/').next().unwrap_or_default();
+    let hash = name
+        .strip_suffix(".xdr")
+        .filter(|h| !h.is_empty())
+        .with_context(|| format!("golden file {} is not named <hash>.xdr", file.path))?;
+    Ok(format!("{family}.golden-{hash}-{record}"))
 }
 
 /// What [`import`] wrote.
@@ -478,31 +480,57 @@ pub struct ImportReport {
 }
 
 /// Writes `corpus/goldens/core-<tag>/index.json` and one entry per selection, after removing
-/// every existing `core-golden` entry so a re-import leaves no stale ones.
+/// every existing `core-golden` entry so a re-import leaves no stale ones. Every entry is
+/// rendered and written to a staging directory before any existing one is removed, so a
+/// failure there leaves the corpus as it was.
 pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result<ImportReport> {
     let (selections, not_imported) = select(set, registry)?;
-    let mut report = ImportReport {
-        removed: entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden)?,
-        not_imported,
-        ..Default::default()
-    };
+    let mut rendered = Vec::new();
     for sel in &selections {
         let family = registry
             .family(&sel.family)
             .with_context(|| format!("unknown family {}", sel.family))?;
         let lcm = &set.lcms[sel.lcm];
         let file = &set.files[lcm.file];
-        let id = entry_id(&family.id, file, lcm.record);
+        let id = entry_id(&family.id, file, lcm.record)?;
         let caps = caps_at(family, registry, file.records[lcm.record].ledger_version)?;
         let entry = golden_entry(set, family, sel, &id, caps)?;
-        entry_io::write_xdr_entry(corpus, entry, "any", &lcm.bytes)?;
+        let r = entry_io::render_xdr_entry(entry, "any", &lcm.bytes)?;
+        entry_io::check_replaceable(corpus, &r)?;
+        rendered.push((family.id.clone(), lcm.file, r));
+    }
+    let entries = corpus.join(ENTRIES_DIR);
+    std::fs::create_dir_all(&entries).with_context(|| format!("creating {}", entries.display()))?;
+    // under entries/ so the moves below are renames on one filesystem; each entry one level
+    // deeper than entries/<family>/<id>/, so the walk that removes the old entries (and any
+    // reader of entries/) does not take a staged one for a committed one
+    let stage = tempfile::Builder::new()
+        .prefix(".golden-import-")
+        .tempdir_in(&entries)
+        .with_context(|| format!("creating a directory in {}", entries.display()))?;
+    let staged = |i: usize| stage.path().join(i.to_string()).join("entry");
+    for (i, (_, _, r)) in rendered.iter().enumerate() {
+        let dir = staged(i);
+        std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
+        entry_io::write_files(&dir, r)?;
+    }
+    let mut report = ImportReport {
+        removed: entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden)?,
+        not_imported,
+        ..Default::default()
+    };
+    for (i, (family, file, r)) in rendered.into_iter().enumerate() {
+        entry_io::swap_in(&staged(i), &corpus.join(&r.rel_dir))?;
         report
             .written
-            .entry(family.id.clone())
+            .entry(family)
             .or_default()
-            .push(id.clone());
-        set.files[lcm.file].imported_entries.push(id);
+            .push(r.entry.id.clone());
+        set.files[file].imported_entries.push(r.entry.id);
     }
+    stage
+        .close()
+        .with_context(|| format!("removing the staging directory in {}", entries.display()))?;
     for f in &mut set.files {
         f.imported_entries.sort();
     }
