@@ -14,7 +14,9 @@ use anyhow::{Context, Result, bail, ensure};
 use serde::Deserialize;
 use serde_json::{Map, Value};
 
-use crate::versions::{MemoryResource, Target};
+#[cfg(not(target_os = "macos"))]
+use crate::versions::MemoryResource;
+use crate::versions::Target;
 
 pub const PROTOCOL_VERSION: u64 = 2;
 
@@ -139,6 +141,9 @@ struct Running {
     written: Receiver<std::io::Result<()>>,
     lines: Receiver<Result<String, LineError>>,
     stderr: Arc<Mutex<VecDeque<u8>>>,
+    /// Stops the footprint sampler when the process is dropped.
+    #[cfg(target_os = "macos")]
+    _footprint: footprint::Watch,
 }
 
 pub struct Testee {
@@ -455,6 +460,7 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    #[cfg(not(target_os = "macos"))]
     limit_memory(&mut cmd, target.memory.resource, target.memory.mib);
     let mut child = cmd.spawn().with_context(|| {
         format!(
@@ -476,6 +482,9 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
     std::thread::spawn(move || read_lines(BufReader::new(stdout), max, tx));
 
     let stderr = Arc::new(Mutex::new(VecDeque::with_capacity(STDERR_TAIL)));
+    #[cfg(target_os = "macos")]
+    let footprint = footprint::watch(&child, target.memory.mib, Arc::clone(&stderr))
+        .with_context(|| format!("{}: watching the memory of the testee", target.key()))?;
     let sink = Arc::clone(&stderr);
     std::thread::spawn(move || {
         let mut chunk = [0u8; 4096];
@@ -502,6 +511,8 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
         written,
         lines: rx,
         stderr,
+        #[cfg(target_os = "macos")]
+        _footprint: footprint,
     })
 }
 
@@ -563,6 +574,7 @@ fn resolve(root: &Path, program: &str) -> PathBuf {
 }
 
 /// Sets the limit in the child between fork and exec, so only the testee is capped.
+#[cfg(not(target_os = "macos"))]
 fn limit_memory(cmd: &mut Command, resource: MemoryResource, mib: u64) {
     use nix::sys::resource::{Resource, setrlimit};
     use std::os::unix::process::CommandExt;
@@ -574,5 +586,182 @@ fn limit_memory(cmd: &mut Command, resource: MemoryResource, mib: u64) {
     // safety: setrlimit is async-signal-safe and the closure allocates nothing
     unsafe {
         cmd.pre_exec(move || setrlimit(resource, bytes, bytes).map_err(std::io::Error::from));
+    }
+}
+
+/// The memory limit on macOS. xnu refuses `RLIMIT_AS` and `RLIMIT_DATA` below the process's
+/// current virtual size (EINVAL), and on arm64 every process maps hundreds of GiB before its
+/// `main` runs, so no useful rlimit can be set. The runner samples the physical footprint of
+/// the testee and of every process it started instead, the private memory each dirtied plus
+/// what the kernel compressed (the figure Activity Monitor shows), and kills a process once
+/// its own footprint passes the limit. That matches linux, where each process inherits the
+/// rlimit and is capped on its own.
+#[cfg(target_os = "macos")]
+mod footprint {
+    use std::collections::VecDeque;
+    use std::process::Child;
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::{Arc, Mutex};
+    use std::time::Duration;
+
+    use anyhow::{Result, bail};
+
+    const INTERVAL: Duration = Duration::from_millis(10);
+
+    pub struct Watch {
+        stop: Arc<AtomicBool>,
+    }
+
+    impl Drop for Watch {
+        fn drop(&mut self) {
+            self.stop.store(true, Ordering::Relaxed);
+        }
+    }
+
+    pub fn watch(child: &Child, mib: u64, stderr: Arc<Mutex<VecDeque<u8>>>) -> Result<Watch> {
+        let stop = Arc::new(AtomicBool::new(false));
+        let watch = Watch {
+            stop: Arc::clone(&stop),
+        };
+        let pid = libc::pid_t::try_from(child.id())?;
+        let limit = mib.saturating_mul(1024 * 1024);
+        // the start time tells this process from a later one that reuses its pid
+        let Some(started) = start_time(pid)? else {
+            // already exited and reaped: nothing left to cap
+            return Ok(watch);
+        };
+        std::thread::spawn(move || {
+            let note = |text: String| {
+                let mut buf = match stderr.lock() {
+                    Ok(g) => g,
+                    Err(poisoned) => poisoned.into_inner(),
+                };
+                buf.extend(format!("\nshapekit: {text}\n").as_bytes());
+                while buf.len() > super::STDERR_TAIL {
+                    buf.pop_front();
+                }
+            };
+            while !stop.load(Ordering::Relaxed) {
+                match start_time(pid) {
+                    Ok(Some(t)) if t == started => {}
+                    _ => return,
+                }
+                match over_limit(pid, limit) {
+                    Ok(None) => {}
+                    Ok(Some((p, bytes))) => {
+                        // SAFETY: kill only sends a signal to a pid of the tree just measured
+                        unsafe { libc::kill(p, libc::SIGKILL) };
+                        let who = if p == pid {
+                            "the testee".to_string()
+                        } else {
+                            format!("process {p}, which the testee started,")
+                        };
+                        note(format!(
+                            "killed {who} at a physical footprint of {} MiB, over the {mib} MiB limit",
+                            bytes / (1024 * 1024)
+                        ));
+                        if p == pid {
+                            return;
+                        }
+                    }
+                    Err(e) => {
+                        // a testee whose memory cannot be read cannot be held to the limit
+                        // SAFETY: as above, pid was checked to still be this child
+                        unsafe { libc::kill(pid, libc::SIGKILL) };
+                        note(format!(
+                            "killed the testee, its memory could not be read: {e:#}"
+                        ));
+                        return;
+                    }
+                }
+                std::thread::sleep(INTERVAL);
+            }
+        });
+        Ok(watch)
+    }
+
+    /// The first process of the tree under `root` (itself included) whose footprint is over
+    /// `limit`, with that footprint.
+    fn over_limit(root: libc::pid_t, limit: u64) -> Result<Option<(libc::pid_t, u64)>> {
+        let mut todo = vec![root];
+        while let Some(p) = todo.pop() {
+            match phys_footprint(p)? {
+                Some(bytes) if bytes > limit => return Ok(Some((p, bytes))),
+                Some(_) => todo.extend(children(p)?),
+                // exited between listing and reading
+                None => {}
+            }
+        }
+        Ok(None)
+    }
+
+    fn children(pid: libc::pid_t) -> Result<Vec<libc::pid_t>> {
+        let mut cap = 64usize;
+        loop {
+            let mut buf: Vec<libc::pid_t> = vec![0; cap];
+            let bytes = libc::c_int::try_from(cap * std::mem::size_of::<libc::pid_t>())?;
+            // SAFETY: the buffer holds `bytes` bytes; the call returns how many pids it wrote
+            let n = unsafe { libc::proc_listchildpids(pid, buf.as_mut_ptr().cast(), bytes) };
+            if n < 0 {
+                bail!(
+                    "proc_listchildpids for pid {pid}: {}",
+                    std::io::Error::last_os_error()
+                );
+            }
+            let n = usize::try_from(n)?;
+            if n < cap {
+                buf.truncate(n);
+                return Ok(buf);
+            }
+            // a full buffer may have cut the list short
+            cap *= 4;
+        }
+    }
+
+    /// The process's start time, or `None` when no process has the pid.
+    fn start_time(pid: libc::pid_t) -> Result<Option<(u64, u64)>> {
+        let size = std::mem::size_of::<libc::proc_bsdinfo>() as libc::c_int;
+        // SAFETY: proc_pidinfo writes at most `size` bytes into the zeroed struct
+        let (n, info) = unsafe {
+            let mut info: libc::proc_bsdinfo = std::mem::zeroed();
+            let n = libc::proc_pidinfo(
+                pid,
+                libc::PROC_PIDTBSDINFO,
+                0,
+                (&mut info as *mut libc::proc_bsdinfo).cast(),
+                size,
+            );
+            (n, info)
+        };
+        if n == size {
+            return Ok(Some((info.pbi_start_tvsec, info.pbi_start_tvusec)));
+        }
+        let err = std::io::Error::last_os_error();
+        if err.raw_os_error() == Some(libc::ESRCH) {
+            return Ok(None);
+        }
+        bail!("proc_pidinfo(PROC_PIDTBSDINFO) for pid {pid} returned {n}: {err}")
+    }
+
+    /// The process's physical footprint in bytes, or `None` when no process has the pid.
+    fn phys_footprint(pid: libc::pid_t) -> Result<Option<u64>> {
+        // SAFETY: proc_pid_rusage writes one rusage_info_v4 into the zeroed struct
+        let (rc, info) = unsafe {
+            let mut info: libc::rusage_info_v4 = std::mem::zeroed();
+            let rc = libc::proc_pid_rusage(
+                pid,
+                libc::RUSAGE_INFO_V4,
+                (&mut info as *mut libc::rusage_info_v4).cast(),
+            );
+            (rc, info)
+        };
+        if rc == 0 {
+            return Ok(Some(info.ri_phys_footprint));
+        }
+        let err = std::io::Error::last_os_error();
+        if err.raw_os_error() == Some(libc::ESRCH) {
+            return Ok(None);
+        }
+        bail!("proc_pid_rusage for pid {pid}: {err}")
     }
 }

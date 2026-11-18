@@ -141,6 +141,7 @@ fn a_testee_that_stops_reading_cannot_block_the_write() {
     assert_eq!(t.starts, 2);
 }
 
+#[cfg(not(target_os = "macos"))]
 #[test]
 fn the_memory_limit_reaches_the_testee() {
     for (resource, field) in [(MemoryResource::As, "as"), (MemoryResource::Data, "data")] {
@@ -156,6 +157,49 @@ fn the_memory_limit_reaches_the_testee() {
             "{field}: {message}"
         );
     }
+}
+
+// macos has no usable memory rlimit; the runner kills a process over its footprint instead
+#[cfg(target_os = "macos")]
+#[test]
+fn a_testee_over_the_memory_limit_is_killed() {
+    let limit = MemoryLimit {
+        resource: MemoryResource::As,
+        mib: 300,
+    };
+    let mut target = fixture("hog", limit);
+    target.timeout_ms = 10_000;
+    let mut t = Testee::start(&root(), &target).unwrap();
+    match t.request(order_request()).unwrap() {
+        Err(Failure::Exited { status, stderr }) => {
+            assert!(status.contains("SIGKILL"), "{status}");
+            assert!(
+                stderr.contains("killed the testee at a physical footprint of")
+                    && stderr.contains("over the 300 MiB limit"),
+                "{stderr}"
+            );
+        }
+        other => panic!("the testee is killed, not {other:?}"),
+    }
+    assert_eq!(t.starts, 2);
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn a_process_the_testee_starts_is_held_to_the_memory_limit() {
+    let limit = MemoryLimit {
+        resource: MemoryResource::As,
+        mib: 300,
+    };
+    let mut target = fixture("hogchild", limit);
+    target.timeout_ms = 10_000;
+    let mut t = Testee::start(&root(), &target).unwrap();
+    // the shell reports 128 + 9 for a child ended by SIGKILL
+    let Ok(Reply::Error { message, .. }) = t.request(order_request()).unwrap() else {
+        panic!("the testee survives and reports its child's status");
+    };
+    assert_eq!(message, "child=137");
+    assert_eq!(t.starts, 1);
 }
 
 #[test]

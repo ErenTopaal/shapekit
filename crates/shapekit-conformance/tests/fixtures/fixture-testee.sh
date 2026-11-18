@@ -25,6 +25,9 @@ while IFS= read -r line; do
     json8) printf '{"id":"%s","status":"ok","result":{"json":{"u32":8}}}\n' "$id" ;;
     json9) printf '{"id":"%s","status":"ok","result":{"json":{"u32":9}}}\n' "$id" ;;
     limits) printf '{"id":"%s","status":"error","error":{"class":"internal","message":"as=%s data=%s"}}\n' "$id" "$(ulimit -v)" "$(ulimit -d)" ;;
+    # grows the testee itself, or a process it starts, past 300 MiB
+    hog) x=a; while :; do x=$x$x; done ;;
+    hogchild) perl -e '$x = "a" x 400e6; sleep 5'; printf '{"id":"%s","status":"error","error":{"class":"internal","message":"child=%s"}}\n' "$id" "$?" ;;
     *) printf '{"id":"%s","status":"ok","result":{"order":-1}}\n' "$id" ;;
   esac
 done

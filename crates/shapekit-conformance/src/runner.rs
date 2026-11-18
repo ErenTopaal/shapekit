@@ -696,7 +696,9 @@ pub fn cell_checks(names: &[String], cell: &Cell) -> known::CellChecks {
 fn peak_rss() -> Result<i64> {
     use nix::sys::resource::{UsageWho, getrusage};
     let usage = getrusage(UsageWho::RUSAGE_SELF).context("getrusage")?;
-    Ok(usage.max_rss())
+    // ru_maxrss is in kilobytes on linux and in bytes on macos (getrusage(2) of each)
+    let per_kib = if cfg!(target_os = "macos") { 1024 } else { 1 };
+    Ok(usage.max_rss() / per_kib)
 }
 
 /// What each testee covered over the whole run, from one `coverage_snapshot` at its end.
