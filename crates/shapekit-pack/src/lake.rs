@@ -472,7 +472,7 @@ pub struct LakeLedgers<'a> {
     next_batch: usize,
     current: Option<Batch>,
     index: u32,
-    expect: Option<u32>,
+    expect: Option<u64>,
 }
 
 impl Iterator for LakeLedgers<'_> {
@@ -481,11 +481,13 @@ impl Iterator for LakeLedgers<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(b) = &self.current {
-                let seq = b.start + self.index;
-                if seq <= b.end {
+                // parse() checked start <= end; counting from the start rather than adding
+                // to the last ledger keeps a batch ending at u32::MAX from overflowing
+                if self.index <= b.end - b.start {
+                    let seq = b.start + self.index;
                     self.index += 1;
                     if let Some(e) = self.expect
-                        && e != seq
+                        && e != u64::from(seq)
                     {
                         self.current = None;
                         self.next_batch = self.lake.batches.len();
@@ -494,7 +496,8 @@ impl Iterator for LakeLedgers<'_> {
                             e - 1
                         ))));
                     }
-                    self.expect = Some(seq + 1);
+                    // u64, so the ledger after u32::MAX is one no batch can hold
+                    self.expect = Some(u64::from(seq) + 1);
                     let xdr = b.ledger(seq).expect("seq is in the batch").to_vec();
                     return Some(Ok(RawLedger { seq, xdr }));
                 }

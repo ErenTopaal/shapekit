@@ -258,6 +258,32 @@ fn batches_of_64_round_trip() {
     assert_eq!(back2, all);
 }
 
+/// A lake whose last batch ends at u32::MAX reads to its end and stops, in one batch and
+/// across two.
+#[test]
+fn a_lake_ending_at_the_last_ledger_reads_to_its_end() {
+    use stellar_xdr::{LedgerCloseMeta, LedgerCloseMetaV0, Limits, WriteXdr};
+    let lcm = |seq: u32| {
+        let mut m = LedgerCloseMetaV0::default();
+        m.ledger_header.header.ledger_seq = seq;
+        LedgerCloseMeta::V0(m).to_xdr(Limits::none()).unwrap()
+    };
+    let all: Vec<Vec<u8>> = (u32::MAX - 2..=u32::MAX).map(lcm).collect();
+    let tmp = tempfile::tempdir().unwrap();
+    for (name, layout) in [("one", Layout::new(4, 1)), ("each", Layout::new(1, 1))] {
+        let dir = tmp.path().join(name);
+        shapekit_pack::write_sep54(all.iter().cloned().map(Ok), "x", &dir, layout.unwrap())
+            .unwrap();
+        let back: Vec<(u32, Vec<u8>)> = Lake::open(&dir)
+            .unwrap()
+            .ledgers()
+            .map(|l| l.map(|l| (l.seq, l.xdr)).unwrap())
+            .collect();
+        let want: Vec<(u32, Vec<u8>)> = (u32::MAX - 2..=u32::MAX).zip(all.clone()).collect();
+        assert_eq!(back, want, "{name}");
+    }
+}
+
 #[test]
 fn writer_refuses_gaps() {
     let all = ledgers(&fixture());
