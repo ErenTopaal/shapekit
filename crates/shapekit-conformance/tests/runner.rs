@@ -89,6 +89,71 @@ fn a_dying_testee_is_reported_and_restarted() {
     assert_eq!(t.starts, 2);
 }
 
+// whether a process still runs: gone, or killed and waiting for its parent to reap it, is not
+#[cfg(target_os = "linux")]
+fn still_runs(pid: &str) -> bool {
+    match std::fs::read_to_string(format!("/proc/{pid}/stat")) {
+        Err(_) => false,
+        // the state follows the parenthesised command name
+        Ok(stat) => !stat.rsplit_once(") ").unwrap().1.starts_with('Z'),
+    }
+}
+
+// whether a process stops within two seconds: a kill is delivered asynchronously
+#[cfg(target_os = "linux")]
+fn stops(pid: &str) -> bool {
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(2);
+    while still_runs(pid) {
+        if std::time::Instant::now() > until {
+            return false;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    true
+}
+
+#[cfg(target_os = "linux")]
+fn child_pid(target: &mut Target) -> (tempfile::TempDir, PathBuf) {
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("pid");
+    target.env.insert(
+        "FIXTURE_PIDFILE".into(),
+        file.to_string_lossy().into_owned(),
+    );
+    (dir, file)
+}
+
+// a timeout stops every process the testee started, not only the testee
+#[cfg(target_os = "linux")]
+#[test]
+fn a_timeout_kills_the_processes_the_testee_started() {
+    let mut target = fixture("slowchild", SMALL);
+    let (_dir, file) = child_pid(&mut target);
+    let mut t = Testee::start(&root(), &target).unwrap();
+    assert_eq!(
+        t.request(order_request()).unwrap(),
+        Err(Failure::Timeout { ms: 300 })
+    );
+    let pid = std::fs::read_to_string(&file).unwrap();
+    assert!(stops(pid.trim()), "process {pid} outlived the timeout");
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn dropping_a_testee_kills_the_processes_it_started() {
+    let mut target = fixture("bgchild", SMALL);
+    let (_dir, file) = child_pid(&mut target);
+    let mut t = Testee::start(&root(), &target).unwrap();
+    assert!(matches!(
+        t.request(order_request()).unwrap(),
+        Ok(Reply::Ok(_))
+    ));
+    let pid = std::fs::read_to_string(&file).unwrap();
+    assert!(still_runs(pid.trim()));
+    drop(t);
+    assert!(stops(pid.trim()), "process {pid} outlived the testee");
+}
+
 #[test]
 fn a_response_with_another_id_is_a_protocol_violation() {
     let mut t = Testee::start(&root(), &fixture("badid", SMALL)).unwrap();

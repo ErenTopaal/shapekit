@@ -191,7 +191,7 @@ impl Testee {
     }
 
     fn restart(&mut self) -> Result<()> {
-        self.stop();
+        self.stop()?;
         self.running = Some(spawn(&self.root, &self.target)?);
         self.starts += 1;
         let reply = self
@@ -316,31 +316,48 @@ impl Testee {
         })
     }
 
-    fn stop(&mut self) {
+    fn stop(&mut self) -> Result<()> {
         if let Some(mut r) = self.running.take() {
-            // the process may already be gone; kill and wait only reap it
-            let _ = r.child.kill();
-            let _ = r.child.wait();
+            kill_group(&r.child)
+                .with_context(|| format!("{}: stopping the testee", self.target.key()))?;
+            r.child
+                .wait()
+                .with_context(|| format!("{}: reaping the testee", self.target.key()))?;
         }
+        Ok(())
     }
 }
 
 impl Drop for Testee {
     fn drop(&mut self) {
         if let Some(mut r) = self.running.take() {
-            // closing stdin lets a healthy testee exit 0 on its own
+            // closing stdin lets a healthy testee exit 0 on its own; the group is killed after
+            // the grace period whatever the testee did, so a process it started cannot outlive
+            // it, and before the testee is reaped, so the group id still names its processes
             drop(r.requests.take());
-            match r.child.try_wait() {
-                Ok(Some(_)) => {}
-                _ => {
-                    std::thread::sleep(Duration::from_millis(50));
-                    if !matches!(r.child.try_wait(), Ok(Some(_))) {
-                        let _ = r.child.kill();
-                    }
-                    let _ = r.child.wait();
-                }
+            std::thread::sleep(Duration::from_millis(50));
+            let key = self.target.key();
+            // drop cannot return an error, so a failure is reported where the run's output is
+            if let Err(e) = kill_group(&r.child) {
+                eprintln!("{key}: stopping the testee: {e:#}");
+            }
+            if let Err(e) = r.child.wait() {
+                eprintln!("{key}: reaping the testee: {e}");
             }
         }
+    }
+}
+
+/// Kills every process of the testee's process group: the testee and whatever it started (a
+/// shell's children, a package runner's interpreter), which a kill of the testee alone leaves
+/// running with the testee's pipes open. A group with no process left is not an error.
+fn kill_group(child: &Child) -> Result<()> {
+    use nix::sys::signal::{Signal, killpg};
+    use nix::unistd::Pid;
+    let pid = i32::try_from(child.id()).context("the testee's pid does not fit a pid_t")?;
+    match killpg(Pid::from_raw(pid), Signal::SIGKILL) {
+        Ok(()) | Err(nix::errno::Errno::ESRCH) => Ok(()),
+        Err(e) => Err(e).context("killing the testee's process group"),
     }
 }
 
@@ -460,6 +477,8 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    // its own process group, so a timeout or a stop reaches every process it starts
+    std::os::unix::process::CommandExt::process_group(&mut cmd, 0);
     #[cfg(not(target_os = "macos"))]
     limit_memory(&mut cmd, target.memory.resource, target.memory.mib);
     let mut child = cmd.spawn().with_context(|| {

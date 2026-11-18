@@ -1,7 +1,8 @@
 #!/bin/sh
 # a protocol-speaking stand-in used only by the runner's own tests, to exercise timeouts,
-# crashes, bad responses, the response line limit, writes to a testee that stops reading, the
-# memory limit and expected_json cross-checks. FIXTURE_MODE picks the behaviour after hello.
+# crashes, processes a testee starts, bad responses, the response line limit, writes to a
+# testee that stops reading, the memory limit and expected_json cross-checks. FIXTURE_MODE
+# picks the behaviour after hello.
 ops='["asset_order"]'
 case "$FIXTURE_MODE" in
   json*) ops='["asset_order","decode_json"]' ;;
@@ -18,6 +19,10 @@ while IFS= read -r line; do
   esac
   case "$FIXTURE_MODE" in
     slow) sleep 5 ;;
+    # hangs in a process of its own, whose pid it leaves in FIXTURE_PIDFILE
+    slowchild) sleep 30 & echo $! > "$FIXTURE_PIDFILE"; wait ;;
+    # answers, leaving a process of its own running
+    bgchild) sleep 30 & echo $! > "$FIXTURE_PIDFILE"; printf '{"id":"%s","status":"ok","result":{"order":-1}}\n' "$id" ;;
     die) exit 3 ;;
     badid) printf '{"id":"x%s","status":"ok","result":{}}\n' "$id" ;;
     huge) printf '{"id":"%s","status":"ok","result":{"order":-1,"pad":"%0200d"}}\n' "$id" 0 ;;
