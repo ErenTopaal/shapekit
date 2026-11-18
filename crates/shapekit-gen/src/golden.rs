@@ -555,10 +555,10 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
         set.files[file].imported_entries.push(r.entry.id);
     }
     let held: BTreeSet<String> = placed.into_iter().collect();
-    report.removed =
-        entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden, &held).with_context(
-            || format!("all {total} entries are in place; removing the earlier ones it does not hold"),
-        )?;
+    report.removed = entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden, &held)
+        .with_context(|| {
+            format!("all {total} entries are in place; removing the earlier ones it does not hold")
+        })?;
     stage
         .close()
         .with_context(|| format!("removing the staging directory in {}", entries.display()))?;

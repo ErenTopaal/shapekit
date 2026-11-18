@@ -283,7 +283,13 @@ fn scan_import_and_verify_a_golden_tree() {
     assert!(text.contains("stopped part way"), "{text}");
     let first_id = &again.written[&selections[0].family][0];
     assert!(text.contains(first_id.as_str()), "{text}");
-    assert!(out.join("entries").join(&selections[0].family).join(first_id).join("entry.json").is_file());
+    assert!(
+        out.join("entries")
+            .join(&selections[0].family)
+            .join(first_id)
+            .join("entry.json")
+            .is_file()
+    );
     let left: Vec<_> = std::fs::read_dir(out.join("entries"))
         .unwrap()
         .map(|e| e.unwrap().file_name().into_string().unwrap())

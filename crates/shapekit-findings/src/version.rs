@@ -81,7 +81,10 @@ mod tests {
     fn newest_is_in_release_order() {
         assert_eq!(newest(["v0.9.0", "v0.10.0", "v0.2.0"]), Some("v0.10.0"));
         assert_eq!(newest(["2.0.0-rc.1", "1.9.0", "2.0.0"]), Some("2.0.0"));
-        assert_eq!(newest(["1.0.0+b", "1.0.0+a"]), newest(["1.0.0+a", "1.0.0+b"]));
+        assert_eq!(
+            newest(["1.0.0+b", "1.0.0+a"]),
+            newest(["1.0.0+a", "1.0.0+b"])
+        );
         assert_eq!(newest([]), None);
     }
 }

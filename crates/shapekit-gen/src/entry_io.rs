@@ -175,13 +175,8 @@ pub fn swap_in(staged: &Path, dir: &Path) -> Result<()> {
         return shapekit_process::rename::no_replace(staged, dir)
             .with_context(|| format!("moving {} to {}", staged.display(), dir.display()));
     }
-    shapekit_process::rename::exchange(staged, dir).with_context(|| {
-        format!(
-            "exchanging {} with {}",
-            staged.display(),
-            dir.display()
-        )
-    })?;
+    shapekit_process::rename::exchange(staged, dir)
+        .with_context(|| format!("exchanging {} with {}", staged.display(), dir.display()))?;
     std::fs::remove_dir_all(staged).with_context(|| {
         format!(
             "{} now holds the new entry; removing the replaced one from {}",
@@ -327,12 +322,18 @@ mod tests {
         // a staged directory that does not exist: the exchange fails, the entry stays
         let missing = t.path().join("entries/f/.staged-missing");
         assert!(swap_in(&missing, &dir).is_err());
-        assert_eq!(std::fs::read_to_string(dir.join("entry.json")).unwrap(), "old");
+        assert_eq!(
+            std::fs::read_to_string(dir.join("entry.json")).unwrap(),
+            "old"
+        );
         let staged = t.path().join("entries/f/.staged-1");
         std::fs::create_dir(&staged).unwrap();
         std::fs::write(staged.join("entry.json"), "new").unwrap();
         swap_in(&staged, &dir).unwrap();
-        assert_eq!(std::fs::read_to_string(dir.join("entry.json")).unwrap(), "new");
+        assert_eq!(
+            std::fs::read_to_string(dir.join("entry.json")).unwrap(),
+            "new"
+        );
         assert!(!staged.exists(), "the replaced copy is removed");
         // a new entry is moved, and the staged path is gone
         let staged = t.path().join("entries/f/.staged-2");
@@ -349,7 +350,11 @@ mod tests {
         let family = corpus.path().join("entries/history");
         let staged = family.join(".staged-x");
         std::fs::create_dir(&staged).unwrap();
-        std::fs::copy(family.join("history.x/entry.json"), staged.join("entry.json")).unwrap();
+        std::fs::copy(
+            family.join("history.x/entry.json"),
+            staged.join("entry.json"),
+        )
+        .unwrap();
         let class = scval_entry().source.class;
         let keep = BTreeSet::from(["history.x".to_owned()]);
         assert!(
@@ -362,6 +367,9 @@ mod tests {
             remove_entries_of_class(corpus.path(), class, &BTreeSet::new()).unwrap(),
             ["history.x"]
         );
-        assert!(staged.join("entry.json").is_file(), "a staging copy is not an entry");
+        assert!(
+            staged.join("entry.json").is_file(),
+            "a staging copy is not an entry"
+        );
     }
 }

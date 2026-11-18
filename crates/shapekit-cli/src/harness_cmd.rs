@@ -1196,8 +1196,8 @@ impl StateTally {
 #[cfg(test)]
 mod tests {
     use super::{
-        NEEDS_LINUX_DOCKER, StateTally, docker_host, docker_in_a_vm, free_field_verdict,
-        pair_keys, split_command,
+        NEEDS_LINUX_DOCKER, StateTally, docker_host, docker_in_a_vm, free_field_verdict, pair_keys,
+        split_command,
     };
     use shapekit_harness::relations::free_field::FreeFieldReport;
     use shapekit_harness::relations::state::{ChainState, StateReport};

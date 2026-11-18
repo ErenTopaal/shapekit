@@ -32,7 +32,13 @@ mod imp {
         let (f, t) = (c(from)?, c(to)?);
         // SAFETY: both pointers are nul-terminated strings that live across the call
         let rc = unsafe {
-            libc::renameat2(libc::AT_FDCWD, f.as_ptr(), libc::AT_FDCWD, t.as_ptr(), flags)
+            libc::renameat2(
+                libc::AT_FDCWD,
+                f.as_ptr(),
+                libc::AT_FDCWD,
+                t.as_ptr(),
+                flags,
+            )
         };
         if rc == 0 {
             Ok(())
