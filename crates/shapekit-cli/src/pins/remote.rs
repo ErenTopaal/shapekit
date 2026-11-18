@@ -58,7 +58,7 @@ fn http_transient(err: &anyhow::Error) -> bool {
 }
 
 fn git_transient(err: &anyhow::Error) -> bool {
-    let msg = format!("{err:#}");
+    let msg = crate::error_text::chain(err.as_ref());
     [
         "Could not resolve host",
         "Failed to connect",

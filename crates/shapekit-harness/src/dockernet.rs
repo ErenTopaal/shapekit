@@ -93,7 +93,11 @@ impl Network {
 impl Drop for Network {
     fn drop(&mut self) {
         if let Err(e) = self.remove() {
-            eprintln!("shapekit harness: removing network {}: {e:#}", self.name);
+            eprintln!(
+                "shapekit harness: removing network {}: {}",
+                self.name,
+                shapekit_process::error_text::chain(e.as_ref())
+            );
         }
     }
 }

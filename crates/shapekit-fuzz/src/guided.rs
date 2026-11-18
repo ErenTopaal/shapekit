@@ -25,6 +25,8 @@ use serde_json::{Map, Value};
 use shapekit_conformance::testee::{Reply, Testee};
 use shapekit_conformance::versions::{self, VersionsFile};
 
+use shapekit_process::error_text::chain;
+
 use crate::mutate::{Rng, mutate};
 use crate::oracle::{classify, go_side, known_filter, rust_side, signature};
 use crate::types::FuzzType;
@@ -210,7 +212,7 @@ pub struct SourceStats {
 
 /// One run, with or without the coverage feedback.
 pub fn run(cfg: &GuidedConfig, feedback: bool) -> Result<GuidedRun> {
-    let seeds = crate::load_seeds(&cfg.root.join("corpus"), &FuzzType::ALL, cfg.max_seed_bytes)?;
+    let seeds = crate::load_seeds(&cfg.root.join("corpus"), FuzzType::ALL, cfg.max_seed_bytes)?;
     let mut sides = start(cfg)?;
     let mut rng = Rng::new(cfg.seed);
     // per type the corpus seeds first, then (with the feedback) the inputs that grew coverage
@@ -307,7 +309,7 @@ pub fn run(cfg: &GuidedConfig, feedback: bool) -> Result<GuidedRun> {
             let side = match go_side(&mut s.testee, ty, &data, ty.depth()) {
                 Ok(side) => side,
                 // a type the testee has no table entry for tells nothing about this input
-                Err(e) if format!("{e:#}").contains("does not support") => continue,
+                Err(e) if chain(e.as_ref()).contains("does not support") => continue,
                 Err(e) => return Err(e),
             };
             if let Some(kind) = classify(&rust, &side) {

@@ -695,7 +695,8 @@ mod footprint {
                         // SAFETY: as above, pid was checked to still be this child
                         unsafe { libc::kill(pid, libc::SIGKILL) };
                         note(format!(
-                            "killed the testee, its memory could not be read: {e:#}"
+                            "killed the testee, its memory could not be read: {}",
+                            shapekit_process::error_text::chain(e.as_ref())
                         ));
                         return;
                     }

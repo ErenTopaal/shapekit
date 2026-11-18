@@ -25,6 +25,8 @@ use shapekit_contracts::obligations::{
     Obligation, ObligationKind, ObligationLedger, ObligationStatus,
 };
 
+use shapekit_process::error_text::chain;
+
 use crate::runner::{self, Cell, RunOptions, Selection};
 use crate::versions::VersionsFile;
 
@@ -213,7 +215,7 @@ pub fn probe(
     let outcome = match corpus_cells(paths, sdk, version, command) {
         Ok(now) => compare(&base, &now),
         Err(e) => ProbeOutcome::Failed {
-            message: format!("{e:#}"),
+            message: chain(e.as_ref()),
         },
     };
     write_json(record, &outcome)?;

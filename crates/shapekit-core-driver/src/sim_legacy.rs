@@ -236,7 +236,7 @@ macro_rules! legacy_simulator {
                     if let Some(e) = snapshot.0.take_failure() {
                         return Err(e);
                     }
-                    let network_config = loaded.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                    let network_config = loaded.map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     let mut ledger_info = LedgerInfo {
                         protocol_version: ctx.protocol_version,
                         sequence_number: ctx.sequence_number,
@@ -296,7 +296,7 @@ macro_rules! legacy_simulator {
                         true,
                     );
                     self.failure()?;
-                    let r = run.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                    let r = run.map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     let diagnostic_events = to_new_all(&r.diagnostic_events, "diagnostic event")?;
                     let return_value = match r.invoke_result {
                         Ok(v) => to_new(&v, "return value")?,
@@ -330,7 +330,7 @@ macro_rules! legacy_simulator {
                         .collect::<Result<_, _>>()?;
                     let restoring =
                         AutoRestoringSnapshotSource::new(self.snapshot.clone(), &self.ledger_info)
-                            .map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                            .map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     let run = simulate_extend_ttl_op(
                         &restoring,
                         &self.network_config,
@@ -340,14 +340,14 @@ macro_rules! legacy_simulator {
                         extend_to,
                     );
                     self.failure()?;
-                    let extend = run.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                    let extend = run.map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     let restore = restoring
                         .simulate_restore_keys_op(
                             &self.network_config,
                             &adjustment_config(),
                             &self.ledger_info,
                         )
-                        .map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                        .map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     self.failure()?;
                     Ok(ExtendTtlSimulation {
                         transaction_data: to_new(&extend.transaction_data, "transaction data")?,
@@ -373,7 +373,7 @@ macro_rules! legacy_simulator {
                         &keys,
                     );
                     self.failure()?;
-                    let r = run.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+                    let r = run.map_err(|e| SimError::Setup(shapekit_process::error_text::chain(e.as_ref())))?;
                     to_new(&r.transaction_data, "transaction data")
                 }
             }

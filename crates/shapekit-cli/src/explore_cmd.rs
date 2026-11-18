@@ -16,6 +16,8 @@ use shapekit_explore::verify;
 use shapekit_gen::recipe::ir_run::IrRecipe;
 use shapekit_schema::Schema;
 
+use crate::error_text::chain;
+
 #[derive(Subcommand)]
 pub enum ExploreCommand {
     /// Search for recipes for a time budget and write them, with a report of the union arms
@@ -609,7 +611,7 @@ fn verify_dir(dir: &Path, repeat: usize, jobs: usize, pins: &Path) -> Result<boo
                         Err(e) => verify::Checked {
                             recipe: name.to_string(),
                             runs: Vec::new(),
-                            problems: vec![format!("{e:#}")],
+                            problems: vec![chain(e.as_ref())],
                         },
                     };
                     eprintln!(
@@ -745,12 +747,12 @@ fn pairs(recipes: &Path, max: usize, jobs: usize, out: &Path, pins: &Path) -> Re
                                 "not applied under both"
                             }
                         ),
-                        Err(e) => eprintln!("{name}: {e:#}"),
+                        Err(e) => eprintln!("{name}: {}", chain(e.as_ref())),
                     }
                     results
                         .lock()
                         .expect("no thread panics holding the lock")
-                        .push(r.map_err(|e| format!("{name}: {e:#}")));
+                        .push(r.map_err(|e| format!("{name}: {}", chain(e.as_ref()))));
                 }
             });
         }
@@ -944,11 +946,11 @@ fn gates_cmd(
                     match run.and_then(|r| gates::save(&r, &runs_dir)) {
                         Ok(()) => eprintln!("{name}: {:.1}s", started.elapsed().as_secs_f64()),
                         Err(e) => {
-                            eprintln!("{name}: {e:#}");
+                            eprintln!("{name}: {}", chain(e.as_ref()));
                             failures
                                 .lock()
                                 .expect("no thread panics holding the lock")
-                                .push(format!("{name}: {e:#}"));
+                                .push(format!("{name}: {}", chain(e.as_ref())));
                         }
                     }
                 }

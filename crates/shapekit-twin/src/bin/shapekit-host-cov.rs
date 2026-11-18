@@ -25,7 +25,7 @@ fn main() -> ExitCode {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,
         Err(e) => {
-            eprintln!("error: {e:#}");
+            eprintln!("error: {}", shapekit_process::error_text::chain(e.as_ref()));
             ExitCode::from(2)
         }
     }

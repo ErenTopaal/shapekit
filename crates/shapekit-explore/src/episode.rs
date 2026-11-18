@@ -242,7 +242,7 @@ impl<'e, 'a> Live<'e, 'a> {
             {
                 self.steps.pop();
                 self.stats.invalid_fills += 1;
-                let mut why = format!("{:#}", e);
+                let mut why = shapekit_process::error_text::chain(e.as_ref());
                 why.truncate(120);
                 *self.stats.fill_errors.entry(why).or_insert(0) += 1;
                 return Ok(());

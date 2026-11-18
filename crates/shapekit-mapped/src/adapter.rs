@@ -12,6 +12,7 @@ use shapekit_harness::protocol::{
     StopResult,
 };
 use shapekit_oracle::vocab::ORACLE_VOCAB_VERSION;
+use shapekit_process::error_text::chain;
 
 use crate::docker::{self, PeakSampler};
 use crate::lake::{Lake, Sink};
@@ -40,7 +41,7 @@ pub fn err(class: ErrorClass, message: impl std::fmt::Display) -> AdapterError {
 }
 
 fn target_err(e: anyhow::Error) -> AdapterError {
-    err(ErrorClass::Target, format!("{e:#}"))
+    err(ErrorClass::Target, chain(e.as_ref()))
 }
 
 /// How the adapter was invoked.
@@ -391,8 +392,9 @@ impl Adapter {
                 err(
                     ErrorClass::Target,
                     format!(
-                        "copying the lake up to ledger {}: {e:#}",
-                        p.ledgers.bootstrap
+                        "copying the lake up to ledger {}: {}",
+                        p.ledgers.bootstrap,
+                        chain(e.as_ref())
                     ),
                 )
             })?;
@@ -430,7 +432,12 @@ impl Adapter {
                 Err((t, e)) => (t, Err(e)),
             };
             docker::log(&format!("{}:\n{text}", step.name));
-            res.map_err(|e| err(ErrorClass::Target, format!("{}: {e:#}", step.name)))?;
+            res.map_err(|e| {
+                err(
+                    ErrorClass::Target,
+                    format!("{}: {}", step.name, chain(e.as_ref())),
+                )
+            })?;
         }
 
         let ingest = format!("{prefix}-ingest");
@@ -466,8 +473,12 @@ impl Adapter {
         let cmd = self.mapping().ingest.command.clone();
         args.extend(self.ctx.expand_all(&cmd).map_err(target_err)?);
         self.running().containers.push(ingest.clone());
-        docker::docker(&args)
-            .map_err(|e| err(ErrorClass::Target, format!("starting ingest: {e:#}")))?;
+        docker::docker(&args).map_err(|e| {
+            err(
+                ErrorClass::Target,
+                format!("starting ingest: {}", chain(e.as_ref())),
+            )
+        })?;
         let r = self.running();
         r.ingest = Some(ingest.clone());
         r.sampler = Some(PeakSampler::start(&ingest));
@@ -523,8 +534,12 @@ impl Adapter {
         args.push(s.image.clone());
         args.extend(self.ctx.expand_all(&s.command).map_err(target_err)?);
         self.running().containers.push(name.clone());
-        docker::docker(&args)
-            .map_err(|e| err(ErrorClass::Target, format!("starting {}: {e:#}", s.name)))?;
+        docker::docker(&args).map_err(|e| {
+            err(
+                ErrorClass::Target,
+                format!("starting {}: {}", s.name, chain(e.as_ref())),
+            )
+        })?;
         let ip = docker::container_ip(&name, network).map_err(target_err)?;
         self.ctx
             .set(format!("service.{}.host", s.name), name.clone());
@@ -545,7 +560,7 @@ impl Adapter {
                 a.extend(self.ctx.expand_all(cmd).map_err(target_err)?);
                 match docker::docker(&a) {
                     Ok(_) => (true, String::new(), 500),
-                    Err(e) => (false, format!("{e:#}"), 500),
+                    Err(e) => (false, chain(e.as_ref()), 500),
                 }
             } else {
                 let url = self
@@ -598,7 +613,10 @@ impl Adapter {
             lake.copy_up_to(head).map_err(|e| {
                 err(
                     ErrorClass::Target,
-                    format!("copying the lake up to ledger {head}: {e:#}"),
+                    format!(
+                        "copying the lake up to ledger {head}: {}",
+                        chain(e.as_ref())
+                    ),
                 )
             })?;
         }
@@ -628,7 +646,12 @@ impl Adapter {
             status.log_tail.to_string(),
             ingest.clone(),
         ])
-        .map_err(|(_, e)| err(ErrorClass::Target, format!("reading ingest logs: {e:#}")))?;
+        .map_err(|(_, e)| {
+            err(
+                ErrorClass::Target,
+                format!("reading ingest logs: {}", chain(e.as_ref())),
+            )
+        })?;
         let mut last_error = last_error(&status.error, &logs);
         let crashed = match &status.crash {
             Some(c) => regex::Regex::new(c)
@@ -716,9 +739,12 @@ impl Adapter {
     }
 
     pub fn stop(&mut self) -> Res<StopResult> {
-        let logs = self
-            .teardown()
-            .map_err(|e| err(ErrorClass::Internal, format!("removing containers: {e:#}")))?;
+        let logs = self.teardown().map_err(|e| {
+            err(
+                ErrorClass::Internal,
+                format!("removing containers: {}", chain(e.as_ref())),
+            )
+        })?;
         Ok(StopResult { logs })
     }
 
@@ -735,17 +761,17 @@ impl Adapter {
         if let Some(i) = &run.ingest {
             match docker::logs_tail(i, 20000, MAX_STOP_LOGS) {
                 Ok(l) => logs = l,
-                Err(e) if format!("{e:#}").contains("No such container") => {}
-                Err(e) => errs.push(format!("{e:#}")),
+                Err(e) if chain(e.as_ref()).contains("No such container") => {}
+                Err(e) => errs.push(chain(e.as_ref())),
             }
         }
         drop(run.store.take());
         // the ingest container first, so nothing writes while its services go away
         for name in run.containers.iter().rev() {
             if let Err(e) = docker::docker(&["rm".into(), "-f".into(), "-v".into(), name.clone()])
-                && !format!("{e:#}").contains("No such container")
+                && !chain(e.as_ref()).contains("No such container")
             {
-                errs.push(format!("{e:#}"));
+                errs.push(chain(e.as_ref()));
             }
         }
         if errs.is_empty() {
@@ -792,4 +818,37 @@ pub fn last_error(rules: &[crate::mapping::ErrorRule], logs: &str) -> Option<Str
         }
     }
     last
+}
+
+#[cfg(test)]
+mod tests {
+    use super::target_err;
+
+    // shaped like the library errors: the message ends with the source, which source()
+    // also returns
+    #[derive(Debug)]
+    struct Reading(std::io::Error);
+
+    impl std::fmt::Display for Reading {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "reading /x.json: {}", self.0)
+        }
+    }
+
+    impl std::error::Error for Reading {
+        fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+            Some(&self.0)
+        }
+    }
+
+    #[test]
+    fn a_target_error_prints_each_cause_once() {
+        let io = || std::io::Error::from(std::io::ErrorKind::NotFound);
+        let e = anyhow::Error::new(Reading(io())).context("starting the target");
+        let message = target_err(e).message;
+        assert_eq!(
+            message,
+            format!("starting the target: reading /x.json: {}", io())
+        );
+    }
 }

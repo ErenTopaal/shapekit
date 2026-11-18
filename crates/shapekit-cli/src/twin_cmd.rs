@@ -12,6 +12,7 @@ use shapekit_registry::Registry;
 use shapekit_twin::gates;
 use shapekit_twin::verify::{DEFAULT_CHAINS, SMOKE, VerifyOptions};
 
+use crate::error_text::chain;
 use crate::{manifest_cmd, pins};
 
 /// The smoke chain's testnet canonical hash on the release image, as
@@ -738,7 +739,7 @@ fn core_tests(spec: &str, twin_pins: &Path, jobs: usize, out: &Path) -> Result<b
             }
             Err(e) => {
                 ok = false;
-                println!("{i}: {}: {e:#}", names[*i]);
+                println!("{i}: {}: {}", names[*i], chain(e.as_ref()));
                 tsv.push_str(&format!("{i}\terror\t0\t{}\n", names[*i]));
             }
         }

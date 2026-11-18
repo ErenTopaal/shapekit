@@ -19,6 +19,8 @@ use shapekit_pack::chain::LEDGERS_DIR;
 use shapekit_pack::{Layout, lake_digest, pack_chain};
 use shapekit_registry::{Family, Registry};
 
+use shapekit_process::error_text::chain;
+
 use super::ctx::{Captured, ChainCtx};
 use super::output::{
     CHAINS_DIR, ChainCheck, Journal, chain_entries, check_entry, generator_entry_json,
@@ -252,7 +254,7 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
                 runs.push(run);
                 by_chain.entry(*i).or_default().insert(*n, caps);
             }
-            Err(e) => failures.push(format!("{e:#}")),
+            Err(e) => failures.push(chain(e.as_ref())),
         }
     }
     if !failures.is_empty() {
@@ -351,7 +353,8 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
         // the staging directory still holds what could not be put back
         let kept = staging.keep();
         bail!(
-            "installing failed ({e:#}) and the corpus could not be fully restored; the replaced directories are under {}:\n{}",
+            "installing failed ({}) and the corpus could not be fully restored; the replaced directories are under {}:\n{}",
+            chain(e.as_ref()),
             kept.display(),
             failed.join("\n")
         );

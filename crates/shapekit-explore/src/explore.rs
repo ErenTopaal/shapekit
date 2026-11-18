@@ -14,6 +14,8 @@ use serde::Serialize;
 use shapekit_contracts::RecipeIr;
 use shapekit_contracts::recipe_ir::NodeOptions;
 
+use shapekit_process::error_text::chain;
+
 use crate::action::OpMenu;
 use crate::episode::{self, Env, Episode, Spec};
 use crate::feedback::RegionKey;
@@ -296,7 +298,7 @@ pub fn run(env: &Env<'_>, opts: &Options) -> Result<Report> {
                 while Instant::now() < deadline {
                     let n = counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                     if let Err(e) = one(env, opts, state, &mut rng, n) {
-                        let msg = format!("episode {n}: {e:#}");
+                        let msg = format!("episode {n}: {}", chain(e.as_ref()));
                         eprintln!("{msg}");
                         state
                             .lock()

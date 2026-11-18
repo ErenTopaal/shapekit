@@ -17,6 +17,8 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context as _, Result, bail, ensure};
 use serde::{Deserialize, Serialize};
 
+use shapekit_process::error_text::chain;
+
 use super::{
     Context, Paths, ProbeOutcome, Report, Status, Tool, args, copy_tree, counts, fault_from,
     output, probe, read_json, run, sample, write_baseline, write_json,
@@ -193,7 +195,7 @@ pub fn exec(paths: &Paths, setup_file: &Path) -> Result<i32> {
             write_json(
                 &record,
                 &ProbeOutcome::Failed {
-                    message: format!("does not build: {e:#}"),
+                    message: format!("does not build: {}", chain(e.as_ref())),
                 },
             )?;
             std::fs::write(record.with_extension("unviable"), b"")?;

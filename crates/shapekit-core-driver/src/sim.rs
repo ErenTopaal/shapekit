@@ -29,6 +29,8 @@ use stellar_xdr::{
     SorobanAuthorizationEntry, SorobanTransactionData,
 };
 
+use shapekit_process::error_text::chain;
+
 use crate::keys::network_id;
 
 /// PRNG seed handed to the host in every simulation. The value only steers
@@ -316,7 +318,7 @@ impl Simulator {
         if let Some(e) = snapshot.take_failure() {
             return Err(e);
         }
-        let network_config = loaded.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+        let network_config = loaded.map_err(|e| SimError::Setup(chain(e.as_ref())))?;
         let mut ledger_info = LedgerInfo {
             protocol_version: ctx.protocol_version,
             sequence_number: ctx.sequence_number,
@@ -375,7 +377,7 @@ impl Simulator {
         if let Some(e) = self.snapshot.take_failure() {
             return Err(e);
         }
-        let r = run.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+        let r = run.map_err(|e| SimError::Setup(chain(e.as_ref())))?;
         let return_value = match r.invoke_result {
             Ok(v) => v,
             Err(e) => {
@@ -406,7 +408,7 @@ impl Simulator {
     ) -> Result<ExtendTtlSimulation, SimError> {
         let keys = unique(keys);
         let restoring = AutoRestoringSnapshotSource::new(self.snapshot.clone(), &self.ledger_info)
-            .map_err(|e| SimError::Setup(format!("{e:#}")))?;
+            .map_err(|e| SimError::Setup(chain(e.as_ref())))?;
         let run = simulate_extend_ttl_op(
             &restoring,
             &self.network_config,
@@ -418,14 +420,14 @@ impl Simulator {
         if let Some(e) = self.snapshot.take_failure() {
             return Err(e);
         }
-        let extend = run.map_err(|e| SimError::Setup(format!("{e:#}")))?;
+        let extend = run.map_err(|e| SimError::Setup(chain(e.as_ref())))?;
         let restore = restoring
             .simulate_restore_keys_op(
                 &self.network_config,
                 &adjustment_config(),
                 &self.ledger_info,
             )
-            .map_err(|e| SimError::Setup(format!("{e:#}")))?;
+            .map_err(|e| SimError::Setup(chain(e.as_ref())))?;
         if let Some(e) = self.snapshot.take_failure() {
             return Err(e);
         }
@@ -450,7 +452,7 @@ impl Simulator {
             return Err(e);
         }
         Ok(run
-            .map_err(|e| SimError::Setup(format!("{e:#}")))?
+            .map_err(|e| SimError::Setup(chain(e.as_ref())))?
             .transaction_data)
     }
 }

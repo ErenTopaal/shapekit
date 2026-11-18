@@ -13,6 +13,8 @@ use shapekit_oracle::vocab::{ORACLE_VOCAB_VERSION, OracleFile};
 use shapekit_pack::chain::ChainFile;
 use shapekit_serve::{DEFAULT_CACHE_BYTES, ServeConfig};
 
+use shapekit_process::error_text::chain as error_chain;
+
 use crate::adapter::Adapter;
 use crate::compare::{
     EntryVerdict, Reason, Stop, Verdict, compare_tx, stopped_verdict, verdict_of,
@@ -252,7 +254,7 @@ fn run_chain(
     let entries = match drive(&mut ctx, opts, vocab, &mut describe) {
         Ok(entries) => entries,
         Err(e) => {
-            let msg = format!("{e:#}");
+            let msg = error_chain(e.as_ref());
             ctx.result.error = Some(msg.clone());
             rows(job, |_| {
                 EntryVerdict::simple(
@@ -614,13 +616,16 @@ fn drive_adapter(
     // a cleanup failure is reported even when ingestion already failed
     let mut cleanup = Vec::new();
     if let Some(e) = stop_error {
-        cleanup.push(format!("{e:#}"));
+        cleanup.push(error_chain(e.as_ref()));
     }
     if let Err(e) = server_stopped {
         cleanup.push(format!("stopping the replay server: {e}"));
     }
     if let Err(e) = net_removed {
-        cleanup.push(format!("removing the docker network: {e:#}"));
+        cleanup.push(format!(
+            "removing the docker network: {}",
+            error_chain(e.as_ref())
+        ));
     }
     if let Err(e) = workdir_removed {
         cleanup.push(format!("removing the adapter work directory: {e}"));
@@ -656,11 +661,14 @@ fn take_dump(
             match Known::from_chain(&ctx.job.dir, &chain.passphrase, through) {
                 Ok(known) => ctx.result.carry = Some(carry::check(&d, &known)),
                 Err(e) => {
-                    ctx.result.dump_error = Some(format!("reading the chain's values: {e:#}"))
+                    ctx.result.dump_error = Some(format!(
+                        "reading the chain's values: {}",
+                        error_chain(e.as_ref())
+                    ))
                 }
             }
         }
-        Err(e) => ctx.result.dump_error = Some(format!("{e:#}")),
+        Err(e) => ctx.result.dump_error = Some(error_chain(e.as_ref())),
     }
 }
 

@@ -14,6 +14,8 @@ use shapekit_core_driver::recorder::canonical_frame;
 use shapekit_gen::recipe::ir_run::IrRecipe;
 use shapekit_gen::recipe::{Network, Recipe, start_chain};
 
+use shapekit_process::error_text::chain;
+
 use crate::arms::{arms_in, ledger_signature};
 
 #[derive(Debug, Clone, Serialize)]
@@ -150,7 +152,7 @@ pub fn check(
                     }
                     runs.push(r);
                 }
-                Err(e) => problems.push(format!("{e:#}")),
+                Err(e) => problems.push(chain(e.as_ref())),
             }
         }
     }
