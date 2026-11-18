@@ -2,6 +2,20 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-18: PostgreSQL indexers connect through a mapping file
+
+- `shapekit check indexer --mapping <file>` (and `harness run`, `harness reproduce`) connects an
+  indexer that runs in Docker and stores in PostgreSQL with no adapter program: one TOML file
+  says how to build and start it, how ledgers reach it (rpc, or the SEP-54 lake through S3, GCS
+  or a directory), how to read its progress, and which tables and columns hold which oracle
+  facts. The format is in `docs/mapping-adapter.md`.
+- `adapters/walletbackend/adapter.toml` connects wallet-backend this way. At `3e22515a`, over
+  every chain on both networks, it gives the 906 entries the same verdicts as the Go adapter
+  (678 pass, 106 mishandled, 44 dropped, 78 out of scope), with the same reasons, problems and
+  carry check results on every entry and chain. The reproductions table run through it holds
+  on all 24 rows: 20 entry verdicts and 4 carry checks.
+- The reusable `indexer-conformance` workflow takes `mapping` and `vars` inputs as an
+  alternative to `adapter`.
 ## 2026-11-18: 0.2.0 release candidate
 
 What 0.2.0 holds:
