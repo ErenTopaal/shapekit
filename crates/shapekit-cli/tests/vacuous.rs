@@ -92,3 +92,51 @@ fn verify_raw_order_does_not_count_a_copied_recording() {
         "{stdout}"
     );
 }
+
+fn repo(rel: &str) -> std::path::PathBuf {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(rel)
+}
+
+#[test]
+fn goldens_agree_without_pairs() {
+    // the manifest crate's sample corpus has no golden entry, so no family pairs
+    let sample = repo("crates/shapekit-manifest/tests/fixtures/sample/manifest.json");
+    let out = shapekit(&[
+        "goldens",
+        "agree",
+        "--file",
+        sample.to_str().unwrap(),
+        "--registry",
+        repo("registry").to_str().unwrap(),
+    ]);
+    assert_eq!(out.status.code(), Some(2), "{}", stderr(&out));
+    assert!(stderr(&out).contains("no pairs"), "{}", stderr(&out));
+}
+
+#[test]
+fn contracts_validate_of_a_file_it_cannot_read() {
+    let tmp = tempfile::tempdir().unwrap();
+    let garbled = tmp.path().join("garbled.json");
+    std::fs::write(&garbled, "{ not json").unwrap();
+    let wrong = tmp.path().join("wrong.json");
+    std::fs::write(&wrong, r#"{"schema_version": 1, "no_such_field": 1}"#).unwrap();
+    let validate = |file: &std::path::Path| {
+        shapekit(&[
+            "contracts",
+            "validate",
+            "--contract",
+            "obligations",
+            "--file",
+            file.to_str().unwrap(),
+        ])
+    };
+    // missing or not JSON: an error; JSON that is not the contract: a failed check
+    assert_eq!(
+        validate(&tmp.path().join("missing.json")).status.code(),
+        Some(2)
+    );
+    assert_eq!(validate(&garbled).status.code(), Some(2));
+    assert_eq!(validate(&wrong).status.code(), Some(1));
+}

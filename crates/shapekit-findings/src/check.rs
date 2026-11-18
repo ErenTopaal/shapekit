@@ -73,10 +73,11 @@ pub fn with_committed_hashes(fresh: &Collection, written: Option<&Collection>) -
 }
 
 /// Checks a fresh collection. `written` is the committed `findings.json` and `written_md`
-/// the committed `FINDINGS.md`; both must equal what collect would write now, so the
-/// published record cannot lag the runs it claims to describe.
+/// the committed `FINDINGS.md`, both read from `out_dir`; both must equal what collect would
+/// write now, so the published record cannot lag the runs it claims to describe.
 pub fn check(
     root: &Path,
+    out_dir: &Path,
     fresh: &Collection,
     written: Option<&Collection>,
     written_md: Option<&str>,
@@ -125,22 +126,26 @@ pub fn check(
             out.problems.push(m);
         }
     }
+    let json = out_dir.join("findings.json");
+    let json = json.display();
     match written {
-        None => out
-            .problems
-            .push("findings/findings.json is missing; run `shapekit findings collect`".into()),
-        Some(w) if w != fresh => out.problems.push(
-            "findings/findings.json differs from a fresh collection of the inputs; run `shapekit findings collect`".into(),
-        ),
+        None => out.problems.push(format!(
+            "{json} is missing; run `shapekit findings collect`"
+        )),
+        Some(w) if w != fresh => out.problems.push(format!(
+            "{json} differs from a fresh collection of the inputs; run `shapekit findings collect`"
+        )),
         Some(_) => {}
     }
+    let md_path = out_dir.join("FINDINGS.md");
+    let md_path = md_path.display();
     match written_md {
         None => out
             .problems
-            .push("findings/FINDINGS.md is missing; run `shapekit findings collect`".into()),
-        Some(md) if md != crate::render::markdown(fresh, up, triage) => out.problems.push(
-            "findings/FINDINGS.md differs from a fresh rendering of the inputs; run `shapekit findings collect`".into(),
-        ),
+            .push(format!("{md_path} is missing; run `shapekit findings collect`")),
+        Some(md) if md != crate::render::markdown(fresh, up, triage) => out.problems.push(format!(
+            "{md_path} differs from a fresh rendering of the inputs; run `shapekit findings collect`"
+        )),
         Some(_) => {}
     }
     out.ok = out.problems.is_empty();
@@ -203,6 +208,34 @@ mod tests {
     }
 
     #[test]
+    fn a_missing_record_is_named_where_it_was_looked_for() {
+        let c = collection(vec![]);
+        let out = check(
+            Path::new("."),
+            Path::new("elsewhere"),
+            &c,
+            None,
+            None,
+            "../",
+            "findings/triage.toml",
+        );
+        assert!(
+            out.problems
+                .iter()
+                .any(|p| p.starts_with("elsewhere/findings.json is missing")),
+            "{:?}",
+            out.problems
+        );
+        assert!(
+            out.problems
+                .iter()
+                .any(|p| p.starts_with("elsewhere/FINDINGS.md is missing")),
+            "{:?}",
+            out.problems
+        );
+    }
+
+    #[test]
     fn committed_hashes_hide_only_the_input_hashes() {
         use crate::collect::InputRef;
         let input = |sha: &str, detail: &str| InputRef {
@@ -239,6 +272,7 @@ mod tests {
         ]);
         let out = check(
             Path::new("."),
+            Path::new("findings"),
             &c,
             Some(&c),
             Some(&md(&c)),
@@ -253,6 +287,7 @@ mod tests {
         stale.summary.failures += 1;
         let out = check(
             Path::new("."),
+            Path::new("findings"),
             &stale,
             Some(&c),
             Some(&md(&stale)),
@@ -275,6 +310,7 @@ mod tests {
         assert_eq!(
             check(
                 Path::new("."),
+                Path::new("findings"),
                 &c,
                 Some(&c),
                 Some(&md(&c)),
@@ -291,6 +327,7 @@ mod tests {
         assert!(
             check(
                 Path::new("."),
+                Path::new("findings"),
                 &c,
                 Some(&c),
                 Some(&md(&c)),
@@ -307,6 +344,7 @@ mod tests {
         assert!(
             check(
                 Path::new("."),
+                Path::new("findings"),
                 &c,
                 Some(&c),
                 Some(&md(&c)),
@@ -325,6 +363,7 @@ mod tests {
         });
         let out = check(
             Path::new("."),
+            Path::new("findings"),
             &c,
             Some(&written),
             Some(&md(&c)),
@@ -335,6 +374,7 @@ mod tests {
         assert!(
             !check(
                 Path::new("."),
+                Path::new("findings"),
                 &written,
                 None,
                 Some(&md(&written)),
@@ -346,6 +386,7 @@ mod tests {
         assert!(
             !check(
                 Path::new("."),
+                Path::new("findings"),
                 &written,
                 Some(&written),
                 None,
@@ -357,6 +398,7 @@ mod tests {
         assert!(
             !check(
                 Path::new("."),
+                Path::new("findings"),
                 &written,
                 Some(&written),
                 Some("# stale\n"),
@@ -374,6 +416,7 @@ mod tests {
         let c = collection(vec![f.clone()]);
         let out = check(
             Path::new("."),
+            Path::new("findings"),
             &c,
             Some(&c),
             Some(&md(&c)),
@@ -390,6 +433,7 @@ mod tests {
         assert!(
             check(
                 Path::new("."),
+                Path::new("findings"),
                 &c,
                 Some(&c),
                 Some(&md(&c)),
@@ -419,6 +463,7 @@ mod tests {
         let c = collection(vec![f]);
         let out = check(
             Path::new("."),
+            Path::new("findings"),
             &c,
             Some(&c),
             Some(&md(&c)),

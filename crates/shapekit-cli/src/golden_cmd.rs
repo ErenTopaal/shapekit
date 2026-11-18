@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use shapekit_gen::golden;
 use shapekit_manifest::build;
 use shapekit_registry::Registry;
@@ -153,9 +153,9 @@ pub fn agree(manifest_file: &Path, registry_dir: &Path) -> Result<bool> {
             x.kinds.join(", ")
         );
     }
+    // with nothing to compare the goldens agree with nothing, which must not read as a pass
     if report.families.is_empty() {
-        println!("no pairs: no family has both a golden entry and a local-core or history entry");
-        return Ok(report.failures() == 0);
+        bail!("no pairs: no family has both a golden entry and a local-core or history entry");
     }
     let checked: usize = report.families.iter().map(|f| f.combinations.len()).sum();
     let failures = report.failures();
@@ -163,5 +163,8 @@ pub fn agree(manifest_file: &Path, registry_dir: &Path) -> Result<bool> {
         "{} families compared, {checked} golden combinations checked, {failures} failures",
         report.families.len()
     );
+    if checked == 0 {
+        bail!("no golden combination was checked: no paired family shares an operation");
+    }
     Ok(failures == 0)
 }

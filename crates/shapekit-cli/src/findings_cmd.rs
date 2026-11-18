@@ -160,6 +160,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             };
             let mut out = check::check(
                 &c.root,
+                &c.out,
                 &judged,
                 written.as_ref(),
                 written_md.as_deref(),

@@ -63,10 +63,17 @@ pub fn run(command: ContractsCommand) -> Result<bool> {
             else {
                 bail!("no contract named {contract}");
             };
+            use shapekit_contracts::ContractError;
             match (c.validate)(&file) {
                 Ok(()) => {
                     println!("{} ok as {contract}", file.display());
                     Ok(true)
+                }
+                // a file that cannot be read, or is not JSON at all, was never checked
+                // against the contract: that is an error, not a failed check
+                Err(e @ ContractError::Io { .. }) => Err(e.into()),
+                Err(ContractError::Parse { path, source }) if !source.is_data() => {
+                    Err(ContractError::Parse { path, source }.into())
                 }
                 Err(e) => {
                     println!("{e}");
