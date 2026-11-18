@@ -151,7 +151,7 @@ pub enum StateCommand {
         #[arg(long)]
         mapping: PathBuf,
         /// Which network's chain of each run, when a run holds both.
-        #[arg(long, default_value = "testnet")]
+        #[arg(long, default_value = "testnet", value_parser = ["testnet", "mainnet"])]
         network: String,
         /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
@@ -168,7 +168,7 @@ pub enum StateCommand {
         #[arg(long, required = true)]
         run: Vec<PathBuf>,
         /// Only chains of this network.
-        #[arg(long)]
+        #[arg(long, value_parser = ["testnet", "mainnet"])]
         network: Option<String>,
         /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
@@ -190,7 +190,7 @@ pub enum StateCommand {
         #[arg(long)]
         exclusions: Option<PathBuf>,
         /// Only chains of this network.
-        #[arg(long)]
+        #[arg(long, value_parser = ["testnet", "mainnet"])]
         network: Option<String>,
         /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
@@ -646,6 +646,12 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 text.push('\n');
                 std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
             }
+            // no difference among no compared sets says nothing about the field
+            if r.compared == 0 {
+                bail!(
+                    "no set of alike attempts was compared, so the run says nothing about the groups"
+                );
+            }
             Ok(r.differences.is_empty())
         }
         HarnessCommand::Relate(a) => {
@@ -909,6 +915,13 @@ fn state(c: StateCommand) -> Result<bool> {
                 .iter()
                 .map(|e| route::pair_key(e.get("key").unwrap_or(&serde_json::Value::Null)))
                 .collect::<Result<Vec<_>>>()?;
+            // no entry to compare would pass without showing anything
+            if keys.is_empty() {
+                bail!(
+                    "{} lists no entries, so there is nothing to compare",
+                    pair.display()
+                );
+            }
             let results = route::pair_check(&ca, &cb, &keys, &m);
             let mut ok = true;
             for r in &results {
@@ -1113,6 +1126,16 @@ fn state(c: StateCommand) -> Result<bool> {
                 let mut text = serde_json::to_string_pretty(&results)?;
                 text.push('\n');
                 std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
+            }
+            // the mapping holding on no chain at all says nothing about it
+            if ord == 0 {
+                bail!(
+                    "the runs hold no ordinary chain with a dump{}, so nothing was compared",
+                    network
+                        .as_deref()
+                        .map(|n| format!(" on {n}"))
+                        .unwrap_or_default()
+                );
             }
             Ok(ord_ok == ord)
         }

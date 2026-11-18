@@ -148,6 +148,7 @@ pub fn run(
     base: &RunOptions,
     out: &Path,
 ) -> Result<Vec<CaseResult>> {
+    unknown_ids(table, only)?;
     let mut results = Vec::new();
     for r in table
         .reproduction
@@ -345,9 +346,56 @@ pub fn write(results: &[CaseResult], out: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Fails on an id in `only` the table does not hold: a misspelled id would otherwise
+/// select nothing and pass.
+fn unknown_ids(table: &Table, only: &[String]) -> Result<()> {
+    let unknown: Vec<&str> = only
+        .iter()
+        .filter(|id| !table.reproduction.iter().any(|r| &r.id == *id))
+        .map(String::as_str)
+        .collect();
+    if !unknown.is_empty() {
+        bail!(
+            "no reproduction has the id {}; the table holds {}",
+            unknown.join(", "),
+            table
+                .reproduction
+                .iter()
+                .map(|r| r.id.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
-    use super::short;
+    use super::{AdapterSpec, Reproduction, Table, short, unknown_ids};
+
+    #[test]
+    fn an_unknown_only_id_is_an_error() {
+        let table = Table {
+            adapter: AdapterSpec {
+                command: vec!["a".into()],
+            },
+            reproduction: vec![Reproduction {
+                id: "wb-716".into(),
+                issue: "i".into(),
+                chain: "c".into(),
+                network: "testnet".into(),
+                notes: None,
+                case: vec![],
+            }],
+        };
+        assert!(unknown_ids(&table, &[]).is_ok());
+        assert!(unknown_ids(&table, &["wb-716".into()]).is_ok());
+        let e = unknown_ids(&table, &["wb-761".into()])
+            .unwrap_err()
+            .to_string();
+        assert!(e.contains("no reproduction has the id wb-761"), "{e}");
+        assert!(e.contains("wb-716"), "{e}");
+    }
 
     #[test]
     fn short_commits_never_split_a_character() {
