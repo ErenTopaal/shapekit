@@ -986,9 +986,9 @@ var Fields = []Field{
 	{
 		ID:              "op.invoke_host_function.create_contract.preimage",
 		XDRPath:         "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage",
-		ValidatedByCore: "yes",
-		Measured:        "validated",
-		Risk:            "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746)",
+		ValidatedByCore: "partial",
+		Measured:        "mixed",
+		Risk:            "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746). the salt is any 32 bytes the submitter picks",
 		Handling:        "take the created contract id and its creator from meta (new contract instance entry) and events",
 		Accessors: []Accessor{
 			{Type: "HostFunction", Member: "CreateContract"},

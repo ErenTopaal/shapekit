@@ -1069,7 +1069,7 @@ citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/e2e_invoke.rs", symbol = "invoke_host_function", lines = "517-541" },
 ]
-notes = "probed on core 30: every other address the probe tried fails the operation (registry/generated/validation.json)"
+notes = "probed on core 30, each address with its own footprint and auth: two other contract addresses that name no contract fail the operation with Error(Storage, MissingValue), and an account, muxed account, claimable balance, liquidity pool or muxed contract address fails it with Error(Value, UnexpectedType) (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.invoke_contract.function_name"
@@ -1084,7 +1084,7 @@ citations = [
   { repo = "stellar/stellar-xdr", ref = "v30.0", path = "Stellar-contract.x", symbol = "SCSymbol", lines = "11-12" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-common/src/symbol.rs", symbol = "SymbolError", lines = "60-85" },
 ]
-notes = "probed on core 30: every other name the probe tried, within the symbol character set or not, fails the operation (registry/generated/validation.json)"
+notes = "probed on core 30, each name with its own footprint and auth: an empty name and a 32-byte name that echo does not export fail the operation with Error(WasmVm, MissingValue), and a name outside the symbol character set fails it with Error(Value, InvalidInput) (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.invoke_contract.args"
@@ -1112,22 +1112,22 @@ go_accessors = ["xdr.HostFunction.Wasm", "xdr.HostFunction.GetWasm"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1446-1456" },
 ]
-notes = "probed on core 30: every byte string the probe tried that is no valid module fails the operation (registry/generated/validation.json)"
+notes = "probed on core 30, each upload with its own footprint: an empty byte string and 64 bytes of 0xab, neither a wasm module, fail the operation with Error(WasmVm, InvalidAction) (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.create_contract.preimage"
 xdr_path = "InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage"
-validated_by_core = "yes"
-checks = "core checks only that an asset preimage passes isAssetValid (v1 create only). the host requires the address in an address preimage to authorize the creation, and rejects mismatched preimage and executable pairs, at execution"
+validated_by_core = "partial"
+checks = "core checks only that an asset preimage passes isAssetValid (v1 create only). at execution the host requires the address in an address preimage to authorize the creation and rejects mismatched preimage and executable pairs. the salt is not checked: the host only hashes it with the rest of the preimage into the new contract id"
 protocol_min = 20
-risk = "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746)"
+risk = "the deployer address in the envelope is a claim until the host authorizes it; contract-creation state read from declared auth entries is wrong (wallet-backend#746). the salt is any 32 bytes the submitter picks"
 handling = "take the created contract id and its creator from meta (new contract instance entry) and events"
 go_accessors = ["xdr.HostFunction.CreateContract", "xdr.HostFunction.CreateContractV2", "xdr.CreateContractArgs.ContractIdPreimage", "xdr.CreateContractArgsV2.ContractIdPreimage", "xdr.ContractIdPreimage.FromAddress", "xdr.ContractIdPreimage.FromAsset"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1457-1468" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
 ]
-notes = "probed on core 30: every other preimage the probe tried fails the operation (registry/generated/validation.json)"
+notes = "probed on core 30, each preimage with its own footprint and auth: an address preimage naming another account or a contract fails the operation with Error(Auth, InvalidAction), as that address's authorization is unsigned; a muxed account, claimable balance, liquidity pool or muxed contract address fails it with Error(Object, InvalidInput); an asset preimage with a wasm executable fails it with Error(Value, InvalidInput). two other salts, the first byte changed and all zero, both create a contract (registry/generated/validation.json)"
 
 [[field]]
 id = "op.invoke_host_function.create_contract_v2.constructor_args"
@@ -1141,8 +1141,9 @@ go_accessors = ["xdr.CreateContractArgsV2.ConstructorArgs"]
 citations = [
   { repo = "stellar/stellar-core", ref = "v30.0.0", path = "src/transactions/InvokeHostFunctionOpFrame.cpp", symbol = "InvokeHostFunctionOpFrame::doCheckValidForSoroban", lines = "1440-1470" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::create_contract_with_optional_auth", lines = "208-271" },
+  { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/lifecycle.rs", symbol = "Host::call_constructor", lines = "101-158" },
 ]
-notes = "probed on core 30: every other constructor argument list the probe tried fails the operation, even an owner the constructor takes, because the source's authorization entry names the constructor arguments it authorizes (CreateContractArgsV2 in SorobanAuthorizedFunction)"
+notes = "probed on core 30 with the factory contract, whose constructor takes one owner address, each argument list with its own footprint and auth: another owner address succeeds, while an empty list and a list with the owner twice fail the operation with Error(Context, InvalidAction), the error the host gives for any recoverable failure of the constructor call (registry/generated/validation.json; Host::call_constructor)"
 
 [[field]]
 id = "op.invoke_host_function.auth"
@@ -1204,6 +1205,7 @@ citations = [
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AccountAuthorizationTracker::verify_and_consume_nonce", lines = "2586-2626" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "Host::consume_nonce", lines = "2958-3014" },
 ]
+notes = "probed on core 30, each nonce with its own footprint and auth: in credentials a require_auth matches, five nonces the address never used (0, the minimum, the maximum, and the base nonce plus and minus one) succeed, and the base's nonce, which the same address consumed in an earlier ledger with its entry still live, fails the operation with Error(Auth, ExistingValue). in credentials no require_auth matches, every nonce succeeds, the consumed one included (registry/generated/validation.json)"
 
 [[field]]
 id = "auth.credentials.address.signature_expiration_ledger"
