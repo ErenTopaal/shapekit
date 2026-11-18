@@ -68,6 +68,9 @@ func TestBaseline(t *testing.T) {
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"fromU32","issue":"https://example.com/issues/1"},
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"fromU64","issue":"https://example.com/issues/2"},
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"direct","issue":"https://example.com/issues/3"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"checkedTooLate","issue":"https://example.com/issues/5"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"otherN","issue":"https://example.com/issues/6"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"inOneBranch","issue":"https://example.com/issues/7"},
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"gone","issue":"https://example.com/issues/4"}
 	]}`
 
@@ -80,7 +83,7 @@ func TestBaseline(t *testing.T) {
 		t.Fatalf("exit %d, want 0 with every finding baselined: %+v", code, rep)
 	}
 
-	if rep.Counts.Baselined != 3 || len(rep.UnusedEntries) != 1 || rep.UnusedEntries[0].Function != "gone" {
+	if rep.Counts.Baselined != 6 || len(rep.UnusedEntries) != 1 || rep.UnusedEntries[0].Function != "gone" {
 		t.Errorf("baselined %d, unused %+v", rep.Counts.Baselined, rep.UnusedEntries)
 	}
 
@@ -113,7 +116,7 @@ func TestVetBaselineIsPartOfTheCacheKey(t *testing.T) {
 	tmp := t.TempDir()
 	bin := filepath.Join(tmp, "indexerlint")
 
-	build := exec.CommandContext(t.Context(), "go", "build", "-o", bin, ".")
+	build := exec.CommandContext(t.Context(), "go", "build", "-o", bin, ".") //nolint:gosec // go is the fixed program; bin is the test's temp dir
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build: %v\n%s", err, out)
 	}
@@ -129,7 +132,10 @@ func TestVetBaselineIsPartOfTheCacheKey(t *testing.T) {
 	entries := `{"version":1,"entries":[
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"fromU32","issue":"https://example.com/issues/1"},
 		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"fromU64","issue":"https://example.com/issues/2"},
-		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"direct","issue":"https://example.com/issues/3"}
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"direct","issue":"https://example.com/issues/3"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"checkedTooLate","issue":"https://example.com/issues/5"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"otherN","issue":"https://example.com/issues/6"},
+		{"rule":"IDX002","package":"example.com/idx002/src/alloc","function":"inOneBranch","issue":"https://example.com/issues/7"}
 	]}`
 
 	if err := os.WriteFile(base, []byte(entries), 0o600); err != nil {
@@ -138,7 +144,7 @@ func TestVetBaselineIsPartOfTheCacheKey(t *testing.T) {
 
 	cache := filepath.Join(tmp, "gocache")
 	vet := func(baseline string) error {
-		cmd := exec.CommandContext(t.Context(), "go", "vet", "-vettool="+bin, "./src/alloc")
+		cmd := exec.CommandContext(t.Context(), "go", "vet", "-vettool="+bin, "./src/alloc") //nolint:gosec // go is the fixed program; bin is the linter this test built
 		cmd.Dir = dir
 		cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=-mod=mod", "GOCACHE="+cache, "INDEXERLINT_BASELINE="+baseline)
 		out, err := cmd.CombinedOutput()
