@@ -26,10 +26,17 @@ pub fn import(
         set.tier
     );
     let report = golden::import(&mut set, &registry, corpus)?;
+    if !report.replaced.is_empty() {
+        println!(
+            "replaced {} earlier core-golden entries",
+            report.replaced.len()
+        );
+    }
     if !report.removed.is_empty() {
         println!(
-            "removed {} earlier core-golden entries",
-            report.removed.len()
+            "removed {} earlier core-golden entries this import does not hold: {}",
+            report.removed.len(),
+            report.removed.join(", ")
         );
     }
     let mut total = 0;

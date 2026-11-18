@@ -262,7 +262,36 @@ fn scan_import_and_verify_a_golden_tree() {
 
     // a second import replaces the first one's entries instead of piling up
     let again = golden::import(&mut set, &registry, &out).unwrap();
-    assert_eq!(again.removed.len(), selections.len());
+    assert_eq!(again.replaced.len(), selections.len());
+    assert!(again.removed.is_empty(), "{:?}", again.removed);
+    let manifest = build::build(&out, "test", generated_with()).unwrap();
+    assert_eq!(manifest.entries.len(), selections.len());
+
+    // a failure while the entries move into place, here a family directory that is a file,
+    // leaves the entries moved before it in place, names them, keeps the earlier entries of
+    // the rest, and removes the staging directory
+    let last = &selections.last().unwrap().family;
+    assert_ne!(
+        &selections[0].family, last,
+        "the fixture selects from two families"
+    );
+    let blocked = out.join("entries").join(last);
+    std::fs::remove_dir_all(&blocked).unwrap();
+    std::fs::write(&blocked, b"not a directory").unwrap();
+    let e = golden::import(&mut set, &registry, &out).unwrap_err();
+    let text = format!("{e:#}");
+    assert!(text.contains("stopped part way"), "{text}");
+    let first_id = &again.written[&selections[0].family][0];
+    assert!(text.contains(first_id.as_str()), "{text}");
+    assert!(out.join("entries").join(&selections[0].family).join(first_id).join("entry.json").is_file());
+    let left: Vec<_> = std::fs::read_dir(out.join("entries"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().into_string().unwrap())
+        .filter(|n| n.starts_with('.'))
+        .collect();
+    assert!(left.is_empty(), "{left:?}");
+    std::fs::remove_file(&blocked).unwrap();
+    golden::import(&mut set, &registry, &out).unwrap();
 
     // an import that fails part way, here on a golden file not named <hash>.xdr, removes
     // none of the entries already there and leaves nothing staged

@@ -473,16 +473,25 @@ pub fn entry_id(family: &str, file: &GoldenFile, record: usize) -> Result<String
 /// What [`import`] wrote.
 #[derive(Debug, Default)]
 pub struct ImportReport {
+    /// Earlier `core-golden` entries this import does not hold, removed.
     pub removed: Vec<String>,
+    /// Earlier entries this import holds again, replaced with its copy.
+    pub replaced: Vec<String>,
     pub written: BTreeMap<String, Vec<String>>,
     pub not_imported: Vec<NotImported>,
     pub index_path: PathBuf,
 }
 
-/// Writes `corpus/goldens/core-<tag>/index.json` and one entry per selection, after removing
-/// every existing `core-golden` entry so a re-import leaves no stale ones. Every entry is
-/// rendered and written to a staging directory before any existing one is removed, so a
-/// failure there leaves the corpus as it was.
+/// Writes `corpus/goldens/core-<tag>/index.json` and one entry per selection, then removes
+/// every earlier `core-golden` entry the import does not hold, so a re-import leaves no stale
+/// ones.
+///
+/// Every entry is rendered and written to a staging directory before anything in the corpus
+/// changes, so a failure there leaves the corpus as it was. Each entry then moves into place
+/// in one step ([`entry_io::swap_in`]), but the entries do so one after another: the import
+/// as a whole is not atomic. A failure part way leaves the entries moved so far in place, the
+/// rest and every stale entry as they were, and no index written; the error names the
+/// entries already in place. A signal removes the staging directory.
 pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result<ImportReport> {
     let (selections, not_imported) = select(set, registry)?;
     let mut rendered = Vec::new();
@@ -501,12 +510,10 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
     }
     let entries = corpus.join(ENTRIES_DIR);
     std::fs::create_dir_all(&entries).with_context(|| format!("creating {}", entries.display()))?;
-    // under entries/ so the moves below are renames on one filesystem; each entry one level
-    // deeper than entries/<family>/<id>/, so the walk that removes the old entries (and any
-    // reader of entries/) does not take a staged one for a committed one
-    let stage = tempfile::Builder::new()
-        .prefix(".golden-import-")
-        .tempdir_in(&entries)
+    // under entries/ so the moves below are renames on one filesystem; dot-prefixed, so
+    // manifest build and the removal of stale entries skip it, and each entry one level
+    // deeper than entries/<family>/<id>/ besides
+    let stage = shapekit_process::scratch::scratch_in(&entries, ".golden-import-")
         .with_context(|| format!("creating a directory in {}", entries.display()))?;
     let staged = |i: usize| stage.path().join(i.to_string()).join("entry");
     for (i, (_, _, r)) in rendered.iter().enumerate() {
@@ -515,12 +522,31 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
         entry_io::write_files(&dir, r)?;
     }
     let mut report = ImportReport {
-        removed: entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden)?,
         not_imported,
         ..Default::default()
     };
+    let total = rendered.len();
+    let mut placed: Vec<String> = Vec::new();
     for (i, (family, file, r)) in rendered.into_iter().enumerate() {
-        entry_io::swap_in(&staged(i), &corpus.join(&r.rel_dir))?;
+        let dir = corpus.join(&r.rel_dir);
+        let existed = dir.exists();
+        entry_io::swap_in(&staged(i), &dir).with_context(|| {
+            format!(
+                "the golden import stopped part way: {} of {total} entries are in place ({}); \
+                 the others and every earlier entry not yet replaced are as they were, and no \
+                 stale entry was removed",
+                placed.len(),
+                if placed.is_empty() {
+                    "none".to_owned()
+                } else {
+                    placed.join(", ")
+                }
+            )
+        })?;
+        if existed {
+            report.replaced.push(r.entry.id.clone());
+        }
+        placed.push(r.entry.id.clone());
         report
             .written
             .entry(family)
@@ -528,9 +554,15 @@ pub fn import(set: &mut GoldenSet, registry: &Registry, corpus: &Path) -> Result
             .push(r.entry.id.clone());
         set.files[file].imported_entries.push(r.entry.id);
     }
+    let held: BTreeSet<String> = placed.into_iter().collect();
+    report.removed =
+        entry_io::remove_entries_of_class(corpus, SourceClass::CoreGolden, &held).with_context(
+            || format!("all {total} entries are in place; removing the earlier ones it does not hold"),
+        )?;
     stage
         .close()
         .with_context(|| format!("removing the staging directory in {}", entries.display()))?;
+    report.replaced.sort();
     for f in &mut set.files {
         f.imported_entries.sort();
     }

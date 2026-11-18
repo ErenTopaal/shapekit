@@ -1,5 +1,6 @@
 //! Writing and clearing `corpus/entries/<family>/<entry-id>/` directories for xdr entries.
 
+use std::collections::BTreeSet;
 use std::path::Path;
 
 use anyhow::{Context, Result, bail};
@@ -9,25 +10,33 @@ use shapekit_manifest::{Entry, decode_limits, sha256_hex};
 use shapekit_registry::SourceClass;
 use walkdir::WalkDir;
 
-/// Removes every entry directory whose `entry.json` has source class `class` and returns the
-/// removed ids, sorted.
-pub fn remove_entries_of_class(corpus: &Path, class: SourceClass) -> Result<Vec<String>> {
+/// Removes every entry directory whose `entry.json` has source class `class`, apart from the
+/// ids in `keep`, and returns the removed ids, sorted. Staging directories (dot-prefixed,
+/// see [`shapekit_manifest::build::build`]) are not entries and are left alone.
+pub fn remove_entries_of_class(
+    corpus: &Path,
+    class: SourceClass,
+    keep: &BTreeSet<String>,
+) -> Result<Vec<String>> {
     let root = corpus.join(ENTRIES_DIR);
     if !root.exists() {
         return Ok(Vec::new());
     }
     let mut removed = Vec::new();
-    for item in WalkDir::new(&root)
-        .min_depth(3)
+    // no min_depth: walkdir does not offer the directories above it to filter_entry, and
+    // a staging directory sits at entries/<family>/.staged-*
+    let walk = WalkDir::new(&root)
         .max_depth(3)
         .sort_by_file_name()
-    {
+        .into_iter()
+        .filter_entry(|e| e.depth() == 0 || !e.file_name().to_string_lossy().starts_with('.'));
+    for item in walk {
         let item = item.with_context(|| format!("walking {}", root.display()))?;
-        if item.file_name() != ENTRY_FILE {
+        if item.depth() != 3 || item.file_name() != ENTRY_FILE {
             continue;
         }
         let entry = read_entry(item.path())?;
-        if entry.source.class == class {
+        if entry.source.class == class && !keep.contains(&entry.id) {
             let dir = item.path().parent().expect("an entry file has a parent");
             std::fs::remove_dir_all(dir).with_context(|| format!("removing {}", dir.display()))?;
             removed.push(entry.id);
@@ -151,52 +160,57 @@ pub fn write_files(dir: &Path, r: &RenderedEntry) -> Result<()> {
     Ok(())
 }
 
-/// Moves the directory `staged` to `dir`, replacing what is there. The old directory is moved
-/// aside first and put back if the move fails, so `dir` is either the old entry or the new
-/// one, never a mix.
+/// Moves the directory `staged` to `dir`, replacing what is there in one step, so no reader
+/// ever finds `dir` missing or half written. An existing `dir` is exchanged with `staged`
+/// atomically (Linux `renameat2` with `RENAME_EXCHANGE`, macOS `renamex_np` with
+/// `RENAME_SWAP`), and the old entry, which is then at `staged`, is removed; a new one is
+/// renamed into place without replacing anything that appears there meanwhile. On an error
+/// before the exchange, `dir` is untouched; on one after it, `dir` holds the new entry and
+/// the error says the old copy at `staged` was not removed. `staged` must be on the same
+/// filesystem as `dir`.
 pub fn swap_in(staged: &Path, dir: &Path) -> Result<()> {
     let parent = dir.parent().context("an entry directory has a parent")?;
     std::fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
     if !dir.exists() {
-        return std::fs::rename(staged, dir)
+        return shapekit_process::rename::no_replace(staged, dir)
             .with_context(|| format!("moving {} to {}", staged.display(), dir.display()));
     }
-    // renaming a directory onto an empty one replaces it, so the aside slot is a fresh empty
-    // directory that is removed with whatever it holds once the swap is done
-    let aside = tempfile::Builder::new()
-        .prefix(".replaced-")
-        .tempdir_in(parent)
-        .with_context(|| format!("creating a directory in {}", parent.display()))?;
-    std::fs::rename(dir, aside.path())
-        .with_context(|| format!("moving {} aside", dir.display()))?;
-    if let Err(e) = std::fs::rename(staged, dir) {
-        std::fs::rename(aside.path(), dir)
-            .with_context(|| format!("putting {} back after: {e}", dir.display()))?;
-        return Err(e).with_context(|| format!("moving {} to {}", staged.display(), dir.display()));
-    }
-    aside
-        .close()
-        .with_context(|| format!("removing the replaced {}", dir.display()))
+    shapekit_process::rename::exchange(staged, dir).with_context(|| {
+        format!(
+            "exchanging {} with {}",
+            staged.display(),
+            dir.display()
+        )
+    })?;
+    std::fs::remove_dir_all(staged).with_context(|| {
+        format!(
+            "{} now holds the new entry; removing the replaced one from {}",
+            dir.display(),
+            staged.display()
+        )
+    })
 }
 
 /// Writes `bytes` as the entry's only variant `variant` (`testnet`, `mainnet` or `any`), its
 /// XDR-JSON next to it, and `entry.json`. The variant record in `entry` supplies the
 /// passphrase; file names and hashes are filled in here. An existing directory for the same
 /// id is replaced only when it holds an entry of the same source class; a directory without
-/// `entry.json` is never removed. Everything is rendered and written beside the directory
-/// first, so a failure leaves the existing entry as it was.
+/// `entry.json` is never removed. Everything is rendered and written to a staging directory
+/// beside it first and then exchanged with it in one step ([`swap_in`]), so a failure leaves
+/// the existing entry as it was. A signal removes the staging directory.
 pub fn write_xdr_entry(corpus: &Path, entry: Entry, variant: &str, bytes: &[u8]) -> Result<Entry> {
     let r = render_xdr_entry(entry, variant, bytes)?;
     check_replaceable(corpus, &r)?;
     let dir = corpus.join(&r.rel_dir);
     let parent = dir.parent().context("an entry directory has a parent")?;
     std::fs::create_dir_all(parent).with_context(|| format!("creating {}", parent.display()))?;
-    let staged = tempfile::Builder::new()
-        .prefix(".staged-")
-        .tempdir_in(parent)
+    let staged = shapekit_process::scratch::scratch_in(parent, ".staged-")
         .with_context(|| format!("creating a directory in {}", parent.display()))?;
     write_files(staged.path(), &r)?;
     swap_in(staged.path(), &dir)?;
+    // the staged directory is the entry now, or held the old one and was removed: dropping
+    // the scratch record must not touch that path again
+    staged.keep();
     Ok(r.entry)
 }
 
@@ -300,5 +314,54 @@ mod tests {
             .map(|e| e.unwrap().file_name())
             .collect();
         assert_eq!(siblings, ["history.x"]);
+    }
+
+    // the swap exchanges the two directories in one step, so a failure never leaves the
+    // entry missing, and nothing is removed before the new copy is in place
+    #[test]
+    fn swap_in_exchanges_and_a_failure_keeps_the_old_entry() {
+        let t = tempfile::tempdir().unwrap();
+        let dir = t.path().join("entries/f/f.x");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("entry.json"), "old").unwrap();
+        // a staged directory that does not exist: the exchange fails, the entry stays
+        let missing = t.path().join("entries/f/.staged-missing");
+        assert!(swap_in(&missing, &dir).is_err());
+        assert_eq!(std::fs::read_to_string(dir.join("entry.json")).unwrap(), "old");
+        let staged = t.path().join("entries/f/.staged-1");
+        std::fs::create_dir(&staged).unwrap();
+        std::fs::write(staged.join("entry.json"), "new").unwrap();
+        swap_in(&staged, &dir).unwrap();
+        assert_eq!(std::fs::read_to_string(dir.join("entry.json")).unwrap(), "new");
+        assert!(!staged.exists(), "the replaced copy is removed");
+        // a new entry is moved, and the staged path is gone
+        let staged = t.path().join("entries/f/.staged-2");
+        std::fs::create_dir(&staged).unwrap();
+        let fresh = t.path().join("entries/g/g.y");
+        swap_in(&staged, &fresh).unwrap();
+        assert!(fresh.is_dir() && !staged.exists());
+    }
+
+    #[test]
+    fn removing_a_class_skips_staging_directories_and_kept_ids() {
+        let corpus = tempfile::tempdir().unwrap();
+        write_xdr_entry(corpus.path(), scval_entry(), "any", &[0, 0, 0, 1]).unwrap();
+        let family = corpus.path().join("entries/history");
+        let staged = family.join(".staged-x");
+        std::fs::create_dir(&staged).unwrap();
+        std::fs::copy(family.join("history.x/entry.json"), staged.join("entry.json")).unwrap();
+        let class = scval_entry().source.class;
+        let keep = BTreeSet::from(["history.x".to_owned()]);
+        assert!(
+            remove_entries_of_class(corpus.path(), class, &keep)
+                .unwrap()
+                .is_empty()
+        );
+        assert!(family.join("history.x").is_dir());
+        assert_eq!(
+            remove_entries_of_class(corpus.path(), class, &BTreeSet::new()).unwrap(),
+            ["history.x"]
+        );
+        assert!(staged.join("entry.json").is_file(), "a staging copy is not an entry");
     }
 }
