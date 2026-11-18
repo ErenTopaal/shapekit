@@ -92,6 +92,11 @@ pub struct Report {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub describe: Option<DescribeResult>,
     pub manifest_sha256: String,
+    /// The manifest's replay digest: what the run depends on, leaving out the entries'
+    /// descriptive fields (`shapekit_manifest::replay::DESCRIPTIVE_FIELDS`). Absent in reports
+    /// written before it was recorded, and for chains named with --chain-dir.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub manifest_replay_digest: Option<String>,
     pub memory_limit_bytes: u64,
     pub rounds: Vec<Round>,
     pub memory: MemoryCheck,
@@ -215,6 +220,7 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
         adapter_command: opts.adapter.clone(),
         describe: first.describe,
         manifest_sha256: sel.manifest_sha256.clone(),
+        manifest_replay_digest: sel.manifest_replay_digest.clone(),
         memory_limit_bytes: opts.memory_limit_bytes,
         rounds,
         memory,
@@ -354,8 +360,15 @@ pub fn markdown(r: &Report) -> String {
         ));
     }
     s.push_str(&format!(
-        "Adapter protocol {}, oracle vocabulary {}, corpus manifest sha256 `{}`, target memory limit {} bytes.\n\n",
-        r.adapter_protocol, r.oracle_vocab_version, r.manifest_sha256, r.memory_limit_bytes
+        "Adapter protocol {}, oracle vocabulary {}, corpus manifest sha256 `{}`{}, target memory limit {} bytes.\n\n",
+        r.adapter_protocol,
+        r.oracle_vocab_version,
+        r.manifest_sha256,
+        r.manifest_replay_digest
+            .as_ref()
+            .map(|d| format!(" (replay digest `{d}`)"))
+            .unwrap_or_default(),
+        r.memory_limit_bytes
     ));
     s.push_str("| verdict | entries |\n|---|---|\n");
     for (k, v) in &r.totals.by_verdict {

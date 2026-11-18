@@ -21,8 +21,12 @@
 //! under `findings/inputs/` ([`import`]): `[[inputs.import]]` names each run output, the
 //! committed copy and the command that wrote it, and `shapekit findings import-inputs`
 //! reduces the outputs into place and records their provenance. A harness report must have
-//! run against the manifest collect reads (`manifest_sha256`) and a matrix must be of its
-//! corpus version; a mismatch is an input problem.
+//! run against a manifest with the replay digest of the one collect reads
+//! (`manifest_replay_digest`, see `shapekit_manifest::replay`) and a matrix must be of its
+//! corpus version; a mismatch is an input problem. The replay digest covers the manifest
+//! header and every entry field except the descriptive ones, `caps`, `arms`, `notes`,
+//! `fields_exercised`, `linked_issues` and `obligations`, so retagging entries keeps a report
+//! current while a change to the bytes, the entry set or an oracle asks for a rerun.
 //!
 //! # Failures
 //!

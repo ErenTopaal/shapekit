@@ -38,7 +38,11 @@ pub fn check(dir: &Path) -> Result<bool> {
     let summary = format!(
         "{} caps{}, {} fields, {} limits, {} lint rules, {families} families",
         registry.caps.caps.len() - usize::from(pre_cap),
-        if pre_cap { " and the pre-cap record" } else { "" },
+        if pre_cap {
+            " and the pre-cap record"
+        } else {
+            ""
+        },
         registry.fields.fields.len(),
         registry.limits.limits.len(),
         registry.lint_rules.rules.len(),

@@ -37,6 +37,8 @@ pub struct Selection {
     pub without_chain: usize,
     pub without_oracle: usize,
     pub manifest_sha256: String,
+    /// The manifest's replay digest ([`shapekit_manifest::replay_digest`]).
+    pub manifest_replay_digest: Option<String>,
 }
 
 pub struct Filter<'a> {
@@ -52,6 +54,7 @@ pub fn select(corpus: &Path, filter: &Filter<'_>) -> Result<Selection> {
         .with_context(|| format!("loading {}", path.display()))?;
     let mut sel = Selection {
         manifest_sha256: shapekit_manifest::sha256_hex(&bytes),
+        manifest_replay_digest: Some(shapekit_manifest::replay_digest(&manifest)),
         ..Selection::default()
     };
     for f in filter.families {

@@ -15,6 +15,8 @@ candidates = "candidate/findings/triage.toml"
 manifest = "corpus/manifest.json"
 # every input below is a committed, reduced copy of a run output; [[inputs.import]] says where
 # each came from. after new runs: `shapekit findings import-inputs`, then `shapekit findings collect`.
+# a harness report stays current while the manifest's replay digest is unchanged: it leaves out
+# each entry's caps, arms, notes, fields_exercised, linked_issues and obligations.
 harness = [
   "findings/inputs/harness-wallet-backend-3e22515a.json",
   "findings/inputs/harness-stellar-etl-2b24ec89.json",

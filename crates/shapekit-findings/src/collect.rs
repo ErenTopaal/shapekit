@@ -446,6 +446,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
     let (bytes, manifest_sha) = inputs::read(&manifest_path)?;
     let manifest: Manifest = serde_json::from_slice(&bytes)
         .with_context(|| format!("parsing {}", manifest_path.display()))?;
+    let replay = shapekit_manifest::replay_digest(&manifest);
     input_refs.push(InputRef {
         kind: "manifest".into(),
         path: triage.inputs.manifest.clone(),
@@ -487,19 +488,30 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                 ("unknown".into(), "unknown".into())
             }
         };
-        if report.manifest_sha256 != manifest_sha {
-            input_problems.push(format!(
-                "{rel}: the harness ran against manifest {}, but {} is {manifest_sha}; rerun the harness and import its report",
-                report.manifest_sha256, triage.inputs.manifest
-            ));
+        // the replay digest leaves out the entries' descriptions, so retagging the corpus
+        // does not ask for a rerun while a change to what is replayed does
+        match &report.manifest_replay_digest {
+            Some(d) if *d == replay => {}
+            Some(d) => input_problems.push(format!(
+                "{rel}: the harness ran against a manifest with replay digest {d}, but {} has {replay}; rerun the harness and import its report",
+                triage.inputs.manifest
+            )),
+            None => input_problems.push(format!(
+                "{rel}: the report records no manifest replay digest (it ran against manifest sha256 {}); rerun the harness and import its report",
+                report.manifest_sha256
+            )),
         }
         input_refs.push(InputRef {
             kind: "harness".into(),
             path: rel.clone(),
             sha256: sha,
             detail: format!(
-                "{target} {version}, {} entries, manifest {}",
-                report.totals.entries, report.manifest_sha256
+                "{target} {version}, {} entries, manifest replay digest {}",
+                report.totals.entries,
+                report
+                    .manifest_replay_digest
+                    .as_deref()
+                    .unwrap_or("not recorded")
             ),
         });
         for c in &report.chains {

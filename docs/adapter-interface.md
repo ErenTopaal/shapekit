@@ -595,12 +595,22 @@ report as JSON.
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):
 
-- `harness-report.json`: run metadata (adapter, target and version, corpus manifest hash,
-  harness peak resident memory per round, the target memory check), per-chain results
-  (delivery mode, bootstrap ledger, last ingested ledger, target peak memory, stop reason,
-  dump and carry summary) and one row per entry with
+- `harness-report.json`: run metadata (adapter, target and version, corpus manifest sha256
+  and replay digest, harness peak resident memory per round, the target memory check),
+  per-chain results (delivery mode, bootstrap ledger, last ingested ledger, target peak memory,
+  stop reason, dump and carry summary) and one row per entry with
   `verdict`, `reason`, the problems found and any unmapped rows.
 - `HARNESS.md`: the same as tables, one row per entry.
+
+The replay digest (`manifest_replay_digest`) is the sha256 of the manifest with keys sorted,
+leaving out these fields of every entry: `caps`, `arms`, `notes`, `fields_exercised`,
+`linked_issues` and `obligations`. It covers everything else: the header (corpus version, the
+stack the corpus was generated with, the protocol tiers) and of every entry its id, kind,
+family, protocol, XDR type, meta versions, source, flags, expected verdicts and every variant
+with its file paths and the sha256 of its bytes, expected JSON and oracle file.
+`shapekit findings check` compares a report's replay digest with the committed manifest's, so
+retagging entries keeps a report current, while a change to the bytes, the entry set or an
+oracle asks for a rerun.
 - `logs/`: adapter stderr (`<chain>.<network>.adapter.log`) and the target logs `stop`
   returned (`<chain>.<network>.target.log`) per chain, and the dump
   (`<chain>.<network>.dump.json`: `{"schema": 1, "tables": {<name>: {"columns", "rows"}}}`)
