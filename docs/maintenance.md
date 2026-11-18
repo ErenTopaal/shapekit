@@ -138,8 +138,8 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   the other testees at their current version (Python, Java, soroban-sdk, Dart, PHP, .NET, KMP
   and stellar-cli; the .NET and KMP builds treat warnings as errors, and neither testee has
   unit tests of its own), whose corpus runs are in full mode and in their own `pr.yml` jobs;
-  the findings record; the em dash
-  check; and
+  the findings record; the `STATUS.md` release candidate section of the version in
+  `Cargo.toml`, which the release notes are made from; the em dash check; and
   `scripts/check-public-text.sh`, which fails when a tracked file holds an absolute home
   directory, a private or tailnet address, or a match of a pattern in the maintainers' pattern
   file. That file names people, machines and local directories, so it is not tracked: the
