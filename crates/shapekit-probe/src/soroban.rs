@@ -26,6 +26,7 @@ use stellar_xdr::{
 
 use crate::carriers::{Base, BaseOutcome, Carrier, XLM, extra, no_extra};
 use crate::sign::{AuthSigner, SignPlan};
+use crate::values::Replacement;
 use crate::world::{ARCHIVAL_MIN_PERSISTENT_TTL, ECHO_WASM, Subject, World, WorldKind};
 use serde_json::json;
 use shapekit_core_driver::keys::account_strkey;
@@ -672,6 +673,96 @@ fn unmatched_delegated(w: &mut World, s: &Subject) -> Result<Base> {
     unmatched(w, s, creds, plan)
 }
 
+/// Peer 0 consumes `nonce`: a call of `auth_tree.node` that requires peer 0, with peer 0's
+/// address credentials at that nonce, sent by peer 1 so the subject's source keeps its
+/// sequence number. The nonce entry lives until the credentials' signature expiration,
+/// [`AUTH_VALID_FOR`] ledgers ahead (soroban-env-host 30.0.0 src/auth.rs 2958-3010,
+/// `consume_nonce`).
+fn consume_nonce(w: &mut World, s: &Subject, nonce: &serde_json::Value) -> Result<()> {
+    let nonce: i64 = match nonce {
+        serde_json::Value::String(n) => n.parse()?,
+        other => other.as_i64().context("a nonce is an i64")?,
+    };
+    let peer = account_address(&s.peers[0].verifying_key());
+    let hf = auth_call(w, peer.clone())?;
+    let sim = simulator(w)?;
+    let sender = &s.peers[1];
+    let source = account_id(&sender.verifying_key());
+    let rec = sim.simulate_invoke(hf.clone(), RECORD, &source)?;
+    let exp = w.driver.last_closed() + AUTH_VALID_FOR;
+    let mut auth = Vec::new();
+    for mut e in rec.auth {
+        let SorobanCredentials::Address(c) = &mut e.credentials else {
+            bail!("the call that consumes a nonce records address credentials only");
+        };
+        ensure!(
+            c.address == peer,
+            "the call requires an address other than peer 0"
+        );
+        c.nonce = nonce;
+        c.signature_expiration_ledger = exp;
+        let payload = authorization_payload(&e, w.driver.network_id())?;
+        if let SorobanCredentials::Address(c) = &mut e.credentials {
+            c.signature = account_signature(&payload, &[&s.peers[0]])?;
+        }
+        auth.push(e);
+    }
+    ensure!(
+        auth.len() == 1,
+        "expected one auth entry, simulation recorded {}",
+        auth.len()
+    );
+    let enforced = sim.simulate_invoke(hf.clone(), AuthMode::Enforce(auth.clone()), &source)?;
+    let tx = w
+        .builder(sender)?
+        .fee(BASE_FEE)
+        .operation(
+            None,
+            OperationBody::InvokeHostFunction(stellar_xdr::InvokeHostFunctionOp {
+                host_function: hf,
+                auth: Default::default(),
+            }),
+        )
+        .build()?;
+    let tx = assemble_soroban(tx, spare(enforced.transaction_data), Some(auth))?;
+    let plan = SignPlan {
+        tx: vec![sender.clone()],
+        ..Default::default()
+    };
+    let env = crate::sign::sign_typed(World::unsigned(tx), &plan, &w.network_id())?;
+    w.driver
+        .apply_ok(&env)
+        .context("peer 0 consuming the nonce")?;
+    Ok(())
+}
+
+/// The value of a nonce that is already used: the base's own nonce, which the same address
+/// consumed in an earlier ledger, its entry still live. Every value the type gives is a
+/// nonce the address never used.
+fn nonce_replays(f: &str, base: &serde_json::Value) -> Vec<Replacement> {
+    match f {
+        "nonce" => vec![Replacement {
+            name:
+                "the same nonce, consumed by the same address in an earlier ledger and still live"
+                    .into(),
+            value: base.clone(),
+            xdr: None,
+            before: Some(consume_nonce),
+        }],
+        _ => Vec::new(),
+    }
+}
+
+fn replayed_nonce(
+    _: &World,
+    _: &Subject,
+    f: &str,
+    base: &serde_json::Value,
+    _: &serde_json::Value,
+) -> Result<Vec<Replacement>> {
+    Ok(nonce_replays(f, base))
+}
+
 fn subject_nonce(s: &Subject) -> i64 {
     let h: [u8; 32] = Sha256::digest(format!("shapekit.probe/{}/nonce", s.tag)).into();
     i64::from_be_bytes(h[..8].try_into().expect("eight bytes")) & i64::MAX
@@ -1081,6 +1172,7 @@ pub fn carriers() -> Vec<Carrier> {
         },
         Carrier {
             id: "matched",
+            extra: replayed_nonce,
             ..c(
                 "SorobanAddressCredentials",
                 "a peer's address credentials for one require_auth",
@@ -1089,6 +1181,7 @@ pub fn carriers() -> Vec<Carrier> {
         },
         Carrier {
             id: "unmatched",
+            extra: replayed_nonce,
             ..c(
                 "SorobanAddressCredentials",
                 "a peer's address credentials for a call that never requires them",
@@ -1270,6 +1363,20 @@ mod tests {
         assert_eq!(rebuild_scope("/tx/tx/fee"), None);
         assert_eq!(rebuild_scope(&format!("{OP}/authx")), None);
         assert_eq!(rebuild_scope(&format!("{HF}x")), None);
+    }
+
+    #[test]
+    fn a_nonce_also_takes_the_base_nonce_already_consumed() {
+        let base = json!("4598685041475779676");
+        let got = nonce_replays("nonce", &base);
+        assert_eq!(got.len(), 1);
+        // the same value as the base: only the ledger before the attempt differs
+        assert_eq!(got[0].value, base);
+        assert!(got[0].xdr.is_none());
+        assert!(got[0].before.is_some());
+        for other in ["address", "signatureExpirationLedger", "signature"] {
+            assert!(nonce_replays(other, &base).is_empty());
+        }
     }
 
     #[test]

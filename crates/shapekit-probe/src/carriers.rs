@@ -90,6 +90,7 @@ pub fn extra(name: &str, value: serde_json::Value) -> Replacement {
         name: name.to_owned(),
         value,
         xdr: None,
+        before: None,
     }
 }
 

@@ -72,6 +72,7 @@ impl<'s> Typer<'s> {
             name: label,
             value,
             xdr: (back.as_deref() != Some(bytes.as_slice())).then_some(bytes),
+            before: None,
         })
     }
 
@@ -442,6 +443,7 @@ impl<'s> Typer<'s> {
                     name: "present, smallest".into(),
                     value: self.json_of_type(element, &v)?,
                     xdr: None,
+                    before: None,
                 });
             }
             Type::VarArray { element, .. } if base.as_array().is_some_and(|a| a.is_empty()) => {
@@ -452,6 +454,7 @@ impl<'s> Typer<'s> {
                     name: "one element, smallest".into(),
                     value: Value::Array(vec![self.json_of_type(element, &v)?]),
                     xdr: None,
+                    before: None,
                 });
             }
             _ => {}

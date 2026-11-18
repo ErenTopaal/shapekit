@@ -339,6 +339,16 @@ pub fn probe_field(
             reps.len()
         );
         let rep = mine[i].clone();
+        if let Some(before) = rep.before {
+            // the state the value is judged against is closed before the variant is built, so
+            // the rebuild simulates against the chain core applies the variant on
+            before(w, s, &rep.value).with_context(|| {
+                format!(
+                    "{} attempt {:?}: the ledger before it",
+                    field.path, rep.name
+                )
+            })?;
+        }
         let raw = match &rep.xdr {
             Some(x) => Some(x.clone()),
             None => string_shaped_raw(typer, carrier, field, &p, &rep.value)?,

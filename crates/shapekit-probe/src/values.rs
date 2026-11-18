@@ -4,14 +4,24 @@
 use serde_json::Value;
 use shapekit_schema::{Definition, Schema, Type};
 
+use crate::world::{Subject, World};
+
+/// Ledger state a value is judged against, closed in a ledger before the attempt that carries
+/// it: a nonce the same address already consumed. Called with the attempt's accounts and the
+/// value.
+pub type Before = fn(&mut World, &Subject, &Value) -> anyhow::Result<()>;
+
 /// One replacement value and how it reads in a report.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct Replacement {
     pub name: String,
     pub value: Value,
     /// The value's XDR, when XDR-JSON cannot write it: stellar-xdr renders a signed payload
     /// signer with an empty payload as an `<INVALID:...>` string it cannot read back.
     pub xdr: Option<Vec<u8>>,
+    /// Run before the attempt that carries the value, `None` for a value judged on the chain
+    /// as every attempt finds it.
+    pub before: Option<Before>,
 }
 
 fn rep(name: impl Into<String>, value: Value) -> Replacement {
@@ -19,6 +29,7 @@ fn rep(name: impl Into<String>, value: Value) -> Replacement {
         name: name.into(),
         value,
         xdr: None,
+        before: None,
     }
 }
 
