@@ -318,3 +318,52 @@ fn ts_testee_skeleton() {
 fn go_testee_skeleton() {
     testee("go");
 }
+
+#[test]
+fn init_refuses_an_output_path_with_whitespace() {
+    let tmp = tempfile::tempdir().unwrap();
+    for kind in [
+        &["init", "testee", "--lang", "python"][..],
+        &[
+            "init",
+            "adapter",
+            "--lang",
+            "python",
+            "--target",
+            "x",
+            "--target-version",
+            "1",
+        ][..],
+    ] {
+        let out = Command::new(env!("CARGO_BIN_EXE_shapekit"))
+            .args(kind)
+            .args(["--out", "my dir"])
+            .current_dir(tmp.path())
+            .output()
+            .unwrap();
+        assert_eq!(out.status.code(), Some(2), "{kind:?}");
+        assert!(
+            String::from_utf8_lossy(&out.stderr).contains("must not hold whitespace"),
+            "{kind:?}"
+        );
+        assert!(!tmp.path().join("my dir").exists());
+    }
+}
+
+#[test]
+fn the_testee_readme_names_a_known_failures_list_init_writes() {
+    let tmp = tempfile::tempdir().unwrap();
+    shapekit(
+        tmp.path(),
+        &["init", "testee", "--lang", "python", "--out", "t"],
+    );
+    let readme = std::fs::read_to_string(tmp.path().join("t/README.md")).unwrap();
+    assert!(
+        readme.contains("--known-failures t/known-failures"),
+        "{readme}"
+    );
+    let lines =
+        shapekit_conformance::known::load(&tmp.path().join("t/known-failures"), "python").unwrap();
+    assert!(lines.is_empty());
+    assert!(tmp.path().join("t/known-failures/python.txt").is_file());
+}

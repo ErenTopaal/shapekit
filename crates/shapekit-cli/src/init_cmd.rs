@@ -248,7 +248,27 @@ fn check_name(what: &str, name: &str) -> Result<()> {
     Ok(())
 }
 
-fn write_all(out: &Path, files: &[File], vars: &[(&str, String)], readme: &str) -> Result<()> {
+/// The output directory as the README and templates spell it. They put it into shell
+/// commands and into versions.toml strings, and the adapter command is split on whitespace,
+/// so a path with whitespace, a quote or a backslash could not be written there faithfully.
+fn out_dir(out: &Path) -> Result<String> {
+    let dir = out
+        .to_str()
+        .context("the output path is not valid UTF-8")?
+        .trim_end_matches('/')
+        .to_owned();
+    if dir.contains(|c: char| c.is_whitespace() || matches!(c, '"' | '\'' | '\\')) {
+        bail!("the output path {dir:?} must not hold whitespace, quotes or backslashes");
+    }
+    Ok(dir)
+}
+
+fn write_all(
+    out: &Path,
+    files: &[File],
+    vars: &[(&str, String)],
+    extra: &[(String, String)],
+) -> Result<()> {
     if out.exists() {
         let mut entries =
             std::fs::read_dir(out).with_context(|| format!("reading {}", out.display()))?;
@@ -261,10 +281,16 @@ fn write_all(out: &Path, files: &[File], vars: &[(&str, String)], readme: &str) 
     for (name, template, executable) in files {
         rendered.push((*name, render(template, vars)?, *executable));
     }
-    rendered.push(("README.md", readme.to_owned(), false));
+    for (name, text) in extra {
+        rendered.push((name.as_str(), text.clone(), false));
+    }
     std::fs::create_dir_all(out).with_context(|| format!("creating {}", out.display()))?;
     for (name, text, executable) in rendered {
         let path = out.join(name);
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)
+                .with_context(|| format!("creating {}", parent.display()))?;
+        }
         std::fs::write(&path, text).with_context(|| format!("writing {}", path.display()))?;
         if executable {
             use std::os::unix::fs::PermissionsExt;
@@ -308,7 +334,7 @@ fn adapter(a: AdapterArgs) -> Result<bool> {
             format!("./{name}"),
         ),
     };
-    let dir = out.display();
+    let dir = out_dir(&out)?;
     let build_line = build
         .as_ref()
         .map(|b| format!("(cd {dir} && {b})\n"))
@@ -335,7 +361,12 @@ fn adapter(a: AdapterArgs) -> Result<bool> {
         lang = a.lang.name(),
         proto = shapekit_harness::protocol::ADAPTER_PROTOCOL_VERSION,
     );
-    write_all(&out, adapter_files(a.lang), &vars, &readme)?;
+    write_all(
+        &out,
+        adapter_files(a.lang),
+        &vars,
+        &[("README.md".to_owned(), readme)],
+    )?;
     Ok(true)
 }
 
@@ -375,14 +406,7 @@ fn testee(a: TesteeArgs) -> Result<bool> {
     let out = a
         .out
         .unwrap_or_else(|| PathBuf::from(format!("testee-{name}")));
-    let dir = out
-        .to_str()
-        .context("the output path is not valid UTF-8")?
-        .trim_end_matches('/')
-        .to_owned();
-    if dir.contains(['"', '\\']) {
-        bail!("the output path {dir:?} must not hold quotes or backslashes");
-    }
+    let dir = out_dir(&out)?;
     let vars = [
         ("name", name.clone()),
         ("package", package.clone()),
@@ -416,11 +440,25 @@ fn testee(a: TesteeArgs) -> Result<bool> {
          shapekit check sdk --sdk {name} --versions-file {dir}/versions.toml --known-failures {dir}/known-failures\n\
          ```\n\n\
          The build steps in `versions.toml` install {package} {version} into this directory \
-         first; the matrix goes to `target/conformance/MATRIX.md`.\n",
+         first; the matrix goes to `target/conformance/MATRIX.md`. A failure you accept until \
+         {package} fixes it goes into `known-failures/{name}.txt`, whose comment says how.\n",
         lang = a.lang.name(),
         proto = shapekit_conformance::testee::PROTOCOL_VERSION,
     );
-    write_all(&out, testee_files(a.lang), &vars, &readme)?;
+    let known = format!(
+        "# known failures of the {name} testee ({package}), none yet.\n\
+         # format: <entry-id> <version|*> <result> <issue> <check>[, <check>...]; see\n\
+         # docs/testee-protocol.md, \"Known failures\", in the shapekit repository.\n"
+    );
+    write_all(
+        &out,
+        testee_files(a.lang),
+        &vars,
+        &[
+            ("README.md".to_owned(), readme),
+            (format!("known-failures/{name}.txt"), known),
+        ],
+    )?;
     Ok(true)
 }
 
