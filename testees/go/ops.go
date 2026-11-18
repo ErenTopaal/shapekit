@@ -190,8 +190,8 @@ func requestLimits(req request) (depth uint32, maxLen int, err error) {
 }
 
 // decodeBytes reads data as one value into dst with xdr.UnmarshalWithOptions under the given
-// limits and refuses bytes left after the value. hello reports decode_limits "honoured", so
-// every op's xdr input goes through here, not through SafeUnmarshal, which has no limits.
+// limits and refuses bytes left after the value. hello says the testee passes the limits to the
+// sdk, so every op's xdr input goes through here, not through SafeUnmarshal, which has no limits.
 func decodeBytes(data []byte, dst any, depth uint32, maxLen int) error {
 	var read int
 	opts := xdr.DecodeOptions{MaxDepth: uint(depth), MaxInputLen: maxLen}

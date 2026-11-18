@@ -230,8 +230,8 @@ func TestDepVersionReplace(t *testing.T) {
 	}
 }
 
-// hello reports decode_limits "honoured", so the limits reach the decoder of every op's xdr
-// input, not only decode_encode's
+// hello says the testee passes the decode limits to the sdk, so they reach the decoder of every
+// op's xdr input, not only decode_encode's
 func TestLimitsReachEveryDecode(t *testing.T) {
 	// ContractIdPreimage from the native asset, 8 bytes
 	const preimage = "AAAAAQAAAAA="
