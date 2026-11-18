@@ -279,9 +279,10 @@ pub fn checkpoints(
     Ok(true)
 }
 
-/// `shapekit gen verify-raw-order`: compares core's raw stream of every chain present in both
-/// corpora, ledger by ledger, and fails on any per-key order difference or any difference that
-/// is not a reordering.
+/// `shapekit gen verify-raw-order`: compares core's raw stream of every chain of `corpus`
+/// with the one in `other`, ledger by ledger, and fails on any per-key order difference or
+/// any difference that is not a reordering. A chain `other` lacks fails; a recording
+/// byte-identical in both is not counted as compared, since a copy gives it too.
 pub fn verify_raw_order(corpus: &Path, other: &Path) -> Result<bool> {
     use shapekit_core_driver::canonical::{RawOrderStats, compare_raw_order};
     use shapekit_core_driver::meta::read_all;
