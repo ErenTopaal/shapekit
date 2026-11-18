@@ -1,6 +1,8 @@
 import { use, useMemo } from "react"
 import { Link, useParams } from "react-router"
-import { load, type Entry, type HarnessRun } from "@/lib/data"
+import { load, type Entry } from "@/lib/data"
+import { sdkName } from "@/lib/sdks"
+import { entryPath } from "./corpus"
 import { docs, expectations, sourceClasses, sources, verdictMeaning } from "@/lib/terms"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,31 +19,16 @@ import {
   Terms,
   TextLink,
   fmt,
+  indexerHref,
+  indexerResults,
   issueLabel,
-  verdictTone,
 } from "@/components/common"
 import { NotFound } from "./not-found"
-
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 
 function Counts({ counts }: { counts: Record<string, number> }) {
   const e = Object.entries(counts)
   if (e.length === 0) return <span className="text-muted-foreground">none</span>
   return <span className="num">{e.map(([k, v]) => `${k} ${v}`).join(", ")}</span>
-}
-
-// the harness verdicts of one entry, one phrase per distinct verdict
-function indexerResult(run: HarnessRun | undefined, id: string): { text: string; tone: ReturnType<typeof verdictTone> } | null {
-  const v = run?.verdicts[id]
-  if (!v) return null
-  const by = new Map<string, string[]>()
-  for (const [net, r] of Object.entries(v)) {
-    const k = r.reason ? `${r.verdict} (${r.reason})` : r.verdict
-    by.set(k, [...(by.get(k) ?? []), net])
-  }
-  const parts = [...by].map(([k, nets]) => `${k} on ${nets.toSorted().join(" and ")}`)
-  const worst = Object.values(v).find((r) => r.verdict !== "pass" && r.verdict !== "out-of-scope") ?? Object.values(v)[0]
-  return { text: parts.join("; "), tone: verdictTone(worst?.verdict ?? "pass") }
 }
 
 export function CapPage() {
@@ -56,7 +43,6 @@ export function CapPage() {
   const families = coverage.families.filter((f) => row?.families.includes(f.id))
   const capEntries = useMemo(() => entries.entries.filter((e) => e.caps.includes(cap)), [entries, cap])
   const capFindings = findings.findings.filter((f) => f.caps.includes(cap))
-  const run = harness.runs[0]
 
   // per entry and sdk, the versions with a failing cell in the committed matrix
   const sdkFails = useMemo(() => {
@@ -187,9 +173,10 @@ export function CapPage() {
               <TextLink to={docs.checks}>How the runner checks it</TextLink>.
             </Term>
             <Term name="results">
-              The committed SDK matrices list only versions that diverge on the entry; the indexer column gives the
-              committed wallet-backend run&apos;s verdict (<TextLink to={docs.verdicts}>verdicts</TextLink>). Entries that
-              are not on a ledger chain (synthetic, refused, vectors) are not replayed into the indexer.
+              The committed SDK matrices list only versions that diverge on the entry; the indexer lines give the
+              verdict of each committed indexer run, {harness.runs.map((r) => r.describe?.target ?? "").filter(Boolean).join(" and ")}{" "}
+              (<TextLink to={docs.verdicts}>verdicts</TextLink>). Entries that are not on a ledger chain (synthetic,
+              refused, vectors) are not replayed into an indexer.
             </Term>
           </Terms>
         </div>
@@ -324,7 +311,7 @@ export function CapPage() {
               <ol className="flex flex-col divide-y border-y text-sm">
                 {list.map((e) => {
                   const sdk = sdkFails.get(e.id)
-                  const hx = indexerResult(run, e.id)
+                  const hx = indexerResults(harness.runs, e.id)
                   const short = e.id.startsWith(`${e.family}.`) ? e.id.slice(e.family.length + 1) : e.id
                   return (
                     <li
@@ -333,10 +320,12 @@ export function CapPage() {
                       className="grid scroll-mt-20 gap-x-6 gap-y-1.5 py-3 target:bg-accent/60 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
                     >
                       <div className="flex min-w-0 flex-col gap-1">
-                        <Id className="font-medium" title={e.id}>
-                          <span className="text-muted-foreground">{e.family}.</span>
-                          {short}
-                        </Id>
+                        <Link to={entryPath(e.id)} className="text-primary underline decoration-primary/40 hover:decoration-primary">
+                          <Id className="font-medium" title={e.id}>
+                            <span className="text-muted-foreground">{e.family}.</span>
+                            {short}
+                          </Id>
+                        </Link>
                         <span className="text-xs text-muted-foreground">
                           {e.source}
                           {e.synthetic && e.source !== "synthetic" ? ", synthetic" : ""}, protocol{" "}
@@ -365,27 +354,30 @@ export function CapPage() {
                               to={`/dashboard/sdk?sdk=${s}&entry=${encodeURIComponent(e.id)}`}
                               className="text-diverge underline decoration-diverge/40"
                             >
-                              {sdkName[s] ?? s} diverges at {vs.length} of {versionsOf.get(s)} versions ({vs.join(", ")})
+                              {sdkName(s)} diverges at {vs.length} of {versionsOf.get(s)} versions ({vs.join(", ")})
                             </Link>
                           ))
                         ) : (
                           <span className="text-muted-foreground">No SDK version diverges</span>
                         )}
-                        {hx ? (
-                          hx.tone === "pass" || hx.tone === "idle" ? (
-                            <span className="text-muted-foreground" title={verdictMeaning(hx.text.split(" ")[0] ?? "")}>
-                              Indexer: {hx.text}
-                            </span>
-                          ) : (
-                            <Link
-                              to={`/dashboard/indexer?q=${encodeURIComponent(e.id)}&network=both#problems`}
-                              className="text-diverge underline decoration-diverge/40"
-                            >
-                              Indexer: {hx.text}
-                            </Link>
+                        {hx.length > 0 ? (
+                          hx.map((r) =>
+                            r.tone === "pass" || r.tone === "idle" ? (
+                              <span key={r.target} className="text-muted-foreground" title={verdictMeaning(r.verdict)}>
+                                {r.target}: {r.text}
+                              </span>
+                            ) : (
+                              <Link
+                                key={r.target}
+                                to={indexerHref(r.target, e.id)}
+                                className="text-diverge underline decoration-diverge/40"
+                              >
+                                {r.target}: {r.text}
+                              </Link>
+                            ),
                           )
                         ) : (
-                          <span className="text-muted-foreground">Indexer: not replayed</span>
+                          <span className="text-muted-foreground">Indexers: not replayed</span>
                         )}
                       </div>
                     </li>

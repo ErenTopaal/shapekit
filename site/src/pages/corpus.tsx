@@ -1,6 +1,7 @@
 import { use, useEffect, useMemo, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router"
 import { load, type Conformance, type Entry, type HarnessRun } from "@/lib/data"
+import { bySdkOrder, sdkName } from "@/lib/sdks"
 import { checkResults, docs, expectations, sourceClasses, verdictMeaning } from "@/lib/terms"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -19,12 +20,13 @@ import {
   TextLink,
   bytes,
   fmt,
+  indexerHref,
+  indexerResults,
   issueLabel,
   verdictTone,
 } from "@/components/common"
 import { NotFound } from "./not-found"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust" }
 const failing = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
 // the decoded XDR-JSON of a file larger than this is offered as a download, not shown inline
 const INLINE_JSON_BYTES = 512 * 1024
@@ -52,12 +54,13 @@ function sdkFailures(conformance: Conformance) {
   return m
 }
 
-function indexerVerdicts(run: HarnessRun | undefined, id: string) {
-  const v = run?.verdicts[id]
-  if (!v) return []
-  return Object.entries(v)
-    .toSorted(([a], [b]) => a.localeCompare(b))
-    .map(([network, r]) => ({ network, verdict: r.verdict, reason: r.reason }))
+// every committed indexer run's verdict on the entry, per network
+function indexerVerdicts(runs: HarnessRun[], id: string) {
+  return runs.flatMap((run, i) =>
+    Object.entries(run.verdicts[id] ?? {})
+      .toSorted(([a], [b]) => a.localeCompare(b))
+      .map(([network, r]) => ({ target: run.describe?.target ?? `run ${i + 1}`, network, verdict: r.verdict, reason: r.reason })),
+  )
 }
 
 const verdictText = (r: { verdict: string; reason: string | null }) => (r.reason ? `${r.verdict} (${r.reason})` : r.verdict)
@@ -94,7 +97,7 @@ function FilterSelect({
   )
 }
 
-function CorpusTerms() {
+function CorpusTerms({ targets }: { targets: string[] }) {
   return (
     <Terms>
       <Term name="shape">
@@ -120,8 +123,9 @@ function CorpusTerms() {
         answered at every version. <TextLink to={docs.checks}>How the runner checks an entry</TextLink>.
       </Term>
       <Term name="indexer">
-        The verdict of the committed wallet-backend run, per network (<TextLink to={docs.verdicts}>verdicts</TextLink>).
-        Entries that are not on a ledger chain (synthetic, refused, vectors) are not replayed.
+        The verdict of each committed indexer run, {targets.join(" and ")}, per network (
+        <TextLink to={docs.verdicts}>verdicts</TextLink>). Entries that are not on a ledger chain (synthetic, refused,
+        vectors) are not replayed.
       </Term>
     </Terms>
   )
@@ -147,7 +151,6 @@ export function CorpusPage() {
   }
 
   const fails = useMemo(() => sdkFailures(conformance), [conformance])
-  const run = harness.runs[0]
   const caps = useMemo(() => [...new Set(entries.entries.flatMap((e) => e.caps))].toSorted(), [entries])
   const families = useMemo(() => [...new Set(entries.entries.map((e) => e.family))].toSorted(), [entries])
   const versions = conformance.sdks.find((s) => s.sdk === sdk)?.versions.map((v) => v.version) ?? []
@@ -172,11 +175,11 @@ export function CorpusPage() {
       <PageHeader title="Corpus explorer">
         <p>
           Every corpus entry, with its decoded XDR-JSON, where its bytes come from, what each SDK version and the
-          reference indexer did with it, and how to run it again. Filter by CAP, by shape, or by an SDK and the version
+          indexers did with it, and how to run it again. Filter by CAP, by shape, or by an SDK and the version
           that fails on it; the filters are kept in the address, so a filtered list can be linked.
         </p>
       </PageHeader>
-      <CorpusTerms />
+      <CorpusTerms targets={harness.runs.map((r) => r.describe?.target ?? "").filter(Boolean)} />
       <Section
         title="Entries"
         id="entries"
@@ -212,7 +215,7 @@ export function CorpusPage() {
             label="Filter by an SDK that fails"
             value={sdk}
             any="Any SDK result"
-            options={conformance.sdks.map((s) => ({ value: s.sdk, label: `${sdkName[s.sdk] ?? s.sdk} fails` }))}
+            options={bySdkOrder(conformance.sdks, (s) => s.sdk).map((s) => ({ value: s.sdk, label: `${sdkName(s.sdk)} fails` }))}
             onChange={(v) => set("sdk", v, "all")}
           />
           {sdk !== "all" ? (
@@ -247,7 +250,7 @@ export function CorpusPage() {
             <TableBody>
               {shown.map((e) => {
                 const f = fails.get(e.id) ?? []
-                const hx = indexerVerdicts(run, e.id)
+                const hx = indexerResults(harness.runs, e.id)
                 const short = e.id.startsWith(`${e.family}.`) ? e.id.slice(e.family.length + 1) : e.id
                 return (
                   <TableRow key={e.id}>
@@ -265,7 +268,7 @@ export function CorpusPage() {
                       {f.length === 0 ? (
                         <span className="text-muted-foreground">none</span>
                       ) : (
-                        <span className="text-diverge">{f.map((x) => `${x.sdk}@${x.version}`).join(", ")}</span>
+                        <span className="text-diverge">{f.map((x) => `${sdkName(x.sdk)} ${x.version}`).join(", ")}</span>
                       )}
                     </TableCell>
                     <TableCell className="align-top text-xs whitespace-normal">
@@ -273,9 +276,9 @@ export function CorpusPage() {
                         <span className="text-muted-foreground">not replayed</span>
                       ) : (
                         hx.map((r) => (
-                          <span key={r.network} className="block" title={verdictMeaning(r.verdict)}>
-                            <Status tone={verdictTone(r.verdict)}>
-                              {r.network}: {verdictText(r)}
+                          <span key={r.target} className="block" title={verdictMeaning(r.verdict)}>
+                            <Status tone={r.tone}>
+                              {r.target}: {r.text}
                             </Status>
                           </span>
                         ))
@@ -349,7 +352,7 @@ export function EntryPage() {
   if (!e) return <NotFound />
 
   const f = fails.get(e.id) ?? []
-  const hx = indexerVerdicts(harness.runs[0], e.id)
+  const hx = indexerVerdicts(harness.runs, e.id)
   const onEntry = findings.findings.filter((x) => x.entries.includes(e.id))
   const fieldRows = e.fields.map((id) => entries.guide.fields.find((r) => r.id === id) ?? { id, validated_by_core: "not in the field table", risk: "", handling: "" })
   const checklist = entries.guide.checklist.filter((c) => c.fields.some((x) => e.fields.includes(x)))
@@ -502,7 +505,7 @@ export function EntryPage() {
                       to={`/dashboard/sdk?sdk=${x.sdk}&entry=${encodeURIComponent(e.id)}`}
                       className="text-primary underline decoration-primary/40"
                     >
-                      {sdkName[x.sdk] ?? x.sdk} {x.version}
+                      {sdkName(x.sdk)} {x.version}
                     </Link>
                   </TableCell>
                   <TableCell className="align-top">
@@ -525,17 +528,17 @@ export function EntryPage() {
         )}
         <h3 className="pt-2 font-medium">Indexer</h3>
         {hx.length === 0 ? (
-          <p className="text-sm text-muted-foreground">The committed indexer run did not replay this entry.</p>
+          <p className="text-sm text-muted-foreground">No committed indexer run replayed this entry.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {hx.map((r) => (
-              <li key={r.network}>
+              <li key={`${r.target}/${r.network}`}>
                 <Status tone={verdictTone(r.verdict)}>
-                  {harness.runs[0]?.describe?.target ?? "indexer"} on {r.network}: {verdictText(r)}
+                  {r.target} on {r.network}: {verdictText(r)}
                 </Status>{" "}
                 <span className="text-muted-foreground">{verdictMeaning(r.verdict)}.</span>{" "}
                 {verdictTone(r.verdict) === "diverge" ? (
-                  <TextLink to={`/dashboard/indexer?q=${encodeURIComponent(e.id)}&network=both#problems`}>
+                  <TextLink to={indexerHref(r.target, e.id)}>
                     The problems
                   </TextLink>
                 ) : null}
@@ -573,7 +576,7 @@ export function EntryPage() {
         id="reproduce"
         description="From a shapekit checkout. The SDK command runs the current version unless you add --version; the harness command replays the entry's whole chain into the indexer behind your adapter."
       >
-        {conformance.sdks.map((s) => {
+        {bySdkOrder(conformance.sdks, (s) => s.sdk).map((s) => {
           const failingVersions = f.filter((x) => x.sdk === s.sdk).map((x) => x.version)
           const v = failingVersions.at(-1)
           return (

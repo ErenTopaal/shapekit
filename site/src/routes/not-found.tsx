@@ -11,14 +11,9 @@ export function NotFoundBody() {
     <div className="flex max-w-[60ch] flex-col gap-3">
       <h1 className="text-2xl font-semibold tracking-tight">No page at this address</h1>
       <p className="text-fd-muted-foreground">
-        The link may be mistyped, or it may name a page this build of the site does not have.
+        This build of the site has no page at this address. Check the link, or start from the docs or the dashboard.
       </p>
       <ul className="flex flex-wrap gap-x-6 gap-y-2">
-        <li>
-          <Link to="/" className="text-fd-primary underline underline-offset-4">
-            Go to the start page
-          </Link>
-        </li>
         <li>
           <Link to="/docs" className="text-fd-primary underline underline-offset-4">
             Read the docs

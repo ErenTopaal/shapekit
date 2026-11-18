@@ -67,7 +67,7 @@ the entry and the failing version, and the entry id) are kept in the query strin
   range, expected decode result, source class and provenance, flags and upstream sightings;
 - how the entry was recorded: its recipe IR file or recorded chain;
 - its results: each SDK version whose committed matrix has a failing check on it, with the
-  checks and the known-failures issue, the committed wallet-backend verdict per network, and
+  checks and the known-failures issue, each committed indexer run's verdict per network, and
   the findings that name the entry;
 - commands that run it again (`shapekit check sdk` per SDK, at the newest failing version
   when there is one, and `shapekit check indexer` on its chain);
@@ -83,9 +83,9 @@ The files come from `site/scripts/corpus-files.ts`, which runs before every dev 
 and build. It copies each file `corpus/manifest.json` names (every variant's `.xdr` and
 `.expected.json`, and every vector file) to `site/public/corpus/`, so the site serves
 `/corpus/entries/<family>/<entry>/<variant>.xdr` and the explorer reads the XDR-JSON from the
-site's own origin. That is about 2,300 files and 59 MiB, which makes the built site about
-100 MiB; the 716 entry pages bring the build to 842 prerendered pages, and `npm run build`
-takes about 12 seconds on a 10-core machine.
+site's own origin. That is about 3,800 files and 95 MiB, which makes the built site about
+150 MiB; the 1,092 entry pages bring the build to about 1,220 prerendered HTML pages, and `npm run build`
+takes about 20 seconds on a 10-core machine.
 
 ## Docs come from docs/
 
@@ -97,9 +97,9 @@ takes about 12 seconds on a 10-core machine.
 | Getting started | `/docs` (Introduction) | `README.md`: introduction, "What is in it", "Infrastructure and privacy", "Maintenance", "License" |
 | | `/docs/install` | `README.md`: "Install" and "Building and checking" |
 | | `/docs/quick-start` | `README.md`: "Quick start" |
-| Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the dashboard's coverage page) |
+| Corpus | `/docs/corpus/adding-a-shape` | `docs/adding-a-shape.md` (the sidebar also links the dashboard's coverage page and the corpus explorer) |
 | Harness | `/docs/harness/adapter-interface`, `/docs/harness/mapping-adapter`, `/docs/harness/replay-server`, `/docs/harness/indexer-ci` | `docs/adapter-interface.md`, `docs/mapping-adapter.md`, `docs/replay-server.md`, `docs/indexer-ci.md` |
-| SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci` | `docs/testee-protocol.md`, `docs/sdk-ci.md` |
+| SDK conformance | `/docs/sdk/testee-protocol`, `/docs/sdk/sdk-ci`, `/docs/sdk/seeded-faults` | `docs/testee-protocol.md`, `docs/sdk-ci.md`, `docs/seeded-faults.md` |
 | Results | `/docs/results/report` | `docs/report.md` |
 | Linter | `/docs/linter/indexerlint` | `docs/linter.md` |
 | Guide | `/docs/guide/indexer-hardening` | `docs/guide/indexer-hardening.mdx` |
@@ -160,7 +160,7 @@ Every number the dashboard shows is read from JSON that `shapekit site data` wri
 | `corpus/coverage/coverage.json` | per-CAP, per-family, per-fragment and per-arm coverage, and the summary |
 | `corpus/coverage/COVERAGE.md` | the meaning of each blocker, from its "Blockers" table |
 | `registry/*.toml` | CAP texts (linked at the pinned stellar-protocol commit), XDR additions, family priority and protocol range |
-| `findings/triage.toml` | the paths of the committed harness report, conformance matrices and linter result |
+| `findings/triage.toml` | the paths of the committed harness reports, conformance matrices and linter result |
 | `findings/inputs/*` | those reduced run outputs, as `findings/triage.toml` names them |
 | `adapters/walletbackend/reproductions.toml` | the wallet-backend sightings `shapekit harness reproduce` checks, with their commits and expected verdicts |
 | `findings/findings.json` | the findings record and its summary |
@@ -190,7 +190,7 @@ committed files:
   from probes are not in the matrix and say so. `shapekit conformance reproduce` remains the
   check that actually runs them.
 - Harness verdicts per entry and network, the distinct entries replayed and the chains per
-  network, from the committed report. The wallet-backend reproduction rows carry, for each
+  network, from each committed report. The wallet-backend reproduction rows carry, for each
   expected verdict, the verdict the committed run gave the same entry at the pinned commit; the
   rows' own pre-fix and fixed commits are run by `shapekit harness reproduce` in the nightly
   workflow, which commits no result.
@@ -214,10 +214,13 @@ cd site
 npm ci
 npm run typecheck       # generates the docs content and route types, then tsc
 npm run lint            # oxlint
-npm run dev -- --host   # development server
 npm run build           # prerenders every route into dist/client
 npm run preview         # serves dist/client with site/Caddyfile in the pinned caddy image (docker), port 5182
 ```
+
+`npm run preview -- stop` stops the preview container. For a development server that reloads on
+every change, run `npm run dev -- --host` in `site/` instead of the build and preview; it keeps
+running until you stop it.
 
 `site/public/data/`, `site/public/corpus/`, `site/content/` and `site/.source/`
 (fumadocs-mdx's output for `site/source.config.ts`) are ignored by git; all are always

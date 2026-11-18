@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "SDK matrix | shapekit" }]
+  return [{ title: "SDK matrix | shapekit" }, { name: "description", content: "Which corpus entries each SDK version diverges on, with the failing checks and the known failures." }]
 }
 
 export default function Route() {

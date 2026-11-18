@@ -15,7 +15,10 @@ export function shouldRevalidate() {
 }
 
 export function meta({ params }: { params: { cap?: string } }) {
-  return [{ title: `${params.cap ?? "CAP"} coverage | shapekit` }]
+  return [
+    { title: `${params.cap ?? "CAP"} coverage | shapekit` },
+    { name: "description", content: `The corpus entries, shape families, findings and results for ${params.cap ?? "this CAP"}.` },
+  ]
 }
 
 export default function Route() {

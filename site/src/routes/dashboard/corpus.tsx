@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Corpus explorer | shapekit" }]
+  return [{ title: "Corpus explorer | shapekit" }, { name: "description", content: "Every corpus entry with its decoded XDR-JSON, its source, what each SDK version and indexer did with it, and how to run it again." }]
 }
 
 export default function Route() {

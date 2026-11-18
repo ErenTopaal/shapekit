@@ -42,7 +42,7 @@ export function HydrateFallback() {
     <HomeLayout {...baseOptions()} style={homeStyle}>
       <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
         <noscript>
-          <p>This address has no prerendered page. The landing page and the docs work without JavaScript.</p>
+          <p>This address has no prerendered page. The docs work without JavaScript; the dashboard needs it.</p>
         </noscript>
       </div>
     </HomeLayout>
@@ -53,6 +53,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const notFound = isRouteErrorResponse(error) && error.status === 404
   return (
     <HomeLayout {...baseOptions()} style={homeStyle}>
+      <title>{notFound ? "Not found | shapekit" : "Error | shapekit"}</title>
       <div id="main" className="mx-auto w-full max-w-(--fd-layout-width) flex-1 px-4 py-10">
         {notFound ? (
           <NotFoundBody />

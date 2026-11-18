@@ -39,7 +39,7 @@ export function IssueRef({ value, className }: { value: string; className?: stri
   }
   return (
     <RepoLink path={value} className={className}>
-      issue draft <Id>{value.replace(/^findings\/issues\//, "")}</Id>
+      issue draft <Id>{value.replace(/^(candidate\/)?findings\/issues\//, "")}</Id>
     </RepoLink>
   )
 }
@@ -252,4 +252,35 @@ export function verdictTone(v: string): Tone {
   if (v === "pass") return "pass"
   if (v === "out-of-scope") return "idle"
   return "diverge"
+}
+
+// each committed indexer run's verdicts on one entry, one phrase per distinct verdict
+// ("pass on mainnet and testnet"); runs that did not replay the entry are left out
+export function indexerResults(
+  runs: { describe: { target: string } | null; verdicts: Record<string, Record<string, { verdict: string; reason: string | null }>> }[],
+  id: string,
+): { target: string; text: string; tone: Tone; verdict: string }[] {
+  return runs.flatMap((run, i) => {
+    const v = run.verdicts[id]
+    if (!v) return []
+    const by = new Map<string, string[]>()
+    for (const [net, r] of Object.entries(v)) {
+      const k = r.reason ? `${r.verdict} (${r.reason})` : r.verdict
+      by.set(k, [...(by.get(k) ?? []), net])
+    }
+    const text = [...by].map(([k, nets]) => `${k} on ${nets.toSorted().join(" and ")}`).join("; ")
+    const worst = Object.values(v).find((r) => r.verdict !== "pass" && r.verdict !== "out-of-scope") ?? Object.values(v)[0]
+    const verdict = worst?.verdict ?? "pass"
+    return [{ target: run.describe?.target ?? `run ${i + 1}`, text, tone: verdictTone(verdict), verdict }]
+  })
+}
+
+// the indexer page of one run
+export function indexerHref(target: string, q?: string): string {
+  const p = new URLSearchParams({ target })
+  if (q) {
+    p.set("q", q)
+    p.set("network", "both")
+  }
+  return `/dashboard/indexer?${p.toString()}${q ? "#problems" : ""}`
 }

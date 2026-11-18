@@ -332,6 +332,8 @@ export interface Harness {
 export interface Finding {
   id: string
   title: string
+  /** the defect in one plain sentence, from findings/triage.toml; null when the triage has none */
+  short: string | null
   component: string
   severity: string
   status: string

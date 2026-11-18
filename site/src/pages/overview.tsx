@@ -3,15 +3,16 @@ import { Link } from "react-router"
 import { ChevronDownIcon } from "lucide-react"
 import { load, sum, type Counts } from "@/lib/data"
 import { useMeta } from "@/lib/meta"
+import { and, bySdkOrder, sdkLabel, sdkList, sdkName } from "@/lib/sdks"
+import type { HarnessRun } from "@/lib/data"
 import { severities, severityRank, sourceClasses, statuses, docs as docPages, sources } from "@/lib/terms"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { FamilyStrip } from "@/components/fragments"
 import { Meter, VerdictBar, VerdictLegend, VersionColumns } from "@/components/charts"
-import { Id, RepoLink, Section, Term, Terms, TextLink, fmt, issueLabel, short } from "@/components/common"
+import { Id, RepoLink, Section, Term, Terms, TextLink, fmt, indexerHref, issueLabel, short } from "@/components/common"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 
 // pages of this site's docs first, then committed files that only exist in the repository
 const docs: { to?: string; path?: string; label: string }[] = [
@@ -97,6 +98,54 @@ function FindingsGrid({ byComponent }: { byComponent: Record<string, Counts> }) 
   )
 }
 
+function IndexerSection({
+  run,
+  reproductions,
+}: {
+  run: HarnessRun
+  reproductions: { rows: number; named: number; passing: number } | null
+}) {
+  const target = run.describe?.target ?? "replay run"
+  // the networks of the run, and whether they agree
+  const networks = Object.keys(run.by_network).toSorted()
+  const sameEverywhere =
+    networks.length > 1 && networks.every((n) => JSON.stringify(run.by_network[n]) === JSON.stringify(run.by_network[networks[0] ?? ""]))
+  return (
+    <Section
+      title={`Indexer: ${target}`}
+      id={`indexer-${target}`}
+      description={
+        <>
+          The replay harness fed {fmt.format(run.distinct_entries)} corpus entries, ledger by ledger, to {target} at commit{" "}
+          <Id>{short(run.describe?.target_version ?? "", 8)}</Id> on {networks.join(" and ")} ({fmt.format(run.totals.entries)}{" "}
+          replays) and compared what it stored with what the ledger meta shows.{" "}
+          {sameEverywhere ? "Both networks gave the same verdicts, so one bar shows both." : null}{" "}
+          <TextLink to={docPages.verdicts}>What the verdicts mean</TextLink>.
+        </>
+      }
+    >
+      {(sameEverywhere ? networks.slice(0, 1) : networks).map((n) => (
+        <div key={n} className="flex flex-col gap-2">
+          {!sameEverywhere ? <span className="text-sm font-medium">{n}</span> : null}
+          <VerdictBar counts={run.by_network[n] ?? {}} className="h-4" />
+          <VerdictLegend counts={run.by_network[n] ?? {}} />
+        </div>
+      ))}
+      <p className="text-sm text-muted-foreground">
+        {reproductions ? (
+          <>
+            {reproductions.rows} {target} bugs reported upstream are reproduced by <Id>shapekit harness reproduce</Id> on
+            commits before and after their fixes. At the pinned commit the committed run passes {reproductions.passing} of
+            the {reproductions.named} entries they name.{" "}
+            <TextLink to={`${indexerHref(target)}#reproductions`}>The reproductions</TextLink>,{" "}
+          </>
+        ) : null}
+        <TextLink to={indexerHref(target)}>{reproductions ? "the whole run" : `The whole ${target} run`}</TextLink>.
+      </p>
+    </Section>
+  )
+}
+
 export function Overview() {
   const meta = useMeta()
   const coverage = use(load("coverage"))
@@ -105,19 +154,15 @@ export function Overview() {
   const findings = use(load("findings"))
   const s = coverage.summary
   const fs = findings.summary
-  const run = harness.runs[0]
+  const runs = harness.runs
+  const targets = runs.map((r) => r.describe?.target ?? "").filter(Boolean)
+  const sdks = bySdkOrder(conformance.sdks, (x) => x.sdk)
   const gw = meta.corpus.generated_with
   const families = coverage.families.toSorted((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
   const tiers = meta.corpus.protocol_tiers
   const nonCore = sourceClasses.filter((c) => !c.core && (s.entries_by_source_class[c.id] ?? 0) > 0)
   const visibleGaps = coverage.caps.filter((c) => c.indexer_visible && c.core_emitted_entries === 0)
 
-  // the networks of the run, and whether they agree family by family
-  const networks = run ? Object.keys(run.by_network).toSorted() : []
-  const sameEverywhere =
-    run !== undefined &&
-    networks.length > 1 &&
-    networks.every((n) => JSON.stringify(run.by_network[n]) === JSON.stringify(run.by_network[networks[0] ?? ""]))
 
   // wallet-backend sightings: the entries they name, and how the committed run at the pin judged them
   const named = new Map<string, string[]>()
@@ -145,9 +190,11 @@ export function Overview() {
       <header className="flex flex-col gap-3 pb-6">
         <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">What shapekit found</h1>
         <p className="max-w-[70ch] text-muted-foreground sm:text-lg">
-          shapekit replays a corpus of rare but valid Stellar ledger shapes, most of them recorded on a real stellar-core, through
-          the JavaScript, Go and Rust SDKs and through an indexer, and records where they read it wrong. This page
-          summarises the results committed at <Id>{short(meta.commit, 10)}</Id>, built against stellar-core{" "}
+          shapekit replays a corpus of rare but valid Stellar ledger shapes, most of them recorded on a real stellar-core,
+          through SDKs and indexers, and records where they read it wrong. This page summarises the results for{" "}
+          {sdkList(conformance.sdks.map((x) => x.sdk))}
+          {targets.length > 0 ? `, and for the ${targets.length === 1 ? "indexer" : "indexers"} ${and(targets)},` : ""} committed
+          at <Id>{short(meta.commit, 10)}</Id>, built against stellar-core{" "}
           <Id>{gw.core_image.tag.split("-")[0]}</Id> and stellar-xdr <Id>{gw.xdr_definitions.tag}</Id>.{" "}
           <TextLink to="/docs">What shapekit is</TextLink>.
         </p>
@@ -158,7 +205,7 @@ export function Overview() {
         id="findings"
         description={
           <>
-            Every failure the indexer run, the SDK runs and the linter reported is traced to a root cause, a finding.
+            Every failure the indexer runs, the SDK runs and the linter reported is traced to a root cause, a finding.
             Each finding names its severity, the component it affects, its CAPs and the smallest corpus entry that shows
             it. Source: <RepoLink path={sources.findingsReport} />.
           </>
@@ -192,37 +239,15 @@ export function Overview() {
         </Terms>
       </Section>
 
-      {run ? (
-        <Section
-          title={`Indexer: ${run.describe?.target ?? "replay run"}`}
-          id="indexer"
-          description={
-            <>
-              The replay harness fed {fmt.format(run.distinct_entries)} corpus entries, ledger by ledger, to{" "}
-              {run.describe?.target ?? "the target"} at commit <Id>{short(run.describe?.target_version ?? "", 8)}</Id>{" "}
-              on {networks.join(" and ")} ({fmt.format(run.totals.entries)} replays) and compared what it stored with what
-              the ledger meta shows.{" "}
-              {sameEverywhere ? "Both networks gave the same verdicts, so one bar shows both." : null}{" "}
-              <TextLink to={docPages.verdicts}>What the verdicts mean</TextLink>.
-            </>
+      {runs.map((run) => (
+        <IndexerSection
+          key={run.report}
+          run={run}
+          reproductions={
+            run.describe?.target === "wallet-backend" ? { rows: harness.reproductions.rows.length, named: named.size, passing: namedPassing } : null
           }
-        >
-          {(sameEverywhere ? networks.slice(0, 1) : networks).map((n) => (
-            <div key={n} className="flex flex-col gap-2">
-              {!sameEverywhere ? <span className="text-sm font-medium">{n}</span> : null}
-              <VerdictBar counts={run.by_network[n] ?? {}} className="h-4" />
-              <VerdictLegend counts={run.by_network[n] ?? {}} />
-            </div>
-          ))}
-          <p className="text-sm text-muted-foreground">
-            {harness.reproductions.rows.length} wallet-backend bugs reported upstream are reproduced by{" "}
-            <Id>shapekit harness reproduce</Id> on commits before and after their fixes. At the pinned commit the
-            committed run passes {namedPassing} of the {named.size} entries they name.{" "}
-            <TextLink to="/dashboard/indexer#reproductions">The reproductions</TextLink>,{" "}
-            <TextLink to="/dashboard/indexer">the whole run</TextLink>.
-          </p>
-        </Section>
-      ) : null}
+        />
+      ))}
 
       <Section
         title="SDKs"
@@ -235,7 +260,7 @@ export function Overview() {
         }
       >
         <div className="grid gap-3 md:grid-cols-3">
-          {conformance.sdks.map((x) => {
+          {sdks.map((x) => {
             const rows = x.versions.map((v) => ({ version: v.version, value: sum(v.failing_cells_by_result), current: v.current }))
             const cur = x.versions.find((v) => v.current)
             const curFailing = sum(cur?.failing_cells_by_result)
@@ -244,7 +269,7 @@ export function Overview() {
             return (
               <div key={x.sdk} className="flex flex-col gap-3 rounded-lg border bg-card p-4">
                 <div className="flex flex-col">
-                  <h3 className="font-semibold">{sdkName[x.sdk] ?? x.sdk}</h3>
+                  <h3 className="font-semibold">{sdkName(x.sdk)}</h3>
                   <Id className="text-muted-foreground">{x.package}</Id>
                 </div>
                 <VersionColumns caption={`${x.package}: entries that diverge, per version`} rows={rows} max={max} />
@@ -258,7 +283,7 @@ export function Overview() {
                     : "."}
                 </p>
                 <TextLink to={`/dashboard/sdk?sdk=${x.sdk}`} className="mt-auto text-sm">
-                  The {sdkName[x.sdk] ?? x.sdk} matrix
+                  The {sdkName(x.sdk)} matrix
                 </TextLink>
               </div>
             )
@@ -370,10 +395,10 @@ export function Overview() {
                     </TableCell>
                   </TableRow>
                 ))}
-              {conformance.sdks.map((x) => (
+              {sdks.map((x) => (
                 <TableRow key={x.sdk}>
                   <TableCell className="font-medium">
-                    {x.package} <span className="font-normal text-muted-foreground">({sdkName[x.sdk] ?? x.sdk} SDK, current)</span>
+                    {x.package} <span className="font-normal text-muted-foreground">({x.package === sdkName(x.sdk) ? "current" : `${sdkLabel(x.sdk)}, current`})</span>
                   </TableCell>
                   <TableCell>
                     <Id>{x.current}</Id>

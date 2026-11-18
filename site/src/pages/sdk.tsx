@@ -2,6 +2,7 @@ import { use, useMemo, useState } from "react"
 import { useSearchParams } from "react-router"
 import { load, sum, type Cell, type FamilyRow, type Observation, type Reproduction, type Sdk } from "@/lib/data"
 import { checkResults, docs } from "@/lib/terms"
+import { bySdkOrder, sdkLabel, sdkName } from "@/lib/sdks"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -24,7 +25,6 @@ import {
   type Tone,
 } from "@/components/common"
 
-const sdkName: Record<string, string> = { js: "JavaScript", go: "Go", rust: "Rust", soroban: "soroban-sdk" }
 const failing = new Set(checkResults.filter((c) => c.id !== "unsupported").map((c) => c.id))
 const failingChecks = (cell: Cell) => cell.checks.filter((k) => failing.has(k.result))
 
@@ -189,7 +189,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
           <EmptyTitle>No failing entry matches</EmptyTitle>
           <EmptyDescription>
             {sdk.entries.length === 0
-              ? `The committed ${sdkName[sdk.sdk] ?? sdk.sdk} matrix has no failing cells.`
+              ? `The committed ${sdkLabel(sdk.sdk)} matrix has no failing cells.`
               : "Clear the filter to see every failing entry."}
           </EmptyDescription>
         </EmptyHeader>
@@ -203,7 +203,7 @@ function Matrix({ sdk, families, filter, op }: { sdk: Sdk; families: FamilyRow[]
       <div className="rounded-md border">
         <Table className="border-collapse">
           <caption className="sr-only">
-            Failing cells of the {sdkName[sdk.sdk]} matrix: corpus entries by {sdk.package} version, grouped by shape
+            Failing cells of the {sdkLabel(sdk.sdk)} matrix: corpus entries by {sdk.package} version, grouped by shape
             family
           </caption>
           <thead>
@@ -361,7 +361,7 @@ function Reproductions() {
                     return (
                       <li key={v} className="flex flex-col">
                         <span className="font-mono text-xs">
-                          {sdkName[r.sdk] ?? r.sdk} {v}
+                          {sdkName(r.sdk)} {v}
                         </span>
                         <Status tone={ob.tone}>{ob.text}</Status>
                       </li>
@@ -378,7 +378,8 @@ function Reproductions() {
 }
 
 export function SdkPage() {
-  const conformance = use(load("conformance"))
+  const loaded = use(load("conformance"))
+  const conformance = useMemo(() => ({ ...loaded, sdks: bySdkOrder(loaded.sdks, (s) => s.sdk) }), [loaded])
   const coverage = use(load("coverage"))
   const [params, setParams] = useSearchParams()
   const first = conformance.sdks.find((s) => s.sdk === "js")?.sdk ?? conformance.sdks[0]?.sdk ?? ""
@@ -425,12 +426,12 @@ export function SdkPage() {
       </Terms>
 
       <Tabs value={tab} onValueChange={(v) => set("sdk", v, first)} className="pt-6">
-        <TabsList className="h-auto w-full sm:w-fit">
+        <TabsList className="h-auto w-full flex-wrap justify-start sm:w-fit">
           {conformance.sdks.map((s) => {
             const cur = s.versions.find((v) => v.current)
             return (
               <TabsTrigger key={s.sdk} value={s.sdk} className="flex-col gap-0 py-1 sm:flex-row sm:gap-1.5">
-                {sdkName[s.sdk] ?? s.sdk}
+                {sdkName(s.sdk)}
                 <span className="num text-xs font-normal">{sum(cur?.failing_cells_by_result)} at current</span>
               </TabsTrigger>
             )
@@ -439,7 +440,7 @@ export function SdkPage() {
         {conformance.sdks.map((s) => (
           <TabsContent key={s.sdk} value={s.sdk} className="flex flex-col">
             <p className="pt-4 text-sm text-muted-foreground">
-              <Id className="text-foreground">{s.package}</Id>, {s.versions.length} versions, current <Id>{s.current}</Id>.
+              <Id className="text-foreground">{s.package}</Id>, {s.versions.length} {s.versions.length === 1 ? "version" : "versions"}, current <Id>{s.current}</Id>.
               Issues go to <ExtLink href={`https://github.com/${s.issues_repo}`}>{s.issues_repo}</ExtLink>. Matrix:{" "}
               {s.matrix ? <RepoLink path={s.matrix} /> : "none committed"}
               {s.known_failures_file ? (

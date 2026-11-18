@@ -14,7 +14,10 @@ export function shouldRevalidate() {
 }
 
 export function meta({ params }: { params: { entry?: string } }) {
-  return [{ title: `${params.entry ?? "Corpus entry"} | shapekit` }]
+  return [
+    { title: `${params.entry ?? "Corpus entry"} | shapekit` },
+    { name: "description", content: `Corpus entry ${params.entry ?? ""}: its manifest record, decoded XDR-JSON, SDK and indexer results, and how to run it again.` },
+  ]
 }
 
 export default function Route() {

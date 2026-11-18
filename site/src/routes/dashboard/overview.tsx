@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Dashboard | shapekit" }]
+  return [{ title: "Dashboard | shapekit" }, { name: "description", content: "The findings, indexer runs, SDK results and corpus coverage committed in the shapekit repository." }]
 }
 
 export default function Route() {

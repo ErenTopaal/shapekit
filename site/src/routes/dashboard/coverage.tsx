@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "CAP coverage | shapekit" }]
+  return [{ title: "CAP coverage | shapekit" }, { name: "description", content: "Every CAP with the corpus entries that carry its shapes, the union arms covered and the fields core does not fully validate." }]
 }
 
 export default function Route() {

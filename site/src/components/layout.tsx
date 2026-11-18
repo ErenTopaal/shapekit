@@ -11,7 +11,7 @@ const nav = [
   { to: "/dashboard", label: "Overview", end: true },
   { to: "/dashboard/coverage", label: "CAP coverage", end: false },
   { to: "/dashboard/sdk", label: "SDK matrix", end: false },
-  { to: "/dashboard/indexer", label: "Indexer run", end: false },
+  { to: "/dashboard/indexer", label: "Indexer runs", end: false },
   { to: "/dashboard/findings", label: "Findings", end: false },
   { to: "/dashboard/corpus", label: "Corpus explorer", end: false },
 ]

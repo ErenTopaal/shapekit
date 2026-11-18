@@ -304,7 +304,7 @@ export function FindingsPage() {
     <div className="flex flex-col">
       <PageHeader title="Findings">
         <p>
-          Every failure the indexer run, the SDK runs and the linter reported,
+          Every failure the indexer runs, the SDK runs and the linter reported,
           traced to a root cause. {s.findings} findings cover{" "}
           {fmt.format(s.failures)} failures, and{" "}
           {s.unmapped === 0
@@ -334,8 +334,8 @@ export function FindingsPage() {
             </Term>
           ))}
         <Term name="siblings, related">
-          Siblings are other findings filed as the same defect elsewhere,
-          usually in another SDK. Related links are upstream issues or pull
+          Siblings are other findings filed alongside this one, such as the
+          same defect in another SDK. Related links are upstream issues or pull
           requests that touch the same code but are not this finding. All of
           these terms are defined in <RepoLink path={sources.triage} />.
         </Term>

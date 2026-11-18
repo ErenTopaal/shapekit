@@ -1,5 +1,5 @@
 import { use, useMemo } from "react"
-import { useSearchParams } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { load, sum, type FamilyRow, type HarnessRun, type HarnessReproduction } from "@/lib/data"
 import { docs, lintRules, verdicts } from "@/lib/terms"
 import { useMeta } from "@/lib/meta"
@@ -21,6 +21,7 @@ import {
   TextLink,
   bytes,
   fmt,
+  indexerHref,
   issueLabel,
   short,
   useHashScroll,
@@ -329,18 +330,26 @@ function Reproductions({
   )
 }
 
+const targetOf = (r: HarnessRun, i: number) => r.describe?.target ?? `run ${i + 1}`
+
 export function IndexerPage() {
   const meta = useMeta()
   // the target's repository, from its pin in pins.toml
   const repoOf = (name: string) => meta.pins.git.find((g) => g.name === name)?.url.replace(/\.git$/, "") ?? `https://github.com/stellar/${name}`
   const harness = use(load("harness"))
   const coverage = use(load("coverage"))
+  const [params] = useSearchParams()
   useHashScroll()
-  const run = harness.runs[0]
+  const wanted = params.get("target")
+  const index = Math.max(
+    0,
+    harness.runs.findIndex((r, i) => targetOf(r, i) === wanted),
+  )
+  const run = harness.runs[index]
   if (!run) {
     return (
       <>
-        <PageHeader title="Indexer run" />
+        <PageHeader title="Indexer runs" />
         <Empty>
           <EmptyHeader>
             <EmptyTitle>No harness report is committed</EmptyTitle>
@@ -356,6 +365,27 @@ export function IndexerPage() {
   const families = coverage.families
   return (
     <div className="flex flex-col">
+      {harness.runs.length > 1 ? (
+        <nav aria-label="Indexer runs" className="pb-4">
+          <ul className="flex flex-wrap gap-2 text-sm">
+            {harness.runs.map((r, i) => (
+              <li key={r.report}>
+                <Link
+                  to={indexerHref(targetOf(r, i))}
+                  aria-current={i === index ? "page" : undefined}
+                  className={
+                    i === index
+                      ? "block rounded-md border border-primary bg-accent px-3 py-1.5 font-medium text-accent-foreground"
+                      : "block rounded-md border px-3 py-1.5 text-muted-foreground hover:bg-muted"
+                  }
+                >
+                  {targetOf(r, i)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
       <PageHeader title={`Indexer run: ${d?.target ?? "target"}`}>
         <p>
           The replay harness served the corpus&apos;s ledger chains to {d?.target ?? "the target"} at commit{" "}
@@ -364,7 +394,12 @@ export function IndexerPage() {
           </ExtLink>{" "}
           through its adapter, <Id>{d?.adapter ?? "the adapter"}</Id> {d?.adapter_version}, over {d?.default_delivery ?? "its default delivery"}
           , then compared every fact the indexer stored with what the ledger meta shows. Report:{" "}
-          <RepoLink path={run.report} />. <TextLink to={docs.walletBackendAdapter}>The wallet-backend adapter</TextLink>.
+          <RepoLink path={run.report} />. {d?.target === "wallet-backend" ? (
+            <TextLink to={docs.walletBackendAdapter}>The wallet-backend adapter</TextLink>
+          ) : (
+            <TextLink to={docs.adapter}>The adapter interface</TextLink>
+          )}
+          .
         </p>
       </PageHeader>
 
@@ -438,7 +473,7 @@ export function IndexerPage() {
           </TableBody>
         </Table>
         <p className="text-sm text-muted-foreground">
-          Mishandled, by reason:{" "}
+          Mishandled replays on {networks.join(" and ")}, by reason:{" "}
           {Object.entries(run.totals.by_reason)
             .map(([k, v]) => `${k} ${v}`)
             .join(", ") || "none"}
@@ -452,14 +487,17 @@ export function IndexerPage() {
         <Families run={run} networks={networks} agree={agree} families={families} />
       </Section>
 
-      <Problems run={run} families={families} />
+      <Problems key={run.report} run={run} families={families} />
 
-      <Reproductions
-        rows={harness.reproductions.rows}
-        table={harness.reproductions.table}
-        families={families}
-        repo={repoOf(d?.target ?? "wallet-backend")}
-      />
+      {/* the reproduction table and the linter result are wallet-backend's */}
+      {d?.target === "wallet-backend" ? (
+        <Reproductions
+          rows={harness.reproductions.rows}
+          table={harness.reproductions.table}
+          families={families}
+          repo={repoOf("wallet-backend")}
+        />
+      ) : null}
 
       <Section title="How the run went" id="run">
         <dl className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
@@ -514,7 +552,7 @@ export function IndexerPage() {
         ) : null}
       </Section>
 
-      {harness.lint.map((l) => (
+      {harness.lint.filter((l) => l.target === d?.target).map((l) => (
         <Section
           key={l.result}
           title={`Linter on ${l.target}`}

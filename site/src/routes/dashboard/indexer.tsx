@@ -15,7 +15,7 @@ export function shouldRevalidate() {
 }
 
 export function meta() {
-  return [{ title: "Indexer run | shapekit" }]
+  return [{ title: "Indexer runs | shapekit" }, { name: "description", content: "What each indexer stored when the replay harness fed it the corpus chains, entry by entry and network by network." }]
 }
 
 export default function Route() {
