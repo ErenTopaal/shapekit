@@ -1,4 +1,5 @@
-//! `shapekit serve`: the replay server for one committed chain.
+//! `shapekit serve`: the replay server for one committed chain, until Ctrl-C, SIGTERM or
+//! SIGHUP.
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
@@ -43,6 +44,23 @@ pub fn run(args: ServeArgs) -> Result<bool> {
             .context("--network is needed when --chain is a chain id")?;
         args.corpus.join("chains").join(&args.chain).join(network)
     };
+    // SIGTERM (what `kill`, docker and process supervisors send) and SIGHUP stop the server
+    // the way Ctrl-C does; ended by the default action instead, the process would drop
+    // nothing and leave its archive copy in the temporary directory. They are registered
+    // before the server starts, so none can arrive while the default action still holds.
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .context("starting the signal runtime")?;
+    let (mut int, mut term, mut hup) = {
+        use tokio::signal::unix::{SignalKind, signal};
+        let _in_runtime = rt.enter();
+        (
+            signal(SignalKind::interrupt()).context("handling SIGINT")?,
+            signal(SignalKind::terminate()).context("handling SIGTERM")?,
+            signal(SignalKind::hangup()).context("handling SIGHUP")?,
+        )
+    };
     let server = start(ServeConfig {
         chain_dir: dir.clone(),
         listen: args.listen,
@@ -53,12 +71,13 @@ pub fn run(args: ServeArgs) -> Result<bool> {
     .with_context(|| format!("serving {}", dir.display()))?;
     // the harness reads this line to learn the bound address
     println!("serving {} at {}", dir.display(), server.url());
-    let rt = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .context("starting the signal runtime")?;
-    rt.block_on(tokio::signal::ctrl_c())
-        .context("waiting for ctrl-c")?;
+    rt.block_on(async {
+        tokio::select! {
+            _ = int.recv() => {}
+            _ = term.recv() => {}
+            _ = hup.recv() => {}
+        }
+    });
     server.stop()?;
     Ok(true)
 }

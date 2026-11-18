@@ -604,8 +604,48 @@ fn dev_listing() -> String {
     out
 }
 
+/// Exits with `128 + signal` on SIGINT, SIGTERM or SIGHUP, after removing the scratch
+/// directories still alive (see `shapekit_pack::scratch`). Without it a stopped run leaves
+/// every node workdir and archive copy in the temporary directory, since a process ended by
+/// a signal drops nothing. `serve` stops its server on these signals itself instead.
+fn exit_cleanly_on_signals() -> std::io::Result<()> {
+    use tokio::signal::unix::{SignalKind, signal};
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_io()
+        .build()?;
+    // registered before any work starts, so no signal can still find the default action
+    let (mut int, mut term, mut hup) = {
+        let _in_runtime = rt.enter();
+        (
+            signal(SignalKind::interrupt())?,
+            signal(SignalKind::terminate())?,
+            signal(SignalKind::hangup())?,
+        )
+    };
+    std::thread::spawn(move || {
+        let code = rt.block_on(async {
+            tokio::select! {
+                _ = int.recv() => 130,
+                _ = term.recv() => 143,
+                _ = hup.recv() => 129,
+            }
+        });
+        for f in shapekit_pack::scratch::remove_all() {
+            eprintln!("shapekit: could not remove {f}");
+        }
+        std::process::exit(code);
+    });
+    Ok(())
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    if !matches!(cli.command, Command::Serve(_))
+        && let Err(e) = exit_cleanly_on_signals()
+    {
+        eprintln!("error: installing the signal handler: {e}");
+        return ExitCode::from(2);
+    }
     let result = match cli.command {
         Command::Pins {
             command: PinsCommand::Verify { file, jobs },
