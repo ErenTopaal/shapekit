@@ -376,7 +376,58 @@ pub fn build(
     for p in ledger.problems() {
         problems.push(Problem::new(at("ledger"), p));
     }
+    problems.extend(dangling_witnesses(&ledger, root, corpus)?);
     Ok((ledger, problems))
+}
+
+/// Every witness must name something that exists: an entry of the corpus or candidate
+/// manifest, a chain directory under corpus/chains or candidate/chains, or a recipe or dataset
+/// file. A move of a recipe or chain that left a witness behind fails here.
+fn dangling_witnesses(
+    ledger: &ObligationLedger,
+    root: &Path,
+    corpus: &Path,
+) -> Result<Vec<Problem>, CoverageError> {
+    let ids = |manifest: &Path| -> Result<std::collections::BTreeSet<String>, CoverageError> {
+        if !manifest.is_file() {
+            return Ok(Default::default());
+        }
+        let m = shapekit_manifest::build::load(manifest).map_err(|e| parse(manifest, e))?;
+        Ok(m.entries.into_iter().map(|e| e.id).collect())
+    };
+    let entries = ids(&corpus.join("manifest.json"))?;
+    let candidates = ids(&root.join("candidate/manifest.json"))?;
+    let mut checked: BTreeMap<String, bool> = BTreeMap::new();
+    let mut problems = Vec::new();
+    for o in &ledger.obligations {
+        for w in &o.witnesses {
+            let Ok(r) = WitnessRef::parse(w) else {
+                // a malformed witness is already a ledger problem
+                continue;
+            };
+            let exists = *checked.entry(w.clone()).or_insert_with(|| match &r {
+                WitnessRef::Entry(id) => entries.contains(id),
+                WitnessRef::Candidate(id) => candidates.contains(id),
+                WitnessRef::Chain(id) => {
+                    corpus.join("chains").join(id).is_dir()
+                        || root.join("candidate/chains").join(id).is_dir()
+                }
+                // a recipe witness may name the protocol it ran at after an @
+                WitnessRef::Recipe(path) => {
+                    let file = path.rsplit_once('@').map_or(path.as_str(), |(f, _)| f);
+                    root.join(file).is_file()
+                }
+                WitnessRef::Dataset(path) => root.join(path).is_file(),
+            });
+            if !exists {
+                problems.push(Problem::new(
+                    format!("obligation {}", o.id),
+                    format!("witness {w} names nothing that exists"),
+                ));
+            }
+        }
+    }
+    Ok(problems)
 }
 
 /// The committed text: one obligation per line, so the file stays small and diffs stay

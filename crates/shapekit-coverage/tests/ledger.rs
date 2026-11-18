@@ -125,6 +125,8 @@ fn every_fragment_must_be_listed_and_entry_ids_need_a_ledger_kind() {
 fn every_gate_contributes_both_sides() {
     let dir = layout(&[], LISTED);
     let root = dir.path();
+    // a witness must name a chain that exists
+    fs::create_dir_all(root.join("corpus/chains/cap40.signed-payload-signer.p18")).unwrap();
     fs::create_dir_all(root.join("registry/generated")).unwrap();
     fs::write(
         root.join("registry/generated/gates.json"),
@@ -245,6 +247,62 @@ fn a_chain_id_under_both_corpus_and_candidate_is_ambiguous() {
     assert_eq!(text.len(), 1, "{text:#?}");
     assert!(
         text[0].contains(&id) && text[0].contains("ambiguous"),
+        "{text:#?}"
+    );
+}
+
+#[test]
+fn a_witness_naming_a_moved_recipe_or_chain_is_a_problem() {
+    let dir = layout(
+        &[],
+        &[
+            "conformance/seed-check/js.obligations.json",
+            "conformance/w.obligations.json",
+        ],
+    );
+    let root = dir.path();
+    fs::create_dir_all(root.join("candidate/recipes/explore.witnesses/g2")).unwrap();
+    fs::write(
+        root.join("candidate/recipes/explore.witnesses/g2/r0000.json"),
+        "{}",
+    )
+    .unwrap();
+    fs::create_dir_all(root.join("corpus/chains/explore.g2.r0000")).unwrap();
+    let fragment = |recipe: &str, chain: &str| {
+        format!(
+            r#"{{"schema_version":1,"obligations":[{{"id":"seed:js@17.4.0:w","kind":"seed","status":"met","witnesses":["chain:{chain}","recipe:{recipe}@p23"]}}]}}"#
+        )
+    };
+    let write = |recipe: &str, chain: &str| {
+        fs::write(
+            root.join("conformance/w.obligations.json"),
+            fragment(recipe, chain),
+        )
+        .unwrap()
+    };
+    write(
+        "candidate/recipes/explore.witnesses/g2/r0000.json",
+        "explore.g2.r0000",
+    );
+    let (_, ok) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    assert!(ok.is_empty(), "{ok:#?}");
+    // the paths before the move of explorer recipes from candidate/recipes/explore/
+    write(
+        "candidate/recipes/explore/g2/r0000.json",
+        "explore.g2.r9999",
+    );
+    let (_, after) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    let text: Vec<String> = after.iter().map(|p| p.to_string()).collect();
+    assert_eq!(text.len(), 2, "{text:#?}");
+    assert!(
+        text.iter().any(|t| t.contains(
+            "recipe:candidate/recipes/explore/g2/r0000.json@p23 names nothing that exists"
+        )),
+        "{text:#?}"
+    );
+    assert!(
+        text.iter()
+            .any(|t| t.contains("chain:explore.g2.r9999 names nothing that exists")),
         "{text:#?}"
     );
 }
