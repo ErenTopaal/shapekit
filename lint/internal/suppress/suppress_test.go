@@ -64,13 +64,36 @@ func TestParseBaseline(t *testing.T) {
 		t.Error("matched a different function")
 	}
 
+	// a finding outside any function is baselined by its message
+	level := `{"version":1,"entries":[{"rule":"IDX002","package":"p","message":"m","issue":"https://x"}]}`
+
+	b, err = ParseBaseline([]byte(level))
+	if err != nil {
+		t.Fatalf("package-level entry: %v", err)
+	}
+
+	if _, ok := b.Match(Record{Rule: "IDX002", Package: "p", Message: "m"}); !ok {
+		t.Error("package-level entry did not match its finding")
+	}
+
+	for _, r := range []Record{
+		{Rule: "IDX002", Package: "p", Message: "other"},
+		{Rule: "IDX002", Package: "p", Function: "f", Message: "m"},
+	} {
+		if _, ok := b.Match(r); ok {
+			t.Errorf("package-level entry matched %+v", r)
+		}
+	}
+
 	bad := map[string]string{
-		"no issue":      `{"version":1,"entries":[{"rule":"IDX003","package":"p","function":"f","issue":""}]}`,
-		"http issue":    `{"version":1,"entries":[{"rule":"IDX003","package":"p","function":"f","issue":"http://x"}]}`,
-		"unknown rule":  `{"version":1,"entries":[{"rule":"IDX004","package":"p","function":"f","issue":"https://x"}]}`,
-		"no function":   `{"version":1,"entries":[{"rule":"IDX003","package":"p","issue":"https://x"}]}`,
-		"wrong version": `{"version":2,"entries":[]}`,
-		"unknown key":   `{"version":1,"entries":[],"extra":true}`,
+		"no issue":                  `{"version":1,"entries":[{"rule":"IDX003","package":"p","function":"f","issue":""}]}`,
+		"http issue":                `{"version":1,"entries":[{"rule":"IDX003","package":"p","function":"f","issue":"http://x"}]}`,
+		"unknown rule":              `{"version":1,"entries":[{"rule":"IDX004","package":"p","function":"f","issue":"https://x"}]}`,
+		"no function":               `{"version":1,"entries":[{"rule":"IDX003","package":"p","issue":"https://x"}]}`,
+		"no package":                `{"version":1,"entries":[{"rule":"IDX003","function":"f","issue":"https://x"}]}`,
+		"no package, package level": `{"version":1,"entries":[{"rule":"IDX003","message":"m","issue":"https://x"}]}`,
+		"wrong version":             `{"version":2,"entries":[]}`,
+		"unknown key":               `{"version":1,"entries":[],"extra":true}`,
 	}
 
 	for name, src := range bad {

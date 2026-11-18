@@ -28,7 +28,8 @@ type Baseline struct {
 
 // Entry matches findings by rule, package and function. Line numbers are
 // left out on purpose: they move with every unrelated edit. Message is
-// optional; when set it has to match exactly.
+// optional; when set it has to match exactly. An entry without a function
+// matches a finding outside any function and then needs its message.
 type Entry struct {
 	Rule     string `json:"rule"`
 	Package  string `json:"package"`
@@ -59,8 +60,15 @@ func ParseBaseline(data []byte) (*Baseline, error) {
 			errs = append(errs, fmt.Errorf("entry %d: %w", i, err))
 		}
 
-		if e.Package == "" || e.Function == "" {
-			errs = append(errs, fmt.Errorf("entry %d: package and function are required", i))
+		if e.Package == "" {
+			errs = append(errs, fmt.Errorf("entry %d: package is required", i))
+		}
+
+		// a finding outside any function (a package-level declaration) has no
+		// function to match; its message stands in, so such an entry cannot
+		// accept every package-level finding of the rule at once
+		if e.Function == "" && e.Message == "" {
+			errs = append(errs, fmt.Errorf("entry %d: function is required, or for a finding outside any function its message", i))
 		}
 
 		if !strings.HasPrefix(e.Issue, "https://") {
