@@ -19,7 +19,7 @@ Only core-emitted entries count as coverage: `core-golden`, `local-core`, `testn
 | Arms uncovered | 63 |
 | Uncovered arms by blocker | refused-before-ledger 47, old-protocol-only 1, history-only 2, not-producible-locally 2, never-emitted 11 |
 | Family fragments covered | 318 of 328 in 41 families |
-| Fields core does not fully validate, exercised | 29 of 29 |
+| Fields core does not fully validate, exercised | 30 of 30 |
 
 ## Blockers
 
@@ -936,6 +936,7 @@ Records of `registry/uncovered.toml` that entries of `candidate/manifest.json` s
 | `op.clawback.from.mux_id` | `ClawbackOp.from(KEY_TYPE_MUXED_ED25519).med25519.id` | no | 2 | 2 | local-core 2 |
 | `op.begin_sponsoring.sponsored_id` | `BeginSponsoringFutureReservesOp.sponsoredID` | partial | 5 | 5 | local-core 5 |
 | `op.invoke_host_function.invoke_contract.args` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_INVOKE_CONTRACT).invokeContract.args` | partial | 59 | 40 | local-core 40, synthetic 19 |
+| `op.invoke_host_function.create_contract.preimage` | `InvokeHostFunctionOp.hostFunction(HOST_FUNCTION_TYPE_CREATE_CONTRACT\|HOST_FUNCTION_TYPE_CREATE_CONTRACT_V2).{createContract,createContractV2}.contractIDPreimage` | partial | 8 | 8 | local-core 8 |
 | `op.invoke_host_function.auth` | `InvokeHostFunctionOp.auth` | partial | 22 | 19 | local-core 19, local-core-refused 1, synthetic 2 |
 | `auth.credentials.address.address` | `SorobanAddressCredentials.address` | partial | 14 | 13 | local-core 13, local-core-refused 1 |
 | `auth.credentials.address.nonce` | `SorobanAddressCredentials.nonce` | partial | 14 | 13 | local-core 13, local-core-refused 1 |
