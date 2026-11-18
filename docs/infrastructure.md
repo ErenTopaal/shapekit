@@ -181,7 +181,7 @@ These are the only commands that use the network, each only when run explicitly:
 | `shapekit conformance file-issues` | GitHub, through `gh` | opens the drafted issues upstream; it refuses to run without the `--confirm` flag |
 | `shapekit conformance run` and `reproduce`, and `shapekit fuzz`, unless `--no-build` | crates.io, the Go module proxy, the npm registry, pub.dev, Packagist and NuGet, through `cargo`, `go`, `npm`, `flutter pub`, `composer` and `dotnet` | the build steps in `conformance/versions.toml` fetch the pinned SDK versions; running the testees is offline |
 | `shapekit audit run`, `shapekit audit watch` and `shapekit audit newest`, unless `--lake <dir>` | the public SEP-54 data lake (`aws-public-blockchain`, us-east-2): `.config.json`, bucket listings for the newest ledger and the testnet prefix, and one object per ledger checked | checks the law book on public ledgers; objects are streamed and never written to disk. With `--sdk`, the SDK's build steps from `conformance/versions.toml` fetch packages unless `--no-build` is given |
-| `wb-adapter` (used by `shapekit harness`) | GitHub and the image registries, on first use of a commit | clones wallet-backend and builds its image; later runs reuse both and are offline |
+| `wb-adapter` (used by `shapekit harness`) | GitHub and the image registries, on first use of a commit | fetches that wallet-backend commit and builds its image; later runs reuse both and are offline |
 
 Everything else (`gen`, `manifest`, `registry`, `synth`, `oracle`, `goldens`, `coverage`,
 `guide`, `pack`, `corpus pack`, `serve`, `harness run` once images exist, `indexerlint`,

@@ -687,8 +687,9 @@ shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit ha
 ```
 
 `--commit` is required and takes a full 40-character lowercase commit hash. `--repo` names a
-wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`, cloned from
-github.com/stellar/wallet-backend on first use); `--db-memory` caps the database container
+wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`, created on first
+use with only the commits you run, each fetched from github.com/stellar/wallet-backend at
+depth 1; a full clone you name stays full); `--db-memory` caps the database container
 (default 1 GiB); `--cpus` passes docker's `--cpus` to every container it starts (default: no
 limit). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes, `dump` (every
 base table of the database's `public` schema, rows ordered by every column) and `restart`

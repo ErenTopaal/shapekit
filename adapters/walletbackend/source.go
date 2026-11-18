@@ -36,26 +36,59 @@ func (s source) git(ctx context.Context, args ...string) ([]byte, error) {
 	return stdout.Bytes(), nil
 }
 
-// ensure makes sure the clone exists and holds commit.
+// ensure makes sure the clone exists and holds commit. A clone the adapter
+// creates fetches only the commits it is asked for, at depth 1: the adapter
+// reads nothing but a commit's tree, and a full clone (over 200 MB) can take
+// longer than the harness gives describe. A full clone passed with --repo stays
+// full.
 func (s source) ensure(ctx context.Context, commit string) error {
 	if _, err := os.Stat(filepath.Join(s.dir, ".git")); os.IsNotExist(err) {
-		if err := os.MkdirAll(filepath.Dir(s.dir), 0o750); err != nil {
-			return fmt.Errorf("creating %s: %w", filepath.Dir(s.dir), err)
-		}
-		cmd := exec.CommandContext(ctx, "git", "clone", "--quiet", s.url, s.dir) //nolint:gosec // git is the fixed program; url is a constant and dir the operator's --repo
-		cmd.Stdout = os.Stderr
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("cloning %s: %w", s.url, err)
-		}
+		return s.create(ctx, commit)
 	} else if err != nil {
 		return fmt.Errorf("checking %s: %w", s.dir, err)
 	}
 	if _, err := s.git(ctx, "cat-file", "-e", commit+"^{commit}"); err == nil {
 		return nil
 	}
-	if _, err := s.git(ctx, "fetch", "--quiet", "origin", commit); err != nil {
+	args := []string{"fetch", "--quiet", "origin", commit}
+	shallow, err := s.git(ctx, "rev-parse", "--is-shallow-repository")
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(string(shallow)) == "true" {
+		args = append(args, "--depth", "1")
+	}
+	if _, err := s.git(ctx, args...); err != nil {
 		return fmt.Errorf("commit %s is not in %s and could not be fetched: %w", commit, s.dir, err)
+	}
+	return nil
+}
+
+// create makes a clone holding only commit, at depth 1. It is fetched under a
+// temporary name and renamed into place, so a run stopped halfway leaves no
+// directory that looks like a clone.
+func (s source) create(ctx context.Context, commit string) error {
+	parent := filepath.Dir(s.dir)
+	if err := os.MkdirAll(parent, 0o750); err != nil {
+		return fmt.Errorf("creating %s: %w", parent, err)
+	}
+	tmp, err := os.MkdirTemp(parent, "."+filepath.Base(s.dir)+"-")
+	if err != nil {
+		return fmt.Errorf("creating a directory in %s: %w", parent, err)
+	}
+	defer os.RemoveAll(tmp) //nolint:errcheck // a no-op after the rename; otherwise it drops the partial fetch
+	staged := source{dir: tmp, url: s.url}
+	for _, args := range [][]string{
+		{"init", "--quiet"},
+		{"remote", "add", "origin", s.url},
+		{"fetch", "--quiet", "--depth", "1", "origin", commit},
+	} {
+		if _, err := staged.git(ctx, args...); err != nil {
+			return fmt.Errorf("fetching %s from %s: %w", commit, s.url, err)
+		}
+	}
+	if err := os.Rename(tmp, s.dir); err != nil {
+		return fmt.Errorf("moving the new clone to %s: %w", s.dir, err)
 	}
 	return nil
 }
