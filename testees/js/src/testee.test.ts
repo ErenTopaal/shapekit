@@ -28,15 +28,23 @@ function layout(sdkDir: string): string {
 }
 
 async function exchange(program: string, lines: string[]): Promise<Reply[]> {
-  const child = spawn(process.execPath, [program], { stdio: ["pipe", "pipe", "inherit"] });
+  const child = spawn(process.execPath, [program], { stdio: ["pipe", "pipe", "pipe"] });
   let out = "";
+  let err = "";
   child.stdout.setEncoding("utf8");
   child.stdout.on("data", (chunk: string) => {
     out += chunk;
   });
+  child.stderr.setEncoding("utf8");
+  child.stderr.on("data", (chunk: string) => {
+    err += chunk;
+  });
+  // a testee that exits before reading all its input must fail the assertion below with its
+  // stderr, not crash the test process with an unhandled EPIPE
+  child.stdin.on("error", () => {});
   child.stdin.end(lines.map((l) => `${l}\n`).join(""));
-  const [code] = await once(child, "close");
-  assert.equal(code, 0);
+  const [code, signal] = await once(child, "close");
+  assert.equal(code, 0, `the testee exited with ${code ?? signal}; its stderr:\n${err}`);
   return out
     .split("\n")
     .filter((line) => line !== "")
