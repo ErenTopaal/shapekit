@@ -172,11 +172,13 @@ fn gap_rows(registry: &Path) -> Result<Vec<(String, String, Option<String>)>, Co
     if !dir.is_dir() {
         return Ok(out);
     }
-    let mut files: Vec<PathBuf> = std::fs::read_dir(&dir)
-        .map_err(io(&dir))?
-        .filter_map(|e| e.ok().map(|e| e.path()))
-        .filter(|p| p.extension().is_some_and(|x| x == "toml"))
-        .collect();
+    let mut files = Vec::new();
+    for e in std::fs::read_dir(&dir).map_err(io(&dir))? {
+        let path = e.map_err(io(&dir))?.path();
+        if path.extension().is_some_and(|x| x == "toml") {
+            files.push(path);
+        }
+    }
     files.sort();
     for path in files {
         let text = std::fs::read_to_string(&path).map_err(io(&path))?;
@@ -238,18 +240,25 @@ pub fn build(
     let at = |what: &str| format!("obligations ({what})");
     // a `chain:<id>` witness names a directory under corpus/chains or candidate/chains, so
     // one id must not be in both
-    let chain_ids = |dir: PathBuf| -> Vec<String> {
-        std::fs::read_dir(dir)
-            .map(|rd| {
-                rd.filter_map(|e| e.ok())
-                    .filter(|e| e.path().is_dir())
-                    .filter_map(|e| e.file_name().into_string().ok())
-                    .collect()
-            })
-            .unwrap_or_default()
+    // a tree without chains has none to compare; any other failure to list them is an error,
+    // not an empty list
+    let chain_ids = |dir: PathBuf| -> Result<Vec<String>, CoverageError> {
+        let rd = match std::fs::read_dir(&dir) {
+            Ok(rd) => rd,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(e) => return Err(io(&dir)(e)),
+        };
+        let mut ids = Vec::new();
+        for e in rd {
+            let e = e.map_err(io(&dir))?;
+            if e.path().is_dir() {
+                ids.push(e.file_name().to_string_lossy().into_owned());
+            }
+        }
+        Ok(ids)
     };
-    let candidate_chains = chain_ids(root.join("candidate/chains"));
-    for id in chain_ids(corpus.join("chains")) {
+    let candidate_chains = chain_ids(root.join("candidate/chains"))?;
+    for id in chain_ids(corpus.join("chains"))? {
         if candidate_chains.contains(&id) {
             problems.push(Problem::new(
                 format!("chain {id}"),
@@ -319,17 +328,33 @@ pub fn build(
         }
     }
 
+    // gaps whose evidence only says that no entry carries their vectors yet; an entry that
+    // witnesses one makes that untrue, so the evidence is dropped then
+    let mut uncarried = std::collections::BTreeSet::new();
     for (language, id, no_vector) in gap_rows(registry)? {
         let oid = Obligation::id_for(ObligationKind::Gap, &format!("{language}:{id}"));
-        map.entry(oid.clone()).or_insert_with(|| Obligation {
-            id: oid,
-            kind: ObligationKind::Gap,
-            status: ObligationStatus::Open,
-            witnesses: Vec::new(),
-            evidence: Some(no_vector.unwrap_or_else(|| {
-                format!("registry/gaps/{language}.toml has vectors for it, but no corpus or candidate entry carries them")
-            })),
-        });
+        if map.contains_key(&oid) {
+            continue;
+        }
+        let evidence = match no_vector {
+            Some(why) => why,
+            None => {
+                uncarried.insert(oid.clone());
+                format!(
+                    "registry/gaps/{language}.toml has vectors for it, but no corpus or candidate entry carries them"
+                )
+            }
+        };
+        map.insert(
+            oid.clone(),
+            Obligation {
+                id: oid,
+                kind: ObligationKind::Gap,
+                status: ObligationStatus::Open,
+                witnesses: Vec::new(),
+                evidence: Some(evidence),
+            },
+        );
     }
 
     let mut named = entry_obligations(&corpus.join("manifest.json"), "entry")?;
@@ -360,6 +385,9 @@ pub fn build(
             _ => {
                 o.status = ObligationStatus::Met;
                 o.witnesses.push(witness);
+                if uncarried.contains(&oid) {
+                    o.evidence = None;
+                }
             }
         }
     }
@@ -405,6 +433,27 @@ fn dangling_witnesses(
                 // a malformed witness is already a ledger problem
                 continue;
             };
+            // a path witness is joined to the tree, so one that leaves it (an absolute path,
+            // `..`) would be judged by whatever lies outside
+            let path = match &r {
+                WitnessRef::Entry(_) | WitnessRef::Candidate(_) => None,
+                WitnessRef::Chain(id) => Some(id.as_str()),
+                // a recipe witness may name the protocol it ran at after an @
+                WitnessRef::Recipe(path) => {
+                    Some(path.rsplit_once('@').map_or(path.as_str(), |(f, _)| f))
+                }
+                WitnessRef::Dataset(path) => Some(path.as_str()),
+            };
+            if let Some(p) = path
+                && (!shapekit_manifest::is_safe_relative(p)
+                    || matches!(r, WitnessRef::Chain(_)) && p.contains('/'))
+            {
+                problems.push(Problem::new(
+                    format!("obligation {}", o.id),
+                    format!("witness {w} is not a plain path inside the repository"),
+                ));
+                continue;
+            }
             let exists = *checked.entry(w.clone()).or_insert_with(|| match &r {
                 WitnessRef::Entry(id) => entries.contains(id),
                 WitnessRef::Candidate(id) => candidates.contains(id),
@@ -412,12 +461,9 @@ fn dangling_witnesses(
                     corpus.join("chains").join(id).is_dir()
                         || root.join("candidate/chains").join(id).is_dir()
                 }
-                // a recipe witness may name the protocol it ran at after an @
-                WitnessRef::Recipe(path) => {
-                    let file = path.rsplit_once('@').map_or(path.as_str(), |(f, _)| f);
-                    root.join(file).is_file()
+                WitnessRef::Recipe(_) | WitnessRef::Dataset(_) => {
+                    root.join(path.expect("a path witness")).is_file()
                 }
-                WitnessRef::Dataset(path) => root.join(path).is_file(),
             });
             if !exists {
                 problems.push(Problem::new(

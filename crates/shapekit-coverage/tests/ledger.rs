@@ -74,6 +74,8 @@ fn entries_meet_what_they_name_and_gap_rows_become_obligations() {
     });
     assert_eq!(by("gap:js:nan").status, ObligationStatus::Met);
     assert_eq!(by("gap:js:nan").witnesses, vec![entry.clone()]);
+    // an entry carries its vectors now, so the evidence that none does is gone
+    assert_eq!(by("gap:js:nan").evidence, None);
     assert_eq!(by("gap:js:lone-surrogate").status, ObligationStatus::Open);
     assert_eq!(
         by("gap:js:lone-surrogate").evidence.as_deref(),
@@ -303,6 +305,35 @@ fn a_witness_naming_a_moved_recipe_or_chain_is_a_problem() {
     assert!(
         text.iter()
             .any(|t| t.contains("chain:explore.g2.r9999 names nothing that exists")),
+        "{text:#?}"
+    );
+}
+
+#[test]
+fn a_path_witness_outside_the_repository_is_a_problem() {
+    let dir = layout(
+        &[],
+        &[
+            "conformance/seed-check/js.obligations.json",
+            "conformance/w.obligations.json",
+        ],
+    );
+    let root = dir.path();
+    // each names a file or directory that exists, but outside the tree it is joined to
+    fs::write(dir.path().join("outside.json"), "{}").unwrap();
+    fs::create_dir_all(root.join("corpus/chains/inner")).unwrap();
+    fs::write(
+        root.join("conformance/w.obligations.json"),
+        r#"{"schema_version":1,"obligations":[{"id":"seed:js@17.4.0:w","kind":"seed","status":"met","witnesses":["chain:../chains/inner","dataset:corpus/../../outside.json","recipe:/etc/hostname@p23"]}]}"#,
+    )
+    .unwrap();
+    let (_, problems) = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap();
+    let text: Vec<String> = problems.iter().map(|p| p.to_string()).collect();
+    assert_eq!(
+        text.iter()
+            .filter(|t| t.contains("is not a plain path inside the repository"))
+            .count(),
+        3,
         "{text:#?}"
     );
 }
