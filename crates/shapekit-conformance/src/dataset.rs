@@ -23,9 +23,9 @@ use shapekit_contracts::obligations::{
 };
 use stellar_xdr::{Limits, ReadXdr, TransactionMeta, WriteXdr};
 
-use crate::compare::{self, Judged, ResultClass};
+use crate::compare::{self, FailureKind, Judged, ResultClass, Verdict};
 use crate::plan::Expect;
-use crate::testee::Testee;
+use crate::testee::{Failure, Reply, Testee};
 use crate::versions::{self, Target, VersionsFile};
 
 const TYPE: &str = "TransactionMeta";
@@ -140,11 +140,46 @@ fn request(bytes: &[u8]) -> Map<String, Value> {
     m
 }
 
-/// What one testee made of one meta: the result class and the testee's answer in short.
-fn judge(testee: &mut Testee, bytes: &[u8]) -> Result<(ResultClass, Option<String>, Value)> {
+/// How a meta failed, as specific as the answer allows: the result, its kind of failure, and
+/// the form of the reply (other bytes, a refusal, an error class, no reply). Shrinking keeps a
+/// smaller meta only when its shape is the same, so a meta that was dropped by writing other
+/// bytes is not shrunk into one the sdk refuses or crashes on.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Shape {
+    pub result: ResultClass,
+    pub failure: Option<FailureKind>,
+    pub reply: String,
+}
+
+impl Shape {
+    /// The shape of a reply and the verdict judged on it.
+    pub fn of(answer: &Result<Reply, Failure>, v: &Verdict) -> Shape {
+        let reply = match answer {
+            Err(_) => "no reply".to_string(),
+            Ok(Reply::Unsupported(_)) => "unsupported".to_string(),
+            Ok(Reply::Error { class, .. }) => class.as_str().to_string(),
+            Ok(Reply::Ok(r)) => {
+                let keys: Vec<&str> = r
+                    .as_object()
+                    .map(|o| o.keys().map(String::as_str).collect())
+                    .unwrap_or_default();
+                format!("ok {}", keys.join(","))
+            }
+        };
+        Shape {
+            result: v.result,
+            failure: v.failure,
+            reply,
+        }
+    }
+}
+
+/// What one testee made of one meta: its failure shape (a pass when it wrote the same bytes
+/// back) and the verdict's detail.
+fn judge(testee: &mut Testee, bytes: &[u8]) -> Result<(Shape, Option<String>)> {
     let answer = testee.request(request(bytes))?;
     match compare::judge(&Expect::Bytes(B64.encode(bytes)), &answer) {
-        Judged::Done(v) => Ok((v.result, v.detail, v.actual)),
+        Judged::Done(v) => Ok((Shape::of(&answer, &v), v.detail)),
         Judged::Peer(_) => unreachable!("a byte expectation is never judged by peers"),
     }
 }
@@ -173,6 +208,11 @@ pub struct TargetResult {
     pub beyond_protocol: usize,
     pub sections_passing: usize,
     pub dropped: Vec<Dropped>,
+    /// The distinct metas the version decoded and wrote back unchanged: what a section is
+    /// judged on, since a meta answered unsupported or failing beyond the version's protocol
+    /// was not round-tripped either. Left out of the report, which counts them in `results`.
+    #[serde(skip)]
+    pub round_tripped: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -214,9 +254,9 @@ fn targets(opts: &DatasetOptions) -> Result<Vec<Target>> {
         .collect()
 }
 
-/// Shrinks a dropped meta while the testee still gives it `class` and the same answer shape:
-/// whole operations, then single changes and events, are removed while the meta still encodes.
-fn shrink(testee: &mut Testee, bytes: &[u8], class: ResultClass) -> Result<Vec<u8>> {
+/// Shrinks a dropped meta while the testee still fails on it with the same `shape`: whole
+/// operations, then single changes and events, are removed while the meta still encodes.
+fn shrink(testee: &mut Testee, bytes: &[u8], shape: &Shape) -> Result<Vec<u8>> {
     let Ok(mut meta) = TransactionMeta::from_xdr(bytes, Limits::none()) else {
         // stellar-xdr itself cannot read it, so there is no structure to remove from
         return Ok(bytes.to_vec());
@@ -236,7 +276,7 @@ fn shrink(testee: &mut Testee, bytes: &[u8], class: ResultClass) -> Result<Vec<u
                 continue;
             }
             calls += 1;
-            if judge(testee, &b)?.0 == class {
+            if judge(testee, &b)?.0 == *shape {
                 best = b;
                 meta = cand;
                 improved = true;
@@ -351,14 +391,19 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
         }
         let mut testee = Testee::start(&opts.root, target)?;
         let mut counts: BTreeMap<ResultClass, usize> = BTreeMap::new();
-        let mut failed: BTreeMap<String, (ResultClass, Option<String>)> = BTreeMap::new();
+        let mut failed: BTreeMap<String, (Shape, Option<String>)> = BTreeMap::new();
+        let mut round_tripped: BTreeSet<String> = BTreeSet::new();
         let mut beyond = 0;
         for (i, sha) in data.metas.keys().enumerate() {
             if i % 5000 == 0 {
                 eprintln!("{}: {i} of {} metas", target.key(), data.metas.len());
             }
             let bytes = data.bytes(sha)?;
-            let (class, detail, _) = judge(&mut testee, &bytes)?;
+            let (shape, detail) = judge(&mut testee, &bytes)?;
+            let class = shape.result;
+            if class == ResultClass::Pass {
+                round_tripped.insert(sha.clone());
+            }
             // a meta from a section that names no protocol is from core's current one
             let newer = match (target.max_protocol, data.protocol(sha)) {
                 (Some(max), Some(p)) => p > max,
@@ -373,22 +418,17 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
             // a testee without the type or op answers unsupported: a gap in the testee, not
             // the sdk dropping the meta
             if class != ResultClass::Pass && class != ResultClass::Unsupported {
-                failed.insert(sha.clone(), (class, detail));
+                failed.insert(sha.clone(), (shape, detail));
             }
         }
-        let unsupported = counts.get(&ResultClass::Unsupported).copied().unwrap_or(0);
-        let sections_passing = if unsupported > 0 {
-            0
-        } else {
-            sections
-                .values()
-                .filter(|shas| shas.iter().all(|s| !failed.contains_key(s)))
-                .count()
-        };
+        let sections_passing = sections
+            .values()
+            .filter(|shas| shas.iter().all(|s| round_tripped.contains(s)))
+            .count();
         let mut dropped = Vec::new();
-        for (sha, (class, detail)) in &failed {
+        for (sha, (shape, detail)) in &failed {
             let bytes = data.bytes(sha)?;
-            let small = shrink(&mut testee, &bytes, *class)?;
+            let small = shrink(&mut testee, &bytes, shape)?;
             let recs: Vec<&IndexRecord> =
                 data.metas[sha].iter().map(|&i| &data.records[i]).collect();
             let entry = write_candidate(
@@ -396,7 +436,7 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
                 target,
                 sha,
                 &small,
-                (*class, detail.as_deref()),
+                (shape.result, detail.as_deref()),
                 recs[0],
                 data.current_protocol(),
             )?;
@@ -423,6 +463,7 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
             beyond_protocol: beyond,
             sections_passing,
             dropped,
+            round_tripped,
         });
     }
     let core_image = std::fs::read_to_string(opts.dataset.join("convert.json"))
@@ -466,31 +507,26 @@ pub fn run(opts: &DatasetOptions) -> Result<DatasetReport> {
 }
 
 /// One `core-test-section` obligation per section. A section is met when every sdk version
-/// the run covered round-tripped every distinct meta of the section; its witness is the run's
-/// committed report (`witness`, `dataset:<path>`) and its evidence names those versions. A
-/// section some version fails stays open, and the evidence names the failing versions and
-/// how many of the section's metas they got through.
+/// the run covered round-tripped every distinct meta of the section (`round_tripped`: a meta
+/// answered unsupported or failing beyond the version's protocol does not count); its witness
+/// is the run's committed report (`witness`, `dataset:<path>`) and its evidence names those
+/// versions. A section some version did not round-trip stays open, and the evidence names
+/// those versions and how many of the section's metas they got through.
 pub fn obligations(
     report: &DatasetReport,
     sections: &BTreeMap<(String, String), BTreeSet<String>>,
     witness: &str,
 ) -> ObligationLedger {
-    let failing: Vec<(String, BTreeSet<&str>)> = report
-        .targets
-        .iter()
-        .map(|t| {
-            (
-                t.key.clone(),
-                t.dropped.iter().map(|d| d.sha256.as_str()).collect(),
-            )
-        })
-        .collect();
     let mut out = Vec::new();
     for ((file, section), shas) in sections {
         let mut passing = Vec::new();
         let mut failed = Vec::new();
-        for (k, f) in &failing {
-            let bad = shas.iter().filter(|s| f.contains(s.as_str())).count();
+        for t in &report.targets {
+            let k = &t.key;
+            let bad = shas
+                .iter()
+                .filter(|s| !t.round_tripped.contains(*s))
+                .count();
             if bad == 0 {
                 passing.push(k.as_str());
             } else {
@@ -778,6 +814,7 @@ mod tests {
                     shrunk_bytes: 4,
                     entry: None,
                 }],
+                round_tripped: BTreeSet::from(["x".to_string()]),
             }],
         };
         let w = "dataset:conformance/dataset/dataset-report.json";
@@ -793,6 +830,7 @@ mod tests {
         // without the failing meta both sections are met through the report
         let mut clean = report.clone();
         clean.targets[0].dropped.clear();
+        clean.targets[0].round_tripped.insert("y".to_string());
         let ledger = obligations(&clean, &sections, w);
         assert!(
             ledger
@@ -809,6 +847,60 @@ mod tests {
         );
         use shapekit_contracts::Contract as _;
         assert!(ledger.problems().is_empty());
+
+        // a meta answered unsupported or failing beyond the version's protocol is not dropped,
+        // and not round-tripped either: its sections stay open
+        let mut unanswered = clean.clone();
+        unanswered.targets[0].round_tripped.remove("y");
+        let ledger = obligations(&unanswered, &sections, w);
+        assert!(
+            ledger
+                .obligations
+                .iter()
+                .all(|o| o.status == ObligationStatus::Open && o.witnesses.is_empty())
+        );
+        assert!(
+            ledger.obligations[1]
+                .evidence
+                .as_deref()
+                .unwrap()
+                .contains("not round-tripped by go@v1 0/1")
+        );
+    }
+
+    // a meta dropped by writing other bytes and one the sdk refuses fail alike, but are not
+    // the same failure, so shrinking one must not turn it into the other
+    #[test]
+    fn failure_shapes_tell_failures_of_one_result_apart() {
+        let expect = Expect::Bytes("AAAA".into());
+        let shape = |answer: Result<Reply, Failure>| match compare::judge(&expect, &answer) {
+            Judged::Done(v) => Shape::of(&answer, &v),
+            Judged::Peer(_) => unreachable!(),
+        };
+        let other_bytes = shape(Ok(Reply::Ok(json!({"xdr": "AAAB"}))));
+        let more_bytes = shape(Ok(Reply::Ok(json!({"xdr": "AAAC"}))));
+        let refused = shape(Ok(Reply::Error {
+            class: crate::testee::ErrorClass::Rejected,
+            message: "bad arm".into(),
+        }));
+        let crashed = shape(Ok(Reply::Error {
+            class: crate::testee::ErrorClass::Panic,
+            message: "boom".into(),
+        }));
+        for s in [&other_bytes, &refused, &crashed] {
+            assert_eq!(s.result, ResultClass::DivergesFromNetwork);
+        }
+        assert_eq!(other_bytes, more_bytes);
+        assert_ne!(other_bytes, refused);
+        assert_ne!(other_bytes, crashed);
+        assert_ne!(refused, crashed);
+        let timeout = shape(Err(Failure::Timeout { ms: 1 }));
+        let died = shape(Err(Failure::Exited {
+            status: "signal 9".into(),
+            stderr: String::new(),
+        }));
+        assert_eq!(timeout.result, died.result);
+        assert_ne!(timeout, died);
     }
 
     #[test]
