@@ -221,6 +221,38 @@ fn paths_cannot_leave_the_corpus() {
     );
 }
 
+// an interrupted entry rewrite or golden import leaves its staging directory behind; it
+// holds a copy of an entry, which is not a second definition of it
+#[test]
+fn build_skips_staging_directories_under_entries() {
+    let dir = tempfile::tempdir().unwrap();
+    copy_dir(&fixtures().join("sample"), dir.path());
+    let committed = fs::read_to_string(dir.path().join("manifest.json")).unwrap();
+    let parsed: Manifest = serde_json::from_str(&committed).unwrap();
+    let entry = fs::read_dir(dir.path().join("entries"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .flat_map(|family| fs::read_dir(family).unwrap())
+        .map(|e| e.unwrap().path().join("entry.json"))
+        .find(|p| p.is_file())
+        .expect("the sample corpus holds an entry");
+    let family = entry.parent().unwrap().parent().unwrap();
+    for staging in [
+        family.join(".staged-x"),
+        dir.path().join("entries/.golden-import-x/0/entry"),
+    ] {
+        fs::create_dir_all(&staging).unwrap();
+        fs::copy(&entry, staging.join("entry.json")).unwrap();
+    }
+    let rebuilt = build::build(
+        dir.path(),
+        &parsed.corpus_version,
+        parsed.generated_with.clone(),
+    )
+    .unwrap();
+    assert_eq!(build::render(&rebuilt), committed);
+}
+
 #[test]
 fn build_rejects_duplicate_ids() {
     let dir = tempfile::tempdir().unwrap();

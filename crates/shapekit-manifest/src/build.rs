@@ -41,7 +41,10 @@ pub enum BuildError {
 }
 
 /// Reads every entry and vector file under `corpus` and returns the manifest, entries sorted
-/// by id. Files are not hashed against the entries here; `validate` does that.
+/// by id. Files are not hashed against the entries here; `validate` does that. A directory
+/// under `entries/` whose name starts with a dot is not read: the tools stage new entries
+/// in such directories (`.staged-*`, `.golden-import-*`) before they move them into place,
+/// and one left by an interrupted run is not a committed entry.
 pub fn build(
     corpus: &Path,
     corpus_version: &str,
@@ -49,7 +52,7 @@ pub fn build(
 ) -> Result<Manifest, BuildError> {
     let mut entries: BTreeMap<String, (String, Entry)> = BTreeMap::new();
 
-    for file in json_files(&corpus.join(ENTRIES_DIR))? {
+    for file in json_files(&corpus.join(ENTRIES_DIR), true)? {
         if file.file_name().and_then(|n| n.to_str()) != Some(ENTRY_FILE) {
             continue;
         }
@@ -80,7 +83,7 @@ pub fn build(
         insert(&mut entries, rel, entry)?;
     }
 
-    for file in json_files(&corpus.join(VECTORS_DIR))? {
+    for file in json_files(&corpus.join(VECTORS_DIR), false)? {
         let rel = relative(corpus, &file)?;
         let bytes = std::fs::read(&file).map_err(|source| BuildError::Read {
             path: file.clone(),
@@ -146,12 +149,20 @@ fn insert(
     Ok(())
 }
 
-fn json_files(dir: &Path) -> Result<Vec<PathBuf>, BuildError> {
+/// Every `.json` file under `dir`, at any depth; with `skip_staging`, none inside a directory
+/// whose name starts with a dot.
+fn json_files(dir: &Path, skip_staging: bool) -> Result<Vec<PathBuf>, BuildError> {
     if !dir.exists() {
         return Ok(Vec::new());
     }
     let mut files = Vec::new();
-    for item in WalkDir::new(dir).sort_by_file_name() {
+    let walk = WalkDir::new(dir).sort_by_file_name().into_iter();
+    for item in walk.filter_entry(|e| {
+        !(skip_staging
+            && e.depth() > 0
+            && e.file_type().is_dir()
+            && e.file_name().to_string_lossy().starts_with('.'))
+    }) {
         let item = item.map_err(|source| BuildError::Walk {
             path: dir.to_path_buf(),
             source,
