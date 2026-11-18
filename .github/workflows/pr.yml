@@ -549,7 +549,7 @@ jobs:
           if [ -f target/conformance-kmp/MATRIX.md ]; then cat target/conformance-kmp/MATRIX.md >>"$GITHUB_STEP_SUMMARY"; fi
 
   stellar-cli:
-    # the stellar-cli testee: rustfmt and clippy of its wrapper, then the corpus through the
+    # the stellar-cli testee: rustfmt, clippy and unit tests of its wrapper, then the corpus through the
     # current release binary, fetched and checked against its pinned sha256 by the build steps
     needs: build
     runs-on: ubuntu-24.04
@@ -570,11 +570,12 @@ jobs:
         with:
           name: shapekit
           path: ${{ runner.temp }}/bin
-      - name: rustfmt and clippy of the stellar-cli testee
+      - name: rustfmt, clippy and unit tests of the stellar-cli testee
         run: |
           set -euo pipefail
           rustfmt --edition 2024 --check testees/stellar-cli/src/*.rs
           cargo clippy --locked --all-targets --manifest-path testees/stellar-cli/Cargo.toml --target-dir target/testees/stellar-cli/testee -- -D warnings
+          cargo test --locked --manifest-path testees/stellar-cli/Cargo.toml --target-dir target/testees/stellar-cli/testee
       - name: conformance run on the current stellar-cli
         run: |
           set -euo pipefail
