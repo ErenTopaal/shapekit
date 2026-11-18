@@ -646,13 +646,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 text.push('\n');
                 std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
             }
-            // no difference among no compared sets says nothing about the field
-            if r.compared == 0 {
-                bail!(
-                    "no set of alike attempts was compared, so the run says nothing about the groups"
-                );
-            }
-            Ok(r.differences.is_empty())
+            free_field_verdict(&r)
         }
         HarnessCommand::Relate(a) => {
             use shapekit_harness::dump::Dump;
@@ -904,24 +898,7 @@ fn state(c: StateCommand) -> Result<bool> {
                 Ok(cs.remove(0))
             };
             let (ca, cb) = (one(&a)?, one(&b)?);
-            let text = std::fs::read_to_string(&pair)
-                .with_context(|| format!("reading {}", pair.display()))?;
-            let v: serde_json::Value = serde_json::from_str(&text)
-                .with_context(|| format!("parsing {}", pair.display()))?;
-            let keys = v
-                .get("entries")
-                .and_then(|e| e.as_array())
-                .with_context(|| format!("{} has no entries", pair.display()))?
-                .iter()
-                .map(|e| route::pair_key(e.get("key").unwrap_or(&serde_json::Value::Null)))
-                .collect::<Result<Vec<_>>>()?;
-            // no entry to compare would pass without showing anything
-            if keys.is_empty() {
-                bail!(
-                    "{} lists no entries, so there is nothing to compare",
-                    pair.display()
-                );
-            }
+            let keys = pair_keys(&pair)?;
             let results = route::pair_check(&ca, &cb, &keys, &m);
             let mut ok = true;
             for r in &results {
@@ -1040,14 +1017,7 @@ fn state(c: StateCommand) -> Result<bool> {
                 .iter()
                 .map(|c| state::check_chain(c, &m, &x))
                 .collect();
-            let (mut ord, mut ord_ok) = (0, 0);
             for r in &results {
-                if r.ordinary {
-                    ord += 1;
-                    if r.state.ok {
-                        ord_ok += 1;
-                    }
-                }
                 println!(
                     "{} ({}): {} rows, {} fields compared, {} mismatched, {} stale, {} missing{}",
                     r.chain,
@@ -1117,8 +1087,12 @@ fn state(c: StateCommand) -> Result<bool> {
                     );
                 }
             }
+            let t = StateTally::of(&results);
             println!(
-                "ordinary chains where the mapping holds: {ord_ok} of {ord}; chains: {}; disagreements with the oracle: {}",
+                "ordinary chains where the mapping holds: {} of {}; ordinary chains that compared no field: {}; chains: {}; disagreements with the oracle: {}",
+                t.held,
+                t.held + t.failed,
+                t.empty,
                 results.len(),
                 results.iter().filter(|r| r.disagreement.is_some()).count()
             );
@@ -1127,24 +1101,172 @@ fn state(c: StateCommand) -> Result<bool> {
                 text.push('\n');
                 std::fs::write(o, text).with_context(|| format!("writing {}", o.display()))?;
             }
-            // the mapping holding on no chain at all says nothing about it
-            if ord == 0 {
-                bail!(
-                    "the runs hold no ordinary chain with a dump{}, so nothing was compared",
-                    network
-                        .as_deref()
-                        .map(|n| format!(" on {n}"))
-                        .unwrap_or_default()
-                );
-            }
-            Ok(ord_ok == ord)
+            t.verdict(network.as_deref())
         }
+    }
+}
+
+/// The verdict of `harness free-field`: no difference among no compared sets says nothing
+/// about the groups, so a run that compared none is an error, not a pass.
+fn free_field_verdict(
+    r: &shapekit_harness::relations::free_field::FreeFieldReport,
+) -> Result<bool> {
+    if r.compared == 0 {
+        bail!("no set of alike attempts was compared, so the run says nothing about the groups");
+    }
+    Ok(r.differences.is_empty())
+}
+
+/// The ledger keys `harness state pair` compares, read from the pair file's `entries`. A
+/// file listing none is an error: comparing nothing would pass without showing anything.
+fn pair_keys(
+    pair: &std::path::Path,
+) -> Result<Vec<(shapekit_harness::relations::state::EntryKind, Vec<String>)>> {
+    use shapekit_harness::relations::route;
+    let text =
+        std::fs::read_to_string(pair).with_context(|| format!("reading {}", pair.display()))?;
+    let v: serde_json::Value =
+        serde_json::from_str(&text).with_context(|| format!("parsing {}", pair.display()))?;
+    let keys = v
+        .get("entries")
+        .and_then(|e| e.as_array())
+        .with_context(|| format!("{} has no entries", pair.display()))?
+        .iter()
+        .map(|e| route::pair_key(e.get("key").unwrap_or(&serde_json::Value::Null)))
+        .collect::<Result<Vec<_>>>()?;
+    if keys.is_empty() {
+        bail!(
+            "{} lists no entries, so there is nothing to compare",
+            pair.display()
+        );
+    }
+    Ok(keys)
+}
+
+/// The ordinary chains of `harness state check`, by what their comparison showed.
+#[derive(Debug, Default, PartialEq, Eq)]
+struct StateTally {
+    /// Ordinary chains in the runs.
+    ordinary: usize,
+    /// The mapping held and at least one field was compared.
+    held: usize,
+    /// The stored state differs from core's.
+    failed: usize,
+    /// The mapping held only because it compared no field (a mapping that maps nothing of
+    /// the chain): not evidence that it holds, so not counted as compared.
+    empty: usize,
+}
+
+impl StateTally {
+    fn of(results: &[shapekit_harness::relations::state::ChainState]) -> StateTally {
+        let mut t = StateTally::default();
+        for r in results.iter().filter(|r| r.ordinary) {
+            t.ordinary += 1;
+            if !r.state.ok {
+                t.failed += 1;
+            } else if r.state.fields_compared == 0 {
+                t.empty += 1;
+            } else {
+                t.held += 1;
+            }
+        }
+        t
+    }
+
+    /// Fails on any ordinary chain whose state differs; holds only when at least one
+    /// ordinary chain compared a field.
+    fn verdict(&self, network: Option<&str>) -> Result<bool> {
+        if self.failed > 0 {
+            return Ok(false);
+        }
+        let on = network.map(|n| format!(" on {n}")).unwrap_or_default();
+        if self.ordinary == 0 {
+            bail!("the runs hold no ordinary chain with a dump{on}, so nothing was compared");
+        }
+        if self.held == 0 {
+            bail!(
+                "the {} ordinary chains with a dump{on} compared no field, so nothing was compared",
+                self.ordinary
+            );
+        }
+        Ok(true)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{NEEDS_LINUX_DOCKER, docker_host, docker_in_a_vm, split_command};
+    use super::{
+        NEEDS_LINUX_DOCKER, StateTally, docker_host, docker_in_a_vm, free_field_verdict,
+        pair_keys, split_command,
+    };
+    use shapekit_harness::relations::free_field::FreeFieldReport;
+    use shapekit_harness::relations::state::{ChainState, StateReport};
+
+    fn chain(ordinary: bool, fields_compared: u64, ok: bool) -> ChainState {
+        ChainState {
+            chain: "c".into(),
+            network: "testnet".into(),
+            ordinary,
+            verdicts: Default::default(),
+            state: StateReport {
+                fields_compared,
+                ok,
+                ..StateReport::default()
+            },
+            route: Default::default(),
+            disagreement: None,
+            problems_outside_state: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn state_check_needs_a_chain_that_compared_a_field() {
+        let err = |results: &[ChainState]| {
+            StateTally::of(results)
+                .verdict(Some("testnet"))
+                .unwrap_err()
+                .to_string()
+        };
+        // no chain, or only chains that are not ordinary
+        assert!(err(&[]).contains("no ordinary chain with a dump on testnet"));
+        assert!(err(&[chain(false, 9, true)]).contains("no ordinary chain"));
+        // a mapping that maps nothing of the only ordinary chain holds on it vacuously
+        let t = StateTally::of(&[chain(true, 0, true)]);
+        assert_eq!((t.held, t.empty), (0, 1));
+        assert!(err(&[chain(true, 0, true)]).contains("compared no field"));
+        // one chain that compared fields is enough; an empty one beside it is not counted
+        let both = [chain(true, 0, true), chain(true, 3, true)];
+        assert_eq!(StateTally::of(&both).held, 1);
+        assert!(StateTally::of(&both).verdict(None).unwrap());
+        // a difference fails, whether or not a field was compared
+        for bad in [chain(true, 3, false), chain(true, 0, false)] {
+            assert!(!StateTally::of(&[bad]).verdict(None).unwrap());
+        }
+    }
+
+    #[test]
+    fn state_pair_needs_an_entry() {
+        let tmp = tempfile::tempdir().unwrap();
+        let pair = tmp.path().join("pair.json");
+        std::fs::write(&pair, r#"{"entries":[]}"#).unwrap();
+        let e = pair_keys(&pair).unwrap_err().to_string();
+        assert!(e.contains("lists no entries"), "{e}");
+        std::fs::write(&pair, r#"{}"#).unwrap();
+        let e = pair_keys(&pair).unwrap_err().to_string();
+        assert!(e.contains("has no entries"), "{e}");
+    }
+
+    #[test]
+    fn free_field_needs_a_compared_set() {
+        let none = FreeFieldReport::default();
+        let e = free_field_verdict(&none).unwrap_err().to_string();
+        assert!(e.contains("no set of alike attempts was compared"), "{e}");
+        let one = FreeFieldReport {
+            compared: 1,
+            ..FreeFieldReport::default()
+        };
+        assert!(free_field_verdict(&one).unwrap());
+    }
 
     #[test]
     fn the_docker_delivery_network_needs_a_linux_host() {
