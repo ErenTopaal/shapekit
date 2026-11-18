@@ -668,9 +668,7 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
-          if "$RUNNER_TEMP/bin/shapekit" findings --help | grep -q import-inputs; then
-            "$RUNNER_TEMP/bin/shapekit" findings import-inputs
-          fi
+          "$RUNNER_TEMP/bin/shapekit" findings import-inputs
       - name: findings check, drafts tolerated
         # --allow-draft passes when the only problems are findings still waiting to be filed;
         # any other problem fails the job
