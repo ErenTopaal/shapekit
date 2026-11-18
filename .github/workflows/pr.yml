@@ -546,6 +546,11 @@ jobs:
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           "$RUNNER_TEMP/bin/shapekit" conformance run --sdk dotnet --out target/conformance-dotnet
+      - name: unit checks of the testee, on the build the run above made
+        run: |
+          set -euo pipefail
+          v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["dotnet"]["current"])' conformance/versions.toml)
+          python3 -I testees/dotnet/tests/check.py "target/testees/dotnet/$v"
       - name: matrix to the job summary
         if: ${{ !cancelled() }}
         run: |
