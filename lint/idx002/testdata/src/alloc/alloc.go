@@ -57,4 +57,63 @@ func constant() map[string]int {
 	return make(map[string]int, maxItems)
 }
 
-var _ = []any{fromU32, fromU64, direct, checked, clamped, fromLen, constant}
+// checkedTooLate compares the count only after it allocated.
+func checkedTooLate(v xdr.ScVal) ([]byte, error) {
+	n := v.MustU32()
+	buf := make([]byte, n) // want `IDX002: make sized by n`
+
+	if n > maxItems {
+		return nil, errTooBig
+	}
+
+	return buf, nil
+}
+
+// otherN compares a different variable that has the same name.
+func otherN(v xdr.ScVal, items []int) ([]byte, error) {
+	n := v.MustU32()
+	if n := len(items); n > maxItems {
+		return nil, errTooBig
+	}
+
+	return make([]byte, n), nil // want `IDX002: make sized by n`
+}
+
+// inOneBranch checks the count only on a path the allocation does not take.
+func inOneBranch(v xdr.ScVal, strict bool) ([]byte, error) {
+	n := v.MustU32()
+	if strict {
+		if n > maxItems {
+			return nil, errTooBig
+		}
+	}
+
+	return make([]byte, n), nil // want `IDX002: make sized by n`
+}
+
+// guarded allocates only inside the branch the check allows.
+func guarded(v xdr.ScVal) []byte {
+	n := v.MustU32()
+	if n <= maxItems {
+		return make([]byte, n)
+	}
+
+	return nil
+}
+
+// switched checks the count in a case expression before the allocation.
+func switched(v xdr.ScVal) ([]byte, error) {
+	n := v.MustU32()
+
+	switch {
+	case n > maxItems:
+		return nil, errTooBig
+	}
+
+	return make([]byte, n), nil
+}
+
+var _ = []any{
+	fromU32, fromU64, direct, checked, clamped, fromLen, constant,
+	checkedTooLate, otherN, inOneBranch, guarded, switched,
+}

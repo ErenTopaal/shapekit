@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"slices"
 
 	"golang.org/x/tools/go/analysis"
 
@@ -18,7 +19,26 @@ type allocScan struct {
 	info *types.Info
 	// decoded maps a local to the source expressions it was derived from
 	decoded map[types.Object][]string
-	checked map[string]bool
+	checks  []check
+}
+
+// check is one operand (or a variable or selector inside one) of an ordered
+// comparison: where the comparison is, and the blocks around it, so that
+// only a comparison that can run before a make counts for it.
+type check struct {
+	key    string
+	pos    token.Pos
+	blocks []ast.Node
+}
+
+// identKey names a variable by its declaration, so that two variables of one
+// name in different scopes are told apart.
+func identKey(name string, obj types.Object) string {
+	if obj == nil {
+		return name
+	}
+
+	return fmt.Sprintf("%s@%d", name, obj.Pos())
 }
 
 func checkAllocations(pass *analysis.Pass, rep *suppress.Reporter) {
@@ -33,7 +53,7 @@ func checkAllocations(pass *analysis.Pass, rep *suppress.Reporter) {
 				continue
 			}
 
-			s := &allocScan{info: pass.TypesInfo, decoded: map[types.Object][]string{}, checked: map[string]bool{}}
+			s := &allocScan{info: pass.TypesInfo, decoded: map[types.Object][]string{}}
 			s.propagate(fd.Body)
 			s.collectChecks(fd.Body)
 			s.report(rep, fd)
@@ -67,7 +87,7 @@ func (s *allocScan) sources(e ast.Expr) []string {
 	case *ast.Ident:
 		if obj := s.info.Uses[x]; obj != nil {
 			if src, ok := s.decoded[obj]; ok {
-				return append([]string{x.Name}, src...)
+				return append([]string{identKey(x.Name, obj)}, src...)
 			}
 		}
 	case *ast.BinaryExpr:
@@ -133,9 +153,20 @@ func (s *allocScan) propagate(body *ast.BlockStmt) {
 }
 
 // collectChecks records every expression that is an operand of an ordered
-// comparison, plus every variable inside one.
+// comparison, plus every variable inside one, with the blocks the
+// comparison sits in.
 func (s *allocScan) collectChecks(body *ast.BlockStmt) {
+	var stack []ast.Node
+
 	ast.Inspect(body, func(x ast.Node) bool {
+		if x == nil {
+			stack = stack[:len(stack)-1]
+
+			return true
+		}
+
+		stack = append(stack, x)
+
 		be, ok := x.(*ast.BinaryExpr)
 		if !ok {
 			return true
@@ -147,17 +178,36 @@ func (s *allocScan) collectChecks(body *ast.BlockStmt) {
 			return true
 		}
 
+		var blocks []ast.Node
+
+		for _, n := range stack {
+			switch n := n.(type) {
+			case *ast.BlockStmt:
+				blocks = append(blocks, n)
+			case *ast.CaseClause:
+				blocks = clause(blocks, n, n.Colon, be.Pos())
+			case *ast.CommClause:
+				blocks = clause(blocks, n, n.Colon, be.Pos())
+			}
+		}
+
+		add := func(key string) {
+			s.checks = append(s.checks, check{key: key, pos: be.Pos(), blocks: blocks})
+		}
+
 		for _, side := range []ast.Expr{be.X, be.Y} {
-			s.checked[types.ExprString(side)] = true
+			if _, isIdent := ast.Unparen(side).(*ast.Ident); !isIdent {
+				add(types.ExprString(side))
+			}
 
 			ast.Inspect(side, func(y ast.Node) bool {
 				switch y := y.(type) {
 				case *ast.Ident:
-					s.checked[y.Name] = true
+					add(identKey(y.Name, s.info.ObjectOf(y)))
 				case *ast.SelectorExpr:
-					s.checked[types.ExprString(y)] = true
+					add(types.ExprString(y))
 				case *ast.CallExpr:
-					s.checked[types.ExprString(y)] = true
+					add(types.ExprString(y))
 				}
 
 				return true
@@ -181,7 +231,7 @@ func (s *allocScan) report(rep *suppress.Reporter, fd *ast.FuncDecl) {
 			}
 
 			src := s.sources(size)
-			if len(src) == 0 || s.anyChecked(src) {
+			if len(src) == 0 || s.anyChecked(src, call) {
 				continue
 			}
 
@@ -194,12 +244,42 @@ func (s *allocScan) report(rep *suppress.Reporter, fd *ast.FuncDecl) {
 	})
 }
 
-func (s *allocScan) anyChecked(src []string) bool {
-	for _, e := range src {
-		if s.checked[e] {
+// clause adds a case clause to the blocks of a comparison in its body. a
+// comparison in the case expression runs before the switch goes on, like an
+// if condition, so neither the clause nor the switch body (the block just
+// before it) holds it in.
+func clause(blocks []ast.Node, n ast.Node, colon, at token.Pos) []ast.Node {
+	if at > colon {
+		return append(blocks, n)
+	}
+
+	return blocks[:len(blocks)-1]
+}
+
+// anyChecked reports whether a comparison of one of src can run before the
+// make: it comes earlier in the source and every block it sits in also holds
+// the make, so it is in a statement before the make or in the head of one
+// around it (an if condition), not in a branch the make is not part of.
+func (s *allocScan) anyChecked(src []string, mk *ast.CallExpr) bool {
+	for _, c := range s.checks {
+		if c.pos >= mk.Pos() || !holdsAll(c.blocks, mk) {
+			continue
+		}
+
+		if slices.Contains(src, c.key) {
 			return true
 		}
 	}
 
 	return false
+}
+
+func holdsAll(blocks []ast.Node, mk *ast.CallExpr) bool {
+	for _, b := range blocks {
+		if mk.Pos() < b.Pos() || mk.End() > b.End() {
+			return false
+		}
+	}
+
+	return true
 }
