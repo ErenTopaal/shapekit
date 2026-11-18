@@ -634,8 +634,14 @@ fn drive_adapter(
         (Ok(out), true) => Ok(out),
         (Ok(_), false) => bail!("{}", cleanup.join("; ")),
         (Err(e), true) => Err(e),
-        (Err(e), false) => Err(e.context(format!("and then: {}", cleanup.join("; ")))),
+        (Err(e), false) => Err(with_cleanup(&e, &cleanup)),
     }
+}
+
+/// The error of a chain whose cleanup failed as well: the chain's own cause first, then what
+/// the cleanup ran into, so the message reads in the order things happened.
+fn with_cleanup(e: &anyhow::Error, cleanup: &[String]) -> anyhow::Error {
+    anyhow!("{e:#}; cleaning up after it also failed: {}", cleanup.join("; "))
 }
 
 /// Takes and writes the dump. A failure is kept on the chain, not raised: the verdicts do
@@ -898,6 +904,17 @@ pub fn logs_dir(out: &Path, round: u32, rounds: u32) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_failed_cleanup_follows_the_chain_error() {
+        let e = anyhow!("start failed (target): no image").context("starting the target");
+        let msg = format!("{:#}", with_cleanup(&e, &["stopping the target: stop failed".into()]));
+        assert_eq!(
+            msg,
+            "starting the target: start failed (target): no image; cleaning up after it also \
+             failed: stopping the target: stop failed"
+        );
+    }
 
     #[test]
     fn checkpoints_must_sit_on_the_frequency() {
