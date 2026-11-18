@@ -76,7 +76,9 @@ shapekit check indexer --adapter "<adapter>" --corpus <corpus> --network <networ
 
 The runner is `ubuntu-24.04`, which has Docker. The harness creates an internal Docker network
 for each chain and the adapter attaches the indexer's containers to it, as
-[adapter-interface.md](adapter-interface.md#transport) describes.
+[adapter-interface.md](adapter-interface.md#transport) describes. Indexer checks run on Linux
+only: on macOS, Docker runs in a VM whose networks the host cannot reach (see
+[Network access](adapter-interface.md#network-access)).
 
 After the run, whether it passed or failed, the job runs [`shapekit report`](report.md) on it,
 from `shapekit/`, with `baseline` (or `expect`) as the baseline when one is given:
@@ -120,7 +122,8 @@ the comment job skips it; the job summary and the artifact are there as usual. W
 
 ## Reproducing a result locally
 
-From a checkout of shapekit at the release tag, with your adapter built:
+On a Linux host with Docker, from a checkout of shapekit at the release tag, with your adapter
+built:
 
 ```sh
 shapekit check indexer --adapter "<path to your adapter>" --chain <chain id>

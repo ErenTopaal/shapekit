@@ -8,7 +8,7 @@ use std::time::Duration;
 use anyhow::Result;
 use clap::{Args, ValueEnum};
 
-use crate::harness_cmd::split_command;
+use crate::harness_cmd::{NEEDS_LINUX_DOCKER, docker_in_a_vm, split_command};
 use crate::pins::{self, Toolchain};
 
 #[derive(Clone, Copy, PartialEq, Eq, ValueEnum)]
@@ -316,7 +316,16 @@ fn sdk(
     }
 }
 
-fn indexer(r: &mut Report, a: &DoctorArgs) {
+// on a host whose docker runs in a vm the delivery network is out of reach, so whether docker
+// answers says nothing about check indexer there, and the linux advice does not apply
+fn docker(r: &mut Report, in_a_vm: bool) {
+    if in_a_vm {
+        r.fail(
+            NEEDS_LINUX_DOCKER,
+            "run check indexer on a Linux host with Docker Engine, as CI does on its Linux runners; --no-docker skips that network, for a target that runs as host processes",
+        );
+        return;
+    }
     if !on_path("docker") {
         r.fail(
             "docker: not found (check indexer runs the target and its replay network in docker)",
@@ -341,6 +350,10 @@ fn indexer(r: &mut Report, a: &DoctorArgs) {
             Err(e) => r.fail(&format!("docker: {e}"), &install_hint("docker", None)),
         }
     }
+}
+
+fn indexer(r: &mut Report, a: &DoctorArgs) {
+    docker(r, docker_in_a_vm());
     if let Some(cmd) = &a.adapter {
         match split_command(cmd) {
             Ok(argv) if on_path(&argv[0]) => r.ok(&format!("adapter: {} found", argv[0])),
@@ -430,4 +443,16 @@ pub fn run(a: DoctorArgs) -> Result<bool> {
     disk(&mut r, Path::new("."));
     println!("doctor: {} missing, {} warning(s)", r.failed, r.warned);
     Ok(r.failed == 0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Report, docker};
+
+    #[test]
+    fn a_docker_vm_host_is_reported_without_asking_docker() {
+        let mut r = Report::default();
+        docker(&mut r, true);
+        assert_eq!((r.failed, r.warned), (1, 0));
+    }
 }

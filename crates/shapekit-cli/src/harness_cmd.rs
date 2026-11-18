@@ -372,6 +372,30 @@ fn options(c: &Common, adapter: Vec<String>, logs: PathBuf) -> Result<RunOptions
     })
 }
 
+/// What `check indexer`, `harness run` and `harness reproduce` say on a host where the docker
+/// delivery network cannot work.
+pub const NEEDS_LINUX_DOCKER: &str = "check indexer needs a Linux docker host: the isolated delivery network is not reachable from macOS (docker runs in a VM)";
+
+// docker on macOS runs in a vm: the gateway of the --internal network, where the replay server
+// binds, and the containers' addresses, which the adapters connect to, exist only inside it
+fn docker_host(docker: bool, macos: bool) -> Result<()> {
+    if docker && macos {
+        bail!(
+            "{NEEDS_LINUX_DOCKER}; --no-docker runs without that network, for a target that runs as host processes"
+        );
+    }
+    Ok(())
+}
+
+/// Whether this build's host runs docker in a VM, out of reach of the delivery network.
+pub fn docker_in_a_vm() -> bool {
+    cfg!(target_os = "macos")
+}
+
+fn linux_docker_host(c: &Common) -> Result<()> {
+    docker_host(!c.no_docker, docker_in_a_vm())
+}
+
 pub fn run(cmd: HarnessCommand) -> Result<bool> {
     match cmd {
         HarnessCommand::Expect(a) => {
@@ -575,6 +599,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             Ok(write || stale.is_empty())
         }
         HarnessCommand::Run(a) => {
+            linux_docker_host(&a.common)?;
             // a broken expectations file should fail before a long run, not after it
             let want = a
                 .expect
@@ -663,6 +688,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             Ok(rep.ok() && met)
         }
         HarnessCommand::Reproduce(a) => {
+            linux_docker_host(&a.common)?;
             let table = reproduce::load(&a.table)?;
             let base = options(&a.common, Vec::new(), a.out.join("logs"))?;
             let results = reproduce::run(&table, &a.only, &a.common.corpus, &base, &a.out)?;
@@ -950,7 +976,29 @@ fn state(c: StateCommand) -> Result<bool> {
 
 #[cfg(test)]
 mod tests {
-    use super::split_command;
+    use super::{NEEDS_LINUX_DOCKER, docker_host, docker_in_a_vm, split_command};
+
+    #[test]
+    fn the_docker_delivery_network_needs_a_linux_host() {
+        assert!(docker_host(true, false).is_ok());
+        assert!(docker_host(false, true).is_ok());
+        let e = docker_host(true, true).unwrap_err().to_string();
+        assert!(e.starts_with(NEEDS_LINUX_DOCKER), "{e}");
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn on_macos_a_docker_run_stops_before_it_starts() {
+        assert!(docker_in_a_vm());
+        assert!(docker_host(true, docker_in_a_vm()).is_err());
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    #[test]
+    fn off_macos_a_docker_run_goes_ahead() {
+        assert!(!docker_in_a_vm());
+        assert!(docker_host(true, docker_in_a_vm()).is_ok());
+    }
 
     #[test]
     fn splits_with_quotes() {

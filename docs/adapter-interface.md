@@ -345,8 +345,15 @@ host side of the network's bridge. A container on an `--internal` network has no
 the host. The harness binds the replay server to the gateway address only, not to every
 interface of the host.
 
+This needs a Linux host. On macOS, Docker runs in a VM: the network's gateway and the
+containers' addresses exist only inside it, so the harness cannot bind there and the adapter
+cannot reach its containers. `check indexer`, `harness run` and `harness reproduce` therefore
+stop on macOS with `check indexer needs a Linux docker host`, and `shapekit doctor indexer`
+reports the same. The CI workflows run on Linux runners.
+
 With `--no-docker` the harness creates no network and binds the server to `127.0.0.1`, for
-adapters whose target runs as a host process.
+adapters whose target runs as a host process. The macOS check above does not
+apply to it; it has not been run on macOS.
 
 ## Verdicts
 

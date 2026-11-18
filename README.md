@@ -129,8 +129,11 @@ lists the rest. To run the corpus in an SDK repository's own CI, see
 
 ### Replay chains into an indexer
 
-Needs Docker. The first run of a wallet-backend commit clones it and builds its image; after that
-it runs offline.
+Needs Linux and Docker. The harness binds the replay server to the gateway of an internal
+Docker network, and the adapter connects to its containers' addresses. On macOS, Docker runs
+in a VM and neither is reachable from the host, so `check indexer` and `harness run` stop with
+that error there. The CI workflows run on Linux runners. The first run of a wallet-backend
+commit clones it and builds its image; after that it runs offline.
 
 ```sh
 docker pull "$(scripts/pin.sh image timescaledb)"
