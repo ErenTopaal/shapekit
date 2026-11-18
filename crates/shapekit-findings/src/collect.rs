@@ -286,14 +286,28 @@ fn problem_line(p: &Problem) -> String {
     format!("{kind} {}: {}", p.fact, p.detail)
 }
 
+/// The conformance command that reruns `entry` on the first sdk (by name) it failed on,
+/// at a version of that same sdk.
+fn sdk_reproduce(runs: &BTreeMap<(String, String), Vec<String>>, entry: &str) -> Option<String> {
+    let ((_, sdk), versions) = runs
+        .range((entry.to_owned(), String::new())..)
+        .next()
+        .filter(|((e, _), _)| e == entry)?;
+    let version = versions.last()?;
+    Some(format!(
+        "shapekit conformance run --sdk {sdk} --version {version} --entry {entry}"
+    ))
+}
+
 /// What one collection matched, before records are built.
 struct Matched<'a> {
     def: &'a FindingDef,
     occurrences: Vec<Occurrence>,
-    /// Per entry, how to rerun it: the chain and network of a harness entry, or the sdk and
-    /// failing versions of a conformance entry.
+    /// Per entry, how to rerun it: the chain and network of a harness entry, or, per entry
+    /// and sdk, the failing versions of a conformance entry. Keyed by sdk as well, since one
+    /// finding can match an entry on two sdks, and a version belongs to its own sdk only.
     harness_runs: BTreeMap<String, (String, String, String)>,
-    sdk_runs: BTreeMap<String, (String, Vec<String>)>,
+    sdk_runs: BTreeMap<(String, String), Vec<String>>,
     /// Entries whose answers split across the sdks, rerun with every sdk at once.
     peer_runs: BTreeSet<String>,
     lint_runs: Vec<String>,
@@ -359,12 +373,10 @@ fn cite_answers(
                                 if s != sdk || !any_or(&am.versions, v) {
                                     continue;
                                 }
-                                let run = mm
-                                    .sdk_runs
-                                    .entry(e.id.clone())
-                                    .or_insert((s.to_owned(), Vec::new()));
-                                if !run.1.iter().any(|x| x == v) {
-                                    run.1.push(v.to_owned());
+                                let run =
+                                    mm.sdk_runs.entry((e.id.clone(), s.to_owned())).or_default();
+                                if !run.iter().any(|x| x == v) {
+                                    run.push(v.to_owned());
                                 }
                                 found.push(Occurrence {
                                     source: "answer".into(),
@@ -655,11 +667,10 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                 });
                 match hit {
                     Some(mm) => {
-                        let run = mm
-                            .sdk_runs
-                            .entry(e.id.clone())
-                            .or_insert((sdk.to_owned(), Vec::new()));
-                        run.1.push(version.to_owned());
+                        mm.sdk_runs
+                            .entry((e.id.clone(), sdk.to_owned()))
+                            .or_default()
+                            .push(version.to_owned());
                         mm.occurrences.push(occ);
                     }
                     None => hold_or_unmap(
@@ -865,11 +876,8 @@ fn record(
                     "shapekit harness run --chain {chain} --network {network} --adapter \"{adapter}\""
                 ));
             }
-            if let Some((sdk, versions)) = m.sdk_runs.get(e) {
-                let version = versions.last()?;
-                return Some(format!(
-                    "shapekit conformance run --sdk {sdk} --version {version} --entry {e}"
-                ));
+            if let Some(line) = sdk_reproduce(&m.sdk_runs, e) {
+                return Some(line);
             }
             m.peer_runs
                 .contains(e)
@@ -1205,6 +1213,69 @@ mod tests {
     }
 
     #[test]
+    fn a_finding_on_two_sdks_reruns_each_at_its_own_version() {
+        use crate::inputs::{CellView, CheckView, MatrixEntry};
+        let def: FindingDef = toml::from_str(
+            r#"
+id = "X-1"
+title = "t"
+component = "rs-stellar-xdr"
+severity = "divergence"
+status = "filed"
+cause = "c"
+[[answer]]
+sdk = "rust"
+entries = ["e"]
+checks = ["any/decode_json"]
+answers = ['a']
+[[answer]]
+sdk = "python"
+entries = ["e"]
+checks = ["any/decode_json"]
+answers = ['b']
+"#,
+        )
+        .unwrap();
+        let answer = |v: &str| CellView {
+            result: "pass".into(),
+            known_issue: None,
+            checks: vec![CheckView {
+                check: "any/decode_json".into(),
+                op: "decode_json".into(),
+                result: "pass".into(),
+                detail: Some("implementation-defined: no answer is required".into()),
+                actual: Some(serde_json::json!(v)),
+            }],
+        };
+        let entries = vec![MatrixEntry {
+            id: "e".into(),
+            cells: BTreeMap::from([
+                ("rust@1.0.0".into(), answer("a")),
+                ("python@7.0.0".into(), answer("b")),
+            ]),
+        }];
+        let testees: BTreeMap<&str, (&str, &str)> = BTreeMap::from([
+            ("rust@1.0.0", ("rust", "1.0.0")),
+            ("python@7.0.0", ("python", "7.0.0")),
+        ]);
+        let mut matched = vec![Matched {
+            def: &def,
+            occurrences: Vec::new(),
+            harness_runs: BTreeMap::new(),
+            sdk_runs: BTreeMap::new(),
+            peer_runs: BTreeSet::new(),
+            lint_runs: Vec::new(),
+        }];
+        cite_answers(&mut matched, &entries, &testees);
+        assert_eq!(matched[0].sdk_runs.len(), 2);
+        assert_eq!(
+            sdk_reproduce(&matched[0].sdk_runs, "e").unwrap(),
+            "shapekit conformance run --sdk python --version 7.0.0 --entry e"
+        );
+        assert_eq!(sdk_reproduce(&matched[0].sdk_runs, "other"), None);
+    }
+
+    #[test]
     fn answer_matchers_cite_recorded_answers_and_splits() {
         use crate::inputs::{CellView, CheckView, MatrixEntry};
         let def: FindingDef = toml::from_str(
@@ -1290,7 +1361,10 @@ split = 3
             .map(|o| o.on.as_str())
             .collect();
         assert_eq!(on, ["rust@1", "rust@2"]);
-        assert_eq!(matched[0].sdk_runs["e-bool"].1, ["1", "2"]);
+        assert_eq!(
+            matched[0].sdk_runs[&("e-bool".to_owned(), "rust".to_owned())],
+            ["1", "2"]
+        );
         assert_eq!(matched[1].occurrences.len(), 1);
         let split = &matched[1].occurrences[0];
         assert_eq!(split.on, ALL_SDKS);
