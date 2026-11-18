@@ -237,10 +237,11 @@ jobs:
     # the candidate lane: entries waiting for promotion run through the current version of each
     # sdk. a divergence here is a finding to triage, not a broken build, so it is reported in
     # the job summary and the job stays green; a malformed candidate manifest, a testee that
-    # does not start or a run without a matrix fails it
+    # does not start or a run without a matrix fails it. one local run of its main step took
+    # 41 minutes
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
