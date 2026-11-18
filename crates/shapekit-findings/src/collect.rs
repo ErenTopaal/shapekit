@@ -1243,6 +1243,7 @@ answers = ['b']
                 check: "any/decode_json".into(),
                 op: "decode_json".into(),
                 result: "pass".into(),
+                failure: None,
                 detail: Some("implementation-defined: no answer is required".into()),
                 actual: Some(serde_json::json!(v)),
             }],
