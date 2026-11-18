@@ -219,10 +219,12 @@ jobs:
           "$RUNNER_TEMP/bin/shapekit" conformance reproduce --no-build
       - name: matrices to the job summary
         if: ${{ !cancelled() }}
+        # a step summary holds at most 1 MiB and the eleven matrices are about 2.5 MB, so it takes
+        # each matrix's tables up to the entry list; the conformance artifact has them whole
         run: |
           for sdk in rust go js soroban python java dart php dotnet kmp stellar-cli; do
             f="target/conformance/$sdk/MATRIX.md"
-            if [ -f "$f" ]; then cat "$f" >>"$GITHUB_STEP_SUMMARY"; fi
+            if [ -f "$f" ]; then sed '/^## Entries that do not pass everywhere/,$d' "$f" >>"$GITHUB_STEP_SUMMARY"; fi
           done
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -308,16 +310,24 @@ jobs:
             # 1 is a divergence, anything else is the run itself failing
             if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then exit "$code"; fi
             test -f "$out/divergence-matrix.json" || { echo "::error::no matrix for $sdk"; exit 1; }
-            cat "$out/MATRIX.md" >>"$GITHUB_STEP_SUMMARY"
+            # a step summary holds at most 1 MiB and the lane's matrices are megabytes, so the
+            # summary takes each matrix's tables up to the entry list; the artifact has them whole
+            sed '/^## Entries that do not pass everywhere/,$d' "$out/MATRIX.md" >>"$GITHUB_STEP_SUMMARY"
             matrices+=(--matrix "$out/divergence-matrix.json")
           done
           echo "## promotion" >>"$GITHUB_STEP_SUMMARY"
-          for id in $ids; do
-            code=0
-            "$shapekit" corpus promote "$id" --dry-run "${matrices[@]}" >"target/candidate/$id.txt" || code=$?
-            if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then cat "target/candidate/$id.txt"; exit "$code"; fi
-            { echo '```'; cat "target/candidate/$id.txt"; echo '```'; } >>"$GITHUB_STEP_SUMMARY"
-          done
+          # one dry run over every id reads the lanes and matrices once; one call per id took
+          # about 0.4 s each, too slow for thousands of candidates
+          code=0
+          # shellcheck disable=SC2086
+          "$shapekit" corpus promote $ids --dry-run "${matrices[@]}" >target/candidate/promotion.txt || code=$?
+          if [ "$code" -ne 0 ] && [ "$code" -ne 1 ]; then cat target/candidate/promotion.txt; exit "$code"; fi
+          {
+            echo "$(grep -c ' can be promoted$' target/candidate/promotion.txt || true) can be promoted, $(grep -c ' stays in the candidate lane$' target/candidate/promotion.txt || true) stay in the candidate lane; every decision is in target/candidate/promotion.txt in the artifact"
+            echo '```'
+            grep ' can be promoted$' target/candidate/promotion.txt || true
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:

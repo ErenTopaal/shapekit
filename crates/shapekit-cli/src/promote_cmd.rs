@@ -22,8 +22,10 @@ use shapekit_registry::Registry;
 
 #[derive(Args)]
 pub struct PromoteArgs {
-    /// Id of the candidate entry.
-    entry: String,
+    /// Id of the candidate entry. With --dry-run, several ids may be given; the lanes, the
+    /// triage and the matrices are read once and a decision is printed for each.
+    #[arg(required = true, num_args = 1..)]
+    entries: Vec<String>,
     /// divergence-matrix.json of a `shapekit conformance run --manifest
     /// candidate/manifest.json` that covers the entry; repeatable, one per run.
     #[arg(long = "matrix", required = true)]
@@ -63,15 +65,22 @@ pub fn run(args: PromoteArgs) -> Result<bool> {
         .with_context(|| format!("loading {}", candidate_file.display()))?;
     let corpus =
         build::load(&corpus_file).with_context(|| format!("loading {}", corpus_file.display()))?;
-    let Some(entry) = candidate.entries.iter().find(|e| e.id == args.entry) else {
-        bail!("{} has no entry {}", candidate_file.display(), args.entry);
-    };
     ensure!(
-        !corpus.entries.iter().any(|e| e.id == args.entry),
-        "{} already has an entry {}",
-        corpus_file.display(),
-        args.entry
+        args.dry_run || args.entries.len() == 1,
+        "promote one entry at a time; several ids are for --dry-run"
     );
+    for id in &args.entries {
+        ensure!(
+            candidate.entries.iter().any(|e| &e.id == id),
+            "{} has no entry {id}",
+            candidate_file.display()
+        );
+        ensure!(
+            !corpus.entries.iter().any(|e| &e.id == id),
+            "{} already has an entry {id}",
+            corpus_file.display()
+        );
+    }
     let versions = VersionsFile::load(&args.versions_file)?;
     let triage = shapekit_findings::triage::load(&args.triage)?;
     let mut matrices = Vec::new();
@@ -84,47 +93,77 @@ pub fn run(args: PromoteArgs) -> Result<bool> {
         matrices.push(view);
     }
 
-    let (accepted, mut refusals) = decide(&args.entry, &versions, &matrices, &triage, &root);
+    let find = |id: &str| {
+        candidate
+            .entries
+            .iter()
+            .find(|e| e.id == id)
+            .context("the entry was checked above")
+    };
     // the harness replays an entry from its chain under corpus/chains, so an entry cut from a
     // chain moves only when the corpus holds that chain
-    if let Some(chain) = &entry.source.chain
-        && !args.corpus.join("chains").join(chain).is_dir()
-    {
-        refusals.push(format!(
-            "its chain {chain} is not under {}, so the harness could not replay the entry",
-            args.corpus.join("chains").display()
-        ));
-    }
-    for a in &accepted {
-        println!(
-            "{}@{}: {} is finding {} ({})",
-            a.sdk, a.version, a.cell.result, a.finding.id, a.issue
-        );
-    }
-    if !refusals.is_empty() {
-        for r in &refusals {
-            println!("refused: {r}");
+    let decide_entry = |entry: &Entry| {
+        let (accepted, mut refusals) = decide(&entry.id, &versions, &matrices, &triage, &root);
+        if let Some(chain) = &entry.source.chain
+            && !args.corpus.join("chains").join(chain).is_dir()
+        {
+            refusals.push(format!(
+                "its chain {chain} is not under {}, so the harness could not replay the entry",
+                args.corpus.join("chains").display()
+            ));
         }
-        println!("{} stays in the candidate lane", args.entry);
-        return Ok(false);
-    }
+        (accepted, refusals)
+    };
     if args.dry_run {
-        println!("{} can be promoted", args.entry);
-        return Ok(true);
+        let mut all = true;
+        for (i, id) in args.entries.iter().enumerate() {
+            if i > 0 {
+                println!();
+            }
+            let (accepted, refusals) = decide_entry(find(id)?);
+            all &= report(id, &accepted, &refusals);
+            if refusals.is_empty() {
+                println!("{id} can be promoted");
+            }
+        }
+        return Ok(all);
+    }
+    let id = &args.entries[0];
+    let entry = find(id)?;
+    let (accepted, refusals) = decide_entry(entry);
+    if !report(id, &accepted, &refusals) {
+        return Ok(false);
     }
     let registry = Registry::load(&args.registry)
         .with_context(|| format!("loading the registry in {}", args.registry.display()))?;
     let moved = entry_files(entry)?;
     promote(&args, &registry, &candidate, &corpus, &moved)?;
     for a in &accepted {
-        add_known_failure(&args.known_failures, &args.entry, a)?;
+        add_known_failure(&args.known_failures, id, a)?;
     }
     println!(
-        "promoted {} ({} files); rerun `shapekit oracle run`, `shapekit coverage` and the conformance run for the corpus",
-        args.entry,
+        "promoted {id} ({} files); rerun `shapekit oracle run`, `shapekit coverage` and the conformance run for the corpus",
         moved.len()
     );
     Ok(true)
+}
+
+/// Prints the accepted failures and the refusals of one entry; true when nothing refuses it.
+fn report(id: &str, accepted: &[Accepted<'_>], refusals: &[String]) -> bool {
+    for a in accepted {
+        println!(
+            "{}@{}: {} is finding {} ({})",
+            a.sdk, a.version, a.cell.result, a.finding.id, a.issue
+        );
+    }
+    if refusals.is_empty() {
+        return true;
+    }
+    for r in refusals {
+        println!("refused: {r}");
+    }
+    println!("{id} stays in the candidate lane");
+    false
 }
 
 /// Every SDK's current version must pass, or its failure must be a triaged finding with a

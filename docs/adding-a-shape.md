@@ -359,7 +359,8 @@ The command promotes the entry when the current version of every SDK in
 `conformance/versions.toml` passes it, or when every SDK that fails it has a finding in
 `findings/triage.toml` whose conformance matcher takes the failure and whose `draft` is a file
 under `findings/issues/`. Otherwise it lists each reason and leaves the entry where it is.
-`--dry-run` prints the decision without moving anything.
+`--dry-run` prints the decision without moving anything, and takes several entry ids at once,
+one decision each.
 
 On promotion the entry's files move from `candidate/` to `corpus/`, both manifests are
 rebuilt, and the corpus manifest must validate or nothing moves. Each accepted failure gets

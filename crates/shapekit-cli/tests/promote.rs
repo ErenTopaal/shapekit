@@ -337,3 +337,57 @@ fn an_entry_whose_chain_is_not_in_the_corpus_stays_a_candidate() {
         text(&out)
     );
 }
+
+#[test]
+fn a_dry_run_decides_several_entries_with_one_load() {
+    let dir = layout();
+    let d = dir.path();
+    let matrices: Vec<String> = FIXTURE_SDKS.iter().map(|s| fixture(s)).collect();
+    let mut args = vec!["corpus", "promote", ENTRY, ENTRY];
+    for p in &matrices {
+        args.push("--matrix");
+        args.push(p);
+    }
+    let moving = shapekit(d, &args);
+    assert_eq!(moving.status.code(), Some(2), "{}", text(&moving));
+    assert!(
+        text(&moving).contains("several ids are for --dry-run"),
+        "{}",
+        text(&moving)
+    );
+
+    args.push("--dry-run");
+    let out = shapekit(d, &args);
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert_eq!(
+        text(&out)
+            .matches(&format!("{ENTRY} stays in the candidate lane"))
+            .count(),
+        2,
+        "{}",
+        text(&out)
+    );
+
+    triage_the_other_failures(d);
+    let out = shapekit(d, &args);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert_eq!(
+        text(&out)
+            .matches(&format!("{ENTRY} can be promoted"))
+            .count(),
+        2,
+        "{}",
+        text(&out)
+    );
+    assert_eq!(entries(d, "corpus"), 0);
+
+    let mut unknown = args.clone();
+    unknown[3] = "no.such.entry";
+    let out = shapekit(d, &unknown);
+    assert_eq!(out.status.code(), Some(2), "{}", text(&out));
+    assert!(
+        text(&out).contains("has no entry no.such.entry"),
+        "{}",
+        text(&out)
+    );
+}
