@@ -19,7 +19,7 @@ pub struct Outcome {
 type Job<'a> = Box<dyn Fn() -> Verdict + Send + Sync + 'a>;
 
 fn net<T>(r: Result<T>) -> Result<T, String> {
-    r.map_err(|e| format!("{e:#}"))
+    r.map_err(|e| crate::error_text::chain(e.as_ref()))
 }
 
 fn jobs<'a>(pins: &'a Pins, http: &'a Http) -> Vec<(&'static str, String, Job<'a>)> {

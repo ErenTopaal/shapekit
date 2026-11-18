@@ -8,6 +8,7 @@ mod contracts_cmd;
 mod coretest_cmd;
 mod coverage_cmd;
 mod doctor_cmd;
+mod error_text;
 mod explore_cmd;
 mod findings_cmd;
 mod fuzz_cmd;
@@ -806,7 +807,7 @@ fn main() -> ExitCode {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,
         Err(err) => {
-            eprintln!("error: {err:#}");
+            eprintln!("error: {}", error_text::chain(err.as_ref()));
             ExitCode::from(2)
         }
     }

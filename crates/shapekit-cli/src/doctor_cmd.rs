@@ -8,6 +8,7 @@ use std::time::Duration;
 use anyhow::Result;
 use clap::{Args, ValueEnum};
 
+use crate::error_text::chain;
 use crate::harness_cmd::{NEEDS_LINUX_DOCKER, docker_in_a_vm, split_command};
 use crate::pins::{self, Toolchain};
 
@@ -234,7 +235,7 @@ fn sdk(
         Ok(f) => f,
         Err(e) => {
             r.fail(
-                &format!("{}: {e:#}", a.versions_file.display()),
+                &format!("{}: {}", a.versions_file.display(), chain(e.as_ref())),
                 "run from the root of a shapekit checkout, or pass --versions-file",
             );
             return;
@@ -250,14 +251,14 @@ fn sdk(
         let sdk = match file.sdk(name) {
             Ok(s) => s,
             Err(e) => {
-                r.fail(&format!("sdk {name}: {e:#}"), "");
+                r.fail(&format!("sdk {name}: {}", chain(e.as_ref())), "");
                 continue;
             }
         };
         let target = match file.target(name, &sdk.current) {
             Ok(t) => t,
             Err(e) => {
-                r.fail(&format!("sdk {name}: {e:#}"), "");
+                r.fail(&format!("sdk {name}: {}", chain(e.as_ref())), "");
                 continue;
             }
         };
@@ -364,7 +365,7 @@ fn indexer(r: &mut Report, a: &DoctorArgs) {
                 &format!("adapter: {} not found", argv[0]),
                 "build the adapter first; for the wallet-backend reference adapter, `(cd adapters && go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter)`",
             ),
-            Err(e) => r.fail(&format!("adapter: {e:#}"), ""),
+            Err(e) => r.fail(&format!("adapter: {}", chain(e.as_ref())), ""),
         }
     }
 }
@@ -398,7 +399,7 @@ pub fn run(a: DoctorArgs) -> Result<bool> {
         match pins::load(&a.pins) {
             Ok(p) => Some(p),
             Err(e) => {
-                r.fail(&format!("{}: {e:#}", a.pins.display()), "");
+                r.fail(&format!("{}: {}", a.pins.display(), chain(e.as_ref())), "");
                 None
             }
         }

@@ -38,7 +38,11 @@ fn with_retries<T>(
     loop {
         match f() {
             Err(err) if attempt < ATTEMPTS && is_transient(&err) => {
-                eprintln!("retry {attempt}/{}: {what}: {err:#}", ATTEMPTS - 1);
+                eprintln!(
+                    "retry {attempt}/{}: {what}: {}",
+                    ATTEMPTS - 1,
+                    crate::error_text::chain(err.as_ref())
+                );
                 std::thread::sleep(Duration::from_secs(u64::from(attempt) * 2));
                 attempt += 1;
             }
