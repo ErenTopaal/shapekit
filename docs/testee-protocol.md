@@ -598,8 +598,9 @@ A coverage build starts the testee with the JaCoCo agent its Maven build copies 
 as for Java. `decode_limits` is `"ignored"`: `XdrReader` takes no limits. `XdrReader` keeps its position in
 a private field, which the testee reads to refuse bytes left after a value; the decode itself is
 the SDK's. A `StackOverflowError`, `OutOfMemoryError`, `NullPointerException`,
-`ClassCastException` or `IndexOutOfBoundsException` is reported as `panic` with the SDK frame it
-left; every other exception is a rejection.
+`ClassCastException` or `IndexOutOfBoundsException` thrown by an SDK call is reported as
+`panic` with the SDK frame it left; every other exception an SDK call throws is a rejection,
+and an exception from the testee's own code is `internal`.
 
 ## The stellar-cli testee
 
@@ -786,6 +787,8 @@ is installed into its own venv under `target/testees/python/<version>/` from the
   `float` otherwise.
 - `map_validate` answers `unsupported`: the SDK has no ScMap validation, and the key
   comparison `scval.to_map` sorts with is private.
+- `address_from_scval` calls `scval.from_address`, which refuses an `ScVal` of another arm with
+  `ValueError`, and answers the address's strkey.
 - `balance_id` counts the `IndexError` and `TypeError` that
   `Transaction.get_claimable_balance_id` documents as its refusals as `rejected`. Elsewhere
   `ValueError`, `EOFError`, `OverflowError`, `struct.error` and the `xdrlib3` errors are
@@ -810,6 +813,8 @@ pinned JDK and Maven.
   refuses unread bytes itself, since `fromXdrByteArray` does not.
 - `to_native` and `map_validate` answer `unsupported`: the SDK has only typed per-arm
   converters (`Scv.fromX`), and its ScVal key comparator is not public.
+- `address_from_scval` calls `Address.fromSCVal` and answers the address's `toString`, its
+  strkey.
 - `id_parse` reads the input as Horizon's JSON through the SDK's own Gson, into
   `OfferResponse.id` and `TransactionResponse.accountMuxedId`, and reports the muxed ID that
   `MuxedAccount` encodes.
@@ -850,9 +855,9 @@ without a class answer `unsupported` with the reason.
 | `balance_id`, `contract_id` | SHA-256 of the `HashIDPreimage` the SDK encodes; `Address.deriveContractId` for address preimages |
 
 `map_validate` is `unsupported`: the SDK orders map keys but has no check of a map it is
-given. `decode_limits` is `"ignored"`. A stack overflow, an `OutOfMemoryError`, a
-`TypeError` or a `NoSuchMethodError` is reported as `panic`; every other exception the SDK throws is a
-rejection.
+given. `decode_limits` is `"ignored"`. A stack overflow, an `OutOfMemoryError`, a `TypeError` or
+a `NoSuchMethodError` thrown by an SDK call is reported as `panic`; every other exception an SDK
+call throws is a rejection, and an exception from the testee's own code is `internal`.
 
 ## The PHP testee
 
@@ -873,10 +878,12 @@ The ops call the same parts of the SDK as the Dart testee, with these difference
 - `hello` reports the version Composer installed (`Composer\InstalledVersions`).
 
 PHP writes warnings to stdout by default; the testee sends them to stderr, so they reach the
-runner's report without breaking the protocol. A `TypeError`, an `ArgumentCountError`, running
-out of stack or memory, and calling an undefined method or a method on null are reported
-as `panic`; every other
-exception is a rejection.
+runner's report without breaking the protocol. Every engine `\Error` from the SDK (a
+`TypeError`, a `ValueError`, a typed property read before it was set, an undefined method) is
+reported as `panic`; every `\Exception` is a rejection. PHP keeps the frames of PHP calls on
+the heap, so a deep recursion grows memory rather than the stack: the testee sets PHP's
+`memory_limit` to 3072 MiB, below the runner's 4096 MiB limit, and answers a request that runs
+out of it as `panic` with PHP's fatal error message before the process exits.
 
 ## The .NET testee
 
@@ -884,7 +891,10 @@ exception is a rejection.
 the project file and NuGet lock file under `testees/dotnet/versions/<version>/`. The SDK names
 its XDR classes as the `.x` files name the types (`SCVal`, `AccountID`), so the testee finds a
 request's type by reflection over `StellarDotnetSdk.Xdr`, without regard to case, and calls the
-class's static `Decode` and `Encode`.
+class's static `Decode` and `Encode`. The classes of nested unions and structs sit inside the
+class of their outer type (`TransactionResult.TransactionResultResult`) under the name
+stellar-xdr gives them, and are found the same way; a name two classes share answers
+`unsupported`.
 
 | op | what it calls |
 |---|---|
@@ -901,6 +911,8 @@ class's static `Decode` and `Encode`.
 The SDK has no XDR-JSON and no map ordering, so `decode_json`, `encode_json`, `map_sort` and
 `map_validate` are `unsupported`, and an entry with an expected JSON counts as `unsupported`
 even when its bytes pass. A `NullReferenceException`, `InvalidCastException`,
-`IndexOutOfRangeException` or `InsufficientExecutionStackException` is reported as `panic`,
-with the SDK frame it left; every other exception is a rejection.
+`IndexOutOfRangeException` or `InsufficientExecutionStackException` thrown by an SDK call is
+reported as `panic`, with the SDK frame it left; every other exception an SDK call throws is a
+rejection, and an exception from the testee's own code is `internal`. Version 16.0.0 has no W
+strkey decoder, so a W string is a rejection there, and its encoder is `unsupported`.
 
