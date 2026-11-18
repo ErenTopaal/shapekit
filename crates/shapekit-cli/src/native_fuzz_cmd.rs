@@ -18,8 +18,10 @@ pub struct NativeFuzzArgs {
     /// Work directory and report.json; emptied first.
     #[arg(long)]
     out: Option<PathBuf>,
+    /// The candidate lane new failure classes are written to.
     #[arg(long, default_value = "candidate")]
     candidate: PathBuf,
+    /// Failure classes that are triaged already; they are skipped.
     #[arg(long, default_value = "conformance/native-fuzz/known-classes.txt")]
     known: PathBuf,
     /// Skip the javascript testee's build steps (the sdk install must exist).

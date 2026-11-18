@@ -42,8 +42,10 @@ pub enum ExploreCommand {
         /// New steps per episode.
         #[arg(long, default_value_t = 40)]
         actions: usize,
+        /// Seed of the search; the same seed and settings repeat the same episodes.
         #[arg(long, default_value_t = 1)]
         seed: u64,
+        /// Directory to write the recipes and the report into; must not exist.
         #[arg(long)]
         out: PathBuf,
         /// Arms counted as targets: the core-witnessed arms of this coverage report.
@@ -53,8 +55,10 @@ pub enum ExploreCommand {
         /// which are left out of the targets.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
     },
@@ -68,10 +72,13 @@ pub enum ExploreCommand {
         /// At most this many candidates are run.
         #[arg(long, default_value_t = 40)]
         max: usize,
+        /// Candidates run at once, each on its own node.
         #[arg(long, default_value_t = 3)]
         jobs: usize,
+        /// Directory to write the kept pairs into; must not exist.
         #[arg(long)]
         out: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -89,23 +96,29 @@ pub enum ExploreCommand {
         /// Protocols to run at: one number, a comma list or a range.
         #[arg(long, default_value = "1-30")]
         protocol: String,
+        /// Runs at once, each on its own node.
         #[arg(long, default_value_t = 3)]
         jobs: usize,
         /// Where runs are kept (reused on a second call) and the results are written.
         #[arg(long)]
         out: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
     },
     /// Record one recipe under both passphrases into a directory in the committed chain form
     /// (`<out>/testnet`, `<out>/mainnet`).
     Record {
+        /// The recipe IR file to record.
         #[arg(long)]
         recipe: PathBuf,
+        /// Directory to write the chain into; must not exist.
         #[arg(long)]
         out: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -113,15 +126,19 @@ pub enum ExploreCommand {
     /// compare the entries the last ledger of each changed (all of them, or only those of
     /// one ledger entry type) into `<out>/pair.json`.
     Pair {
+        /// The recipe IR file of side `a`.
         #[arg(long)]
         a: PathBuf,
+        /// The recipe IR file of side `b`.
         #[arg(long)]
         b: PathBuf,
         /// Compare only entries of this type (`trustline`, `account`, ...).
         #[arg(long)]
         only: Option<String>,
+        /// Directory to write both chains and pair.json into.
         #[arg(long)]
         out: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -140,6 +157,7 @@ pub enum ExploreCommand {
         /// The recipe the chain was recorded from, relative to the repository root.
         #[arg(long)]
         recipe: String,
+        /// The family the entry ids start with.
         #[arg(long, default_value = "explore.witnesses")]
         family: String,
         /// What the entry ids start with after the family; `-l<ledger>` follows.
@@ -160,6 +178,7 @@ pub enum ExploreCommand {
         /// Cover only these arms; repeatable.
         #[arg(long)]
         arm: Vec<String>,
+        /// The candidate lane the entries are written into.
         #[arg(long, default_value = "candidate")]
         out: PathBuf,
     },
@@ -169,22 +188,26 @@ pub enum ExploreCommand {
         /// Committed chain directories (each holding `testnet/` and `mainnet/`); repeatable.
         #[arg(long = "chain", required = true)]
         chains: Vec<PathBuf>,
+        /// The coverage report whose core-witnessed arms are counted.
         #[arg(long, default_value = "corpus/coverage/coverage.json")]
         coverage_report: PathBuf,
         /// The registry whose `uncovered.toml` names the arms only network history holds.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
     },
-    /// Record every recipe of a run again under both passphrases, twice each, and check the
-    /// streams repeat and the credited arms are there.
+    /// Record every recipe of a run again under both passphrases, --repeat times each, and
+    /// check the recorded ledgers are the same every time and the credited arms are there.
     Verify {
         /// The directory `explore run` wrote.
         #[arg(long)]
         dir: PathBuf,
+        /// How many times each recipe is recorded under each passphrase.
         #[arg(long, default_value_t = 2)]
         repeat: usize,
+        /// Recipes recorded at once, each on its own node.
         #[arg(long, default_value_t = 3)]
         jobs: usize,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },

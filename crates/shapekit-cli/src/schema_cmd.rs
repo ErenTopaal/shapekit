@@ -40,14 +40,17 @@ pub enum SchemaCommand {
         /// Only names that start with this text.
         #[arg(long)]
         prefix: Option<String>,
+        /// The directory holding <tag>/xdr.json files.
         #[arg(long, default_value = "schema/xdr")]
         dir: PathBuf,
     },
     /// Date each family's signature fragments in the schema history and compare the tag they
     /// all appear from with the family's protocol_introduced in families.toml.
     Families {
+        /// Directory holding the registry files, including families.toml.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The directory holding <tag>/xdr.json files.
         #[arg(long, default_value = "schema/xdr")]
         dir: PathBuf,
     },

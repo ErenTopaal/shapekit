@@ -23,11 +23,26 @@ type options struct {
 	patterns []string
 }
 
+const usageText = `usage: indexerlint [-format text|json] [-baseline file] packages...
+
+Checks Go indexer code built on go-stellar-sdk for three ingestion mistakes:
+  IDX001  an unvalidated transaction field is used as a key, stored, or converted lossily
+  IDX002  a recursive xdr structure or a decoded length is used without a depth or size cap
+  IDX003  participants are derived from the envelope instead of meta changes or events
+
+Run it from the root of the module to check, for example indexerlint ./...
+Under go vet: go vet -vettool=$(command -v indexerlint) ./...
+Exit status: 0 no findings, 1 findings, 2 usage, load or analysis error.
+Suppressions and the baseline file are described in docs/linter.md.
+
+Flags:
+`
+
 func parseFlags(args []string, stderr io.Writer) (options, error) {
 	fs := flag.NewFlagSet("indexerlint", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() {
-		_, _ = fmt.Fprintf(stderr, "usage: indexerlint [-format text|json] [-baseline file] packages...\n")
+		_, _ = fmt.Fprint(stderr, usageText)
 		fs.PrintDefaults()
 	}
 
@@ -50,6 +65,7 @@ func parseFlags(args []string, stderr io.Writer) (options, error) {
 	}
 
 	if len(o.patterns) == 0 {
+		_, _ = fmt.Fprintln(stderr, "indexerlint: no packages given; pass package patterns such as ./...")
 		fs.Usage()
 
 		return o, errors.New("no packages")

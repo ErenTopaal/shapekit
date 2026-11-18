@@ -29,6 +29,7 @@ pub enum VectorsCommand {
     /// disallowed one, each confirmed by the reference interpreter. Run `shapekit manifest
     /// build --corpus <out>` afterwards.
     Gen {
+        /// The candidate lane the vectors are written into.
         #[arg(long, default_value = "candidate")]
         out: PathBuf,
         /// The schema history, for the protocol each definition first appears in.
@@ -43,8 +44,10 @@ pub enum VectorsCommand {
     /// per gap row and id kind, under <out>/vectors/. Run `shapekit manifest build --corpus
     /// <out>` afterwards.
     Gaps {
+        /// Directory holding the registry files, including gaps/.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The candidate lane the vectors are written into.
         #[arg(long, default_value = "candidate")]
         out: PathBuf,
         /// Compare with the files already under <out> instead of writing; exits 1 on a

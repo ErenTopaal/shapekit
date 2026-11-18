@@ -26,6 +26,14 @@ func run() error {
 	cpus := flag.String("cpus", "", "docker --cpus limit of the stellar-rpc container (default: none)")
 	from := flag.String("events-from", stellarrpc.FromEvents,
 		"method the export reads events from: events (getEvents), transactions (getTransactions) or ledgers (getLedgers)")
+	flag.Usage = func() {
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "usage: rpc-adapter [flags]\n\n"+
+			"rpc-adapter puts stellar-rpc behind the shapekit replay harness. It speaks the adapter\n"+
+			"protocol on stdin and stdout (docs/adapter-interface.md) and logs to stderr, so you\n"+
+			"run it through the harness, for example:\n\n"+
+			"  shapekit check indexer --adapter \"rpc-adapter\"\n\nFlags:\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

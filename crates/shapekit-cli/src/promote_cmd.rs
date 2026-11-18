@@ -58,16 +58,22 @@ pub struct PromoteArgs {
     /// Report the decisions without moving anything.
     #[arg(long)]
     dry_run: bool,
+    /// The candidate lane directory.
     #[arg(long, default_value = "candidate")]
     candidate: PathBuf,
+    /// The corpus directory, holding manifest.json.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
+    /// Directory holding the registry files.
     #[arg(long, default_value = "registry")]
     registry: PathBuf,
+    /// The SDK versions and how to build and start each testee.
     #[arg(long, default_value = "conformance/versions.toml")]
     versions_file: PathBuf,
+    /// Directory of <sdk>.txt files listing the known failures.
     #[arg(long, default_value = "conformance/known-failures")]
     known_failures: PathBuf,
+    /// The findings triage: the inputs and the finding every failure maps to.
     #[arg(long, default_value = "findings/triage.toml")]
     triage: PathBuf,
     /// The candidate lane's findings, which hold failures no main finding takes.

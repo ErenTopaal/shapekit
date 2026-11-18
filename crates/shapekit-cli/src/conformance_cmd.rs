@@ -24,7 +24,7 @@ pub enum ConformanceCommand {
         /// Run every version in versions.toml instead of the current one.
         #[arg(long)]
         all_versions: bool,
-        /// Entry id to run; repeatable.
+        /// Entry id to run; repeatable. Every entry when absent.
         #[arg(long = "entry")]
         entries: Vec<String>,
         /// Entry kind to run; repeatable.
@@ -57,10 +57,13 @@ pub enum ConformanceCommand {
         /// Run the selection this many times in one invocation and require equal results.
         #[arg(long, default_value_t = 1)]
         passes: u32,
+        /// The corpus manifest; entry files are resolved next to it.
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// Directory of <sdk>.txt files listing the known failures.
         #[arg(long, default_value = "conformance/known-failures")]
         known_failures: PathBuf,
         /// Directory for divergence-matrix.json and MATRIX.md.
@@ -78,10 +81,13 @@ pub enum ConformanceCommand {
         /// Skip the build steps in versions.toml (the testees must already be built).
         #[arg(long)]
         no_build: bool,
+        /// The corpus manifest; entry files are resolved next to it.
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// Directory of <sdk>.txt files listing the known failures.
         #[arg(long, default_value = "conformance/known-failures")]
         known_failures: PathBuf,
         /// Directory for crosscheck.json and CROSSCHECK.md.
@@ -93,12 +99,16 @@ pub enum ConformanceCommand {
         /// Only rows for this SDK; repeatable.
         #[arg(long = "sdk")]
         sdks: Vec<String>,
+        /// Skip the build steps in versions.toml (the testees must already be built).
         #[arg(long)]
         no_build: bool,
+        /// The corpus manifest; entry files are resolved next to it.
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// The upstream sightings, each with the SDK versions before and after its fix.
         #[arg(long, default_value = "conformance/reproductions.toml")]
         reproductions: PathBuf,
     },
@@ -110,10 +120,13 @@ pub enum ConformanceCommand {
         /// With --check: on drift, also write the report as markdown to this file.
         #[arg(long, requires = "check")]
         report: Option<PathBuf>,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// The upstream sightings, each with the SDK versions before and after its fix.
         #[arg(long, default_value = "conformance/reproductions.toml")]
         reproductions: PathBuf,
+        /// Directory of <sdk>.txt files listing the known failures.
         #[arg(long, default_value = "conformance/known-failures")]
         known_failures: PathBuf,
     },
@@ -138,7 +151,7 @@ pub enum ConformanceCommand {
         /// Skip the testee build steps in versions.toml.
         #[arg(long)]
         no_build: bool,
-        /// Scratch directory for sdk copies, tools and builds.
+        /// Work directory for sdk copies, tools and builds.
         #[arg(long, default_value = "target/seed-check")]
         work: PathBuf,
         /// Where <sdk>.json, <sdk>.obligations.json and SEED-CHECK.md go.
@@ -151,10 +164,13 @@ pub enum ConformanceCommand {
         /// Flag the candidate lane entries must carry; repeatable.
         #[arg(long = "candidate-flag")]
         candidate_flags: Vec<String>,
+        /// The corpus manifest; entry files are resolved next to it.
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// Directory of <sdk>.txt files listing the known failures.
         #[arg(long, default_value = "conformance/known-failures")]
         known_failures: PathBuf,
     },
@@ -222,17 +238,22 @@ pub enum ConformanceCommand {
     },
     /// Write one issue body per SDK and diverging entry from a divergence matrix.
     DraftIssues {
+        /// The divergence matrix of a `conformance run`.
         #[arg(long, default_value = "target/conformance/divergence-matrix.json")]
         matrix: PathBuf,
+        /// The corpus manifest; entry files are resolved next to it.
         #[arg(long, default_value = "corpus/manifest.json")]
         manifest: PathBuf,
+        /// The SDK versions and how to build and start each testee.
         #[arg(long, default_value = "conformance/versions.toml")]
         versions_file: PathBuf,
+        /// Directory the issue bodies are written into.
         #[arg(long, default_value = "findings/issues")]
         out: PathBuf,
     },
     /// Open the drafted issues upstream with gh. Refuses to run without --confirm.
     FileIssues {
+        /// Directory holding the drafted issue bodies (`conformance draft-issues --out`).
         #[arg(long, default_value = "findings/issues")]
         issues: PathBuf,
         /// Only these drafted files; repeatable.

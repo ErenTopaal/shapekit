@@ -37,8 +37,10 @@ pub struct FuzzArgs {
     /// Most raw bytes handed to `arbitrary` for one generated value.
     #[arg(long, default_value_t = 4096)]
     max_arbitrary_bytes: usize,
+    /// The corpus directory, holding manifest.json.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
+    /// The SDK versions file naming the go testee build and command.
     #[arg(long, default_value = "conformance/versions.toml")]
     versions: PathBuf,
     /// Run report and a reproducer for every class seen.

@@ -29,7 +29,8 @@ pub struct ReportArgs {
     /// For a conformance run: the known-failures directory it ran with, as its baseline.
     #[arg(long)]
     pub known_failures: Option<PathBuf>,
-    /// The corpus manifest the run used. Default: the triage's manifest.
+    /// The corpus manifest the run used. Default: the manifest the triage names
+    /// (corpus/manifest.json).
     #[arg(long)]
     pub manifest: Option<PathBuf>,
     /// The shapekit checkout the triage, the candidate triage and the registry are read from.

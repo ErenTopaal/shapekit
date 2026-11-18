@@ -15,6 +15,7 @@ pub struct ServeArgs {
     /// Network variant of the chain; ignored when --chain is a path to a network directory.
     #[arg(long, value_parser = ["testnet", "mainnet"])]
     network: Option<String>,
+    /// Address and port the server listens on.
     #[arg(long, default_value = "127.0.0.1:8000")]
     listen: SocketAddr,
     /// Visible head ledger at start; the chain's last ledger when absent.
@@ -26,6 +27,7 @@ pub struct ServeArgs {
     /// Print every JSON-RPC method called, to stderr.
     #[arg(long)]
     log_requests: bool,
+    /// The corpus directory a chain id is looked up in.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
 }

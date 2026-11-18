@@ -24,6 +24,7 @@ pub enum ProbeCommand {
         /// Also write the attempts as JSON.
         #[arg(long)]
         out: Option<PathBuf>,
+        /// The pins file, read for the core image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -35,6 +36,7 @@ pub enum ProbeCommand {
         /// verdicts and writes nothing under the repository.
         #[arg(long)]
         only: Vec<String>,
+        /// Where the validation table goes.
         #[arg(long, default_value = "registry/generated/validation.json")]
         out: PathBuf,
         /// The candidate lane the witness entries are written to.
@@ -57,6 +59,7 @@ pub enum ProbeCommand {
         /// names the image alone.
         #[arg(long, default_value = "pins.toml")]
         source_pins: PathBuf,
+        /// The pins file, read for the core image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -67,12 +70,17 @@ pub enum ProbeCommand {
         /// --scratch.
         #[arg(long)]
         only: Vec<String>,
+        /// Where the limits table goes.
         #[arg(long, default_value = "registry/generated/limits.json")]
         out: PathBuf,
+        /// The candidate lane the witness entries are written to.
         #[arg(long, default_value = "candidate")]
         candidate: PathBuf,
+        /// The bounded quantities to measure and their expected limits.
         #[arg(long, default_value = "registry/caps-limits.toml")]
         caps: PathBuf,
+        /// With --only: write the table and the witness entries under this directory instead of
+        /// leaving them out.
         #[arg(long)]
         scratch: Option<PathBuf>,
         /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
@@ -85,21 +93,24 @@ pub enum ProbeCommand {
         /// names the image alone.
         #[arg(long, default_value = "pins.toml")]
         source_pins: PathBuf,
+        /// The pins file, read for the core image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
-    /// Run the probe again in a scratch directory and compare its recorded chains (canonical
+    /// Run the probe again in a temporary directory and compare its recorded chains (canonical
     /// hashes, ledger range, lake), the table and the witness entries with the committed ones.
     VerifyRepro {
         /// The table to compare: validation.json, or limits.json with --limits.
         #[arg(long)]
         out: Option<PathBuf>,
-        /// Run the limit finder (`probe limits`) instead of the envelope field probe, against
-        /// this caps-limits file.
+        /// Run the limit finder (`probe limits`) over the --caps file instead of the envelope
+        /// field probe.
         #[arg(long)]
         limits: bool,
+        /// With --limits: the bounded quantities to measure.
         #[arg(long, default_value = "registry/caps-limits.toml")]
         caps: PathBuf,
+        /// The committed candidate lane the witness entries are compared with.
         #[arg(long, default_value = "candidate")]
         candidate: PathBuf,
         /// Write the coverage profiles of every node into `<dir>/<chain name>`, one directory
@@ -112,12 +123,14 @@ pub enum ProbeCommand {
         /// names the image alone.
         #[arg(long, default_value = "pins.toml")]
         source_pins: PathBuf,
+        /// The pins file, read for the core image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
     /// Write the `field` obligations of a validation table beside it, as
     /// <table stem>.obligations.json; probe all writes them too.
     Obligations {
+        /// The validation table `probe all` wrote.
         #[arg(long, default_value = "registry/generated/validation.json")]
         table: PathBuf,
     },
@@ -125,8 +138,10 @@ pub enum ProbeCommand {
     /// fields and carriers it speaks about. Exits 1 on a disagreement no source reading
     /// settles, or on a settlement for a row that agrees.
     Compare {
+        /// The validation table `probe all` wrote.
         #[arg(long, default_value = "registry/generated/validation.json")]
         table: PathBuf,
+        /// The field rows of the registry.
         #[arg(long, default_value = "registry/fields.toml")]
         fields: PathBuf,
         /// The per-row verdict file: one record per fields.toml row with the measured verdict,

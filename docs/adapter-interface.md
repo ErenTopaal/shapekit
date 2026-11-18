@@ -56,27 +56,26 @@ family does not hide the others.
   final line.
 - stdout carries responses only. Logs go to stderr; the harness saves the adapter's stderr
   next to the report (`logs/<chain>.<network>.adapter.log`).
-- Members the receiver does not know must be ignored, so later protocol versions can add
-  optional members.
+- Ignore members you do not know; later protocol versions can add optional members.
 - When stdin reaches end of file the adapter tears the target down as for `stop` and exits.
 - The harness enforces a timeout per request. Defaults: `describe` 60 s, `start` 30 min
   (the adapter can build images during `start`), `advance` 120 s, `status` 300 s, `export`
-  10 min, `stop` 5 min. `--start-timeout` and `--status-timeout` change the two that depend
+  and `dump` 10 min, `restart` and `stop` 5 min. `--start-timeout` and `--status-timeout` change the two that depend
   on the host. A status timeout ends the chain, so the status default leaves room for a
-  heavily loaded host: the wallet-backend adapter's status answer took more than 60 s at a
-  load average near 200.
+  heavily loaded host.
 - Two more limits apply to the target's progress, not to single requests: how long the
   target can go without ingesting a ledger while it bootstraps (`--bootstrap-timeout`,
   default 600 s) and after each released ledger (`--ledger-timeout`, default 120 s). When
   one passes, the target has stopped at that ledger (see "Verdicts").
-- On a timeout, a protocol violation, an error response or an adapter exit, the harness sends
-  `stop` where it still can and records every entry of the chain as `not-evaluated` with the
-  reason. After `stop`, and on every other path, it closes the adapter's stdin, waits up to
+- Once it has sent `start`, the harness sends `stop` after a timeout, a protocol violation, an
+  error response or a failed ledger, unless the adapter has exited; a failure before `start`
+  sends no `stop`. It records every entry of the chain as `not-evaluated` with the reason.
+  On every path it then closes the adapter's stdin, waits up to
   30 s for the adapter to exit, and then kills it.
 - When a request times out, the harness stops waiting for it but remembers its id. If that
   request's lines arrive later, while the harness waits for the reply to a later request
-  (usually `stop`), the harness skips them, up to and including their final line, and lists
-  them in the chain's `notes`. This is the one exception to the id rule above. A line with an
+  (in practice `stop`), the harness skips them, up to and including their final line, and
+  lists the first 16 in the chain's `notes`, then their count. This is the one exception to the id rule above. A line with an
   id the harness never sent, or with the id of a request that was already answered, is still
   a protocol violation.
 - Attach every container the adapter starts to `docker_network`. Before the harness removes
@@ -98,7 +97,7 @@ family does not hide the others.
 ```json
 {"id": "3", "status": "ok", "result": {"head": 65}}
 {"id": "7", "status": "record", "record": {"type": "transaction", "ledger": 65, "hash": "...", "participants": [], "changes": []}}
-{"id": "4", "status": "error", "error": {"class": "target", "message": "timescaledb did not accept connections within 120s"}}
+{"id": "4", "status": "error", "error": {"class": "target", "message": "timescaledb did not accept connections within 3m0s"}}
 ```
 
 ### Error classes
@@ -127,7 +126,7 @@ Result:
 | `adapter`, `adapter_version` | string | the adapter program and its version |
 | `target` | string | the indexer, for example `wallet-backend` |
 | `target_version` | string | the exact build, for example a full commit hash, never a branch name |
-| `delivery_modes` | array | modes the adapter can drive: `sep54-filesystem`, `sep54-s3`, `rpc` |
+| `delivery_modes` | array | modes the adapter can drive: `sep54-filesystem`, `sep54-s3`, `sep54-gcs` (protocol 2), `rpc` |
 | `default_delivery` | string | mode used unless the harness is given `--delivery`; one of `delivery_modes` |
 | `bootstrap` | `checkpoint` or `ledger` | how the target starts, see "Bootstrap" |
 | `vocab_version` | integer | the oracle vocabulary version the claims and exports use; must equal the harness's |
@@ -161,7 +160,7 @@ Request members (besides `id` and `cmd`):
 | `ledgers.bootstrap` | integer | the visible head while `start` runs |
 | `ledgers.last` | integer | the chain's last ledger |
 | `ledgers.checkpoint_frequency` | integer | `64` |
-| `limits.memory_bytes` | integer | memory limit to apply to the target's ingesting process or containers (`--memory-limit`, default 4 GiB) |
+| `limits.memory_bytes` | integer | memory limit to apply to the target's ingesting process or containers (`--memory-limit <bytes>`, default 4 GiB) |
 | `docker_network` | string | the internal network the target's containers must join; absent with `--no-docker` |
 | `workdir` | string | an empty directory for this chain; the harness removes it afterwards |
 
@@ -177,7 +176,7 @@ target needs) that the report keeps.
 
 Request: `{"cmd": "advance", "head": N}`. Ledgers up to `N` are now visible on the replay
 server. In `rpc` mode the target sees them through `getLedgers` on its own and the adapter
-just answers. In `sep54-filesystem` and `sep54-s3` modes the adapter copies the batches whose
+answers at once. In the `sep54-*` modes the adapter copies the batches whose
 last ledger is at or below `N` (from `lake.url`, or from `lake.path` skipping later batches)
 into the directory or bucket the target reads, then answers.
 
@@ -203,7 +202,9 @@ is set (see "Verdicts").
 Request: `{"cmd": "export", "from": A, "to": B}`. Stream one `record` line per stored
 transaction in ledgers `A` to `B` inclusive, in ledger and apply order, then
 `{"status": "ok", "result": {"records": N}}` where `N` counts the record lines. Stream from
-the database cursor; do not build the whole answer in memory.
+the database cursor; do not build the whole answer in memory. A `records` count that differs
+from the lines sent, or a `hash` that is not 64 lowercase hex digits, is a protocol violation
+and ends the chain.
 
 Records are of two types:
 
@@ -355,7 +356,7 @@ reports the same. The CI workflows run on Linux runners.
 
 With `--no-docker` the harness creates no network and binds the server to `127.0.0.1`, for
 adapters whose target runs as a host process. The macOS check above does not
-apply to it; it has not been run on macOS.
+apply to it, and `--no-docker` is untested on macOS.
 
 ## Verdicts
 
@@ -515,7 +516,8 @@ shapekit harness state check --run <run out> [--run ...] --mapping mapping.toml
 ```
 
 - `infer` reads the ordinary chains of the runs: chains that ran without an error, whose
-  carry check is clean, and where no entry is `mishandled` or `dropped`. For each table it
+  carry check is clean, where no entry is `mishandled` or `dropped`, and where at least one
+  entry passes. Chains run with `--chain-dir` have no entries, so they never count. For each table it
   takes the entry kind and key columns that match the most rows: a column whose cells are
   account, contract or pool addresses in a known encoding, or ids of another table's rows
   that render as an asset (`{code}:{issuer}`) or a contract. A column is mapped to an entry
@@ -593,9 +595,10 @@ report as JSON.
 
 `shapekit harness run` writes into `--out` (default `harness-out/`):
 
-- `harness-report.json`: run metadata (adapter, target and version, delivery mode, corpus
-  manifest hash, harness peak resident memory per round), per-chain results (bootstrap
-  ledger, last ingested ledger, target peak memory, stop reason) and one row per entry with
+- `harness-report.json`: run metadata (adapter, target and version, corpus manifest hash,
+  harness peak resident memory per round, the target memory check), per-chain results
+  (delivery mode, bootstrap ledger, last ingested ledger, target peak memory, stop reason,
+  dump and carry summary) and one row per entry with
   `verdict`, `reason`, the problems found and any unmapped rows.
 - `HARNESS.md`: the same as tables, one row per entry.
 - `logs/`: adapter stderr (`<chain>.<network>.adapter.log`) and the target logs `stop`
@@ -605,7 +608,10 @@ report as JSON.
 
 `--repeat N` runs the whole selection N times in one process. The run fails when a later
 round's verdicts differ from the first round's, or when its peak resident memory exceeds the
-first round's by more than `--memory-slack` (default 10% or 16 MiB, whichever is larger).
+first round's by more than `--memory-slack` of it (a fraction, default `0.1`) or 16 MiB,
+whichever is larger. It also fails when a chain's target peak memory in a later round exceeds
+its first-round peak by more than `--memory-slack` or 64 MiB, whichever is larger, and when
+any chain could not run or its dump failed.
 `--memory-budget` fails a round over a fixed bound. On Linux the harness reads its peak memory
 from `/proc/self/status` (`VmHWM`) and resets it between rounds through
 `/proc/self/clear_refs`. macOS has no peak a process can reset, so there the harness reads
@@ -698,8 +704,9 @@ shapekit harness run --adapter "adapters/bin/wb-adapter --commit <full commit ha
 `--commit` is required and takes a full 40-character lowercase commit hash. `--repo` names a
 wallet-backend clone (default: `<user cache dir>/shapekit/wallet-backend`, created on first
 use with only the commits you run, each fetched from github.com/stellar/wallet-backend at
-depth 1; a full clone you name stays full); `--db-memory` caps the database container
-(default 1 GiB); `--cpus` passes docker's `--cpus` to every container it starts (default: no
+depth 1; a full clone you name stays full); `--db-memory <bytes>` caps the database
+container (default 1 GiB); `--builder` names the buildx builder the image is built with
+(default: the current builder); `--cpus` passes docker's `--cpus` to every container it starts (default: no
 limit). The adapter offers the `rpc` (default) and `sep54-s3` delivery modes, `dump` (every
 base table of the database's `public` schema, rows ordered by every column) and `restart`
 (`docker restart` of the ingest container).
@@ -779,7 +786,7 @@ to maintain liabilities) become core's `TrustLineFlags` values (1, 4, 2). Two BA
 only when the second has the next `state_change_id` after the first, the reason the pair needs,
 and the same token and amount. wallet-backend writes the two rows of one token event next to
 each other (`createDebitCreditPair`, `handleMint`, `handleDefaultBurnOrClawback` in
-`internal/indexer/processors/token_transfer.go`) and numbers each stream's rows 1..N per
+`internal/indexer/processors/token_transfer.go`) and numbers the state change rows 1..N per
 operation in that order (`AssignStateChangeOrdinals`), so this pairs rows of one event and never
 joins rows of two events that happen to agree on token and amount, such as a one-sided
 liquidity-pool leg of a path payment followed by a transfer. State change and participant rows
@@ -804,11 +811,11 @@ form, and they are kept on purpose:
   `state_change_reason` column is an open vocabulary, so the loss happens in wallet-backend's
   mapping, not in what the ledger or its schema can carry. A wallet that shows this history
   would show a clawback as a voluntary payment. Each clawback therefore counts as one dropped
-  `clawback` and one extra `burn`, which is finding WB-W3.
+  `clawback` and one extra `burn`, which is finding [WB-W3](../findings/FINDINGS.md#wb-w3).
 - **`to_muxed_id` on every arm.** CAP-67 puts the destination's mux id or, without one, the
   transaction memo into a transfer's `to_muxed_id`, typed as u64, string or bytes.
   wallet-backend's `setToMuxedID` keeps only the u64 arm, although its `to_muxed_id` column is
-  `TEXT`. A text, hash or return memo is lost, which is finding WB-W4.
+  `TEXT`. A text, hash or return memo is lost, which is finding [WB-W4](../findings/FINDINGS.md#wb-w4).
 
 The rule for both: a claim says what wallet-backend is expected to record of a fact it ingests
 and has a place for, judged against the oracle. Claiming only what it stores today would turn

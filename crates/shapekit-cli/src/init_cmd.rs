@@ -35,6 +35,7 @@ impl Lang {
 
 #[derive(Args)]
 pub struct AdapterArgs {
+    /// The language of the skeleton.
     #[arg(long, value_enum)]
     lang: Lang,
     /// The indexer the adapter drives, as describe reports it, for example `my-indexer`.
@@ -50,6 +51,7 @@ pub struct AdapterArgs {
 
 #[derive(Args)]
 pub struct TesteeArgs {
+    /// The language of the skeleton.
     #[arg(long, value_enum)]
     lang: Lang,
     /// The SDK package under test: an npm package (ts), a PyPI distribution (python) or a go
@@ -299,7 +301,12 @@ fn adapter(a: AdapterArgs) -> Result<bool> {
     let (build, command) = match a.lang {
         Lang::Python => (None, "python3 adapter.py".to_owned()),
         Lang::Ts => (None, "node adapter.ts".to_owned()),
-        Lang::Go => (Some(format!("go build -o {name} .")), format!("./{name}")),
+        // GOWORK=off: the readme runs this from the root of a shapekit checkout, whose go.work
+        // does not list the new module, so a plain go build refuses to run there
+        Lang::Go => (
+            Some(format!("GOWORK=off go build -o {name} .")),
+            format!("./{name}"),
+        ),
     };
     let dir = out.display();
     let build_line = build

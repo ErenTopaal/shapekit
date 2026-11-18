@@ -28,6 +28,16 @@ indexerlint -baseline indexerlint-baseline.json ./...
 
 Exit codes: `0` no findings, `1` findings, `2` usage, load or analysis error (including an invalid baseline). Text output is one line per finding, `file:line:col: RULE: message [function]`, then one line per baseline entry that matched nothing, then a count line. JSON output has `findings`, `suppressed`, `baselined`, `unused_baseline_entries` and `counts`. Without `-baseline`, the standalone driver reads the baseline path from the `INDEXERLINT_BASELINE` environment variable.
 
+Through shapekit, which starts the `indexerlint` on `PATH` (or the one `--linter` names) inside
+the module directory:
+
+```
+shapekit lint <module dir>
+shapekit lint <module dir> --baseline indexerlint-baseline.json --json
+```
+
+`shapekit lint` exits with indexerlint's status for no findings (0) and findings (1).
+
 Under `go vet`:
 
 ```

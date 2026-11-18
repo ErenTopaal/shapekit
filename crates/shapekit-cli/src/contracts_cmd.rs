@@ -16,14 +16,17 @@ pub enum ContractsCommand {
         /// Compare only, the default; fails when a committed schema is stale or missing.
         #[arg(long)]
         check: bool,
+        /// Directory holding the committed schemas.
         #[arg(long, default_value = "schema")]
         dir: PathBuf,
     },
     /// Load a data file as one contract: its schema version, its fields and the checks the
     /// schema cannot express.
     Validate {
+        /// The contract the file is checked as.
         #[arg(long, value_parser = contract_names())]
         contract: String,
+        /// The data file to check.
         #[arg(long)]
         file: PathBuf,
     },

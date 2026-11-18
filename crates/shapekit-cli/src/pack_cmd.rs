@@ -22,27 +22,36 @@ pub enum PackCommand {
         /// in the corpus when absent.
         #[arg(long)]
         chain: Vec<PathBuf>,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Ledgers in one lake batch.
         #[arg(long, default_value_t = shapekit_pack::layout::DEFAULT_LEDGERS_PER_BATCH)]
         ledgers_per_batch: u32,
+        /// Batches in one lake partition directory.
         #[arg(long, default_value_t = shapekit_pack::layout::DEFAULT_BATCHES_PER_PARTITION)]
         batches_per_partition: u32,
     },
     /// Check committed chains against their chain.json, and that the lake holds exactly the
     /// canonical form of core's raw stream.
     Verify {
+        /// A chain directory (corpus/chains/<chain-id>/<network>); repeatable. Every chain in the
+        /// corpus when absent.
         #[arg(long)]
         chain: Vec<PathBuf>,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
     },
     /// Write the history archive as it stood at one checkpoint into a new directory.
     ArchiveAt {
+        /// A chain directory (corpus/chains/<chain-id>/<network>).
         #[arg(long)]
         chain: PathBuf,
+        /// The last ledger of the checkpoint (63, 127, 191 and so on).
         #[arg(long)]
         checkpoint: u32,
+        /// Directory to write the archive into.
         #[arg(long)]
         out: PathBuf,
     },

@@ -47,6 +47,7 @@ pub enum HarnessCommand {
     /// Check, or with --write regenerate, schema/adapter-protocol.schema.json and the
     /// vocabulary section of docs/adapter-interface.md.
     Schema {
+        /// Write the schema and the vocabulary section instead of checking them.
         #[arg(long)]
         write: bool,
         /// The repository root.
@@ -57,6 +58,7 @@ pub enum HarnessCommand {
 
 #[derive(Args, Clone)]
 pub struct Common {
+    /// The corpus directory, holding manifest.json.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
     /// Delivery mode to ask the adapter for; its default when absent.
@@ -68,7 +70,7 @@ pub struct Common {
     /// Seconds a target may go without ingesting a released ledger.
     #[arg(long, default_value_t = 120)]
     ledger_timeout: u64,
-    /// Seconds from start until the target has ingested the bootstrap ledger.
+    /// Seconds the target may go without ingesting a ledger while it bootstraps.
     #[arg(long, default_value_t = 600)]
     bootstrap_timeout: u64,
     /// Seconds the adapter may take to answer start (it may build images).
@@ -106,8 +108,10 @@ pub struct RunArgs {
     /// judge, from its first checkpoint; the corpus selection is not used.
     #[arg(long, value_name = "NAME=DIR")]
     pub(crate) chain_dir: Vec<String>,
+    /// Which passphrase's recording of each chain to replay.
     #[arg(long, default_value = "testnet", value_parser = ["testnet", "mainnet", "both"])]
     pub(crate) network: String,
+    /// Directory for harness-report.json, HARNESS.md and the logs.
     #[arg(long, default_value = "harness-out")]
     pub(crate) out: PathBuf,
     /// Run the whole selection this many times in one process and fail when a later round's
@@ -143,11 +147,13 @@ pub enum StateCommand {
         /// The pair's `pair.json`.
         #[arg(long)]
         pair: PathBuf,
+        /// The table mapping `harness state infer` wrote.
         #[arg(long)]
         mapping: PathBuf,
         /// Which network's chain of each run, when a run holds both.
         #[arg(long, default_value = "testnet")]
         network: String,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
         /// Write the result as JSON here.
@@ -164,16 +170,20 @@ pub enum StateCommand {
         /// Only chains of this network.
         #[arg(long)]
         network: Option<String>,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Where to write the inferred mapping.
         #[arg(long)]
         write: PathBuf,
     },
     /// Apply a mapping to every chain of the given runs and list where the stored state
     /// differs from core's, and where that disagrees with the oracle's verdicts.
     Check {
+        /// A `harness run --out` directory whose run kept dumps; repeatable.
         #[arg(long, required = true)]
         run: Vec<PathBuf>,
+        /// The table mapping `harness state infer` wrote.
         #[arg(long)]
         mapping: PathBuf,
         /// Core entries a table leaves out on purpose, each with the target's source line.
@@ -182,6 +192,7 @@ pub enum StateCommand {
         /// Only chains of this network.
         #[arg(long)]
         network: Option<String>,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
         /// Write the per-chain results as JSON here.
@@ -217,6 +228,7 @@ pub struct RelateArgs {
     /// The logs directory of a second run of the base configuration, to measure noise.
     #[arg(long)]
     control: Option<PathBuf>,
+    /// The corpus directory, holding manifest.json.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
     /// Write the reports as JSON here.
@@ -303,6 +315,7 @@ fn report_expectations(
 
 #[derive(Args)]
 pub struct ReproduceArgs {
+    /// The reproductions table, for example adapters/walletbackend/reproductions.toml.
     #[arg(long)]
     table: PathBuf,
     /// Run every case through the mapped adapter with this mapping file instead of the
@@ -321,6 +334,7 @@ pub struct ReproduceArgs {
     /// Only the reproduction with this id; repeatable.
     #[arg(long)]
     only: Vec<String>,
+    /// Directory for one harness run per reproduction side and the summary.
     #[arg(long, default_value = "harness-reproduce")]
     out: PathBuf,
     #[command(flatten)]

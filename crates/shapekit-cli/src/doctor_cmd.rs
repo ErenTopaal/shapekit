@@ -38,10 +38,13 @@ pub struct DoctorArgs {
     /// Skip the checks that contact package registries and GitHub.
     #[arg(long)]
     offline: bool,
+    /// With sdk: the SDK versions and how to build and start each testee.
     #[arg(long, default_value = "conformance/versions.toml")]
     versions_file: PathBuf,
+    /// The corpus directory whose presence is checked.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
+    /// The pins file, read for the pinned images and tools.
     #[arg(long, default_value = "pins.toml")]
     pins: PathBuf,
 }

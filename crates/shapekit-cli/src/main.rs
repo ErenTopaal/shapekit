@@ -269,6 +269,7 @@ enum GenCommand {
     /// without repeats: the recipes of this build and the chains of the corpus's
     /// recipes/chains.toml.
     Families {
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
     },
@@ -300,18 +301,23 @@ enum GenCommand {
         /// Chains recorded at once, each on its own core container.
         #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
         jobs: u16,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
     /// Record a chain with no transactions through --last, so its history archive holds
     /// checkpoints, and write it in the committed form.
     Checkpoints {
+        /// Passphrase the chain runs under.
         #[arg(long, value_parser = ["testnet", "mainnet"])]
         network: String,
+        /// Protocol the chain is upgraded to after genesis.
         #[arg(long, default_value_t = 30)]
         protocol: u32,
         /// Last ledger; checkpoints end at 63, 127, 191 and so on.
@@ -320,6 +326,7 @@ enum GenCommand {
         /// Directory to write the chain into; must not exist.
         #[arg(long)]
         out: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -331,6 +338,7 @@ enum GenCommand {
         /// The corpus holding the second recording.
         #[arg(long)]
         other: PathBuf,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
     },
@@ -342,12 +350,16 @@ enum GenCommand {
         /// testnet, mainnet or both.
         #[arg(long, default_value = "both")]
         network: String,
+        /// Chains recorded at once, each on its own core container.
         #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
         jobs: u16,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -357,12 +369,16 @@ enum GenCommand {
         /// Only the recipes of this family; repeatable. All when absent.
         #[arg(long)]
         family: Vec<String>,
+        /// Chains recorded at once, each on its own core container.
         #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
         jobs: u16,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
+        /// The pins file, read for the core image and the pinned sources.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -413,6 +429,7 @@ enum ManifestCommand {
     },
     /// Write the manifest JSON Schema generated from the manifest types.
     Schema {
+        /// Where to write the schema.
         #[arg(long, default_value = "schema/manifest.schema.json")]
         out: PathBuf,
     },
@@ -426,14 +443,17 @@ enum ImportCommand {
         /// A git checkout of stellar-core at the tag, holding the --tier directory.
         #[arg(long)]
         core_src: PathBuf,
+        /// The stellar-core tag the checkout is at.
         #[arg(long, default_value = "v30.0.0")]
         tag: String,
         /// Golden tier to read. test-lcm-next is the next protocol's meta and belongs in the
         /// next/ rehearsal tree (--corpus next), never in the release corpus.
         #[arg(long, default_value = "test-lcm-current", value_parser = ["test-lcm-current", "test-lcm-next"])]
         tier: String,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
     },
@@ -443,19 +463,25 @@ enum ImportCommand {
 enum GoldensCommand {
     /// Rescan a stellar-core checkout and require it to match the committed golden index.
     Verify {
+        /// A git checkout of stellar-core at the tag, holding the --tier directory.
         #[arg(long)]
         core_src: PathBuf,
+        /// The stellar-core tag the checkout is at.
         #[arg(long, default_value = "v30.0.0")]
         tag: String,
+        /// Golden tier to rescan.
         #[arg(long, default_value = "test-lcm-current", value_parser = ["test-lcm-current", "test-lcm-next"])]
         tier: String,
+        /// The committed golden index to compare with.
         #[arg(long, default_value = "corpus/goldens/core-v30.0.0/index.json")]
         index: PathBuf,
     },
     /// Structural agreement between golden entries and local-core or history entries.
     Agree {
+        /// The corpus manifest.
         #[arg(long, default_value = "corpus/manifest.json")]
         file: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
     },
@@ -465,8 +491,10 @@ enum GoldensCommand {
 enum CaptureCommand {
     /// Capture one ledger's LedgerCloseMeta as a testnet-history or mainnet-history entry.
     History {
+        /// The network whose history the ledger comes from.
         #[arg(long, value_enum)]
         network: capture_cmd::NetworkArg,
+        /// The ledger sequence to capture.
         #[arg(long)]
         ledger: u32,
         /// A transaction hash the ledger must contain; recorded with its apply index.
@@ -496,8 +524,10 @@ enum CaptureCommand {
         /// Extra provenance text appended to the entry notes.
         #[arg(long)]
         note: Option<String>,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
     },
@@ -507,23 +537,29 @@ enum CaptureCommand {
 enum OracleCommand {
     /// Write <variant>.oracle.json next to every eligible corpus entry and record it.
     Run {
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
     },
     /// Apply a record-marked LedgerCloseMeta stream to a ledger state, checking state
     /// consistency, conservation of lumens and interpretation on every ledger.
     Check {
+        /// The record-marked LedgerCloseMeta stream.
         #[arg(long)]
         file: PathBuf,
+        /// The network passphrase the ledgers were closed under.
         #[arg(long)]
         passphrase: String,
+        /// What the ledger state was before the first ledger of the file.
         #[arg(long, value_enum, default_value = "genesis")]
         start: oracle_cmd::StartState,
     },
     /// Print the oracle facts for a LedgerCloseMeta file.
     Interpret {
+        /// The LedgerCloseMeta file.
         #[arg(long)]
         file: PathBuf,
+        /// The network passphrase the ledger was closed under.
         #[arg(long)]
         passphrase: String,
         /// The file is a record-marked stream of ledgers rather than one bare value.

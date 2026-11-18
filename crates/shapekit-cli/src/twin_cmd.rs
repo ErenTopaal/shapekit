@@ -133,8 +133,10 @@ pub enum TwinCommand {
         /// The chain's protocol.
         #[arg(long)]
         protocol: u32,
+        /// Pins naming the release image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
         /// Output directory; must not exist.
@@ -155,8 +157,10 @@ pub enum TwinCommand {
         /// How the chain is named as a witness, `chain:<...>`.
         #[arg(long)]
         label: String,
+        /// Pins naming the release image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
         /// Output directory; must not exist.
@@ -166,6 +170,7 @@ pub enum TwinCommand {
     /// How many of the `ordinary` unknown ranges (the explorer's targets) a set of runs
     /// reaches: `twin coverage` output directories or `explore gates` run counts.
     Targets {
+        /// The unknown ranges `twin classify` wrote.
         #[arg(long, default_value = "corpus/coverage/unknown-regions.json")]
         unknown: PathBuf,
         /// Region count files (`counts.json` of `twin coverage`, `<run>.counts.json` of
@@ -183,8 +188,10 @@ pub enum TwinCommand {
         /// A stellar-core checkout at the gate list's commit.
         #[arg(long)]
         core_src: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
+        /// The gate list to rewrite.
         #[arg(long, default_value = "registry/generated/gates.json")]
         gates: PathBuf,
         /// `explore-gate-sides.json` files from `shapekit explore gates` (repeatable): recipe
@@ -201,12 +208,16 @@ pub enum TwinCommand {
         /// A stellar-core checkout at the summary's commit.
         #[arg(long)]
         core_src: PathBuf,
+        /// The core coverage summary whose unreached regions are sorted.
         #[arg(long, default_value = "corpus/coverage/core-coverage.json")]
         coverage: PathBuf,
+        /// The gate list, for the protocol sides.
         #[arg(long, default_value = "registry/generated/gates.json")]
         gates: PathBuf,
+        /// Hand labels for ranges the static rules leave unsorted.
         #[arg(long, default_value = "twin/unknown-labels.toml")]
         labels: PathBuf,
+        /// Where to write the sorted ranges.
         #[arg(long, default_value = "corpus/coverage/unknown-regions.json")]
         out: PathBuf,
     },
@@ -217,6 +228,7 @@ pub enum TwinCommand {
         /// Catch2 test spec selecting the test cases.
         #[arg(long, default_value = "[tx]")]
         spec: String,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
         /// Test cases run at once, each in a container of one cpu.
@@ -235,8 +247,10 @@ pub enum TwinCommand {
         /// A `twin core-tests` output directory.
         #[arg(long)]
         tests: PathBuf,
+        /// Pins naming the release image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
+        /// Pins naming the coverage twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
         /// Where to write the summary (corpus/coverage/core-coverage.json).
@@ -257,8 +271,10 @@ pub enum TwinCommand {
         /// Pins naming the twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
         /// Print the regions overlapping these lines, `<file>:<from>-<to>` with the file
@@ -284,8 +300,10 @@ pub enum TwinCommand {
         /// Pins naming the twin image.
         #[arg(long, default_value = "twin/pins.toml")]
         twin_pins: PathBuf,
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
         /// Chains recorded at once on each image.
@@ -308,6 +326,7 @@ pub enum TwinCommand {
         /// Where to write the gate list (registry/generated/gates.json).
         #[arg(long)]
         out: PathBuf,
+        /// The pins file naming the stellar-core commit the checkout must be at.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },

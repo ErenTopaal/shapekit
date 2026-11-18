@@ -24,10 +24,18 @@ func main() {
 }
 
 func run() error {
-	commit := flag.String("commit", "", "full stellar-etl commit hash to build and run")
+	commit := flag.String("commit", "", "full stellar-etl commit hash to build and run (required)")
 	repo := flag.String("repo", "", "stellar-etl git clone (default: <user cache dir>/shapekit/stellar-etl, cloned on first use)")
 	cpus := flag.String("cpus", "", "docker --cpus limit of every container the adapter starts (default: none)")
 	builder := flag.String("builder", "", "buildx builder to build the image with (default: the current builder)")
+	flag.Usage = func() {
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "usage: etl-adapter [flags]\n\n"+
+			"etl-adapter puts stellar-etl behind the shapekit replay harness. It speaks the adapter\n"+
+			"protocol on stdin and stdout (docs/adapter-interface.md) and logs to stderr, so you\n"+
+			"run it through the harness, for example:\n\n"+
+			"  shapekit check indexer --adapter \"etl-adapter --commit <commit>\"\n\nFlags:\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	if *repo == "" {
 		cache, err := os.UserCacheDir()

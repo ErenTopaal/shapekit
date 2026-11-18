@@ -10,8 +10,10 @@ pub struct CoverageArgs {
     /// Fail instead of writing when a gap has no reason or the committed files are stale.
     #[arg(long)]
     check: bool,
+    /// The corpus directory, holding manifest.json.
     #[arg(long, default_value = "corpus")]
     corpus: PathBuf,
+    /// Directory holding the registry files.
     #[arg(long, default_value = "registry")]
     registry: PathBuf,
 }
@@ -21,8 +23,10 @@ pub enum CorpusCommand {
     /// Write corpus-<version>.tar.zst and SHA256SUMS from the committed corpus, byte for byte
     /// the same on every run.
     Pack {
+        /// The corpus directory, holding manifest.json.
         #[arg(long, default_value = "corpus")]
         corpus: PathBuf,
+        /// Directory holding the registry files.
         #[arg(long, default_value = "registry")]
         registry: PathBuf,
         /// Directory for the archive and SHA256SUMS.

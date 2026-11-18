@@ -27,7 +27,7 @@ as `report.html` next to that file. Run the command from a shapekit checkout, or
 | `--out <file>` | Where the HTML page goes. |
 | `--summary <file>` | Also writes a markdown summary for a pull request comment. |
 | `--json <file>` | Also writes everything the page shows as JSON. |
-| `--baseline <run or file>` | Compares with an earlier run of the same kind, or a harness run with an expectations file (`shapekit harness expect --write`). |
+| `--baseline <run or file>` | Compares with an earlier run of the same kind, or a harness run with an expectations file (`shapekit harness expect --write`). Not together with `--known-failures`. |
 | `--known-failures <dir>` | For a conformance run: compares with the known-failures directory the run used. |
 | `--manifest <file>` | The corpus manifest the run used, when it is not the checkout's `corpus/manifest.json`. |
 | `--root <dir>`, `--triage <file>` | The shapekit checkout, and the triage in it (default `findings/triage.toml`). |
@@ -78,7 +78,9 @@ conformance cell whose result is neither `pass` nor `unsupported`.
 
 A harness failure is one entry on one network, and it is the same failure in both runs when
 its verdict and reason are the same. A conformance failure is one check of one entry on one
-testee, and it is the same when its result is. Against a baseline each failure is:
+testee, and it is the same when its result is. A conformance cell with several failing checks
+is one failure in its group but several in the comparison, so the comparison counts of a
+conformance run can exceed the failure count of its groups. Against a baseline each failure is:
 
 - **new** when the baseline does not fail it;
 - **changed** when both fail it with a different verdict, reason or result;

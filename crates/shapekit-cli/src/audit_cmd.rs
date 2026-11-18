@@ -128,6 +128,7 @@ pub enum AuditCommand {
     },
     /// Print an audit report as Markdown, for a CI job summary.
     Summary {
+        /// The audit report (`audit run --out` or `audit watch --out`).
         #[arg(long)]
         report: PathBuf,
     },

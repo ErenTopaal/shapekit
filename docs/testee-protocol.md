@@ -112,11 +112,11 @@ Result members:
 | member | type | meaning |
 |---|---|---|
 | `protocol` | integer | `2` (the runner also accepts `1`) |
-| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK), `stellar-sdk` (Python), `network.lightsail:stellar-sdk` (Java), `stellar_flutter_sdk` (Dart), `soneso/stellar-php-sdk` (PHP), `stellar-dotnet-sdk` (.NET) |
+| `sdk` | string | the package under test: `stellar-xdr` (Rust), `github.com/stellar/go-stellar-sdk` (Go), `@stellar/stellar-sdk` (JS), `soroban-sdk` (the Rust contract SDK), `stellar-sdk` (Python), `network.lightsail:stellar-sdk` (Java), `stellar_flutter_sdk` (Dart), `soneso/stellar-php-sdk` (PHP), `stellar-dotnet-sdk` (.NET), `com.soneso.stellar:stellar-sdk-jvm` (KMP), `stellar-cli` (stellar-cli) |
 | `sdk_version` | string | the exact version that is linked or loaded, read from the build or the installed package, never typed in. The runner refuses a testee whose `sdk` or `sdk_version` differs from the `package` and `version` in the versions file |
 | `components` | object, string to string | other packages whose behaviour the ops depend on and their exact versions, for example `{"stellar-strkey": "1.0.0"}`. Can be empty |
 | `ops` | array of strings | the ops this build implements, excluding `hello`. The runner refuses a `hello` that lists an op this page does not define. It does not send unlisted ops and records their checks as `unsupported` |
-| `decode_limits` | `"honoured"` or `"ignored"` | whether `depth_limit` and `len_limit` reach the SDK's decoder (see `decode_encode`). `"honoured"` covers the XDR inputs of every op. `asset_order`, `pool_id`, `map_sort` and `map_validate` requests carry no limits, so a testee that reports `"honoured"` decodes their inputs at depth 1000 with the input's own length as the length limit, or with `depth_limit` and `len_limit` when a request carries them |
+| `decode_limits` | `"honoured"` or `"ignored"` | whether `depth_limit` and `len_limit` reach the SDK's decoder (see `decode_encode`). `"honoured"` covers the XDR inputs of every op. `asset_order`, `pool_id`, `map_sort`, `map_validate`, `to_native` and `address_from_scval` requests carry no limits, so a testee that reports `"honoured"` decodes their inputs at depth 1000 with the input's own length as the length limit, or with `depth_limit` and `len_limit` when a request carries them |
 
 ## Operations
 
@@ -261,8 +261,9 @@ the runner exactly as the corpus vector has it, which includes numbers above 2^5
 negative numbers).
 
 The testee hands `input` to the SDK API that takes a textual or numeric ID (JS `MuxedAccount`
-and `Operation.manageSellOffer`; in Rust the only textual path is the XDR-JSON reader of the
-`id` and `offer_id` fields; in Go the Horizon response types, `horizon.Offer.ID` and
+and `Operation.manageSellOffer`; in Rust the only textual path is the XDR-JSON reader of
+`ManageSellOfferOp.offer_id`, and muxed IDs have none, so the Rust testee answers
+`unsupported` for them; in Go the Horizon response types, `horizon.Offer.ID` and
 `horizon.Transaction.AccountMuxedID`, which read IDs from JSON strings only; in Python
 `MuxedAccount` and `ManageSellOffer`, which take integers only; in Java the Horizon response
 types `OfferResponse.id` and `TransactionResponse.accountMuxedId`, read with the SDK's Gson), in
@@ -308,7 +309,8 @@ Result: `text` (the strkey).
 ### tx_hash
 
 Request: `xdr` (base64 XDR `TransactionEnvelope`), `network_passphrase` (string),
-`depth_limit`, `len_limit`, and optionally `inner` (boolean).
+`depth_limit` and `len_limit` (optional in the schema; the runner always sends them), and
+optionally `inner` (boolean).
 
 The SDK builds its transaction object from the envelope and the passphrase and returns the
 transaction hash: the hash of the outer transaction, for a fee bump the fee bump's own hash.
@@ -322,7 +324,7 @@ Result: `hash` (lowercase hex, 64 characters).
 ### balance_id
 
 Request: `xdr` (base64 XDR `TransactionEnvelope`), `network_passphrase`, `op_index` (integer),
-`depth_limit`, `len_limit`.
+`depth_limit` and `len_limit` (optional in the schema; the runner always sends them).
 
 The ID of the claimable balance the `CreateClaimableBalance` operation at `op_index` creates.
 For a fee bump the operation belongs to the inner transaction. An operation of another type,
@@ -335,8 +337,8 @@ type, then the 32-byte hash).
 
 ### contract_id
 
-Request: `preimage` (base64 XDR `ContractIdPreimage`), `network_passphrase`, `depth_limit`,
-`len_limit`.
+Request: `preimage` (base64 XDR `ContractIdPreimage`), `network_passphrase`, `depth_limit` and
+`len_limit` (optional in the schema; the runner always sends them).
 
 The ID of the contract the preimage deploys on that network. An SDK with a function for asset
 preimages (`Asset.contractId`, `xdr.Asset.ContractID`) uses it. For a preimage without such a
@@ -368,8 +370,7 @@ Result: `tool` (what measured it), `ranges` (sorted strings, each range once), a
 JavaScript testee `uncovered` (the ranges V8 has reported with a count of 0 that have not run
 since the process started, in the same form). V8 resets its counters each time it is read, so
 the JavaScript testee folds every read into what it has seen before; every snapshot covers the
-whole process, as for Rust, Go, Python and Java. V8
-lists a nested block only while its count differs from the count of the block around it, so a
+whole process, as for every other testee. V8 lists a nested block only while its count differs from the count of the block around it, so a
 block can be missing from both lists: it then ran exactly as often as its parent. To decide
 whether a range ran, look it up in `ranges`, then in `uncovered`, and otherwise take the
 answer of the smallest listed range that contains it. Rust regions and Go blocks are a fixed
@@ -428,7 +429,7 @@ strkey). A case the runner cannot map is an `error` (a runner bug), never skippe
 | `strkey` | `strkey_decode`, and `strkey_encode` for valid strings | decode gives the expected kind and raw payload, or `rejected` for invalid strings; encode of that kind and payload gives back the text |
 | `textual-id` | `id_parse` | the ID equals `expected.id`, or `rejected` when the case expects a rejection. A case whose `expected` is `{"either": [{"id": ...}, {"reject": ...}]}` passes with exactly that ID or with `rejected`; any other ID diverges. This form is used where reading the exact ID and refusing are both correct: decimal text with leading zeros, integral JSON numbers written with a zero fraction, JSON numbers above 2^53-1, and negative offer IDs, which the XDR `int64` holds and stellar-core refuses only when it checks the operation. Such a case is judged against its own expectation even when the entry is `implementation-defined` |
 | `native-projection` | `to_native` | `rejected`, or a native map that keeps every entry of the input map |
-| `native-projection`, `address_from_scval` cases | `address_from_scval` | the strkey equals `expected.text`, or the answer is `rejected` when the case expects a rejection. `{"either": [{"text": ...}, {"reject": ...}]}` passes with that strkey or with `rejected`: an SDK's address type may or may not hold claimable balance and liquidity pool addresses |
+| `native-projection`, `address_from_scval` cases | `address_from_scval` | the strkey equals `expected.text`, or the answer is `rejected` when the case expects a rejection. `{"either": [{"text": ...}, {"reject": ...}]}` passes with that strkey or with `rejected`: SDK address types differ on whether they hold claimable balance and liquidity pool addresses |
 
 The runner derives each expected hash and ID with the law library (`crates/shapekit-laws`) and
 uses it only where the ledger confirms it: a derived transaction hash must be the hash core
@@ -495,8 +496,8 @@ rendering, or the value is one of the three above, where the library departs fro
 `reference`.
 
 `shapekit conformance crosscheck` supplies the independent evidence: it sends every
-`decode_json` check with a canonical `expected_json` to the Go and JS testees at their
-current versions and reports, per entry, where either renders something else. A disagreement
+`decode_json` check with a canonical `expected_json` to the Go and JS testees (or the
+`--sdk` ones) at their current versions and reports, per entry, where either renders something else. A disagreement
 where two decoders render the same other value points at stellar-xdr's rendering; one where a
 single decoder differs while another agrees is that SDK's divergence. The command fails unless
 every disagreement is a single-SDK divergence already in that SDK's known-failures list.
@@ -525,17 +526,18 @@ regression next to a known failure is caught. A listed check that now passes, is
 is unsupported, fails with another result, or is not a check of the entry fails the run too,
 until the line is fixed. Every line must name an entry in the manifest and a version in
 `versions.toml`. A `diverges-from-peers` line can no longer fail: in a run with other SDKs its
-check passing fails the run, so remove the line.
+check passing fails the run (a run of one SDK ignores the line), so remove the line.
 
 ## Limits the runner applies
 
 - A per-request timeout: `timeout_ms` per SDK in `conformance/versions.toml`, 10000 (10 s)
-  when absent. It covers writing the request as well as reading the response, so a testee
+  when absent; a `--coverage` run raises it to at least 120000. It covers writing the request as well as reading the response, so a testee
   that stops reading stdin cannot block the runner on a request larger than the pipe buffer.
 - Response lines of at most 256 MiB (see [Transport](#transport)).
 - A memory limit set with `setrlimit` in the child before `exec`: `RLIMIT_AS` (address space)
-  for testees whose runtime reserves little virtual memory (Rust, Go), `RLIMIT_DATA` for
-  runtimes that reserve large `PROT_NONE` regions up front (Node's V8 cage), where an
+  for testees whose runtime reserves little virtual memory (Rust, Go, Python, PHP,
+  stellar-cli), `RLIMIT_DATA` for runtimes that reserve large `PROT_NONE` regions up front
+  (Node's V8 cage, the JVM, the Dart VM, .NET), where an
   address-space cap would kill the process before it touches the data. The resource and size
   are set per SDK in `versions.toml` (`memory = { resource = "as" | "data", mib = <n> }`).
   On macOS neither rlimit can be set: the kernel refuses a limit below the process's current
@@ -558,8 +560,9 @@ resolved are checked against `testees/kmp/versions/<version>/lib.sha256` (writte
 The type table `TypesGen.kt` is generated by `testees/kmp/gentypes.py` from the schema, the
 manifest and each version's jar: a type maps to the class `<name>Xdr` whose companion has
 `decode(XdrReader)` and `fromXdrJsonElement`. Typedefs are Kotlin value classes, whose JVM
-methods carry mangled names, so the testee calls them through Kotlin reflection. The 44 overlay
-and survey types have no class and answer `unsupported`.
+methods carry mangled names, so the testee calls them through Kotlin reflection. The 44 schema
+types with no class (overlay, survey and SCP-persistence messages, `LedgerCloseMetaBatch`)
+answer `unsupported`.
 
 | op | what it calls |
 |---|---|
@@ -613,8 +616,8 @@ source of the version instead of the release binary, and answers `coverage_snaps
 
 `shapekit conformance sync-versions` writes the version lists of
 [conformance/versions.toml](../conformance/versions.toml) and the per-version testee files under
-`testees/*/versions/` from what crates.io, the Go module proxy, npm, PyPI and Maven Central
-publish. For each SDK it
+`testees/*/versions/` from what crates.io, the Go module proxy, npm, PyPI, Maven Central, pub.dev,
+Packagist and NuGet publish. For each SDK it
 picks:
 
 - for every release line (a major version, or a minor version below 1.0) the newest stable
@@ -649,8 +652,11 @@ changed no XDR, so `max_protocol` runs up to the protocol before the next tag: `
 protocol 29. A commit that is not a release tag stops the command.
 
 For a newly picked version the command writes the testee files from those of the current
-version and resolves them with `cargo generate-lockfile`, `go mod tidy`,
-`npm install --package-lock-only`, `uv pip compile --generate-hashes` or `testees/java/lock.sh`. For Python, run
+version and resolves them with `cargo generate-lockfile` (rust, soroban), `go mod tidy`,
+`npm install --package-lock-only`, `uv pip compile --generate-hashes`,
+`testees/java/lock.sh`, `flutter pub get`, `composer update --no-install`,
+`dotnet restore --use-lock-file`, `testees/kmp/lock.sh` or
+`testees/stellar-cli/fetch.sh --lock`. For Python, run
 `python3 -I testees/python/gentypes.py` after the new version's venv is built, so the type
 table covers it. It removes the files of versions it no longer picks and
 leaves the files of the other versions alone, since their lock files are the pins. The comment
@@ -692,8 +698,8 @@ each SDK.
 
 ## Writing a testee
 
-`shapekit init testee --lang go|ts|python` writes a skeleton into `testee-<lang>/` (or
-`--out <dir>`) for the Stellar SDK of that language: `@stellar/stellar-sdk` (ts),
+`shapekit init testee --lang go|ts|python` writes a skeleton into `testee-<name>/` (or
+`--out <dir>`; `<name>` is `--name`, else the language) for the Stellar SDK of that language: `@stellar/stellar-sdk` (ts),
 `github.com/stellar/go-stellar-sdk` (go) or `stellar-sdk` (python). For another package, give
 `--package`, `--sdk-version` and `--issues-repo`; `--name` sets its key in the versions file.
 The skeleton answers `hello` with the SDK version read from the installed package or the build
@@ -722,7 +728,8 @@ follows `schema/testee-protocol.schema.json` (`crates/shapekit-cli/tests/init_sk
    `shapekit conformance sync-versions` does this (see "The version matrix").
 
 Working testees are in `testees/rust`, `testees/go`, `testees/js`, `testees/soroban`,
-`testees/python`, `testees/java`, `testees/dart`, `testees/php` and `testees/dotnet`.
+`testees/python`, `testees/java`, `testees/kmp`, `testees/dart`, `testees/php`,
+`testees/dotnet` and `testees/stellar-cli`.
 
 ## The soroban-sdk testee
 
@@ -829,8 +836,8 @@ without a class answer `unsupported` with the reason.
 | `balance_id`, `contract_id` | SHA-256 of the `HashIDPreimage` the SDK encodes; `Address.deriveContractId` for address preimages |
 
 `map_validate` is `unsupported`: the SDK orders map keys but has no check of a map it is
-given. `decode_limits` is `"ignored"`. A stack overflow, a `TypeError` or a
-`NoSuchMethodError` is reported as `panic`; every other exception the SDK throws is a
+given. `decode_limits` is `"ignored"`. A stack overflow, an `OutOfMemoryError`, a
+`TypeError` or a `NoSuchMethodError` is reported as `panic`; every other exception the SDK throws is a
 rejection.
 
 ## The PHP testee
@@ -853,7 +860,8 @@ The ops call the same parts of the SDK as the Dart testee, with these difference
 
 PHP writes warnings to stdout by default; the testee sends them to stderr, so they reach the
 runner's report without breaking the protocol. A `TypeError`, an `ArgumentCountError`, running
-out of stack or memory and calling an undefined method are reported as `panic`; every other
+out of stack or memory, and calling an undefined method or a method on null are reported
+as `panic`; every other
 exception is a rejection.
 
 ## The .NET testee

@@ -40,6 +40,7 @@ pub enum CoretestCommand {
         /// Defaults to the cases one process cannot hold in 2 GB and the longest ones.
         #[arg(long = "split-by-version", default_values = shapekit_coretest::run::SPLIT_BY_DEFAULT)]
         split: Vec<String>,
+        /// The pins file, read for the core test image.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },
@@ -64,6 +65,7 @@ pub enum CoretestCommand {
         /// Dumps converted at once.
         #[arg(long, default_value_t = 2)]
         jobs: usize,
+        /// The pins file, read for the stellar-core commit.
         #[arg(long, default_value = "pins.toml")]
         pins: PathBuf,
     },

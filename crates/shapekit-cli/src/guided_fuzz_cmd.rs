@@ -8,6 +8,7 @@ use shapekit_fuzz::guided::{self, GuidedConfig, GuidedRun};
 
 #[derive(clap::Args)]
 pub struct GuidedFuzzArgs {
+    /// Seed of the input generator; the same seed and budget give the same run.
     #[arg(long, default_value_t = 1)]
     seed: u64,
     /// Inputs per run; every input goes to all three testees.

@@ -30,13 +30,15 @@ unmodified build. Any of these counts:
 
 - an entry's checks change result;
 - an entry's answer changes;
-- the run hangs;
-- the testee no longer starts.
+- an entry gets no answer within the testee's timeout;
+- the testee no longer starts, or quits on some entry.
 
 Known failures are compared like every other result. A fault that changes an answer the corpus
 already marks as wrong is caught too. A fault whose effect no entry observes is missed.
 
-A fault that does not compile is not counted either way.
+A fault that does not compile is not counted either way. A corpus run that does not finish
+within the mutation tool's own time limit is counted as timed out: not caught, so its `seed`
+obligation stays open, but it counts toward the built faults the catch rate divides by.
 
 ## What the catch rate means
 

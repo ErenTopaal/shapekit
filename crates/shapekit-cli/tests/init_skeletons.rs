@@ -206,6 +206,42 @@ fn go_adapter_skeleton() {
     );
 }
 
+// the readme's build line runs from the root of a shapekit checkout, inside a go workspace that
+// does not list the skeleton's module
+#[test]
+fn go_adapter_readme_builds_inside_a_go_workspace() {
+    let tmp = tempfile::tempdir().unwrap();
+    std::fs::write(tmp.path().join("go.work"), "go 1.27.4\n").unwrap();
+    shapekit(
+        tmp.path(),
+        &[
+            "init",
+            "adapter",
+            "--lang",
+            "go",
+            "--target",
+            "my-indexer",
+            "--target-version",
+            "0123456789abcdef",
+            "--out",
+            "a",
+        ],
+    );
+    let readme = std::fs::read_to_string(tmp.path().join("a/README.md")).unwrap();
+    let build = readme
+        .lines()
+        .find(|l| l.starts_with("(cd a && "))
+        .expect("the readme has a build line");
+    let st = Command::new("sh")
+        .args(["-c", build])
+        .current_dir(tmp.path())
+        .env_remove("GOWORK")
+        .status()
+        .unwrap();
+    assert!(st.success(), "{build} failed");
+    assert!(tmp.path().join("a/my-indexer-adapter").is_file());
+}
+
 #[test]
 fn init_refuses_a_directory_that_is_not_empty() {
     let tmp = tempfile::tempdir().unwrap();
