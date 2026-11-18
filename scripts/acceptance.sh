@@ -226,6 +226,10 @@ PATH="$java_path:$PATH" step testee_build kmp
 step stellar_cli_testee
 step testee_build stellar-cli
 step "$shapekit" findings check
+# the release notes of this version: STATUS.md holds its release candidate section
+current="release notes for the version in Cargo.toml"
+echo "== $current"
+scripts/release-notes.sh "v$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -1)" >/dev/null
 step scripts/check-no-em-dash.sh
 step scripts/check-public-text.sh
 # relative links and anchors of the public text; full mode also fetches the external ones

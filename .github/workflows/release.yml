@@ -3,8 +3,9 @@ name: release
 # publishes a release from a signed tag: the shapekit, indexerlint and wallet-backend adapter
 # binaries for linux and macos on x86_64 and arm64, the corpus
 # archive and the golden snapshot, one SHA256SUMS over all of them, a build provenance
-# attestation per asset, and release notes from the newest STATUS.md section. the archives are
-# built twice on separate runners and must have equal checksums before anything is published.
+# attestation per asset, and release notes from STATUS.md: the tag's release candidate section and
+# every newer one (scripts/release-notes.sh). the archives are built twice on separate runners
+# and must have equal checksums before anything is published.
 
 on:
   push:
