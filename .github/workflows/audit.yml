@@ -134,11 +134,16 @@ jobs:
       - uses: actions/checkout@v7
       - if: matrix.sdk == 'rust'
         uses: dtolnay/rust-toolchain@1.99.1
+      # the rust testee builds outside the workspace into its own target directory, which is
+      # what is cached
       - if: matrix.sdk == 'rust'
-        uses: Swatinem/rust-cache@v2
+        uses: actions/cache@v6
         with:
-          key: testee-rust
-          workspaces: testees/rust
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            target/testees/rust/30.0.0
+          key: testee-rust-30.0.0-${{ hashFiles('testees/rust/versions/30.0.0/Cargo.lock') }}
       - if: matrix.sdk == 'go'
         uses: actions/setup-go@v7
         with:
