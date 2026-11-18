@@ -165,6 +165,7 @@ for (const r of releases) {
       assert.equal(hello.decode_limits, "ignored");
       assert.equal(hello.ops.includes("encode_json"), r.xdrJson);
       assert.equal(hello.ops.includes("map_validate"), false);
+      assert.equal(hello.ops.includes("address_from_scval"), true);
     });
 
     test("decode_encode round-trips and refuses trailing bytes", async () => {
@@ -291,6 +292,15 @@ for (const r of releases) {
           ],
         },
       });
+    });
+
+    test("address_from_scval converts with the sdk's Address", async () => {
+      // SCV_ADDRESS of the account with key 32 bytes of 0x3a, then a u32
+      const account = "AAAAEgAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo=";
+      assert.deepEqual(ok(await ask(r.program, { op: "address_from_scval", xdr: account })), {
+        text: "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ",
+      });
+      assert.equal(errorClass(await ask(r.program, { op: "address_from_scval", xdr: "AAAAAwAAAAc=" })), "rejected");
     });
 
     test("protocol errors", async () => {

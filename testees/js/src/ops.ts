@@ -119,6 +119,7 @@ export class Ops {
     if (typeof this.m.scvSortedMap === "function") ops.push("map_sort");
     ops.push("id_parse");
     if (typeof this.m.scValToNative === "function") ops.push("to_native");
+    if (typeof this.m.Address?.fromScVal === "function") ops.push("address_from_scval");
     if (typeof this.m.TransactionBuilder?.fromXDR === "function") ops.push("tx_hash");
     if (typeof this.m.Transaction?.prototype?.getClaimableBalanceId === "function") ops.push("balance_id");
     if (typeof this.m.Asset?.prototype?.contractId === "function" && typeof this.m.hash === "function") {
@@ -157,6 +158,8 @@ export class Ops {
         return this.idParse(req);
       case "to_native":
         return this.toNative(req);
+      case "address_from_scval":
+        return this.addressFromScVal(req);
       case "tx_hash":
         return this.txHash(req);
       case "balance_id":
@@ -437,5 +440,14 @@ export class Ops {
     const value = this.decodeAs(this.xdrType("ScVal"), bytes(req, "xdr"));
     const native: unknown = sdk(() => this.m.scValToNative(value));
     return { native: describeNative(native) };
+  }
+
+  // Address.fromScVal throws for an ScVal that is not an address; toString is its strkey
+  private addressFromScVal(req: Request): Result {
+    const value = this.decodeAs(this.xdrType("ScVal"), bytes(req, "xdr"));
+    const address: Loose = sdk(() => this.m.Address.fromScVal(value));
+    const text: unknown = sdk(() => address.toString());
+    if (typeof text !== "string") throw new Error(`Address.toString returned ${typeof text}`);
+    return { text };
   }
 }

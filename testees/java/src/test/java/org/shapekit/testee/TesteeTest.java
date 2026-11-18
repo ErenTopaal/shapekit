@@ -169,4 +169,14 @@ class TesteeTest {
       }
     }
   }
+
+  @Test
+  void addressFromScVal() throws Json.ParseError {
+    // SCV_ADDRESS of the account with key 32 bytes of 0x3a, then a u32
+    Map<String, Object> ok =
+        call("{\"id\":\"1\",\"op\":\"address_from_scval\",\"xdr\":\"AAAAEgAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo=\"}");
+    assertEquals("GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ", map(ok.get("result")).get("text"));
+    Map<String, Object> refused = call("{\"id\":\"2\",\"op\":\"address_from_scval\",\"xdr\":\"AAAAAwAAAAc=\"}");
+    assertEquals("rejected", map(refused.get("error")).get("class"));
+  }
 }

@@ -81,6 +81,7 @@ class Ops:
             "map_sort",
             "id_parse",
             "to_native",
+            "address_from_scval",
             "tx_hash",
             "balance_id",
             "contract_id",
@@ -102,6 +103,7 @@ class Ops:
             "map_sort": self.map_sort,
             "id_parse": self.id_parse,
             "to_native": self.to_native,
+            "address_from_scval": self.address_from_scval,
             "tx_hash": self.tx_hash,
             "balance_id": self.balance_id,
             "contract_id": self.contract_id,
@@ -297,6 +299,14 @@ class Ops:
         value = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(data))
         native = sdk(lambda: scval.to_native(value))
         return {"native": describe_native(native)}
+
+    def address_from_scval(self, req: Request) -> dict[str, Any]:
+        """scval.from_address, which refuses an ScVal that is not an address with ValueError,
+        and the address's strkey."""
+        data = req.bytes("xdr")
+        value = sdk(lambda: stellar_xdr.SCVal.from_xdr_bytes(data))
+        address = sdk(lambda: scval.from_address(value))
+        return {"text": sdk(lambda: address.address)}
 
     # hashes and ids the network writes into a ledger
 

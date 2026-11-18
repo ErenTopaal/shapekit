@@ -15,8 +15,9 @@ use stellar_strkey::{ClaimableBalance, Contract, HashX, LiquidityPool, PreAuthTx
 use stellar_xdr::{
     AccountId, Asset, ClaimableBalanceId, ContractIdPreimage, FeeBumpTransactionInnerTx, Hash,
     HashIdPreimage, HashIdPreimageContractId, HashIdPreimageOperationId, Limited, Limits,
-    MuxedAccount, OperationBody, PublicKey, TransactionEnvelope, Uint256, LiquidityPoolConstantProductParameters, LiquidityPoolParameters,
-    ManageSellOfferOp, ReadXdr, ScMap, ScMapEntry, ScVal, Type, TypeVariant, Validate, WriteXdr,
+    LiquidityPoolConstantProductParameters, LiquidityPoolParameters, ManageSellOfferOp,
+    MuxedAccount, OperationBody, PublicKey, ReadXdr, ScMap, ScMapEntry, ScVal, TransactionEnvelope,
+    Type, TypeVariant, Uint256, Validate, WriteXdr,
 };
 
 /// Every op this build implements, as `hello` reports them. `to_native` is absent on purpose:
@@ -33,6 +34,7 @@ pub const OPS: &[&str] = &[
     "map_sort",
     "map_validate",
     "id_parse",
+    "address_from_scval",
     "tx_hash",
     "balance_id",
     "contract_id",
@@ -143,13 +145,18 @@ pub fn run(req: &Request) -> Outcome {
         "map_sort" => map_sort(req),
         "map_validate" => map_validate(req),
         "id_parse" => id_parse(req),
+        "address_from_scval" => address_from_scval(req),
         "tx_hash" => tx_hash(req),
         "balance_id" => balance_id(req),
         "contract_id" => contract_id(req),
         #[cfg(shapekit_coverage)]
-        "coverage_snapshot" => crate::coverage::snapshot().map_err(|m| Outcome::Error(ErrorClass::Internal, m)),
+        "coverage_snapshot" => {
+            crate::coverage::snapshot().map_err(|m| Outcome::Error(ErrorClass::Internal, m))
+        }
         #[cfg(shapekit_coverage)]
-        "coverage_new" => crate::coverage::fresh().map_err(|m| Outcome::Error(ErrorClass::Internal, m)),
+        "coverage_new" => {
+            crate::coverage::fresh().map_err(|m| Outcome::Error(ErrorClass::Internal, m))
+        }
         #[cfg(not(shapekit_coverage))]
         "coverage_snapshot" | "coverage_new" => Err(Outcome::Unsupported(
             "the testee was built without -C instrument-coverage --cfg shapekit_coverage".into(),
@@ -546,6 +553,15 @@ fn map_validate(req: &Request) -> Result<Value, Outcome> {
     match value {
         ScVal::Map(Some(map)) => Ok(json!({"valid": map.validate().is_ok()})),
         _ => Err(bad("map_validate needs an ScVal of arm SCV_MAP with a map")),
+    }
+}
+
+// stellar-xdr's address type is ScAddress itself, held by the SCV_ADDRESS arm, and its strkey
+// form is ScAddress's Display; an ScVal of any other arm holds no address
+fn address_from_scval(req: &Request) -> Result<Value, Outcome> {
+    match xdr_value::<ScVal>(req, "xdr")? {
+        ScVal::Address(address) => Ok(json!({"text": address.to_string()})),
+        _ => Err(rejected("the ScVal is not of arm SCV_ADDRESS")),
     }
 }
 

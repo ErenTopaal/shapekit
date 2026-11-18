@@ -122,6 +122,17 @@ class Native(unittest.TestCase):
         self.assertEqual(native["entries"], [{"key": {"type": "integer", "value": "1"}, "value": {"type": "integer", "value": "7"}}])
 
 
+class Address(unittest.TestCase):
+    # SCV_ADDRESS of the account with key 32 bytes of 0x3a
+    ACCOUNT = "AAAAEgAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="
+
+    def test_address_from_scval(self) -> None:
+        r = one({"id": "1", "op": "address_from_scval", "xdr": self.ACCOUNT})
+        self.assertEqual(r["result"], {"text": "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ"})
+        r = one({"id": "2", "op": "address_from_scval", "xdr": U32_7})
+        self.assertEqual(r["error"]["class"], "rejected")
+
+
 class Ordering(unittest.TestCase):
     NATIVE = "AAAAAA=="
 

@@ -92,6 +92,7 @@ final class Ops {
                 "pool_id",
                 "map_sort",
                 "id_parse",
+                "address_from_scval",
                 "tx_hash",
                 "balance_id",
                 "contract_id"));
@@ -142,6 +143,8 @@ final class Ops {
                 + info.version
                 + " has no native projection of an ScVal: org.stellar.sdk.scval.Scv has one"
                 + " typed fromX converter per arm and none that dispatches on the arm");
+      case "address_from_scval":
+        return addressFromScVal(req);
       case "tx_hash":
         return txHash(req);
       case "balance_id":
@@ -195,6 +198,14 @@ final class Ops {
     int depth = req.has("depth_limit") ? req.integer("depth_limit", 0) : DEFAULT_DEPTH;
     int len = req.has("len_limit") ? req.integer("len_limit", 0) : data.length;
     return Types.decode(type, data, depth, len);
+  }
+
+  /** Address.fromSCVal, which refuses an SCVal that is not an address, and its strkey. */
+  private Map<String, Object> addressFromScVal(Request req) {
+    SCVal value = (SCVal) decodeMember(req, "xdr", SCVal.class);
+    org.stellar.sdk.Address address =
+        Sdk.call("Address.fromSCVal", () -> org.stellar.sdk.Address.fromSCVal(value));
+    return one("text", Sdk.call("Address.toString", address::toString));
   }
 
   private static Map<String, Object> one(String name, Object value) {
