@@ -13,9 +13,11 @@ on:
 permissions:
   contents: read
 
+# a newer push to a pull request supersedes the run in progress; on main every run finishes, so
+# each merge gets its result and its caches are saved
 concurrency:
   group: pr-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CARGO_TERM_COLOR: always
