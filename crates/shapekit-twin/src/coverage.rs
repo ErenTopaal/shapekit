@@ -369,11 +369,13 @@ pub fn spans_in(counts: &Counts, file: &str, from: u32, to: u32) -> Vec<(Span, u
 /// Merges the profiles in `dir` and exports them, inside the twin image,
 /// into `dir/export.json`. Returns the export's path.
 pub fn merge_and_export(image: &CoreImage, dir: &Path) -> Result<PathBuf> {
-    let profiles = std::fs::read_dir(dir)
-        .with_context(|| format!("reading {}", dir.display()))?
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_name().to_string_lossy().ends_with(".profraw"))
-        .count();
+    let mut profiles = 0;
+    for e in std::fs::read_dir(dir).with_context(|| format!("reading {}", dir.display()))? {
+        let e = e.with_context(|| format!("reading {}", dir.display()))?;
+        if e.file_name().to_string_lossy().ends_with(".profraw") {
+            profiles += 1;
+        }
+    }
     if profiles == 0 {
         bail!(
             "no profile in {}: the twin wrote none, so core did not exit normally or the image is not a coverage build",
@@ -399,7 +401,7 @@ pub fn merge_and_export(image: &CoreImage, dir: &Path) -> Result<PathBuf> {
         ])
         .arg(&user)
         .arg("-v")
-        .arg(format!("{}:/profiles", dir.display()))
+        .arg(profiles_mount(dir)?)
         .args(["--entrypoint", "sh"])
         .arg(image.reference())
         .args(["-c", &script])
@@ -412,6 +414,22 @@ pub fn merge_and_export(image: &CoreImage, dir: &Path) -> Result<PathBuf> {
         );
     }
     Ok(dir.join("export.json"))
+}
+
+/// The bind mount of `dir` at `/profiles`. Docker reads a source that is not an absolute
+/// path as a volume name, so the source is the directory's absolute path, with symbolic links
+/// resolved so the mount names the directory itself.
+fn profiles_mount(dir: &Path) -> Result<String> {
+    let real = dir
+        .canonicalize()
+        .with_context(|| format!("resolving {}", dir.display()))?;
+    let real = real
+        .to_str()
+        .with_context(|| format!("{} is not UTF-8", real.display()))?;
+    if real.contains(':') {
+        bail!("{real} holds a colon, which a docker bind mount cannot name");
+    }
+    Ok(format!("{real}:/profiles"))
 }
 
 fn host_user(dir: &Path) -> Result<String> {
@@ -535,6 +553,40 @@ pub fn image_ref(image: &CoreImage) -> ImageRef {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_profiles_mount_names_the_resolved_absolute_directory() {
+        let base = tempfile::tempdir().unwrap();
+        let real = base.path().join("real");
+        std::fs::create_dir(&real).unwrap();
+        let link = base.path().join("link");
+        std::os::unix::fs::symlink(&real, &link).unwrap();
+        let want = format!("{}:/profiles", real.canonicalize().unwrap().display());
+        assert_eq!(profiles_mount(&link).unwrap(), want);
+        // a relative path resolves against the working directory
+        let cwd = std::env::current_dir().unwrap();
+        let rel = pathdiff(&real, &cwd);
+        assert_eq!(profiles_mount(&rel).unwrap(), want);
+        assert!(profiles_mount(&base.path().join("missing")).is_err());
+    }
+
+    /// `to` relative to `from`, through `..` components.
+    fn pathdiff(to: &Path, from: &Path) -> PathBuf {
+        let (to, from) = (to.canonicalize().unwrap(), from.canonicalize().unwrap());
+        let common = to
+            .components()
+            .zip(from.components())
+            .take_while(|(a, b)| a == b)
+            .count();
+        let mut out = PathBuf::new();
+        for _ in from.components().skip(common) {
+            out.push("..");
+        }
+        for c in to.components().skip(common) {
+            out.push(c);
+        }
+        out
+    }
 
     #[test]
     fn repository_paths() {
