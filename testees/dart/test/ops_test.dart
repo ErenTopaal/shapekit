@@ -71,4 +71,25 @@ void main() {
     });
     expect(r['status'], 'unsupported');
   });
+
+  test('base64 that is url-safe or unpadded is a bad request', () {
+    for (final xdr in ['AAAAAwAAAAc', 'AAAAAw__AAc=']) {
+      final r = ask({
+        'id': '9',
+        'op': 'decode_encode',
+        'type': 'ScVal',
+        'xdr': xdr,
+        'depth_limit': 1000,
+        'len_limit': 8,
+      });
+      expect((r['error'] as Map)['class'], 'bad-request', reason: xdr);
+    }
+  });
+
+  test('what an sdk call throws is the sdk\'s, anything else the testee\'s', () {
+    expect(() => sdk(() => throw ArgumentError('x')), throwsA(isA<SdkFailure>().having((e) => e.cls, 'cls', 'rejected')));
+    expect(() => sdk(() => throw StackOverflowError()), throwsA(isA<SdkFailure>().having((e) => e.cls, 'cls', 'panic')));
+    final r = ask({'id': '10', 'op': 'address_from_scval', 'xdr': 'AAAAAwAAAAc='});
+    expect((r['error'] as Map)['class'], 'rejected');
+  });
 }

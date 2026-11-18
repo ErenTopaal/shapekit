@@ -67,6 +67,32 @@ Map<String, Object?> _error(String id, String cls, String message) => {
   'error': {'class': cls, 'message': message},
 };
 
+/// What an sdk call threw, already sorted into `rejected` or `panic` by [sdk].
+class SdkFailure implements Exception {
+  SdkFailure(this.cls, this.message);
+  final String cls;
+  final String message;
+}
+
+/// Runs one call into the sdk and sorts what it throws: a crash ([isCrash]) is `panic`, any
+/// other throwable the sdk's refusal. A throwable from the testee's own code is `internal`
+/// (see [handleLine]), so only what escapes an sdk call is laid at the sdk's door.
+T sdk<T>(T Function() call) {
+  try {
+    return call();
+  } on BadRequest {
+    rethrow;
+  } on Unsupported {
+    rethrow;
+  } on Refused {
+    rethrow;
+  } on SdkFailure {
+    rethrow;
+  } catch (e) {
+    throw SdkFailure(isCrash(e) ? 'panic' : 'rejected', '${e.runtimeType}: $e');
+  }
+}
+
 /// A stack overflow, running out of memory, a type error (a null check on a value the sdk
 /// assumed present among them) or a call to a member that does not exist is the sdk crashing.
 /// Every other throwable, exception or error, is the sdk's refusal: the sdk throws
@@ -103,12 +129,11 @@ Map<String, Object?> handleLine(String line) {
     return {'id': id, 'status': 'unsupported', 'reason': e.reason};
   } on Refused catch (e) {
     return _error(id, 'rejected', e.message);
+  } on SdkFailure catch (e) {
+    return _error(id, e.cls, e.message);
   } catch (e) {
-    return _error(
-      id,
-      isCrash(e) ? 'panic' : 'rejected',
-      '${e.runtimeType}: $e',
-    );
+    // not thrown inside an sdk call: the testee failed, the input says nothing about the sdk
+    return _error(id, 'internal', '${e.runtimeType}: $e');
   }
 }
 
@@ -132,12 +157,13 @@ Map<String, Object?> run(String op, Map<String, dynamic> req) {
     case 'decode_json':
       final t = _type(req);
       final value = _decode(t, _bytes(req, 'xdr'));
-      return {'json': t.toJson(value)};
+      return {'json': sdk(() => t.toJson(value))};
     case 'encode_json':
       final t = _type(req);
       if (!req.containsKey('json'))
         throw BadRequest('encode_json needs member json');
-      return {'xdr': base64.encode(_encode(t, t.fromJson(req['json'])))};
+      final json = req['json'];
+      return {'xdr': base64.encode(_encode(t, sdk(() => t.fromJson(json))))};
     case 'strkey_decode':
       return _strkeyDecode(req);
     case 'strkey_encode':
@@ -154,7 +180,7 @@ Map<String, Object?> run(String op, Map<String, dynamic> req) {
       return _toNative(req);
     case 'address_from_scval':
       final val = _scval(_bytes(req, 'xdr'));
-      return {'text': _addressText(Address.fromXdrSCVal(val))};
+      return {'text': _addressText(sdk(() => Address.fromXdrSCVal(val)))};
     case 'tx_hash':
       return _txHash(req);
     case 'balance_id':
@@ -182,8 +208,14 @@ String _string(Map<String, dynamic> req, String name) {
 }
 
 Uint8List _bytes(Map<String, dynamic> req, String name) {
+  final text = _string(req, name);
+  // dart's decoder also takes the url-safe alphabet and input without its padding, which the
+  // protocol refuses
+  if (text.length % 4 != 0 || text.contains(RegExp(r'[^A-Za-z0-9+/=]'))) {
+    throw BadRequest('$name is not standard padded base64');
+  }
   try {
-    return base64.decode(_string(req, name));
+    return base64.decode(text);
   } on FormatException catch (e) {
     throw BadRequest('$name is not base64: ${e.message}');
   }
@@ -207,7 +239,7 @@ XdrType _known(String name) => xdrTypesByLowerName[name.toLowerCase()]!;
 /// requires of every decoder.
 Object _decode(XdrType t, Uint8List bytes) {
   final stream = XdrDataInputStream(bytes);
-  final value = t.decode(stream);
+  final value = sdk(() => t.decode(stream));
   final left = stream.fileLength! - stream.offset!;
   if (left != 0) throw Refused('$left trailing bytes after the value');
   return value;
@@ -215,7 +247,7 @@ Object _decode(XdrType t, Uint8List bytes) {
 
 Uint8List _encode(XdrType t, Object value) {
   final out = XdrDataOutputStream();
-  t.encode(out, value);
+  sdk(() => t.encode(out, value));
   return Uint8List.fromList(out.bytes);
 }
 
@@ -241,25 +273,25 @@ Map<String, Object?> _strkeyDecode(Map<String, dynamic> req) {
   if (text.isEmpty) throw Refused('empty strkey');
   switch (text[0]) {
     case 'G':
-      return _kind('account', StrKey.decodeStellarAccountId(text));
+      return _kind('account', sdk(() => StrKey.decodeStellarAccountId(text)));
     case 'M':
-      return _kind('muxed_account', StrKey.decodeStellarMuxedAccountId(text));
+      return _kind('muxed_account', sdk(() => StrKey.decodeStellarMuxedAccountId(text)));
     case 'S':
-      return _kind('seed', StrKey.decodeStellarSecretSeed(text));
+      return _kind('seed', sdk(() => StrKey.decodeStellarSecretSeed(text)));
     case 'T':
-      return _kind('pre_auth_tx', StrKey.decodePreAuthTx(text));
+      return _kind('pre_auth_tx', sdk(() => StrKey.decodePreAuthTx(text)));
     case 'X':
-      return _kind('hash_x', StrKey.decodeSha256Hash(text));
+      return _kind('hash_x', sdk(() => StrKey.decodeSha256Hash(text)));
     case 'C':
-      return _kind('contract', StrKey.decodeContractId(text));
+      return _kind('contract', sdk(() => StrKey.decodeContractId(text)));
     case 'L':
-      return _kind('liquidity_pool', StrKey.decodeLiquidityPoolId(text));
+      return _kind('liquidity_pool', sdk(() => StrKey.decodeLiquidityPoolId(text)));
     case 'B':
-      return _kind('claimable_balance', StrKey.decodeClaimableBalanceId(text));
+      return _kind('claimable_balance', sdk(() => StrKey.decodeClaimableBalanceId(text)));
     case 'W':
-      return _kind('muxed_contract', StrKey.decodeMuxedContractId(text));
+      return _kind('muxed_contract', sdk(() => StrKey.decodeMuxedContractId(text)));
     case 'P':
-      final p = StrKey.decodeXdrSignedPayload(text);
+      final p = sdk(() => StrKey.decodeXdrSignedPayload(text));
       final payload = p.payload.dataValue;
       final raw = BytesBuilder()
         ..add(p.ed25519.uint256)
@@ -285,23 +317,23 @@ Map<String, Object?> _strkeyEncode(Map<String, dynamic> req) {
   final String text;
   switch (kind) {
     case 'account':
-      text = StrKey.encodeStellarAccountId(p);
+      text = sdk(() => StrKey.encodeStellarAccountId(p));
     case 'muxed_account':
-      text = StrKey.encodeStellarMuxedAccountId(p);
+      text = sdk(() => StrKey.encodeStellarMuxedAccountId(p));
     case 'seed':
-      text = StrKey.encodeStellarSecretSeed(p);
+      text = sdk(() => StrKey.encodeStellarSecretSeed(p));
     case 'pre_auth_tx':
-      text = StrKey.encodePreAuthTx(p);
+      text = sdk(() => StrKey.encodePreAuthTx(p));
     case 'hash_x':
-      text = StrKey.encodeSha256Hash(p);
+      text = sdk(() => StrKey.encodeSha256Hash(p));
     case 'contract':
-      text = StrKey.encodeContractId(p);
+      text = sdk(() => StrKey.encodeContractId(p));
     case 'liquidity_pool':
-      text = StrKey.encodeLiquidityPoolId(p);
+      text = sdk(() => StrKey.encodeLiquidityPoolId(p));
     case 'claimable_balance':
-      text = StrKey.encodeClaimableBalanceId(p);
+      text = sdk(() => StrKey.encodeClaimableBalanceId(p));
     case 'muxed_contract':
-      text = StrKey.encodeMuxedContractId(p);
+      text = sdk(() => StrKey.encodeMuxedContractId(p));
     case 'signed_payload':
       // the encoder takes an XdrSignedPayload: the key, then the payload its length names
       if (p.length < 36)
@@ -309,10 +341,19 @@ Map<String, Object?> _strkeyEncode(Map<String, dynamic> req) {
       final n = p.buffer.asByteData(p.offsetInBytes).getUint32(32);
       if (36 + n > p.length)
         throw Refused('the payload length runs past the input');
-      text = StrKey.encodeXdrSignedPayload(
-        XdrSignedPayload(
-          XdrUint256(p.sublist(0, 32)),
-          XdrDataValue(p.sublist(36, 36 + n)),
+      final padded = 36 + n + (4 - n % 4) % 4;
+      if (p.length != padded || p.sublist(36 + n).any((b) => b != 0)) {
+        throw Unsupported(
+          'StrKey.encodeXdrSignedPayload takes the key and the payload; a raw payload with '
+          'padding that is not zero or bytes after it has no such form',
+        );
+      }
+      text = sdk(
+        () => StrKey.encodeXdrSignedPayload(
+          XdrSignedPayload(
+            XdrUint256(p.sublist(0, 32)),
+            XdrDataValue(p.sublist(36, 36 + n)),
+          ),
         ),
       );
     default:
@@ -321,15 +362,17 @@ Map<String, Object?> _strkeyEncode(Map<String, dynamic> req) {
   return {'text': text};
 }
 
-Asset _asset(Map<String, dynamic> req, String name) =>
-    Asset.fromXdr(_decode(_known('Asset'), _bytes(req, name)) as XdrAsset);
+Asset _asset(Map<String, dynamic> req, String name) {
+  final xdr = _decode(_known('Asset'), _bytes(req, name)) as XdrAsset;
+  return sdk(() => Asset.fromXdr(xdr));
+}
 
 bool _orders(Asset a, Asset b) {
   try {
-    AssetTypePoolShare(assetA: a, assetB: b);
+    sdk(() => AssetTypePoolShare(assetA: a, assetB: b));
     return true;
-  } catch (e) {
-    if (isCrash(e)) rethrow;
+  } on SdkFailure catch (e) {
+    if (e.cls == 'panic') rethrow;
     return false;
   }
 }
@@ -354,18 +397,20 @@ Map<String, Object?> _poolId(Map<String, dynamic> req) {
   final b = _asset(req, 'b');
   final fee = req['fee'];
   if (fee is! int) throw BadRequest('fee must be an integer');
-  AssetTypePoolShare(assetA: a, assetB: b);
+  sdk(() => AssetTypePoolShare(assetA: a, assetB: b));
   if (_orders(b, a)) throw Refused('the assets are equal');
-  final params = XdrLiquidityPoolParameters(
-    XdrLiquidityPoolType.LIQUIDITY_POOL_CONSTANT_PRODUCT,
-  );
-  params.constantProduct = XdrLiquidityPoolConstantProductParameters(
-    a.toXdr(),
-    b.toXdr(),
-    XdrInt32(fee),
-  );
   final out = XdrDataOutputStream();
-  XdrLiquidityPoolParameters.encode(out, params);
+  sdk(() {
+    final params = XdrLiquidityPoolParameters(
+      XdrLiquidityPoolType.LIQUIDITY_POOL_CONSTANT_PRODUCT,
+    );
+    params.constantProduct = XdrLiquidityPoolConstantProductParameters(
+      a.toXdr(),
+      b.toXdr(),
+      XdrInt32(fee),
+    );
+    XdrLiquidityPoolParameters.encode(out, params);
+  });
   return {'pool_id': Util.bytesToHex(Util.hash(Uint8List.fromList(out.bytes)))};
 }
 
@@ -382,7 +427,7 @@ Map<String, Object?> _mapSort(Map<String, dynamic> req) {
       ),
     );
   }
-  final sorted = sortedScMap(list);
+  final sorted = sdk(() => sortedScMap(list));
   return {'xdr': base64.encode(_encode(_known('ScVal'), sorted))};
 }
 
@@ -407,15 +452,17 @@ Map<String, Object?> _idParse(Map<String, dynamic> req) {
   final issuer = KeyPair.fromAccountId(
     'GD7777777777777777777777777777777777777777777777777773DB',
   );
-  final op = ManageSellOfferOperationBuilder(
-    Asset.NATIVE,
-    AssetTypeCreditAlphaNum4('ABC', issuer.accountId),
-    '1',
-    '1',
-  ).setOfferId(input).build();
-  final body = op.toOperationBody();
   final out = XdrDataOutputStream();
-  XdrManageSellOfferOp.encode(out, body.manageSellOfferOp!);
+  sdk(() {
+    final op = ManageSellOfferOperationBuilder(
+      Asset.NATIVE,
+      AssetTypeCreditAlphaNum4('ABC', issuer.accountId),
+      '1',
+      '1',
+    ).setOfferId(input).build();
+    final body = op.toOperationBody();
+    XdrManageSellOfferOp.encode(out, body.manageSellOfferOp!);
+  });
   // offerID is the op's last field (ManageSellOfferOp in Stellar-transaction.x), so the
   // encoding ends with the eight bytes of the int64 the sdk wrote
   final bytes = Uint8List.fromList(out.bytes);
@@ -425,7 +472,7 @@ Map<String, Object?> _idParse(Map<String, dynamic> req) {
 
 Map<String, Object?> _toNative(Map<String, dynamic> req) {
   final val = _scval(_bytes(req, 'xdr'));
-  final native = val.toNative();
+  final native = sdk(() => val.toNative());
   // the documented refusal: a value with no native form comes back as the XdrSCVal itself
   // (XdrSCVal.toNative, lib/src/xdr/xdr_sc_val.dart)
   if (native is XdrSCVal) {
@@ -463,13 +510,15 @@ Object? _describe(Object? v) {
   return {
     'type': 'object',
     'class': v.runtimeType.toString(),
-    'text': v.toString(),
+    'text': sdk(() => v.toString()),
   };
 }
 
 /// The strkey of an address, from the fields Address.fromXdr fills, with the sdk's encoders:
 /// contract, claimable balance and liquidity pool ids are held as hex.
-String _addressText(Address a) {
+String _addressText(Address a) => sdk(() => _addressTextOf(a));
+
+String _addressTextOf(Address a) {
   switch (a.type) {
     case Address.TYPE_ACCOUNT:
       return a.accountId!;
@@ -488,15 +537,18 @@ String _addressText(Address a) {
   }
 }
 
-Network _network(Map<String, dynamic> req) =>
-    Network(_string(req, 'network_passphrase'));
+Network _network(Map<String, dynamic> req) {
+  final passphrase = _string(req, 'network_passphrase');
+  return sdk(() => Network(passphrase));
+}
 
 XdrTransactionEnvelope _envelope(Map<String, dynamic> req) =>
     _decode(_known('TransactionEnvelope'), _bytes(req, 'xdr'))
         as XdrTransactionEnvelope;
 
 Map<String, Object?> _txHash(Map<String, dynamic> req) {
-  final tx = AbstractTransaction.fromEnvelopeXdr(_envelope(req));
+  final env = _envelope(req);
+  final tx = sdk(() => AbstractTransaction.fromEnvelopeXdr(env));
   final network = _network(req);
   final inner = req['inner'];
   if (inner != null && inner is! bool)
@@ -504,37 +556,44 @@ Map<String, Object?> _txHash(Map<String, dynamic> req) {
   if (inner == true) {
     if (tx is! FeeBumpTransaction)
       throw BadRequest('inner on an envelope that is no fee bump');
-    return {'hash': Util.bytesToHex(tx.innerTransaction.hash(network))};
+    return {'hash': Util.bytesToHex(sdk(() => tx.innerTransaction.hash(network)))};
   }
-  return {'hash': Util.bytesToHex(tx.hash(network))};
+  return {'hash': Util.bytesToHex(sdk(() => tx.hash(network)))};
 }
 
 /// The sdk has no balance id function, so the testee hashes the HashIDPreimage of the operation
 /// (ENVELOPE_TYPE_OP_ID) that the sdk's own encoder writes, from the sdk's transaction object.
 Map<String, Object?> _balanceId(Map<String, dynamic> req) {
-  var tx = AbstractTransaction.fromEnvelopeXdr(_envelope(req));
-  if (tx is FeeBumpTransaction) tx = tx.innerTransaction;
-  final t = tx as Transaction;
   final index = req['op_index'];
   if (index is! int || index < 0)
     throw BadRequest('op_index must be a non-negative integer');
-  if (index >= t.operations.length)
+  final env = _envelope(req);
+  var tx = sdk(() => AbstractTransaction.fromEnvelopeXdr(env));
+  if (tx is FeeBumpTransaction) {
+    final fb = tx;
+    tx = sdk<AbstractTransaction>(() => fb.innerTransaction);
+  }
+  final t = tx as Transaction;
+  final operations = sdk(() => t.operations);
+  if (index >= operations.length)
     throw Refused('no operation at index $index');
-  final body = t.operations[index].toOperationBody();
+  final body = sdk(() => operations[index].toOperationBody());
   if (body.discriminant != XdrOperationType.CREATE_CLAIMABLE_BALANCE) {
     throw Refused(
       'the operation at index $index does not create a claimable balance',
     );
   }
-  final source = KeyPair.fromAccountId(t.sourceAccount.ed25519AccountId);
-  final preimage = XdrHashIDPreimage(XdrEnvelopeType.ENVELOPE_TYPE_OP_ID);
-  preimage.operationID = XdrHashIDPreimageOperationID(
-    XdrAccountID(source.xdrPublicKey),
-    XdrSequenceNumber(t.sequenceNumber),
-    XdrUint32(index),
-  );
   final out = XdrDataOutputStream();
-  XdrHashIDPreimage.encode(out, preimage);
+  sdk(() {
+    final source = KeyPair.fromAccountId(t.sourceAccount.ed25519AccountId);
+    final preimage = XdrHashIDPreimage(XdrEnvelopeType.ENVELOPE_TYPE_OP_ID);
+    preimage.operationID = XdrHashIDPreimageOperationID(
+      XdrAccountID(source.xdrPublicKey),
+      XdrSequenceNumber(t.sequenceNumber),
+      XdrUint32(index),
+    );
+    XdrHashIDPreimage.encode(out, preimage);
+  });
   final hash = Util.hash(Uint8List.fromList(out.bytes));
   return {'balance_id': '00000000${Util.bytesToHex(hash)}'};
 }
@@ -550,20 +609,24 @@ Map<String, Object?> _contractId(Map<String, dynamic> req) {
   if (preimage.discriminant ==
       XdrContractIDPreimageType.CONTRACT_ID_PREIMAGE_FROM_ADDRESS) {
     final from = preimage.fromAddress!;
-    final id = Address.deriveContractId(
-      deployer: Address.fromXdr(from.address),
-      salt: from.salt.uint256,
-      network: network,
+    final id = sdk(
+      () => Address.deriveContractId(
+        deployer: Address.fromXdr(from.address),
+        salt: from.salt.uint256,
+        network: network,
+      ),
     );
-    return {'contract_id': Util.bytesToHex(StrKey.decodeContractId(id))};
+    return {'contract_id': Util.bytesToHex(sdk(() => StrKey.decodeContractId(id)))};
   }
-  final hp = XdrHashIDPreimage(XdrEnvelopeType.ENVELOPE_TYPE_CONTRACT_ID);
-  hp.contractID = XdrHashIDPreimageContractID(
-    XdrHash(network.networkId),
-    preimage,
-  );
   final out = XdrDataOutputStream();
-  XdrHashIDPreimage.encode(out, hp);
+  sdk(() {
+    final hp = XdrHashIDPreimage(XdrEnvelopeType.ENVELOPE_TYPE_CONTRACT_ID);
+    hp.contractID = XdrHashIDPreimageContractID(
+      XdrHash(network.networkId),
+      preimage,
+    );
+    XdrHashIDPreimage.encode(out, hp);
+  });
   return {
     'contract_id': Util.bytesToHex(Util.hash(Uint8List.fromList(out.bytes))),
   };
