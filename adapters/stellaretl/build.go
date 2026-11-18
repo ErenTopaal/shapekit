@@ -88,6 +88,8 @@ func (s source) show(ctx context.Context, commit, path string) ([]byte, error) {
 var sdkProtocols = map[string]uint32{
 	// the protocol 30 sdk line (v0.8.x) at the commit stellar-etl v2.8.34 requires
 	"v0.8.1-0.20261106081502-e31e3b146d00": 30,
+	// the release stellar-etl v2.8.35 requires; its xdr is v30.0 (xdr/xdr_commit_generated.txt)
+	"v0.9.0": 30,
 }
 
 func (s source) sdk(ctx context.Context, commit string) (string, uint32, error) {
