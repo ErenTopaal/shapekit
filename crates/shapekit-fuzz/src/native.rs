@@ -265,20 +265,7 @@ fn unquote_go(s: &str) -> Result<Vec<u8>> {
 /// Seeds in the shared input format, one file each.
 fn write_seeds(cfg: &NativeConfig, dir: &Path) -> Result<usize> {
     std::fs::create_dir_all(dir)?;
-    let seeds = crate::load_seeds(&crate::Config {
-        root: cfg.root.clone(),
-        corpus: cfg.root.join("corpus"),
-        versions: cfg.root.join("conformance/versions.toml"),
-        go_version: None,
-        build: false,
-        seconds: 0,
-        max_inputs: None,
-        seed: 0,
-        jobs: 1,
-        types: FuzzType::ALL.to_vec(),
-        max_seed_bytes: cfg.max_seed_bytes,
-        max_arbitrary_bytes: 0,
-    })?;
+    let seeds = crate::load_seeds(&cfg.root.join("corpus"), &FuzzType::ALL, cfg.max_seed_bytes)?;
     let mut n = 0;
     for (ty, list) in seeds {
         let sel = FuzzType::ALL

@@ -18,6 +18,7 @@ pub mod report;
 pub mod types;
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::num::NonZeroUsize;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
@@ -52,8 +53,9 @@ pub struct Config {
     pub types: Vec<FuzzType>,
     /// Corpus files above this size are not used as seeds.
     pub max_seed_bytes: u64,
-    /// Upper bound of the raw bytes handed to `arbitrary` per generated value.
-    pub max_arbitrary_bytes: usize,
+    /// Upper bound of the raw bytes handed to `arbitrary` per generated value; never zero,
+    /// since a generated length is drawn below it.
+    pub max_arbitrary_bytes: NonZeroUsize,
 }
 
 /// Where an input came from, for the stats and for replaying a first sighting.
@@ -174,10 +176,15 @@ pub fn go_target(cfg: &Config) -> Result<(Target, u32)> {
 }
 
 /// Seeds per type: every corpus xdr entry of a fuzzed type, plus the values nested in them.
-pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
+/// Only `types` are kept, and corpus files above `max_seed_bytes` are skipped.
+pub fn load_seeds(
+    corpus: &Path,
+    types: &[FuzzType],
+    max_seed_bytes: u64,
+) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
     // read loosely: only kind, type and file paths matter here, so a manifest written by a
     // newer or older model still seeds the run
-    let manifest_path = cfg.corpus.join("manifest.json");
+    let manifest_path = corpus.join("manifest.json");
     let text = std::fs::read_to_string(&manifest_path)
         .with_context(|| format!("reading {}", manifest_path.display()))?;
     let manifest: serde_json::Value = serde_json::from_str(&text)
@@ -185,7 +192,7 @@ pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
     let entries = manifest["entries"]
         .as_array()
         .with_context(|| format!("{} has no entries array", manifest_path.display()))?;
-    let wanted: BTreeSet<FuzzType> = cfg.types.iter().copied().collect();
+    let wanted: BTreeSet<FuzzType> = types.iter().copied().collect();
     let mut seen = BTreeSet::new();
     let mut seeds: BTreeMap<FuzzType, Vec<Vec<u8>>> = BTreeMap::new();
     for entry in entries {
@@ -208,14 +215,14 @@ pub fn load_seeds(cfg: &Config) -> Result<BTreeMap<FuzzType, Vec<Vec<u8>>>> {
             let sha = entry["variants"][variant]["xdr_sha256"]
                 .as_str()
                 .with_context(|| format!("{id}: {variant} has no xdr_sha256"))?;
-            let path = cfg.corpus.join(file);
+            let path = corpus.join(file);
             let size = std::fs::metadata(&path)
                 .with_context(|| format!("{id}: {}", path.display()))?
                 .len();
-            if size > cfg.max_seed_bytes {
+            if size > max_seed_bytes {
                 continue;
             }
-            let bytes = shapekit_manifest::read_verified(&cfg.corpus, file, Some(sha))
+            let bytes = shapekit_manifest::read_verified(corpus, file, Some(sha))
                 .map_err(|e| anyhow::anyhow!("{id}: {e}"))?;
             let mut found = vec![(ty, bytes.clone())];
             found.extend(types::nested_seeds(ty, &bytes));
@@ -324,7 +331,7 @@ impl Worker<'_> {
             // mostly small buffers, now and then a large one, so both shallow values with
             // every arm and long arrays or deep nesting come up
             let cap = 1usize << (2 + self.rng.below(11));
-            let len = 1 + self.rng.below(cap.min(self.cfg.max_arbitrary_bytes));
+            let len = 1 + self.rng.below(cap.min(self.cfg.max_arbitrary_bytes.get()));
             let mut raw = vec![0u8; len];
             self.rng.fill(&mut raw);
             let mut u = Unstructured::new(&raw);
@@ -390,7 +397,7 @@ pub fn run(cfg: &Config) -> Result<Outcome> {
 pub fn run_against(cfg: &Config, target: Target, protocol: u32) -> Result<Outcome> {
     ensure!(cfg.jobs > 0, "--jobs must be at least 1");
     ensure!(!cfg.types.is_empty(), "no types to fuzz");
-    let seeds = load_seeds(cfg)?;
+    let seeds = load_seeds(&cfg.corpus, &cfg.types, cfg.max_seed_bytes)?;
     let seed_counts: BTreeMap<FuzzType, usize> = cfg
         .types
         .iter()

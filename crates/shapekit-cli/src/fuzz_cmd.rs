@@ -90,7 +90,8 @@ pub fn run(args: FuzzArgs) -> Result<bool> {
         jobs: args.jobs,
         types,
         max_seed_bytes: args.max_seed_bytes,
-        max_arbitrary_bytes: args.max_arbitrary_bytes as usize,
+        max_arbitrary_bytes: std::num::NonZeroUsize::new(args.max_arbitrary_bytes as usize)
+            .context("--max-arbitrary-bytes must be at least 1")?,
     };
 
     if let Some(dir) = args.replay {

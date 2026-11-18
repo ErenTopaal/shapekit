@@ -15,6 +15,7 @@
 //! reached in each, along with every disagreement class with stellar-xdr.
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
@@ -40,7 +41,8 @@ pub struct GuidedConfig {
     pub max_inputs: u64,
     pub build: bool,
     pub max_seed_bytes: u64,
-    pub max_arbitrary_bytes: usize,
+    /// Upper bound of the raw bytes handed to `arbitrary` per generated value.
+    pub max_arbitrary_bytes: NonZeroUsize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -176,10 +178,10 @@ struct Item {
 }
 
 /// A generated value and the raw bytes it came from.
-fn generate(rng: &mut Rng, ty: FuzzType, max: usize) -> Option<(Vec<u8>, Vec<u8>)> {
+fn generate(rng: &mut Rng, ty: FuzzType, max: NonZeroUsize) -> Option<(Vec<u8>, Vec<u8>)> {
     for _ in 0..8 {
         let cap = 1usize << (2 + rng.below(11));
-        let len = 1 + rng.below(cap.min(max));
+        let len = 1 + rng.below(cap.min(max.get()));
         let mut raw = vec![0u8; len];
         rng.fill(&mut raw);
         if let Some(v) = ty.arbitrary(&mut Unstructured::new(&raw)) {
@@ -208,20 +210,7 @@ pub struct SourceStats {
 
 /// One run, with or without the coverage feedback.
 pub fn run(cfg: &GuidedConfig, feedback: bool) -> Result<GuidedRun> {
-    let seeds = crate::load_seeds(&crate::Config {
-        root: cfg.root.clone(),
-        corpus: cfg.root.join("corpus"),
-        versions: cfg.root.join("conformance/versions.toml"),
-        go_version: None,
-        build: false,
-        seconds: 0,
-        max_inputs: None,
-        seed: 0,
-        jobs: 1,
-        types: FuzzType::ALL.to_vec(),
-        max_seed_bytes: cfg.max_seed_bytes,
-        max_arbitrary_bytes: cfg.max_arbitrary_bytes,
-    })?;
+    let seeds = crate::load_seeds(&cfg.root.join("corpus"), &FuzzType::ALL, cfg.max_seed_bytes)?;
     let mut sides = start(cfg)?;
     let mut rng = Rng::new(cfg.seed);
     // per type the corpus seeds first, then (with the feedback) the inputs that grew coverage
@@ -467,4 +456,23 @@ pub fn render(with: &GuidedRun, without: &GuidedRun) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // the bound is drawn below, so the smallest one allowed must still give a length; a zero
+    // bound is not a value GuidedConfig or Config can hold
+    #[test]
+    fn the_smallest_bound_generates_one_byte_inputs() {
+        let mut rng = Rng::new(1);
+        for &ty in FuzzType::ALL {
+            for _ in 0..16 {
+                if let Some((raw, _)) = generate(&mut rng, ty, NonZeroUsize::MIN) {
+                    assert_eq!(raw.len(), 1);
+                }
+            }
+        }
+    }
 }

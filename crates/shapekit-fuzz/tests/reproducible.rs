@@ -54,7 +54,7 @@ fn two_runs_with_three_workers_write_equal_reports() {
             FuzzType::Asset,
         ],
         max_seed_bytes: 16 * 1024,
-        max_arbitrary_bytes: 1024,
+        max_arbitrary_bytes: std::num::NonZeroUsize::new(1024).unwrap(),
     };
     let known = BTreeMap::new();
     let mut outs = Vec::new();

@@ -63,7 +63,8 @@ pub fn run(args: GuidedFuzzArgs) -> Result<bool> {
         max_inputs: args.max_inputs,
         build: !args.no_build,
         max_seed_bytes: args.max_seed_bytes,
-        max_arbitrary_bytes: args.max_arbitrary_bytes as usize,
+        max_arbitrary_bytes: std::num::NonZeroUsize::new(args.max_arbitrary_bytes as usize)
+            .context("--max-arbitrary-bytes must be at least 1")?,
     };
     let out = root.join(&args.out);
     std::fs::create_dir_all(&out).with_context(|| out.display().to_string())?;
