@@ -287,13 +287,14 @@ fn problem_line(p: &Problem) -> String {
 }
 
 /// The conformance command that reruns `entry` on the first sdk (by name) it failed on,
-/// at a version of that same sdk.
+/// at the newest failing version of that same sdk in release order (by name, `v0.9.0` would
+/// come after `v0.10.0`).
 fn sdk_reproduce(runs: &BTreeMap<(String, String), Vec<String>>, entry: &str) -> Option<String> {
     let ((_, sdk), versions) = runs
         .range((entry.to_owned(), String::new())..)
         .next()
         .filter(|((e, _), _)| e == entry)?;
-    let version = versions.last()?;
+    let version = crate::version::newest(versions.iter().map(String::as_str))?;
     Some(format!(
         "shapekit conformance run --sdk {sdk} --version {version} --entry {entry}"
     ))
@@ -1210,6 +1211,22 @@ mod tests {
             occurrences: vec![occ("go@v0.9.0", "e")],
         };
         assert_eq!(other_sdks(&r, &failures), vec!["js@17.4.0"]);
+    }
+
+    #[test]
+    fn the_rerun_takes_the_newest_failing_version_in_release_order() {
+        // versions arrive in the order of "sdk@version" keys, where v0.9.0 follows v0.10.0
+        let runs = BTreeMap::from([
+            (
+                ("e".to_owned(), "go".to_owned()),
+                vec!["v0.10.0".to_owned(), "v0.9.0".to_owned()],
+            ),
+            (("e".to_owned(), "js".to_owned()), vec!["17.4.0".to_owned()]),
+        ]);
+        assert_eq!(
+            sdk_reproduce(&runs, "e").unwrap(),
+            "shapekit conformance run --sdk go --version v0.10.0 --entry e"
+        );
     }
 
     #[test]

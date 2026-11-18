@@ -102,6 +102,7 @@ pub mod import;
 pub mod inputs;
 pub mod render;
 pub mod triage;
+pub mod version;
 
 use anyhow::{Context, Result};
 
