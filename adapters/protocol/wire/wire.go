@@ -360,17 +360,25 @@ func Serve(in io.Reader, out io.Writer, h Handler) error {
 		}
 		done, err := dispatch(req, h, w)
 		if err != nil {
-			return err
+			// the harness is gone or the line cannot be answered; the target must not outlive it
+			return errors.Join(err, closeAfter(h))
 		}
 		if done {
 			return nil
 		}
 	}
 	if err := sc.Err(); err != nil {
-		return fmt.Errorf("reading requests: %w", err)
+		return errors.Join(fmt.Errorf("reading requests: %w", err), closeAfter(h))
 	}
 	if err := h.Close(); err != nil {
 		return fmt.Errorf("tearing down after end of input: %w", err)
+	}
+	return nil
+}
+
+func closeAfter(h Handler) error {
+	if err := h.Close(); err != nil {
+		return fmt.Errorf("tearing down: %w", err)
 	}
 	return nil
 }

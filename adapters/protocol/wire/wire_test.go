@@ -2,6 +2,7 @@ package wire
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -100,5 +101,31 @@ func TestDumpWithoutDumperIsUnsupported(t *testing.T) {
 	lines := serveLines(t, fakeHandler{}, `{"id":"1","cmd":"dump","tables":["t"]}`+"\n"+`{"id":"2","cmd":"stop"}`+"\n")
 	if lines[0]["status"] != "error" || lines[0]["error"].(map[string]any)["class"] != "unsupported" {
 		t.Fatalf("%v", lines)
+	}
+}
+
+type closeCounter struct {
+	fakeHandler
+	closed *int
+}
+
+func (c closeCounter) Close() error { *c.closed++; return nil }
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) { return 0, errors.New("the harness is gone") }
+
+// a target must not outlive a harness that can no longer be answered or read
+func TestServeTearsDownWhenItCannotGoOn(t *testing.T) {
+	closed := 0
+	err := Serve(strings.NewReader(`{"id":"1","cmd":"status"}`+"\n"), failingWriter{}, closeCounter{closed: &closed})
+	if err == nil || closed != 1 {
+		t.Fatalf("write failure: err %v, closed %d times", err, closed)
+	}
+	closed = 0
+	long := `{"id":"1","cmd":"status","pad":"` + strings.Repeat("x", 17<<20) + `"}` + "\n"
+	err = Serve(strings.NewReader(long), &strings.Builder{}, closeCounter{closed: &closed})
+	if err == nil || closed != 1 {
+		t.Fatalf("read failure: err %v, closed %d times", err, closed)
 	}
 }
