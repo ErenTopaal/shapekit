@@ -629,6 +629,18 @@ from `/proc/self/status` (`VmHWM`) and resets it between rounds through
 highest of that round and every round before it. A later round that grows past the first
 still raises it, so both checks keep working.
 
+`--shard <index>/<count>` replays one part of the selection, for a run split across machines
+or CI jobs: the selected chains, sorted by name, are dealt out in turn, so every chain is in
+exactly one shard and both networks of a chain are in the same one. The report records the
+shard. `shapekit harness merge --out <dir> <shard dir>...` takes the reports of every shard of
+one run, each once, and writes the `harness-report.json` and `HARNESS.md` the whole run would
+have written: the same chains and entries in the same order, the verdict totals added up, the
+memory checks holding where they hold in every shard, a round's seconds added up and its peaks
+the largest shard's. It refuses shards of different runs (another adapter, target build,
+corpus, memory limit or round count) and a set with a shard missing or given twice, and
+`--expect` checks the merged report. `shapekit findings` refuses a single shard's report as an
+input.
+
 ## Reproductions
 
 `shapekit harness reproduce --table <toml>` runs pairs of target builds over named chains and

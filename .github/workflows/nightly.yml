@@ -339,21 +339,30 @@ jobs:
 
   harness:
     # every chain through the wallet-backend adapter at the current pin, once per delivery mode;
-    # the rpc run goes twice in one process and fails if the second round's peak memory grows
+    # the rpc run goes twice in one process and fails if the second round's peak memory grows.
+    # each mode is split into shards of the chains (harness run --shard), so no job comes near
+    # github's 6 hour limit; harness-merge puts each mode's shards together. estimated for the
+    # 1092-entry corpus from the 2026-11-14 durations and per-chain times of local runs (docs/
+    # infrastructure.md): rpc about 29,700 s in all, six shards of about 5,000 s; sep54-s3
+    # about 18,300 s, four shards of about 4,600 s
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
         include:
-          - delivery: rpc
-            network: both
-            repeat: 2
-          - delivery: sep54-s3
-            network: testnet
-            repeat: 1
-    name: harness (${{ matrix.delivery }})
+          - {delivery: rpc, network: both, repeat: 2, shard: 1, shards: 6}
+          - {delivery: rpc, network: both, repeat: 2, shard: 2, shards: 6}
+          - {delivery: rpc, network: both, repeat: 2, shard: 3, shards: 6}
+          - {delivery: rpc, network: both, repeat: 2, shard: 4, shards: 6}
+          - {delivery: rpc, network: both, repeat: 2, shard: 5, shards: 6}
+          - {delivery: rpc, network: both, repeat: 2, shard: 6, shards: 6}
+          - {delivery: sep54-s3, network: testnet, repeat: 1, shard: 1, shards: 4}
+          - {delivery: sep54-s3, network: testnet, repeat: 1, shard: 2, shards: 4}
+          - {delivery: sep54-s3, network: testnet, repeat: 1, shard: 3, shards: 4}
+          - {delivery: sep54-s3, network: testnet, repeat: 1, shard: 4, shards: 4}
+    name: harness (${{ matrix.delivery }}, ${{ matrix.shard }}/${{ matrix.shards }})
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -398,13 +407,14 @@ jobs:
           DELIVERY: ${{ matrix.delivery }}
           NETWORK: ${{ matrix.network }}
           REPEAT: ${{ matrix.repeat }}
+          SHARD: ${{ matrix.shard }}/${{ matrix.shards }}
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           pin=$(scripts/pin.sh git wallet-backend)
           "$RUNNER_TEMP/bin/shapekit" harness run \
             --adapter "adapters/bin/wb-adapter --commit $pin" \
-            --delivery "$DELIVERY" --network "$NETWORK" --repeat "$REPEAT" \
+            --delivery "$DELIVERY" --network "$NETWORK" --repeat "$REPEAT" --shard "$SHARD" \
             --out harness-out
       - name: save the wallet-backend image for the cache
         if: ${{ !cancelled() && steps.wb-cache.outputs.cache-hit != 'true' }}
@@ -414,23 +424,26 @@ jobs:
           if docker image inspect "shapekit-wallet-backend:$PIN" >/dev/null 2>&1; then
             docker save --output "$RUNNER_TEMP/wallet-backend-image.tar" "shapekit-wallet-backend:$PIN"
           fi
-      - name: report to the job summary
-        if: ${{ !cancelled() }}
-        run: |
-          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: harness-${{ matrix.delivery }}
+          name: harness-${{ matrix.delivery }}-shard-${{ matrix.shard }}
           path: harness-out/
           retention-days: 30
 
   harness-stellar-etl:
-    # every chain of both networks through the stellar-etl adapter at the pinned commit; its
-    # report is the stellar-etl input the findings job imports (findings/triage.toml)
+    # every chain of both networks through the stellar-etl adapter at the pinned commit, in five
+    # shards of the chains (about 22,000 s in all, estimated for the 1092-entry corpus);
+    # harness-merge puts them together into the stellar-etl input the findings job imports
+    # (findings/triage.toml)
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    name: harness stellar-etl (${{ matrix.shard }}/5)
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -445,21 +458,19 @@ jobs:
         run: docker pull --quiet "$(scripts/pin.sh image fake-gcs-server)"
       - run: cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter
       - name: harness run
+        env:
+          SHARD: ${{ matrix.shard }}
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           pin=$(scripts/pin.sh git stellar-etl)
           "$RUNNER_TEMP/bin/shapekit" harness run \
             --adapter "adapters/bin/etl-adapter --commit $pin --cpus 2" \
-            --network both --out harness-out
-      - name: report to the job summary
-        if: ${{ !cancelled() }}
-        run: |
-          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+            --network both --shard "$SHARD/5" --out harness-out
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: harness-stellar-etl
+          name: harness-stellar-etl-shard-${{ matrix.shard }}
           path: harness-out/
           retention-days: 30
 
@@ -507,15 +518,18 @@ jobs:
 
   harness-stellar-rpc:
     # every chain of both networks through the stellar-rpc adapter, once per method the export
-    # reads events from; each run must give the verdicts of the committed expectations file
+    # reads events from, each in three shards of the chains (about 12,300 s per method in all,
+    # estimated for the 1092-entry corpus); harness-merge checks each method's merged report
+    # against the committed expectations file
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 240
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
         events-from: [events, transactions, ledgers]
-    name: harness stellar-rpc (${{ matrix.events-from }})
+        shard: [1, 2, 3]
+    name: harness stellar-rpc (${{ matrix.events-from }}, ${{ matrix.shard }}/3)
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -530,23 +544,20 @@ jobs:
         run: docker pull --quiet "$(scripts/pin.sh image stellar-rpc)"
       - run: cd adapters && go build -o bin/rpc-adapter ./stellarrpc/cmd/rpc-adapter
       - name: harness run
+        # the expectations are checked on the merged report, in harness-merge
         env:
           EVENTS_FROM: ${{ matrix.events-from }}
+          SHARD: ${{ matrix.shard }}/3
         run: |
           set -euo pipefail
           chmod +x "$RUNNER_TEMP/bin/shapekit"
           "$RUNNER_TEMP/bin/shapekit" harness run \
             --adapter "adapters/bin/rpc-adapter --cpus 2 --events-from $EVENTS_FROM" \
-            --network both --expect crates/shapekit-harness/expect/stellar-rpc.toml \
-            --out harness-out
-      - name: report to the job summary
-        if: ${{ !cancelled() }}
-        run: |
-          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+            --network both --shard "$SHARD" --out harness-out
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: harness-stellar-rpc-${{ matrix.events-from }}
+          name: harness-stellar-rpc-${{ matrix.events-from }}-shard-${{ matrix.shard }}
           path: harness-out/
           retention-days: 30
 
@@ -594,6 +605,54 @@ jobs:
           path: fuzz-out/
           retention-days: 30
 
+  harness-merge:
+    # each harness leg's shards put together into the report one whole run writes: its summary,
+    # the stellar-rpc expectations, and the artifacts the findings job imports
+    needs: [build, harness, harness-stellar-etl, harness-stellar-rpc]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {leg: rpc, artifact: harness-rpc}
+          - {leg: sep54-s3, artifact: harness-sep54-s3}
+          - {leg: stellar-etl, artifact: harness-stellar-etl}
+          - {leg: stellar-rpc-events, artifact: harness-stellar-rpc-events, expect: crates/shapekit-harness/expect/stellar-rpc.toml}
+          - {leg: stellar-rpc-transactions, artifact: harness-stellar-rpc-transactions, expect: crates/shapekit-harness/expect/stellar-rpc.toml}
+          - {leg: stellar-rpc-ledgers, artifact: harness-stellar-rpc-ledgers, expect: crates/shapekit-harness/expect/stellar-rpc.toml}
+    name: harness merge (${{ matrix.leg }})
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: ${{ matrix.artifact }}-shard-*
+          path: ${{ runner.temp }}/shards
+      - name: merge the shards
+        env:
+          EXPECT: ${{ matrix.expect }}
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          args=()
+          if [ -n "$EXPECT" ]; then args=(--expect "$EXPECT"); fi
+          "$RUNNER_TEMP/bin/shapekit" harness merge --out harness-out "${args[@]}" "$RUNNER_TEMP"/shards/*
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ matrix.artifact }}
+          path: harness-out/
+          retention-days: 30
+
   findings:
     # every failure the nightly runs report must map to a triaged finding with an upstream link
     # or a recorded decision (shapekit findings check, inputs as findings/triage.toml declares
@@ -602,7 +661,7 @@ jobs:
     # on any other problem: an unmapped failure, a finding that matches nothing, a missing
     # draft file, a filed finding without a link, or a committed findings.json that differs
     # from what tonight's runs give
-    needs: [build, conformance, harness, harness-stellar-etl]
+    needs: [build, conformance, harness-merge]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30

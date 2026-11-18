@@ -174,6 +174,27 @@ The `nightly.yml` run on 2026-11-14 took 2 hours 13 minutes. Its jobs run in par
 | conformance (every version, and the reproductions) | 349 s |
 | findings | 60 s |
 
+Those durations are of the 716-entry corpus (44 chains). The corpus now has 1,092 entries in
+135 chains, and each harness leg now runs in shards of the chains (`harness run --shard`),
+which a `harness-merge` job puts back together (`harness merge`) before the findings job
+imports them. The leg durations below are **estimates** until a GitHub run measures them:
+local runs of the whole corpus on a shared 10-core host, scaled by how runs of the old 44
+chains compared: the 2026-11-14 GitHub run took 0.91 times the local time with rpc delivery
+and 2.14 times the local rpc-delivery time with sep54-s3; a local run of the GitHub workflow
+(act) took the GitHub time for the rpc leg within 1%, 1.12 times the local time for
+stellar-etl, and 3,037 s, 2,984 s and 2,631 s for the stellar-rpc events, transactions and
+ledgers methods, which the new corpus scales by 4.06 (the local rpc leg's 135 chains against
+its 44).
+
+| Leg | Estimated in all | Shards | Estimated per shard | Timeout per shard |
+|---|---|---|---|---|
+| harness (rpc delivery, both networks, two rounds) | 29,700 s | 6 | 5,000 s | 180 min |
+| harness (sep54-s3 delivery, testnet) | 18,300 s | 4 | 4,600 s | 180 min |
+| harness-stellar-etl (both networks) | 22,000 s | 5 | 4,400 s | 150 min |
+| harness-stellar-rpc, events method (both networks) | 12,300 s | 3 | 4,100 s | 150 min |
+| harness-stellar-rpc, transactions method | 12,100 s | 3 | 4,000 s | 150 min |
+| harness-stellar-rpc, ledgers method | 10,700 s | 3 | 3,600 s | 150 min |
+
 ## Network access and telemetry
 
 shapekit collects no telemetry. It does not phone home, report usage, check for updates, or
