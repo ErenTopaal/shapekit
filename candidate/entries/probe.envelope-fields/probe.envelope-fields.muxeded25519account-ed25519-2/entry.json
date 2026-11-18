@@ -3,7 +3,7 @@
   "expected": {
     "decode": "must-accept",
     "roundtrip": true,
-    "validity": "invalid-by-core"
+    "validity": "valid"
   },
   "family": "probe.envelope-fields",
   "fields_exercised": [],
@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.muxeded25519account-ed25519-2",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of MuxedEd25519Account.ed25519, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"\": applied and failed, tx_failed",
+  "notes": "probe of MuxedEd25519Account.ed25519, attempt \"all zero: \\\"0000000000000000000000000000000000000000000000000000000000000000\\\"; own footprint and auth, the host runs it\": applied and succeeded",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -21,23 +21,18 @@
   "source": {
     "chain": "probe.envelope-fields.p30",
     "class": "local-core",
-    "core_rejection": {
-      "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAPhf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
-      "stage": "apply"
-    },
     "ledger_seq": 1107,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "82d1d5c18bd6efc51a6c8111f240ab6500f241ed13914c99e54e009cce01cc10"
+    "tx_hash": "341aa6619c2ee53f6b75ede5166afce22eebe1c166cf389f5b0f01e06e6750cd"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxeded25519account-ed25519-2/testnet.expected.json",
-      "expected_json_sha256": "cf4c51b02e41a9a1a7ecbdedb9220dc42cc9a440b6f1b1a5a302704cb19dc528",
+      "expected_json_sha256": "5b9977210fa498dc574c4d10c4116f7743263c7d55658fb7f75bcaba98967868",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxeded25519account-ed25519-2/testnet.xdr",
-      "xdr_sha256": "9b148a2d2b0548ba453f81a0c8d96f311be01a49fd83f3ff1521bdf80feb2147"
+      "xdr_sha256": "11c618ddb9c457318f28025f62d16f2a63d87f94125f2a37793a6d547f981c19"
     }
   },
   "xdr_type": "TransactionEnvelope"

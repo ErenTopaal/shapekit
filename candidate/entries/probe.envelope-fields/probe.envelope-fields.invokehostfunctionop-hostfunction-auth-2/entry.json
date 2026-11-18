@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokehostfunctionop-hostfunction-auth-2",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier auth, attempt \"arm create_contract, smallest: {\\\"create_contract\\\":{\\\"contract_id_preimage\\\":{\\\"asset\\\":\\\"native\\\"},\\\"execut...\": applied and failed, tx_failed",
+  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier auth, attempt \"arm create_contract, smallest: {\\\"create_contract\\\":{\\\"contract_id_preimage\\\":{\\\"asset\\\":\\\"native\\\"},\\\"execut...; own footprint and auth, the host fails it with Error(Storage, ExistingValue)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAOAf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAK/n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 545,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "324206d3fbcf79e61bb3fb0a361db38809d8cd286e0c377a16de97e9936a6ad2"
+    "tx_hash": "c503ea8dc08a946b0f078bbd6fba7233b2fc48bb9165c087efb7936d1838fd55"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-2/testnet.expected.json",
-      "expected_json_sha256": "2aee9f4b91393c02979df3c7fd1b55f60d1bc6297869d9bcb1066d10222a1b60",
+      "expected_json_sha256": "ce84f9f2980377f24d615db65ccaccef35871bbe28c57663fb203c1cb38f0a4c",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-2/testnet.xdr",
-      "xdr_sha256": "63684dcd4553f32c1e353f6b0052fa310037263b565d897becdc06487d74457a"
+      "xdr_sha256": "118894108be62fdde60529ab134bc0b2674543b5a1bba6de703931a3edb4b890"
     }
   },
   "xdr_type": "TransactionEnvelope"

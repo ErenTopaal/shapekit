@@ -3,7 +3,7 @@
     "signatures": [
       {
         "hint": "672abae0",
-        "signature": "645818da49b1421981985b9b1bf50893ddb420c0d4e398c0a308b8d3f214ffc8448f567a0d118f48b3cc9a0af1bbe2ffa882e639d799b8d2f6d7779ae26a3f03"
+        "signature": "1bbd23a38c06ea0c030392585950aa66dc2a27cfec47c470cb03002860c9e5ac44d38c5327dae917148bde904941b04ae585a517617e4ae6520342eea6c4b303"
       }
     ],
     "tx": {
@@ -11,42 +11,36 @@
       "ext": {
         "v1": {
           "ext": "v0",
-          "resource_fee": "50045550",
+          "resource_fee": "50022580",
           "resources": {
             "disk_read_bytes": 10000,
             "footprint": {
               "read_only": [
                 {
                   "contract_data": {
-                    "contract": "CC7CBZCZ7X5KNYSA5PF4PEBJYCJIJ2RGUC2HTDSEPKTLD6LFSEKYVAD6",
+                    "contract": "CCNAZ4QZ3KWWQ4MQFKUGETZYV3XT3AF2Z2RNTUG6NTXOBSTZSQKVUHSH",
+                    "durability": "persistent",
+                    "key": "ledger_key_contract_instance"
+                  }
+                },
+                {
+                  "contract_data": {
+                    "contract": "CC7SBZCZ7X5KNYSA5PF4PEBJYCJIJ2RGUC2HTDSEPKTLD6LFSEKYVRRH",
                     "durability": "persistent",
                     "key": {
                       "executable_tag": "echo"
                     }
                   }
-                },
-                {
-                  "contract_code": {
-                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
-                  }
                 }
               ],
-              "read_write": [
-                {
-                  "contract_data": {
-                    "contract": "CCNAZ4QZ3KWWQ4MQFKUGETZYV3XT3AF2Z2RNTUG6NTXOBSTZSQKVUHSH",
-                    "durability": "persistent",
-                    "key": "ledger_key_contract_instance"
-                  }
-                }
-              ]
+              "read_write": []
             },
-            "instructions": 10623486,
-            "write_bytes": 10116
+            "instructions": 10065896,
+            "write_bytes": 10000
           }
         }
       },
-      "fee": 50045650,
+      "fee": 50022680,
       "memo": "none",
       "operations": [
         {
@@ -67,7 +61,7 @@
                         },
                         "executable": {
                           "external_ref": {
-                            "executable_owner": "CC7CBZCZ7X5KNYSA5PF4PEBJYCJIJ2RGUC2HTDSEPKTLD6LFSEKYVAD6",
+                            "executable_owner": "CC7SBZCZ7X5KNYSA5PF4PEBJYCJIJ2RGUC2HTDSEPKTLD6LFSEKYVRRH",
                             "tag": "echo"
                           }
                         }

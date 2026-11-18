@@ -3,7 +3,7 @@
   "expected": {
     "decode": "must-accept",
     "roundtrip": true,
-    "validity": "invalid-by-core"
+    "validity": "valid"
   },
   "family": "probe.envelope-fields",
   "fields_exercised": [],
@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.muxedcontract-contractid-2",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of MuxedContract.contractId, attempt \"all zero: \\\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\\\"\": applied and failed, tx_failed",
+  "notes": "probe of MuxedContract.contractId, attempt \"all zero: \\\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4\\\"; own footprint and auth, the host runs it\": applied and succeeded",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -21,23 +21,18 @@
   "source": {
     "chain": "probe.envelope-fields.p30",
     "class": "local-core",
-    "core_rejection": {
-      "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAO7v/////AAAAAQAAAAAAAAAY/////gAAAAA=",
-      "stage": "apply"
-    },
     "ledger_seq": 1095,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "c6a578dffd63b0dd4cd2c4dcfdecdeb7a1a4bbf6a8be3596ce73feeac6c37cc6"
+    "tx_hash": "7d4008c0dcf854c60054836e34eb4fb9789e84e41f82b6f5ec0e1247508c0431"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedcontract-contractid-2/testnet.expected.json",
-      "expected_json_sha256": "0af1e9753a88c86d0a8ea30dc63fa48fd450965b9dce0ac0c9bc810830604d66",
+      "expected_json_sha256": "aead74dc1d3b08a039eeebaa341a9a0ca9fdebe68d7cf44439decec0d945f2ab",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedcontract-contractid-2/testnet.xdr",
-      "xdr_sha256": "acd7b30184d6be4af08bcd0aa948e30eb1f723ee9f6e5d28bc8e6b4e2361b292"
+      "xdr_sha256": "5bb8cf8c77adc10fff2c4485831473c4cbbad843624977ecab01f6a45a1aaaa7"
     }
   },
   "xdr_type": "TransactionEnvelope"

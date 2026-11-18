@@ -4,19 +4,19 @@
     "ext": "v0",
     "ledger_header": {
       "ext": "v0",
-      "hash": "97c5545aecbaada23989366688975b3528109b69f65556654e7f4cdad5368a22",
+      "hash": "973c91c4dba3bb7bf835129c015954f55f9bbe971bce6f638544da75198c62a2",
       "header": {
         "base_fee": 100,
         "base_reserve": 100000000,
-        "bucket_list_hash": "652adb4b6e081d266c0dfbf1e1022d09e799681673f481971ce92fb3b0faf30f",
+        "bucket_list_hash": "d568963bec0fcd854a73744fe195a4a225a64227213167b9df5c3ed58158859f",
         "ext": "v0",
-        "fee_pool": "7115562",
+        "fee_pool": "7112392",
         "id_pool": "0",
         "inflation_seq": 0,
         "ledger_seq": 311,
         "ledger_version": 30,
         "max_tx_set_size": 100,
-        "previous_ledger_hash": "20b26f96cef5ed7f2f7072ad0dccf303ffcb7b7c5a5ad89746bdf2b9b2d4e24b",
+        "previous_ledger_hash": "947b52d093820f4b45193b9e1676e0fce31ca93f1001e71d644c9fdef5e0ddc3",
         "scp_value": {
           "close_time": "1794096000",
           "ext": {
@@ -24,21 +24,21 @@
               "close_time_ms": "1794096000000",
               "lc_value_signature": {
                 "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
-                "signature": "7ec202e955781a239129e5825c2de608d0475d0e313b4dc1521ae8551d53ea050d5a141468c23de54435ee2b2a965b1cefaef4fe34a55da386d32ae3d5363b02"
+                "signature": "33181121ef465f325155c2fe82f160acc48f50a4dc8f0c832a11621cf37c371f119f312cf30cafb6e7a54855d535c4b842b2b48606772bc5d94ec279eb8df608"
               }
             }
           },
-          "tx_set_hash": "54aaaf279dc069a2d57ac547ee65f2873a2a65671ea34deb68635e05e5d148b4",
+          "tx_set_hash": "239befb5cf34a01e3c8acf08c5e6db19cbcc478047b787c7d65428c8125f91c8",
           "upgrades": []
         },
         "skip_list": [
-          "9bcaae0ff27d40a862ca79246dd01046a315cfeffdc89430063fbe69ce1ded44",
+          "d38942ad351f6dc787b64b7c7f9fac3f0bf1efa2d7d3899cd8562964cfeeec17",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000"
         ],
         "total_coins": "1000000000000000000",
-        "tx_set_result_hash": "1a05d5e86e6f9669becf89b322ec7bd69549a903a4cbc10ceb062c8698e8726d"
+        "tx_set_result_hash": "807fd0414535ab288dff8008654b37db59fc69ea0f3d7a3ed02be69a8822079f"
       }
     },
     "scp_info": [],
@@ -135,7 +135,7 @@
               "data": {
                 "account": {
                   "account_id": "GBNT7RXCXYGZYRN3EVJRVCHD6XYTFST3554OOFSKNVS4VWVL2W2A3Z7I",
-                  "balance": "9999987262",
+                  "balance": "9999975781",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -175,18 +175,20 @@
         "result": {
           "result": {
             "ext": "v0",
-            "fee_charged": "12738",
+            "fee_charged": "24219",
             "result": {
-              "tx_failed": [
+              "tx_success": [
                 {
                   "op_inner": {
-                    "invoke_host_function": "trapped"
+                    "invoke_host_function": {
+                      "success": "f77a3443522359f5fd91e2f559dc23d270ed187f621ad249ccfe60cbcceafbd2"
+                    }
                   }
                 }
               ]
             }
           },
-          "transaction_hash": "3604474e88314d24bc38e9bb026df343e8a2ddd04218ecd3b6770f783698fe64"
+          "transaction_hash": "b85d44639d0e4dbe16938788a9323b0a7f5b30d021657e03f5c381fb44e37065"
         },
         "tx_apply_processing": {
           "v4": {
@@ -220,7 +222,7 @@
                   "body": {
                     "v0": {
                       "data": {
-                        "i128": "-50029832"
+                        "i128": "-50018351"
                       },
                       "topics": [
                         {
@@ -240,8 +242,54 @@
               }
             ],
             "ext": "v0",
-            "operations": [],
-            "soroban_meta": null,
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "created": {
+                      "data": {
+                        "contract_data": {
+                          "contract": "CD7XUB4TMNS2EGSBEVNRVLZ36UOIIC3FZ7FA7IT23XP5MOAXLWTTWA4P",
+                          "durability": "persistent",
+                          "ext": "v0",
+                          "key": "ledger_key_contract_instance",
+                          "val": {
+                            "contract_instance": {
+                              "executable": {
+                                "wasm": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                              },
+                              "storage": null
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 311
+                    }
+                  },
+                  {
+                    "created": {
+                      "data": {
+                        "ttl": {
+                          "key_hash": "662c34dad507a4480e2a201ae7476c4996a2963f9fc570b5b21862d056edb328",
+                          "live_until_ledger_seq": 121270
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 311
+                    }
+                  }
+                ],
+                "events": [],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": {
+              "ext": "v0",
+              "return_value": {
+                "address": "CD7XUB4TMNS2EGSBEVNRVLZ36UOIIC3FZ7FA7IT23XP5MOAXLWTTWA4P"
+              }
+            },
             "tx_changes_after": [],
             "tx_changes_before": [
               {
@@ -327,7 +375,7 @@
                         "signatures": [
                           {
                             "hint": "abd5b40d",
-                            "signature": "a000e2a386e0f98ebd4d4eff9fa175936e0b1b21799ccf7ecb1ca6cfcc81575e6d1333b8f54822bc0323e51af7a014d983405e5a8b97898f886233e3b6bf890c"
+                            "signature": "20b9f146444cba90114d69ea49e085ee4400fd843fdc37d8a3fb43d8eb91698e9c14fc5b309d358a9d3138d2a6e968dd8e408705940d0ecc04f6bea9dfe82a01"
                           }
                         ],
                         "tx": {
@@ -349,7 +397,7 @@
                                   "read_write": [
                                     {
                                       "contract_data": {
-                                        "contract": "CDSDLUPAS4CVLFQ3FIWG4WQG2D56U3SC465HNE6SQOJEMIRIXD6TL3K4",
+                                        "contract": "CD7XUB4TMNS2EGSBEVNRVLZ36UOIIC3FZ7FA7IT23XP5MOAXLWTTWA4P",
                                         "durability": "persistent",
                                         "key": "ledger_key_contract_instance"
                                       }
@@ -377,7 +425,7 @@
                                             "contract_id_preimage": {
                                               "address": {
                                                 "address": "GBNT7RXCXYGZYRN3EVJRVCHD6XYTFST3554OOFSKNVS4VWVL2W2A3Z7I",
-                                                "salt": "0e0ee8d0bec3b61eff1a116bd3d49825b921c8c3102b07423a08877d78232c1a"
+                                                "salt": "0000000000000000000000000000000000000000000000000000000000000000"
                                               }
                                             },
                                             "executable": {
@@ -418,7 +466,7 @@
             }
           }
         ],
-        "previous_ledger_hash": "20b26f96cef5ed7f2f7072ad0dccf303ffcb7b7c5a5ad89746bdf2b9b2d4e24b"
+        "previous_ledger_hash": "947b52d093820f4b45193b9e1676e0fce31ca93f1001e71d644c9fdef5e0ddc3"
       }
     },
     "upgrades_processing": []

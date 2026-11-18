@@ -3,7 +3,7 @@
     "signatures": [
       {
         "hint": "162b0dbe",
-        "signature": "914a9e7d216cc88c553f005de645e348f0be7a88e0422d5ec2589504c1e443316f58093ff8af484f413cfee967fb6dcfa895df24ff765ef71ccbc29e98e38602"
+        "signature": "0fd8043f4be34f3913e5592126bcfe19e2db04f861ae541032faf8b90777dc1053930d11ece53eab383ebc4e70fd071989a994c5e9d730208e1b55f1cbba2906"
       }
     ],
     "tx": {
@@ -11,33 +11,27 @@
       "ext": {
         "v1": {
           "ext": "v0",
-          "resource_fee": "50042470",
+          "resource_fee": "50022410",
           "resources": {
             "disk_read_bytes": 10000,
             "footprint": {
               "read_only": [
                 {
-                  "contract_code": {
-                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
-                  }
-                }
-              ],
-              "read_write": [
-                {
                   "contract_data": {
-                    "contract": "CCJFWOIVNIY5HMSQ3FA6KZPFMMWGBVQFAEEDEQSDUEZ6WCXSUFJ72QM5",
+                    "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
                     "durability": "persistent",
                     "key": "ledger_key_contract_instance"
                   }
                 }
-              ]
+              ],
+              "read_write": []
             },
-            "instructions": 10591471,
-            "write_bytes": 10104
+            "instructions": 10070775,
+            "write_bytes": 10000
           }
         }
       },
-      "fee": 50042570,
+      "fee": 50022510,
       "memo": "none",
       "operations": [
         {
@@ -45,15 +39,22 @@
             "invoke_host_function": {
               "auth": [
                 {
-                  "credentials": "source_account",
+                  "credentials": {
+                    "address": {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                      "nonce": "4598685041475779676",
+                      "signature": "void",
+                      "signature_expiration_ledger": 439
+                    }
+                  },
                   "root_invocation": {
                     "function": {
                       "create_contract_v2_host_fn": {
                         "constructor_args": [],
                         "contract_id_preimage": {
                           "address": {
-                            "address": "GDJGFOOOTUCFAPFNZEWFQR7PO6J4THED4FN4JR6BBCQFJIYWFMG35O3X",
-                            "salt": "bf92066ba9c7b5a4fc22fb7e2c26395ad3a8be3840320f8c3c16651c01d555d3"
+                            "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                            "salt": "0000000000000000000000000000000000000000000000000000000000000000"
                           }
                         },
                         "executable": {

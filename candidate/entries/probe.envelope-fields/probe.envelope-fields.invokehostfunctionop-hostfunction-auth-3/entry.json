@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokehostfunctionop-hostfunction-auth-3",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier auth, attempt \"arm upload_contract_wasm, smallest: {\\\"upload_contract_wasm\\\":\\\"\\\"}\": applied and failed, tx_failed",
+  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier auth, attempt \"arm upload_contract_wasm, smallest: {\\\"upload_contract_wasm\\\":\\\"\\\"}; own footprint and auth, the host fails it with Error(WasmVm, InvalidAction)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAN/b/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAALU//////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 546,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "9465904b1e73d475d1ae5b2c69b6673f0dc0bcc78aa2b907167c4865f2bb6f4b"
+    "tx_hash": "8b0bc8c5ed85ee3e84db00c5b149ee04492c9cb17b7d6cdfea58e8b8485b1e15"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-3/testnet.expected.json",
-      "expected_json_sha256": "87f6d4a100ead9188b0ed570cf6392729cdb5ca161aa2d07d01d5ff472487ba6",
+      "expected_json_sha256": "3f6679015d717d0d86932f3723b58cdbda8f3f81d30dc4679b0f0a2f82e75a67",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-auth-3/testnet.xdr",
-      "xdr_sha256": "04917b908145d11c11e01faab4d0fe30fc68b0116a25e845dc7376c7944cbafc"
+      "xdr_sha256": "2000e611d7a51c5fedcd54b2de0ea1c56399958dc32f66e1d7f7666d949a8d87"
     }
   },
   "xdr_type": "TransactionEnvelope"

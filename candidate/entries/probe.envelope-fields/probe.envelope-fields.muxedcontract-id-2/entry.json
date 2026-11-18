@@ -3,7 +3,7 @@
   "expected": {
     "decode": "must-accept",
     "roundtrip": true,
-    "validity": "invalid-by-core"
+    "validity": "valid"
   },
   "family": "probe.envelope-fields",
   "fields_exercised": [],
@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.muxedcontract-id-2",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of MuxedContract.id, attempt \"maximum 18446744073709551615: \\\"18446744073709551615\\\"\": applied and failed, tx_failed",
+  "notes": "probe of MuxedContract.id, attempt \"maximum 18446744073709551615: \\\"18446744073709551615\\\"; own footprint and auth, the host runs it\": applied and succeeded",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -21,23 +21,18 @@
   "source": {
     "chain": "probe.envelope-fields.p30",
     "class": "local-core",
-    "core_rejection": {
-      "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAO7v/////AAAAAQAAAAAAAAAY/////gAAAAA=",
-      "stage": "apply"
-    },
     "ledger_seq": 1100,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "1579b65f21ce85e4e0adf267722cd1f444e65d423487488fc62c6a2acf1b6626"
+    "tx_hash": "321bd28dad11a623ad657da5c3671a4f36fae8faa2a442e2962d61b4b8187606"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedcontract-id-2/testnet.expected.json",
-      "expected_json_sha256": "fed8060a1680b579510a7cc1fdd32b17cc985b05b4ff2a4ba4fa88549a4973be",
+      "expected_json_sha256": "c9390a567202fa61d54008831fc2100d7b5130dc5bc0f05b74aa56af306642b6",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.muxedcontract-id-2/testnet.xdr",
-      "xdr_sha256": "3ac6850ce204dd32ae321a0f4c59351fbf696868e012fd17887531d9b3d4e889"
+      "xdr_sha256": "ca80dccdf753a31e9ff3ff32048ff313fb2339e482ff815110df238c04eacf4e"
     }
   },
   "xdr_type": "TransactionEnvelope"

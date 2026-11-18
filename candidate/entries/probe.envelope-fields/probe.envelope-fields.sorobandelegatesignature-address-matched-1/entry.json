@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.sorobandelegatesignature-address-matched-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of SorobanDelegateSignature.address in carrier matched, attempt \"same arm, same arm, first byte changed: \\\"GBMFNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJN5F\\\"\": applied and failed, tx_failed",
+  "notes": "probe of SorobanDelegateSignature.address in carrier matched, attempt \"same arm, same arm, first byte changed: \\\"GBMFNRND2H4NPCCO3VRX25FLC3YUWE3LXQID6QP7TZVLEMAQMGKSJN5F\\\"; own footprint and auth, the host fails it with Error(Auth, InvalidAction)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAO8n/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAMbr/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 1778,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "91c7ae5f53ab268fc089ad2da9927e9a0154dcce012fde40803ce177eb24edee"
+    "tx_hash": "9da6849e0b8d5509f52113d32b9ac5b4f0795d42107dfe7a3f0cb10a3eac020a"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-address-matched-1/testnet.expected.json",
-      "expected_json_sha256": "16bd1162260e9e88b8d9ea2daa3f4516c093896a52b0ddd492ab75cecf713ec1",
+      "expected_json_sha256": "4e1dec35ae7e621dc18a6fb1dce23dd89ad3f8869ea5515418b08a5682ef3a1c",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobandelegatesignature-address-matched-1/testnet.xdr",
-      "xdr_sha256": "28a6ed145900ad006389bd14a3ecca51a9001be565a08718c49363d905c7bae6"
+      "xdr_sha256": "d0a47ee1a812b916561bb683f907ee5abb78e24c9a3a37301000b2d7802dc16c"
     }
   },
   "xdr_type": "TransactionEnvelope"

@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.createcontractargs-contractidpreimage-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of CreateContractArgs.contractIDPreimage, attempt \"same arm, smallest value: {\\\"address\\\":{\\\"address\\\":\\\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...\": applied and failed, tx_failed",
+  "notes": "probe of CreateContractArgs.contractIDPreimage, attempt \"same arm, smallest value: {\\\"address\\\":{\\\"address\\\":\\\"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...; own footprint and auth, the host fails it with Error(Auth, InvalidAction), authorization unsigned for CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4 (no key)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMbn/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAALCn/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 340,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "f8de31e19b0774012bbc1051518cbe3471156cb64385297aa835a406650a9e9d"
+    "tx_hash": "19bd76dec2195212ff4f0474750041d2f52593c23b67bb61d7773e807a3bdca5"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-contractidpreimage-1/testnet.expected.json",
-      "expected_json_sha256": "c74e33df37da02642f267f1e440e35dab8a8b16f5c14372235ea11fe9e0a18f0",
+      "expected_json_sha256": "d30146a31a01713f235200bbc27ac84ec427c9e844304049cf05d188f0435c51",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-contractidpreimage-1/testnet.xdr",
-      "xdr_sha256": "213f8fc620189f425b609b422c9c8c0879879639b67c784841887dab756db6ea"
+      "xdr_sha256": "4eca5b82e129f6271e3d49d3be012ef2125480cf777c6d3ad8887c793abae2f6"
     }
   },
   "xdr_type": "TransactionEnvelope"

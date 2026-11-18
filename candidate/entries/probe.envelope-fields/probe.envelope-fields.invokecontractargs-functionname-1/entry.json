@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokecontractargs-functionname-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeContractArgs.functionName, attempt \"empty: \\\"\\\"\": applied and failed, tx_failed",
+  "notes": "probe of InvokeContractArgs.functionName, attempt \"empty: \\\"\\\"; own footprint and auth, the host fails it with Error(WasmVm, MissingValue)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMFf/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAKrr/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 510,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "ba5fbd00a619a9ed20d99832a3292cacfe17650a67dfebce795be246ec353c75"
+    "tx_hash": "22cecf68dc0ffc519b84f583fdcec914bd9b25ae4a6f7ced82cf97fdcd5b347c"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokecontractargs-functionname-1/testnet.expected.json",
-      "expected_json_sha256": "cfe3ddc09489e301711af4688e6e2189fce391286112f7e999cb51fca621b6b0",
+      "expected_json_sha256": "20f140b36f08cfadf755e0d8af86f62b009381ffd157e6a84bd64f4d7faac7a7",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokecontractargs-functionname-1/testnet.xdr",
-      "xdr_sha256": "c6e75799084f3ca5cc1e24eb7fe18eb674a11109ead38584ba0abafb6c65314c"
+      "xdr_sha256": "65a80cea259b9c06d243b6bd226ba2edd9aa3314e33da5f8290271ec9a84129f"
     }
   },
   "xdr_type": "TransactionEnvelope"

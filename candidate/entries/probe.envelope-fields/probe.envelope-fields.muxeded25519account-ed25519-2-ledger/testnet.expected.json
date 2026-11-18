@@ -4,19 +4,19 @@
     "ext": "v0",
     "ledger_header": {
       "ext": "v0",
-      "hash": "1607e960222d3ffe4585abe97d56b4132134e7ec5526e6edf29826621ada05b7",
+      "hash": "dbd140a4c97e9ccf37e72436bc5c3f08c03785bd4ee08c11ff64042adc3aa1e8",
       "header": {
         "base_fee": 100,
         "base_reserve": 100000000,
-        "bucket_list_hash": "2581627193349eb71ca219d65d35e7d6cabf8d89f378b9e66fbabab5811fea8c",
+        "bucket_list_hash": "edfa9a52bc80be3ce480c139790d954f9e33cc5bc0c46f90fa003998e461f4ff",
         "ext": "v0",
-        "fee_pool": "9500135",
+        "fee_pool": "9644806",
         "id_pool": "29",
         "inflation_seq": 0,
         "ledger_seq": 1107,
         "ledger_version": 30,
         "max_tx_set_size": 100,
-        "previous_ledger_hash": "c69c5c12e3b4ef65b075c31162f6464ec2a9a5fd0ad24419b5b35eea5c3793a7",
+        "previous_ledger_hash": "e425b0a07b8b4cf75ca5e5e496f1d07ca1b3937806842075182e23ca26adbf5d",
         "scp_value": {
           "close_time": "1862870400",
           "ext": {
@@ -24,25 +24,25 @@
               "close_time_ms": "1862870400000",
               "lc_value_signature": {
                 "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
-                "signature": "6ed58f60c5ee4d4ba12234f0cdd1738131b70f3e46d4daecac32bbee7332956729d82d937e743f208568a879a5d935c6516e806aa470fb47f9f9ab882b08780d"
+                "signature": "cdd786e317fdf6348b92acf790b49ff56cc59315fa91827052ce4361b10365a4fb4ba9fa8cbc1d211834aab4ac3833264ef80ce06b6b9512976333e4dfc6010a"
               }
             }
           },
-          "tx_set_hash": "9501790f0b830555a958fd4dceb6e6a715397552bd9dfc74ffeecc7aaee7af40",
+          "tx_set_hash": "1f51ab04424c3aae222595b59a108572b60c2ed18bd33d0ebd0b2937975b281e",
           "upgrades": []
         },
         "skip_list": [
-          "f37a9d292a8a38a6e7de5af9ccad47f8de2c168c8cf4cb672d0fc48e79400ef0",
+          "2981fceca8203072d8be241406daf0a920ef5cffa0f1d05a9fb3e51130393f10",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000"
         ],
         "total_coins": "1000000000000000000",
-        "tx_set_result_hash": "8954c6a29f1c59a92e44cee6118ce497558519204e2e6d2ac2aed0c4210b6b55"
+        "tx_set_result_hash": "b6da79e8bcbf45552ba5f469345d080f5371e0a5b037cb792095d240be8243f2"
       }
     },
     "scp_info": [],
-    "total_byte_size_of_live_soroban_state": "151645",
+    "total_byte_size_of_live_soroban_state": "151802",
     "tx_processing": [
       {
         "ext": "v0",
@@ -94,7 +94,7 @@
               "data": {
                 "account": {
                   "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT",
-                  "balance": "9949976090",
+                  "balance": "9939976090",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -135,7 +135,7 @@
               "data": {
                 "account": {
                   "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT",
-                  "balance": "9999984105",
+                  "balance": "9989983480",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -175,18 +175,20 @@
         "result": {
           "result": {
             "ext": "v0",
-            "fee_charged": "15895",
+            "fee_charged": "16520",
             "result": {
-              "tx_failed": [
+              "tx_success": [
                 {
                   "op_inner": {
-                    "invoke_host_function": "trapped"
+                    "invoke_host_function": {
+                      "success": "afeb63ae9db5113391b12ef26eab12a0277bded6025ae749b781ba98d2987365"
+                    }
                   }
                 }
               ]
             }
           },
-          "transaction_hash": "82d1d5c18bd6efc51a6c8111f240ab6500f241ed13914c99e54e009cce01cc10"
+          "transaction_hash": "341aa6619c2ee53f6b75ede5166afce22eebe1c166cf389f5b0f01e06e6750cd"
         },
         "tx_apply_processing": {
           "v4": {
@@ -220,7 +222,7 @@
                   "body": {
                     "v0": {
                       "data": {
-                        "i128": "-50008015"
+                        "i128": "-50007390"
                       },
                       "topics": [
                         {
@@ -240,8 +242,184 @@
               }
             ],
             "ext": "v0",
-            "operations": [],
-            "soroban_meta": null,
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "state": {
+                      "data": {
+                        "account": {
+                          "account_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+                          "balance": "1020000000",
+                          "ext": "v0",
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 0,
+                          "seq_num": "1357209665536",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1016
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "account": {
+                          "account_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+                          "balance": "1030000000",
+                          "ext": "v0",
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 0,
+                          "seq_num": "1357209665536",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1107
+                    }
+                  },
+                  {
+                    "state": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT",
+                          "balance": "9949976090",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": {
+                                    "v3": {
+                                      "ext": "v0",
+                                      "seq_ledger": 1107,
+                                      "seq_time": "1862870400"
+                                    }
+                                  },
+                                  "num_sponsored": 0,
+                                  "num_sponsoring": 0,
+                                  "signer_sponsoring_i_ds": []
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 0,
+                          "seq_num": "4741643894785",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1107
+                    }
+                  },
+                  {
+                    "updated": {
+                      "data": {
+                        "account": {
+                          "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT",
+                          "balance": "9939976090",
+                          "ext": {
+                            "v1": {
+                              "ext": {
+                                "v2": {
+                                  "ext": {
+                                    "v3": {
+                                      "ext": "v0",
+                                      "seq_ledger": 1107,
+                                      "seq_time": "1862870400"
+                                    }
+                                  },
+                                  "num_sponsored": 0,
+                                  "num_sponsoring": 0,
+                                  "signer_sponsoring_i_ds": []
+                                }
+                              },
+                              "liabilities": {
+                                "buying": "0",
+                                "selling": "0"
+                              }
+                            }
+                          },
+                          "flags": 0,
+                          "home_domain": "",
+                          "inflation_dest": null,
+                          "num_sub_entries": 0,
+                          "seq_num": "4741643894785",
+                          "signers": [],
+                          "thresholds": "01000000"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1107
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "body": {
+                      "v0": {
+                        "data": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "amount"
+                              },
+                              "val": {
+                                "i128": "10000000"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "to_muxed_id"
+                              },
+                              "val": {
+                                "u64": "9"
+                              }
+                            }
+                          ]
+                        },
+                        "topics": [
+                          {
+                            "symbol": "transfer"
+                          },
+                          {
+                            "address": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT"
+                          },
+                          {
+                            "address": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
+                          },
+                          {
+                            "string": "native"
+                          }
+                        ]
+                      }
+                    },
+                    "contract_id": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+                    "ext": "v0",
+                    "type": "contract"
+                  }
+                ],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": {
+              "ext": "v0",
+              "return_value": "void"
+            },
             "tx_changes_after": [],
             "tx_changes_before": [
               {
@@ -327,7 +505,7 @@
                         "signatures": [
                           {
                             "hint": "d1f4e98e",
-                            "signature": "03844f1f201f93f2f279a6b34e5a6f1a3dd161737a56deaaf0d08b3352bbbcd4207fc8d49c3a5db1c8e393181048a1a93ef81a605d7fcc3035e8ec5f3c09d509"
+                            "signature": "a19374def5d85a8edcad02477c7217a00922ee058a5fe5ec91d5e0a77d22dd8bdc587a076648bba2d2d503ed243ee2567b444ab5f9cb9fea7da7c7a7c68a2d0e"
                           }
                         ],
                         "tx": {
@@ -351,17 +529,17 @@
                                   "read_write": [
                                     {
                                       "account": {
-                                        "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT"
+                                        "account_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF"
                                       }
                                     },
                                     {
                                       "account": {
-                                        "account_id": "GDIY5S7GSJVZFC6Q4BZF4YW5Z3UL6EPKZHQIDGKKOXSYZHDD4S7GVRBV"
+                                        "account_id": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT"
                                       }
                                     }
                                   ]
                                 },
-                                "instructions": 10222150,
+                                "instructions": 10222486,
                                 "write_bytes": 10288
                               }
                             }
@@ -383,7 +561,7 @@
                                                 "address": "GCKQ5HIJT4D3PY7NJ7KRU2BLK7BQ4ENAZEMTOO46Q3PTC7GR6TUY4ZMT"
                                               },
                                               {
-                                                "address": "MDIY5S7GSJVZFC6Q4BZF4YW5Z3UL6EPKZHQIDGKKOXSYZHDD4S7GUAAAAAAAAAAABFP6U"
+                                                "address": "MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABFJRE"
                                               },
                                               {
                                                 "i128": "10000000"
@@ -430,7 +608,7 @@
             }
           }
         ],
-        "previous_ledger_hash": "c69c5c12e3b4ef65b075c31162f6464ec2a9a5fd0ad24419b5b35eea5c3793a7"
+        "previous_ledger_hash": "e425b0a07b8b4cf75ca5e5e496f1d07ca1b3937806842075182e23ca26adbf5d"
       }
     },
     "upgrades_processing": []

@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokehostfunctionop-hostfunction-echo-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier echo, attempt \"same arm, smallest value: {\\\"invoke_contract\\\":{\\\"args\\\":[],\\\"contract_address\\\":\\\"CAAAAAAAAAAAAAAAAAA...\": applied and failed, tx_failed",
+  "notes": "probe of InvokeHostFunctionOp.hostFunction in carrier echo, attempt \"same arm, smallest value: {\\\"invoke_contract\\\":{\\\"args\\\":[],\\\"contract_address\\\":\\\"CAAAAAAAAAAAAAAAAAA...; own footprint and auth, the host fails it with Error(Storage, MissingValue)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMEX/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAKhL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 529,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "64085f82437985961df03b9c92016ab62ba6f356fa85095149994e8cbc1d91d7"
+    "tx_hash": "918694cdd0aec9defef2e078345e2a2befb65dd146f04b1e4aa705330c6c826a"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-echo-1/testnet.expected.json",
-      "expected_json_sha256": "28b34f5a85ff6ab5c04fb54a0eadc5c8cd564f8776d8409e1532ba6da5b01356",
+      "expected_json_sha256": "b7fcc95746c42b36ee66ecc1c8a5f8a0d5feb69bcd9867a95df2ef45453a4043",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-hostfunction-echo-1/testnet.xdr",
-      "xdr_sha256": "7c8d03e3a8831aec94ff127f6303e8c0729dd8045cc323856b776a674505cb8a"
+      "xdr_sha256": "45706993ac05b3314649bcecc54e257ac96e5a454f66225ffaffcb0961e0502d"
     }
   },
   "xdr_type": "TransactionEnvelope"

@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.scmapentry-key-3",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of SCMapEntry.key, attempt \"same arm, bytes outside ascii: {\\\"symbol\\\":\\\"\\\\\\\\xc3\\\\\\\\xa9\\\"}\": applied and failed, tx_failed",
+  "notes": "probe of SCMapEntry.key, attempt \"same arm, bytes outside ascii: {\\\"symbol\\\":\\\"\\\\\\\\xc3\\\\\\\\xa9\\\"}; own footprint and auth, the host fails it with Error(Value, InvalidInput)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMKH/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAKfb/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 1421,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "cf155ea4769531ed7fbfd96bb4fb5c62d3ae4f968b2f280c673348d6d7e0145a"
+    "tx_hash": "6570bfea3a979cbafaf6e2d4f60d815f019471cdbd0221bab95e363d48be569c"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.scmapentry-key-3/testnet.expected.json",
-      "expected_json_sha256": "863e9d5feb04d188900240c6b6dc32a442267760f2075ef829d279d0d3e84f53",
+      "expected_json_sha256": "2193fb819e171f0989c7023d10260dbf5a84d79b5e69ff5f9a82bd70823796d9",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.scmapentry-key-3/testnet.xdr",
-      "xdr_sha256": "3caed732b758781e64f989fb858aea807c3ddf67e65c61005df767966d14ffb2"
+      "xdr_sha256": "3d9219b12883b9eb9140dc1b81cbb4821a76d7da0f24d5977aa861b6070cb255"
     }
   },
   "xdr_type": "TransactionEnvelope"

@@ -4,19 +4,19 @@
     "ext": "v0",
     "ledger_header": {
       "ext": "v0",
-      "hash": "20b26f96cef5ed7f2f7072ad0dccf303ffcb7b7c5a5ad89746bdf2b9b2d4e24b",
+      "hash": "947b52d093820f4b45193b9e1676e0fce31ca93f1001e71d644c9fdef5e0ddc3",
       "header": {
         "base_fee": 100,
         "base_reserve": 100000000,
-        "bucket_list_hash": "33125bef9fee554e18c4e2b770461eb1f70d919834136072e59a2c6a844bb0ae",
+        "bucket_list_hash": "c1cd2eb63560159bbf5cb24fc07afe8dddf7252886635351ef96553588ea23e5",
         "ext": "v0",
-        "fee_pool": "7102824",
+        "fee_pool": "7088173",
         "id_pool": "0",
         "inflation_seq": 0,
         "ledger_seq": 310,
         "ledger_version": 30,
         "max_tx_set_size": 100,
-        "previous_ledger_hash": "fd8fcd70380e0a4dee01386cbb3384cc2745a1f7eb627c4ef2f6a4a748fc144a",
+        "previous_ledger_hash": "67804cfa27fbd4ac1662cf1e2cf6e58f9ff261af0128e0b5541e5c25e0af08bf",
         "scp_value": {
           "close_time": "1794009600",
           "ext": {
@@ -24,21 +24,21 @@
               "close_time_ms": "1794009600000",
               "lc_value_signature": {
                 "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
-                "signature": "d8bf8385f6cafabdc787f8ee02329024c346f10994d0dcf3f1fb07bb50bd6fd8717f9cd9c10c729fe1882592a316dc1deeabb60dd53ccbb420d628e09327a00a"
+                "signature": "44239083eaf07c0046c7f658b23f789c6302456baf5f82860539372d9e9e68764ab009b58df01ccc14baae201e8fe2ac4c556f22dfcde1854926b9399dd6ee00"
               }
             }
           },
-          "tx_set_hash": "d58eae32ccae32de9a4ff2eb7b5e1b3c03c0d7bff3fc638d126a68d99e3fabd6",
+          "tx_set_hash": "d7d27ab23523c6e7bed17c2997fa9a5a698775193ac66f54b9539984d4d9c013",
           "upgrades": []
         },
         "skip_list": [
-          "9bcaae0ff27d40a862ca79246dd01046a315cfeffdc89430063fbe69ce1ded44",
+          "d38942ad351f6dc787b64b7c7f9fac3f0bf1efa2d7d3899cd8562964cfeeec17",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000"
         ],
         "total_coins": "1000000000000000000",
-        "tx_set_result_hash": "c2be970dd5d182c81e33b7264505cc1d193192d6d6c77bda1c7fc3e966295826"
+        "tx_set_result_hash": "1c0a5b3e85b8b5c2fc243c6548fe87863fea28ae00e371f1c5055da3c38d657b"
       }
     },
     "scp_info": [],
@@ -135,7 +135,7 @@
               "data": {
                 "account": {
                   "account_id": "GAHSCLXL5EPIPCM3R6FR3URLUTJ3LWWF56Y2TPG45CWT5Z6O25SO3ALW",
-                  "balance": "9999987262",
+                  "balance": "9999975781",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -175,18 +175,20 @@
         "result": {
           "result": {
             "ext": "v0",
-            "fee_charged": "12738",
+            "fee_charged": "24219",
             "result": {
-              "tx_failed": [
+              "tx_success": [
                 {
                   "op_inner": {
-                    "invoke_host_function": "trapped"
+                    "invoke_host_function": {
+                      "success": "9fde46df49c561c3e01dc3ff6831dc63aa2a6a712fa9634b09f87e4576b46482"
+                    }
                   }
                 }
               ]
             }
           },
-          "transaction_hash": "159eac4b6bd938273b04d57ea2f2aa78b162e5a23d9a2d39b120a2bd0488d7ba"
+          "transaction_hash": "1795e0f4b94f815aee29ae6b839985cd9d54d20b2cfd6af3821b308ad321585b"
         },
         "tx_apply_processing": {
           "v4": {
@@ -220,7 +222,7 @@
                   "body": {
                     "v0": {
                       "data": {
-                        "i128": "-50029832"
+                        "i128": "-50018351"
                       },
                       "topics": [
                         {
@@ -240,8 +242,54 @@
               }
             ],
             "ext": "v0",
-            "operations": [],
-            "soroban_meta": null,
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "created": {
+                      "data": {
+                        "contract_data": {
+                          "contract": "CCMZXXU2JSQ75AHVFSVXTAIVIEGEUDIBIESXML6F4UFCJH2O5B42OWJY",
+                          "durability": "persistent",
+                          "ext": "v0",
+                          "key": "ledger_key_contract_instance",
+                          "val": {
+                            "contract_instance": {
+                              "executable": {
+                                "wasm": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                              },
+                              "storage": null
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 310
+                    }
+                  },
+                  {
+                    "created": {
+                      "data": {
+                        "ttl": {
+                          "key_hash": "f87f3c107f148b53b98a2bbda38db812cff7f55fd04fd378c2919cf362f90e8e",
+                          "live_until_ledger_seq": 121269
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 310
+                    }
+                  }
+                ],
+                "events": [],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": {
+              "ext": "v0",
+              "return_value": {
+                "address": "CCMZXXU2JSQ75AHVFSVXTAIVIEGEUDIBIESXML6F4UFCJH2O5B42OWJY"
+              }
+            },
             "tx_changes_after": [],
             "tx_changes_before": [
               {
@@ -327,7 +375,7 @@
                         "signatures": [
                           {
                             "hint": "ced764ed",
-                            "signature": "777203bdd873b938b7304e42861584855c623be0de798b152c9fd64e77af7b1a86c9d2825580fe982b990198e9020e337b8f1e92fbad0bd5a616c49b984baa03"
+                            "signature": "c0bbbe64d0ca6abf1cb21ed93a3e022e9e15c905fcb106051908c20fcfdb4c93340327f5e20aceb53fbc1e48a89227b69117f9e73c2e54bce0f6653f1ec24205"
                           }
                         ],
                         "tx": {
@@ -349,7 +397,7 @@
                                   "read_write": [
                                     {
                                       "contract_data": {
-                                        "contract": "CB6AFD53D6FN3HGKHPNEFLGTLQRZO3DITQASZQ5SWB3P4GNTZTBEZLP7",
+                                        "contract": "CCMZXXU2JSQ75AHVFSVXTAIVIEGEUDIBIESXML6F4UFCJH2O5B42OWJY",
                                         "durability": "persistent",
                                         "key": "ledger_key_contract_instance"
                                       }
@@ -377,7 +425,7 @@
                                             "contract_id_preimage": {
                                               "address": {
                                                 "address": "GAHSCLXL5EPIPCM3R6FR3URLUTJ3LWWF56Y2TPG45CWT5Z6O25SO3ALW",
-                                                "salt": "16ea832e4a8f2776e203c98f0c21cf2d5658fc00eff72a8dc4d3f7add3b44665"
+                                                "salt": "17ea832e4a8f2776e203c98f0c21cf2d5658fc00eff72a8dc4d3f7add3b44665"
                                               }
                                             },
                                             "executable": {
@@ -418,7 +466,7 @@
             }
           }
         ],
-        "previous_ledger_hash": "fd8fcd70380e0a4dee01386cbb3384cc2745a1f7eb627c4ef2f6a4a748fc144a"
+        "previous_ledger_hash": "67804cfa27fbd4ac1662cf1e2cf6e58f9ff261af0128e0b5541e5c25e0af08bf"
       }
     },
     "upgrades_processing": []

@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokehostfunctionop-auth-auth-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeHostFunctionOp.auth in carrier auth, attempt \"empty: []\": applied and failed, tx_failed",
+  "notes": "probe of InvokeHostFunctionOp.auth in carrier auth, attempt \"empty: []; own footprint and auth, the host fails it with Error(Auth, InvalidAction)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAANeL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAK8X/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 524,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "5ddf59d62a80ca536a8aa7d5b0e3f75e59cc904d0632b50511036c4c4e3a54c0"
+    "tx_hash": "27f855770cfceab005e4ced9d628d20cc886b1354f4ecfc50ea1d5af7efff919"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-auth-auth-1/testnet.expected.json",
-      "expected_json_sha256": "1bf54449903ab4e5fd7e56ee1bf613d6d7bfa4a5f7f3a70590ce8027bde94916",
+      "expected_json_sha256": "2e979e9d6dde7178fb61f13706f00a432d0cd19d34524178f460675710c78bcd",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokehostfunctionop-auth-auth-1/testnet.xdr",
-      "xdr_sha256": "0bdbd084f91f33eef442564e0a2663467d8d8742afa7f00887421e3211b1bd57"
+      "xdr_sha256": "89126ce81f2925a78523dfad2065145cd2dbc1e42d6ac8609d7649c26712b2da"
     }
   },
   "xdr_type": "TransactionEnvelope"

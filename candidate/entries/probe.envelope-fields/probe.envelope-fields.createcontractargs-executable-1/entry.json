@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.createcontractargs-executable-1",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of CreateContractArgs.executable, attempt \"same arm, first byte changed: {\\\"wasm\\\":\\\"5cf9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691...\": applied and failed, tx_failed",
+  "notes": "probe of CreateContractArgs.executable, attempt \"same arm, first byte changed: {\\\"wasm\\\":\\\"5cf9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691...; own footprint and auth, the host fails it with Error(Storage, MissingValue)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMcL/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAALBX/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 345,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "0538fdaa30dfb4db00a9f85f0e9b2ced222ae34c9f2336645346458d7c7cf06b"
+    "tx_hash": "b11c9697918d81a38c3d1ba2c81f501f59644e946134bc6f291c6457a5673f0c"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-executable-1/testnet.expected.json",
-      "expected_json_sha256": "516e7c6fb67b18597e3003de2b90c1ffd3ddfd68dcc4e7034db74f87275593ef",
+      "expected_json_sha256": "77c46760df09c20cc4a2757a8066f4cd3ee4ebc9824e0bd737cdd2c3c3331626",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.createcontractargs-executable-1/testnet.xdr",
-      "xdr_sha256": "e753d0e30c555cfc350fe27ecc1cd4d204c611bfc420b0776009c52ad645a90c"
+      "xdr_sha256": "c6b1cec0e73dbafc0006b0ec6aa933cfd729b2bfddb65793a54c0df3253a54dc"
     }
   },
   "xdr_type": "TransactionEnvelope"

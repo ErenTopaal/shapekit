@@ -4,19 +4,19 @@
     "ext": "v0",
     "ledger_header": {
       "ext": "v0",
-      "hash": "40bf0414d342ea3f741d1ebf2e12f1b3873f0d04fba59adbacbc66125770514d",
+      "hash": "120ba9a1c275a0919a4dcf7001dd2d95b14032b3676cc04f2ea565a5c641515a",
       "header": {
         "base_fee": 100,
         "base_reserve": 100000000,
-        "bucket_list_hash": "03dc704dde8bb6057c8988b51b79e66b8bb16ffc542f5eb3fe55739657271bdd",
+        "bucket_list_hash": "8c917eaf68277313a356a0e7c8a70e2ee25c19b5ba31d8862501d97affe246eb",
         "ext": "v0",
-        "fee_pool": "7325336",
+        "fee_pool": "7330439",
         "id_pool": "0",
         "inflation_seq": 0,
         "ledger_seq": 354,
         "ledger_version": 30,
         "max_tx_set_size": 100,
-        "previous_ledger_hash": "8c9b5037fec38cdb61c320b4fbcdd05985b406d3aae56e36e761d3d2d7a46403",
+        "previous_ledger_hash": "7f0caedf4f157760bea047a06adb75f376b98348c331aa8acd2d83f3b1227f9d",
         "scp_value": {
           "close_time": "1797811200",
           "ext": {
@@ -24,25 +24,25 @@
               "close_time_ms": "1797811200000",
               "lc_value_signature": {
                 "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
-                "signature": "af8e69939ade8e19d9981229f2679f551f7b351bd1b8948a570b86efe8e1d9852c5233f14000b860d8c1de5b456034addb66876ade5452fb41afb5d69d1ddf02"
+                "signature": "83e89ab90cbc719dafcf5632bdbd27502fbe33334569d42ccc58206fa0bb4f08751f5b7963f6df722281ae77c5adad90129ee359a2002f42dca91fb028323e0f"
               }
             }
           },
-          "tx_set_hash": "dfe83495427504c101c9dd5dfa120e510aa398f4116a28479ad99fa785d74b9f",
+          "tx_set_hash": "caba246f6986be45ce3a8472a8130b4b2ce11b0425c97434696b7511724daba9",
           "upgrades": []
         },
         "skip_list": [
-          "005ba73a7f6248529545d02d92efe6a89054d1132c58e05ff3e91af251154da0",
+          "67537ba16904f08eb1a863290ede89e006af903d9b2e73686c800c8fe39029f6",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000"
         ],
         "total_coins": "1000000000000000000",
-        "tx_set_result_hash": "eb61c694d05879abdec7abc3347d468d9f24b402c2d51f4553e9d8fae9af6f47"
+        "tx_set_result_hash": "c9e5fe3f26de7b81e86393c5261a4cc1d7ac6a31147efa18cff2e3cc2049b325"
       }
     },
     "scp_info": [],
-    "total_byte_size_of_live_soroban_state": "72971",
+    "total_byte_size_of_live_soroban_state": "72978",
     "tx_processing": [
       {
         "ext": "v0",
@@ -135,7 +135,7 @@
               "data": {
                 "account": {
                   "account_id": "GCYFTFL6XTNTS7VHPAR5KFFFZWGZP4DXKTPCQHJKC54FXR4L4D343VEO",
-                  "balance": "9999987021",
+                  "balance": "9999969318",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -175,18 +175,20 @@
         "result": {
           "result": {
             "ext": "v0",
-            "fee_charged": "12979",
+            "fee_charged": "30682",
             "result": {
-              "tx_failed": [
+              "tx_success": [
                 {
                   "op_inner": {
-                    "invoke_host_function": "trapped"
+                    "invoke_host_function": {
+                      "success": "71f8d32a368675c2dea7515db142be9a8de6a696f639e1fda55a74d203f0d5c8"
+                    }
                   }
                 }
               ]
             }
           },
-          "transaction_hash": "1d98781d04eb0e372c4ce7789904f935f97a48033694d37b6bb7a0fd5be3fc79"
+          "transaction_hash": "95dce0666770d6cb3e415d565a6a17363149c6e2f6e3543a49acfc7d9ca7c1f2"
         },
         "tx_apply_processing": {
           "v4": {
@@ -220,7 +222,7 @@
                   "body": {
                     "v0": {
                       "data": {
-                        "i128": "-50044379"
+                        "i128": "-50026676"
                       },
                       "topics": [
                         {
@@ -240,8 +242,63 @@
               }
             ],
             "ext": "v0",
-            "operations": [],
-            "soroban_meta": null,
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "created": {
+                      "data": {
+                        "contract_data": {
+                          "contract": "CB6J5YWPBYJTIJD6775XAVVFDXEIVRYCMFSJEVNQQZ7JHK5VRZVQWOEH",
+                          "durability": "persistent",
+                          "ext": "v0",
+                          "key": "ledger_key_contract_instance",
+                          "val": {
+                            "contract_instance": {
+                              "executable": {
+                                "wasm": "d7c7487b453553214a09fc89e52b0e69ce4508e68b4f80b499546c55dd95b65d"
+                              },
+                              "storage": [
+                                {
+                                  "key": {
+                                    "symbol": "owner"
+                                  },
+                                  "val": {
+                                    "address": "GAOPQJ3IYVGZJOVCOVYNBHX4UG4M3CT2Q5S2ZDYLE6AXXPXHG4DTERN3"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 354
+                    }
+                  },
+                  {
+                    "created": {
+                      "data": {
+                        "ttl": {
+                          "key_hash": "8da4d31f428850e5561368ad523e362d41c403cfe3258010befac1571c07cc9a",
+                          "live_until_ledger_seq": 121313
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 354
+                    }
+                  }
+                ],
+                "events": [],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": {
+              "ext": "v0",
+              "return_value": {
+                "address": "CB6J5YWPBYJTIJD6775XAVVFDXEIVRYCMFSJEVNQQZ7JHK5VRZVQWOEH"
+              }
+            },
             "tx_changes_after": [],
             "tx_changes_before": [
               {
@@ -327,7 +384,7 @@
                         "signatures": [
                           {
                             "hint": "8be0f7cd",
-                            "signature": "78dea609555f0a8c545c7401c032ee90d9f7f516ed03d1b3a8a212743c622d813717f2bc4d5b431735b8cc04365c65674157d53a71eb727dba86a94b01cfbb09"
+                            "signature": "50a0070d2c64d5a897c1d0ef48e7943a15ff2f7bc08ee9dc26f89430cb1ebc1ad8a12d13cf47b9bf1755078f2f3a5cc48bcc0d77d884a30a2001e13cebe7bf09"
                           }
                         ],
                         "tx": {
@@ -375,7 +432,7 @@
                                           "create_contract_v2_host_fn": {
                                             "constructor_args": [
                                               {
-                                                "address": "GCYFTFL6XTNTS7VHPAR5KFFFZWGZP4DXKTPCQHJKC54FXR4L4D343VEO"
+                                                "address": "GAOPQJ3IYVGZJOVCOVYNBHX4UG4M3CT2Q5S2ZDYLE6AXXPXHG4DTERN3"
                                               }
                                             ],
                                             "contract_id_preimage": {
@@ -427,7 +484,7 @@
             }
           }
         ],
-        "previous_ledger_hash": "8c9b5037fec38cdb61c320b4fbcdd05985b406d3aae56e36e761d3d2d7a46403"
+        "previous_ledger_hash": "7f0caedf4f157760bea047a06adb75f376b98348c331aa8acd2d83f3b1227f9d"
       }
     },
     "upgrades_processing": []

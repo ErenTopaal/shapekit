@@ -3,7 +3,7 @@
     "signatures": [
       {
         "hint": "70fecac8",
-        "signature": "e748650cb9e8f7ad36de44fe6db4977cf32c152fceefcc83e32263fa667f273954dff0468d840a2655a50d2f7aa501368206b86229cc3033b49437c86ab6500b"
+        "signature": "2982423edea4b98fe1756835f7eb7a2f26d23f3170b8a8b56ee932969f482e6192c793ac1862d877070e3da9b9f2a770b602a60c68fcdac6d9d0cc70a4b5b303"
       }
     ],
     "tx": {
@@ -11,49 +11,27 @@
       "ext": {
         "v1": {
           "ext": "v0",
-          "resource_fee": "50022970",
+          "resource_fee": "50022348",
           "resources": {
-            "disk_read_bytes": 10144,
+            "disk_read_bytes": 10000,
             "footprint": {
               "read_only": [
                 {
-                  "account": {
-                    "account_id": "GD4KHJ6HFMFUQCBZ32YVHGS5WNTWC2HUUS2F7XMBUMGAB4G3MOE7KY5B"
-                  }
-                },
-                {
                   "contract_data": {
-                    "contract": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
+                    "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
                     "durability": "persistent",
                     "key": "ledger_key_contract_instance"
                   }
-                },
-                {
-                  "contract_code": {
-                    "hash": "7dea1afecb1b97f8d87c77bbbf5311feab7a7111691baa4da5647b2f8cda597a"
-                  }
                 }
               ],
-              "read_write": [
-                {
-                  "contract_data": {
-                    "contract": "GD4KHJ6HFMFUQCBZ32YVHGS5WNTWC2HUUS2F7XMBUMGAB4G3MOE7KY5B",
-                    "durability": "temporary",
-                    "key": {
-                      "ledger_key_nonce": {
-                        "nonce": "4598685041475779676"
-                      }
-                    }
-                  }
-                }
-              ]
+              "read_write": []
             },
-            "instructions": 11236154,
-            "write_bytes": 10076
+            "instructions": 10054752,
+            "write_bytes": 10000
           }
         }
       },
-      "fee": 50023070,
+      "fee": 50022448,
       "memo": "none",
       "operations": [
         {
@@ -82,7 +60,7 @@
                                   "symbol": "signature"
                                 },
                                 "val": {
-                                  "bytes": "aa98b1db2166545d848ca3d5dd0b8b545f739a53d5d844ad2d58cf6dbe3e3c52e2fda245d039431cffbb4abfad4736fdf88d447d4ca66db3779504362da4fa08"
+                                  "bytes": "8fcf02efa32baa26d6a001e8e4fab64e52764f98f2e6168cf4a14831a0cad84ceda6899635dd03f00426fd067f4e86960943c756d0b51914a221d3b48d01c403"
                                 }
                               }
                             ]
@@ -94,38 +72,12 @@
                   },
                   "root_invocation": {
                     "function": {
-                      "contract_fn": {
-                        "args": [
-                          {
-                            "vec": []
-                          },
-                          {
-                            "vec": [
-                              {
-                                "map": [
-                                  {
-                                    "key": {
-                                      "symbol": "fanout"
-                                    },
-                                    "val": {
-                                      "u32": 0
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "signer"
-                                    },
-                                    "val": {
-                                      "address": "GD4KHJ6HFMFUQCBZ32YVHGS5WNTWC2HUUS2F7XMBUMGAB4G3MOE7KY5B"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ],
-                        "contract_address": "CBR66JNC4ODVABA55T5JVAOEFHO7W4FPFGVCKFA7OCUNAY7W76ZHL6KZ",
-                        "function_name": "node"
+                      "create_contract_v2_host_fn": {
+                        "constructor_args": [],
+                        "contract_id_preimage": {
+                          "asset": "native"
+                        },
+                        "executable": "stellar_asset"
                       }
                     },
                     "sub_invocations": []

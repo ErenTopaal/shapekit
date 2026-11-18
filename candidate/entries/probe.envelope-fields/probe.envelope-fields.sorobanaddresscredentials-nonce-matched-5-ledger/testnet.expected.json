@@ -4,19 +4,19 @@
     "ext": "v0",
     "ledger_header": {
       "ext": "v0",
-      "hash": "f3c5b163dbf806c8904a91e8d738c8577029794f83b5df14a89ead16eeea5e33",
+      "hash": "c810b8c7ffacd3c2e0708cfc1e05271ecf9d6c648eab56168ebdf91d36605945",
       "header": {
         "base_fee": 100,
         "base_reserve": 100000000,
-        "bucket_list_hash": "f0250ab9c5ff3423f842b8211f4280e518caf4c7465be25776dadf7c3364c4ce",
+        "bucket_list_hash": "e8fffec9e73b8ac63e6bf6a8b701044669701c0093fbacd3e656e669e757409a",
         "ext": "v0",
-        "fee_pool": "10976356",
+        "fee_pool": "11095228",
         "id_pool": "34",
         "inflation_seq": 0,
         "ledger_seq": 1626,
         "ledger_version": 30,
         "max_tx_set_size": 100,
-        "previous_ledger_hash": "0902d4232ea383c4296a5c86c8b7916c28af0eee9104c9d18ee225b77bb4265d",
+        "previous_ledger_hash": "75cdd96a8192bc588b0ecd0ab356d74dbaba9b424d01d729de96f69d56465013",
         "scp_value": {
           "close_time": "1907712000",
           "ext": {
@@ -24,25 +24,25 @@
               "close_time_ms": "1907712000000",
               "lc_value_signature": {
                 "node_id": "GB4WH2VTILAXT2GUDH4KI2ZA2GGYSLJJUYBH6LP42LXI4WNBRIHHDDVT",
-                "signature": "1570371b0842e502d75a22fad72ffefa9969aae067afc7d4ba2f2c4789fa86565e40629cbb818bc8b7c7dc270439a77b14a7b924bcefe0e1e8baf4a3ea0d2107"
+                "signature": "f6a449c92e1adb82cf37cec50c134c583dc585b113d1623a54451ff2821c1af995f0110c0a3c9e012b67ef1036dc233c4793c5824510743452a38af8e32a5602"
               }
             }
           },
-          "tx_set_hash": "6f4657bba39e24f53c8e81c9ae635622cdeaddf25ef1358487b782c9c99470dd",
+          "tx_set_hash": "ad48017a44a16fb8f970341a7471cd6b4c4fc99cf8adafea2a2d83f739ab2464",
           "upgrades": []
         },
         "skip_list": [
-          "c546432e56d167eb81b5dece1546c0093969c45964fb5f9fd947b4ca75b5e1f1",
+          "a879077332cc8a0044901249dfd757fac7a0c68fb5581a09bef865c6049bf74b",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000",
           "0000000000000000000000000000000000000000000000000000000000000000"
         ],
         "total_coins": "1000000000000000000",
-        "tx_set_result_hash": "cb446fc06be13faf8ae1b2d3dc23abb618fe41f9b5ca2b6b538ab359f34653d8"
+        "tx_set_result_hash": "e342498a5cc623654337dcd0d0d87d27468884eeabdab217b862e80a3e9ae6c0"
       }
     },
     "scp_info": [],
-    "total_byte_size_of_live_soroban_state": "204181",
+    "total_byte_size_of_live_soroban_state": "204558",
     "tx_processing": [
       {
         "ext": "v0",
@@ -135,7 +135,7 @@
               "data": {
                 "account": {
                   "account_id": "GDBZHSLN2IQJPG7RWMKU3JYHRBYVKDZY5A3NDBUZV3HZB3U2CPRFYTEC",
-                  "balance": "9999985317",
+                  "balance": "9999984004",
                   "ext": {
                     "v1": {
                       "ext": {
@@ -175,18 +175,20 @@
         "result": {
           "result": {
             "ext": "v0",
-            "fee_charged": "14683",
+            "fee_charged": "15996",
             "result": {
-              "tx_failed": [
+              "tx_success": [
                 {
                   "op_inner": {
-                    "invoke_host_function": "trapped"
+                    "invoke_host_function": {
+                      "success": "df071a249d03fc2f22313f75c734a254bbea03124cea77001704db0670b2fc02"
+                    }
                   }
                 }
               ]
             }
           },
-          "transaction_hash": "b7ae7d880e931a4c9d51a83a7cab0e2094bf23bb6ba5d5af2d036c581ce7b08e"
+          "transaction_hash": "997889e4bdca8fd0110256ccc6431c0a0582b5af687c4a7a69ca19cb8ccf721e"
         },
         "tx_apply_processing": {
           "v4": {
@@ -220,7 +222,7 @@
                   "body": {
                     "v0": {
                       "data": {
-                        "i128": "-50008387"
+                        "i128": "-50007074"
                       },
                       "topics": [
                         {
@@ -240,8 +242,51 @@
               }
             ],
             "ext": "v0",
-            "operations": [],
-            "soroban_meta": null,
+            "operations": [
+              {
+                "changes": [
+                  {
+                    "created": {
+                      "data": {
+                        "contract_data": {
+                          "contract": "GCEM3DMJUVE7NPGU3F7CRF5BYNCODXWTTB6HSTQ7ZQHOFNYPPQMMYQLF",
+                          "durability": "temporary",
+                          "ext": "v0",
+                          "key": {
+                            "ledger_key_nonce": {
+                              "nonce": "4598685041475779675"
+                            }
+                          },
+                          "val": "void"
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1626
+                    }
+                  },
+                  {
+                    "created": {
+                      "data": {
+                        "ttl": {
+                          "key_hash": "ecef1d98a1ab984e4c87322dcbd9b26a46776e6e68592e59796b9679c309d9ea",
+                          "live_until_ledger_seq": 2345
+                        }
+                      },
+                      "ext": "v0",
+                      "last_modified_ledger_seq": 1626
+                    }
+                  }
+                ],
+                "events": [],
+                "ext": "v0"
+              }
+            ],
+            "soroban_meta": {
+              "ext": "v0",
+              "return_value": {
+                "u32": 1
+              }
+            },
             "tx_changes_after": [],
             "tx_changes_before": [
               {
@@ -327,7 +372,7 @@
                         "signatures": [
                           {
                             "hint": "9a13e25c",
-                            "signature": "69d7ecc59df906b09abedb3e2b6c679cd99b7b57128812c842211b461c7b13c6c7947bdc8d04e6a2a29902383067043394f96ab4723f0d47a2dbf3f8174a4807"
+                            "signature": "ee3f886cdc535c103441e287434353d03527e4cd5884a67dc93b70015923178355be232d1f69cec4000daa33b8246eade854ce71c10e155fd686c9c6892efa08"
                           }
                         ],
                         "tx": {
@@ -365,7 +410,7 @@
                                         "durability": "temporary",
                                         "key": {
                                           "ledger_key_nonce": {
-                                            "nonce": "4598685041475779676"
+                                            "nonce": "4598685041475779675"
                                           }
                                         }
                                       }
@@ -507,7 +552,7 @@
             }
           }
         ],
-        "previous_ledger_hash": "0902d4232ea383c4296a5c86c8b7916c28af0eee9104c9d18ee225b77bb4265d"
+        "previous_ledger_hash": "75cdd96a8192bc588b0ecd0ab356d74dbaba9b424d01d729de96f69d56465013"
       }
     },
     "upgrades_processing": []

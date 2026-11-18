@@ -3,7 +3,7 @@
     "signatures": [
       {
         "hint": "4a2a383d",
-        "signature": "e75eb8a3548967ddd55a9932fc45fcab47104470c97962ddd0d2300972c84c75d2ae80fa2a71e7730846e20649b8692cdd9875f4f289816715485f26f2ba7a0a"
+        "signature": "6b9df48df847c54fb3879dc60db2c0b5e29c9d1542be6ee738f89c67a8db73a692dd25e1f9edc9d73eaf2878819add67375fd6823a786e2213ec8a76bbe5dc0e"
       }
     ],
     "tx": {
@@ -11,18 +11,20 @@
       "ext": {
         "v1": {
           "ext": "v0",
-          "resource_fee": "50042470",
+          "resource_fee": "50022512",
           "resources": {
             "disk_read_bytes": 10000,
             "footprint": {
               "read_only": [
                 {
-                  "contract_code": {
-                    "hash": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                  "contract_data": {
+                    "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                    "durability": "persistent",
+                    "key": {
+                      "executable_tag": ""
+                    }
                   }
-                }
-              ],
-              "read_write": [
+                },
                 {
                   "contract_data": {
                     "contract": "CCABF6OKWGILAMSMVPEPCIRYAVWAXCY2HNT6AO7RECNTXFGS3IGVNGRH",
@@ -30,14 +32,15 @@
                     "key": "ledger_key_contract_instance"
                   }
                 }
-              ]
+              ],
+              "read_write": []
             },
-            "instructions": 10591471,
-            "write_bytes": 10104
+            "instructions": 10064977,
+            "write_bytes": 10000
           }
         }
       },
-      "fee": 50042570,
+      "fee": 50022612,
       "memo": "none",
       "operations": [
         {
@@ -57,7 +60,10 @@
                           }
                         },
                         "executable": {
-                          "wasm": "5df9b5df3832de0441dd36d086306e1c7d40a1babcfd186c944bcb5cf691ce70"
+                          "external_ref": {
+                            "executable_owner": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4",
+                            "tag": ""
+                          }
                         }
                       }
                     },

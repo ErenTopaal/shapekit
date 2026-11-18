@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.sorobanaddresscredentials-address-matched-2",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of SorobanAddressCredentials.address in carrier matched, attempt \"same arm, same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"\": applied and failed, tx_failed",
+  "notes": "probe of SorobanAddressCredentials.address in carrier matched, attempt \"same arm, same arm, all zero: \\\"GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF\\\"; own footprint and auth, the host fails it with Error(Auth, InvalidAction)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAOVv/////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAL0X/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 1603,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "ef48d29494ded8cfffa81752f7557fc9c50acceeb655c5932b4abd3780eeed16"
+    "tx_hash": "db45da5ff1b9c3c4a6ccf4de07d441ab2aeb8a912865557058f8496d858a1670"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-address-matched-2/testnet.expected.json",
-      "expected_json_sha256": "c52f5fb64d73d58309f294da13b6172a2c75b9b4265dc7d93fe7d697c956b66c",
+      "expected_json_sha256": "2f97826fb1a70ba1f1c2f3a1da99ac9192da69b694db9886d2da1edccfa2a5c6",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.sorobanaddresscredentials-address-matched-2/testnet.xdr",
-      "xdr_sha256": "753d455564dadfd29929cdba547a0a32d7272d41c0a957ac845bd45b6f978279"
+      "xdr_sha256": "37cc365d322b630d26e2097938670ca4faf3698f3bb051e6a93b68b08ce6d936"
     }
   },
   "xdr_type": "TransactionEnvelope"

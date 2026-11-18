@@ -11,7 +11,7 @@
   "id": "probe.envelope-fields.invokecontractargs-functionname-3",
   "kind": "xdr",
   "linked_issues": [],
-  "notes": "probe of InvokeContractArgs.functionName, attempt \"bytes outside ascii: \\\"\\\\\\\\xc3\\\\\\\\xa9\\\"\": applied and failed, tx_failed",
+  "notes": "probe of InvokeContractArgs.functionName, attempt \"bytes outside ascii: \\\"\\\\\\\\xc3\\\\\\\\xa9\\\"; own footprint and auth, the host fails it with Error(Value, InvalidInput)\": applied and failed, tx_failed",
   "passphrase_dependent": true,
   "protocol": {
     "generated_at": 30,
@@ -23,21 +23,21 @@
     "class": "local-core",
     "core_rejection": {
       "result_code": "tx_failed",
-      "result_xdr": "AAAAAAAAMF//////AAAAAQAAAAAAAAAY/////gAAAAA=",
+      "result_xdr": "AAAAAAAAKcH/////AAAAAQAAAAAAAAAY/////gAAAAA=",
       "stage": "apply"
     },
     "ledger_seq": 512,
     "recipe": "probe.envelope-fields",
-    "tx_hash": "4c2e1b148d7d9c349ce6eb69625ec72d12ee5bf1e039faf21c4c58ef92635ed4"
+    "tx_hash": "861f8ab7a31c9a9759d949a95debe016502b8a8de80ca572006e92554a18eea7"
   },
   "synthetic": false,
   "variants": {
     "testnet": {
       "expected_json_file": "entries/probe.envelope-fields/probe.envelope-fields.invokecontractargs-functionname-3/testnet.expected.json",
-      "expected_json_sha256": "a09bcaf97506f8a4c401152f3488d7b9352edcf8474623c90b752cdd42029a45",
+      "expected_json_sha256": "7f9eec99260ebe3558532c3db4b45ee773bbe16960f7acd7741c24ba01bb624b",
       "network_passphrase": "Test SDF Network ; September 2015",
       "xdr_file": "entries/probe.envelope-fields/probe.envelope-fields.invokecontractargs-functionname-3/testnet.xdr",
-      "xdr_sha256": "2cd4a4f56157f54f6e74144d8b68c953e8fed05b8f0b6a3c1e53d378e0692964"
+      "xdr_sha256": "b15cb81440edbb5a9567a102a298eebb0ddd52311d050b781e7c7db04608f2d4"
     }
   },
   "xdr_type": "TransactionEnvelope"

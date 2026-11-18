@@ -21,12 +21,12 @@
     },
     {
       "id": "auth.credentials.address.nonce",
-      "measured": "mixed",
+      "measured": "not-validated",
       "sites": [
         {
           "field": "SorobanAddressCredentials.nonce",
           "carrier": "matched",
-          "verdict": "validated"
+          "verdict": "not-validated"
         },
         {
           "field": "SorobanAddressCredentials.nonce",
@@ -481,7 +481,7 @@
     },
     {
       "id": "op.invoke_host_function.create_contract.preimage",
-      "measured": "validated",
+      "measured": "mixed",
       "sites": [
         {
           "field": "CreateContractArgs.contractIDPreimage",
@@ -501,7 +501,7 @@
         {
           "field": "ContractIDPreimageFromAddress.salt",
           "carrier": "single",
-          "verdict": "validated"
+          "verdict": "not-validated"
         }
       ],
       "settled_by_source": null
