@@ -1,5 +1,5 @@
 {
-  "corpus_version": "0.1.0",
+  "corpus_version": "0.2.0",
   "testees": [
     {
       "key": "php@1.18.0",
@@ -2089,6 +2089,30 @@
       }
     },
     {
+      "id": "soroban.invoke-basics.synth-invoke-arg-bool-2",
+      "cells": {
+        "php@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "soroban.scval-shapes.mainnet-63092996-71f6c6ff-meta",
       "cells": {
         "php@1.18.0": {
@@ -2175,6 +2199,30 @@
               "op": "decode_json",
               "result": "diverges-from-network",
               "detail": "the sdk refused a value the network accepts: InvalidArgumentException: uint64ToString accepts only non-negative values; got -1. For uint64 values above PHP_INT_MAX, pass the value as a string to stringToUint64()."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-bool-value-2",
+      "cells": {
+        "php@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
             }
           ]
         }

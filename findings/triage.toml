@@ -15,7 +15,10 @@ candidates = "candidate/findings/triage.toml"
 manifest = "corpus/manifest.json"
 # every input below is a committed, reduced copy of a run output; [[inputs.import]] says where
 # each came from. after new runs: `shapekit findings import-inputs`, then `shapekit findings collect`.
-harness = ["findings/inputs/harness-wallet-backend-3e22515a.json"]
+harness = [
+  "findings/inputs/harness-wallet-backend-3e22515a.json",
+  "findings/inputs/harness-stellar-etl-2b24ec89.json",
+]
 matrices = [
   "findings/inputs/conformance-rust.json",
   "findings/inputs/conformance-go.json",
@@ -34,6 +37,14 @@ kind = "harness"
 from = "target/findings/wallet-backend-3e22515a/harness-report.json"
 to = "findings/inputs/harness-wallet-backend-3e22515a.json"
 command = "shapekit harness run --network both --repeat 2 --adapter \"adapters/bin/wb-adapter --commit 3e22515a44979fdc3a558fda3991ca2b48e38cef\" --out target/findings/wallet-backend-3e22515a"
+
+# stellar-etl, the second adapter: its findings have no upstream decision yet, so they stay in
+# the candidate triage, which imports the same run, and hold the failures of this input there
+[[inputs.import]]
+kind = "harness"
+from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
+to = "findings/inputs/harness-stellar-etl-2b24ec89.json"
+command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
 
 [[inputs.import]]
 kind = "conformance"
@@ -71,6 +82,10 @@ command = "indexerlint -format json ./... (in a checkout of stellar/wallet-backe
 [targets.wallet-backend]
 repo = "stellar/wallet-backend"
 adapter = "adapters/bin/wb-adapter --commit {version}"
+
+[targets.stellar-etl]
+repo = "stellar/stellar-etl"
+adapter = "adapters/bin/etl-adapter --commit {version}"
 
 # wallet-backend, current pin, harness
 
@@ -353,7 +368,7 @@ cause = "Asset issuers were compared as strkey text and ScVal map keys by their 
 [[finding.conformance]]
 sdk = "js"
 versions = ["16.3.0", "17.2.0"]
-entries = ["cap38.liquidity-pools.synth-assets-*"]
+entries = ["cap38.liquidity-pools.synth-assets-*", "cap38.liquidity-pools.testnet-5521432"]
 
 [[finding.conformance]]
 sdk = "js"

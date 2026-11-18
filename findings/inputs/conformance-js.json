@@ -1,5 +1,5 @@
 {
-  "corpus_version": "0.1.0",
+  "corpus_version": "0.2.0",
   "testees": [
     {
       "key": "js@16.3.0",
@@ -1547,6 +1547,41 @@
       }
     },
     {
+      "id": "cap38.liquidity-pools.testnet-5521432",
+      "cells": {
+        "js@16.3.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md",
+          "checks": [
+            {
+              "check": "testnet/encode_json",
+              "op": "encode_json",
+              "result": "unsupported",
+              "detail": "js@16.3.0 does not implement encode_json"
+            },
+            {
+              "check": "testnet/tx_hash 3",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "diverges-from-network",
+          "known_issue": "findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md",
+          "checks": [
+            {
+              "check": "testnet/tx_hash 3",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: Error: Assets are not in lexicographic order"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "cap40.signed-payload-signer.synth-strkey-p-invalid",
       "cells": {
         "js@16.3.0": {
@@ -2006,6 +2041,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2022,6 +2063,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2053,6 +2100,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2069,6 +2122,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2100,6 +2159,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2116,6 +2181,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2293,6 +2364,144 @@
       }
     },
     {
+      "id": "soroban.invoke-basics.synth-invoke-arg-bool-2",
+      "cells": {
+        "js@16.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "soroban.invoke-basics.synth-strkey-c-invalid",
       "cells": {
         "js@16.3.0": {
@@ -2377,6 +2586,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2393,6 +2608,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2471,6 +2692,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2487,6 +2714,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2565,6 +2798,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2581,6 +2820,12 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
             }
           ]
         }
@@ -2659,6 +2904,12 @@
               "detail": "js@16.4.1 does not implement encode_json"
             },
             {
+              "check": "testnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            },
+            {
               "check": "mainnet/decode_encode",
               "op": "decode_encode",
               "result": "diverges-from-network",
@@ -2675,6 +2926,150 @@
               "op": "encode_json",
               "result": "unsupported",
               "detail": "js@16.4.1 does not implement encode_json"
+            },
+            {
+              "check": "mainnet/tx_hash 0",
+              "op": "tx_hash",
+              "result": "diverges-from-network",
+              "detail": "the sdk refused a value the network accepts: TypeError: XDR Read Error: exceeded max decoding depth"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-bool-value-2",
+      "cells": {
+        "js@16.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": "rejected"
             }
           ]
         }

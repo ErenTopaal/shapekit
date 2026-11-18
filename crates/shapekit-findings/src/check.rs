@@ -295,7 +295,7 @@ mod tests {
         let mut f = finding("RS-3", Status::Filed, Some("https://x/1"));
         f.occurrences.clear();
         let c = collection(vec![f]);
-        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)));
+        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../");
         assert!(!out.ok);
         assert!(
             !out.only_drafts(),

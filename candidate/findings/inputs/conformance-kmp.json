@@ -1,5 +1,5 @@
 {
-  "corpus_version": "0.1.0",
+  "corpus_version": "0.2.0",
   "testees": [
     {
       "key": "kmp@1.18.0",
@@ -1138,6 +1138,86 @@
       }
     },
     {
+      "id": "soroban.invoke-basics.synth-invoke-arg-bool-2",
+      "cells": {
+        "kmp@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": true
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "soroban.muxed-source.p28-muxed-and-base-source-one-ledger",
       "cells": {
         "kmp@1.18.0": {
@@ -1643,6 +1723,36 @@
               "op": "encode_json",
               "result": "diverges-from-network",
               "detail": "the sdk refused a value the network accepts: IllegalArgumentException: LedgerCloseMetaXdr: input nests deeper than the limit of 128"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "soroban.scval-shapes.synth-bool-value-2",
+      "cells": {
+        "kmp@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": {
+                "xdr": "AAAAAAAAAAE="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged",
+              "actual": {
+                "json": {
+                  "bool": true
+                }
+              }
             }
           ]
         }

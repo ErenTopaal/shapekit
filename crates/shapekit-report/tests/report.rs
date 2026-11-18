@@ -45,6 +45,26 @@ fn recorded(source: &str) -> BTreeMap<String, usize> {
     out
 }
 
+/// [`recorded`] plus the failures the record lists as held by candidate findings, which a
+/// report groups under their candidate finding like any other.
+fn recorded_with_held(source: &str) -> BTreeMap<String, usize> {
+    let mut out = recorded(source);
+    let text = std::fs::read_to_string(root().join("findings/findings.json")).unwrap();
+    let v: Value = serde_json::from_str(&text).unwrap();
+    for (id, occs) in v["held"].as_object().unwrap() {
+        let n = occs
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|o| o["source"] == source)
+            .count();
+        if n > 0 {
+            *out.entry(id.clone()).or_default() += n;
+        }
+    }
+    out
+}
+
 #[test]
 fn harness_groups_are_the_findings_record() {
     let r = build(&options(root().join(HARNESS))).unwrap();
@@ -85,7 +105,7 @@ fn conformance_against_its_known_failures() {
         .iter()
         .map(|g| (g.id.clone(), g.occurrences.len()))
         .collect();
-    let want: BTreeMap<String, usize> = recorded("conformance")
+    let want: BTreeMap<String, usize> = recorded_with_held("conformance")
         .into_iter()
         .filter(|(id, _)| id.starts_with("GO-"))
         .collect();

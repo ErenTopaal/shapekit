@@ -960,3 +960,342 @@ evidence = "the generated decoders cap their own recursion per type: SorobanDele
 # format.xdr-grammar vectors of types and arms its XDR (v28.0) predates (ML-DSA cost types,
 # muxed contract addresses, delegate signatures, the longer contract spec names), which is its
 # XDR's age, not a defect.
+
+# explorer witnesses (candidate lane, families explore.witnesses and explore.pairs, 387 entries):
+#   shapekit conformance run --no-build --sdk <sdk> --manifest candidate/manifest.json \
+#     --entry <each explore.* entry> --known-failures <empty lists>
+# rust 30.0.0 and js 17.4.0 pass all 387; go v0.9.0 and soroban-sdk 29.0.1 support no check
+# that fails (go has no encode_json, soroban-sdk no ledger ops). every failing check of the other
+# sdks is attributed below. `shapekit corpus promote --dry-run` with the eleven matrices
+# refuses all 387: every one is cut from a chain under candidate/chains or candidate/pairs,
+# and the harness replays an entry from its chain under corpus/chains. 32 of them every sdk
+# passes; the other 355 are also refused by python@17.0.1 (355), java@6.0.0 (350),
+# stellar-cli@30.0.1 (70), php@1.18.0 (49), dotnet@17.0.0 (30), kmp@1.18.0 (13) and
+# dart@3.12.0 (8), none of whose findings is in findings/triage.toml.
+#
+# the three mainnet ledgers of the audit's coverage step (cap15.fee-bump.mainnet-57369500,
+# cap03.offer-liabilities.mainnet-37466023 and -44679511) pass rust, go, js, soroban-sdk and
+# kmp and are refused by python, java, php and stellar-cli on all three, and by dart and
+# dotnet on 57369500 and 37466023: the naming, hex hash, tx hash and price candidates above.
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["17.0.1"]
+entries = ["explore.witnesses.*", "explore.pairs.*"]
+checks = "decode_json and encode_json on 355 of the explorer entries"
+observed = "the XDR-JSON naming of the python candidate above: to_json writes txsuccess for tx_success and the other multi-word names without SEP-51's word breaks, and from_json raises KeyError on the SEP-51 names"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["17.0.1"]
+entries = [
+  "explore.witnesses.f62c-r0000-l68",
+  "explore.witnesses.f62c-r0000-l71",
+  "explore.witnesses.f62c-r0005-l124",
+  "explore.witnesses.f62d-r0000-l72",
+  "explore.witnesses.f62d-r0000-l81",
+  "explore.witnesses.f62d-r0002-l66",
+  "explore.witnesses.f63-p24-r0001-l84",
+  "explore.witnesses.g1-r0004-l141",
+  "explore.witnesses.g2-r0000-l69",
+  "explore.witnesses.g2-r0001-l102",
+  "explore.witnesses.g2-r0003-l101",
+  "explore.witnesses.g2-r0003-l75",
+  "explore.witnesses.g2-r0013-l92",
+  "explore.witnesses.g2-r0015-l71",
+  "explore.witnesses.g2-r0026-l107",
+]
+checks = "encode_json on 15 of the explorer entries"
+observed = "the AssetCode form of the python candidate above: from_json refuses the bare asset code SEP-51 writes"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["17.0.1"]
+entries = [
+  "explore.witnesses.f62c-r0000-l94",
+  "explore.witnesses.g2-r0000-l74",
+  "explore.witnesses.g2-r0000-l75",
+  "explore.witnesses.g2-r0000-l79",
+  "explore.witnesses.g2-r0022-l146",
+  "explore.witnesses.g2-r0037-l118",
+]
+checks = "encode_json on 6 of the explorer entries"
+observed = "the ClawbackOp field from_ of the python candidate above"
+
+[[candidate]]
+finding = "new"
+sdk = "python"
+versions = ["17.0.1"]
+entries = ["explore.witnesses.f63-sac-transfer-to-muxed-contract-l72"]
+checks = "decode_json and encode_json on 1 of the explorer entries"
+observed = "the muxed contract address of the python candidate above (\"Unknown SCAddress type: 5\")"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = ["explore.witnesses.*", "explore.pairs.*"]
+checks = "decode_json and encode_json on 350 of the explorer entries"
+observed = "the XDR-JSON naming of the java candidate above: toJson writes the lowercased .x names and fromJson refuses the SEP-51 names"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = [
+  "explore.witnesses.f62c-r0000-l68",
+  "explore.witnesses.f62c-r0000-l71",
+  "explore.witnesses.f62c-r0005-l124",
+  "explore.witnesses.f62d-r0000-l72",
+  "explore.witnesses.f62d-r0000-l81",
+  "explore.witnesses.f62d-r0002-l66",
+  "explore.witnesses.f63-p24-r0001-l84",
+  "explore.witnesses.g1-r0004-l141",
+  "explore.witnesses.g2-r0000-l69",
+  "explore.witnesses.g2-r0001-l102",
+  "explore.witnesses.g2-r0003-l101",
+  "explore.witnesses.g2-r0003-l75",
+  "explore.witnesses.g2-r0013-l92",
+  "explore.witnesses.g2-r0015-l71",
+  "explore.witnesses.g2-r0026-l107",
+]
+checks = "encode_json on 15 of the explorer entries"
+observed = "the AssetCode form of the java candidate above: fromJson casts the bare code to a Map (ClassCastException)"
+
+[[candidate]]
+finding = "new"
+sdk = "java"
+versions = ["6.0.0"]
+entries = ["explore.witnesses.f63-sac-transfer-to-muxed-contract-l72"]
+checks = "decode_json on 1 of the explorer entries"
+observed = "the muxed contract address of the java candidate above: toJson throws \"Unknown SCAddress type\""
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = [
+  "explore.witnesses.g1-r0047-l69",
+  "explore.witnesses.g2-r0007-l69",
+  "explore.witnesses.g2-r0010-l92",
+  "explore.witnesses.g2-r0038-l67",
+]
+checks = "tx_hash on 4 of the explorer entries"
+observed = "the price candidate of the dart sdk above: offers and liquidity pool deposit bounds whose price is not in lowest terms (7/7, 3/3, 2147483647/2147483647) are rebuilt reduced, so the hash is another one"
+
+[[candidate]]
+finding = "new"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["explore.witnesses.f62d-r0000-l96"]
+checks = "tx_hash 0 on 1 of the explorer entries"
+observed = "TimeBounds.fromXdr reads the max time with BigInt.toInt (lib/src/transaction.dart L1087-L1092 at 3.12.0), which clamps 18446744073709551615 to 9223372036854775807, and toXdr writes the clamped value back (L1095-L1100), so a transaction core applied with max_time 2^64-1 hashes to another value"
+
+[[candidate]]
+finding = "DART-OFFERU64"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["explore.witnesses.f62d-r0004-l69"]
+checks = "decode_json and encode_json on 1 of the explorer entries"
+observed = "the manage sell offer id -1 core applied in a failed transaction renders as 18446744073709551615 and the canonical \"-1\" is refused"
+
+[[candidate]]
+finding = "DART-INFLATION"
+sdk = "dart"
+versions = ["3.12.0"]
+entries = ["explore.witnesses.f62d-r0004-l74", "explore.witnesses.g2-r0010-l74"]
+checks = "tx_hash on 2 of the explorer entries"
+observed = "an inflation operation (OperationType 9) has no transaction object"
+
+[[candidate]]
+finding = "PHP-HEXHASH"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "explore.pairs.sac-trust-p30-a-l67",
+  "explore.pairs.sac-trust-p30-b-l67",
+  "explore.witnesses.f62c-r0000-l89",
+  "explore.witnesses.f62c-r0000-l90",
+  "explore.witnesses.f62c-r0000-l92",
+  "explore.witnesses.f62c-r0005-l112",
+  "explore.witnesses.f62c-r0005-l97",
+  "explore.witnesses.f62c-r0016-l94",
+  "explore.witnesses.f62d-r0000-l100",
+  "explore.witnesses.f62d-r0003-l73",
+  "explore.witnesses.f62d-r0007-l72",
+  "explore.witnesses.f62d-r0007-l74",
+  "explore.witnesses.f62d-r0007-l77",
+  "explore.witnesses.f62d-r0008-l84",
+  "explore.witnesses.f62d-r0008-l87",
+  "explore.witnesses.f62d-r0022-l76",
+  "explore.witnesses.f62d-r0022-l82",
+  "explore.witnesses.f62d-r0024-l97",
+  "explore.witnesses.f63-p28-r0000-l79",
+  "explore.witnesses.f63-p29-r0003-l105",
+  "explore.witnesses.g2-r0001-l113",
+  "explore.witnesses.g2-r0001-l114",
+  "explore.witnesses.g2-r0003-l77",
+  "explore.witnesses.g2-r0005-l102",
+  "explore.witnesses.g2-r0005-l68",
+  "explore.witnesses.g2-r0005-l95",
+  "explore.witnesses.g2-r0006-l121",
+  "explore.witnesses.g2-r0007-l71",
+  "explore.witnesses.g2-r0007-l74",
+  "explore.witnesses.g2-r0007-l81",
+  "explore.witnesses.g2-r0009-l78",
+  "explore.witnesses.g2-r0009-l83",
+  "explore.witnesses.g2-r0017-l129",
+  "explore.witnesses.g2-r0018-l122",
+  "explore.witnesses.g2-r0021-l101",
+  "explore.witnesses.g2-r0022-l171",
+]
+checks = "decode_json and encode_json on 36 of the explorer entries"
+observed = "hashes (transaction hashes in results, the config upgrade set content hash) written as the hex of their hex, which then read back with the wrong length (\"Has length 16, expected 32\") or crash opaqueFixed"
+
+[[candidate]]
+finding = "PHP-CBKEY-JSON"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "explore.witnesses.f62c-r0000-l86",
+  "explore.witnesses.g2-r0000-l77",
+  "explore.witnesses.g2-r0006-l126",
+  "explore.witnesses.g2-r0014-l143",
+]
+checks = "decode_json and encode_json on 4 of the explorer entries"
+observed = "a removed claimable balance's ledger key without its balance_id member"
+
+[[candidate]]
+finding = "PHP-UINT64"
+sdk = "php"
+versions = ["1.18.0"]
+entries = [
+  "explore.witnesses.f62d-r0000-l80",
+  "explore.witnesses.f62d-r0000-l96",
+  "explore.witnesses.f63-p26-r0002-l89",
+  "explore.witnesses.f63-p27-r0002-l90",
+  "explore.witnesses.g2-r0004-l125",
+  "explore.witnesses.g2-r0021-l101",
+]
+checks = "decode_json on 6 of the explorer entries"
+observed = "a max time of 2^64-1 and other uint64 values above 2^63-1 (\"uint64ToString accepts only non-negative values; got -1\")"
+
+[[candidate]]
+finding = "PHP-INFLATION"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["explore.witnesses.f62d-r0004-l74", "explore.witnesses.g2-r0010-l74"]
+checks = "tx_hash on 2 of the explorer entries"
+observed = "an inflation operation has no transaction object (\"Unknown operation type: 9\")"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["explore.witnesses.f62d-r0004-l69"]
+checks = "tx_hash 0 on 1 of the explorer entries"
+observed = "rebuilding a transaction core applied (and failed) whose manage sell offer has offer id -1 throws \"Invalid offer id: -1\": the offer id check of ManageSellOfferOperationBuilder::setOfferId (Soneso/StellarSDK/ManageSellOfferOperationBuilder.php L69-L72 at 1.18.0) refuses a value the int64 field holds, the class of the kmp sdk's transaction-object refusals"
+
+[[candidate]]
+finding = "new"
+sdk = "php"
+versions = ["1.18.0"]
+entries = ["explore.witnesses.f62d-r0007-l77", "explore.witnesses.g2-r0015-l71"]
+checks = "tx_hash on 2 of the explorer entries"
+observed = "the set options candidate of the php sdk above: clear_flags 0 and an empty home domain left out when the sdk rebuilds the operation"
+
+[[candidate]]
+finding = "NET-DEPRECATED-OPS"
+sdk = "dotnet"
+versions = ["17.0.0"]
+entries = [
+  "explore.witnesses.f62c-r0000-l68",
+  "explore.witnesses.f62c-r0000-l71",
+  "explore.witnesses.f62c-r0005-l124",
+  "explore.witnesses.f62d-r0000-l72",
+  "explore.witnesses.f62d-r0000-l81",
+  "explore.witnesses.f62d-r0002-l66",
+  "explore.witnesses.f62d-r0004-l74",
+  "explore.witnesses.f63-p24-r0001-l84",
+  "explore.witnesses.g1-r0004-l141",
+  "explore.witnesses.g2-r0000-l69",
+  "explore.witnesses.g2-r0001-l102",
+  "explore.witnesses.g2-r0003-l101",
+  "explore.witnesses.g2-r0003-l75",
+  "explore.witnesses.g2-r0010-l74",
+  "explore.witnesses.g2-r0013-l92",
+  "explore.witnesses.g2-r0015-l71",
+  "explore.witnesses.g2-r0026-l107",
+]
+checks = "tx_hash on 17 of the explorer entries"
+observed = "allow trust and inflation operations refused (\"AllowTrustOperation is no longer supported\")"
+
+[[candidate]]
+finding = "NET-CREATECONTRACT"
+sdk = "dotnet"
+versions = ["17.0.0"]
+entries = [
+  "explore.pairs.sac-trust-p28-a-l65",
+  "explore.pairs.sac-trust-p28-b-l65",
+  "explore.pairs.sac-trust-p30-a-l69",
+  "explore.pairs.sac-trust-p30-b-l69",
+  "explore.witnesses.f63-p21-r0001-l67",
+  "explore.witnesses.f63-p21-r0001-l69",
+  "explore.witnesses.f63-p24-r0001-l71",
+  "explore.witnesses.f63-p28-r0000-l81",
+]
+checks = "tx_hash on 8 of the explorer entries"
+observed = "CreateContractOperation.FromXdr crashes (NullReferenceException) on create contract operations of the first version"
+
+[[candidate]]
+finding = "new"
+sdk = "dotnet"
+versions = ["17.0.0"]
+entries = [
+  "explore.witnesses.g2-r0007-l69",
+  "explore.witnesses.g2-r0010-l92",
+  "explore.witnesses.g2-r0027-l67",
+  "explore.witnesses.g2-r0031-l67",
+  "explore.witnesses.g2-r0038-l67",
+]
+checks = "tx_hash on 5 of the explorer entries"
+observed = "the price candidate of the dotnet sdk above: unreduced fractions and 1/2147483647"
+
+[[candidate]]
+finding = "KMP-MUXED-SOURCE"
+sdk = "kmp"
+versions = ["1.18.0"]
+entries = [
+  "explore.witnesses.f62c-r0000-l69",
+  "explore.witnesses.f62c-r0000-l77",
+  "explore.witnesses.f62c-r0000-l86",
+  "explore.witnesses.f62c-r0017-l77",
+  "explore.witnesses.f62d-r0000-l85",
+  "explore.witnesses.f62d-r0003-l79",
+  "explore.witnesses.f62d-r0008-l75",
+  "explore.witnesses.g2-r0007-l77",
+  "explore.witnesses.g2-r0012-l78",
+  "explore.witnesses.g2-r0013-l93",
+  "explore.witnesses.g2-r0018-l122",
+]
+checks = "tx_hash on 11 of the explorer entries"
+observed = "the muxed id of the transaction source dropped when the sdk rebuilds the transaction"
+
+[[candidate]]
+finding = "new"
+sdk = "kmp"
+versions = ["1.18.0"]
+entries = ["explore.witnesses.f62d-r0000-l96", "explore.witnesses.f62d-r0004-l69"]
+checks = "tx_hash 0 on 2 of the explorer entries"
+observed = "the transaction-object refusals of the kmp candidate above: max time 2^64-1 (\"maxTime must be >= 0\") and offer id -1 (\"Offer ID must be non-negative\")"
+
+[[candidate]]
+finding = "CLI-TXHASH-V1"
+sdk = "stellar-cli"
+versions = ["30.0.1"]
+entries = ["explore.witnesses.*", "explore.pairs.*"]
+checks = "tx_hash on 70 of the explorer entries"
+observed = "stellar tx hash refuses v0 and fee bump envelopes (\"only transaction v1 is supported\")"

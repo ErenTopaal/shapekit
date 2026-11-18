@@ -4,55 +4,55 @@
     {
       "kind": "manifest",
       "path": "corpus/manifest.json",
-      "sha256": "16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609",
-      "detail": "corpus 0.1.0"
+      "sha256": "9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e",
+      "detail": "corpus 0.2.0"
     },
     {
       "kind": "harness",
       "path": "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json",
-      "sha256": "eea9f4e3fd91bbc1d4520e3589f21fa278fd469c56051b236f6e41610b469217",
-      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 35 entries, manifest 16d387657a8edbe9a155bf48e0c30420ef20ce6dbe274370f177a6ee0c51f609"
+      "sha256": "ec360a556fdf380929762149cde264c93c7c63fde6127bdf67b95e241845c84d",
+      "detail": "stellar-etl 2b24ec89ddce7fc0beb7795de982c93e6895eaf3, 906 entries, manifest 9aea15cac71b67baf75c4fca783f7d7a58ccba3d38504e66ba06269d1885139e"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-go-textual-offer-id.json",
-      "sha256": "4da67c01027fef119a5180e776a27eaa595a47fee383734b3fdf0dc0769f81b1",
-      "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
+      "sha256": "36d74fa433e3643d3d821628125e15cddb4ec1160b46e185228fb42d1dc02c69",
+      "detail": "corpus 0.2.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dart.json",
-      "sha256": "9c1ec705021c93477c8b11bba6ebc126a44a2aa040154fb59689e8f23bdf9630",
-      "detail": "corpus 0.1.0, dart@3.12.0"
+      "sha256": "88dfe28f392c739fbe75fd3fe4747bb03f687c1159a55789513c2314dbf9a512",
+      "detail": "corpus 0.2.0, dart@3.12.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-php.json",
-      "sha256": "2d2a34a6fe8f3b6b9d7f23eb1421792552496f34f8950730286fc93bc034def8",
-      "detail": "corpus 0.1.0, php@1.18.0"
+      "sha256": "3526df3d06c65a54ef96d7305159b1b96a816c359cdc297477e706c96c91a72e",
+      "detail": "corpus 0.2.0, php@1.18.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-dotnet.json",
-      "sha256": "e9ec43f67e89d05edbd947cd8770fd57808d7c13813cc1ae3da81372dd495882",
-      "detail": "corpus 0.1.0, dotnet@16.0.0 dotnet@17.0.0"
+      "sha256": "2e6e809b372a7abf1247c46d055e34213abf087923c006b0ef3ee49125e191c6",
+      "detail": "corpus 0.2.0, dotnet@16.0.0 dotnet@17.0.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-kmp.json",
-      "sha256": "8341c807b87b2f301b23f368b8e802c41d81cea298506981938d0008f226b7a8",
-      "detail": "corpus 0.1.0, kmp@1.18.0"
+      "sha256": "b55b5e4b1030ea98c4ae7e5230c10161615cbde65adf2f52df5ec41611d9629d",
+      "detail": "corpus 0.2.0, kmp@1.18.0"
     },
     {
       "kind": "conformance",
       "path": "candidate/findings/inputs/conformance-stellar-cli.json",
-      "sha256": "94f7a5302339cb6a39b16f094fbab0dcb4bbdc5add7a64af3ad11c37637b431a",
-      "detail": "corpus 0.1.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
+      "sha256": "ba72ba195701ab715907ecb8c938f76541a36e7d61aca06ba5ca398b59924a67",
+      "detail": "corpus 0.2.0, stellar-cli@28.1.0 stellar-cli@30.0.1"
     }
   ],
   "summary": {
-    "findings": 37,
-    "failures": 376,
+    "findings": 40,
+    "failures": 466,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -77,7 +77,8 @@
         "robustness": 5
       },
       "stellar-etl": {
-        "data-loss": 2
+        "data-loss": 4,
+        "robustness": 1
       },
       "stellar_flutter_sdk": {
         "data-loss": 1,
@@ -86,15 +87,593 @@
       }
     },
     "by_severity": {
-      "data-loss": 6,
+      "data-loss": 8,
       "divergence": 16,
-      "robustness": 15
+      "robustness": 16
     },
     "by_status": {
-      "draft": 37
+      "draft": 39,
+      "wont-fix": 1
     }
   },
   "findings": [
+    {
+      "id": "ETL-META-V4",
+      "title": "stellar-etl's token transfer export halts on ledgers whose transaction meta is below version 4",
+      "component": "stellar-etl",
+      "severity": "robustness",
+      "caps": [
+        "CAP-0002",
+        "CAP-0003",
+        "CAP-0006",
+        "CAP-0026",
+        "CAP-0028",
+        "CAP-0067"
+      ],
+      "minimal_entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+      "reproduce": "shapekit harness run --chain classic.failed-tx.change-trust-native.p9 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "status": "wont-fix",
+      "reason": "intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta",
+      "cause": "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3) is not evaluated, on both networks.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "DART-INFLATION",
+        "NET-DEPRECATED-OPS",
+        "PHP-CBKEY-JSON",
+        "PHP-INFLATION",
+        "PHP-UINT64"
+      ],
+      "related": [],
+      "entries": [
+        "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+        "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+        "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+        "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
+        "cap26.inflation.p11-inflation-not-time",
+        "cap26.inflation.p11-inflation-payout",
+        "cap67.unified-events.p22-account-merge-muxed-destination",
+        "cap67.unified-events.p22-claim-claimable-balance",
+        "cap67.unified-events.p22-clawback",
+        "cap67.unified-events.p22-clawback-claimable-balance",
+        "cap67.unified-events.p22-create-claimable-balance",
+        "cap67.unified-events.p22-liquidity-pool-deposit",
+        "cap67.unified-events.p22-path-payment-muxed-destination",
+        "cap67.unified-events.p22-payment-burn",
+        "cap67.unified-events.p22-payment-memo-hash",
+        "cap67.unified-events.p22-payment-memo-id",
+        "cap67.unified-events.p22-payment-memo-text",
+        "cap67.unified-events.p22-payment-mint",
+        "cap67.unified-events.p22-payment-muxed-destination",
+        "cap67.unified-events.p22-payment-to-self",
+        "cap67.unified-events.p22-payment-transfer",
+        "cap67.unified-events.p22-set-authorized-false",
+        "cap67.unified-events.p22-set-authorized-true",
+        "classic.failed-tx.p12-allow-trust-self-not-allowed",
+        "classic.failed-tx.p12-allow-trust-trust-not-required",
+        "classic.failed-tx.p12-change-trust-self-not-allowed",
+        "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+        "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+        "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+        "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+        "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+        "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+        "classic.failed-tx.p12-payment-no-issuer",
+        "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+        "classic.failed-tx.p9-change-trust-native-internal-error-meta"
+      ],
+      "recipe": "chain:classic.failed-tx.change-trust-native.p9",
+      "affected": [
+        {
+          "on": "stellar-etl",
+          "tested": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ],
+          "failing": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "dart@3.12.0",
+        "dotnet@16.0.0",
+        "dotnet@17.0.0",
+        "php@1.18.0",
+        "stellar-cli@28.1.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-manage-buy-offer-claim-atom-v0",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-manage-sell-offer-claim-atom-v0",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-path-payment-strict-receive-claim-atom-v0",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap03.offer-liabilities.p17-path-payment-strict-send-claim-atom-v0",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap26.inflation.p11-inflation-not-time",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap26.inflation.p11-inflation-not-time",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap26.inflation.p11-inflation-payout",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-account-merge-muxed-destination",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-account-merge-muxed-destination",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 85"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-claim-claimable-balance",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-claim-claimable-balance",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 80"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-clawback",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-clawback",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 76"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-clawback-claimable-balance",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-clawback-claimable-balance",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 82"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-create-claimable-balance",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-create-claimable-balance",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 79"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-liquidity-pool-deposit",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-liquidity-pool-deposit",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 84"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-path-payment-muxed-destination",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-path-payment-muxed-destination",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-burn",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-burn",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-hash",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-hash",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-id",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-id",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-text",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-memo-text",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-mint",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-mint",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-muxed-destination",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-muxed-destination",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-to-self",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-to-self",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-transfer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-payment-transfer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-set-authorized-false",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-set-authorized-false",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 77"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-set-authorized-true",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap67.unified-events.p22-set-authorized-true",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 78"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-allow-trust-self-not-allowed",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-allow-trust-self-not-allowed",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 74"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-allow-trust-trust-not-required",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-allow-trust-trust-not-required",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 73"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-change-trust-self-not-allowed",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-change-trust-self-not-allowed",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 75"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-buy-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 69"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-buy-offer-sell-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 68"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-buy-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 67"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-manage-sell-offer-sell-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 66"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-path-payment-strict-receive-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 70"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-path-payment-strict-send-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 71"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-payment-no-issuer",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p12-payment-no-issuer",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 72"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-envelope",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+          "at": "mainnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p9-change-trust-native-internal-error-meta",
+          "at": "testnet",
+          "what": "not-evaluated: the target stopped at ledger 64 (halted, a ledger with no corpus entry) before reaching ledger 65"
+        }
+      ]
+    },
     {
       "id": "ETL-1",
       "title": "question: the effects table has no trustline_created for a trustline a Stellar asset contract trust() call opens",
@@ -104,18 +683,20 @@
         "CAP-0046-06",
         "CAP-0073"
       ],
-      "minimal_entry": "cap73.sac-trust.p30-trust-envelope",
-      "reproduce": "shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "minimal_entry": "cap73.sac-trust.p28-trust-envelope",
+      "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
       "status": "draft",
       "draft": "candidate/findings/issues/stellar-etl-E1.md",
       "cause": "transformEffects derives the effects of an InvokeHostFunction operation only from Stellar asset contract events (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89), which turn transfer, mint, clawback and burn into credit and debit effects. A trustline the contract's trust() function opens (CAP-73) changes the ledger without such an event, so it gets no trustline_created effect, while a ChangeTrust operation that opens the same trustline does (addChangeTrustEffects, L647-L705). The source does not say whether this is intended.",
       "siblings": [],
       "related": [],
       "entries": [
+        "cap73.sac-trust.p28-trust-envelope",
+        "cap73.sac-trust.p28-trust-meta",
         "cap73.sac-trust.p30-trust-envelope",
         "cap73.sac-trust.p30-trust-meta"
       ],
-      "recipe": "chain:cap73.sac-trust.p30",
+      "recipe": "chain:cap73.sac-trust.p28",
       "affected": [
         {
           "on": "stellar-etl",
@@ -131,8 +712,50 @@
         {
           "source": "harness",
           "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-trust-envelope",
+          "at": "mainnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-trust-envelope",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-trust-meta",
+          "at": "mainnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-trust-meta",
+          "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-trust-envelope",
+          "at": "mainnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
           "entry": "cap73.sac-trust.p30-trust-envelope",
           "at": "testnet",
+          "what": "dropped trustline-created: trustline-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-trust-meta",
+          "at": "mainnet",
           "what": "dropped trustline-created: trustline-created is missing"
         },
         {
@@ -153,18 +776,20 @@
         "CAP-0046-06",
         "CAP-0073"
       ],
-      "minimal_entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
-      "reproduce": "shapekit harness run --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "minimal_entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
+      "reproduce": "shapekit harness run --chain cap73.sac-trust.p28 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
       "status": "draft",
       "draft": "candidate/findings/issues/stellar-etl-E2.md",
       "cause": "An XLM transfer through the native asset contract to an account that does not exist creates it (CAP-73). transformEffects writes account_debited and account_credited for the transfer event (addInvokeHostFunctionEffects, internal/transform/effects.go L1326-L1440 at 2b24ec89) but account_created only for a CreateAccount operation (addAccountCreatedEffects, L411-L437), so the new account has no account_created effect. The source does not say whether this is intended.",
       "siblings": [],
       "related": [],
       "entries": [
+        "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
+        "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
         "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
         "cap73.sac-trust.p30-xlm-transfer-creates-account-meta"
       ],
-      "recipe": "chain:cap73.sac-trust.p30",
+      "recipe": "chain:cap73.sac-trust.p28",
       "affected": [
         {
           "on": "stellar-etl",
@@ -180,6 +805,41 @@
         {
           "source": "harness",
           "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
+          "at": "mainnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-envelope",
+          "at": "testnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
+          "at": "mainnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p28-xlm-transfer-creates-account-meta",
+          "at": "testnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
+          "at": "mainnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
           "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-envelope",
           "at": "testnet",
           "what": "dropped account-created: account-created is missing"
@@ -188,8 +848,148 @@
           "source": "harness",
           "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
           "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
+          "at": "mainnet",
+          "what": "dropped account-created: account-created is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap73.sac-trust.p30-xlm-transfer-creates-account-meta",
           "at": "testnet",
           "what": "dropped account-created: account-created is missing"
+        }
+      ]
+    },
+    {
+      "id": "ETL-3",
+      "title": "question: the effects table has no signer_removed for a pre-auth signer core removes when its transaction applies",
+      "component": "stellar-etl",
+      "severity": "data-loss",
+      "caps": [
+        "CAP-0002",
+        "CAP-0015",
+        "CAP-0028"
+      ],
+      "minimal_entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+      "reproduce": "shapekit harness run --chain cap15.fee-bump.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-etl-E3.md",
+      "cause": "Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 2b24ec89); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended.",
+      "siblings": [
+        "CLI-TXHASH-V1",
+        "PHP-HEXHASH"
+      ],
+      "related": [],
+      "entries": [
+        "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+        "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
+        "classic.failed-tx.p30-pre-auth-failed-removes-signer"
+      ],
+      "recipe": "chain:cap15.fee-bump.p30",
+      "affected": [
+        {
+          "on": "stellar-etl",
+          "tested": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ],
+          "failing": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ]
+        }
+      ],
+      "other_sdks": [
+        "php@1.18.0",
+        "stellar-cli@30.0.1"
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+          "at": "mainnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-envelope",
+          "at": "testnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
+          "at": "mainnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta",
+          "at": "testnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p30-pre-auth-failed-removes-signer",
+          "at": "mainnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "classic.failed-tx.p30-pre-auth-failed-removes-signer",
+          "at": "testnet",
+          "what": "dropped signer-removed: signer-removed is missing"
+        }
+      ]
+    },
+    {
+      "id": "ETL-4",
+      "title": "question: the effects table has no trustline_removed for the pool share trustline a revocation removes",
+      "component": "stellar-etl",
+      "severity": "data-loss",
+      "caps": [
+        "CAP-0038"
+      ],
+      "minimal_entry": "cap38.liquidity-pools.p30-revoke-redeems-pool-shares",
+      "reproduce": "shapekit harness run --chain cap38.liquidity-pools.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3\"",
+      "status": "draft",
+      "draft": "candidate/findings/issues/stellar-etl-E4.md",
+      "cause": "A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 2b24ec89), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended.",
+      "siblings": [],
+      "related": [],
+      "entries": [
+        "cap38.liquidity-pools.p30-revoke-redeems-pool-shares"
+      ],
+      "recipe": "chain:cap38.liquidity-pools.p30",
+      "affected": [
+        {
+          "on": "stellar-etl",
+          "tested": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ],
+          "failing": [
+            "2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap38.liquidity-pools.p30-revoke-redeems-pool-shares",
+          "at": "mainnet",
+          "what": "dropped trustline-removed: trustline-removed is missing"
+        },
+        {
+          "source": "harness",
+          "on": "stellar-etl@2b24ec89ddce7fc0beb7795de982c93e6895eaf3",
+          "entry": "cap38.liquidity-pools.p30-revoke-redeems-pool-shares",
+          "at": "testnet",
+          "what": "dropped trustline-removed: trustline-removed is missing"
         }
       ]
     },
@@ -836,6 +1636,7 @@
       "cause": "Operation.fromXdr has no case for INFLATION and throws \"Unknown operation body OperationType.9\" (lib/src/operation.dart L258-L259), so the sdk cannot build a transaction object, nor its hash, for envelopes from before protocol 12 that core applied.",
       "siblings": [
         "CLI-TXHASH-V1",
+        "ETL-META-V4",
         "NET-DEPRECATED-OPS",
         "PHP-INFLATION"
       ],
@@ -1120,6 +1921,7 @@
       "cause": "uint64 fields are php ints, which hold 2^64-1 as -1, and XdrJsonHelper::uint64ToString refuses negative ints (Soneso/StellarSDK/Xdr/XdrJsonHelper.php L290-L300), so a muxed id or memo id at or above 2^63 has no XDR-JSON. In the other direction XdrSequenceNumber is read as an unsigned BigInteger (Xdr/XdrBuffer.php readBigInteger64), so a bump_to of -1 renders as \"18446744073709551615\" where the schema's int64 says -1.",
       "siblings": [
         "DART-UTF8",
+        "ETL-META-V4",
         "KMP-MUXED-SOURCE",
         "KMP-UTF8"
       ],
@@ -1335,7 +2137,8 @@
       "draft": "candidate/findings/issues/php-cap15.fee-bump.p30-fee-source-is-inner-source-meta.md",
       "cause": "XdrInnerTransactionResultPair and XdrConfigUpgradeSetKey keep their hash as hex text (bin2hex in decode, Soneso/StellarSDK/Xdr/XdrInnerTransactionResultPair.php L21 and Xdr/XdrConfigUpgradeSetKey.php L18), while the base classes' toJsonValue hex-encodes the field again (Xdr/XdrInnerTransactionResultPairBase.php L52), so XDR-JSON carries a 128-character string. Reading that JSON back fails (\"Unexpected length for value. Has length 16, expected 32\") or crashes with a TypeError in XdrEncoder::opaqueFixed. The bytes round trip; only XDR-JSON is wrong. Encoding the pair from a decoded value also raises php warnings (pack(): illegal hex digit) on stderr.",
       "siblings": [
-        "CLI-TXHASH-V1"
+        "CLI-TXHASH-V1",
+        "ETL-3"
       ],
       "related": [],
       "entries": [
@@ -1559,7 +2362,9 @@
       "status": "draft",
       "draft": "candidate/findings/issues/php-cap23.claimable-balances.p30-claim-through-depth-4-meta.md",
       "cause": "XdrLedgerKeyBase::toJsonValue writes the claimable_balance arm as the bare ClaimableBalanceID, and fromJsonValue reads it that way (Soneso/StellarSDK/Xdr/XdrLedgerKeyBase.php L148 and L183), where the schema's arm is the struct LedgerKeyClaimableBalance { balance_id }, so the canonical XDR-JSON of every removed or restored claimable balance is refused (\"Expected string for XdrClaimableBalanceID JSON value, got array\").",
-      "siblings": [],
+      "siblings": [
+        "ETL-META-V4"
+      ],
       "related": [],
       "entries": [
         "cap23.claimable-balances.p30-claim-through-depth-4-meta",
@@ -1832,6 +2637,7 @@
       "siblings": [
         "CLI-TXHASH-V1",
         "DART-INFLATION",
+        "ETL-META-V4",
         "NET-DEPRECATED-OPS"
       ],
       "related": [],
@@ -2145,6 +2951,7 @@
       "siblings": [
         "CLI-TXHASH-V1",
         "DART-INFLATION",
+        "ETL-META-V4",
         "PHP-INFLATION"
       ],
       "related": [],
@@ -3750,6 +4557,8 @@
       "cause": "tx hash runs unwrap_envelope_v1 on the envelope (soroban-cli 30.0.1 src/commands/tx/hash.rs L31, src/commands/tx/xdr.rs L79-L84), which returns OnlyTransactionV1Supported (xdr.rs L18-L19) for a TransactionV0 or fee bump envelope, so the hash of those transactions, which stellar-core computes, cannot be had from the command.",
       "siblings": [
         "DART-INFLATION",
+        "ETL-3",
+        "ETL-META-V4",
         "NET-DEPRECATED-OPS",
         "PHP-HEXHASH",
         "PHP-INFLATION"

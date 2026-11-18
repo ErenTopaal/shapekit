@@ -2,6 +2,59 @@
 
 A dated public log of what has landed in shapekit. Newest entry first.
 
+## 2026-11-17: explorer witnesses in the candidate lane, stellar-etl in the findings, version 0.2.0
+
+- The workspace, the three adapters and the site package say 0.2.0, so the corpus manifest's
+  `corpus_version` is 0.2.0 and `shapekit corpus pack` writes `corpus-0.2.0.tar.zst`. No tag
+  exists yet.
+- `shapekit explore entries` turns a chain recorded from an explorer recipe into candidate
+  entries: the fewest ledgers that together hold the union arms the run credited to the recipe,
+  one `LedgerCloseMeta` entry each with both passphrases' bytes (families `explore.witnesses`
+  and `explore.pairs`). Every committed explorer recipe now has its chain under
+  `candidate/chains/`, and the lane holds 387 such entries. The committed chains hold 435 of the
+  436 arms that corpus entries core emitted hold; the one left, `StellarValueExt:basic`, only
+  network history has (`shapekit explore witnessed`). Four recipes of an earlier run, the only
+  witnesses of `ClaimAtom:v0`, `LedgerKey:liquidity_pool`, `LiquidityPoolDepositResult:underfunded`
+  and `PathPaymentStrictReceiveResult:underfunded`, are committed in
+  `candidate/recipes/explore/g1/`; each records byte for byte twice under each passphrase.
+- Promotion: `shapekit corpus promote` now also refuses an entry whose chain is not under
+  `corpus/chains`, because the harness replays an entry from its chain. Every explorer entry is
+  cut from a chain in the candidate lane, so all 387 stay there. Through the current version of
+  each SDK, rust and js pass all 387, and go and soroban-sdk have no failing check; 355 are also
+  refused by SDKs whose findings are candidate drafts: python (355, its XDR-JSON names), java
+  (350), stellar-cli (70, `tx hash` of v0 and fee bump envelopes), php (49), dotnet (30), kmp
+  (13) and dart (8). Each failing check is attributed in `candidate/finding-candidates.toml`;
+  one new dart candidate (a max time of 2^64-1 clamped to 2^63-1 when the SDK rebuilds the
+  transaction, so the hash changes) and one new php candidate (an offer id of -1 refused when
+  the SDK rebuilds a transaction core applied). The three mainnet ledgers the random audit
+  added (57369500, 37466023, 44679511) stay in the lane too: rust, go, js, soroban-sdk and kmp
+  pass them, and python, java, php and stellar-cli refuse all three.
+- The corpus keeps its 716 entries; its manifest changes only by the version. The
+  `sdk-version` obligations of rust, go and js are regenerated over the 716 entries; they still
+  listed the 712 of 0.1.0.
+- wallet-backend at `3e22515a`, every chain on both networks, twice in one process: 906
+  entries, 678 pass, 106 mishandled, 44 dropped, 78 out of scope, the same verdicts as before.
+  The stellar-rpc adapter (`--events-from events`) gives 820 pass and 86 out of scope, as its
+  expectations file says. The wallet-backend reproductions hold (24 of 24 rows) and
+  `indexerlint` is clean on wallet-backend with its baseline.
+- stellar-etl (F7.7): its harness run now covers every chain on both networks, and it is an
+  input of the main findings (`findings/inputs/harness-stellar-etl-2b24ec89.json`). 906 entries:
+  796 pass, 24 dropped, 16 out of scope and 70 not evaluated. Its findings stay in the
+  candidate lane, which imports the same run, because none has an upstream decision; the main
+  findings check counts their failures as held. Two new questions, drafted and not filed: a
+  pre-auth signer that core removes when its transaction applies has no `signer_removed`
+  effect (ETL-3), and the pool share trustline a revocation removes has no
+  `trustline_removed` effect (ETL-4). The 70 entries not evaluated are the five chains recorded
+  at protocols 9 to 22: `export_token_transfer` reads only unified events and stops on
+  transaction meta below version 4 (ETL-META-V4, recorded as intended, since the public ledger
+  lake stellar-etl reads holds v4 meta for every protocol). An export with no rows is now
+  dumped as an empty column list; the adapter wrote `null`, which the harness refused.
+- Findings: 24 findings covering 611 failures, 0 unmapped. Against 510: two
+  `cap38.liquidity-pools.testnet-5521432` cells of js 16.3.0 and 17.2.0, which JS-1766 now takes,
+  and 99 failures held by candidate findings (ETL-1 8, ETL-2 8, ETL-3 6, ETL-4 2, ETL-META-V4
+  70, GO-TEXTID 5). The candidate lane has 40 findings, 466 failures, 0 unmapped. Draft links in
+  `candidate/findings/FINDINGS.md` are now relative to that file.
+
 ## 2026-11-18: implementation-defined entries are recorded, not voted on
 
 - An implementation-defined entry (the references disagree, so no answer is required) used to

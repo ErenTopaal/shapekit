@@ -8,6 +8,8 @@ schema = 1
 [inputs]
 manifest = "corpus/manifest.json"
 dir = "candidate/findings/inputs"
+# the stellar-etl run is imported here and, from the same run output, as a main input of
+# findings/triage.toml, whose check counts the failures as held by the ETL findings below
 harness = ["candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"]
 matrices = ["candidate/findings/inputs/conformance-go-textual-offer-id.json", "candidate/findings/inputs/conformance-dart.json", "candidate/findings/inputs/conformance-php.json", "candidate/findings/inputs/conformance-dotnet.json", "candidate/findings/inputs/conformance-kmp.json", "candidate/findings/inputs/conformance-stellar-cli.json"]
 
@@ -15,7 +17,7 @@ matrices = ["candidate/findings/inputs/conformance-go-textual-offer-id.json", "c
 kind = "harness"
 from = "target/findings/stellar-etl-2b24ec89/harness-report.json"
 to = "candidate/findings/inputs/harness-stellar-etl-2b24ec89.json"
-command = "shapekit harness run --chain cap27.muxed-accounts.p30 --chain cap40.signed-payload-signer.p30 --chain cap73.sac-trust.p30 --network testnet --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
+command = "shapekit harness run --network both --adapter \"adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3 --cpus 2\" --out target/findings/stellar-etl-2b24ec89"
 
 [[inputs.import]]
 kind = "conformance"
@@ -26,6 +28,26 @@ command = "shapekit conformance run --sdk go --all-versions --entry cap03.offer-
 [targets.stellar-etl]
 repo = "stellar/stellar-etl"
 adapter = "adapters/bin/etl-adapter --commit {version}"
+
+[[finding]]
+id = "ETL-META-V4"
+title = "stellar-etl's token transfer export halts on ledgers whose transaction meta is below version 4"
+component = "stellar-etl"
+severity = "robustness"
+status = "wont-fix"
+reason = "intended for the data stellar-etl reads: the public ledger lake holds history re-emitted by a current core, so every ledger there carries TransactionMeta v4, which unified events need. Only locally recorded chains below protocol 23 hold v2 or v3 meta"
+cause = "export_token_transfer builds the processor with NewEventsProcessorForUnifiedEvents (internal/transform/token_transfer.go L15 at 2b24ec89), which reads the CAP-67 unified events stream and returns \"expected version 4 got N\" for any other meta version (go-stellar-sdk processors/token_transfer/token_transfer_processor.go L474-L478 at e31e3b146d00, the pseudo-version stellar-etl pins). The command exits 1, the adapter retries it, and the harness stops the chain at its first ledger with a transaction: every entry of the five corpus chains recorded at protocols 9 to 22 (meta v2 or v3) is not evaluated, on both networks."
+
+[[finding.harness]]
+target = "stellar-etl"
+verdicts = ["not-evaluated"]
+entries = [
+  "cap03.offer-liabilities.p17-*",
+  "cap26.inflation.p11-*",
+  "cap67.unified-events.p22-*",
+  "classic.failed-tx.p9-*",
+  "classic.failed-tx.p12-*",
+]
 
 [[finding]]
 id = "ETL-1"
@@ -53,6 +75,34 @@ cause = "An XLM transfer through the native asset contract to an account that do
 [[finding.harness]]
 target = "stellar-etl"
 facts = ["account-created"]
+problems = ["dropped"]
+
+[[finding]]
+id = "ETL-3"
+title = "question: the effects table has no signer_removed for a pre-auth signer core removes when its transaction applies"
+component = "stellar-etl"
+severity = "data-loss"
+status = "draft"
+draft = "candidate/findings/issues/stellar-etl-E3.md"
+cause = "Core removes a pre-auth signer in txChangesBefore whether its transaction succeeds or fails, and a fee bump's also from the fee source. effects() returns nothing for a failed transaction and builds effects per operation from the operation's own changes (internal/transform/effects.go L60-L176 at 2b24ec89); signer_removed comes only from addSetOptionsEffects (L530-L645). The source does not say whether this is intended."
+
+[[finding.harness]]
+target = "stellar-etl"
+facts = ["signer-removed"]
+problems = ["dropped"]
+
+[[finding]]
+id = "ETL-4"
+title = "question: the effects table has no trustline_removed for the pool share trustline a revocation removes"
+component = "stellar-etl"
+severity = "data-loss"
+status = "draft"
+draft = "candidate/findings/issues/stellar-etl-E4.md"
+cause = "A revocation that redeems pool shares removes the owner's pool share trustline; addLiquidityPoolRevokedEffect (internal/transform/effects.go L1152-L1219 at 2b24ec89), called from addSetTrustLineFlagsEffects and addAllowTrustEffects, writes claimable_balance_created and liquidity_pool_revoked from the operation's changes but no trustline_removed for the removed entry. The source does not say whether this is intended."
+
+[[finding.harness]]
+target = "stellar-etl"
+facts = ["trustline-removed"]
 problems = ["dropped"]
 
 [[finding]]
