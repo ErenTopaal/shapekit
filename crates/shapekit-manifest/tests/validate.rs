@@ -622,3 +622,21 @@ fn pre_cap_needs_the_arms_it_stands_for() {
         "{p:#?}"
     );
 }
+
+#[test]
+fn protocol_ranges_are_written_as_numbers() {
+    let (dir, mut manifest) = sample();
+    let p = &mut manifest.entries[0].protocol;
+    p.valid_min = p.generated_at.unwrap() + 1;
+    p.valid_max = None;
+    let problems = problems(&manifest, dir.path());
+    let want = format!(
+        "valid_min {} and later",
+        manifest.entries[0].protocol.valid_min
+    );
+    assert!(problems.iter().any(|l| l.contains(&want)), "{problems:#?}");
+    assert!(
+        !problems.iter().any(|l| l.contains("None")),
+        "{problems:#?}"
+    );
+}

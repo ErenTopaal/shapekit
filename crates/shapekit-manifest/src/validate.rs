@@ -352,10 +352,10 @@ impl Checker<'_> {
 
     fn protocol(&mut self) {
         let p = self.entry.protocol;
-        if p.valid_max.is_some_and(|max| max < p.valid_min) {
+        if let Some(max) = p.valid_max.filter(|max| *max < p.valid_min) {
             self.problem(format!(
-                "protocol.valid_max {:?} is below valid_min {}",
-                p.valid_max, p.valid_min
+                "protocol.valid_max {max} is below valid_min {}",
+                p.valid_min
             ));
         }
         let contrast = self.entry.flags.iter().any(|f| f == BELOW_PROTOCOL_VALID);
@@ -379,8 +379,11 @@ impl Checker<'_> {
             && (at < p.valid_min || p.valid_max.is_some_and(|max| at > max))
         {
             self.problem(format!(
-                "protocol.generated_at {at} is outside valid_min {} to valid_max {:?}; bytes core emitted at a protocol are valid there",
-                p.valid_min, p.valid_max
+                "protocol.generated_at {at} is outside {}; bytes core emitted at a protocol are valid there",
+                match p.valid_max {
+                    Some(max) => format!("valid_min {} to valid_max {max}", p.valid_min),
+                    None => format!("valid_min {} and later", p.valid_min),
+                }
             ));
         }
     }
