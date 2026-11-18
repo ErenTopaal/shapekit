@@ -424,6 +424,44 @@ jobs:
           path: harness-out/
           retention-days: 30
 
+  harness-stellar-etl:
+    # every chain of both networks through the stellar-etl adapter at the pinned commit; its
+    # report is the stellar-etl input the findings job imports (findings/triage.toml)
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: pull the pinned gcs emulator by digest
+        run: docker pull --quiet "$(scripts/pin.sh image fake-gcs-server)"
+      - run: cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter
+      - name: harness run
+        run: |
+          set -euo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          pin=$(scripts/pin.sh git stellar-etl)
+          "$RUNNER_TEMP/bin/shapekit" harness run \
+            --adapter "adapters/bin/etl-adapter --commit $pin --cpus 2" \
+            --network both --out harness-out
+      - name: report to the job summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f harness-out/HARNESS.md ]; then cat harness-out/HARNESS.md >>"$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: harness-stellar-etl
+          path: harness-out/
+          retention-days: 30
+
   harness-reproduce:
     # wallet-backend#729, #731, #716, #753 and #792 on their pre-fix and fixed commits
     needs: build
@@ -563,7 +601,7 @@ jobs:
     # on any other problem: an unmapped failure, a finding that matches nothing, a missing
     # draft file, a filed finding without a link, or a committed findings.json that differs
     # from what tonight's runs give
-    needs: [build, conformance, harness]
+    needs: [build, conformance, harness, harness-stellar-etl]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -587,6 +625,11 @@ jobs:
         with:
           name: harness-rpc
           path: ${{ runner.temp }}/harness-rpc
+      - name: harness report, stellar-etl, both networks
+        uses: actions/download-artifact@v8
+        with:
+          name: harness-stellar-etl
+          path: ${{ runner.temp }}/harness-stellar-etl
       - name: indexerlint on wallet-backend at the pin
         run: |
           set -euo pipefail
@@ -607,13 +650,17 @@ jobs:
           set -euo pipefail
           cd "$RUNNER_TEMP/wb"
           "$RUNNER_TEMP/bin/indexerlint" -baseline "$GITHUB_WORKSPACE/lint/baselines/wallet-backend.json" ./...
-      - name: put the harness report where the triage reads it
+      - name: put the harness reports where the triage reads them
         run: |
           set -euo pipefail
           pin=$(scripts/pin.sh git wallet-backend)
           dir="target/findings/wallet-backend-${pin:0:8}"
           mkdir -p "$dir"
           cp "$RUNNER_TEMP/harness-rpc/harness-report.json" "$dir/"
+          pin=$(scripts/pin.sh git stellar-etl)
+          dir="target/findings/stellar-etl-${pin:0:8}"
+          mkdir -p "$dir"
+          cp "$RUNNER_TEMP/harness-stellar-etl/harness-report.json" "$dir/"
       - name: import tonight's runs as the triage inputs
         # the triage reads committed, reduced copies of the run outputs (findings/inputs);
         # import-inputs replaces them with tonight's, so the check below judges these runs
