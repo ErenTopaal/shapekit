@@ -219,8 +219,12 @@ fn site_data_matches_the_committed_files() {
         let mut cells = std::collections::BTreeSet::new();
         for m in &matrices {
             for e in m["entries"].as_array().unwrap() {
-                for key in e["cells"].as_object().unwrap().keys() {
-                    if key.starts_with(&prefix) {
+                // a cell that only carries implementation-defined answers for the findings
+                // is not a failure, and the conformance page counts failures
+                for (key, cell) in e["cells"].as_object().unwrap() {
+                    let failing =
+                        !["pass", "unsupported"].contains(&cell["result"].as_str().unwrap());
+                    if key.starts_with(&prefix) && failing {
                         entries.insert(e["id"].as_str().unwrap().to_owned());
                         cells.insert((e["id"].as_str().unwrap().to_owned(), key.clone()));
                     }

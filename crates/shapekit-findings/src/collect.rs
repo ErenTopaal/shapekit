@@ -13,7 +13,8 @@ use shapekit_manifest::Manifest;
 
 use crate::inputs::{self, LintFinding, MatrixView};
 use crate::triage::{
-    ConformanceMatch, FindingDef, HarnessMatch, LintMatch, Severity, Status, Triage, glob,
+    AnswerMatch, ConformanceMatch, FindingDef, HarnessMatch, LintMatch, Severity, Status, Triage,
+    glob,
 };
 
 pub const FINDINGS_SCHEMA: u32 = 1;
@@ -21,7 +22,8 @@ pub const FINDINGS_SCHEMA: u32 = 1;
 /// One failure that needs a finding.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Occurrence {
-    /// `harness`, `conformance` or `lint`.
+    /// `harness`, `conformance` or `lint` for a failure; `answer` for an answer recorded on
+    /// an implementation-defined entry, which is evidence but not a failure.
     pub source: String,
     /// The target or SDK it was observed on, with its version: `wallet-backend@e967ce8b...`,
     /// `go@v0.7.1`.
@@ -290,7 +292,124 @@ struct Matched<'a> {
     /// failing versions of a conformance entry.
     harness_runs: BTreeMap<String, (String, String, String)>,
     sdk_runs: BTreeMap<String, (String, Vec<String>)>,
+    /// Entries whose answers split across the sdks, rerun with every sdk at once.
+    peer_runs: BTreeSet<String>,
     lint_runs: Vec<String>,
+}
+
+/// The `on` of an occurrence that stands for the answers of every sdk of a matrix.
+pub const ALL_SDKS: &str = "all sdks";
+
+/// An answer short enough for one line: a long one is cut and named by its hash, so two
+/// different long answers still read as different.
+fn short_answer(a: &str) -> String {
+    match a.char_indices().nth(48) {
+        None => a.to_owned(),
+        Some((i, _)) => format!(
+            "{}... (sha256 {})",
+            &a[..i],
+            &shapekit_manifest::sha256_hex(a.as_bytes())[..12]
+        ),
+    }
+}
+
+pub fn answer_matches(m: &AnswerMatch, entry: &str, check: &str) -> bool {
+    m.entries.iter().any(|g| glob(g, entry)) && any_or(&m.checks, check)
+}
+
+/// Cites the implementation-defined answers of `entries` that `matched`'s answer matchers
+/// ask for. Answers are recorded, not judged, so an answer no matcher asks for is neither a
+/// failure nor unmapped.
+fn cite_answers(
+    matched: &mut [Matched<'_>],
+    entries: &[crate::inputs::MatrixEntry],
+    testees: &BTreeMap<&str, (&str, &str)>,
+) {
+    for e in entries {
+        // check, then answer, then the testees that gave it
+        let mut by_check: BTreeMap<&str, BTreeMap<String, Vec<&str>>> = BTreeMap::new();
+        for (key, cell) in &e.cells {
+            for c in cell.checks.iter().filter(|c| c.is_implementation_defined()) {
+                by_check
+                    .entry(c.check.as_str())
+                    .or_default()
+                    .entry(c.answer())
+                    .or_default()
+                    .push(key.as_str());
+            }
+        }
+        for (check, answers) in &by_check {
+            for mm in matched.iter_mut() {
+                let mut found = Vec::new();
+                for am in mm
+                    .def
+                    .answer
+                    .iter()
+                    .filter(|am| answer_matches(am, &e.id, check))
+                {
+                    if let Some(sdk) = &am.sdk {
+                        for (answer, keys) in answers.iter().filter(|(a, _)| am.answers.contains(a))
+                        {
+                            for key in keys {
+                                let Some(&(s, v)) = testees.get(key) else {
+                                    continue;
+                                };
+                                if s != sdk || !any_or(&am.versions, v) {
+                                    continue;
+                                }
+                                let run = mm
+                                    .sdk_runs
+                                    .entry(e.id.clone())
+                                    .or_insert((s.to_owned(), Vec::new()));
+                                if !run.1.iter().any(|x| x == v) {
+                                    run.1.push(v.to_owned());
+                                }
+                                found.push(Occurrence {
+                                    source: "answer".into(),
+                                    on: (*key).to_owned(),
+                                    entry: Some(e.id.clone()),
+                                    at: (*check).to_owned(),
+                                    what: format!(
+                                        "implementation-defined, answered {}",
+                                        short_answer(answer)
+                                    ),
+                                });
+                            }
+                        }
+                    } else if let Some(n) = am.split
+                        && answers.len() >= n
+                    {
+                        mm.peer_runs.insert(e.id.clone());
+                        let total: usize = answers.values().map(Vec::len).sum();
+                        found.push(Occurrence {
+                            source: "answer".into(),
+                            on: ALL_SDKS.into(),
+                            entry: Some(e.id.clone()),
+                            at: (*check).to_owned(),
+                            what: format!(
+                                "implementation-defined, {} different answers from {total} sdk versions: {}",
+                                answers.len(),
+                                answers
+                                    .iter()
+                                    .map(|(a, keys)| format!(
+                                        "{} from {}",
+                                        short_answer(a),
+                                        keys.join(", ")
+                                    ))
+                                    .collect::<Vec<_>>()
+                                    .join("; ")
+                            ),
+                        });
+                    }
+                }
+                for o in found {
+                    if !mm.occurrences.contains(&o) {
+                        mm.occurrences.push(o);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// Splits an occurrence's `on`, `go@v0.7.1` or `wallet-backend@3e22...`, at its first `@`.
@@ -327,6 +446,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
             occurrences: Vec::new(),
             harness_runs: BTreeMap::new(),
             sdk_runs: BTreeMap::new(),
+            peer_runs: BTreeSet::new(),
             lint_runs: Vec::new(),
         })
         .collect();
@@ -554,6 +674,7 @@ pub fn collect(root: &Path, triage: &Triage) -> Result<Collection> {
                 }
             }
         }
+        cite_answers(&mut matched, &m.entries, &testees);
     }
 
     for li in &triage.inputs.lint {
@@ -742,11 +863,15 @@ fn record(
                     "shapekit harness run --chain {chain} --network {network} --adapter \"{adapter}\""
                 ));
             }
-            let (sdk, versions) = m.sdk_runs.get(e)?;
-            let version = versions.last()?;
-            Some(format!(
-                "shapekit conformance run --sdk {sdk} --version {version} --entry {e}"
-            ))
+            if let Some((sdk, versions)) = m.sdk_runs.get(e) {
+                let version = versions.last()?;
+                return Some(format!(
+                    "shapekit conformance run --sdk {sdk} --version {version} --entry {e}"
+                ));
+            }
+            m.peer_runs
+                .contains(e)
+                .then(|| format!("shapekit conformance run --entry {e}"))
         })
         .or_else(|| m.lint_runs.first().cloned());
     let mut occurrences = m.occurrences.clone();
@@ -791,7 +916,8 @@ fn recipe_of(e: &shapekit_manifest::Entry) -> Option<String> {
 
 fn affected(occurrences: &[Occurrence], tested: &BTreeMap<String, Vec<String>>) -> Vec<Affected> {
     let mut failing: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
-    for o in occurrences {
+    // the answers of every sdk at once name no one sdk
+    for o in occurrences.iter().filter(|o| o.on != ALL_SDKS) {
         let (on, version) = split_on(&o.on);
         failing.entry(on).or_default().insert(version);
     }
@@ -1072,5 +1198,121 @@ mod tests {
             occurrences: vec![occ("go@v0.9.0", "e")],
         };
         assert_eq!(other_sdks(&r, &failures), vec!["js@17.4.0"]);
+    }
+
+    #[test]
+    fn answer_matchers_cite_recorded_answers_and_splits() {
+        use crate::inputs::{CellView, CheckView, MatrixEntry};
+        let def: FindingDef = toml::from_str(
+            r#"
+id = "RS-3"
+title = "t"
+component = "rs-stellar-xdr"
+severity = "divergence"
+status = "filed"
+cause = "c"
+[[answer]]
+sdk = "rust"
+entries = ["e-bool"]
+checks = ["any/decode_json"]
+answers = ['{"json":{"bool":false}}']
+"#,
+        )
+        .unwrap();
+        let split_def: FindingDef = toml::from_str(
+            r#"
+id = "CORE-1"
+title = "t"
+component = "stellar-core"
+severity = "robustness"
+status = "filed"
+cause = "c"
+[[answer]]
+entries = ["e-bool"]
+checks = ["any/decode_json"]
+split = 3
+"#,
+        )
+        .unwrap();
+        let answer = |v: serde_json::Value| CellView {
+            result: "pass".into(),
+            known_issue: None,
+            checks: vec![CheckView {
+                check: "any/decode_json".into(),
+                op: "decode_json".into(),
+                result: "pass".into(),
+                detail: Some("implementation-defined: no answer is required".into()),
+                actual: Some(v),
+            }],
+        };
+        let entries = vec![MatrixEntry {
+            id: "e-bool".into(),
+            cells: BTreeMap::from([
+                (
+                    "rust@1".into(),
+                    answer(serde_json::json!({"json": {"bool": false}})),
+                ),
+                (
+                    "rust@2".into(),
+                    answer(serde_json::json!({"json": {"bool": false}})),
+                ),
+                (
+                    "python@1".into(),
+                    answer(serde_json::json!({"json": {"bool": true}})),
+                ),
+                ("go@1".into(), answer(serde_json::json!("rejected"))),
+            ]),
+        }];
+        let testees: BTreeMap<&str, (&str, &str)> = BTreeMap::from([
+            ("rust@1", ("rust", "1")),
+            ("rust@2", ("rust", "2")),
+            ("python@1", ("python", "1")),
+            ("go@1", ("go", "1")),
+        ]);
+        let new = |def| Matched {
+            def,
+            occurrences: Vec::new(),
+            harness_runs: BTreeMap::new(),
+            sdk_runs: BTreeMap::new(),
+            peer_runs: BTreeSet::new(),
+            lint_runs: Vec::new(),
+        };
+        let mut matched = vec![new(&def), new(&split_def)];
+        cite_answers(&mut matched, &entries, &testees);
+        let on: Vec<&str> = matched[0]
+            .occurrences
+            .iter()
+            .map(|o| o.on.as_str())
+            .collect();
+        assert_eq!(on, ["rust@1", "rust@2"]);
+        assert_eq!(matched[0].sdk_runs["e-bool"].1, ["1", "2"]);
+        assert_eq!(matched[1].occurrences.len(), 1);
+        let split = &matched[1].occurrences[0];
+        assert_eq!(split.on, ALL_SDKS);
+        assert!(
+            split
+                .what
+                .contains("3 different answers from 4 sdk versions")
+                && split.what.contains("rejected from go@1"),
+            "{}",
+            split.what
+        );
+        // a split of three needs three answers
+        let two = vec![MatrixEntry {
+            id: "e-bool".into(),
+            cells: entries[0]
+                .cells
+                .iter()
+                .filter(|(k, _)| k.as_str() != "go@1")
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
+        }];
+        let mut matched = vec![new(&def), new(&split_def)];
+        cite_answers(&mut matched, &two, &testees);
+        assert!(matched[1].occurrences.is_empty());
+        assert!(
+            affected(std::slice::from_ref(split), &BTreeMap::new()).is_empty(),
+            "the answers of every sdk name no one sdk"
+        );
     }
 }

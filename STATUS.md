@@ -18,11 +18,19 @@ A dated public log of what has landed in shapekit. Newest entry first.
   30.0.0 86 (was 84). The `diverges-from-peers` lines for these entries are gone from the rust
   and python known-failures lists, and the soroban list, which held only such a line, is removed.
   The all-SDK current-version run over the corpus passes with all eleven SDKs.
-- The committed findings inputs are not regenerated here. RS-3 and CORE-1 take their conformance
-  failures from the rust testee diverging from its peers in
-  `findings/inputs/conformance-peers.json`, so they match nothing on the next import of a new
-  run. Their evidence is then the recorded answers and the fuzz classes in
-  `findings/fuzz/known-classes.txt`, and their matchers need a decision.
+- Findings cite the recorded answers. A new `[[finding.answer]]` matcher takes either an sdk
+  and the exact answers it recorded on an implementation-defined entry, or `split = N`, at
+  least N different answers among the SDKs of one matrix. An answer is evidence, never a
+  failure, so one no matcher takes is not unmapped. RS-3 now cites stellar-xdr reading the
+  bool word 2 as false on `synth-bool-value-2` (6 answers: two checks on 28.0.0, 28.0.1 and
+  30.0.0). CORE-1 cites the three-way split on `synth-invoke-arg-bool-2`: true from dart, kmp
+  and python, false from rust, dotnet and stellar-cli, refused by go, java, js and php
+  (2 occurrences, one per check). `findings/inputs/conformance-peers.json` is reimported
+  from a new `--all-versions --flag references-disagree` run over every SDK (28 versions, all
+  pass); the import now keeps implementation-defined answers whole. Failures go from 516 to
+  510: the 6 rust cells that diverged from their peers are answers now. `findings check`:
+  24 findings, 0 unmapped, every finding with evidence. A finding of any status that matches
+  nothing already failed the check; a test now pins it for a filed finding.
 - A question to SEP-51 about three enum names (IPv4, the `tx` result-code prefix, `b8_bit`) is
   drafted in the candidate lane and not filed.
 

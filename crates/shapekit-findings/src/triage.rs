@@ -116,6 +116,33 @@ pub struct ConformanceMatch {
     pub versions: Vec<String>,
 }
 
+/// Evidence from the answers SDKs give on implementation-defined entries. Those answers are
+/// recorded, not judged, so they are never failures; a finding cites them when the answer
+/// itself is the defect. Two forms:
+/// - `sdk` and `answers`: the SDK gave one of `answers` on an entry, for example rust reading
+///   the bool word 2 as `{"json":{"bool":false}}`;
+/// - `split`: the SDKs of one matrix gave at least `split` different answers on an entry,
+///   the disagreement itself being the evidence.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AnswerMatch {
+    pub sdk: Option<String>,
+    /// Entry id patterns.
+    pub entries: Vec<String>,
+    /// Check names, such as `any/decode_json`; every check when empty.
+    #[serde(default)]
+    pub checks: Vec<String>,
+    /// Exact versions of `sdk`; every version when empty.
+    #[serde(default)]
+    pub versions: Vec<String>,
+    /// Answers as the matrix records them: a string answer (`rejected`) as itself, anything
+    /// else as compact JSON.
+    #[serde(default)]
+    pub answers: Vec<String>,
+    /// The least number of different answers on one check.
+    pub split: Option<usize>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LintMatch {
@@ -159,6 +186,8 @@ pub struct FindingDef {
     pub harness: Vec<HarnessMatch>,
     #[serde(default)]
     pub conformance: Vec<ConformanceMatch>,
+    #[serde(default)]
+    pub answer: Vec<AnswerMatch>,
     #[serde(default)]
     pub lint: Vec<LintMatch>,
 }
@@ -284,7 +313,11 @@ pub fn validate(t: &Triage) -> Result<()> {
         if !seen.insert(&f.id) {
             bail!("finding {} is listed twice", f.id);
         }
-        if f.harness.is_empty() && f.conformance.is_empty() && f.lint.is_empty() {
+        if f.harness.is_empty()
+            && f.conformance.is_empty()
+            && f.answer.is_empty()
+            && f.lint.is_empty()
+        {
             bail!("finding {} has no matcher, so nothing can map to it", f.id);
         }
         // the first matcher that takes a failure keeps it, so one without a constraint would
@@ -297,6 +330,11 @@ pub fn validate(t: &Triage) -> Result<()> {
         for (i, m) in f.conformance.iter().enumerate() {
             if let Some(why) = conformance_unconstrained(m) {
                 bail!("finding {} conformance matcher {}: {why}", f.id, i + 1);
+            }
+        }
+        for (i, m) in f.answer.iter().enumerate() {
+            if let Some(why) = answer_unconstrained(m) {
+                bail!("finding {} answer matcher {}: {why}", f.id, i + 1);
             }
         }
     }
@@ -342,6 +380,31 @@ pub fn conformance_unconstrained(m: &ConformanceMatch) -> Option<String> {
         .iter()
         .find(|p| wildcard_only(p))
         .map(|p| format!("entry pattern {p:?} matches every entry"))
+}
+
+/// Why `m` is not one of the two forms [`AnswerMatch`] allows, or could match every entry.
+pub fn answer_unconstrained(m: &AnswerMatch) -> Option<String> {
+    if m.entries.is_empty() {
+        return Some("no entry pattern, so it can never match".into());
+    }
+    if let Some(p) = m.entries.iter().find(|p| wildcard_only(p)) {
+        return Some(format!("entry pattern {p:?} matches every entry"));
+    }
+    match (&m.sdk, m.split) {
+        (Some(_), None) if m.answers.is_empty() => {
+            Some("an sdk without answers would cite every answer it gives".into())
+        }
+        (Some(_), None) => None,
+        (None, Some(n)) if n < 2 => Some(format!(
+            "split {n} is met by any answer; it needs at least 2"
+        )),
+        (None, Some(_)) if !m.answers.is_empty() || !m.versions.is_empty() => {
+            Some("a split matcher compares every sdk, so it takes no answers or versions".into())
+        }
+        (None, Some(_)) => None,
+        (Some(_), Some(_)) => Some("give either sdk and answers, or split, not both".into()),
+        (None, None) => Some("give either sdk and answers, or split".into()),
+    }
 }
 
 fn validate_imports(inputs: &Inputs) -> Result<()> {
@@ -438,6 +501,56 @@ mod tests {
             ..ConformanceMatch::default()
         };
         assert!(conformance_unconstrained(&none).is_some());
+    }
+
+    #[test]
+    fn answer_matchers_take_one_of_two_forms() {
+        let e = || vec!["soroban.scval-shapes.synth-bool-value-2".to_owned()];
+        let by_sdk = AnswerMatch {
+            sdk: Some("rust".into()),
+            entries: e(),
+            answers: vec!["false".into()],
+            ..AnswerMatch::default()
+        };
+        assert_eq!(answer_unconstrained(&by_sdk), None);
+        let split = AnswerMatch {
+            entries: e(),
+            split: Some(3),
+            ..AnswerMatch::default()
+        };
+        assert_eq!(answer_unconstrained(&split), None);
+        for bad in [
+            AnswerMatch {
+                answers: vec![],
+                ..by_sdk.clone()
+            },
+            AnswerMatch {
+                split: Some(2),
+                ..by_sdk.clone()
+            },
+            AnswerMatch {
+                split: Some(1),
+                ..split.clone()
+            },
+            AnswerMatch {
+                answers: vec!["false".into()],
+                ..split.clone()
+            },
+            AnswerMatch {
+                entries: vec!["*".into()],
+                ..split.clone()
+            },
+            AnswerMatch {
+                entries: vec![],
+                ..by_sdk.clone()
+            },
+            AnswerMatch {
+                entries: e(),
+                ..AnswerMatch::default()
+            },
+        ] {
+            assert!(answer_unconstrained(&bad).is_some(), "{bad:?}");
+        }
     }
 
     #[test]

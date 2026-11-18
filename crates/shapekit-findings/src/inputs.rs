@@ -59,6 +59,38 @@ pub struct CheckView {
     pub result: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
+    /// What the SDK answered. Kept only for the checks of an implementation-defined entry,
+    /// where the answer is recorded rather than judged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub actual: Option<serde_json::Value>,
+}
+
+/// How the conformance runner starts the detail of a check of an implementation-defined
+/// entry (`decode = implementation-defined`): no answer is required, so the answer is
+/// recorded in `actual` and the check passes. MATRIX.md lists these checks under
+/// "Implementation-defined answers".
+pub const IMPLEMENTATION_DEFINED: &str = "implementation-defined";
+
+impl CheckView {
+    /// A check of an implementation-defined entry that recorded an answer.
+    pub fn is_implementation_defined(&self) -> bool {
+        self.result == "pass"
+            && self.actual.is_some()
+            && self
+                .detail
+                .as_deref()
+                .is_some_and(|d| d.starts_with(IMPLEMENTATION_DEFINED))
+    }
+
+    /// The recorded answer in one line: a string answer (`rejected`) as itself, anything else
+    /// as compact JSON. Empty when no answer was recorded.
+    pub fn answer(&self) -> String {
+        match &self.actual {
+            None => String::new(),
+            Some(serde_json::Value::String(s)) => s.clone(),
+            Some(v) => v.to_string(),
+        }
+    }
 }
 
 impl CellView {

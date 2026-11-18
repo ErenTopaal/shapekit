@@ -167,10 +167,20 @@ pub fn markdown(c: &Collection) -> String {
                     .join(", ")
             );
         }
+        let answers = f
+            .occurrences
+            .iter()
+            .filter(|o| o.source == "answer")
+            .count();
         let _ = writeln!(
             s,
-            "- observed: {} failure(s) on {} entr{}",
-            f.occurrences.len(),
+            "- observed: {} failure(s){} on {} entr{}",
+            f.occurrences.len() - answers,
+            if answers == 0 {
+                String::new()
+            } else {
+                format!(" and {answers} implementation-defined answer(s)")
+            },
             f.entries.len(),
             if f.entries.len() == 1 { "y" } else { "ies" }
         );

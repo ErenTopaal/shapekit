@@ -34,8 +34,8 @@
     {
       "kind": "conformance",
       "path": "findings/inputs/conformance-peers.json",
-      "sha256": "95d0b7992b89552bd42b591b9d1225ce72e0afbe1a10aea4bc345959bd3db328",
-      "detail": "corpus 0.1.0, go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 rust@28.0.0 rust@28.0.1 rust@30.0.0"
+      "sha256": "5779c8833473636fa08ad8d1aeb902742fae36ccb375e71349f4894fe1a895c6",
+      "detail": "corpus 0.1.0, dart@3.12.0 dotnet@16.0.0 dotnet@17.0.0 go@v0.7.1 go@v0.7.2 go@v0.7.3 go@v0.8.0 go@v0.9.0 java@5.0.0 java@6.0.0 js@16.3.0 js@16.3.1 js@16.4.1 js@17.2.0 js@17.2.1 js@17.3.0 js@17.4.0 kmp@1.18.0 php@1.18.0 python@16.1.1 python@17.0.1 rust@28.0.0 rust@28.0.1 rust@30.0.0 soroban@28.0.0 soroban@29.0.1 stellar-cli@28.1.0 stellar-cli@30.0.1"
     },
     {
       "kind": "lint",
@@ -46,7 +46,7 @@
   ],
   "summary": {
     "findings": 24,
-    "failures": 516,
+    "failures": 510,
     "unmapped": 0,
     "by_component": {
       "go-stellar-sdk": {
@@ -4814,25 +4814,46 @@
       ],
       "occurrences": [
         {
-          "source": "conformance",
+          "source": "answer",
           "on": "rust@28.0.0",
           "entry": "soroban.scval-shapes.synth-bool-value-2",
-          "at": "rust@28.0.0",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
+          "at": "any/decode_encode",
+          "what": "implementation-defined, answered {\"xdr\":\"AAAAAAAAAAA=\"}"
         },
         {
-          "source": "conformance",
+          "source": "answer",
+          "on": "rust@28.0.0",
+          "entry": "soroban.scval-shapes.synth-bool-value-2",
+          "at": "any/decode_json",
+          "what": "implementation-defined, answered {\"json\":{\"bool\":false}}"
+        },
+        {
+          "source": "answer",
           "on": "rust@28.0.1",
           "entry": "soroban.scval-shapes.synth-bool-value-2",
-          "at": "rust@28.0.1",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
+          "at": "any/decode_encode",
+          "what": "implementation-defined, answered {\"xdr\":\"AAAAAAAAAAA=\"}"
         },
         {
-          "source": "conformance",
+          "source": "answer",
+          "on": "rust@28.0.1",
+          "entry": "soroban.scval-shapes.synth-bool-value-2",
+          "at": "any/decode_json",
+          "what": "implementation-defined, answered {\"json\":{\"bool\":false}}"
+        },
+        {
+          "source": "answer",
           "on": "rust@30.0.0",
           "entry": "soroban.scval-shapes.synth-bool-value-2",
-          "at": "rust@30.0.0",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
+          "at": "any/decode_encode",
+          "what": "implementation-defined, answered {\"xdr\":\"AAAAAAAAAAA=\"}"
+        },
+        {
+          "source": "answer",
+          "on": "rust@30.0.0",
+          "entry": "soroban.scval-shapes.synth-bool-value-2",
+          "at": "any/decode_json",
+          "what": "implementation-defined, answered {\"json\":{\"bool\":false}}"
         }
       ]
     },
@@ -4852,11 +4873,11 @@
         "CAP-0058"
       ],
       "minimal_entry": "soroban.invoke-basics.synth-invoke-arg-bool-2",
-      "reproduce": "shapekit conformance run --sdk rust --version 30.0.0 --entry soroban.invoke-basics.synth-invoke-arg-bool-2",
+      "reproduce": "shapekit conformance run --entry soroban.invoke-basics.synth-invoke-arg-bool-2",
       "status": "filed",
       "link": "https://github.com/stellar/stellar-core/issues/5509",
       "draft": "findings/issues/stellar-core-bool-non-canonical.md",
-      "cause": "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the converted value, so core decodes any non-zero bool word as true. The transaction hash, the signature check and the protocol 28 rust parse check all use core's re-encoding (word 1), never the submitted bytes. In a local core 30.0.0 run an envelope with the word 2 signed over the canonical hash was applied with txSUCCESS and stored with 1; signed over the submitted bytes it got txBAD_AUTH. Low severity: no authorization bypass or fund loss, but the hash of the submitted bytes differs from core's transaction hash and stellar-xdr reads the same argument as false. The matched cells are the rust testee diverging from its peers on the envelope form (the fuzz classes in findings/fuzz/known-classes.txt are the same root cause).",
+      "cause": "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the converted value, so core decodes any non-zero bool word as true. The transaction hash, the signature check and the protocol 28 rust parse check all use core's re-encoding (word 1), never the submitted bytes. In a local core 30.0.0 run an envelope with the word 2 signed over the canonical hash was applied with txSUCCESS and stored with 1; signed over the submitted bytes it got txBAD_AUTH. Low severity: no authorization bypass or fund loss, but the hash of the submitted bytes differs from core's transaction hash and stellar-xdr reads the same argument as false. The evidence is the three-way split of the SDK answers on the envelope form: some read the word 2 as true like core, stellar-xdr reads it as false, and the rest refuse it (the fuzz classes in findings/fuzz/known-classes.txt are the same root cause).",
       "siblings": [
         "RS-3"
       ],
@@ -4864,42 +4885,20 @@
       "entries": [
         "soroban.invoke-basics.synth-invoke-arg-bool-2"
       ],
-      "affected": [
-        {
-          "on": "rust",
-          "tested": [
-            "28.0.0",
-            "28.0.1",
-            "30.0.0"
-          ],
-          "failing": [
-            "28.0.0",
-            "28.0.1",
-            "30.0.0"
-          ]
-        }
-      ],
       "occurrences": [
         {
-          "source": "conformance",
-          "on": "rust@28.0.0",
+          "source": "answer",
+          "on": "all sdks",
           "entry": "soroban.invoke-basics.synth-invoke-arg-bool-2",
-          "at": "rust@28.0.0",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
+          "at": "any/decode_encode",
+          "what": "implementation-defined, 3 different answers from 26 sdk versions: rejected from go@v0.7.1, go@v0.7.2, go@v0.7.3, go@v0.8.0, go@v0.9.0, java@5.0.0, java@6.0.0, js@16.3.0, js@16.3.1, js@16.4.1, js@17.2.0, js@17.2.1, js@17.3.0, js@17.4.0, php@1.18.0; {\"xdr\":\"AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEB... (sha256 40a59b6006ed) from dotnet@16.0.0, dotnet@17.0.0, rust@28.0.0, rust@28.0.1, rust@30.0.0, stellar-cli@28.1.0, stellar-cli@30.0.1; {\"xdr\":\"AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEB... (sha256 69513cbb8773) from dart@3.12.0, kmp@1.18.0, python@16.1.1, python@17.0.1"
         },
         {
-          "source": "conformance",
-          "on": "rust@28.0.1",
+          "source": "answer",
+          "on": "all sdks",
           "entry": "soroban.invoke-basics.synth-invoke-arg-bool-2",
-          "at": "rust@28.0.1",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
-        },
-        {
-          "source": "conformance",
-          "on": "rust@30.0.0",
-          "entry": "soroban.invoke-basics.synth-invoke-arg-bool-2",
-          "at": "rust@30.0.0",
-          "what": "diverges-from-peers (2 check(s): any/decode_encode, any/decode_json)"
+          "at": "any/decode_json",
+          "what": "implementation-defined, 3 different answers from 24 sdk versions: rejected from go@v0.7.1, go@v0.7.2, go@v0.7.3, go@v0.8.0, go@v0.9.0, java@5.0.0, java@6.0.0, js@16.3.0, js@16.3.1, js@16.4.1, js@17.2.0, js@17.2.1, js@17.3.0, js@17.4.0, php@1.18.0; {\"json\":{\"tx\":{\"signatures\":[{\"hint\":\"07070707\",... (sha256 fdc93c8b32da) from rust@28.0.0, rust@28.0.1, rust@30.0.0, stellar-cli@28.1.0, stellar-cli@30.0.1; {\"json\":{\"tx\":{\"signatures\":[{\"hint\":\"07070707\",... (sha256 1426c702ce6b) from dart@3.12.0, kmp@1.18.0, python@16.1.1, python@17.0.1"
         }
       ]
     }

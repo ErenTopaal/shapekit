@@ -749,6 +749,20 @@ fn merge_mixed(
     Ok(())
 }
 
+/// `m` without the implementation-defined answers the findings import keeps for answer
+/// matchers: they pass, so the conformance page, which counts failing cells, leaves them out.
+/// The findings page shows them as evidence.
+fn failures_only(mut m: MatrixView) -> MatrixView {
+    for e in &mut m.entries {
+        e.cells.retain(|_, c| c.is_failure());
+        for c in e.cells.values_mut() {
+            c.checks.retain(|k| !k.is_implementation_defined());
+        }
+    }
+    m.entries.retain(|e| !e.cells.is_empty());
+    m
+}
+
 fn conformance_json(
     src: &mut Sources,
     triage: &Triage,
@@ -760,7 +774,9 @@ fn conformance_json(
     for rel in &triage.inputs.matrices {
         let bytes = src.read(rel)?;
         let path = src.path(rel);
-        let m = shapekit_findings::parse_on_big_stack(move || inputs::matrix(&bytes, &path))?;
+        let m = failures_only(shapekit_findings::parse_on_big_stack(move || {
+            inputs::matrix(&bytes, &path)
+        })?);
         let sdks: Vec<&str> = m.testees.iter().map(|t| t.sdk.as_str()).collect();
         let Some(sdk) = sdks.first().map(|s| (*s).to_owned()) else {
             bail!("{rel} has no testees");

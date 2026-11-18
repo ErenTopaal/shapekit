@@ -53,8 +53,9 @@ from = "target/conformance/js/divergence-matrix.json"
 to = "findings/inputs/conformance-js.json"
 command = "shapekit conformance run --sdk js --all-versions --out target/conformance/js"
 
-# implementation-defined entries show a divergence only next to the other sdks' answers, so the
-# entries whose references disagree are also run with every sdk at once
+# implementation-defined entries record each sdk's answer without judging it, and a split of
+# the answers shows only next to the other sdks', so the entries whose references disagree are
+# also run with every sdk at once; the [[finding.answer]] matchers read these answers
 [[inputs.import]]
 kind = "conformance"
 from = "target/conformance/peers/divergence-matrix.json"
@@ -493,9 +494,12 @@ draft = "findings/issues/fuzz-rust-bool-non-canonical.md"
 siblings = ["CORE-1"]
 cause = "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt)."
 
-[[finding.conformance]]
+# the bool word 2 entries are implementation-defined, so no answer fails; the evidence is the
+# answer stellar-xdr records on them
+[[finding.answer]]
 sdk = "rust"
 entries = ["soroban.scval-shapes.synth-bool-value-2"]
+answers = ['{"json":{"bool":false}}', '{"xdr":"AAAAAAAAAAA="}']
 
 # stellar-core
 
@@ -508,8 +512,10 @@ status = "filed"
 link = "https://github.com/stellar/stellar-core/issues/5509"
 draft = "findings/issues/stellar-core-bool-non-canonical.md"
 siblings = ["RS-3"]
-cause = "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the converted value, so core decodes any non-zero bool word as true. The transaction hash, the signature check and the protocol 28 rust parse check all use core's re-encoding (word 1), never the submitted bytes. In a local core 30.0.0 run an envelope with the word 2 signed over the canonical hash was applied with txSUCCESS and stored with 1; signed over the submitted bytes it got txBAD_AUTH. Low severity: no authorization bypass or fund loss, but the hash of the submitted bytes differs from core's transaction hash and stellar-xdr reads the same argument as false. The matched cells are the rust testee diverging from its peers on the envelope form (the fuzz classes in findings/fuzz/known-classes.txt are the same root cause)."
+cause = "xdrpp's xdr_traits<bool>::from_uint is u != 0, and the enum check runs on the converted value, so core decodes any non-zero bool word as true. The transaction hash, the signature check and the protocol 28 rust parse check all use core's re-encoding (word 1), never the submitted bytes. In a local core 30.0.0 run an envelope with the word 2 signed over the canonical hash was applied with txSUCCESS and stored with 1; signed over the submitted bytes it got txBAD_AUTH. Low severity: no authorization bypass or fund loss, but the hash of the submitted bytes differs from core's transaction hash and stellar-xdr reads the same argument as false. The evidence is the three-way split of the SDK answers on the envelope form: some read the word 2 as true like core, stellar-xdr reads it as false, and the rest refuse it (the fuzz classes in findings/fuzz/known-classes.txt are the same root cause)."
 
-[[finding.conformance]]
-sdk = "rust"
+# the evidence is the disagreement itself: on the envelope form the sdks read the word 2 as
+# true (as core's xdrpp does), as false (as stellar-xdr does) or refuse it
+[[finding.answer]]
 entries = ["soroban.invoke-basics.synth-invoke-arg-bool-2"]
+split = 3

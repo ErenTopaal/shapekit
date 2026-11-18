@@ -7,8 +7,10 @@
 //! Reductions:
 //! - harness report: none, the report is copied byte for byte;
 //! - divergence matrix: only failing cells are kept, with only their failing checks, and
-//!   check details cut to [`DETAIL_CHARS`] characters. Collect reads nothing else, so the
-//!   collection from the reduced matrix equals the one from the full matrix;
+//!   check details cut to [`DETAIL_CHARS`] characters; and the checks of implementation-defined
+//!   entries, with the answer each SDK gave, for the triage's answer matchers. Collect reads
+//!   nothing else, so the collection from the reduced matrix equals the one from the full
+//!   matrix;
 //! - linter result: none.
 
 use std::path::Path;
@@ -55,14 +57,21 @@ fn truncate(s: &str, chars: usize) -> String {
     }
 }
 
-/// `m` without the cells and checks collect never reads.
+/// `m` without the cells and checks collect never reads. An implementation-defined answer
+/// is kept whole, so two answers compare equal exactly when the SDKs gave the same one.
 pub fn reduce_matrix(mut m: MatrixView) -> MatrixView {
     for e in &mut m.entries {
-        e.cells.retain(|_, c| c.is_failure());
+        e.cells.retain(|_, c| {
+            c.is_failure() || c.checks.iter().any(|k| k.is_implementation_defined())
+        });
         for c in e.cells.values_mut() {
-            c.checks.retain(|k| k.result != "pass");
+            c.checks
+                .retain(|k| k.result != "pass" || k.is_implementation_defined());
             for k in &mut c.checks {
                 k.detail = k.detail.as_deref().map(|d| truncate(d, DETAIL_CHARS));
+                if !k.is_implementation_defined() {
+                    k.actual = None;
+                }
             }
         }
     }
@@ -107,7 +116,7 @@ fn one(root: &Path, def: &ImportDef) -> Result<ProvenanceEntry> {
             (
                 pretty(&reduced)?,
                 format!(
-                    "failing cells only, with their failing checks; check details cut to {DETAIL_CHARS} characters"
+                    "failing cells only, with their failing checks; check details cut to {DETAIL_CHARS} characters; implementation-defined answers kept whole"
                 ),
                 describes,
             )
@@ -264,6 +273,7 @@ mod tests {
                     op: "decode".into(),
                     result: (*r).into(),
                     detail: Some("x".repeat(DETAIL_CHARS + 10)),
+                    actual: Some(serde_json::json!({"xdr": "AAAA"})),
                 })
                 .collect(),
         }
@@ -306,6 +316,32 @@ mod tests {
         assert_eq!(c.checks.len(), 1);
         assert_eq!(c.checks[0].check, "json");
         assert!(c.checks[0].detail.as_ref().unwrap().len() < DETAIL_CHARS + 40);
+        assert_eq!(
+            c.checks[0].actual, None,
+            "a failing check's answer is not kept"
+        );
+    }
+
+    #[test]
+    fn reduction_keeps_implementation_defined_answers_whole() {
+        let mut m = matrix();
+        let mut c = cell("pass", &[("any/decode_json", "pass"), ("other", "pass")]);
+        c.checks[0].detail = Some(format!(
+            "{}: no answer is required, so none is judged",
+            crate::inputs::IMPLEMENTATION_DEFINED
+        ));
+        let long = serde_json::json!({"json": "y".repeat(DETAIL_CHARS * 2)});
+        c.checks[0].actual = Some(long.clone());
+        m.entries.push(MatrixEntry {
+            id: "c".into(),
+            cells: BTreeMap::from([("go@v1".into(), c)]),
+        });
+        let r = reduce_matrix(m);
+        assert_eq!(r.entries.len(), 2);
+        let c = &r.entries[1].cells["go@v1"];
+        assert_eq!(c.checks.len(), 1);
+        assert_eq!(c.checks[0].check, "any/decode_json");
+        assert_eq!(c.checks[0].actual, Some(long));
     }
 
     fn triage(from: &str) -> Triage {

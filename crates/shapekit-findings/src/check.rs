@@ -278,4 +278,24 @@ mod tests {
         assert!(!check(Path::new("."), &written, Some(&written), None).ok);
         assert!(!check(Path::new("."), &written, Some(&written), Some("# stale\n")).ok);
     }
+
+    #[test]
+    fn a_filed_finding_that_matches_nothing_fails() {
+        let mut f = finding("RS-3", Status::Filed, Some("https://x/1"));
+        f.occurrences.clear();
+        let c = collection(vec![f]);
+        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)));
+        assert!(!out.ok);
+        assert!(
+            !out.only_drafts(),
+            "a filed finding without evidence is not a draft"
+        );
+        assert!(
+            out.problems
+                .iter()
+                .any(|p| p.starts_with("RS-3 matches nothing")),
+            "{:?}",
+            out.problems
+        );
+    }
 }

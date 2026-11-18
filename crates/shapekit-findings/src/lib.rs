@@ -30,6 +30,7 @@
 //!   failure per listed problem, or one for an entry without problems (a halt, a crash, an
 //!   entry after a halt). `pass` and `out-of-scope` are not failures.
 //! - Conformance: every cell whose result is not `pass` or `unsupported`, on every version.
+//!   An implementation-defined answer passes, so it is never a failure.
 //! - Linter: every finding that is neither suppressed nor baselined.
 //!
 //! # Matching
@@ -45,6 +46,16 @@
 //! something beyond its target, a conformance matcher at least one entry pattern, and no
 //! entry pattern may be `*` alone: as the first match such a matcher would take every later
 //! finding's failures.
+//!
+//! Answer matchers ([`triage::AnswerMatch`]) cite evidence that is not a failure: the answer
+//! an SDK records on an implementation-defined entry (`decode = implementation-defined`),
+//! which the conformance runner records and does not judge. One form names an sdk and the
+//! exact answers (`{"json":{"bool":false}}`, `rejected`), optionally checks and versions; the
+//! other names `split`, the least number of different answers the SDKs of one matrix gave
+//! on a check, so the disagreement itself is the evidence. Every finding whose answer
+//! matcher accepts an answer cites it; an answer no matcher accepts is neither a failure nor
+//! unmapped. A split names no one SDK, so it adds nothing to the affected versions; its
+//! reproduction reruns the entry with every SDK.
 //!
 //! A triage can name a second, candidate triage (`candidates`, the candidate lane's
 //! `candidate/findings/triage.toml`). A failure none of its own findings takes is offered to
@@ -79,7 +90,8 @@
 //! `shapekit findings check` collects afresh and fails, listing every reason, when a failure
 //! matches no finding; an input reports a problem that can hide failures (a harness chain
 //! that did not run, a known-failures list out of step with the matrix, a failing cell not in
-//! it); a finding matches nothing; a named draft file is missing; a finding has no decision
+//! it); a finding matches nothing, whatever its status, so a filed finding cannot lose its
+//! evidence silently; a named draft file is missing; a finding has no decision
 //! (`draft`, or the status's evidence is missing); a committed input is missing, changed
 //! since import or lacks provenance; or `findings/findings.json` or `findings/FINDINGS.md`
 //! differs from the fresh collection. The last lines give totals and the findings pending filing by id.

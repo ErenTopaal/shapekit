@@ -2,6 +2,24 @@
   "corpus_version": "0.1.0",
   "testees": [
     {
+      "key": "dart@3.12.0",
+      "sdk": "dart",
+      "package": "stellar_flutter_sdk",
+      "version": "3.12.0"
+    },
+    {
+      "key": "dotnet@16.0.0",
+      "sdk": "dotnet",
+      "package": "stellar-dotnet-sdk",
+      "version": "16.0.0"
+    },
+    {
+      "key": "dotnet@17.0.0",
+      "sdk": "dotnet",
+      "package": "stellar-dotnet-sdk",
+      "version": "17.0.0"
+    },
+    {
       "key": "go@v0.7.1",
       "sdk": "go",
       "package": "github.com/stellar/go-stellar-sdk",
@@ -30,6 +48,18 @@
       "sdk": "go",
       "package": "github.com/stellar/go-stellar-sdk",
       "version": "v0.9.0"
+    },
+    {
+      "key": "java@5.0.0",
+      "sdk": "java",
+      "package": "network.lightsail:stellar-sdk",
+      "version": "5.0.0"
+    },
+    {
+      "key": "java@6.0.0",
+      "sdk": "java",
+      "package": "network.lightsail:stellar-sdk",
+      "version": "6.0.0"
     },
     {
       "key": "js@16.3.0",
@@ -74,6 +104,30 @@
       "version": "17.4.0"
     },
     {
+      "key": "kmp@1.18.0",
+      "sdk": "kmp",
+      "package": "com.soneso.stellar:stellar-sdk-jvm",
+      "version": "1.18.0"
+    },
+    {
+      "key": "php@1.18.0",
+      "sdk": "php",
+      "package": "soneso/stellar-php-sdk",
+      "version": "1.18.0"
+    },
+    {
+      "key": "python@16.1.1",
+      "sdk": "python",
+      "package": "stellar-sdk",
+      "version": "16.1.1"
+    },
+    {
+      "key": "python@17.0.1",
+      "sdk": "python",
+      "package": "stellar-sdk",
+      "version": "17.0.1"
+    },
+    {
       "key": "rust@28.0.0",
       "sdk": "rust",
       "package": "stellar-xdr",
@@ -90,63 +144,1033 @@
       "sdk": "rust",
       "package": "stellar-xdr",
       "version": "30.0.0"
+    },
+    {
+      "key": "soroban@28.0.0",
+      "sdk": "soroban",
+      "package": "soroban-sdk",
+      "version": "28.0.0"
+    },
+    {
+      "key": "soroban@29.0.1",
+      "sdk": "soroban",
+      "package": "soroban-sdk",
+      "version": "29.0.1"
+    },
+    {
+      "key": "stellar-cli@28.1.0",
+      "sdk": "stellar-cli",
+      "package": "stellar-cli",
+      "version": "28.1.0"
+    },
+    {
+      "key": "stellar-cli@30.0.1",
+      "sdk": "stellar-cli",
+      "package": "stellar-cli",
+      "version": "30.0.1"
     }
   ],
   "entries": [
     {
       "id": "soroban.invoke-basics.synth-invoke-arg-bool-2",
       "cells": {
-        "rust@28.0.0": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+        "dart@3.12.0": {
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": true
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "dotnet@16.0.0": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            }
+          ]
+        },
+        "go@v0.7.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "java@5.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "java@6.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "kmp@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": true
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "php@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "python@16.1.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": true
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "python@17.0.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": true
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "rust@28.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": false
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
             }
           ]
         },
         "rust@28.0.1": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": false
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
             }
           ]
         },
         "rust@30.0.0": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": false
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "stellar-cli@28.1.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": false
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "stellar-cli@30.0.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 10 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAgAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAGQAAAABAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMgAAAARlY2hvAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAD0JAAAAAAAAAAAAAAAAAAAGGoAAAAAEHBwcHAAAAQAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "tx": {
+                    "signatures": [
+                      {
+                        "hint": "07070707",
+                        "signature": "07070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707070707"
+                      }
+                    ],
+                    "tx": {
+                      "cond": "none",
+                      "ext": {
+                        "v1": {
+                          "ext": "v0",
+                          "resource_fee": "100000",
+                          "resources": {
+                            "disk_read_bytes": 0,
+                            "footprint": {
+                              "read_only": [],
+                              "read_write": []
+                            },
+                            "instructions": 1000000,
+                            "write_bytes": 0
+                          }
+                        }
+                      },
+                      "fee": 100,
+                      "memo": "none",
+                      "operations": [
+                        {
+                          "body": {
+                            "invoke_host_function": {
+                              "auth": [],
+                              "host_function": {
+                                "invoke_contract": {
+                                  "args": [
+                                    {
+                                      "bool": false
+                                    }
+                                  ],
+                                  "contract_address": "CAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDFJRF",
+                                  "function_name": "echo"
+                                }
+                              }
+                            }
+                          },
+                          "source_account": null
+                        }
+                      ],
+                      "seq_num": "4294967297",
+                      "source_account": "GAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQDZ7H"
+                    }
+                  }
+                }
+              }
             }
           ]
         }
@@ -155,57 +1179,593 @@
     {
       "id": "soroban.scval-shapes.synth-bool-value-2",
       "cells": {
-        "rust@28.0.0": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+        "dart@3.12.0": {
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAE="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "bool": true
+                }
+              }
+            }
+          ]
+        },
+        "dotnet@16.0.0": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@16.0.0 does not implement decode_json"
+            }
+          ]
+        },
+        "dotnet@17.0.0": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "dotnet@17.0.0 does not implement decode_json"
+            }
+          ]
+        },
+        "go@v0.7.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.7.2": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.7.3": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.8.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "go@v0.9.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "java@5.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "java@6.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.3.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@16.4.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.2.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.3.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "js@17.4.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "kmp@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAE="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "bool": true
+                }
+              }
+            }
+          ]
+        },
+        "php@1.18.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 4 of them this one",
+              "actual": "rejected"
+            }
+          ]
+        },
+        "python@16.1.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAE="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "bool": true
+                }
+              }
+            }
+          ]
+        },
+        "python@17.0.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAE="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 3 of them this one",
+              "actual": {
+                "json": {
+                  "bool": true
+                }
+              }
+            }
+          ]
+        },
+        "rust@28.0.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "bool": false
+                }
+              }
             }
           ]
         },
         "rust@28.0.1": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "bool": false
+                }
+              }
             }
           ]
         },
         "rust@30.0.0": {
-          "result": "diverges-from-peers",
-          "known_issue": "https://github.com/stellar/rs-stellar-xdr/issues/629",
+          "result": "pass",
           "checks": [
             {
               "check": "any/decode_encode",
               "op": "decode_encode",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
             },
             {
               "check": "any/decode_json",
               "op": "decode_json",
-              "result": "diverges-from-peers",
-              "detail": "answers differently from the other sdks"
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "bool": false
+                }
+              }
+            }
+          ]
+        },
+        "soroban@28.0.0": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "soroban@28.0.0 does not implement decode_json"
+            }
+          ]
+        },
+        "soroban@29.0.1": {
+          "result": "unsupported",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "unsupported",
+              "detail": "soroban@29.0.1 does not implement decode_json"
+            }
+          ]
+        },
+        "stellar-cli@28.1.0": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "bool": false
+                }
+              }
+            }
+          ]
+        },
+        "stellar-cli@30.0.1": {
+          "result": "pass",
+          "checks": [
+            {
+              "check": "any/decode_encode",
+              "op": "decode_encode",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 11 sdks gave 3 different answers, 4 of them this one",
+              "actual": {
+                "xdr": "AAAAAAAAAAA="
+              }
+            },
+            {
+              "check": "any/decode_json",
+              "op": "decode_json",
+              "result": "pass",
+              "detail": "implementation-defined: no answer is required, so none is judged; the 9 sdks gave 3 different answers, 2 of them this one",
+              "actual": {
+                "json": {
+                  "bool": false
+                }
+              }
             }
           ]
         }
