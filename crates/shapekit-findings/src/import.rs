@@ -157,8 +157,13 @@ fn stage(to: &Path, bytes: &[u8]) -> Result<tempfile::TempPath> {
         .parent()
         .context("an input path names a file in a directory")?;
     std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
-    let mut f = tempfile::Builder::new()
-        .prefix(".import-")
+    let mut builder = tempfile::Builder::new();
+    builder.prefix(".import-");
+    // tempfile makes files private (0600); the imported inputs are committed files that any
+    // reader of the checkout opens, so they take 0666 less the umask, as a plain create does
+    #[cfg(unix)]
+    builder.permissions(std::os::unix::fs::PermissionsExt::from_mode(0o666));
+    let mut f = builder
         .tempfile_in(dir)
         .with_context(|| format!("creating a file in {}", dir.display()))?;
     std::io::Write::write_all(&mut f, bytes)
@@ -429,6 +434,16 @@ mod tests {
         let to = root.join("findings/inputs/conformance-go.json");
         let parsed = inputs::matrix(&std::fs::read(&to).unwrap(), &to).unwrap();
         assert_eq!(parsed, reduce_matrix(matrix()));
+        #[cfg(unix)]
+        {
+            // the staged files are written private; the imported ones are not
+            use std::os::unix::fs::PermissionsExt;
+            let plain = root.join("plain");
+            std::fs::write(&plain, b"").unwrap();
+            let mode = |p: &Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o777;
+            assert_eq!(mode(&to), mode(&plain));
+            assert_eq!(mode(&root.join(t.inputs.provenance_file())), mode(&plain));
+        }
         std::fs::write(&to, b"{}").unwrap();
         assert_eq!(verify(root, &t).len(), 1);
         // a missing source leaves the committed input alone
