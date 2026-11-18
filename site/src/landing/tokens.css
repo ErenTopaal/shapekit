@@ -1,0 +1,188 @@
+/* design tokens of the landing page (src/routes/home.tsx). every colour, font, size, space, radius,
+   shadow and motion value of the page lives here; landing.css only reads these variables. they are
+   scoped to .sk, so the docs and the dashboard keep their own theme. */
+
+.sk {
+  color-scheme: light;
+  /* colour: warm paper */
+  --c-paper: #f7efe4;
+  --c-paper-raised: #fcf8f1;
+  --c-paper-2: #f0e6d8;
+  --c-paper-3: #e5d7c2;
+  --c-line: #e3d5c0;
+  --c-line-strong: #bba78b;
+  --c-ink: #24190f;
+  --c-ink-2: #4a3b29;
+  --c-ink-3: #625039;
+  --c-brand: #0f5b78;
+  --c-teal: #0f5b78;
+  --c-teal-2: #3d87a3;
+  --c-teal-soft: #cfe1e3;
+  --c-flare: #e0552e;
+  --c-flare-ink: #ad3b18;
+  --c-flare-soft: #f6d6c6;
+  --c-sun: #e6a83a;
+  --c-sun-soft: #f4e2b8;
+  --c-sun-ink: #855407;
+  --c-sage: #cfe3d6;
+  --c-slate: #7c8a88;
+  --c-white: #ffffff;
+  --c-on-dark: #f7efe4;
+  --c-on-dark-2: #c9bfae;
+  --c-nav: rgba(247, 239, 228, 0.84);
+  --c-shade: rgba(31, 27, 22, 0.06);
+  --c-night: #1d1b18;
+  --c-night-2: #292622;
+  --c-night-3: #37332e;
+  --c-night-line: rgba(244, 234, 219, 0.12);
+  --c-night-line-strong: rgba(244, 234, 219, 0.28);
+  --c-on-night: #f4eadb;
+  --c-on-night-2: #d3c5b0;
+  --c-on-night-3: #b4a48c;
+  --c-teal-glow: #74c3df;
+  --c-flare-glow: #f58b63;
+  --c-sun-glow: #f2c46a;
+  --c-kraft: #ebe4da;
+  --c-sand: #efe1cc;
+  --c-mark: #e6a83a;
+  --c-tip: #24190f;
+  --c-on-tip: #f7efe4;
+  --mask-ink: #000000;
+
+  /* section surfaces */
+  --bg-dots: radial-gradient(circle, var(--c-night-line) 1px, transparent 1.5px);
+  --dots-size: 18px;
+  --spot: rgba(230, 168, 58, 0.16);
+
+  /* paper: a fine grain and a soft mottle, drawn over the whole page */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.26 0 0 0 0 0.22 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --paper-mottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.44 0 0 0 0 0.38 0 0 0 0.7 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E");
+  --grain-opacity: 0.13;
+  --mottle-opacity: 0.1;
+
+  /* type */
+  --f-display: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --f-accent: "Instrument Serif", Georgia, serif;
+  --f-body: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --fs-2xs: 0.8125rem;
+  --fs-xs: 0.875rem;
+  --fs-sm: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: clamp(1.125rem, 1rem + 0.4vw, 1.3125rem);
+  --fs-xl: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
+  --fs-2xl: clamp(1.75rem, 1.2rem + 1.8vw, 2.625rem);
+  --fs-3xl: clamp(2.25rem, 1.4rem + 3.2vw, 4.25rem);
+  --fs-4xl: clamp(2.75rem, 1.6rem + 4.6vw, 6rem);
+  --fs-hero: clamp(2.75rem, 1.3rem + 4.4vw, 5.75rem);
+  --fs-mega: clamp(4rem, 1.4rem + 10vw, 11rem);
+  --fs-bytes: clamp(2.75rem, 0.6rem + 7.2vw, 8rem);
+  --fw-body: 450;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-display: 700;
+  --fw-heavy: 800;
+  --lh-flat: 0.95;
+  --lh-tight: 1.04;
+  --lh-snug: 1.22;
+  --lh-body: 1.6;
+  --ls-display: -0.04em;
+  --ls-tight: -0.022em;
+  --ls-caps: 0.08em;
+
+  /* space: one 4 px based scale */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 8rem;
+  --gutter: clamp(1rem, 0.3rem + 3.4vw, 3.5rem);
+  --section-y: clamp(5rem, 3rem + 8vw, 10rem);
+  --page-max: 84rem;
+  --text-max: 38rem;
+  --nav-h: 4rem;
+
+  /* shape */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+  --bw: 1px;
+  --bw-strong: 2px;
+  --bw-heavy: 3px;
+  --tile: clamp(2.5rem, 2rem + 1.6vw, 3.5rem);
+  --mini: clamp(1rem, 0.55rem + 1vw, 1.6rem);
+
+  /* depth */
+  --sh-sm: 0 1px 2px rgba(60, 45, 20, 0.08);
+  --sh-md: 0 14px 34px -16px rgba(60, 45, 20, 0.3);
+  --sh-lg: 0 40px 80px -36px rgba(60, 45, 20, 0.38);
+
+  /* motion */
+  --t-instant: 90ms;
+  --t-fast: 160ms;
+  --t-base: 280ms;
+  --t-slow: 520ms;
+  --t-reveal: 760ms;
+  --t-stagger: 60ms;
+  --t-draw: 1200ms;
+  --t-cycle: 6200ms;
+  --t-trial: 1700ms;
+  --t-judge: 5200ms;
+  --t-flow: 900ms;
+  --t-count: 1400ms;
+  --lift: -3px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --reveal-shift: 26px;
+  --press-scale: 0.96;
+}
+
+
+/* dark sections: the same names, read on a night surface */
+.theme-night {
+  --c-ink: var(--c-on-night);
+  --c-ink-2: var(--c-on-night-2);
+  --c-ink-3: var(--c-on-night-3);
+  --c-line: var(--c-night-line);
+  --c-line-strong: var(--c-night-line-strong);
+  --c-paper: var(--c-night);
+  --c-paper-raised: var(--c-night-2);
+  --c-paper-2: var(--c-night-2);
+  --c-paper-3: var(--c-night-3);
+  --c-teal: var(--c-teal-glow);
+  --c-flare-ink: var(--c-flare-glow);
+  --c-sun-ink: var(--c-sun-glow);
+  --c-teal-soft: rgba(116, 195, 223, 0.16);
+  --c-flare-soft: rgba(245, 139, 99, 0.16);
+  --c-shade: rgba(244, 234, 219, 0.07);
+  --c-mark: #f58b63;
+  --spot: rgba(116, 195, 223, 0.12);
+  background: var(--c-night);
+  color: var(--c-ink);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    --t-instant: 0ms;
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+    --t-reveal: 0ms;
+    --t-stagger: 0ms;
+    --t-draw: 0ms;
+    --reveal-shift: 0px;
+    --press-scale: 1;
+    --lift: 0px;
+    --t-count: 0ms;
+  }
+}
