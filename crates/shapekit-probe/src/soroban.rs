@@ -128,6 +128,288 @@ pub fn simulated(w: &World, s: &Subject, hf: HostFunction) -> Result<SorobanTran
         .transaction_data)
 }
 
+/// What an edit of a Soroban invocation changed, so the variant is built again around it.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Rebuild {
+    /// The host function: the variant takes the auth and footprint the host records for the
+    /// new call, as a client builds a call from scratch.
+    HostFunction,
+    /// An authorization entry: the entries stay as the edit wrote them, the footprint is
+    /// the one the host touches running the call with them.
+    Auth,
+}
+
+/// What an edit at `edit` changed in a Soroban invocation, `None` for an edit that leaves
+/// the call, its auth and its footprint as the base has them, or that is itself the
+/// footprint or the resources.
+pub fn rebuild_scope(edit: &str) -> Option<Rebuild> {
+    let inside = |p: &str| edit == p || edit.starts_with(&format!("{p}/"));
+    if inside(HF) {
+        Some(Rebuild::HostFunction)
+    } else if inside(&format!("{OP}/auth")) {
+        Some(Rebuild::Auth)
+    } else {
+        None
+    }
+}
+
+/// How the host ran a rebuilt variant.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HostRun {
+    /// The host error the call failed with when it ran with the variant's own footprint and
+    /// auth, `None` when it succeeded.
+    pub error: Option<String>,
+    /// Addresses whose recorded authorization the variant carries unsigned: the probe holds
+    /// no key for them.
+    pub unsigned: Vec<String>,
+}
+
+impl HostRun {
+    /// The variant name's suffix that records the run.
+    pub fn note(&self) -> String {
+        let mut s = match &self.error {
+            None => "own footprint and auth, the host runs it".to_owned(),
+            Some(e) => format!("own footprint and auth, the host fails it with {e}"),
+        };
+        if !self.unsigned.is_empty() {
+            s.push_str(&format!(
+                ", authorization unsigned for {} (no key)",
+                self.unsigned.join(", ")
+            ));
+        }
+        s
+    }
+}
+
+fn the_op(tx: &mut stellar_xdr::Transaction) -> Result<&mut stellar_xdr::InvokeHostFunctionOp> {
+    ensure!(tx.operations.len() == 1, "a soroban transaction has one op");
+    let op = tx
+        .operations
+        .iter_mut()
+        .next()
+        .context("a soroban transaction has one op")?;
+    let OperationBody::InvokeHostFunction(op) = &mut op.body else {
+        bail!("the edited transaction does not invoke a host function");
+    };
+    Ok(op)
+}
+
+fn v1(json: &serde_json::Value) -> Result<stellar_xdr::Transaction> {
+    match serde_json::from_value(json.clone())? {
+        stellar_xdr::TransactionEnvelope::Tx(e) => Ok(e.tx),
+        _ => bail!("a soroban carrier is a v1 envelope"),
+    }
+}
+
+fn put_tx(json: &mut serde_json::Value, tx: &stellar_xdr::Transaction) -> Result<()> {
+    crate::edit::set(json, "/tx/tx", serde_json::to_value(tx)?)
+}
+
+/// Builds the edited invocation in `json` again so that only the edited value can make it
+/// fail: a host function edit gets the auth the host records for the new call, signed with
+/// every key the subject holds, and an auth edit keeps its entries; either way the
+/// footprint and resources are the ones the host uses running the call with the auth the
+/// variant carries, with room to spare. A call the host fails keeps the footprint of what
+/// it touched up to the failure, so core fails it at the same point. `plan` is the base's
+/// and takes the new auth signers; `json` ends up signed.
+pub fn rebuild(
+    w: &World,
+    s: &Subject,
+    json: &mut serde_json::Value,
+    plan: &mut SignPlan,
+    edit: &str,
+    scope: Rebuild,
+    base: &stellar_xdr::TransactionEnvelope,
+) -> Result<HostRun> {
+    let sim = simulator(w)?;
+    let source = account_id(&s.source.verifying_key());
+    let network = w.network_id();
+    let mut unsigned = Vec::new();
+    // the host error of a call whose recording run failed: the run that grants every
+    // authorization and reads every entry, so the error is the call's own
+    let mut recorded_error = None;
+    if scope == Rebuild::HostFunction {
+        let mut tx = v1(json)?;
+        let hf = the_op(&mut tx)?.host_function.clone();
+        // non-root authorizations recorded too: a recording that refuses them fails a call
+        // for an authorization, not for its value
+        let rec = sim.record_invoke(
+            hf.clone(),
+            AuthMode::Record {
+                allow_non_root: true,
+                address_v2: false,
+            },
+            &source,
+        )?;
+        match rec.result {
+            Ok(_) => {
+                let exp = w.driver.last_closed() + AUTH_VALID_FOR;
+                let keys: Vec<&SigningKey> = s.funded();
+                let mut signers = Vec::new();
+                let mut auth = Vec::new();
+                for (i, mut e) in rec.auth.into_iter().enumerate() {
+                    if let SorobanCredentials::Address(c) = &mut e.credentials {
+                        c.signature_expiration_ledger = exp;
+                        match keys
+                            .iter()
+                            .find(|k| account_address(&k.verifying_key()) == c.address)
+                        {
+                            Some(k) => signers.push(AuthSigner {
+                                entry: format!("{OP}/auth/{i}"),
+                                keys: vec![(*k).clone()],
+                                delegates: Vec::new(),
+                            }),
+                            None => unsigned.push(
+                                serde_json::to_value(&c.address)?
+                                    .as_str()
+                                    .context("an address is a strkey in XDR-JSON")?
+                                    .to_owned(),
+                            ),
+                        }
+                    }
+                    auth.push(e);
+                }
+                the_op(&mut tx)?.auth = auth.try_into()?;
+                plan.auth = signers;
+            }
+            Err(e) => {
+                // a failed invocation rolls back the authorizations it recorded, so the run
+                // hands none back (soroban-env-host 30.0.0 src/auth.rs, the authorization
+                // manager's snapshot and rollback around every frame). the variant carries
+                // instead what its client would sign: the base's entries, each one that
+                // authorizes the base call now authorizing the edited call, signed by the
+                // base's signers
+                let base_call = base_function(base)?;
+                let op = the_op(&mut tx)?;
+                let mut auth = op.auth.to_vec();
+                for entry in &mut auth {
+                    let f = &entry.root_invocation.function;
+                    if authorized_as(f, &base_call).as_ref() == Some(f)
+                        && let Some(to) = authorized_as(f, &hf)
+                    {
+                        entry.root_invocation.function = to;
+                    }
+                }
+                op.auth = auth.try_into()?;
+                recorded_error = Some(e);
+            }
+        }
+        put_tx(json, &tx)?;
+    }
+    // the entries as the variant carries them, signed
+    crate::sign::sign(json, plan, &network, Some(edit))?;
+    let mut tx = v1(json)?;
+    let op = the_op(&mut tx)?;
+    let (hf, auth) = (op.host_function.clone(), op.auth.to_vec());
+    let run = sim.record_invoke(hf.clone(), AuthMode::Enforce(auth.clone()), &source)?;
+    let stellar_xdr::TransactionExt::V1(old) = &tx.ext else {
+        bail!("a soroban carrier has transaction data");
+    };
+    let inclusion = i64::from(tx.fee) - old.resource_fee;
+    let data = match (&run.result, &run.resources) {
+        (Ok(_), _) => spare(
+            sim.simulate_invoke(hf, AuthMode::Enforce(auth), &source)?
+                .transaction_data,
+        ),
+        // refused before the call touched any entry: the base's footprint is as good as any,
+        // the host never reads it
+        (Err(_), None) => old.clone(),
+        (Err(_), Some(recorded)) => {
+            let mut resources = recorded.clone();
+            resources.instructions = resources.instructions.saturating_add(SPARE_INSTRUCTIONS);
+            resources.disk_read_bytes = resources.disk_read_bytes.saturating_add(SPARE_BYTES);
+            resources.write_bytes = resources.write_bytes.saturating_add(SPARE_BYTES);
+            SorobanTransactionData {
+                ext: if run.restored_rw_entry_indices.is_empty() {
+                    SorobanTransactionDataExt::V0
+                } else {
+                    SorobanTransactionDataExt::V1(stellar_xdr::SorobanResourcesExtV0 {
+                        archived_soroban_entries: run
+                            .restored_rw_entry_indices
+                            .clone()
+                            .try_into()?,
+                    })
+                },
+                resources,
+                // set below, once the envelope's size is known
+                resource_fee: 0,
+            }
+        }
+    };
+    tx.ext = stellar_xdr::TransactionExt::V1(data);
+    if run.result.is_err() && run.resources.is_some() {
+        // the fee is a fixed-width field, so the size measured with a zero fee is the size
+        // the envelope keeps
+        put_tx(json, &tx)?;
+        let size = crate::sign::sign(json, plan, &network, Some(edit))?
+            .to_xdr(Limits::none())?
+            .len();
+        let stellar_xdr::TransactionExt::V1(d) = &mut tx.ext else {
+            unreachable!("set above");
+        };
+        let fee = sim.failed_invoke_fee(
+            &d.resources,
+            run.restored_rw_entry_indices.len() as u32,
+            size.try_into()?,
+        )?;
+        d.resource_fee = fee.saturating_mul(2).saturating_add(SPARE_FEE);
+    }
+    let stellar_xdr::TransactionExt::V1(d) = &tx.ext else {
+        unreachable!("set above");
+    };
+    tx.fee = u32::try_from(inclusion + d.resource_fee)
+        .context("the rebuilt transaction's fee does not fit a u32")?;
+    put_tx(json, &tx)?;
+    crate::sign::sign(json, plan, &network, Some(edit))?;
+    if let Some(e) = &recorded_error {
+        // the variant reaches the error the call fails with when nothing else stands in its
+        // way; any other error is the variant's authorization or footprint, not its value
+        ensure!(
+            run.result.as_ref().err() == Some(e),
+            "the call fails with {e} when every authorization is granted, but with {:?} as the variant carries it",
+            run.result
+        );
+    }
+    Ok(HostRun {
+        error: run.result.err(),
+        unsigned,
+    })
+}
+
+/// The host function of the base envelope.
+fn base_function(base: &stellar_xdr::TransactionEnvelope) -> Result<HostFunction> {
+    let stellar_xdr::TransactionEnvelope::Tx(e) = base else {
+        bail!("a soroban carrier is a v1 envelope");
+    };
+    let mut tx = e.tx.clone();
+    Ok(the_op(&mut tx)?.host_function.clone())
+}
+
+/// What an authorization entry names when it authorizes `hf` at the root, in the arm of
+/// `like`; `None` for an upload, which no entry authorizes. The host reads either create arm
+/// as a v2 create, a v1 one with no constructor arguments, and records it in the v2 arm
+/// (soroban-env-host 30.0.0 src/auth.rs 767-810, `AuthorizedFunction::from_xdr` and
+/// `to_xdr`), so an entry keeps the arm it was recorded in.
+fn authorized_as(
+    like: &stellar_xdr::SorobanAuthorizedFunction,
+    hf: &HostFunction,
+) -> Option<stellar_xdr::SorobanAuthorizedFunction> {
+    use stellar_xdr::SorobanAuthorizedFunction as F;
+    match hf {
+        HostFunction::InvokeContract(a) => Some(F::ContractFn(a.clone())),
+        HostFunction::CreateContract(a) => Some(match like {
+            F::CreateContractV2HostFn(_) => F::CreateContractV2HostFn(CreateContractArgsV2 {
+                contract_id_preimage: a.contract_id_preimage.clone(),
+                executable: a.executable.clone(),
+                constructor_args: Default::default(),
+            }),
+            _ => F::CreateContractHostFn(a.clone()),
+        }),
+        HostFunction::CreateContractV2(a) => Some(F::CreateContractV2HostFn(a.clone())),
+        HostFunction::UploadContractWasm(_) => None,
+    }
+}
+
 fn assemble(
     w: &World,
     s: &Subject,
@@ -963,4 +1245,47 @@ pub fn carriers() -> Vec<Carrier> {
             )
         },
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn only_edits_of_the_call_or_its_auth_are_rebuilt() {
+        let hf = format!("{HF}/invoke_contract/function_name");
+        assert_eq!(rebuild_scope(&hf), Some(Rebuild::HostFunction));
+        assert_eq!(rebuild_scope(HF), Some(Rebuild::HostFunction));
+        assert_eq!(
+            rebuild_scope(&format!("{OP}/auth/0/credentials/address/nonce")),
+            Some(Rebuild::Auth)
+        );
+        assert_eq!(rebuild_scope(&format!("{OP}/auth")), Some(Rebuild::Auth));
+        // the footprint, the resources and the transaction around the call are the field
+        // themselves, and stay as the edit wrote them
+        assert_eq!(
+            rebuild_scope(&format!("{DATA}/resources/footprint/read_only")),
+            None
+        );
+        assert_eq!(rebuild_scope("/tx/tx/fee"), None);
+        assert_eq!(rebuild_scope(&format!("{OP}/authx")), None);
+        assert_eq!(rebuild_scope(&format!("{HF}x")), None);
+    }
+
+    #[test]
+    fn the_note_names_the_host_error_and_unsigned_addresses() {
+        let ok = HostRun {
+            error: None,
+            unsigned: Vec::new(),
+        };
+        assert_eq!(ok.note(), "own footprint and auth, the host runs it");
+        let failed = HostRun {
+            error: Some("Error(Storage, MissingValue)".into()),
+            unsigned: vec!["GA".into(), "CB".into()],
+        };
+        assert_eq!(
+            failed.note(),
+            "own footprint and auth, the host fails it with Error(Storage, MissingValue), authorization unsigned for GA, CB (no key)"
+        );
+    }
 }

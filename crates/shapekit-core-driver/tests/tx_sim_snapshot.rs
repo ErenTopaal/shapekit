@@ -328,3 +328,50 @@ fn fetch_errors_surface() {
         other => panic!("expected missing ttl, got {other:?}"),
     }
 }
+
+#[test]
+fn a_recording_run_keeps_the_footprint_of_a_failed_invocation() {
+    let s = load();
+    let sim = Simulator::new(memory(&s), &s.ctx).expect("simulator");
+    let source = account_id(&root_key(TESTNET).verifying_key());
+    let gone = ContractId(Hash([9; 32]));
+    let missing = HostFunction::InvokeContract(InvokeContractArgs {
+        contract_address: ScAddress::Contract(gone.clone()),
+        function_name: ScSymbol("decimals".try_into().expect("symbol")),
+        args: Default::default(),
+    });
+    let run = sim
+        .record_invoke(missing, record(), &source)
+        .expect("a failed invocation is a result, not an error");
+    assert_eq!(run.result, Err("Error(Storage, MissingValue)".to_owned()));
+    // the instance the call looked for is in the footprint, so a transaction carrying it
+    // fails reading the missing instance and not outside its footprint
+    let resources = run.resources.expect("the run touched the instance");
+    let wanted = LedgerKey::ContractData(LedgerKeyContractData {
+        contract: ScAddress::Contract(gone),
+        key: ScVal::LedgerKeyContractInstance,
+        durability: ContractDataDurability::Persistent,
+    });
+    assert!(resources.footprint.read_only.contains(&wanted));
+    let small = sim.failed_invoke_fee(&resources, 0, 300);
+    let large = sim.failed_invoke_fee(&resources, 0, 3000);
+    assert!(small > 0 && large > small, "{small} {large}");
+}
+
+#[test]
+fn a_recording_run_of_a_working_call_matches_simulation() {
+    let s = load();
+    let sim = Simulator::new(memory(&s), &s.ctx).expect("simulator");
+    let source = account_id(&root_key(TESTNET).verifying_key());
+    let run = sim
+        .record_invoke(call("decimals"), record(), &source)
+        .expect("recording run");
+    let simulated = sim
+        .simulate_invoke(call("decimals"), record(), &source)
+        .expect("simulation");
+    assert_eq!(run.result, Ok(simulated.return_value));
+    assert_eq!(
+        run.resources.expect("footprint").footprint,
+        simulated.transaction_data.resources.footprint
+    );
+}

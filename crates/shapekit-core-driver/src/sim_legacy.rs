@@ -41,8 +41,8 @@ use stellar_xdr::{
 };
 
 use crate::sim::{
-    AuthMode, ExtendTtlSimulation, FetchingSnapshot, InvokeSimulation, LedgerContext, SimError,
-    Simulator, SnapshotFetcher,
+    AuthMode, ExtendTtlSimulation, FetchingSnapshot, InvokeSimulation, LedgerContext,
+    RecordedInvoke, SimError, Simulator, SnapshotFetcher,
 };
 
 /// Ledger protocols a simulator exists for: the ones below 30 that this
@@ -680,6 +680,41 @@ impl AnySimulator {
             Inner::P24(s) => s.simulate_invoke(&host_function, auth_mode, source),
             Inner::P28(s) => s.simulate_invoke(&host_function, auth_mode, source),
             Inner::Current(s) => s.simulate_invoke(host_function, auth_mode, source),
+        }
+    }
+
+    /// See [`Simulator::record_invoke`]. Only the current host is wired for it: the probe
+    /// that needs it runs at protocol 30.
+    pub fn record_invoke(
+        &self,
+        host_function: HostFunction,
+        auth_mode: AuthMode,
+        source: &AccountId,
+    ) -> Result<RecordedInvoke, SimError> {
+        match &self.inner {
+            Inner::Current(s) => s.record_invoke(host_function, auth_mode, source),
+            _ => Err(SimError::NotAtProtocol {
+                protocol: self.protocol,
+                what: "a recording run that keeps a failed invocation's footprint".into(),
+            }),
+        }
+    }
+
+    /// See [`Simulator::failed_invoke_fee`]; protocol 30 only, as [`Self::record_invoke`].
+    pub fn failed_invoke_fee(
+        &self,
+        resources: &stellar_xdr::SorobanResources,
+        restored_entries: u32,
+        transaction_size_bytes: u32,
+    ) -> Result<i64, SimError> {
+        match &self.inner {
+            Inner::Current(s) => {
+                Ok(s.failed_invoke_fee(resources, restored_entries, transaction_size_bytes))
+            }
+            _ => Err(SimError::NotAtProtocol {
+                protocol: self.protocol,
+                what: "the fee of a failed invocation".into(),
+            }),
         }
     }
 

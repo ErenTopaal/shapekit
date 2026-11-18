@@ -223,6 +223,54 @@ pub fn verdict(attempts: &[ProbeAttempt]) -> Verdict {
     }
 }
 
+/// Core's answer to a rebuilt Soroban variant must be the host's: applied, it succeeds
+/// exactly when the host ran the call with the variant's own footprint and auth, and it
+/// fails as INVOKE_HOST_FUNCTION_TRAPPED, the host refusing the call, and not for a resource
+/// or a fee. A refusal at submission is core's validation and needs no agreement. Anything
+/// else means the failure cannot be put on the edited value, so the run stops.
+pub(crate) fn agrees_with_host(a: &ProbeAttempt, run: &crate::soroban::HostRun) -> Result<()> {
+    match (a.applied, &run.error) {
+        (ApplyStatus::NotApplied, _) => Ok(()),
+        (ApplyStatus::Succeeded, None) => Ok(()),
+        (ApplyStatus::Succeeded, Some(e)) => {
+            bail!("core applied it successfully, the host failed it with {e}")
+        }
+        (ApplyStatus::Failed, None) => bail!(
+            "core failed it ({:?}), the host ran it with the same footprint and auth",
+            a.result_xdr
+        ),
+        (ApplyStatus::Failed, Some(_)) => {
+            let xdr = a
+                .result_xdr
+                .as_deref()
+                .context("an applied attempt has a result")?;
+            let r = stellar_xdr::TransactionResult::from_xdr_base64(xdr, Limits::none())?;
+            ensure!(
+                trapped(&r),
+                "core failed it with {:?}, not as the host refusing the call",
+                r.result
+            );
+            Ok(())
+        }
+    }
+}
+
+/// Whether a one-operation transaction failed as INVOKE_HOST_FUNCTION_TRAPPED.
+fn trapped(r: &stellar_xdr::TransactionResult) -> bool {
+    use stellar_xdr::{
+        InvokeHostFunctionResult, OperationResult, OperationResultTr, TransactionResultResult,
+    };
+    let TransactionResultResult::TxFailed(ops) = &r.result else {
+        return false;
+    };
+    matches!(
+        ops.as_slice(),
+        [OperationResult::OpInner(
+            OperationResultTr::InvokeHostFunction(InvokeHostFunctionResult::Trapped)
+        )]
+    )
+}
+
 /// Every attempt for one field.
 pub fn probe_field(
     w: &mut World,
@@ -303,16 +351,53 @@ pub fn probe_field(
                 short(&rep.value)
             ),
         };
-        let plan = p.base.plan.clone();
+        let mut plan = p.base.plan.clone();
+        let mut host = None;
         let env = match &raw {
-            Some(target) => spliced(w, typer, carrier, field, &p, target)?,
+            Some(target) => {
+                let at = format!("{}/{}", p.at, key(&field.name));
+                ensure!(
+                    crate::soroban::rebuild_scope(&at).is_none(),
+                    "{}: a value written as bytes inside a soroban invocation cannot be rebuilt",
+                    field.path
+                );
+                spliced(w, typer, carrier, field, &p, target)?
+            }
             None => {
                 let edit_at = write(typer, carrier, field, &mut p, rep.value)?;
-                sign(&mut p.json, &plan, &w.network_id(), Some(&edit_at))
-                    .with_context(|| format!("{} attempt {name:?}", field.path))?
+                match crate::soroban::rebuild_scope(&edit_at) {
+                    // the base's footprint and auth fit the base's call, not this one: the
+                    // variant gets its own, so a failure is the edited value's and not a read
+                    // outside the footprint or an authorization for another call
+                    Some(scope) => {
+                        let run = crate::soroban::rebuild(
+                            w,
+                            s,
+                            &mut p.json,
+                            &mut plan,
+                            &edit_at,
+                            scope,
+                            &p.base.env,
+                        )
+                        .with_context(|| format!("{} attempt {name:?}", field.path))?;
+                        let env: TransactionEnvelope = serde_json::from_value(p.json.clone())?;
+                        host = Some(run);
+                        env
+                    }
+                    None => sign(&mut p.json, &plan, &w.network_id(), Some(&edit_at))
+                        .with_context(|| format!("{} attempt {name:?}", field.path))?,
+                }
             }
         };
+        let name = match &host {
+            Some(run) => format!("{name}; {}", run.note()),
+            None => name,
+        };
         let (a, ledger) = submit(w, &env, &name)?;
+        if let Some(run) = &host {
+            agrees_with_host(&a, run)
+                .with_context(|| format!("{} attempt {name:?}", field.path))?;
+        }
         evidence.push(Evidence {
             slug: slug(field, carrier, i + 1),
             field: field.path.clone(),
@@ -542,4 +627,81 @@ fn string_shaped_raw(
     Ok(Some(interp.encode_as(&field.ty, &v).map_err(|e| {
         anyhow::anyhow!("encoding {}: {e}", field.path)
     })?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::soroban::HostRun;
+    use stellar_xdr::{
+        InvokeHostFunctionResult, OperationResult, OperationResultTr, TransactionResult,
+        TransactionResultExt, TransactionResultResult,
+    };
+
+    fn failed(r: InvokeHostFunctionResult) -> ProbeAttempt {
+        let result = TransactionResult {
+            fee_charged: 100,
+            result: TransactionResultResult::TxFailed(
+                vec![OperationResult::OpInner(
+                    OperationResultTr::InvokeHostFunction(r),
+                )]
+                .try_into()
+                .unwrap(),
+            ),
+            ext: TransactionResultExt::V0,
+        };
+        ProbeAttempt {
+            variant: "v".into(),
+            submission: SubmitStatus::Pending,
+            result_code: Some("tx_failed".into()),
+            result_xdr: Some(result.to_xdr_base64(Limits::none()).unwrap()),
+            applied: ApplyStatus::Failed,
+            witnesses: Vec::new(),
+            carrier: None,
+        }
+    }
+
+    fn host(error: Option<&str>) -> HostRun {
+        HostRun {
+            error: error.map(str::to_owned),
+            unsigned: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn a_trap_the_host_also_hits_is_the_values_own() {
+        let a = failed(InvokeHostFunctionResult::Trapped);
+        agrees_with_host(&a, &host(Some("Error(Storage, MissingValue)"))).unwrap();
+    }
+
+    #[test]
+    fn a_failure_the_host_does_not_reproduce_stops_the_run() {
+        let a = failed(InvokeHostFunctionResult::Trapped);
+        assert!(agrees_with_host(&a, &host(None)).is_err());
+    }
+
+    #[test]
+    fn a_resource_failure_is_not_the_values() {
+        let a = failed(InvokeHostFunctionResult::ResourceLimitExceeded);
+        assert!(agrees_with_host(&a, &host(Some("Error(Budget, ExceededLimit)"))).is_err());
+        let a = failed(InvokeHostFunctionResult::InsufficientRefundableFee);
+        assert!(agrees_with_host(&a, &host(Some("Error(Budget, ExceededLimit)"))).is_err());
+    }
+
+    #[test]
+    fn success_must_match_the_host() {
+        let mut a = failed(InvokeHostFunctionResult::Trapped);
+        a.applied = ApplyStatus::Succeeded;
+        agrees_with_host(&a, &host(None)).unwrap();
+        assert!(agrees_with_host(&a, &host(Some("Error(Auth, InvalidAction)"))).is_err());
+    }
+
+    #[test]
+    fn a_refusal_at_submission_is_cores_validation() {
+        let mut a = failed(InvokeHostFunctionResult::Trapped);
+        a.applied = ApplyStatus::NotApplied;
+        a.submission = SubmitStatus::Error;
+        agrees_with_host(&a, &host(None)).unwrap();
+        agrees_with_host(&a, &host(Some("Error(Value, InvalidInput)"))).unwrap();
+    }
 }

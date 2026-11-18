@@ -272,6 +272,22 @@ pub struct InvokeSimulation {
     pub simulated_memory: u32,
 }
 
+/// What the host recorded for one invocation, whether it succeeded or failed.
+#[derive(Clone, Debug)]
+pub struct RecordedInvoke {
+    /// The return value, or the host error the invocation failed with, as
+    /// `Error(<type>, <code>)`.
+    pub result: Result<ScVal, String>,
+    /// The entries passed in when enforcing, the recorded ones (signatures cleared) when
+    /// recording.
+    pub auth: Vec<SorobanAuthorizationEntry>,
+    /// The footprint of every entry the run touched and the resources it used, unadjusted;
+    /// `None` when the host refused the inputs before calling anything and touched no entry.
+    pub resources: Option<stellar_xdr::SorobanResources>,
+    /// Indices into the read-write footprint of the archived entries the run restored.
+    pub restored_rw_entry_indices: Vec<u32>,
+}
+
 /// Result of an extend-TTL simulation. `restore` is set when some keys were
 /// archived and must be restored first.
 #[derive(Clone, Debug)]
@@ -396,6 +412,111 @@ impl Simulator {
             simulated_instructions: r.simulated_instructions,
             simulated_memory: r.simulated_memory,
         })
+    }
+
+    /// Runs `host_function` the way [`Self::simulate_invoke`] does, but keeps what the host
+    /// recorded when the invocation fails: soroban-simulation 30.0.0
+    /// (`simulate_invoke_host_function_op`, src/simulation.rs 166-171) returns no footprint
+    /// and no auth for a failed run, while soroban-env-host 30.0.0
+    /// (`invoke_host_function_in_recording_mode`, src/e2e_invoke.rs 752-940) still builds the
+    /// footprint of every entry the run touched and the auth it recorded up to the failure.
+    /// A transaction carrying that footprint and auth fails on core where this run failed.
+    pub fn record_invoke(
+        &self,
+        host_function: HostFunction,
+        auth_mode: AuthMode,
+        source: &AccountId,
+    ) -> Result<RecordedInvoke, SimError> {
+        let mode = match auth_mode {
+            AuthMode::Enforce(entries) => RecordingInvocationAuthMode::Enforcing(entries),
+            AuthMode::Record {
+                allow_non_root,
+                address_v2,
+            } => RecordingInvocationAuthMode::recording(!allow_non_root, address_v2),
+        };
+        // the budget soroban-simulation 30.0.0 builds (`NetworkConfig::create_budget`,
+        // src/network_config.rs 152-165), which it keeps crate private
+        let nc = &self.network_config;
+        let budget = soroban_env_host::budget::Budget::try_from_configs_with_shadow_limits(
+            nc.tx_max_instructions as u64,
+            nc.tx_memory_limit as u64,
+            (nc.tx_max_instructions as u64).saturating_mul(10),
+            (nc.tx_memory_limit as u64).saturating_mul(2),
+            nc.cpu_cost_params.clone(),
+            nc.memory_cost_params.clone(),
+        )
+        .map_err(|e| SimError::Setup(format!("budget: {:?}", e.error)))?;
+        let source_snapshot: Rc<dyn SnapshotSource> = self.snapshot.clone();
+        let mut diagnostic_events = Vec::new();
+        let run = soroban_env_host::e2e_invoke::invoke_host_function_in_recording_mode(
+            &budget,
+            true,
+            &host_function,
+            source,
+            mode,
+            self.ledger_info.clone(),
+            source_snapshot,
+            SIMULATION_PRNG_SEED,
+            &mut diagnostic_events,
+        );
+        if let Some(e) = self.snapshot.take_failure() {
+            return Err(e);
+        }
+        // a host error out of the run itself, not out of the invocation, is the host refusing
+        // the inputs before it calls anything: the auth entries it converts first
+        // (`set_authorization_entries`, src/e2e_invoke.rs 780-787). ledger reads failing are
+        // the snapshot's, taken above
+        let r = match run {
+            Ok(r) => r,
+            Err(e) => {
+                return Ok(RecordedInvoke {
+                    result: Err(format!("{:?}", e.error)),
+                    auth: Vec::new(),
+                    resources: None,
+                    restored_rw_entry_indices: Vec::new(),
+                });
+            }
+        };
+        Ok(RecordedInvoke {
+            result: r.invoke_result.map_err(|e| format!("{:?}", e.error)),
+            auth: r.auth,
+            resources: Some(r.resources),
+            restored_rw_entry_indices: r.restored_rw_entry_indices,
+        })
+    }
+
+    /// The resource fee core asks of a transaction declaring `resources` that is
+    /// `transaction_size_bytes` long and emits no events: what a transaction whose invocation
+    /// fails pays, since a failed invocation writes no entry and so pays no rent.
+    pub fn failed_invoke_fee(
+        &self,
+        resources: &stellar_xdr::SorobanResources,
+        restored_entries: u32,
+        transaction_size_bytes: u32,
+    ) -> i64 {
+        // disk read entries as soroban-simulation 30.0.0 counts them
+        // (`compute_adjusted_transaction_resources`, src/resources.rs 84-126): classic keys of
+        // either footprint plus the entries restored on the way
+        let classic =
+            |k: &&LedgerKey| !matches!(k, LedgerKey::ContractData(_) | LedgerKey::ContractCode(_));
+        let fp = &resources.footprint;
+        let disk_read_entries = (fp.read_only.iter().filter(classic).count()
+            + fp.read_write.iter().filter(classic).count()) as u32
+            + restored_entries;
+        let tx = soroban_env_host::fees::TransactionResources {
+            instructions: resources.instructions,
+            disk_read_entries,
+            write_entries: fp.read_write.len() as u32,
+            disk_read_bytes: resources.disk_read_bytes,
+            write_bytes: resources.write_bytes,
+            contract_events_size_bytes: 0,
+            transaction_size_bytes,
+        };
+        let (non_refundable, refundable) = soroban_env_host::fees::compute_transaction_resource_fee(
+            &tx,
+            &self.network_config.fee_configuration,
+        );
+        non_refundable.saturating_add(refundable)
     }
 
     /// Extend-TTL simulation for `keys`, extending to `extend_to` ledgers past
