@@ -1,12 +1,15 @@
 name: upstream-drift
 
-# weekly: every pin must still exist upstream, and every new stellar-core, stellar-xdr, sdk or
-# stellar-cli release, change to core's golden index or change to a CAP text gets a tracking
-# issue carrying the checklist of docs/protocol-upgrade-runbook.md and what
-# scripts/upstream-regenerate.sh produced against the new version (schema diff and family dating
-# for xdr definitions, the gate list for core, a conformance run for an sdk, the changed CAP
-# texts with their protocols), and a conformance/versions.toml that conformance sync-versions
-# would change gets one listing the difference
+# weekly: every pin must still exist upstream; every new stellar-core, stellar-xdr or stellar-cli
+# release, change to core's golden index or change to a CAP text gets a tracking issue carrying
+# the checklist of docs/protocol-upgrade-runbook.md and what scripts/upstream-regenerate.sh
+# produced against the new version; a conformance/versions.toml that conformance sync-versions
+# would change gets one listing the difference. an sdk whose registry has a newer current version
+# than versions.toml, and an indexer whose newest upstream version is not the pin, is run over
+# the corpus at that version without moving the pin, and its tracking issue says which findings
+# now pass, which entries newly fail and the command that moves the pin
+# (scripts/upstream-drift.py). issues are opened in this repository only; nothing is written to
+# an upstream repository. moving a pin stays a manual step (docs/maintenance.md)
 
 on:
   schedule:
@@ -15,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   group: upstream-drift
@@ -24,34 +26,52 @@ concurrency:
 jobs:
   drift:
     runs-on: ubuntu-24.04
-    # an sdk release builds its testee and runs the corpus through it
-    timeout-minutes: 90
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      sdks: ${{ steps.targets.outputs.sdks }}
+      indexers: ${{ steps.targets.outputs.indexers }}
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@1.99.1
       - uses: Swatinem/rust-cache@v2
         with:
           key: release
-      - uses: actions/setup-go@v7
-        with:
-          go-version: 1.27.4
-          cache-dependency-path: "testees/go/**/*.sum"
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 26.13.1
-          cache: npm
-          cache-dependency-path: testees/js/**/package-lock.json
       - run: cargo build --release --locked -p shapekit-cli
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shapekit
+          path: target/release/shapekit
+          retention-days: 3
       - name: verify every pin still exists upstream
         env:
           # the [[release]] pins read github's releases api, which allows 60 unauthenticated
           # requests an hour per address
           GITHUB_TOKEN: ${{ github.token }}
         run: target/release/shapekit pins verify
-      - name: tracking issue when the sdk version matrix is behind the registries
+      - name: sdks and indexers whose upstream version differs from the pin
+        id: targets
         if: ${{ !cancelled() }}
         env:
           # sync-versions dates a stellar-xdr tag through the github api
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # --check writes nothing; its summary names each sdk's current version in the
+          # registry, and it exits 1 when the matrix is behind, which the next step reports
+          target/release/shapekit conformance sync-versions --check >"$RUNNER_TEMP/sync-summary.txt" || true
+          sdks=$(python3 -I scripts/upstream-drift.py sdks --versions conformance/versions.toml \
+            --summary "$RUNNER_TEMP/sync-summary.txt")
+          indexers=$(python3 -I scripts/upstream-drift.py indexers)
+          echo "sdks=$sdks" >>"$GITHUB_OUTPUT"
+          echo "indexers=$indexers" >>"$GITHUB_OUTPUT"
+          echo "sdks: $sdks"
+          echo "indexers: $indexers"
+      - name: tracking issue when the sdk version matrix is behind the registries
+        if: ${{ !cancelled() }}
+        env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -71,13 +91,223 @@ jobs:
           else
             gh issue create --title "$title" --body-file "$report"
           fi
-      - name: tracking issues for new upstream releases, golden index and CAP text changes
-        # runs even when a pin is broken, since that is exactly when the report is wanted. after
-        # the matrix check, because regenerating an sdk release rewrites conformance/versions.toml
+      - name: tracking issues for new core, xdr and stellar-cli releases, golden index and CAP text changes
+        # runs even when a pin is broken, since that is exactly when the report is wanted
         if: ${{ !cancelled() }}
         env:
-          # an sdk release runs sync-versions, which dates a stellar-xdr tag through the github api
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: scripts/upstream-releases.sh
+
+  sdks:
+    # every sdk whose registry has a newer current version: versions.toml as sync-versions writes
+    # it (in this job's checkout only), the --all-versions run over the corpus, and its report.
+    # skipped when no sdk differs
+    needs: drift
+    if: ${{ !cancelled() && needs.drift.outputs.sdks != '' && needs.drift.outputs.sdks != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@1.99.1
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: "testees/go/**/*.sum"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 11.0.100
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: bcmath, gmp, mbstring, sodium
+          tools: composer:2.11.2
+      - name: flutter 3.50.0, the archive pins.toml pins, for the dart testee
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/flutter.tar.xz" \
+            https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.50.0-stable.tar.xz
+          echo "6ea2d806fd57269ae783e6788e2a81fc26eaad782f1e0d0ff38623bb765ff9f5  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >>"$GITHUB_PATH"
+      - name: pinned uv and cpython for the python testee
+        run: scripts/python-toolchain.sh >>"$GITHUB_PATH"
+      - name: pinned jdk and maven for the java and kmp testees
+        run: scripts/java-toolchain.sh >>"$GITHUB_PATH"
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: sync-versions, then each sdk's new version over the corpus
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SDKS: ${{ needs.drift.outputs.sdks }}
+        run: |
+          set -uo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          shapekit=$RUNNER_TEMP/bin/shapekit
+          mkdir -p drift
+          # the new versions get their versions.toml entries and lock files in this checkout;
+          # nothing is committed
+          sync_failed=false
+          "$shapekit" conformance sync-versions >drift/sync.log 2>&1 || sync_failed=true
+          python3 -I -c 'import json, sys
+          for s in json.loads(sys.argv[1]):
+              print(s["sdk"], s["pinned"], s["upstream"])' "$SDKS" >drift/targets.txt
+          while read -r sdk pinned upstream; do
+            report="drift/sdk-$sdk.md"
+            printf '%s\n' "upstream: sdk $sdk $upstream" >"drift/sdk-$sdk.title"
+            if $sync_failed; then
+              {
+                echo "$sdk $upstream is the registry's current version; conformance/versions.toml has $pinned."
+                echo
+                echo "\`shapekit conformance sync-versions\` failed, so the new version was not run:"
+                echo
+                echo '```'
+                tail -n 40 drift/sync.log
+                echo '```'
+              } >"$report"
+              continue
+            fi
+            # the run exits non-zero when the new version breaks a known-failures expectation,
+            # which the report shows
+            "$shapekit" conformance run --sdk "$sdk" --all-versions --out "drift/run-$sdk" \
+              >"drift/run-$sdk.log" 2>&1 || true
+            if [ -f "drift/run-$sdk/divergence-matrix.json" ]; then
+              python3 -I scripts/upstream-drift.py sdk-report --sdk "$sdk" --pinned "$pinned" \
+                --upstream "$upstream" --matrix "drift/run-$sdk/divergence-matrix.json" >"$report"
+            else
+              {
+                echo "$sdk $upstream is the registry's current version; conformance/versions.toml has $pinned."
+                echo
+                echo "\`shapekit conformance run --sdk $sdk --all-versions\` wrote no matrix:"
+                echo
+                echo '```'
+                tail -n 40 "drift/run-$sdk.log"
+                echo '```'
+              } >"$report"
+            fi
+          done <drift/targets.txt
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: drift-sdks
+          path: |
+            drift/*.md
+            drift/*.title
+          retention-days: 30
+
+  indexers:
+    # each indexer whose newest upstream version is not the pin, over every chain of both
+    # networks at that version, one job per indexer. skipped when no indexer differs
+    needs: drift
+    if: ${{ !cancelled() && needs.drift.outputs.indexers != '' && needs.drift.outputs.indexers != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        indexer: ${{ fromJSON(needs.drift.outputs.indexers) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.4
+          cache-dependency-path: adapters/go.sum
+      - uses: actions/download-artifact@v8
+        with:
+          name: shapekit
+          path: ${{ runner.temp }}/bin
+      - name: the pinned images the adapter needs besides the indexer's own
+        env:
+          NAME: ${{ matrix.indexer.name }}
+        run: |
+          set -euo pipefail
+          case "$NAME" in
+            wallet-backend)
+              docker pull --quiet "$(scripts/pin.sh image timescaledb)"
+              docker pull --quiet "$(scripts/pin.sh image seaweedfs)"
+              ;;
+            stellar-etl) docker pull --quiet "$(scripts/pin.sh image fake-gcs-server)" ;;
+          esac
+      - name: build the adapters
+        run: |
+          cd adapters
+          go build -o bin/wb-adapter ./walletbackend/cmd/wb-adapter
+          go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter
+          go build -o bin/rpc-adapter ./stellarrpc/cmd/rpc-adapter
+      - name: harness run at the upstream version, and its report
+        env:
+          NAME: ${{ matrix.indexer.name }}
+          UPSTREAM: ${{ matrix.indexer.upstream }}
+          ADAPTER: ${{ matrix.indexer.adapter }}
+          BASE: ${{ matrix.indexer.base }}
+        run: |
+          set -uo pipefail
+          chmod +x "$RUNNER_TEMP/bin/shapekit"
+          mkdir -p drift
+          report="drift/indexer-$NAME.md"
+          printf '%s\n' "upstream: indexer $NAME $UPSTREAM" >"drift/indexer-$NAME.title"
+          "$RUNNER_TEMP/bin/shapekit" harness run --network both --adapter "$ADAPTER" --out harness-out \
+            >drift/harness.log 2>&1 || true
+          if [ -f harness-out/harness-report.json ]; then
+            python3 -I scripts/upstream-drift.py indexer-report --name "$NAME" --upstream "$UPSTREAM" \
+              --base "$BASE" --run harness-out/harness-report.json \
+              --command "shapekit harness run --network both --adapter \"$ADAPTER\"" >"$report"
+          else
+            {
+              echo "$NAME $UPSTREAM is the newest upstream version; its harness run did not finish:"
+              echo
+              echo '```'
+              tail -n 60 drift/harness.log
+              echo '```'
+            } >"$report"
+          fi
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: drift-indexer-${{ matrix.indexer.name }}
+          path: |
+            drift/*.md
+            drift/*.title
+          retention-days: 30
+
+  issues:
+    # one tracking issue per new sdk or indexer version, in this repository only
+    needs: [drift, sdks, indexers]
+    # only when a leg ran: with no artifact the download would fail
+    if: >-
+      ${{ !cancelled() && needs.drift.result == 'success' &&
+      (needs.sdks.result != 'skipped' || needs.indexers.result != 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: drift-*
+          path: drift
+          merge-multiple: true
+      - name: open the tracking issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for t in drift/*.title; do
+            title=$(cat "$t")
+            existing=$(gh issue list --state all --search "\"$title\" in:title" --json number,title \
+              --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)
+            if [ -n "$existing" ]; then
+              echo "#$existing already tracks: $title"
+            else
+              gh issue create --title "$title" --body-file "${t%.title}.md"
+            fi
+          done

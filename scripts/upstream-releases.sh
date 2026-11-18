@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# compares the newest upstream releases, core's golden index and the CAP texts with what
-# pins.toml and the committed golden snapshot hold, and opens one tracking issue, carrying the
-# protocol upgrade runbook's checklist and what scripts/upstream-regenerate.sh produced against
-# the new version, for each new upstream item.
+# compares the newest stellar-core, stellar-xdr and stellar-cli releases, core's golden index and
+# the CAP texts with what pins.toml and the committed golden snapshot hold, and opens one
+# tracking issue, carrying the protocol upgrade runbook's checklist and what
+# scripts/upstream-regenerate.sh produced against the new version, for each new upstream item. the sdks and indexers are tracked by
+# scripts/upstream-drift.py and the drift workflow's sdk and indexer jobs, which run the new
+# version over the corpus.
 #
 # usage: scripts/upstream-releases.sh [--dry-run]
 #   --dry-run  print the report and skip every gh call
 #
-# needs: git, curl, python3 >= 3.11 (for tomllib). without --dry-run also gh,
+# needs: git, python3 >= 3.11 (for tomllib). without --dry-run also gh,
 # with GH_TOKEN and GH_REPO set (the drift workflow sets both).
 set -euo pipefail
 
@@ -20,9 +22,6 @@ esac
 
 root=$(git rev-parse --show-toplevel)
 pins="$root/pins.toml"
-
-# crates.io rejects requests without a user agent
-ua="shapekit-upstream-releases (https://github.com/${GH_REPO:-shapekit})"
 
 # newest tag matching an anchored regex, by version sort. ls-remote needs no token
 # and is not rate limited the way the releases api is.
@@ -37,64 +36,40 @@ newest_tag() {
   echo "$tag"
 }
 
-json_field() {
-  python3 -I -c 'import json, sys
-v = json.load(sys.stdin)
-for k in sys.argv[1].split("."):
-    v = v[k]
-print(v)' "$1"
-}
-
 upstream_core=$(newest_tag stellar/stellar-core '^v[0-9]+\.[0-9]+\.[0-9]+$')
 upstream_xdr=$(newest_tag stellar/stellar-xdr '^v[0-9]+\.[0-9]+$')
-upstream_js=$(curl -fsS -A "$ua" https://registry.npmjs.org/@stellar%2fstellar-sdk/latest | json_field version)
-upstream_go=$(curl -fsS -A "$ua" https://proxy.golang.org/github.com/stellar/go-stellar-sdk/@latest | json_field Version)
-upstream_crate=$(curl -fsS -A "$ua" https://crates.io/api/v1/crates/stellar-xdr | json_field crate.max_stable_version)
 upstream_cli=$(newest_tag stellar/stellar-cli '^v[0-9]+\.[0-9]+\.[0-9]+$')
 
-# prints the six pinned versions, one per line, in the same order as above
+# prints the three pinned versions, one per line, in the same order as above
 read_pins() {
   python3 -I - "$pins" <<'PY'
-import re, sys, tomllib
+import sys, tomllib
 
 with open(sys.argv[1], "rb") as f:
     pins = tomllib.load(f)
-
-def key(v):
-    return tuple(int(n) for n in re.findall(r"\d+", v.split("+")[0]))
 
 def git_tag(name):
     [entry] = [g for g in pins["git"] if g["name"] == name]
     return entry["ref"].removeprefix("refs/tags/")
 
-# matrix packages pin several versions; the newest pinned one is what an upstream
-# release is compared against
-def newest(table, field, name):
-    found = [e["version"] for e in pins[table] if e[field] == name]
-    if not found:
-        sys.exit(f"pins.toml has no {table} entry for {name}")
-    return max(found, key=key)
-
 print(git_tag("stellar-core"))
 print(git_tag("stellar-xdr"))
-print(newest("npm", "name", "@stellar/stellar-sdk"))
-print(newest("gomod", "module", "github.com/stellar/go-stellar-sdk"))
-print(newest("crate", "name", "stellar-xdr"))
 [cli] = [r for r in pins["release"] if r["name"] == "stellar-cli"]
 print(cli["tag"])
 PY
 }
 
 mapfile -t pinned < <(read_pins)
-if [ "${#pinned[@]}" -ne 6 ]; then
-  echo "could not read the six pins from $pins" >&2
+if [ "${#pinned[@]}" -ne 3 ]; then
+  echo "could not read the three pins from $pins" >&2
   exit 1
 fi
 
-names=("stellar-core" "stellar-xdr (definitions)" "@stellar/stellar-sdk" "github.com/stellar/go-stellar-sdk" "stellar-xdr (crate)" "stellar-cli")
+# stellar-cli here is the release that builds the test contracts; its testee is an sdk
+names=("stellar-core" "stellar-xdr (definitions)" "stellar-cli")
 # the scripts/upstream-regenerate.sh item of each name; stellar-cli has nothing to regenerate
-regen=("core" "xdr" "js" "go" "rust" "")
-upstream=("$upstream_core" "$upstream_xdr" "$upstream_js" "$upstream_go" "$upstream_crate" "$upstream_cli")
+regen=("core" "xdr" "")
+upstream=("$upstream_core" "$upstream_xdr" "$upstream_cli")
 
 # one tracking issue per new upstream item; the title names the item, so a later run finds
 # the issue (open or closed) instead of opening it again

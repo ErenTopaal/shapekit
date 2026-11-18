@@ -15,11 +15,14 @@ yet), do not follow the steps on the main branch: rehearse them in the separate 
 described in [Rehearsing before the release](#rehearsing-before-the-release-next-tier).
 
 `upstream-drift.yml` runs weekly and opens a tracking issue with the checklist at the end of
-this page when a new stellar-core, stellar-xdr, SDK or stellar-cli release, a change to core's
+this page when a new stellar-core, stellar-xdr or stellar-cli release, a change to core's
 golden index or a change to a CAP text appears. The issue also holds what
 `scripts/upstream-regenerate.sh` produced against the new version: the schema diff and family
-dating for new XDR definitions, the protocol gate list for a new core, a conformance run for a
-new SDK, and the changed CAP texts with the protocol each names. Run the same script locally to
+dating for new XDR definitions, the protocol gate list for a new core, and the changed CAP
+texts with the protocol each names. A new SDK or indexer version gets its own issue with its
+corpus run and the commands that move its pin
+([maintenance.md](maintenance.md#upstream-drift-of-the-sdks-and-indexers)); during an upgrade,
+steps 8 and 9 below move those pins. Run the same script locally to
 repeat any of them. Work through the issue in order; each step is a pull request or a commit on
 one upgrade branch.
 
@@ -296,6 +299,12 @@ shapekit harness reproduce --table adapters/walletbackend/reproductions.toml
 
 Read `harness-out/HARNESS.md`; new `mishandled` or `dropped` verdicts on new families are
 findings.
+
+Move the stellar-etl and stellar-rpc pins the same way when they have a release for the new
+protocol, as [Moving an indexer pin](maintenance.md#moving-an-indexer-pin) describes: the
+stellar-etl adapter needs the go-stellar-sdk version its new `go.mod` requires in
+`sdkProtocols` in `adapters/stellaretl/build.go`, and the stellar-rpc adapter the new image,
+version and commit in `adapters/stellarrpc/adapter.go`.
 
 ### 10. Linter
 

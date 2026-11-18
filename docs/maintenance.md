@@ -56,9 +56,12 @@ How to repeat the rehearsal for the next protocol is in
 ## What maintenance covers
 
 - Keeping the pins current: `upstream-drift.yml` runs every Monday and opens a tracking issue
-  when stellar-core, the stellar-xdr definitions, the `stellar-xdr` crate,
-  `@stellar/stellar-sdk`, `go-stellar-sdk` or the core golden index changes upstream. Each such
-  issue carries the runbook checklist and is worked through or closed with a reason.
+  when stellar-core, the stellar-xdr definitions, the stellar-cli release that builds the test
+  contracts, a CAP text or the core golden index changes upstream, when an SDK's registry has a
+  newer current version than `conformance/versions.toml`, and when wallet-backend, stellar-etl
+  or stellar-rpc has a newer version than its pin. Each such issue is worked through or closed
+  with a reason; [Upstream drift of the SDKs and indexers](#upstream-drift-of-the-sdks-and-indexers)
+  says what the SDK and indexer issues hold and how to move their pins.
 - Keeping CI green: `pr.yml` on every pull request, `nightly.yml` every night. A red nightly
   run is either a bug in shapekit or a real upstream change. A known-failures line is added
   only with an issue link, never to silence a red run.
@@ -66,6 +69,70 @@ How to repeat the rehearsal for the next protocol is in
   rules below.
 - Releases: a signed tag runs `release.yml`, which publishes the binaries, the corpus archive
   and the golden snapshot with checksums and attestations.
+
+## Upstream drift of the SDKs and indexers
+
+`scripts/upstream-drift.py` decides what is newer upstream:
+
+| target | newest upstream | pin |
+|---|---|---|
+| each of the 11 SDKs | the current version `shapekit conformance sync-versions --check` derives from the SDK's registry | `current` in `conformance/versions.toml` |
+| stellar-etl | its newest `vX.Y.Z` tag | `[[git]] stellar-etl` in `pins.toml` |
+| stellar-rpc | its newest `vX.Y.Z` tag, run from the `stellar/stellar-rpc:<version>` image | `[[image]] stellar-rpc` in `pins.toml` |
+| wallet-backend | the newest commit of `main`: the repository publishes no release tags and is deployed from `main` | `[[git]] wallet-backend` in `pins.toml` |
+
+When one differs, the workflow runs that version over the corpus without moving the pin: the
+SDK job runs `shapekit conformance sync-versions` in its own checkout and
+`shapekit conformance run --sdk <sdk> --all-versions`; one indexer job per indexer runs
+`shapekit harness run --network both` with the adapter pointed at the new version
+(`wb-adapter --commit`, `etl-adapter --commit`, `rpc-adapter --image --version --commit`). A job
+runs only when something differs. The tracking issue, titled `upstream: sdk <sdk> <version>` or
+`upstream: indexer <name> <version>`, lists:
+
+- the findings whose every failing entry passes at the new version, with their upstream links,
+  so the upstream issue may be fixed;
+- the entries that fail at the new version and did not at the pin, with the failing checks or
+  the harness verdict and its problems;
+- the entries that failed at the pin and pass now;
+- the commands that move the pin.
+
+The issue is opened in this repository; nothing is written upstream. To see the text for a
+run you made yourself, call the script on its output:
+
+```sh
+python3 -I scripts/upstream-drift.py sdk-report --sdk go --pinned v0.8.0 --upstream v0.9.0 \
+  --matrix target/conformance/go/divergence-matrix.json
+python3 -I scripts/upstream-drift.py indexer-report --name stellar-etl --upstream v2.8.35 \
+  --base findings/inputs/harness-stellar-etl-2b24ec89.json --run harness-out/harness-report.json
+```
+
+### Moving an SDK to a new version
+
+Moving the pin is a pull request, never done by the workflow:
+
+1. `shapekit conformance sync-versions` brings the new version into `conformance/versions.toml`
+   and writes its testee files under `testees/<sdk>/versions/<version>/`.
+2. For rust, go and js, change the version in `pins.toml` (`[[crate]]`, `[[gomod]]`,
+   `[[npm]]`) and run `shapekit pins verify`.
+3. `shapekit conformance run --sdk <sdk> --all-versions` and `shapekit conformance reproduce
+   --no-build`; a new failure is triaged as in [Triage](#triage) before the merge.
+4. For rust, go and js, `shapekit findings import-inputs`, `shapekit findings collect` and
+   `shapekit findings check`.
+
+### Moving an indexer pin
+
+1. Change the pin in `pins.toml`: the `sha` (and for stellar-etl the `ref`) of the `[[git]]`
+   entry, or the `tag` and `digest` of `[[image]] stellar-rpc` together with `Image`,
+   `Version30` and `Commit` in `adapters/stellarrpc/adapter.go`. For stellar-etl, add the
+   go-stellar-sdk version its `go.mod` requires to `sdkProtocols` in
+   `adapters/stellaretl/build.go` when the adapter reports it unknown.
+2. Run the harness with the command in `findings/triage.toml` (`[[inputs.import]]`) at the new
+   pin, update the import paths there and in `candidate/findings/triage.toml`, then
+   `shapekit findings import-inputs`, `shapekit findings collect` and `shapekit findings check`.
+   For wallet-backend also `shapekit harness reproduce --table
+   adapters/walletbackend/reproductions.toml`; for stellar-rpc regenerate
+   `crates/shapekit-harness/expect/stellar-rpc.toml` with `shapekit harness expect` after
+   reviewing the run.
 
 ## Triage
 
