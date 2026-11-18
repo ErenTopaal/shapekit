@@ -55,7 +55,7 @@ same tag, so the workflow and the corpus come from one release.
 | `setup` | no | shell commands run from the root of your repository before the replay: build the adapter, build or pull the images the indexer needs |
 | `shapekit-tag`, `corpus-asset`, `corpus-sha256`, `shapekit-sha256` | yes | the pinned release |
 | `chains` | no | chain ids to replay, separated by spaces; every chain of the corpus when empty |
-| `families` | no | families whose chains to replay, separated by spaces |
+| `families` | no | families whose chains to replay, separated by spaces; with `chains`, a chain must match both |
 | `network` | no | `testnet` (default), `mainnet` or `both` |
 | `delivery` | no | delivery mode to ask the adapter for: `sep54-filesystem`, `sep54-s3`, `sep54-gcs` or `rpc`; the adapter's default when empty |
 | `expect` | no | path, in your repository, of an expected-verdicts file |

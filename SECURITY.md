@@ -10,8 +10,8 @@ published.
 
 In scope:
 
-- the tools in this repository (`shapekit`, `indexerlint`, the wallet-backend adapter, the
-  testees), for example a corpus file or replay input that makes them execute code, write
+- the tools in this repository (`shapekit`, `indexerlint`, the wallet-backend, stellar-etl and
+  stellar-rpc adapters, the testees), for example a corpus file or replay input that makes them execute code, write
   outside their output directory, or reach the network when they are documented as offline;
 - the release process and its artifacts (`release.yml`, the corpus archive, `SHA256SUMS`, the
   provenance attestations);

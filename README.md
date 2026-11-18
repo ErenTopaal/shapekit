@@ -30,7 +30,7 @@ The dated log of what has landed is [STATUS.md](STATUS.md).
 | SDK conformance runner and the testees for the Rust, Go, JavaScript, Python, Java, Dart, PHP, .NET and Kotlin Multiplatform SDKs and soroban-sdk | `crates/shapekit-conformance`, `testees/`, `conformance/` | [testee protocol](docs/testee-protocol.md), [running it in an SDK's CI](docs/sdk-ci.md), [seeded faults](docs/seeded-faults.md) |
 | Fuzzing: stellar-xdr against go-stellar-sdk, a coverage-guided search across the Rust, Go and JavaScript SDKs, and each SDK's own fuzzer checked by the encoding laws | `crates/shapekit-fuzz`, `testees/*/fuzz` | [differential fuzzing](docs/differential-fuzzing.md) |
 | Linter for Go indexers built on go-stellar-sdk | `lint/` | [indexerlint](docs/linter.md) |
-| Indexer-hardening guide, written for developers.stellar.org; a draft until a stellar-core or platform engineer has reviewed it (see the publication gate in [STATUS.md](STATUS.md)) | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
+| Indexer-hardening guide, written for developers.stellar.org; a draft until a stellar-core or platform engineer has reviewed it (see the [guide publication gate](STATUS.md#guide-publication-gate)) | `docs/guide/` | [the guide](docs/guide/indexer-hardening.mdx) |
 | Findings from running the corpus, each with its severity, affected component and corpus entry | `findings/` | [findings report](findings/FINDINGS.md) |
 | CI, releases, maintenance | `.github/workflows/` | [infrastructure](docs/infrastructure.md), [maintenance](docs/maintenance.md), [protocol upgrade runbook](docs/protocol-upgrade-runbook.md), [security policy](SECURITY.md) |
 
@@ -113,8 +113,12 @@ each SDK version and the reference indexer did with them, use the
 
 ### Run an SDK over the corpus
 
-Needs the toolchain of that SDK (cargo, go, node, uv with CPython 3.15 for Python, or JDK 27 and
-Maven for Java and Kotlin Multiplatform).
+Each SDK needs its own toolchain: cargo for rust, soroban and stellar-cli, go, node for js, uv
+with CPython 3.15.2 for python, JDK 27 and Maven for java and kmp, Flutter for dart, PHP and
+Composer for php, and the .NET SDK for dotnet. `shapekit doctor sdk --sdk <sdk>` lists what is
+missing. For python, java and kmp, `export PATH="$(scripts/python-toolchain.sh):$PATH"` and
+`export PATH="$(scripts/java-toolchain.sh):$PATH"` fetch the pinned versions into
+`target/toolchains/` and check each download against its sha256.
 
 ```sh
 shapekit check sdk --sdk js                  # current version, @stellar/stellar-sdk 17.4.0
@@ -165,6 +169,16 @@ shapekit check indexer --mapping adapters/walletbackend/adapter.toml \
 
 [docs/mapping-adapter.md](docs/mapping-adapter.md) describes the file.
 
+stellar-etl is built from its pinned release tag on first use, like wallet-backend, and reads
+the chains from a GCS emulator:
+
+```sh
+docker pull "$(scripts/pin.sh image fake-gcs-server)"
+(cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
+shapekit check indexer --adapter "adapters/bin/etl-adapter --commit $(scripts/pin.sh git stellar-etl)" \
+  --chain cap40.signed-payload-signer.p30
+```
+
 For any other indexer, write an adapter as described in
 [docs/adapter-interface.md](docs/adapter-interface.md). To replay the corpus in an indexer
 repository's own CI, see [docs/indexer-ci.md](docs/indexer-ci.md).
@@ -185,12 +199,13 @@ reruns it. With a baseline it marks failures as new, changed, fixed or unchanged
 
 ```sh
 shapekit lint <your indexer>                                  # indexerlint ./... in that module
-shapekit lint <your indexer> --baseline indexerlint-baseline.json --json
+shapekit lint <your indexer> --baseline <baseline file> --json
 ```
 
 `shapekit lint` starts `indexerlint`, so the linter binary has to be on `PATH` (or named with
 `--linter`), and the Go toolchain too, since the linter loads packages with it. Run on its own,
-`indexerlint ./...` does the same. Rules, suppressions and the baseline file are described in
+`indexerlint ./...` does the same. A relative `--baseline` path is read from the directory you
+run `shapekit lint` in, not from the indexer's directory. Rules, suppressions and the baseline file are described in
 [docs/linter.md](docs/linter.md). The same checks are a checklist in the guide for indexers in
 other languages.
 
@@ -218,8 +233,8 @@ them with one line each.
 `docs/guide/stellar-docs.patch` adds the guide to stellar/stellar-docs as
 `docs/data/indexers/build-your-own/indexer-hardening.mdx`, with a link from the Build Your Own
 index and an entry in `docs.json`. It is made from the guide in this commit with the
-publication-gate comment lines removed and corpus entries linked at the v0.1.0 tag (`shapekit
-guide table --corpus-url https://github.com/ErenTopaal/shapekit/blob/v0.1.0/corpus`), on top
+publication-gate comment lines removed and corpus entries linked at the v0.2.0 tag (`shapekit
+guide table --corpus-url https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus`), on top
 of stellar-docs `main` at `62f29bbb`. The two patched `.mdx` files pass stellar-docs' prettier
 configuration and its `scripts/pad-component-tags.mjs --check`; `mint validate` and `mint
 broken-links` have not been run on them. To apply the patch and repeat those two checks:
@@ -231,6 +246,21 @@ pnpm install
 pnpm exec prettier --config .prettierrc.js --check docs/data/indexers/build-your-own/*.mdx
 node scripts/pad-component-tags.mjs --check docs/data/indexers/build-your-own/*.mdx
 ```
+
+To make the patch again after the guide changes, continue on that branch with `SK` set to the
+root of this repository:
+
+```sh
+f=docs/data/indexers/build-your-own/indexer-hardening.mdx
+sed '2,5d' "$SK/docs/guide/indexer-hardening.mdx" > "$f"    # drops the publication-gate comment
+(cd "$SK" && shapekit guide table --file "$OLDPWD/$f" \
+  --corpus-url https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus)
+git commit -a --amend --no-edit
+git format-patch -1 --stdout > "$SK/docs/guide/stellar-docs.patch"
+```
+
+`shapekit guide table` runs from the repository root because it reads `registry/` and
+`corpus/manifest.json` from there.
 
 ### Regenerate the corpus
 

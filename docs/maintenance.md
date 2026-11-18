@@ -7,7 +7,7 @@ steps for a new protocol version are in [protocol-upgrade-runbook.md](protocol-u
 
 - Maintainer: GitHub user `ErenTopaal`.
 - Duration: from the production release through the first protocol upgrade after delivery,
-  protocol 31. CAP-89 and CAP-90 target protocol 31; both are in Draft status on 2026-11-14.
+  protocol 31. CAP-89 and CAP-90 target protocol 31; both are in Draft status on 2026-11-18.
   The commitment ends when a shapekit release covering protocol 31 is published by following
   the runbook, with every CI tier green.
 
@@ -107,10 +107,11 @@ request that touches them. A branch ruleset on `main` (Settings, Rules) enforces
 
 - require a pull request before merging;
 - require conversation resolution;
-- require the status checks of the `pr.yml` jobs that run on every pull request (build, rust,
-  go, js, contracts, corpus, repro-select, conformance, harness) and that the branch is up to date. The
-  `repro (<shard>)` jobs are not listed: their number depends on the selection, and a failing
-  shard fails the workflow run;
+- require the status checks of nine `pr.yml` jobs (build, rust, go, js, contracts, corpus,
+  repro-select, conformance and harness) and that the branch is up to date. The jobs of the
+  other testees (python, java, soroban, dart, php, dotnet, kmp and stellar-cli) also run on
+  every pull request but are not required checks. The `repro (<shard>)` jobs are not listed:
+  their number depends on the selection, and a failing shard fails the workflow run;
 - block force pushes and deletion.
 
 Repository administrators can bypass the ruleset.
@@ -169,10 +170,13 @@ against its sha256 in `pins.toml`. It stops at the first failing check and names
   with the committed wasm, the site built as `site.yml` builds it, and `scripts/check-links.ts
   --site site/dist/client`, which also checks every link of the prerendered site and fetches
   every external link. It also needs docker, network access for those fetches and the
-  `wasm32v1-none` Rust target. The last lines of its
-  reproduction step and of the findings step give the totals, measured on 2026-11-17:
-  `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)` and
-  `24 findings, 516 failures, 0 unmapped`.
+  `wasm32v1-none` Rust target. `pins verify` reads the GitHub REST API, which allows 60
+  unauthenticated requests an hour per address; set `GITHUB_TOKEN` so a run does not stop on
+  that limit. The last line of its reproduction step gives the table's
+  total, measured on 2026-11-17:
+  `harness reproduce: 24 of 24 table rows hold (20 entry verdicts, 4 carry checks)`. The
+  findings step over the committed inputs prints, on 2026-11-18,
+  `25 findings, 891 failures, 0 unmapped; 0 of 25 findings pending filing (status draft)`.
 
 ## How SDKs pin a corpus release
 

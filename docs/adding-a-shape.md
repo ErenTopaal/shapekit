@@ -69,11 +69,15 @@ impl Recipe for MyRecipe {
     fn emit_classic_events(&self) -> bool { true }  // EMIT_CLASSIC_EVENTS
     fn backfill_stellar_asset_events(&self) -> bool { true } // BACKFILL_STELLAR_ASSET_EVENTS, needs the above
     fn below_protocol_valid(&self) -> bool { false } // contrast chain below the family's valid range
+    fn emit_ledger_close_meta_ext_v1(&self) -> bool { false }        // EMIT_LEDGER_CLOSE_META_EXT_V1
+    fn emit_soroban_transaction_meta_ext_v1(&self) -> bool { false } // EMIT_SOROBAN_TRANSACTION_META_EXT_V1
     fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()> { /* steps and captures */ Ok(()) }
 }
 ```
 
-One recipe value is one chain. Its chain id is `<id>.p<protocol>`. Recording the same family at
+One recipe value is one chain. Its chain id is `<id>.p<protocol>`, unless
+`corpus/recipes/chains.toml` lists the recipe under another id (`chain_id`). Every method
+except `id`, `family`, `protocol` and `run` has the default shown. Recording the same family at
 protocol 30 and 28 means two values in `all()`, as `cap40` does.
 
 ### `ChainCtx`

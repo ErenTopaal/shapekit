@@ -10,7 +10,7 @@ core's `--enable-codecoverage` build option instruments only C and C++.
 ## Building the twin
 
 ```sh
-TMPDIR=<a directory on disk> twin/build.sh [--jobs N] [--memory SIZE] [--cpus N] [--workdir DIR]
+TMPDIR=<a directory on disk> twin/build.sh [--jobs N] [--memory SIZE] [--cpus N] [--workdir DIR] [--tag TAG]
 ```
 
 The script builds the stellar-core commit pinned in `pins.toml` (`[[git]]
@@ -188,8 +188,8 @@ from the same twin image), and writes the core coverage summary over all of
 them. Each line range no chain reaches is `reachable-by-core-tests`, with the
 names of the test cases that reach it, or `unknown` when no test case does.
 The first kind is a list of regions known to be reachable, with a core test
-showing how; a recipe for each is a search target. The second kind may or may
-not be reachable at all.
+showing how; a recipe for each is a search target. For the second kind, no
+known input reaches the range, and it can be unreachable.
 
 Region counts of the same chain can differ by a region or two between runs,
 because some of core's code runs on timers and background threads.

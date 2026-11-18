@@ -80,7 +80,7 @@ branch (`shapekit schema diff v30.0 next`), and each CAP's XDR comes from its te
 Edit `pins.toml`: the two core images (tag and digest), the stellar-core, stellar-xdr and
 stellar-rpc tags with their commit shas, the `stellar-xdr`, `soroban-env-host`,
 `soroban-simulation` and `soroban-sdk` crates, the newest `@stellar/stellar-sdk` and
-`go-stellar-sdk` releases, and the wallet-backend commit. Release images are in
+`go-stellar-sdk` releases, the wallet-backend commit and the stellar-etl tag. Release images are in
 `stellar/stellar-core`; the `-buildtests` images, and the next-protocol builds
 (`<version>-<build>.<commit>.noble-vnext` and `...-vnext-buildtests`, core configured with
 `--enable-next-protocol-version-unsafe-for-production`), are only in
@@ -268,12 +268,14 @@ Let the registries decide the versions:
 ```sh
 shapekit conformance sync-versions
 for sdk in rust go js; do shapekit conformance run --sdk $sdk --all-versions --obligations; done
+for sdk in soroban python java dart php dotnet kmp stellar-cli; do shapekit conformance run --sdk $sdk --all-versions; done
 shapekit conformance reproduce
 shapekit conformance draft-issues
 shapekit coverage
 ```
 
-`sync-versions` reads crates.io, npm and the Go module proxy and writes
+`sync-versions` reads crates.io, npm, the Go module proxy, PyPI, Maven Central, pub.dev,
+Packagist and NuGet, and writes
 `conformance/versions.toml` and the per-version testee files under `testees/*/versions/`, moving
 `current` to the newest stable release. A new divergence gets a line in `conformance/known-failures/<sdk>.txt` that links its drafted
 issue, and goes through [triage](maintenance.md#triage). `shapekit conformance file-issues`

@@ -26,7 +26,7 @@ What 0.2.0 holds:
   candidate lane: 373 explorer ledgers (`explore.witnesses`, `explore.pairs`) with the 91
   chains they are cut from, and the three mainnet ledgers of the random audit (57369500,
   37466023, 44679511), stored as the other network history entries are, without a chain.
-- Promotion follows the rule of the plan: the current versions of rust, go and js pass every
+- Promotion follows one rule: the current versions of rust, go and js pass every
   promoted entry, and each failure of another SDK, or of an older version, is attributed to a
   finding, a candidate finding or a record in `candidate/finding-candidates.toml`
   (`shapekit corpus promote`, described in `docs/adding-a-shape.md`). 14 explorer ledgers stay
@@ -86,6 +86,38 @@ What 0.2.0 holds:
   Linux arm64 and macOS run only on the release runners. They were made before the promotion,
   so they hold the 716-entry corpus.
 
+## 2026-11-18: implementation-defined entries are recorded, not voted on
+
+- An implementation-defined entry (the references disagree, so no answer is required) used to
+  be decided by a vote across the SDKs in a run, and a minority answer was
+  `diverges-from-peers`. The vote changed whenever an SDK joined a run: the two bool-word
+  entries (`synth-bool-value-2`, `synth-invoke-arg-bool-2`) failed the all-SDK run once the newer
+  SDKs had joined. Now every answer that is not a crash passes, and the matrix keeps the answer
+  in `actual` and the spread of answers in `detail`. Each SDK's reading of the bool word 2 stays
+  visible: python, dart and kmp read true; rust (stellar-xdr) and dotnet read false; go, js,
+  java and php reject it; core's xdrpp reads true.
+- Count changes: every SDK that decodes `ScVal` and `TransactionEnvelope` now passes the two
+  bool-word corpus entries instead of counting them as unsupported in a single-SDK run or
+  failing them in a multi-SDK run. Python 17.0.1 passes 197 corpus entries (was 195), rust
+  30.0.0 86 (was 84). The `diverges-from-peers` lines for these entries are gone from the rust
+  and python known-failures lists, and the soroban list, which held only such a line, is removed.
+  The all-SDK current-version run over the corpus passes with all eleven SDKs.
+- Findings cite the recorded answers. A new `[[finding.answer]]` matcher takes either an sdk
+  and the exact answers it recorded on an implementation-defined entry, or `split = N`, at
+  least N different answers among the SDKs of one matrix. An answer is evidence, never a
+  failure, so one no matcher takes is not unmapped. RS-3 now cites stellar-xdr reading the
+  bool word 2 as false on `synth-bool-value-2` (6 answers: two checks on 28.0.0, 28.0.1 and
+  30.0.0). CORE-1 cites the three-way split on `synth-invoke-arg-bool-2`: true from dart, kmp
+  and python, false from rust, dotnet and stellar-cli, refused by go, java, js and php
+  (2 occurrences, one per check). `findings/inputs/conformance-peers.json` is reimported
+  from a new `--all-versions --flag references-disagree` run over every SDK (28 versions, all
+  pass); the import now keeps implementation-defined answers whole. Failures go from 516 to
+  510: the 6 rust cells that diverged from their peers are answers now. `findings check`:
+  24 findings, 0 unmapped, every finding with evidence. A finding of any status that matches
+  nothing already failed the check; a test now pins it for a filed finding.
+- A question to SEP-51 about three enum names (IPv4, the `tx` result-code prefix, `b8_bit`) is
+  drafted in the candidate lane and not filed.
+
 ## 2026-11-17: explorer witnesses in the candidate lane, stellar-etl in the findings, version 0.2.0
 
 - The workspace, the three adapters and the site package say 0.2.0, so the corpus manifest's
@@ -121,7 +153,7 @@ What 0.2.0 holds:
   The stellar-rpc adapter (`--events-from events`) gives 820 pass and 86 out of scope, as its
   expectations file says. The wallet-backend reproductions hold (24 of 24 rows) and
   `indexerlint` is clean on wallet-backend with its baseline.
-- stellar-etl (F7.7): its harness run now covers every chain on both networks, and it is an
+- stellar-etl: its harness run now covers every chain on both networks, and it is an
   input of the main findings (`findings/inputs/harness-stellar-etl-2b24ec89.json`). 906 entries:
   796 pass, 24 dropped, 16 out of scope and 70 not evaluated. Its findings stay in the
   candidate lane, which imports the same run, because none has an upstream decision; the main
@@ -138,38 +170,6 @@ What 0.2.0 holds:
   and 99 failures held by candidate findings (ETL-1 8, ETL-2 8, ETL-3 6, ETL-4 2, ETL-META-V4
   70, GO-TEXTID 5). The candidate lane has 40 findings, 466 failures, 0 unmapped. Draft links in
   `candidate/findings/FINDINGS.md` are now relative to that file.
-
-## 2026-11-18: implementation-defined entries are recorded, not voted on
-
-- An implementation-defined entry (the references disagree, so no answer is required) used to
-  be decided by a vote across the SDKs in a run, and a minority answer was
-  `diverges-from-peers`. The vote changed whenever an SDK joined a run: the two bool-word
-  entries (`synth-bool-value-2`, `synth-invoke-arg-bool-2`) failed the all-SDK run once the newer
-  SDKs had joined. Now every answer that is not a crash passes, and the matrix keeps the answer
-  in `actual` and the spread of answers in `detail`. Each SDK's reading of the bool word 2 stays
-  visible: python, dart and kmp read true; rust (stellar-xdr) and dotnet read false; go, js,
-  java and php reject it; core's xdrpp reads true.
-- Count changes: every SDK that decodes `ScVal` and `TransactionEnvelope` now passes the two
-  bool-word corpus entries instead of counting them as unsupported in a single-SDK run or
-  failing them in a multi-SDK run. Python 17.0.1 passes 197 corpus entries (was 195), rust
-  30.0.0 86 (was 84). The `diverges-from-peers` lines for these entries are gone from the rust
-  and python known-failures lists, and the soroban list, which held only such a line, is removed.
-  The all-SDK current-version run over the corpus passes with all eleven SDKs.
-- Findings cite the recorded answers. A new `[[finding.answer]]` matcher takes either an sdk
-  and the exact answers it recorded on an implementation-defined entry, or `split = N`, at
-  least N different answers among the SDKs of one matrix. An answer is evidence, never a
-  failure, so one no matcher takes is not unmapped. RS-3 now cites stellar-xdr reading the
-  bool word 2 as false on `synth-bool-value-2` (6 answers: two checks on 28.0.0, 28.0.1 and
-  30.0.0). CORE-1 cites the three-way split on `synth-invoke-arg-bool-2`: true from dart, kmp
-  and python, false from rust, dotnet and stellar-cli, refused by go, java, js and php
-  (2 occurrences, one per check). `findings/inputs/conformance-peers.json` is reimported
-  from a new `--all-versions --flag references-disagree` run over every SDK (28 versions, all
-  pass); the import now keeps implementation-defined answers whole. Failures go from 516 to
-  510: the 6 rust cells that diverged from their peers are answers now. `findings check`:
-  24 findings, 0 unmapped, every finding with evidence. A finding of any status that matches
-  nothing already failed the check; a test now pins it for a filed finding.
-- A question to SEP-51 about three enum names (IPv4, the `tx` result-code prefix, `b8_bit`) is
-  drafted in the candidate lane and not filed.
 
 ## 2026-11-17: expected XDR-JSON follows SEP-51
 
@@ -590,7 +590,7 @@ The RFP gates publication of the guide on review by a stellar-core or platform e
 - stellar-docs change: `docs/guide/stellar-docs.patch` adds the page as
   `docs/data/indexers/build-your-own/indexer-hardening.mdx` with a link from the Build Your Own
   index and an entry in `docs.json`, on top of stellar-docs `main` at `62f29bbb`. Corpus
-  entries in the page link to the v0.1.0 tag. The patched pages pass stellar-docs' prettier
+  entries in the page link to the v0.2.0 tag. The patched pages pass stellar-docs' prettier
   configuration and its pad check (`scripts/pad-component-tags.mjs --check`). The README shows
   how to apply it.
 - After the review, this section records the reviewer, the date and the reviewed commit.
