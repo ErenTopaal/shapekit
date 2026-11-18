@@ -1021,9 +1021,13 @@ fn ordered(world: &World, rng: &mut Rng, missing: &BTreeSet<String>) -> Option<V
 /// A claimable balance whose claimants hold two-member and negated predicates, then a claim.
 fn predicate(world: &World, rng: &mut Rng) -> Option<VecDeque<Gen>> {
     let src = other(world, rng, &[])?;
-    let dests: Vec<String> = (0..3).filter_map(|_| other(world, rng, &[&src])).collect();
-    if dests.len() < 3 {
-        return None;
+    // drawn without replacement: core refuses a balance naming one destination twice
+    let mut dests: Vec<String> = Vec::new();
+    for _ in 0..3 {
+        let mut not = vec![src.as_str()];
+        not.extend(dests.iter().map(String::as_str));
+        let d = other(world, rng, &not)?;
+        dests.push(d);
     }
     let now = close_time(world.last_closed + 1);
     let leaf = |rng: &mut Rng| -> Value {
@@ -1258,5 +1262,33 @@ mod tests {
         }
         assert!(failures.is_empty(), "{failures:#?}");
         assert_eq!(seen.len(), KINDS.len(), "{seen:?}");
+    }
+
+    #[test]
+    fn a_balance_names_each_claimant_once() {
+        let mut built = 0;
+        for seed in 0..200 {
+            // a source and exactly three others: with replacement most draws repeat one
+            let mut w = World::new("explore.test", "Test SDF Network ; September 2015", 30);
+            for r in ["a", "b", "c", "d"] {
+                w.add_role(r);
+            }
+            let mut rng = Rng::new(seed);
+            let mut plan = predicate(&w, &mut rng).expect("four funded accounts suffice");
+            let mut first = plan.pop_front().expect("the plan creates a balance first");
+            let Some(Phase::Step(Step::Tx { operations, .. })) = first(&w, &mut rng) else {
+                panic!("the first phase is one transaction");
+            };
+            let claimants = operations[0]["body"]["create_claimable_balance"]["claimants"]
+                .as_array()
+                .expect("a create_claimable_balance with claimants")
+                .iter()
+                .map(|c| c["claimant_type_v0"]["destination"].clone())
+                .collect::<Vec<_>>();
+            let distinct: BTreeSet<String> = claimants.iter().map(Value::to_string).collect();
+            assert_eq!(distinct.len(), 3, "seed {seed}: {claimants:?}");
+            built += 1;
+        }
+        assert_eq!(built, 200);
     }
 }
