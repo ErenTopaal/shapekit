@@ -105,10 +105,8 @@ impl DraftContext {
         let mut diverging: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         for sdk in versions.sdk.keys() {
             for line in crate::known::load(dir, sdk)? {
-                if matches!(
-                    line.result,
-                    ResultClass::DivergesFromNetwork | ResultClass::DivergesFromPeers
-                ) {
+                // a known-failures line cannot be diverges-from-peers (see `known::load`)
+                if line.result.result == ResultClass::DivergesFromNetwork {
                     diverging.entry(line.entry).or_default().insert(sdk.clone());
                 }
             }
