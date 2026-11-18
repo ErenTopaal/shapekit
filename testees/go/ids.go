@@ -20,10 +20,11 @@ func envelopeMember(req request) (xdr.TransactionEnvelope, error) {
 	if err != nil {
 		return env, err
 	}
-	err = sdkCall("xdr.SafeUnmarshal", func() error {
-		return xdr.SafeUnmarshal(data, &env)
-	})
-	return env, err
+	depth, maxLen, err := requestLimits(req)
+	if err != nil {
+		return env, err
+	}
+	return env, decodeBytes(data, &env, depth, maxLen)
 }
 
 // txHash hashes with network.HashTransactionInEnvelope, or for inner: true the fee bump's
@@ -80,6 +81,11 @@ func balanceID(req request) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TransactionFromXDR takes no limits, so the envelope is read under the request's limits
+	// first; bytes those refuse never reach it
+	if _, err := envelopeMember(req); err != nil {
+		return nil, err
+	}
 	var id string
 	err = sdkCall("txnbuild.Transaction.ClaimableBalanceID", func() error {
 		gt, e := txnbuild.TransactionFromXDR(base64.StdEncoding.EncodeToString(data))
@@ -112,10 +118,12 @@ func contractID(req request) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
+	depth, maxLen, err := requestLimits(req)
+	if err != nil {
+		return nil, err
+	}
 	var preimage xdr.ContractIdPreimage
-	if err := sdkCall("xdr.SafeUnmarshal", func() error {
-		return xdr.SafeUnmarshal(data, &preimage)
-	}); err != nil {
+	if err := decodeBytes(data, &preimage, depth, maxLen); err != nil {
 		return nil, err
 	}
 	var id [32]byte

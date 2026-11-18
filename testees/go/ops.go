@@ -31,6 +31,7 @@ var ops = []string{
 	"balance_id",
 	"contract_id",
 	"id_parse",
+	"address_from_scval",
 }
 
 var unsupportedOps = map[string]string{
@@ -68,6 +69,8 @@ func dispatch(req request) (map[string]any, error) {
 		return contractID(req)
 	case "id_parse":
 		return idParse(req)
+	case "address_from_scval":
+		return addressFromScVal(req)
 	case "coverage_snapshot":
 		return coverageSnapshot(req)
 	case "coverage_new":
@@ -158,11 +161,7 @@ func decode(req request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	depth, err := req.uint32("depth_limit")
-	if err != nil {
-		return nil, err
-	}
-	maxLen, err := req.nonNegativeInt("len_limit")
+	depth, maxLen, err := requestLimits(req)
 	if err != nil {
 		return nil, err
 	}
@@ -172,20 +171,42 @@ func decode(req request) (any, error) {
 			"against go-stellar-sdk's xdr package, has no " + name)
 	}
 	value := newValue()
+	if err := decodeBytes(data, value, depth, maxLen); err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+// requestLimits reads depth_limit and len_limit, which every request that carries xdr for a
+// decode has.
+func requestLimits(req request) (depth uint32, maxLen int, err error) {
+	if depth, err = req.uint32("depth_limit"); err != nil {
+		return 0, 0, err
+	}
+	if maxLen, err = req.nonNegativeInt("len_limit"); err != nil {
+		return 0, 0, err
+	}
+	return depth, maxLen, nil
+}
+
+// decodeBytes reads data as one value into dst with xdr.UnmarshalWithOptions under the given
+// limits and refuses bytes left after the value. hello reports decode_limits "honoured", so
+// every op's xdr input goes through here, not through SafeUnmarshal, which has no limits.
+func decodeBytes(data []byte, dst any, depth uint32, maxLen int) error {
 	var read int
 	opts := xdr.DecodeOptions{MaxDepth: uint(depth), MaxInputLen: maxLen}
-	err = sdkCall("xdr.UnmarshalWithOptions", func() error {
+	err := sdkCall("xdr.UnmarshalWithOptions", func() error {
 		var e error
-		read, e = xdr.UnmarshalWithOptions(bytes.NewReader(data), value, opts)
+		read, e = xdr.UnmarshalWithOptions(bytes.NewReader(data), dst, opts)
 		return e
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if read != len(data) {
-		return nil, &opError{class: classRejected, message: fmt.Sprintf("input not fully consumed: decoded %d of %d bytes", read, len(data))}
+		return &opError{class: classRejected, message: fmt.Sprintf("input not fully consumed: decoded %d of %d bytes", read, len(data))}
 	}
-	return value, nil
+	return nil
 }
 
 func decodeEncode(req request) (map[string]any, error) {
@@ -315,10 +336,9 @@ func assetMember(req request, name string) (xdr.Asset, error) {
 	if err != nil {
 		return asset, err
 	}
-	err = sdkCall("xdr.SafeUnmarshal", func() error {
-		return xdr.SafeUnmarshal(data, &asset)
-	})
-	return asset, err
+	// asset_order and pool_id requests carry no limits: depth 1000 and the input's own length
+	// (docs/testee-protocol.md, hello)
+	return asset, decodeBytes(data, &asset, 1000, len(data))
 }
 
 func assetPair(req request) (a, b xdr.Asset, err error) {
@@ -373,4 +393,31 @@ func poolID(req request) (map[string]any, error) {
 		return nil, err
 	}
 	return map[string]any{"pool_id": hex.EncodeToString(id[:])}, nil
+}
+
+// addressFromScVal takes the address out of the ScVal with ScVal.GetAddress, which reports
+// false for any other arm, and writes it with ScAddress.String, the sdk's strkey encoder.
+func addressFromScVal(req request) (map[string]any, error) {
+	data, err := req.bytes("xdr")
+	if err != nil {
+		return nil, err
+	}
+	var value xdr.ScVal
+	if err := decodeBytes(data, &value, 1000, len(data)); err != nil {
+		return nil, err
+	}
+	var text string
+	err = sdkCall("xdr.ScAddress.String", func() error {
+		address, ok := value.GetAddress()
+		if !ok {
+			return fmt.Errorf("the ScVal is not of arm SCV_ADDRESS")
+		}
+		var e error
+		text, e = address.String()
+		return e
+	})
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"text": text}, nil
 }

@@ -229,3 +229,48 @@ func TestDepVersionReplace(t *testing.T) {
 		t.Fatalf("got %q %q %v", v, d, err)
 	}
 }
+
+// hello reports decode_limits "honoured", so the limits reach the decoder of every op's xdr
+// input, not only decode_encode's
+func TestLimitsReachEveryDecode(t *testing.T) {
+	// ContractIdPreimage from the native asset, 8 bytes
+	const preimage = "AAAAAQAAAAA="
+	const testnet = "Test SDF Network ; September 2015"
+	got := roundTrip(t, strings.Join([]string{
+		`{"id":"1","op":"contract_id","preimage":"` + preimage + `","network_passphrase":"` + testnet + `","depth_limit":1000,"len_limit":8}`,
+		`{"id":"2","op":"contract_id","preimage":"` + preimage + `","network_passphrase":"` + testnet + `","depth_limit":1000,"len_limit":4}`,
+		`{"id":"3","op":"contract_id","preimage":"` + preimage + `","network_passphrase":"` + testnet + `","depth_limit":0,"len_limit":8}`,
+		`{"id":"4","op":"contract_id","preimage":"` + preimage + `","network_passphrase":"` + testnet + `"}`,
+		`{"id":"5","op":"tx_hash","xdr":"AAAAAA==","network_passphrase":"` + testnet + `","depth_limit":1000,"len_limit":0}`,
+		`{"id":"6","op":"asset_order","a":"AAAAAA==","b":"AAAAAA=="}`,
+		`{"id":"7","op":"asset_order","a":"AAAAAAA=","b":"AAAAAA=="}`,
+	}, "\n")+"\n")
+	if got[0]["status"] != "ok" {
+		t.Errorf("within the limits: %v", got[0])
+	}
+	for _, g := range []map[string]any{got[1], got[2], got[4], got[6]} {
+		if g["status"] != "error" || g["error"].(map[string]any)["class"] != classRejected {
+			t.Errorf("want rejected: %v", g)
+		}
+	}
+	if got[3]["status"] != "error" || got[3]["error"].(map[string]any)["class"] != classBadRequest {
+		t.Errorf("no limits: want bad-request: %v", got[3])
+	}
+	if got[5]["status"] != "ok" || got[5]["result"].(map[string]any)["order"] != float64(0) {
+		t.Errorf("asset_order without limits: %v", got[5])
+	}
+}
+
+func TestAddressFromScVal(t *testing.T) {
+	// SCV_ADDRESS of the account with key 32 bytes of 0x3a, then a u32
+	got := roundTrip(t, strings.Join([]string{
+		`{"id":"1","op":"address_from_scval","xdr":"AAAAEgAAAAAAAAAAOjo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo6Ojo="}`,
+		`{"id":"2","op":"address_from_scval","xdr":"AAAAAwAAAAc="}`,
+	}, "\n")+"\n")
+	if got[0]["status"] != "ok" || got[0]["result"].(map[string]any)["text"] != "GA5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DUOR2HI5DVTUJ" {
+		t.Errorf("address: %v", got[0])
+	}
+	if got[1]["status"] != "error" || got[1]["error"].(map[string]any)["class"] != classRejected {
+		t.Errorf("u32: %v", got[1])
+	}
+}
