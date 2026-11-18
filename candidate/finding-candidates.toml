@@ -967,7 +967,7 @@ evidence = "the generated decoders cap their own recursion per type: SorobanDele
 # rust 30.0.0 and js 17.4.0 pass all 387; go v0.9.0 and soroban-sdk 29.0.1 support no check
 # that fails (go has no encode_json, soroban-sdk no ledger ops). every failing check of the other
 # sdks is attributed below. `shapekit corpus promote --dry-run` with the eleven matrices
-# refuses all 387: every one is cut from a chain under candidate/chains or candidate/pairs,
+# refuses all 387: every one is cut from a chain under candidate/chains,
 # and the harness replays an entry from its chain under corpus/chains. 32 of them every sdk
 # passes; the other 355 are also refused by python@17.0.1 (355), java@6.0.0 (350),
 # stellar-cli@30.0.1 (70), php@1.18.0 (49), dotnet@17.0.0 (30), kmp@1.18.0 (13) and

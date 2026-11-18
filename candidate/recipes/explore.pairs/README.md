@@ -5,13 +5,14 @@ That transaction names the same thing in two ways. Core leaves the ledger entrie
 about byte for byte the same under both, so an indexer has to store the same state for both.
 The route equivalence relation of the indexer harness checks that it does.
 
-Every pair directory holds:
+Every pair directory here holds:
 
 - `a.json` and `b.json`, the two recipes in recipe IR (`schema/recipe-ir.schema.json`);
-- `a/testnet`, `a/mainnet`, `b/testnet` and `b/mainnet`, the chains of both recipes recorded
-  under both network passphrases, in the form `corpus/chains/` uses;
 - `pair.json`, the entries the pair compares, with each entry's encoded size and whether core
   wrote it identically under both recipes (`records_equal`).
+
+The chains of both recipes, recorded under both network passphrases, are the chain
+directories `pairs.<pair>.a` and `pairs.<pair>.b` beside the other chains of the lane.
 
 | Pair | Recipe `a` | Recipe `b` | Entries compared | Result |
 |---|---|---|---|---|
@@ -36,3 +37,7 @@ hand. You record a pair with
 shapekit explore pair --a a.json --b b.json --out <dir>              # every changed entry
 shapekit explore pair --a a.json --b b.json --only trustline --out <dir>
 ```
+
+and move `<dir>/a` and `<dir>/b` to the chain directories `pairs.<pair>.a` and `pairs.<pair>.b`,
+the recipes and `pair.json` to a directory of the pair here, and list both chains in
+`recipes/chains.toml`.

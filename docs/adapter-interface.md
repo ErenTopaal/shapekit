@@ -546,7 +546,7 @@ whose they are, reached by different operations. For every group and every mappe
 its kind, the rows the target keeps for the group's keys must be equal once the key columns
 are left out; a row stored for some of them and not the others is a difference too.
 
-Recipe pairs (`candidate/pairs/<pair>/`) carry the same check across two chains: two recipes
+Recipe pairs (`candidate/recipes/explore.pairs/<pair>/`) carry the same check across two chains: two recipes
 from one start state that reach an entry in two ways, with the entries core writes
 identically under both listed in `pair.json`. Run the target over each chain on its own with
 `harness run --chain-dir <name>=<dir>`, which replays a chain outside the corpus from its
@@ -554,7 +554,7 @@ first checkpoint for its dump alone, then
 
 ```sh
 shapekit harness state pair --a <run of a> --b <run of b> \
-  --pair candidate/pairs/<pair>/pair.json --mapping adapters/walletbackend/state-mapping.toml
+  --pair candidate/recipes/explore.pairs/<pair>/pair.json --mapping adapters/walletbackend/state-mapping.toml
 ```
 
 For each listed entry it confirms core's entry is the same at the end of both chains, compares
