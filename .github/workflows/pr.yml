@@ -123,7 +123,8 @@ jobs:
 
   python:
     # the python testee: its conformance run on the current version builds that version's venv
-    # from the hash-locked requirements, then the testee's unit tests run in it
+    # from the hash-locked requirements, then the testee's unit tests run in it, then the
+    # generated type table against what gentypes.py writes from every version's venv
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -145,13 +146,31 @@ jobs:
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["python"]["current"])' conformance/versions.toml)
           "target/testees/python/$v/venv/bin/python" -B -E -s -m unittest discover -s testees/python/tests -t testees/python
+      - name: type table
+        # the generator reads every version's build, so the versions the run above did not
+        # build are built first, with the build steps of conformance/versions.toml
+        run: |
+          set -euo pipefail
+          python3 -I - python <<'PY'
+          import os, subprocess, sys, tomllib
+          sdk = tomllib.load(open("conformance/versions.toml", "rb"))["sdk"][sys.argv[1]]
+          for v in sdk["versions"]:
+              if v["version"] == sdk["current"]:
+                  continue
+              for step in v.get("build", []):
+                  env = dict(os.environ, **step.get("env", {}))
+                  subprocess.run(step["argv"], cwd=step.get("dir", "."), env=env, check=True)
+          PY
+          python3 -I testees/python/gentypes.py
+          git diff --exit-code -- testees/python/shapekit_testee/types_gen.py
 
   java:
     # the java testee: its conformance run on the current version builds it with maven and checks
-    # the resolved jars against lib.sha256, then its unit tests run
+    # the resolved jars against lib.sha256, then its unit tests run, then the generated type
+    # table against what gentypes.py writes from every version's jar
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/cache@v6
@@ -174,6 +193,23 @@ jobs:
           set -euo pipefail
           v=$(python3 -I -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["sdk"]["java"]["current"])' conformance/versions.toml)
           mvn -B -q -f "testees/java/versions/$v/pom.xml" test
+      - name: type table
+        # the generator reads every version's build, so the versions the run above did not
+        # build are built first, with the build steps of conformance/versions.toml
+        run: |
+          set -euo pipefail
+          python3 -I - java <<'PY'
+          import os, subprocess, sys, tomllib
+          sdk = tomllib.load(open("conformance/versions.toml", "rb"))["sdk"][sys.argv[1]]
+          for v in sdk["versions"]:
+              if v["version"] == sdk["current"]:
+                  continue
+              for step in v.get("build", []):
+                  env = dict(os.environ, **step.get("env", {}))
+                  subprocess.run(step["argv"], cwd=step.get("dir", "."), env=env, check=True)
+          PY
+          (cd testees/java && python3 -I gentypes.py)
+          git diff --exit-code -- testees/java/src/main/java/org/shapekit/testee/TypesGen.java
 
   contracts:
     # the committed wasm is what `stellar contract build` from the pinned stellar-cli release
