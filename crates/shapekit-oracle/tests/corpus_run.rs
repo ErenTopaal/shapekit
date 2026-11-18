@@ -60,6 +60,7 @@ fn entry(id: &str, xdr_type: &str, file: &str, bytes: &[u8], source: Source) -> 
         },
         flags: vec![],
         fields_exercised: vec![],
+        arms: Vec::new(),
         linked_issues: vec![],
         notes: None,
     }

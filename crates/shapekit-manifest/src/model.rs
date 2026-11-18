@@ -96,6 +96,11 @@ pub struct Entry {
     pub flags: Vec<String>,
     #[serde(default)]
     pub fields_exercised: Vec<String>,
+    /// The union arms the entry was picked to witness, as signatures spell them
+    /// (`OperationBody:payment`), for families whose entries take their caps from their arms.
+    /// `caps` is then the CAPs that introduced these arms, or `PRE-CAP` when none did.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub arms: Vec<String>,
     #[serde(default)]
     pub linked_issues: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -299,7 +299,13 @@ pub fn compute(
             *arms_by_blocker.entry(r.blocker).or_insert(0) += 1;
         }
     }
-    let visible: Vec<&CapRow> = caps.iter().filter(|c| c.indexer_visible).collect();
+    // the pre-cap row tags shapes older than every CAP; it is not a CAP, so the CAP counts
+    // leave it out
+    let real: Vec<&CapRow> = caps
+        .iter()
+        .filter(|c| c.id != shapekit_registry::PRE_CAP)
+        .collect();
+    let visible: Vec<&CapRow> = real.iter().copied().filter(|c| c.indexer_visible).collect();
     let fragments: Vec<&FragmentRow> = family_rows.iter().flat_map(|f| &f.fragments).collect();
     let summary = Summary {
         entries: manifest.entries.len(),
@@ -309,7 +315,7 @@ pub fn compute(
             .filter(|e| is_core_emitted(e))
             .count(),
         entries_by_source_class: by_class,
-        caps: caps.len(),
+        caps: real.len(),
         caps_indexer_visible: visible.len(),
         caps_indexer_visible_core_emitted: visible
             .iter()
@@ -415,9 +421,13 @@ fn cap_rows(
             } else {
                 cap.reason.clone()
             },
+            // the families that name the cap, and those whose entries carry it by their arms
             families: families
                 .iter()
-                .filter(|f| f.caps.iter().any(|c| c == &cap.id))
+                .filter(|f| {
+                    f.caps.iter().any(|c| c == &cap.id)
+                        || (f.caps_from_arms && tagged.iter().any(|e| e.family == f.id))
+                })
                 .map(|f| f.id.clone())
                 .collect(),
             entries: tagged.len(),

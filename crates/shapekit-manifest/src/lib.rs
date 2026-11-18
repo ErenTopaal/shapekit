@@ -1,5 +1,6 @@
 //! Corpus manifest types, XDR round-trip checks, XDR-JSON, shape signatures and coverage.
 
+pub mod arm_caps;
 pub mod build;
 mod depth;
 pub mod framing;

@@ -1,6 +1,16 @@
 schema_version = 1
 
 [[cap]]
+id = "PRE-CAP"
+title = "Shapes in the XDR before the CAP process"
+status = "Not a CAP"
+protocol = 0
+xdr_additions = []
+indexer_visible = true
+source = { path = "core/readme.md" }
+notes = "not a CAP: the tag of corpus entries whose every witnessed union arm was in the XDR before any CAP added to it, so that every entry is tagged. no CAP's xdr_additions names such an arm, its case constant, its type or its union; shapekit manifest validate checks that from the arms an entry records. the source is the index of CAPs and their process"
+
+[[cap]]
 id = "CAP-0001"
 title = "Bump Sequence"
 status = "Final"

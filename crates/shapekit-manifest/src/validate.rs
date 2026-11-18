@@ -25,10 +25,12 @@ pub fn validate(manifest: &Manifest, registry: &Registry, root: &Path) -> Vec<Pr
             "families.toml missing, so entry families cannot be checked",
         ));
     }
+    let arm_caps = crate::arm_caps::ArmCaps::new(registry);
     for entry in &manifest.entries {
         Checker {
             entry,
             registry,
+            arm_caps: &arm_caps,
             root,
             at: format!("manifest {}", entry.id),
             out: &mut out,
@@ -83,6 +85,7 @@ fn header(manifest: &Manifest, out: &mut Vec<Problem>) {
 struct Checker<'a> {
     entry: &'a Entry,
     registry: &'a Registry,
+    arm_caps: &'a crate::arm_caps::ArmCaps,
     root: &'a Path,
     at: String,
     out: &'a mut Vec<Problem>,
@@ -134,18 +137,51 @@ impl Checker<'_> {
         if self.registry.families.is_some() && self.registry.family(&e.family).is_none() {
             self.problem(format!("unknown family {}", e.family));
         }
-        // a family of the xdr definitions themselves names no cap, and neither do its entries
-        let capless = self
-            .registry
-            .family(&e.family)
-            .is_some_and(|f| f.caps.is_empty());
-        match (e.caps.is_empty(), capless) {
-            (true, false) => self.problem("caps is empty"),
-            (false, true) => self.problem(format!(
-                "family {} names no cap, so its entries name none",
-                e.family
-            )),
-            _ => {}
+        let family = self.registry.family(&e.family);
+        let from_arms = family.is_some_and(|f| f.caps_from_arms);
+        if from_arms {
+            if e.arms.is_empty() {
+                self.problem(format!(
+                    "family {} takes each entry's caps from its arms, and arms is empty",
+                    e.family
+                ));
+            }
+        } else {
+            // a family of the xdr definitions themselves names no cap, and neither do its
+            // entries; it says why in no_cap_reason, which the registry check requires
+            let capless = family.is_some_and(|f| f.caps.is_empty());
+            match (e.caps.is_empty(), capless) {
+                (true, false) => self.problem("caps is empty"),
+                (false, true) => self.problem(format!(
+                    "family {} names no cap, so its entries name none",
+                    e.family
+                )),
+                _ => {}
+            }
+        }
+        if !e.arms.is_empty() {
+            match self.arm_caps.for_arms(&e.arms) {
+                Err(unknown) => self.problem(format!(
+                    "arms {} are not union arms of the xdr definitions",
+                    unknown.join(", ")
+                )),
+                Ok(want) if want != e.caps => self.problem(format!(
+                    "caps is [{}] but the arms it witnesses came with [{}] (registry/caps.toml xdr_additions)",
+                    e.caps.join(", "),
+                    want.join(", ")
+                )),
+                Ok(_) => {}
+            }
+            let mut sorted = e.arms.clone();
+            sorted.sort();
+            sorted.dedup();
+            if sorted != e.arms {
+                self.problem("arms is not sorted and unique");
+            }
+        } else if e.caps.iter().any(|c| c == shapekit_registry::PRE_CAP) {
+            self.problem(
+                "PRE-CAP needs the arms the entry witnesses, so the validator can check that each predates every CAP",
+            );
         }
         for cap in &e.caps {
             if self.registry.cap(cap).is_none() {

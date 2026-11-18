@@ -46,8 +46,16 @@ Every id in `fields` must exist in `registry/fields.toml`.
 
 A family whose shapes come from the XDR definitions themselves rather than from a protocol
 change, such as `format.xdr-grammar`, has `caps = []` and a `no_cap_reason` saying why; its
-entries list no caps either. Every other family names at least one CAP and has no
-`no_cap_reason`.
+entries list no caps either.
+
+A family whose entries mix shapes of many CAPs, such as `explore.witnesses`, has `caps = []`
+and `caps_from_arms = true` instead. Each of its entries records the union arms it witnesses in
+`arms` and carries the CAPs that introduced them, read from `xdr_additions` in
+`registry/caps.toml`. An entry whose every arm was in the XDR before any CAP carries `PRE-CAP`,
+a record of `caps.toml` that is not a CAP. `shapekit manifest validate` checks that the caps
+match the arms, and `shapekit manifest arm-caps` sets them after a change to `caps.toml`.
+
+Every other family names at least one CAP and has no `no_cap_reason`.
 
 ## 2. The recipe
 

@@ -78,10 +78,18 @@ fn caps(reg: &Registry, out: &mut Vec<Problem>) {
     );
     for cap in &reg.caps.caps {
         let at = format!("{CAPS_FILE} {}", cap.id);
-        if !valid_cap_id(&cap.id) {
+        let pre_cap = cap.id == crate::PRE_CAP;
+        if !pre_cap && !valid_cap_id(&cap.id) {
             out.push(Problem::new(
                 &at,
                 "id must look like CAP-0040 or CAP-0046-01",
+            ));
+        }
+        // the pre-cap record names the shapes no cap added, at the genesis protocol
+        if pre_cap && (cap.protocol != Some(0) || !cap.xdr_additions.is_empty()) {
+            out.push(Problem::new(
+                &at,
+                "the pre-cap record has protocol 0 and no xdr_additions",
             ));
         }
         if blank(&cap.title) || blank(&cap.status) {
@@ -90,7 +98,7 @@ fn caps(reg: &Registry, out: &mut Vec<Problem>) {
         if blank(&cap.source.path) {
             out.push(Problem::new(&at, "source.path is empty"));
         }
-        if cap.protocol == Some(0) {
+        if cap.protocol == Some(0) && !pre_cap {
             out.push(Problem::new(&at, "protocol 0 is not a real protocol"));
         }
         if !cap.indexer_visible && cap.reason.as_deref().is_none_or(blank) {
@@ -293,7 +301,20 @@ fn families(reg: &Registry, out: &mut Vec<Problem>) {
         if blank(&fam.title) {
             out.push(Problem::new(&at, "title is empty"));
         }
+        if fam.caps_from_arms && (!fam.caps.is_empty() || fam.no_cap_reason.is_some()) {
+            out.push(Problem::new(
+                &at,
+                "caps_from_arms takes each entry's caps from its arms, so the family names no caps and no no_cap_reason",
+            ));
+        }
+        if fam.caps.iter().any(|c| c == crate::PRE_CAP) {
+            out.push(Problem::new(
+                &at,
+                "PRE-CAP tags entries by their arms, not families",
+            ));
+        }
         match (fam.caps.is_empty(), fam.no_cap_reason.as_deref()) {
+            (true, None) if fam.caps_from_arms => {}
             (true, None) => out.push(Problem::new(&at, "names no cap")),
             (true, Some(r)) if blank(r) => out.push(Problem::new(&at, "no_cap_reason is empty")),
             (false, Some(_)) => out.push(Problem::new(
@@ -378,7 +399,12 @@ fn families(reg: &Registry, out: &mut Vec<Problem>) {
         .collect();
     for cap in &reg.caps.caps {
         let in_scope = cap.protocol.is_some_and(|p| p <= COVERED_THROUGH_PROTOCOL);
-        if cap.indexer_visible && in_scope && !referenced.contains(cap.id.as_str()) {
+        // the pre-cap record tags entries by their arms, never a family
+        if cap.id != crate::PRE_CAP
+            && cap.indexer_visible
+            && in_scope
+            && !referenced.contains(cap.id.as_str())
+        {
             out.push(Problem::new(
                 format!("{CAPS_FILE} {}", cap.id),
                 "indexer-visible cap is not referenced by any family",

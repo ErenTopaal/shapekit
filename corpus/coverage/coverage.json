@@ -6303,28 +6303,79 @@
   },
   "caps": [
     {
-      "core_emitted_entries": 8,
-      "entries": 9,
+      "core_emitted_entries": 82,
+      "entries": 82,
+      "entries_by_source_class": {
+        "local-core": 82
+      },
+      "entries_by_variant": {
+        "mainnet": 82,
+        "testnet": 82
+      },
+      "families": [
+        "explore.witnesses",
+        "explore.pairs"
+      ],
+      "id": "PRE-CAP",
+      "indexer_visible": true,
+      "protocol": 0,
+      "protocols_all": [
+        9,
+        10,
+        12,
+        14,
+        17,
+        19,
+        22,
+        23,
+        24,
+        28,
+        30
+      ],
+      "protocols_core_emitted": [
+        9,
+        10,
+        12,
+        14,
+        17,
+        19,
+        22,
+        23,
+        24,
+        28,
+        30
+      ],
+      "status": "Not a CAP",
+      "title": "Shapes in the XDR before the CAP process"
+    },
+    {
+      "core_emitted_entries": 12,
+      "entries": 13,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 7,
+        "local-core": 11,
         "local-core-refused": 1
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 8,
-        "testnet": 8
+        "mainnet": 12,
+        "testnet": 12
       },
       "families": [
-        "cap01.bump-sequence"
+        "cap01.bump-sequence",
+        "explore.witnesses"
       ],
       "id": "CAP-0001",
       "indexer_visible": true,
       "protocol": 10,
       "protocols_all": [
+        17,
+        22,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        22,
         30
       ],
       "status": "Final",
@@ -6369,36 +6420,46 @@
       "title": "Transaction level signature verification"
     },
     {
-      "core_emitted_entries": 25,
-      "entries": 30,
+      "core_emitted_entries": 41,
+      "entries": 46,
       "entries_by_source_class": {
         "core-golden": 6,
-        "local-core": 16,
+        "local-core": 32,
         "mainnet-history": 3,
         "synthetic": 5
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 19,
-        "testnet": 16,
+        "mainnet": 35,
+        "testnet": 32,
         "vector": 4
       },
       "families": [
-        "cap03.offer-liabilities"
+        "cap03.offer-liabilities",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0003",
       "indexer_visible": true,
       "protocol": 10,
       "protocols_all": [
         11,
+        12,
         17,
         19,
+        22,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
         11,
+        12,
         17,
         19,
+        22,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -6435,36 +6496,47 @@
       "title": "Throttling and transaction pricing improvements"
     },
     {
-      "core_emitted_entries": 25,
-      "entries": 30,
+      "core_emitted_entries": 66,
+      "entries": 71,
       "entries_by_source_class": {
         "core-golden": 6,
-        "local-core": 16,
+        "local-core": 57,
         "mainnet-history": 3,
         "synthetic": 5
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 19,
-        "testnet": 16,
+        "mainnet": 60,
+        "testnet": 57,
         "vector": 4
       },
       "families": [
-        "cap03.offer-liabilities"
+        "cap03.offer-liabilities",
+        "explore.witnesses"
       ],
       "id": "CAP-0006",
       "indexer_visible": true,
       "protocol": 11,
       "protocols_all": [
+        9,
         11,
+        12,
+        14,
         17,
         19,
+        22,
+        24,
         30
       ],
       "protocols_core_emitted": [
+        9,
         11,
+        12,
+        14,
         17,
         19,
+        22,
+        24,
         30
       ],
       "status": "Final",
@@ -6583,33 +6655,40 @@
       "title": "Adversarial Transaction Set Ordering"
     },
     {
-      "core_emitted_entries": 21,
-      "entries": 23,
+      "core_emitted_entries": 34,
+      "entries": 36,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 17,
+        "local-core": 30,
         "mainnet-history": 3,
         "synthetic": 2
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 20,
-        "testnet": 17
+        "mainnet": 33,
+        "testnet": 30
       },
       "families": [
-        "cap15.fee-bump"
+        "cap15.fee-bump",
+        "explore.witnesses"
       ],
       "id": "CAP-0015",
       "indexer_visible": true,
       "protocol": 13,
       "protocols_all": [
+        12,
+        14,
         20,
         22,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        12,
+        14,
         20,
         22,
+        28,
         30
       ],
       "status": "Final",
@@ -6672,36 +6751,48 @@
       "title": "Fine-Grained Control of Authorization"
     },
     {
-      "core_emitted_entries": 31,
-      "entries": 47,
+      "core_emitted_entries": 45,
+      "entries": 61,
       "entries_by_source_class": {
         "core-golden": 3,
-        "local-core": 26,
+        "local-core": 40,
         "local-core-refused": 2,
         "mainnet-history": 2,
         "synthetic": 14
       },
       "entries_by_variant": {
         "any": 17,
-        "mainnet": 30,
-        "testnet": 28
+        "mainnet": 44,
+        "testnet": 42
       },
       "families": [
         "classic.max-length",
         "classic.memo-bytes",
-        "classic.memo-arms"
+        "classic.memo-arms",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0019",
       "indexer_visible": true,
       "protocol": 13,
       "protocols_all": [
+        12,
+        17,
+        22,
         23,
+        24,
         26,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        12,
+        17,
+        22,
         23,
+        24,
         26,
+        28,
         30
       ],
       "status": "Final",
@@ -6723,29 +6814,43 @@
       "title": "Bucket Initial Entries"
     },
     {
-      "core_emitted_entries": 15,
-      "entries": 18,
+      "core_emitted_entries": 35,
+      "entries": 38,
       "entries_by_source_class": {
         "core-golden": 2,
-        "local-core": 13,
+        "local-core": 33,
         "local-core-refused": 2,
         "synthetic": 1
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 15,
-        "testnet": 15
+        "mainnet": 35,
+        "testnet": 35
       },
       "families": [
-        "cap21.preconditions"
+        "cap21.preconditions",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0021",
       "indexer_visible": true,
       "protocol": 19,
       "protocols_all": [
+        17,
+        19,
+        22,
+        24,
+        26,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        19,
+        22,
+        24,
+        26,
+        28,
         30
       ],
       "status": "Final",
@@ -6766,61 +6871,85 @@
       "title": "Invalid transactions must have no effects"
     },
     {
-      "core_emitted_entries": 7,
-      "entries": 11,
+      "core_emitted_entries": 30,
+      "entries": 34,
       "entries_by_source_class": {
         "core-golden": 2,
-        "local-core": 5,
+        "local-core": 28,
         "local-core-refused": 1,
         "synthetic": 3
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 6,
-        "testnet": 6,
+        "mainnet": 29,
+        "testnet": 29,
         "vector": 2
       },
       "families": [
-        "cap23.claimable-balances"
+        "cap23.claimable-balances",
+        "explore.witnesses"
       ],
       "id": "CAP-0023",
       "indexer_visible": true,
       "protocol": 14,
       "protocols_all": [
+        14,
+        17,
+        19,
+        22,
         30
       ],
       "protocols_core_emitted": [
+        14,
+        17,
+        19,
+        22,
         30
       ],
       "status": "Final",
       "title": "Two-Part Payments with ClaimableBalanceEntry"
     },
     {
-      "core_emitted_entries": 14,
-      "entries": 26,
+      "core_emitted_entries": 53,
+      "entries": 65,
       "entries_by_source_class": {
         "core-golden": 2,
-        "local-core": 10,
+        "local-core": 49,
         "local-core-refused": 2,
         "mainnet-history": 2,
         "synthetic": 10
       },
       "entries_by_variant": {
         "any": 12,
-        "mainnet": 14,
-        "testnet": 12
+        "mainnet": 53,
+        "testnet": 51
       },
       "families": [
-        "classic.max-length"
+        "classic.max-length",
+        "explore.witnesses"
       ],
       "id": "CAP-0024",
       "indexer_visible": true,
       "protocol": 12,
       "protocols_all": [
+        10,
+        12,
+        14,
+        17,
+        19,
+        22,
+        24,
         26,
         30
       ],
       "protocols_core_emitted": [
+        10,
+        12,
+        14,
+        17,
+        19,
+        22,
+        24,
         26,
         30
       ],
@@ -6871,35 +7000,41 @@
       "title": "Disable Inflation Mechanism"
     },
     {
-      "core_emitted_entries": 32,
-      "entries": 47,
+      "core_emitted_entries": 48,
+      "entries": 63,
       "entries_by_source_class": {
         "core-golden": 2,
-        "local-core": 28,
+        "local-core": 44,
         "local-core-refused": 2,
         "mainnet-history": 2,
         "synthetic": 13
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 32,
-        "testnet": 30,
+        "mainnet": 48,
+        "testnet": 46,
         "vector": 11
       },
       "families": [
         "cap27.muxed-accounts",
-        "soroban.muxed-source"
+        "soroban.muxed-source",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0027",
       "indexer_visible": true,
       "protocol": 13,
       "protocols_all": [
         17,
+        22,
+        24,
         28,
         30
       ],
       "protocols_core_emitted": [
         17,
+        22,
+        24,
         28,
         30
       ],
@@ -7003,27 +7138,45 @@
       "title": "Trustline Preauthorization"
     },
     {
-      "core_emitted_entries": 24,
-      "entries": 24,
+      "core_emitted_entries": 62,
+      "entries": 62,
       "entries_by_source_class": {
         "core-golden": 7,
-        "local-core": 17
+        "local-core": 55
       },
       "entries_by_variant": {
         "any": 7,
-        "mainnet": 17,
-        "testnet": 17
+        "mainnet": 55,
+        "testnet": 55
       },
       "families": [
-        "cap33.sponsorship"
+        "cap33.sponsorship",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0033",
       "indexer_visible": true,
       "protocol": 14,
       "protocols_all": [
+        14,
+        15,
+        17,
+        19,
+        22,
+        23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        14,
+        15,
+        17,
+        19,
+        22,
+        23,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7045,28 +7198,39 @@
       "title": "Preserve Transaction-Set/Close-Time Affinity During Nomination"
     },
     {
-      "core_emitted_entries": 9,
-      "entries": 10,
+      "core_emitted_entries": 37,
+      "entries": 38,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 8,
+        "local-core": 36,
         "local-core-refused": 1
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 9,
-        "testnet": 9
+        "mainnet": 37,
+        "testnet": 37
       },
       "families": [
-        "cap35.clawback"
+        "cap35.clawback",
+        "explore.witnesses"
       ],
       "id": "CAP-0035",
       "indexer_visible": true,
       "protocol": 17,
       "protocols_all": [
+        14,
+        17,
+        19,
+        22,
+        24,
         30
       ],
       "protocols_core_emitted": [
+        14,
+        17,
+        19,
+        22,
+        24,
         30
       ],
       "status": "Final",
@@ -7101,32 +7265,48 @@
       "title": "Automated Market Makers"
     },
     {
-      "core_emitted_entries": 14,
-      "entries": 29,
+      "core_emitted_entries": 60,
+      "entries": 75,
       "entries_by_source_class": {
         "core-golden": 3,
-        "local-core": 10,
+        "local-core": 56,
         "local-core-refused": 1,
         "synthetic": 14,
         "testnet-history": 1
       },
       "entries_by_variant": {
         "any": 5,
-        "mainnet": 11,
-        "testnet": 12,
+        "mainnet": 57,
+        "testnet": 58,
         "vector": 12
       },
       "families": [
-        "cap38.liquidity-pools"
+        "cap38.liquidity-pools",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0038",
       "indexer_visible": true,
       "protocol": 18,
       "protocols_all": [
+        9,
+        12,
+        17,
+        18,
+        19,
+        22,
+        28,
         29,
         30
       ],
       "protocols_core_emitted": [
+        9,
+        12,
+        17,
+        18,
+        19,
+        22,
+        28,
         29,
         30
       ],
@@ -7148,31 +7328,34 @@
       "title": "Not Auth Revocable Trustlines"
     },
     {
-      "core_emitted_entries": 33,
-      "entries": 47,
+      "core_emitted_entries": 36,
+      "entries": 50,
       "entries_by_source_class": {
-        "local-core": 32,
+        "local-core": 35,
         "local-core-refused": 4,
         "synthetic": 10,
         "testnet-history": 1
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 36,
-        "testnet": 37,
+        "mainnet": 39,
+        "testnet": 40,
         "vector": 7
       },
       "families": [
-        "cap40.signed-payload-signer"
+        "cap40.signed-payload-signer",
+        "explore.witnesses"
       ],
       "id": "CAP-0040",
       "indexer_visible": true,
       "protocol": 19,
       "protocols_all": [
+        22,
         28,
         30
       ],
       "protocols_core_emitted": [
+        22,
         28,
         30
       ],
@@ -7194,29 +7377,40 @@
       "title": "Concurrent Transactions"
     },
     {
-      "core_emitted_entries": 3,
-      "entries": 4,
+      "core_emitted_entries": 23,
+      "entries": 24,
       "entries_by_source_class": {
         "core-golden": 3,
+        "local-core": 20,
         "synthetic": 1
       },
       "entries_by_variant": {
-        "any": 4
+        "any": 4,
+        "mainnet": 20,
+        "testnet": 20
       },
       "families": [
-        "cap42.generalized-txset"
+        "cap42.generalized-txset",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0042",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
         20,
+        22,
         23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
         20,
+        22,
         23,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7265,96 +7459,136 @@
       "title": "SPEEDEX - Pricing"
     },
     {
-      "core_emitted_entries": 46,
-      "entries": 52,
+      "core_emitted_entries": 91,
+      "entries": 97,
       "entries_by_source_class": {
         "core-golden": 21,
-        "local-core": 25,
+        "local-core": 70,
         "local-core-refused": 2,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 23,
-        "mainnet": 27,
-        "testnet": 27,
+        "mainnet": 72,
+        "testnet": 72,
         "vector": 2
       },
       "families": [
         "soroban.muxed-source",
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        17,
+        21,
+        22,
+        23,
+        24,
         28,
+        29,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        21,
+        22,
+        23,
+        24,
         28,
+        29,
         30
       ],
       "status": "Final",
       "title": "Soroban smart contract system overview"
     },
     {
-      "core_emitted_entries": 29,
-      "entries": 61,
+      "core_emitted_entries": 71,
+      "entries": 103,
       "entries_by_source_class": {
         "core-golden": 7,
-        "local-core": 18,
+        "local-core": 60,
         "mainnet-history": 4,
         "synthetic": 32
       },
       "entries_by_variant": {
         "any": 24,
-        "mainnet": 22,
-        "testnet": 18,
+        "mainnet": 64,
+        "testnet": 60,
         "vector": 15
       },
       "families": [
-        "soroban.scval-shapes"
+        "soroban.scval-shapes",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-01",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        17,
+        19,
+        21,
         22,
+        23,
+        24,
+        25,
         26,
+        28,
+        29,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        19,
+        21,
         22,
+        23,
+        24,
+        25,
         26,
+        28,
+        29,
         30
       ],
       "status": "Final",
       "title": "Soroban Runtime Environment"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 61,
+      "entries": 65,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 42,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 42,
+        "testnet": 42,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-02",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        21,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        21,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7376,57 +7610,69 @@
       "title": "Smart Contract Host Functions"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 45,
+      "entries": 49,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 26,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 26,
+        "testnet": 26,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-05",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        21,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        21,
+        24,
+        28,
         30
       ],
       "status": "Final",
       "title": "Smart Contract Data"
     },
     {
-      "core_emitted_entries": 22,
-      "entries": 22,
+      "core_emitted_entries": 28,
+      "entries": 28,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 18
+        "local-core": 24
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 18,
-        "testnet": 18
+        "mainnet": 24,
+        "testnet": 24
       },
       "families": [
-        "cap73.sac-trust"
+        "cap73.sac-trust",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-06",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        21,
         28,
         30
       ],
       "protocols_core_emitted": [
+        21,
         28,
         30
       ],
@@ -7434,107 +7680,140 @@
       "title": "Smart Contract Standardized Asset (Stellar Asset Contract)"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 49,
+      "entries": 53,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 30,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 30,
+        "testnet": 30,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-07",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
+        21,
+        23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        20,
+        21,
+        23,
+        24,
+        28,
         30
       ],
       "status": "Final",
       "title": "Fee and resource model in smart contracts"
     },
     {
-      "core_emitted_entries": 46,
-      "entries": 50,
+      "core_emitted_entries": 63,
+      "entries": 67,
       "entries_by_source_class": {
         "core-golden": 23,
-        "local-core": 23,
+        "local-core": 40,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 25,
-        "mainnet": 23,
-        "testnet": 23,
+        "mainnet": 40,
+        "testnet": 40,
         "vector": 2
       },
       "families": [
         "soroban.invoke-basics",
-        "soroban.events-max"
+        "soroban.events-max",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-08",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        17,
+        20,
+        21,
+        22,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        20,
+        21,
+        22,
+        24,
+        28,
         30
       ],
       "status": "Final",
       "title": "Smart Contract Events"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 17,
+      "entries": 17,
       "entries_by_source_class": {
         "core-golden": 3,
-        "local-core": 5
+        "local-core": 14
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 5,
-        "testnet": 5
+        "mainnet": 14,
+        "testnet": 14
       },
       "families": [
-        "cap46.config-upgrades"
+        "cap46.config-upgrades",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-09",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
         20,
+        23,
+        29,
         30
       ],
       "protocols_core_emitted": [
         20,
+        23,
+        29,
         30
       ],
       "status": "Final",
       "title": "Network Configuration Ledger Entries"
     },
     {
-      "core_emitted_entries": 8,
-      "entries": 8,
+      "core_emitted_entries": 10,
+      "entries": 10,
       "entries_by_source_class": {
         "core-golden": 3,
-        "local-core": 5
+        "local-core": 7
       },
       "entries_by_variant": {
         "any": 3,
-        "mainnet": 5,
-        "testnet": 5
+        "mainnet": 7,
+        "testnet": 7
       },
       "families": [
-        "cap46.config-upgrades"
+        "cap46.config-upgrades",
+        "explore.witnesses"
       ],
       "id": "CAP-0046-10",
       "indexer_visible": true,
@@ -7551,60 +7830,86 @@
       "title": "Smart Contract Budget Metering"
     },
     {
-      "core_emitted_entries": 18,
-      "entries": 22,
+      "core_emitted_entries": 38,
+      "entries": 42,
       "entries_by_source_class": {
         "core-golden": 5,
-        "local-core": 13,
+        "local-core": 33,
         "local-core-refused": 1,
         "synthetic": 3
       },
       "entries_by_variant": {
         "any": 8,
-        "mainnet": 14,
-        "testnet": 14
+        "mainnet": 34,
+        "testnet": 34
       },
       "families": [
-        "soroban.auth-trees"
+        "soroban.auth-trees",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-11",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        17,
         20,
+        21,
+        22,
+        23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        17,
         20,
+        21,
+        22,
+        23,
+        24,
+        28,
         30
       ],
       "status": "Final",
       "title": "Soroban Authorization Framework"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 50,
+      "entries": 54,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 31,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 31,
+        "testnet": 31,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0046-12",
       "indexer_visible": true,
       "protocol": 20,
       "protocols_all": [
+        20,
+        21,
+        23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        20,
+        21,
+        23,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7697,29 +8002,37 @@
       "title": "Separate host functions to extend the TTL for contract instance and contract code"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 44,
+      "entries": 48,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 25,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 25,
+        "testnet": 25,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0054",
       "indexer_visible": true,
       "protocol": 21,
       "protocols_all": [
+        21,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        21,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7771,29 +8084,37 @@
       "title": "State Archival Persistent Entry Eviction"
     },
     {
-      "core_emitted_entries": 38,
-      "entries": 42,
+      "core_emitted_entries": 44,
+      "entries": 48,
       "entries_by_source_class": {
         "core-golden": 19,
-        "local-core": 19,
+        "local-core": 25,
         "synthetic": 4
       },
       "entries_by_variant": {
         "any": 21,
-        "mainnet": 19,
-        "testnet": 19,
+        "mainnet": 25,
+        "testnet": 25,
         "vector": 2
       },
       "families": [
-        "soroban.invoke-basics"
+        "soroban.invoke-basics",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0058",
       "indexer_visible": true,
       "protocol": 22,
       "protocols_all": [
+        22,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        22,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7844,56 +8165,71 @@
       "title": "Smart Contract Standardized Asset (Stellar Asset Contract) Extension: Memo"
     },
     {
-      "core_emitted_entries": 9,
-      "entries": 9,
+      "core_emitted_entries": 12,
+      "entries": 12,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 5
+        "local-core": 8
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 5,
-        "testnet": 5
+        "mainnet": 8,
+        "testnet": 8
       },
       "families": [
-        "cap66.archival"
+        "cap66.archival",
+        "explore.witnesses"
       ],
       "id": "CAP-0062",
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
+        23,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        23,
+        28,
         30
       ],
       "status": "Final",
       "title": "Soroban Live State Prioritization"
     },
     {
-      "core_emitted_entries": 6,
-      "entries": 6,
+      "core_emitted_entries": 23,
+      "entries": 23,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 2
+        "local-core": 19
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 2,
-        "testnet": 2
+        "mainnet": 19,
+        "testnet": 19
       },
       "families": [
-        "cap63.parallel-txset"
+        "cap63.parallel-txset",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0063",
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
+        17,
+        22,
         23,
+        24,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        22,
         23,
+        24,
+        28,
         30
       ],
       "status": "Final",
@@ -7929,59 +8265,76 @@
       "title": "Reusable module cache"
     },
     {
-      "core_emitted_entries": 9,
-      "entries": 9,
+      "core_emitted_entries": 12,
+      "entries": 12,
       "entries_by_source_class": {
         "core-golden": 4,
-        "local-core": 5
+        "local-core": 8
       },
       "entries_by_variant": {
         "any": 4,
-        "mainnet": 5,
-        "testnet": 5
+        "mainnet": 8,
+        "testnet": 8
       },
       "families": [
-        "cap66.archival"
+        "cap66.archival",
+        "explore.witnesses"
       ],
       "id": "CAP-0066",
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
+        23,
+        28,
         30
       ],
       "protocols_core_emitted": [
+        23,
+        28,
         30
       ],
       "status": "Final",
       "title": "Soroban In-memory Read Resource"
     },
     {
-      "core_emitted_entries": 68,
-      "entries": 69,
+      "core_emitted_entries": 86,
+      "entries": 87,
       "entries_by_source_class": {
         "core-golden": 9,
-        "local-core": 59,
+        "local-core": 77,
         "synthetic": 1
       },
       "entries_by_variant": {
         "any": 10,
-        "mainnet": 59,
-        "testnet": 59
+        "mainnet": 77,
+        "testnet": 77
       },
       "families": [
         "sep41.muxed-addresses",
-        "cap67.unified-events"
+        "cap67.unified-events",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0067",
       "indexer_visible": true,
       "protocol": 23,
       "protocols_all": [
+        17,
+        21,
         22,
+        23,
+        24,
+        27,
         28,
         30
       ],
       "protocols_core_emitted": [
+        17,
+        21,
         22,
+        23,
+        24,
+        27,
         28,
         30
       ],
@@ -8019,19 +8372,20 @@
       "title": "String/Bytes conversion host functions"
     },
     {
-      "core_emitted_entries": 3,
-      "entries": 3,
+      "core_emitted_entries": 4,
+      "entries": 4,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 2
+        "local-core": 3
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 2,
-        "testnet": 2
+        "mainnet": 3,
+        "testnet": 3
       },
       "families": [
-        "cap70.scp-timing"
+        "cap70.scp-timing",
+        "explore.witnesses"
       ],
       "id": "CAP-0070",
       "indexer_visible": true,
@@ -8048,46 +8402,50 @@
       "title": "Configurable SCP Timing Parameters"
     },
     {
-      "core_emitted_entries": 4,
-      "entries": 4,
+      "core_emitted_entries": 6,
+      "entries": 6,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 3
+        "local-core": 5
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 3,
-        "testnet": 3
+        "mainnet": 5,
+        "testnet": 5
       },
       "families": [
-        "cap71.credentials"
+        "cap71.credentials",
+        "explore.witnesses"
       ],
       "id": "CAP-0071",
       "indexer_visible": true,
       "protocol": 27,
       "protocols_all": [
+        27,
         30
       ],
       "protocols_core_emitted": [
+        27,
         30
       ],
       "status": "Final",
       "title": "Authentication delegation and address-bound Soroban credentials"
     },
     {
-      "core_emitted_entries": 4,
-      "entries": 4,
+      "core_emitted_entries": 5,
+      "entries": 5,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 3
+        "local-core": 4
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 3,
-        "testnet": 3
+        "mainnet": 4,
+        "testnet": 4
       },
       "families": [
-        "cap71.credentials"
+        "cap71.credentials",
+        "explore.witnesses"
       ],
       "id": "CAP-0071-01",
       "indexer_visible": true,
@@ -8102,27 +8460,30 @@
       "title": "Authentication delegation for custom accounts"
     },
     {
-      "core_emitted_entries": 4,
-      "entries": 4,
+      "core_emitted_entries": 5,
+      "entries": 5,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 3
+        "local-core": 4
       },
       "entries_by_variant": {
         "any": 1,
-        "mainnet": 3,
-        "testnet": 3
+        "mainnet": 4,
+        "testnet": 4
       },
       "families": [
-        "cap71.credentials"
+        "cap71.credentials",
+        "explore.witnesses"
       ],
       "id": "CAP-0071-02",
       "indexer_visible": true,
       "protocol": 27,
       "protocols_all": [
+        27,
         30
       ],
       "protocols_core_emitted": [
+        27,
         30
       ],
       "status": "Final",
@@ -8228,19 +8589,20 @@
       "title": "P23 State Archival bug remediation"
     },
     {
-      "core_emitted_entries": 12,
-      "entries": 12,
+      "core_emitted_entries": 17,
+      "entries": 17,
       "entries_by_source_class": {
         "core-golden": 5,
-        "local-core": 7
+        "local-core": 12
       },
       "entries_by_variant": {
         "any": 5,
-        "mainnet": 7,
-        "testnet": 7
+        "mainnet": 12,
+        "testnet": 12
       },
       "families": [
-        "cap77.frozen-keys"
+        "cap77.frozen-keys",
+        "explore.witnesses"
       ],
       "id": "CAP-0077",
       "indexer_visible": true,
@@ -8349,21 +8711,22 @@
       }
     },
     {
-      "core_emitted_entries": 4,
-      "entries": 7,
+      "core_emitted_entries": 5,
+      "entries": 8,
       "entries_by_source_class": {
         "core-golden": 1,
-        "local-core": 3,
+        "local-core": 4,
         "synthetic": 3
       },
       "entries_by_variant": {
         "any": 2,
-        "mainnet": 3,
-        "testnet": 3,
+        "mainnet": 4,
+        "testnet": 4,
         "vector": 2
       },
       "families": [
-        "cap84.muxed-contract"
+        "cap84.muxed-contract",
+        "explore.witnesses"
       ],
       "id": "CAP-0084",
       "indexer_visible": true,
@@ -8378,17 +8741,18 @@
       "title": "Muxed Contract Addresses"
     },
     {
-      "core_emitted_entries": 11,
-      "entries": 11,
+      "core_emitted_entries": 13,
+      "entries": 13,
       "entries_by_source_class": {
-        "local-core": 11
+        "local-core": 13
       },
       "entries_by_variant": {
-        "mainnet": 11,
-        "testnet": 11
+        "mainnet": 13,
+        "testnet": 13
       },
       "families": [
-        "cap85.executable-tag"
+        "cap85.executable-tag",
+        "explore.witnesses"
       ],
       "id": "CAP-0085",
       "indexer_visible": true,
@@ -8433,18 +8797,22 @@
       "title": "Host functions for ML-DSA signature verification"
     },
     {
-      "core_emitted_entries": 2,
-      "entries": 2,
+      "core_emitted_entries": 9,
+      "entries": 9,
       "entries_by_source_class": {
         "core-golden": 1,
+        "local-core": 7,
         "testnet-history": 1
       },
       "entries_by_variant": {
         "any": 1,
-        "testnet": 1
+        "mainnet": 7,
+        "testnet": 8
       },
       "families": [
-        "cap88.ms-close-time"
+        "cap88.ms-close-time",
+        "explore.witnesses",
+        "explore.pairs"
       ],
       "id": "CAP-0088",
       "indexer_visible": true,

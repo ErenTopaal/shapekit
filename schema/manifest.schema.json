@@ -54,6 +54,13 @@
     "Entry": {
       "additionalProperties": false,
       "properties": {
+        "arms": {
+          "description": "The union arms the entry was picked to witness, as signatures spell them\n(`OperationBody:payment`), for families whose entries take their caps from their arms.\n`caps` is then the CAPs that introduced these arms, or `PRE-CAP` when none did.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "caps": {
           "items": {
             "type": "string"

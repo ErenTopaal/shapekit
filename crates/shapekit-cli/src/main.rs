@@ -430,6 +430,19 @@ enum ManifestCommand {
         #[arg(long)]
         dry_run: bool,
     },
+    /// Tag every entry that records the union arms it witnesses (`arms`) with the CAPs that
+    /// introduced them, read from registry/caps.toml xdr_additions, or PRE-CAP when none did.
+    /// Run `manifest build` afterwards.
+    ArmCaps {
+        /// The corpus directory (corpus or candidate).
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
+        /// List the entries whose caps differ and exit 1 instead of writing.
+        #[arg(long)]
+        check: bool,
+    },
     /// Write the manifest JSON Schema generated from the manifest types.
     Schema {
         /// Where to write the schema.
@@ -634,6 +647,11 @@ fn main() -> ExitCode {
             ManifestCommand::Rerender { corpus, dry_run } => {
                 manifest_cmd::rerender(&corpus, dry_run)
             }
+            ManifestCommand::ArmCaps {
+                corpus,
+                registry,
+                check,
+            } => manifest_cmd::arm_caps(&corpus, &registry, check),
         },
         Command::Oracle { command } => match command {
             OracleCommand::Run { corpus } => oracle_cmd::run(&corpus),

@@ -30510,7 +30510,61 @@
       "xdr_type": "TransactionEnvelope"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "ContractEventBody:v0",
+        "CreateAccountResult:success",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:create_account",
+        "OperationResult:op_inner",
+        "OperationResultTr:create_account",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScVal:address",
+        "ScVal:i128",
+        "ScVal:string",
+        "ScVal:symbol",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v0",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30563,7 +30617,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:native",
+        "OperationBody:payment",
+        "OperationResultTr:payment",
+        "PaymentResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30616,7 +30678,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30669,7 +30738,64 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:native",
+        "ContractEventBody:v0",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "MuxedAccount:muxed_ed25519",
+        "OperationBody:payment",
+        "OperationResult:op_inner",
+        "OperationResultTr:payment",
+        "PaymentResult:success",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScVal:address",
+        "ScVal:i128",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u64",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v0",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30722,7 +30848,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account",
+        "TransactionExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30775,7 +30910,80 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum4",
+        "ContractEventBody:v0",
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30828,7 +31036,23 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "LedgerEntryData:trustline",
+        "LedgerKey:account",
+        "LedgerKey:trustline",
+        "ScVal:void",
+        "SorobanAuthorizedFunction:contract_fn",
+        "SorobanCredentials:source_account",
+        "TrustLineAsset:credit_alphanum4",
+        "TrustLineEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0038",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-11"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30881,7 +31105,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30934,7 +31165,80 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum4",
+        "ContractEventBody:v0",
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -30987,7 +31291,21 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum4",
+        "ChangeTrustResult:success",
+        "LedgerEntryData:trustline",
+        "OperationBody:change_trust",
+        "OperationResultTr:change_trust",
+        "TransactionExt:v0",
+        "TrustLineAsset:credit_alphanum4",
+        "TrustLineEntryExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0038",
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31040,7 +31358,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractCodeEntryExt:v1",
+        "HostFunction:upload_contract_wasm",
+        "LedgerEntryData:contract_code"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0054"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31093,7 +31420,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:wasm",
+        "ContractIdPreimage:address",
+        "HostFunction:create_contract_v2",
+        "LedgerKey:contract_code",
+        "SorobanAuthorizedFunction:create_contract_v2_host_fn"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0058"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31146,7 +31484,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:config"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31198,7 +31542,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account",
+        "TransactionExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31251,7 +31604,81 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum4",
+        "ContractEventBody:v0",
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31304,7 +31731,23 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "LedgerEntryData:trustline",
+        "LedgerKey:account",
+        "LedgerKey:trustline",
+        "ScVal:void",
+        "SorobanAuthorizedFunction:contract_fn",
+        "SorobanCredentials:source_account",
+        "TrustLineAsset:credit_alphanum4",
+        "TrustLineEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0038",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-11"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31357,7 +31800,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractCodeEntryExt:v1",
+        "HostFunction:upload_contract_wasm",
+        "LedgerEntryData:contract_code"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0054"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31410,7 +31862,20 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:wasm",
+        "ContractIdPreimage:address",
+        "HostFunction:create_contract_v2",
+        "LedgerKey:contract_code",
+        "SorobanAuthorizedFunction:create_contract_v2_host_fn",
+        "SorobanCredentials:source_account"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0046-11",
+        "CAP-0058"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31463,7 +31928,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "ScVal:void"
+      ],
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-02"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31516,7 +31988,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:config"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31568,7 +32046,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31621,7 +32106,81 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum4",
+        "ContractEventBody:v0",
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31674,7 +32233,21 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum4",
+        "ChangeTrustResult:success",
+        "LedgerEntryData:trustline",
+        "OperationBody:change_trust",
+        "OperationResultTr:change_trust",
+        "TransactionExt:v0",
+        "TrustLineAsset:credit_alphanum4",
+        "TrustLineEntryExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0038",
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31727,7 +32300,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31780,7 +32360,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum12",
+        "ChangeTrustResult:invalid_limit",
+        "LiquidityPoolDepositResult:no_trust",
+        "OperationBody:liquidity_pool_deposit",
+        "OperationResultTr:liquidity_pool_deposit"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31833,7 +32422,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:sell_no_trust"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31886,7 +32480,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AssetCode:credit_alphanum12"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31939,7 +32538,19 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:success",
+        "LedgerEntryChange:removed",
+        "LedgerKey:account",
+        "OperationBody:account_merge",
+        "OperationResultTr:account_merge",
+        "ScVal:string"
+      ],
+      "caps": [
+        "CAP-0027",
+        "CAP-0046-01",
+        "CAP-0063"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -31992,7 +32603,20 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AllowTrustResult:no_trust_line",
+        "AssetCode:credit_alphanum4",
+        "EndSponsoringFutureReservesResult:not_sponsored",
+        "OperationBody:allow_trust",
+        "OperationBody:end_sponsoring_future_reserves",
+        "OperationResultTr:allow_trust",
+        "OperationResultTr:end_sponsoring_future_reserves"
+      ],
+      "caps": [
+        "CAP-0033",
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32045,7 +32669,67 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum12",
+        "Asset:native",
+        "ChangeTrustAsset:pool_share",
+        "ChangeTrustResult:success",
+        "ContractEventBody:v0",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "LedgerCloseMeta:v1",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:liquidity_pool",
+        "LedgerEntryData:trustline",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LiquidityPoolEntryBody:liquidity_pool_constant_product",
+        "LiquidityPoolParameters:liquidity_pool_constant_product",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:change_trust",
+        "OperationResult:op_inner",
+        "OperationResultTr:change_trust",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScVal:address",
+        "ScVal:i128",
+        "ScVal:symbol",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v0",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success",
+        "TrustLineAsset:pool_share",
+        "TrustLineEntryExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0038",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32098,7 +32782,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:begin_sponsoring_future_reserves",
+        "TransactionResultResult:tx_bad_sponsorship"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32151,7 +32841,22 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:credit_alphanum4",
+        "Memo:id",
+        "MuxedAccount:muxed_ed25519",
+        "OperationBody:path_payment_strict_receive",
+        "OperationBody:set_options",
+        "OperationResultTr:path_payment_strict_receive",
+        "OperationResultTr:set_options",
+        "PathPaymentStrictReceiveResult:no_trust",
+        "SetOptionsResult:success",
+        "TransactionResultResult:tx_failed"
+      ],
+      "caps": [
+        "CAP-0024",
+        "CAP-0027"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32204,7 +32909,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BumpSequenceResult:success",
+        "ManageDataResult:name_not_found",
+        "OperationBody:bump_sequence",
+        "OperationBody:manage_data",
+        "OperationResultTr:bump_sequence",
+        "OperationResultTr:manage_data"
+      ],
+      "caps": [
+        "CAP-0001"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32257,7 +32972,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:max_tx_set_size"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32309,7 +33029,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Preconditions:time"
+      ],
+      "caps": [
+        "CAP-0021"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32362,7 +33087,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:path_payment_strict_send",
+        "OperationResultTr:path_payment_strict_send",
+        "PathPaymentStrictSendResult:src_no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32415,7 +33147,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32468,7 +33205,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:no_trust",
+        "OperationBody:liquidity_pool_withdraw",
+        "OperationResultTr:liquidity_pool_withdraw"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32521,7 +33265,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:claimable_balance",
+        "OperationBody:revoke_sponsorship",
+        "OperationResultTr:revoke_sponsorship",
+        "RevokeSponsorshipOp:ledger_entry",
+        "RevokeSponsorshipResult:does_not_exist"
+      ],
+      "caps": [
+        "CAP-0023",
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32574,7 +33328,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationResult:op_no_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32627,7 +33386,27 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:does_not_exist",
+        "ClaimableBalanceId:claimable_balance_id_type_v0",
+        "ClawbackClaimableBalanceResult:does_not_exist",
+        "FeeBumpTransactionExt:v0",
+        "FeeBumpTransactionInnerTx:tx",
+        "InnerTransactionResultExt:v0",
+        "InnerTransactionResultResult:tx_failed",
+        "Memo:return",
+        "OperationBody:claim_claimable_balance",
+        "OperationBody:clawback_claimable_balance",
+        "OperationResultTr:claim_claimable_balance",
+        "OperationResultTr:clawback_claimable_balance",
+        "TransactionEnvelope:tx_fee_bump",
+        "TransactionResultResult:tx_fee_bump_inner_failed"
+      ],
+      "caps": [
+        "CAP-0015",
+        "CAP-0023",
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32680,7 +33459,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum4"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32733,7 +33517,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipOp:signer",
+        "SignerKey:ed25519_signed_payload"
+      ],
+      "caps": [
+        "CAP-0033",
+        "CAP-0040"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32786,7 +33577,20 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_success",
+        "LedgerEntryData:offer",
+        "ManageOfferSuccessResultOffer:created",
+        "ManageSellOfferResult:success",
+        "OfferEntryExt:v0",
+        "OperationBody:create_passive_sell_offer",
+        "OperationResultTr:manage_sell_offer",
+        "TransactionResultResult:tx_fee_bump_inner_success"
+      ],
+      "caps": [
+        "CAP-0006",
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32839,7 +33643,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackResult:no_trust",
+        "OperationBody:clawback",
+        "OperationBody:payment",
+        "OperationResultTr:clawback",
+        "OperationResultTr:payment",
+        "PaymentResult:line_full"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32892,7 +33706,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:manage_sell_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32945,7 +33764,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:over_sendmax"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -32998,7 +33822,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:success",
+        "ScVal:bool",
+        "TrustLineAsset:credit_alphanum4"
+      ],
+      "caps": [
+        "CAP-0038",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33051,7 +33883,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:underfunded",
+        "Preconditions:v2"
+      ],
+      "caps": [
+        "CAP-0021",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33104,7 +33943,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33156,7 +34000,28 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ConfigSettingEntry:contract_bandwidth_v0",
+        "ConfigSettingEntry:contract_compute_v0",
+        "ConfigSettingEntry:contract_cost_params_cpu_instructions",
+        "ConfigSettingEntry:contract_cost_params_memory_bytes",
+        "ConfigSettingEntry:contract_data_entry_size_bytes",
+        "ConfigSettingEntry:contract_data_key_size_bytes",
+        "ConfigSettingEntry:contract_events_v0",
+        "ConfigSettingEntry:contract_execution_lanes",
+        "ConfigSettingEntry:contract_historical_data_v0",
+        "ConfigSettingEntry:contract_ledger_cost_v0",
+        "ConfigSettingEntry:contract_max_size_bytes",
+        "ConfigSettingEntry:eviction_iterator",
+        "ConfigSettingEntry:live_soroban_state_size_window",
+        "ConfigSettingEntry:state_archival"
+      ],
+      "caps": [
+        "CAP-0046-07",
+        "CAP-0046-09",
+        "CAP-0046-10",
+        "CAP-0046-12"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33208,7 +34073,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionMeta:v3"
+      ],
+      "caps": [
+        "CAP-0046-08"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33261,7 +34131,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TrustLineEntryExt:v1",
+        "TrustLineEntryExtensionV2Ext:v0",
+        "TrustLineEntryV1Ext:v2"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33314,7 +34192,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:not_found"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33367,7 +34250,26 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:credit_alphanum12",
+        "Asset:native",
+        "FeeBumpTransactionExt:v0",
+        "FeeBumpTransactionInnerTx:tx",
+        "InnerTransactionResultExt:v0",
+        "InnerTransactionResultResult:tx_failed",
+        "LedgerHeaderExt:v1",
+        "LedgerHeaderExtensionV1Ext:v0",
+        "OperationBody:path_payment_strict_send",
+        "OperationResultTr:path_payment_strict_send",
+        "PathPaymentStrictSendResult:src_no_trust",
+        "TransactionEnvelope:tx_fee_bump",
+        "TransactionResultResult:tx_fee_bump_inner_failed"
+      ],
+      "caps": [
+        "CAP-0015",
+        "CAP-0024",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33420,7 +34322,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_fee"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33472,7 +34379,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:cannot_claim",
+        "OperationBody:claim_claimable_balance",
+        "OperationResultTr:claim_claimable_balance"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33525,7 +34439,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33578,7 +34497,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:payment",
+        "OperationResultTr:payment",
+        "PaymentResult:no_trust"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33631,7 +34557,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:ed25519_signed_payload"
+      ],
+      "caps": [
+        "CAP-0040"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33684,7 +34615,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:pre_auth_tx"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33737,7 +34673,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33790,7 +34731,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33843,7 +34789,29 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AllowTrustResult:no_trust_line",
+        "AssetCode:credit_alphanum4",
+        "ClawbackClaimableBalanceResult:does_not_exist",
+        "CreateAccountResult:already_exist",
+        "Memo:id",
+        "OperationBody:allow_trust",
+        "OperationBody:clawback_claimable_balance",
+        "OperationBody:create_account",
+        "OperationBody:set_options",
+        "OperationResultTr:allow_trust",
+        "OperationResultTr:clawback_claimable_balance",
+        "OperationResultTr:create_account",
+        "OperationResultTr:set_options",
+        "Preconditions:time",
+        "SetOptionsResult:auth_revocable_required",
+        "TransactionResultResult:tx_failed"
+      ],
+      "caps": [
+        "CAP-0021",
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33896,7 +34864,76 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum4",
+        "ClaimPredicate:before_absolute_time",
+        "ClaimableBalanceEntryExt:v0",
+        "ClaimableBalanceId:claimable_balance_id_type_v0",
+        "Claimant:claimant_type_v0",
+        "ContractEventBody:v0",
+        "CreateClaimableBalanceResult:success",
+        "DataEntryExt:v0",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:claimable_balance",
+        "LedgerEntryData:data",
+        "LedgerEntryExt:v0",
+        "LedgerEntryExt:v1",
+        "LedgerEntryExtensionV1Ext:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "ManageDataResult:success",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "MuxedAccount:muxed_ed25519",
+        "OperationBody:create_claimable_balance",
+        "OperationBody:manage_data",
+        "OperationResult:op_inner",
+        "OperationResultTr:create_claimable_balance",
+        "OperationResultTr:manage_data",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:claimable_balance",
+        "ScVal:address",
+        "ScVal:i128",
+        "ScVal:string",
+        "ScVal:symbol",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v0",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0023",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -33949,7 +34986,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Memo:text",
+        "OperationBody:revoke_sponsorship",
+        "OperationResultTr:revoke_sponsorship",
+        "RevokeSponsorshipOp:signer",
+        "RevokeSponsorshipResult:does_not_exist",
+        "SignerKey:hash_x"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34002,7 +35049,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:ed25519"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34055,7 +35107,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateClaimableBalanceResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34108,7 +35165,20 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:success",
+        "LedgerEntryChange:removed",
+        "LedgerKey:account",
+        "OperationBody:account_merge",
+        "OperationResultTr:account_merge",
+        "ScVal:map",
+        "ScVal:u64"
+      ],
+      "caps": [
+        "CAP-0027",
+        "CAP-0046-01",
+        "CAP-0063"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34161,7 +35231,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:cant_revoke",
+        "AssetCode:credit_alphanum12"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34214,7 +35290,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:no_trust",
+        "OperationBody:liquidity_pool_deposit",
+        "OperationResultTr:liquidity_pool_deposit"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34267,7 +35350,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimPredicate:unconditional",
+        "ManageDataResult:name_not_found"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34320,7 +35409,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackClaimableBalanceResult:not_issuer"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34373,7 +35467,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "EndSponsoringFutureReservesResult:not_sponsored",
+        "OperationBody:end_sponsoring_future_reserves",
+        "OperationResultTr:end_sponsoring_future_reserves"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34426,7 +35527,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:no_destination"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34479,7 +35585,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipOp:ledger_entry",
+        "RevokeSponsorshipResult:success"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34532,7 +35644,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipResult:not_sponsor"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34585,7 +35702,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:buy_no_trust",
+        "OperationBody:manage_buy_offer",
+        "OperationResultTr:manage_buy_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34638,7 +35762,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:flags"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34690,7 +35819,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:no_trust",
+        "Memo:return",
+        "OperationBody:liquidity_pool_withdraw",
+        "OperationResultTr:liquidity_pool_withdraw"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34743,7 +35880,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:path_payment_strict_receive",
+        "OperationResultTr:path_payment_strict_receive",
+        "PathPaymentStrictReceiveResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34796,7 +35940,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BumpSequenceResult:success",
+        "OperationBody:bump_sequence",
+        "OperationResultTr:bump_sequence"
+      ],
+      "caps": [
+        "CAP-0001"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34849,7 +36000,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:max_tx_set_size"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34901,7 +36057,25 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum4",
+        "ChangeTrustResult:success",
+        "LedgerCloseMeta:v0",
+        "LedgerEntryData:trustline",
+        "OperationBody:change_trust",
+        "OperationResultTr:change_trust",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx_v0",
+        "TransactionMeta:v2",
+        "TransactionV0Ext:v0",
+        "TrustLineAsset:credit_alphanum4",
+        "TrustLineEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0015",
+        "CAP-0019",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -34954,7 +36128,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum12",
+        "TrustLineAsset:credit_alphanum12"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35007,7 +36187,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:sell_no_trust"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35060,7 +36245,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:no_destination"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35113,7 +36303,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:self_not_allowed"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35166,7 +36361,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35219,7 +36419,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35271,7 +36476,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35324,7 +36534,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:invalid_limit"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35377,7 +36592,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:trustline"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35430,7 +36650,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:low_reserve",
+        "SetOptionsResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35483,7 +36709,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:pool_share",
+        "ChangeTrustResult:trust_line_missing",
+        "LiquidityPoolParameters:liquidity_pool_constant_product"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35536,7 +36769,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:does_not_exist"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35589,7 +36827,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Memo:hash",
+        "PathPaymentStrictReceiveResult:success",
+        "ScVal:bytes"
+      ],
+      "caps": [
+        "CAP-0024",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35642,7 +36888,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:sell_no_trust",
+        "OperationBody:create_passive_sell_offer",
+        "OperationResultTr:manage_sell_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35695,7 +36948,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:not_found",
+        "OperationBody:manage_sell_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35748,7 +37007,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InflationResult:success",
+        "OperationBody:inflation",
+        "OperationResultTr:inflation"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35801,7 +37067,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:over_sendmax"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35854,7 +37125,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35907,7 +37183,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:begin_sponsoring_future_reserves",
+        "TransactionResultResult:tx_bad_sponsorship"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -35960,7 +37242,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_success",
+        "TransactionResultResult:tx_fee_bump_inner_success"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36013,7 +37301,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:buy_no_trust"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36066,7 +37359,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:line_full"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36119,7 +37417,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:invalid_inflation"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36172,7 +37475,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageDataResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36225,7 +37533,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36278,7 +37591,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:under_destmin"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36331,7 +37649,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageOfferSuccessResultOffer:created",
+        "ManageSellOfferResult:success",
+        "OfferEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36384,7 +37709,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimPredicate:before_relative_time",
+        "CreateClaimableBalanceResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36437,7 +37768,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:immutable_set"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36490,7 +37826,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExtensionV2Ext:v0",
+        "BeginSponsoringFutureReservesResult:success",
+        "ClawbackClaimableBalanceResult:not_clawback_enabled",
+        "OperationResultTr:begin_sponsoring_future_reserves"
+      ],
+      "caps": [
+        "CAP-0033",
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36543,7 +37888,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:cant_change"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36596,7 +37946,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:success"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36649,7 +38004,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ConfigSettingEntry:frozen_ledger_keys",
+        "LedgerEntryData:config_setting",
+        "LedgerUpgrade:config"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09",
+        "CAP-0077"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36701,7 +38065,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:set_trust_line_flags",
+        "OperationResultTr:set_trust_line_flags",
+        "SetTrustLineFlagsResult:cant_revoke"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36754,7 +38125,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36807,7 +38183,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SorobanCredentials:address_with_delegates"
+      ],
+      "caps": [
+        "CAP-0071",
+        "CAP-0071-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36860,7 +38242,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScError:auth",
+        "ScError:context",
+        "ScError:contract",
+        "ScError:events",
+        "ScError:object",
+        "ScError:storage",
+        "ScError:value"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36913,7 +38306,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:ttl"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-12"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -36965,7 +38364,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:external_ref"
+      ],
+      "caps": [
+        "CAP-0085"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37018,7 +38422,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ExtendFootprintTtlResult:resource_limit_exceeded"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37071,7 +38480,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RestoreFootprintResult:resource_limit_exceeded"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37124,7 +38538,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractCodeEntryExt:v1",
+        "HostFunction:upload_contract_wasm",
+        "LedgerEntryData:contract_code"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0054"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37177,7 +38600,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:wasm",
+        "ContractIdPreimage:address",
+        "LedgerKey:contract_code",
+        "SorobanAuthorizedFunction:create_contract_host_fn",
+        "SorobanCredentials:source_account"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-02",
+        "CAP-0046-11"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37230,7 +38664,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:restore_footprint",
+        "OperationResultTr:restore_footprint",
+        "RestoreFootprintResult:success",
+        "ScVal:bool"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37283,7 +38726,43 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerKey:contract_data",
+        "OperationBody:invoke_host_function",
+        "OperationResultTr:invoke_host_function",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "TransactionExt:v1"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37336,7 +38815,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "ScVal:timepoint",
+        "ScVal:void"
+      ],
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-02"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37389,7 +38876,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractEventBody:v0"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-08"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37442,7 +38935,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ExtendFootprintTtlResult:success",
+        "OperationBody:extend_footprint_ttl",
+        "OperationResultTr:extend_footprint_ttl"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37495,7 +38995,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:create_contract_v2",
+        "ScVal:i128",
+        "SorobanAuthorizedFunction:create_contract_v2_host_fn"
+      ],
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0058"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37548,7 +39056,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InvokeHostFunctionResult:resource_limit_exceeded",
+        "ScVal:u256"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37601,7 +39116,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:u64"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37654,7 +39174,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:u128"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37707,7 +39232,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InvokeHostFunctionResult:entry_archived",
+        "ScVal:ledger_key_nonce",
+        "SorobanAuthorizedFunction:contract_fn",
+        "SorobanCredentials:address"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-11"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37760,7 +39294,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerEntryChange:restored",
+        "SorobanTransactionDataExt:v1"
+      ],
+      "caps": [
+        "CAP-0062",
+        "CAP-0066"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37813,7 +39354,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScAddress:claimable_balance"
+      ],
+      "caps": [
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37866,7 +39412,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account",
+        "ScVal:string"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37919,7 +39473,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractCodeEntryExt:v1",
+        "HostFunction:upload_contract_wasm",
+        "LedgerEntryData:contract_code",
+        "ScVal:bytes"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0054"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -37972,7 +39537,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:create_contract_v2"
+      ],
+      "caps": [
+        "CAP-0058"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38025,7 +39595,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:void"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38078,7 +39653,77 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "ContractEventBody:v0",
+        "ContractExecutable:wasm",
+        "ContractIdPreimage:address",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v1",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_code",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:symbol",
+        "SorobanAuthorizedFunction:create_contract_v2_host_fn",
+        "SorobanCredentials:source_account",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0058",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38131,7 +39776,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:restore_footprint",
+        "OperationResultTr:restore_footprint",
+        "RestoreFootprintResult:success"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38184,7 +39836,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "EndSponsoringFutureReservesResult:not_sponsored",
+        "Memo:return",
+        "OperationBody:end_sponsoring_future_reserves",
+        "OperationResultTr:end_sponsoring_future_reserves"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38237,7 +39897,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ExtendFootprintTtlResult:success",
+        "OperationBody:extend_footprint_ttl",
+        "OperationResultTr:extend_footprint_ttl"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38290,7 +39957,25 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:credit_alphanum4",
+        "Asset:native",
+        "ManageDataResult:name_not_found",
+        "ManageOfferSuccessResultOffer:created",
+        "ManageSellOfferResult:success",
+        "OfferEntryExt:v0",
+        "OperationBody:manage_data",
+        "OperationBody:manage_sell_offer",
+        "OperationResultTr:manage_data",
+        "OperationResultTr:manage_sell_offer",
+        "TransactionExt:v0",
+        "TransactionResultResult:tx_failed",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0006",
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38343,7 +40028,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:credit_alphanum12",
+        "OperationBody:path_payment_strict_send",
+        "OperationResultTr:path_payment_strict_send",
+        "PathPaymentStrictSendResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38396,7 +40089,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "ScVal:bool",
+        "SorobanAuthorizedFunction:contract_fn"
+      ],
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-11"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38449,7 +40151,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InvokeHostFunctionResult:resource_limit_exceeded"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38502,7 +40209,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:cant_revoke",
+        "AssetCode:credit_alphanum12",
+        "OperationBody:allow_trust",
+        "OperationResultTr:allow_trust"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38555,7 +40270,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:max_tx_set_size"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38607,7 +40327,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:i64"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38660,7 +40385,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:i256"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38713,7 +40443,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:duration",
+        "ScVal:i32"
+      ],
+      "caps": [
+        "CAP-0021",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38766,7 +40503,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScError:wasm_vm",
+        "ScVal:error"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38819,7 +40562,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScAddress:muxed_account"
+      ],
+      "caps": [
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38872,7 +40620,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SorobanCredentials:address_v2"
+      ],
+      "caps": [
+        "CAP-0071",
+        "CAP-0071-02"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38925,7 +40679,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -38978,7 +40739,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:upload_contract_wasm"
+      ],
+      "caps": [
+        "CAP-0046-02"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39031,7 +40797,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractExecutable:wasm",
+        "ContractIdPreimage:address",
+        "HostFunction:create_contract_v2",
+        "SorobanAuthorizedFunction:create_contract_v2_host_fn",
+        "SorobanCredentials:source_account"
+      ],
+      "caps": [
+        "CAP-0046-02",
+        "CAP-0046-11",
+        "CAP-0058"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39084,7 +40861,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:flags"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39136,7 +40918,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "HostFunction:invoke_contract",
+        "ScVal:void"
+      ],
+      "caps": [
+        "CAP-0046-01",
+        "CAP-0046-02"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39189,7 +40978,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "LiquidityPoolWithdrawResult:no_trust",
+        "OperationBody:liquidity_pool_withdraw",
+        "OperationResultTr:liquidity_pool_withdraw",
+        "TransactionResultResult:tx_failed"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39242,7 +41040,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ExtendFootprintTtlResult:success",
+        "OperationBody:extend_footprint_ttl",
+        "OperationResultTr:extend_footprint_ttl"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39295,7 +41100,24 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "EndSponsoringFutureReservesResult:not_sponsored",
+        "FeeBumpTransactionExt:v0",
+        "FeeBumpTransactionInnerTx:tx",
+        "InnerTransactionResultExt:v0",
+        "InnerTransactionResultResult:tx_failed",
+        "OperationBody:end_sponsoring_future_reserves",
+        "OperationResultTr:end_sponsoring_future_reserves",
+        "TransactionEnvelope:tx_fee_bump",
+        "TransactionExt:v0",
+        "TransactionResultResult:tx_fee_bump_inner_failed",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0015",
+        "CAP-0033",
+        "CAP-0042"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39348,7 +41170,20 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ContractCodeEntryExt:v1",
+        "LedgerEntryChange:restored",
+        "LedgerEntryData:contract_code",
+        "LedgerKey:contract_code",
+        "OperationBody:restore_footprint",
+        "OperationResultTr:restore_footprint",
+        "RestoreFootprintResult:success"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0054",
+        "CAP-0062"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39401,7 +41236,81 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "Asset:credit_alphanum12",
+        "ContractEventBody:v0",
+        "ContractExecutable:stellar_asset",
+        "ContractIdPreimage:asset",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:create_contract",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_data",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v1",
+        "LedgerHeaderExtensionV1Ext:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_data",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:contract",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:contract_instance",
+        "ScVal:i128",
+        "ScVal:ledger_key_contract_instance",
+        "ScVal:map",
+        "ScVal:string",
+        "ScVal:symbol",
+        "ScVal:u32",
+        "ScVal:vec",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0038",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-05",
+        "CAP-0046-06",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39454,7 +41363,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SorobanTransactionDataExt:v1"
+      ],
+      "caps": [
+        "CAP-0066"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39507,7 +41421,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:already_exist"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39560,7 +41479,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:config"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39612,7 +41537,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScError:budget"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39665,7 +41595,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:executable_tag"
+      ],
+      "caps": [
+        "CAP-0085"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39718,7 +41653,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScError:crypto"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39771,7 +41711,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScAddress:liquidity_pool"
+      ],
+      "caps": [
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39824,7 +41769,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InvokeHostFunctionResult:insufficient_refundable_fee"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39877,7 +41827,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ExtendFootprintTtlResult:insufficient_refundable_fee"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39930,7 +41885,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RestoreFootprintResult:insufficient_refundable_fee"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -39983,7 +41943,18 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account",
+        "ScVal:string",
+        "TransactionExt:v0",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0042",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40036,7 +42007,71 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v3",
+        "ContractCodeEntryExt:v1",
+        "ContractEventBody:v0",
+        "ExtensionPoint:v0",
+        "GeneralizedTransactionSet:v1",
+        "HostFunction:upload_contract_wasm",
+        "InvokeHostFunctionResult:success",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:contract_code",
+        "LedgerEntryData:ttl",
+        "LedgerEntryExt:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "LedgerKey:contract_code",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:invoke_host_function",
+        "OperationResult:op_inner",
+        "OperationResultTr:invoke_host_function",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScVal:address",
+        "ScVal:bytes",
+        "ScVal:i128",
+        "ScVal:symbol",
+        "SorobanTransactionDataExt:v0",
+        "SorobanTransactionMetaExt:v0",
+        "StellarValueExt:signed_ms",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v1",
+        "TransactionMeta:v4",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0042",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-02",
+        "CAP-0046-07",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0046-12",
+        "CAP-0054",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40089,7 +42124,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerEntryChange:restored",
+        "OperationBody:restore_footprint",
+        "OperationResultTr:restore_footprint",
+        "RestoreFootprintResult:success"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0062"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40142,7 +42186,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScAddress:muxed_contract"
+      ],
+      "caps": [
+        "CAP-0084"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40195,7 +42244,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SorobanTransactionMetaExt:v1"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-08",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40248,7 +42304,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:max_soroban_tx_set_size"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40300,7 +42362,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InvokeHostFunctionResult:trapped"
+      ],
+      "caps": [
+        "CAP-0046"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40353,7 +42420,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40406,7 +42478,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40459,7 +42536,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:already_exist",
+        "PathPaymentStrictReceiveResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40512,7 +42595,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:invalid_limit"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40565,7 +42653,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:has_sub_entries"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40618,7 +42711,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageDataResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40671,7 +42769,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40723,7 +42826,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:self_not_allowed"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40776,7 +42884,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimAtom:v0",
+        "ManageOfferSuccessResultOffer:deleted"
+      ],
+      "caps": [
+        "CAP-0006",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40829,7 +42944,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40882,7 +43002,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40935,7 +43060,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:liquidity_pool"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -40988,7 +43118,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41041,7 +43176,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:trustline",
+        "OperationBody:revoke_sponsorship",
+        "OperationResultTr:revoke_sponsorship",
+        "RevokeSponsorshipOp:ledger_entry",
+        "RevokeSponsorshipResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41094,7 +43238,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:not_authorized"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41147,7 +43296,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:not_authorized"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41200,7 +43354,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:not_authorized"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41253,7 +43412,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:not_authorized"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41306,7 +43470,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:buy_not_authorized"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41359,7 +43528,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:buy_not_authorized"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41412,7 +43586,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41465,7 +43644,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:invalid_limit",
+        "Memo:hash",
+        "OperationBody:set_options",
+        "OperationResultTr:set_options",
+        "SetOptionsResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41518,7 +43706,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:native",
+        "OperationBody:path_payment_strict_send",
+        "OperationResultTr:path_payment_strict_send",
+        "PathPaymentStrictSendResult:under_destmin"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41571,7 +43767,19 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:success",
+        "MuxedAccount:muxed_ed25519",
+        "OperationBody:account_merge",
+        "OperationBody:clawback_claimable_balance",
+        "OperationResult:op_no_account",
+        "OperationResultTr:account_merge",
+        "TransactionResultResult:tx_failed"
+      ],
+      "caps": [
+        "CAP-0027",
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41624,7 +43832,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:cant_revoke",
+        "AssetCode:credit_alphanum4",
+        "OperationBody:allow_trust",
+        "OperationResultTr:allow_trust"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41677,7 +43893,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:payment",
+        "OperationResultTr:payment",
+        "PaymentResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41730,7 +43953,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackResult:success",
+        "OperationBody:clawback",
+        "OperationResultTr:clawback"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41783,7 +44013,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41836,7 +44071,70 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExt:v0",
+        "AccountEntryExt:v1",
+        "AccountEntryExtensionV1Ext:v2",
+        "AccountEntryExtensionV2Ext:v0",
+        "Asset:credit_alphanum12",
+        "ClaimPredicate:unconditional",
+        "ClaimableBalanceEntryExt:v1",
+        "ClaimableBalanceEntryExtensionV1Ext:v0",
+        "ClaimableBalanceId:claimable_balance_id_type_v0",
+        "Claimant:claimant_type_v0",
+        "ContractEventBody:v0",
+        "CreateClaimableBalanceResult:success",
+        "ExtensionPoint:v0",
+        "LedgerCloseMeta:v0",
+        "LedgerEntryChange:created",
+        "LedgerEntryChange:state",
+        "LedgerEntryChange:updated",
+        "LedgerEntryData:account",
+        "LedgerEntryData:claimable_balance",
+        "LedgerEntryData:trustline",
+        "LedgerEntryExt:v0",
+        "LedgerEntryExt:v1",
+        "LedgerEntryExtensionV1Ext:v0",
+        "LedgerHeaderExt:v0",
+        "LedgerHeaderHistoryEntryExt:v0",
+        "Memo:none",
+        "MuxedAccount:ed25519",
+        "OperationBody:create_claimable_balance",
+        "OperationResult:op_inner",
+        "OperationResultTr:create_claimable_balance",
+        "Preconditions:none",
+        "PublicKey:public_key_type_ed25519",
+        "ScAddress:account",
+        "ScAddress:claimable_balance",
+        "ScVal:address",
+        "ScVal:i128",
+        "ScVal:string",
+        "ScVal:symbol",
+        "StellarValueExt:signed",
+        "TransactionEnvelope:tx",
+        "TransactionExt:v0",
+        "TransactionMeta:v4",
+        "TransactionResultExt:v0",
+        "TransactionResultResult:tx_success",
+        "TrustLineAsset:credit_alphanum12",
+        "TrustLineEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0019",
+        "CAP-0021",
+        "CAP-0023",
+        "CAP-0027",
+        "CAP-0033",
+        "CAP-0035",
+        "CAP-0038",
+        "CAP-0046",
+        "CAP-0046-01",
+        "CAP-0046-08",
+        "CAP-0046-11",
+        "CAP-0063",
+        "CAP-0067"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41889,7 +44187,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackClaimableBalanceResult:success",
+        "LedgerEntryChange:removed",
+        "LedgerKey:claimable_balance",
+        "OperationResultTr:clawback_claimable_balance"
+      ],
+      "caps": [
+        "CAP-0023",
+        "CAP-0035",
+        "CAP-0063"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41942,7 +44250,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionResultResult:tx_bad_sponsorship"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -41995,7 +44308,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42048,7 +44366,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:path_payment_strict_receive",
+        "OperationResultTr:path_payment_strict_receive",
+        "PathPaymentStrictReceiveResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42101,7 +44426,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:already_exist",
+        "Memo:return",
+        "OperationBody:create_account",
+        "OperationResultTr:create_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42154,7 +44487,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:no_trust"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42207,7 +44545,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:credit_alphanum4"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42260,7 +44603,19 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Asset:credit_alphanum4",
+        "OperationBody:set_trust_line_flags",
+        "OperationResultTr:set_trust_line_flags",
+        "ScVal:bool",
+        "SetTrustLineFlagsResult:success",
+        "TrustLineAsset:credit_alphanum4"
+      ],
+      "caps": [
+        "CAP-0035",
+        "CAP-0038",
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42313,7 +44668,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:does_not_exist",
+        "OperationBody:claim_claimable_balance",
+        "OperationResultTr:claim_claimable_balance"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42366,7 +44728,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:underfunded",
+        "OperationBody:manage_sell_offer",
+        "OperationResultTr:manage_sell_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42419,7 +44788,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:underfunded",
+        "OperationBody:manage_buy_offer",
+        "OperationResultTr:manage_buy_offer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42472,7 +44848,22 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BeginSponsoringFutureReservesResult:success",
+        "ChangeTrustAsset:credit_alphanum12",
+        "ChangeTrustResult:success",
+        "EndSponsoringFutureReservesResult:success",
+        "OperationBody:begin_sponsoring_future_reserves",
+        "OperationBody:change_trust",
+        "OperationBody:end_sponsoring_future_reserves",
+        "OperationResultTr:begin_sponsoring_future_reserves",
+        "OperationResultTr:change_trust",
+        "OperationResultTr:end_sponsoring_future_reserves"
+      ],
+      "caps": [
+        "CAP-0033",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42525,7 +44916,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:success",
+        "AssetCode:credit_alphanum12"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42578,7 +44975,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:no_destination"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42631,7 +45033,21 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "FeeBumpTransactionExt:v0",
+        "FeeBumpTransactionInnerTx:tx",
+        "InnerTransactionResultExt:v0",
+        "InnerTransactionResultResult:tx_failed",
+        "ManageSellOfferResult:buy_no_trust",
+        "ManageSellOfferResult:sell_no_trust",
+        "TransactionEnvelope:tx_fee_bump",
+        "TransactionMeta:v2",
+        "TransactionResultResult:tx_fee_bump_inner_failed"
+      ],
+      "caps": [
+        "CAP-0006",
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42684,7 +45100,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_success",
+        "TransactionResultResult:tx_fee_bump_inner_success"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42737,7 +45159,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:has_sub_entries"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42790,7 +45217,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimableBalanceEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42843,7 +45275,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:src_not_authorized"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42896,7 +45333,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:src_not_authorized"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -42949,7 +45391,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:src_not_authorized"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43002,7 +45449,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateClaimableBalanceResult:not_authorized"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43055,7 +45507,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:sell_not_authorized"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43108,7 +45565,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:sell_not_authorized"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43161,7 +45623,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:not_authorized"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43214,7 +45681,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateClaimableBalanceResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43267,7 +45739,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageDataResult:name_not_found",
+        "OperationBody:manage_data",
+        "OperationResultTr:manage_data"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43320,7 +45799,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:pool_share",
+        "ChangeTrustResult:not_auth_maintain_liabilities",
+        "LiquidityPoolParameters:liquidity_pool_constant_product"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43373,7 +45859,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetTrustLineFlagsResult:invalid_state"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43426,7 +45917,35 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExtensionV2Ext:v3",
+        "GeneralizedTransactionSet:v1",
+        "LedgerCloseMeta:v2",
+        "LedgerCloseMetaExt:v0",
+        "LedgerEntryData:liquidity_pool",
+        "LiquidityPoolDepositResult:success",
+        "LiquidityPoolEntryBody:liquidity_pool_constant_product",
+        "OperationBody:liquidity_pool_deposit",
+        "OperationResultTr:liquidity_pool_deposit",
+        "ScAddress:liquidity_pool",
+        "StellarValueExt:signed_ms",
+        "TransactionPhase:v0",
+        "TransactionPhase:v1",
+        "TrustLineAsset:pool_share",
+        "TrustLineEntryExt:v1",
+        "TrustLineEntryExtensionV2Ext:v0",
+        "TrustLineEntryV1Ext:v2",
+        "TxSetComponent:txset_comp_txs_maybe_discounted_fee"
+      ],
+      "caps": [
+        "CAP-0003",
+        "CAP-0021",
+        "CAP-0038",
+        "CAP-0042",
+        "CAP-0063",
+        "CAP-0067",
+        "CAP-0088"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43479,7 +45998,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetTrustLineFlagsResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43532,7 +46056,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43585,7 +46114,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimPredicate:before_absolute_time",
+        "ClaimPredicate:before_relative_time"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43638,7 +46173,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43691,7 +46231,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43744,7 +46289,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackClaimableBalanceResult:does_not_exist"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43797,7 +46347,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageDataResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43850,7 +46405,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerEntryData:offer",
+        "ManageOfferSuccessResultOffer:created",
+        "ManageSellOfferResult:success",
+        "OfferEntryExt:v0"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43903,7 +46466,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:dest_full"
+      ],
+      "caps": [
+        "CAP-0003"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -43956,7 +46524,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:no_trust_line"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44009,7 +46582,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Memo:text"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44062,7 +46640,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:line_full"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44115,7 +46698,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:account",
+        "Preconditions:time",
+        "RevokeSponsorshipResult:not_sponsor"
+      ],
+      "caps": [
+        "CAP-0021",
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44168,7 +46759,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:cannot_delete"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44221,7 +46817,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:line_full"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44274,7 +46875,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:bad_price"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44327,7 +46933,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:pool_full"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44380,7 +46991,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:under_minimum",
+        "OperationBody:liquidity_pool_withdraw",
+        "OperationResultTr:liquidity_pool_withdraw"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44433,7 +47051,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:success"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44486,7 +47109,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimAtom:liquidity_pool",
+        "PathPaymentStrictSendResult:success"
+      ],
+      "caps": [
+        "CAP-0024",
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44539,7 +47169,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:line_full"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44592,7 +47227,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:line_full"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44645,7 +47285,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:is_sponsor"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44698,7 +47343,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:too_many_signers",
+        "SignerKey:hash_x"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44751,7 +47402,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "Memo:id"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44804,7 +47460,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BumpSequenceResult:success",
+        "ManageBuyOfferResult:sell_no_trust",
+        "OperationBody:bump_sequence",
+        "OperationResultTr:bump_sequence"
+      ],
+      "caps": [
+        "CAP-0001",
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44857,7 +47522,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:no_issuer"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44910,7 +47580,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:line_full"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -44963,7 +47638,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "EndSponsoringFutureReservesResult:not_sponsored"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45016,7 +47696,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_bad_auth"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45069,7 +47754,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45122,7 +47812,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45175,7 +47870,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:ed25519",
+        "TransactionResultResult:tx_bad_auth_extra"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45228,7 +47929,16 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ConfigSettingEntry:frozen_ledger_keys",
+        "LedgerEntryData:config_setting",
+        "LedgerUpgrade:config"
+      ],
+      "caps": [
+        "CAP-0046",
+        "CAP-0046-09",
+        "CAP-0077"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45280,7 +47990,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:trustline_frozen"
+      ],
+      "caps": [
+        "CAP-0077"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45333,7 +48048,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:trustline_frozen"
+      ],
+      "caps": [
+        "CAP-0077"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45386,7 +48106,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:trustline_frozen"
+      ],
+      "caps": [
+        "CAP-0077"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45439,7 +48164,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:cannot_claim"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45492,7 +48222,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45545,7 +48280,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:src_no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45598,7 +48338,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:success",
+        "ClaimPredicate:and",
+        "ClaimPredicate:not",
+        "ClaimPredicate:or"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45651,7 +48399,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateClaimableBalanceResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45704,7 +48457,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateClaimableBalanceResult:low_reserve"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45757,7 +48515,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationBody:create_passive_sell_offer"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45810,7 +48573,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45863,7 +48631,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:underfunded"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45916,7 +48689,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_bad_min_seq_age_or_gap",
+        "Preconditions:v2"
+      ],
+      "caps": [
+        "CAP-0021"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -45969,7 +48748,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:buy_no_trust",
+        "PathPaymentStrictSendResult:too_few_offers"
+      ],
+      "caps": [
+        "CAP-0006",
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46022,7 +48808,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_no_account"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46075,7 +48866,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:data",
+        "RevokeSponsorshipResult:does_not_exist"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46128,7 +48925,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:no_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46181,7 +48983,17 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:self_not_allowed",
+        "PathPaymentStrictReceiveResult:no_issuer",
+        "TransactionEnvelope:tx_v0",
+        "TransactionV0Ext:v0"
+      ],
+      "caps": [
+        "CAP-0015",
+        "CAP-0019",
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46234,7 +49046,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:max_tx_set_size"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46286,7 +49103,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:underfunded"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46339,7 +49161,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:success"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46392,7 +49219,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:no_destination"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46445,7 +49277,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:over_sendmax"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46498,7 +49335,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:ed25519_signed_payload"
+      ],
+      "caps": [
+        "CAP-0040"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46551,7 +49393,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionResultResult:tx_bad_auth"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46604,7 +49451,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionResultResult:tx_bad_seq"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46657,7 +49509,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionResultResult:tx_bad_min_seq_age_or_gap"
+      ],
+      "caps": [
+        "CAP-0021"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46710,7 +49567,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_bad_seq"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46763,7 +49625,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_bad_auth_extra"
+      ],
+      "caps": [
+        "CAP-0015"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46816,7 +49683,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionResultResult:tx_no_account"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46869,7 +49741,15 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InflationResult:not_time",
+        "InflationResult:success",
+        "OperationBody:inflation",
+        "OperationResultTr:inflation"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46922,7 +49802,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:buy_no_issuer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -46975,7 +49860,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustAsset:native",
+        "TransactionResultResult:tx_internal_error"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47028,7 +49919,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolDepositResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47081,7 +49977,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackClaimableBalanceResult:not_issuer"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47134,7 +50035,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:map",
+        "ScVal:u64"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47187,7 +50094,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LiquidityPoolWithdrawResult:underfunded"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47240,7 +50152,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "CreateAccountResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47293,7 +50210,25 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ConfigSettingEntry:contract_ledger_cost_ext_v0",
+        "ConfigSettingEntry:contract_ledger_cost_v0",
+        "ConfigSettingEntry:contract_parallel_compute_v0",
+        "ConfigSettingEntry:live_soroban_state_size_window",
+        "ConfigSettingEntry:scp_timing",
+        "ConfigSettingEntry:state_archival",
+        "LedgerCloseMeta:v1",
+        "LedgerUpgrade:version"
+      ],
+      "caps": [
+        "CAP-0042",
+        "CAP-0046-07",
+        "CAP-0046-09",
+        "CAP-0046-12",
+        "CAP-0063",
+        "CAP-0066",
+        "CAP-0070"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47345,7 +50280,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipOp:signer"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47398,7 +50338,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationResult:op_bad_auth"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47451,7 +50396,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:offer_cross_self"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47504,7 +50454,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:src_no_trust"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47557,7 +50512,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipResult:only_transferable"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47610,7 +50570,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerHeaderExt:v1",
+        "LedgerHeaderExtensionV1Ext:v0",
+        "LedgerUpgrade:flags"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47662,7 +50629,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:line_full"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47715,7 +50687,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SignerKey:pre_auth_tx"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47768,7 +50745,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47820,7 +50802,13 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AllowTrustResult:self_not_allowed",
+        "AllowTrustResult:trust_not_required"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47873,7 +50861,14 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "DataEntryExt:v0",
+        "LedgerEntryData:data",
+        "ManageDataResult:success"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47926,7 +50921,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerUpgrade:base_fee"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -47978,7 +50978,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ChangeTrustResult:trust_line_missing"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48031,7 +51036,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "InnerTransactionResultResult:tx_bad_sponsorship"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48084,7 +51094,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "RevokeSponsorshipResult:success"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48137,7 +51152,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ScVal:bytes"
+      ],
+      "caps": [
+        "CAP-0046-01"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48190,7 +51210,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:auth_revocable_required"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48243,7 +51268,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimAtom:order_book"
+      ],
+      "caps": [
+        "CAP-0038"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48296,7 +51326,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48349,7 +51384,25 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ConfigSettingEntry:contract_bandwidth_v0",
+        "ConfigSettingEntry:contract_compute_v0",
+        "ConfigSettingEntry:contract_cost_params_cpu_instructions",
+        "ConfigSettingEntry:contract_cost_params_memory_bytes",
+        "ConfigSettingEntry:contract_data_entry_size_bytes",
+        "ConfigSettingEntry:contract_data_key_size_bytes",
+        "ConfigSettingEntry:contract_events_v0",
+        "ConfigSettingEntry:contract_execution_lanes",
+        "ConfigSettingEntry:contract_historical_data_v0",
+        "ConfigSettingEntry:contract_max_size_bytes",
+        "ConfigSettingEntry:eviction_iterator"
+      ],
+      "caps": [
+        "CAP-0046-07",
+        "CAP-0046-09",
+        "CAP-0046-10",
+        "CAP-0046-12"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48401,7 +51454,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TransactionMeta:v3"
+      ],
+      "caps": [
+        "CAP-0046-08"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48454,7 +51512,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountEntryExtensionV1Ext:v0"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48507,7 +51570,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:not_found"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48560,7 +51628,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:cross_self"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48613,7 +51686,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "LedgerKey:offer"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48666,7 +51744,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:no_destination"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48719,7 +51802,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:success"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48772,7 +51860,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:invalid_inflation"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48825,7 +51918,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictReceiveResult:src_no_trust"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48878,7 +51976,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:immutable_set"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48931,7 +52034,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:cant_change"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -48984,7 +52092,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:offer_cross_self"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49037,7 +52150,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetOptionsResult:low_reserve"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49090,7 +52208,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageOfferSuccessResultOffer:deleted"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49143,7 +52266,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetTrustLineFlagsResult:cant_revoke"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49196,7 +52324,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:no_issuer"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49249,7 +52382,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageSellOfferResult:sell_no_issuer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49302,7 +52440,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BeginSponsoringFutureReservesResult:recursive"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49355,7 +52498,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageOfferSuccessResultOffer:updated"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49408,7 +52556,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "BeginSponsoringFutureReservesResult:already_sponsored"
+      ],
+      "caps": [
+        "CAP-0033"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49461,7 +52614,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:not_found"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49514,7 +52672,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:sell_no_issuer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49567,7 +52730,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "SetTrustLineFlagsResult:no_trust_line"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49620,7 +52788,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PaymentResult:line_full"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49673,7 +52846,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:cross_self"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49726,7 +52904,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:line_full"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49779,7 +52962,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackResult:not_clawback_enabled"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49832,7 +53020,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ManageBuyOfferResult:buy_no_issuer"
+      ],
+      "caps": [
+        "CAP-0006"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49885,7 +53078,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "PathPaymentStrictSendResult:no_issuer"
+      ],
+      "caps": [
+        "CAP-0024"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49938,7 +53136,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClawbackClaimableBalanceResult:not_clawback_enabled"
+      ],
+      "caps": [
+        "CAP-0035"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -49991,7 +53194,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "AccountMergeResult:seqnum_too_far"
+      ],
+      "caps": [
+        "CAP-0001"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -50044,7 +53252,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "TrustLineEntryV1Ext:v0"
+      ],
+      "caps": [
+        "CAP-0003"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -50097,7 +53310,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "ClaimClaimableBalanceResult:no_trust"
+      ],
+      "caps": [
+        "CAP-0023"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -50150,7 +53368,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationResult:op_exceeded_work_limit"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,
@@ -50203,7 +53426,12 @@
       "xdr_type": "LedgerCloseMeta"
     },
     {
-      "caps": [],
+      "arms": [
+        "OperationResult:op_too_many_subentries"
+      ],
+      "caps": [
+        "PRE-CAP"
+      ],
       "expected": {
         "decode": "must-accept",
         "roundtrip": true,

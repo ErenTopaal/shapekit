@@ -237,4 +237,8 @@ pub struct Family {
     /// themselves rather than from a protocol change. Required exactly when `caps` is empty.
     #[serde(default)]
     pub no_cap_reason: Option<String>,
+    /// Each entry of the family records the union arms it witnesses (`arms`) and carries the
+    /// CAPs that introduced them, for families whose entries mix shapes of many CAPs.
+    #[serde(default)]
+    pub caps_from_arms: bool,
 }

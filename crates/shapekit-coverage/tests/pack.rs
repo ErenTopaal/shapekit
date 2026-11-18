@@ -104,6 +104,7 @@ fn manifest(vector_sha: &str) -> Manifest {
             },
             flags: vec![],
             fields_exercised: vec![],
+            arms: Vec::new(),
             linked_issues: vec![],
             notes: None,
         }],

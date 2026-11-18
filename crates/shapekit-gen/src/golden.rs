@@ -648,6 +648,7 @@ fn golden_entry(
         },
         flags: Vec::new(),
         fields_exercised: Vec::new(),
+        arms: Vec::new(),
         linked_issues: Vec::new(),
         notes: Some(format!(
             "core test \"{}\"{section}, ledger {} (record {} of {} in the upstream file). smallest golden ledger matching {}",

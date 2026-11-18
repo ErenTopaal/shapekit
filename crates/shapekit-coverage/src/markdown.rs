@@ -131,7 +131,9 @@ fn caps(out: &mut String, c: &Coverage) {
     out.push_str("| CAP | Protocol | Indexer-visible | Families | Entries | Core-emitted | By source class | By variant | Core-emitted protocols | Note |\n");
     out.push_str("|---|---|---|---|---|---|---|---|---|---|\n");
     for cap in &c.caps {
-        let note = if let Some(r) = &cap.uncovered {
+        let note = if cap.id == shapekit_registry::PRE_CAP {
+            "Not a CAP: entries whose every witnessed union arm was in the XDR before any CAP added to it.".to_owned()
+        } else if let Some(r) = &cap.uncovered {
             reason(r)
         } else if let Some(r) = &cap.not_visible_reason {
             r.clone()

@@ -183,6 +183,9 @@ pub enum ExploreCommand {
         /// The candidate lane the entries are written into.
         #[arg(long, default_value = "candidate")]
         out: PathBuf,
+        /// The registry whose caps.toml says which CAP introduced each arm an entry witnesses.
+        #[arg(long, default_value = "registry")]
+        registry: PathBuf,
     },
     /// The core-witnessed arms of the coverage report that committed chains hold: the union
     /// over every chain directory given, with the arms none of them holds.
@@ -381,7 +384,11 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
             run,
             arm,
             out,
+            registry,
         } => {
+            let registry = shapekit_registry::Registry::load(&registry)
+                .with_context(|| format!("loading {}", registry.display()))?;
+            let arm_caps = shapekit_manifest::arm_caps::ArmCaps::new(&registry);
             let id = match id {
                 Some(id) => id,
                 None => chain_id(&chain)?,
@@ -401,6 +408,7 @@ pub fn run(command: ExploreCommand) -> Result<bool> {
                 credited.as_ref(),
                 last,
                 &out,
+                &arm_caps,
             )
         }
         ExploreCommand::Witnessed {
@@ -430,6 +438,7 @@ fn chain_entries(
     credited: Option<&BTreeSet<String>>,
     last: bool,
     out: &Path,
+    arm_caps: &shapekit_manifest::arm_caps::ArmCaps,
 ) -> Result<bool> {
     let reachable = arms::reachable()?;
     let ledgers = entries::read_chain(chain, &reachable)?;
@@ -445,7 +454,7 @@ fn chain_entries(
     let removed = entries::remove_chain_entries(out, &src.family, &src.chain_id)?;
     let held: BTreeSet<&String> = ledgers.iter().flat_map(|l| &l.arms).collect();
     for p in &picks {
-        let e = entries::entry(&src, p);
+        let e = entries::entry(&src, p, arm_caps)?;
         let id = e.id.clone();
         entries::write(out, e, p)?;
         println!("{id}: {} arms", p.credited.len());

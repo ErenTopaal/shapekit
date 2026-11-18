@@ -509,6 +509,7 @@ pub fn write_capture(
             },
             flags: Vec::new(),
             fields_exercised: Vec::new(),
+            arms: Vec::new(),
             linked_issues: req.linked_issues.clone(),
             notes: Some(notes.clone()),
         };

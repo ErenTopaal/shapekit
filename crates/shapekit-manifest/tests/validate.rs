@@ -496,3 +496,129 @@ fn entries_of_a_capless_family_name_no_cap() {
     let p = problems(&manifest, dir.path());
     assert!(p.iter().any(|l| l.contains("caps is empty")), "{p:#?}");
 }
+
+// these tests edit the synthetic entry in the manifest only, so its vector file, which holds
+// the record too, no longer matches; that one problem is left out
+fn problems_with(manifest: &Manifest, reg: &Registry, root: &Path) -> Vec<String> {
+    validate(manifest, reg, root)
+        .iter()
+        .map(ToString::to_string)
+        .filter(|p| !p.contains("holds a different entry record than the manifest"))
+        .collect()
+}
+
+// the synthetic entry, which no network history backs
+const NON_HISTORY: usize = 1;
+
+#[test]
+fn a_non_history_entry_with_no_cap_and_no_reason_is_refused() {
+    let (dir, mut manifest) = sample();
+    assert_eq!(
+        manifest.entries[NON_HISTORY].source.class.as_str(),
+        "synthetic"
+    );
+    manifest.entries[NON_HISTORY].caps.clear();
+    let p = problems(&manifest, dir.path());
+    assert!(p.iter().any(|l| l.contains("caps is empty")), "{p:#?}");
+    // a family that names no cap without saying why is refused by the registry check, and its
+    // capless entries with it
+    let mut reg = registry();
+    let fam = reg
+        .families
+        .as_mut()
+        .unwrap()
+        .families
+        .iter_mut()
+        .find(|f| f.id == manifest.entries[NON_HISTORY].family)
+        .unwrap();
+    fam.caps.clear();
+    assert!(
+        reg.check()
+            .iter()
+            .any(|p| p.to_string().contains("names no cap")),
+        "{:#?}",
+        reg.check()
+    );
+}
+
+#[test]
+fn caps_taken_from_arms_must_match_the_arms() {
+    let (dir, mut manifest) = sample();
+    let mut reg = registry();
+    let fam = reg
+        .families
+        .as_mut()
+        .unwrap()
+        .families
+        .iter_mut()
+        .find(|f| f.id == manifest.entries[NON_HISTORY].family)
+        .unwrap();
+    fam.caps.clear();
+    fam.caps_from_arms = true;
+    let family_problems: Vec<_> = reg
+        .check()
+        .into_iter()
+        .filter(|p| p.to_string().starts_with("families.toml"))
+        .collect();
+    assert_eq!(family_problems, vec![]);
+    let e = &mut manifest.entries[NON_HISTORY];
+    e.caps.clear();
+    let p = problems_with(&manifest, &reg, dir.path());
+    assert!(
+        p.iter()
+            .any(|l| l.contains("takes each entry's caps from its arms, and arms is empty")),
+        "{p:#?}"
+    );
+
+    let e = &mut manifest.entries[NON_HISTORY];
+    e.arms = vec!["MuxedAccount:muxed_ed25519".into()];
+    let p = problems_with(&manifest, &reg, dir.path());
+    assert!(
+        p.iter()
+            .any(|l| l.contains("caps is [] but the arms it witnesses came with [CAP-0027]")),
+        "{p:#?}"
+    );
+    manifest.entries[NON_HISTORY].caps = vec!["CAP-0027".into()];
+    assert_eq!(
+        problems_with(&manifest, &reg, dir.path()),
+        Vec::<String>::new()
+    );
+
+    // an arm older than every cap tags the entry PRE-CAP, and only then
+    let e = &mut manifest.entries[NON_HISTORY];
+    e.arms = vec!["OperationBody:payment".into()];
+    e.caps = vec!["PRE-CAP".into()];
+    assert_eq!(
+        problems_with(&manifest, &reg, dir.path()),
+        Vec::<String>::new()
+    );
+    let e = &mut manifest.entries[NON_HISTORY];
+    e.arms = vec![
+        "MuxedAccount:muxed_ed25519".into(),
+        "OperationBody:payment".into(),
+    ];
+    let p = problems_with(&manifest, &reg, dir.path());
+    assert!(
+        p.iter()
+            .any(|l| l.contains("caps is [PRE-CAP] but the arms it witnesses came with [CAP-0027]")),
+        "{p:#?}"
+    );
+    manifest.entries[NON_HISTORY].arms = vec!["Nothing:at_all".into()];
+    let p = problems_with(&manifest, &reg, dir.path());
+    assert!(
+        p.iter()
+            .any(|l| l.contains("arms Nothing:at_all are not union arms")),
+        "{p:#?}"
+    );
+}
+
+#[test]
+fn pre_cap_needs_the_arms_it_stands_for() {
+    let (dir, mut manifest) = sample();
+    manifest.entries[NON_HISTORY].caps = vec!["PRE-CAP".into()];
+    let p = problems(&manifest, dir.path());
+    assert!(
+        p.iter().any(|l| l.contains("PRE-CAP needs the arms")),
+        "{p:#?}"
+    );
+}

@@ -185,6 +185,7 @@ impl Spec {
             },
             flags,
             fields_exercised: fields,
+            arms: Vec::new(),
             linked_issues: links,
             notes: (!self.notes.is_empty()).then(|| self.notes.clone()),
         })

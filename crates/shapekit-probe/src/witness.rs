@@ -105,6 +105,7 @@ fn base_entry(family: &str, e: &Evidence, id: String, xdr_type: &str) -> Entry {
         },
         flags: Vec::new(),
         fields_exercised: Vec::new(),
+        arms: Vec::new(),
         linked_issues: Vec::new(),
         notes: Some(format!(
             "{} of {}{}, attempt {:?}: {}",

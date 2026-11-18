@@ -1,4 +1,4 @@
-//! `shapekit manifest validate`, `build`, `schema` and `rerender`.
+//! `shapekit manifest validate`, `build`, `schema`, `rerender` and `arm-caps`.
 
 use std::path::Path;
 
@@ -121,27 +121,47 @@ pub fn write_schema(out: &Path) -> Result<bool> {
     Ok(true)
 }
 
-/// Rewrites each entry's expected XDR-JSON files from its XDR files with the current
-/// renderer, and the sha256 the entry file records. Prints every file that changed.
-pub fn rerender(corpus: &Path, dry_run: bool) -> Result<bool> {
+/// Every `entry.json` under `<corpus>/entries`, sorted. A walk error is an error, and a
+/// corpus without an entries directory is refused, so a wrong path cannot pass as empty.
+fn entry_files(corpus: &Path) -> Result<Vec<std::path::PathBuf>> {
     let entries_dir = corpus.join("entries");
-    let mut files: Vec<std::path::PathBuf> = walkdir::WalkDir::new(&entries_dir)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file() && e.file_name() == "entry.json")
-        .map(|e| e.into_path())
-        .collect();
+    if !entries_dir.is_dir() {
+        bail!("{} is not a directory", entries_dir.display());
+    }
+    let mut files = Vec::new();
+    for e in walkdir::WalkDir::new(&entries_dir) {
+        let e = e.with_context(|| format!("walking {}", entries_dir.display()))?;
+        if e.file_type().is_file() && e.file_name() == "entry.json" {
+            files.push(e.into_path());
+        }
+    }
     files.sort();
+    Ok(files)
+}
+
+fn read_entry(file: &Path) -> Result<shapekit_manifest::Entry> {
+    let text =
+        std::fs::read_to_string(file).with_context(|| format!("reading {}", file.display()))?;
+    serde_json::from_str(&text).with_context(|| format!("parsing {}", file.display()))
+}
+
+fn write_entry(file: &Path, entry: &shapekit_manifest::Entry) -> Result<()> {
+    let out = shapekit_manifest::xdr::render_json(&serde_json::to_value(entry)?);
+    std::fs::write(file, out).with_context(|| format!("writing {}", file.display()))
+}
+
+/// Rewrites each entry's expected XDR-JSON files from its XDR files with the current
+/// renderer, and the sha256 the entry file records. Prints every file that changed. Every
+/// variant of an entry is rendered before any of its files is written.
+pub fn rerender(corpus: &Path, dry_run: bool) -> Result<bool> {
+    let files = entry_files(corpus)?;
     let mut changed = 0;
     for entry_file in &files {
-        let text = std::fs::read_to_string(entry_file)
-            .with_context(|| format!("reading {}", entry_file.display()))?;
-        let mut entry: shapekit_manifest::Entry = serde_json::from_str(&text)
-            .with_context(|| format!("parsing {}", entry_file.display()))?;
+        let mut entry = read_entry(entry_file)?;
         let Some(type_name) = entry.xdr_type.clone() else {
             continue;
         };
-        let mut entry_changed = false;
+        let mut writes = Vec::new();
         for slot in [
             &mut entry.variants.testnet,
             &mut entry.variants.mainnet,
@@ -162,25 +182,73 @@ pub fn rerender(corpus: &Path, dry_run: bool) -> Result<bool> {
             if old == json {
                 continue;
             }
-            println!("{}", path.display());
-            changed += 1;
-            entry_changed = true;
-            if !dry_run {
-                std::fs::write(&path, json.as_bytes())
-                    .with_context(|| format!("writing {}", path.display()))?;
-                v.expected_json_sha256 = Some(shapekit_manifest::sha256_hex(json.as_bytes()));
-            }
+            v.expected_json_sha256 = Some(shapekit_manifest::sha256_hex(json.as_bytes()));
+            writes.push((path, json));
         }
-        if entry_changed && !dry_run {
-            let out = shapekit_manifest::xdr::render_json(&serde_json::to_value(&entry)?);
-            std::fs::write(entry_file, out)
-                .with_context(|| format!("writing {}", entry_file.display()))?;
+        for (path, _) in &writes {
+            println!("{}", path.display());
+        }
+        changed += writes.len();
+        if writes.is_empty() || dry_run {
+            continue;
+        }
+        for (path, json) in &writes {
+            std::fs::write(path, json.as_bytes())
+                .with_context(|| format!("writing {}", path.display()))?;
+        }
+        write_entry(entry_file, &entry)?;
+    }
+    println!(
+        "{changed} expected files {} in {} ({} entries read)",
+        if dry_run { "would change" } else { "rewritten" },
+        corpus.display(),
+        files.len()
+    );
+    Ok(true)
+}
+
+/// Sets the caps of every entry that records the arms it witnesses to the CAPs those arms came
+/// with (`registry/caps.toml` xdr_additions), or PRE-CAP when none did. With `check`, lists
+/// the entries whose caps differ and fails instead of writing.
+pub fn arm_caps(corpus: &Path, registry_dir: &Path, check: bool) -> Result<bool> {
+    let registry = Registry::load(registry_dir)
+        .with_context(|| format!("loading the registry in {}", registry_dir.display()))?;
+    let table = shapekit_manifest::arm_caps::ArmCaps::new(&registry);
+    let files = entry_files(corpus)?;
+    let mut with_arms = 0;
+    let mut differ = 0;
+    for file in &files {
+        let mut entry = read_entry(file)?;
+        if entry.arms.is_empty() {
+            continue;
+        }
+        with_arms += 1;
+        let caps = table.for_arms(&entry.arms).map_err(|unknown| {
+            anyhow::anyhow!(
+                "{}: arms {} are not union arms of the xdr definitions",
+                entry.id,
+                unknown.join(", ")
+            )
+        })?;
+        if caps == entry.caps {
+            continue;
+        }
+        differ += 1;
+        println!(
+            "{}: [{}] -> [{}]",
+            entry.id,
+            entry.caps.join(", "),
+            caps.join(", ")
+        );
+        if !check {
+            entry.caps = caps;
+            write_entry(file, &entry)?;
         }
     }
     println!(
-        "{changed} expected files {} in {}",
-        if dry_run { "would change" } else { "rewritten" },
-        corpus.display()
+        "{with_arms} of {} entries record their arms; {differ} {}",
+        files.len(),
+        if check { "differ" } else { "retagged" }
     );
-    Ok(true)
+    Ok(!check || differ == 0)
 }

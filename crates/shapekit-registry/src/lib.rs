@@ -20,6 +20,11 @@ pub const COVERED_THROUGH_PROTOCOL: u32 = 30;
 pub const LINT_RULE_IDS: [&str; 3] = ["IDX001", "IDX002", "IDX003"];
 
 pub const CAPS_FILE: &str = "caps.toml";
+
+/// The `caps.toml` record of shapes that were in the XDR before the CAP process. It is not a
+/// CAP: it tags corpus entries whose every witnessed arm predates every CAP, so no entry is
+/// left untagged.
+pub const PRE_CAP: &str = "PRE-CAP";
 pub const FIELDS_FILE: &str = "fields.toml";
 pub const LIMITS_FILE: &str = "caps-limits.toml";
 pub const LINT_RULES_FILE: &str = "lint-rules.toml";

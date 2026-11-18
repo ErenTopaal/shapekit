@@ -252,6 +252,7 @@ pub(crate) fn merge(
             },
             flags: s.flags.clone(),
             fields_exercised: fields_carried(first, &s.fields_exercised)?,
+            arms: Vec::new(),
             linked_issues: s
                 .linked_issues
                 .clone()

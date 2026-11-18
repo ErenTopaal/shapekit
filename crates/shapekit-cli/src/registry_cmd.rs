@@ -29,9 +29,16 @@ pub fn check(dir: &Path) -> Result<bool> {
         println!("{p}");
     }
     let families = registry.families.as_ref().map_or(0, |f| f.families.len());
+    // the pre-cap record is not a cap, so it is counted apart
+    let pre_cap = registry
+        .caps
+        .caps
+        .iter()
+        .any(|c| c.id == shapekit_registry::PRE_CAP);
     let summary = format!(
-        "{} caps, {} fields, {} limits, {} lint rules, {families} families",
-        registry.caps.caps.len(),
+        "{} caps{}, {} fields, {} limits, {} lint rules, {families} families",
+        registry.caps.caps.len() - usize::from(pre_cap),
+        if pre_cap { " and the pre-cap record" } else { "" },
         registry.fields.fields.len(),
         registry.limits.limits.len(),
         registry.lint_rules.rules.len(),

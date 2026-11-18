@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, bail, ensure};
 use shapekit_gen::golden::{decode_lcm, lcm_version, ledger_version, tx_meta_version};
 use shapekit_gen::recipe::Network;
+use shapekit_manifest::arm_caps::ArmCaps;
 use shapekit_manifest::build::{ENTRIES_DIR, ENTRY_FILE};
 use shapekit_manifest::xdr::render_json;
 use shapekit_manifest::{
@@ -191,9 +192,24 @@ fn variants() -> Variants {
     }
 }
 
-/// The entry record of one picked ledger, before its files are written.
-pub fn entry(src: &ChainSource, pick: &Pick<'_>) -> Entry {
+/// The entry record of one picked ledger, before its files are written. Its `arms` are the
+/// arms it was picked for (every arm the ledger holds for one kept for another reason), and
+/// its caps the CAPs that introduced them.
+pub fn entry(src: &ChainSource, pick: &Pick<'_>, arm_caps: &ArmCaps) -> Result<Entry> {
     let l = pick.ledger;
+    let arms: Vec<String> = if pick.credited.is_empty() {
+        l.arms.iter().cloned().collect()
+    } else {
+        pick.credited.iter().cloned().collect()
+    };
+    let caps = arm_caps.for_arms(&arms).map_err(|unknown| {
+        anyhow::anyhow!(
+            "ledger {} of chain {} holds arms the xdr definitions do not name: {}",
+            l.seq,
+            src.chain_id,
+            unknown.join(", ")
+        )
+    })?;
     let held = if pick.credited.is_empty() {
         "kept as the last ledger, the one the pair compares".to_owned()
     } else {
@@ -202,11 +218,11 @@ pub fn entry(src: &ChainSource, pick: &Pick<'_>) -> Entry {
             pick.credited.iter().cloned().collect::<Vec<_>>().join(", ")
         )
     };
-    Entry {
+    Ok(Entry {
         id: format!("{}.{}-l{}", src.family, src.slug, l.seq),
         kind: EntryKind::Xdr,
         family: src.family.clone(),
-        caps: Vec::new(),
+        caps,
         protocol: EntryProtocol {
             introduced: 0,
             generated_at: Some(l.protocol),
@@ -240,13 +256,14 @@ pub fn entry(src: &ChainSource, pick: &Pick<'_>) -> Entry {
         },
         flags: Vec::new(),
         fields_exercised: Vec::new(),
+        arms,
         linked_issues: Vec::new(),
         notes: Some(format!(
             "{} ledger {} of chain {} at protocol {}, recorded from {}; {}",
             src.about, l.seq, src.chain_id, l.protocol, src.recipe, held
         )),
         obligations: Vec::new(),
-    }
+    })
 }
 
 fn read_entry(path: &Path) -> Result<Entry> {
