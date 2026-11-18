@@ -161,7 +161,7 @@ derived_from = [
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/auth.rs", symbol = "AuthorizedInvocation::from_xdr (recursion without a depth limiter)", value = "no host depth check" },
   { repo = "stellar/rs-soroban-env", ref = "v30.0.0", path = "soroban-env-host/src/host/frame.rs", symbol = "with_frame_and_initial_mem_charge (context stack >= DEFAULT_HOST_DEPTH_LIMIT)", value = "100" },
 ]
-rationale = "The XDR declares subInvocations<> without a bound and the host converts the tree recursively without a depth limiter, so the only bound is the envelope depth check. Each nesting costs 2 decode levels, and a single chain in an auth entry reaches 493 levels before the envelope exceeds depth 1000 (measured). The host's call stack is capped at DEFAULT_HOST_DEPTH_LIMIT = 100 frames, so only the top 100 levels can ever match a real call; deeper nodes are declared but never authorized, and a transaction carrying them can still succeed. This is the unbounded authorization tree that halted wallet-backend ingestion."
+rationale = "The XDR declares subInvocations<> without a bound and the host converts the tree recursively without a depth limiter, so the only bound is the envelope depth check. Each nesting costs 2 decode levels, and a single chain in an auth entry reaches 493 levels before the envelope exceeds depth 1000 (measured). The host's call stack is capped at DEFAULT_HOST_DEPTH_LIMIT = 100 frames, so only the top 100 levels can ever match a real call; deeper nodes are declared but never authorized, and a transaction carrying them can still succeed. wallet-backend walks this tree without a depth limit (wallet-backend#820)."
 
 [[limit]]
 id = "auth.invocation.nodes"

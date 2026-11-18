@@ -671,7 +671,7 @@ var Fields = []Field{
 		XDRPath:         "ChangeTrustOp.line",
 		ValidatedByCore: "yes",
 		Measured:        "validated",
-		Risk:            "the issuer need not exist",
+		Risk:            "the issuer existed when the trustline was created or last changed; it can have been merged since",
 		Handling:        "key the trustline asset by raw bytes",
 		Accessors: []Accessor{
 			{Type: "ChangeTrustOp", Member: "Line"},
@@ -1015,7 +1015,7 @@ var Fields = []Field{
 		XDRPath:         "InvokeHostFunctionOp.auth",
 		ValidatedByCore: "partial",
 		Measured:        "mixed",
-		Risk:            "declared auth entries are submitter claims; an unmatched entry can name any address with any signature and still appear in a successful transaction. unbounded trees halted wallet-backend ingestion",
+		Risk:            "declared auth entries are submitter claims; an unmatched entry can name any account or contract address with any signature that converts and still appear in a successful transaction. the invocation tree has no depth bound but the envelope depth check",
 		Handling:        "never derive participants or authorizations from declared entries; use events and meta; cap recursion when walking",
 		Accessors: []Accessor{
 			{Type: "InvokeHostFunctionOp", Member: "Auth"},
@@ -1039,7 +1039,7 @@ var Fields = []Field{
 		XDRPath:         "SorobanAddressCredentials.address",
 		ValidatedByCore: "partial",
 		Measured:        "mixed",
-		Risk:            "an unmatched entry can name any address, including muxed, claimable balance or liquidity pool addresses",
+		Risk:            "an unmatched entry can name any account or contract address; other address types appear only in failed transactions",
 		Handling:        "do not treat the address as a participant unless meta or events confirm it",
 		Accessors: []Accessor{
 			{Type: "SorobanCredentials", Member: "Address"},
