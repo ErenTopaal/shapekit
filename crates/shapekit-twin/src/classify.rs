@@ -340,11 +340,14 @@ pub fn classify(
     scan: &GateScan,
     labels: &[Label],
 ) -> Result<UnknownRegions> {
-    let protocols: BTreeSet<u32> = coverage
-        .chains
-        .iter()
-        .filter_map(|c| chain_protocol(c))
-        .collect();
+    // the summary carries chain references only, so each must name its protocol: a chain
+    // left out here would make the protocol rule call its sides unrun
+    let mut protocols: BTreeSet<u32> = BTreeSet::new();
+    for c in &coverage.chains {
+        protocols.insert(chain_protocol(c).with_context(|| {
+            format!("chain {c} of the coverage summary names no protocol (<id>.p<N>)")
+        })?);
+    }
     if protocols.is_empty() {
         bail!("the coverage summary names no chain with a protocol");
     }
@@ -560,6 +563,36 @@ mod tests {
         assert_eq!(chain_protocol("chain:cap26.inflation.p11"), Some(11));
         assert!(diagnostic_function("TransactionFrame::toString"));
         assert!(!diagnostic_function("TransactionFrame::apply"));
+    }
+
+    #[test]
+    fn a_chain_without_a_protocol_is_refused_not_dropped() {
+        let core = CoreRef {
+            version: "v30.0.0".into(),
+            commit: "0e49751aa9ddf892302cca02cea7f3f5d97df9f1".into(),
+            image: None,
+        };
+        let coverage = CoreCoverage {
+            schema_version: 1,
+            core: core.clone(),
+            chains: vec!["chain:a.p30".into(), "chain:pairs.x.a".into()],
+            files: Vec::new(),
+            unreached: Vec::new(),
+        };
+        let gates = GateList {
+            schema_version: 1,
+            core,
+            gates: Vec::new(),
+        };
+        let e = classify(
+            Path::new("/nonexistent"),
+            &coverage,
+            &gates,
+            &GateScan::default(),
+            &[],
+        )
+        .unwrap_err();
+        assert!(format!("{e:#}").contains("chain:pairs.x.a"), "{e:#}");
     }
 
     #[test]

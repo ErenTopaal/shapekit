@@ -56,8 +56,9 @@ fn branch_of<'a>(
     if let Some(c) = at(g.column) {
         return Some((c, false));
     }
-    // `!protocolVersion...`: the region starts on the `!`
-    let col = g.column.checked_sub(1)?;
+    // `!protocolVersion...`: the region starts on the `!`, one column before the call; a call
+    // in column 1 has nothing before it
+    let col = g.column.checked_sub(1).filter(|c| *c >= 1)?;
     let bang = line_text
         .and_then(|l| l.chars().nth((col - 1) as usize))
         .is_some_and(|c| c == '!');
@@ -196,6 +197,18 @@ pub struct Witnesses {
     /// Sides met only by explorer reruns.
     pub met_by_reruns_only: usize,
     pub conflicts: Vec<Conflict>,
+}
+
+/// Fails when two of `chains` carry the same reference: their outcomes are kept by
+/// reference, so one would silently replace the other.
+pub fn distinct_chains(chains: &[(String, u32, Branches)]) -> anyhow::Result<()> {
+    let mut seen = BTreeSet::new();
+    for (c, _, _) in chains {
+        if !seen.insert(c.as_str()) {
+            anyhow::bail!("{c} is measured twice; give each chain directory once");
+        }
+    }
+    Ok(())
 }
 
 /// Sets every side of `list` from the chains' branch counts. `chains` pairs
@@ -508,6 +521,25 @@ mod tests {
             "chain:cap40.signed-payload-signer.p30"
         );
         assert!(shapekit_contracts::Contract::problems(&w.list).is_empty());
+    }
+
+    #[test]
+    fn a_chain_measured_twice_is_refused() {
+        let a = ("chain:x.p30".to_owned(), 30, Branches::new());
+        let b = ("chain:y.p30".to_owned(), 30, Branches::new());
+        assert!(distinct_chains(&[a.clone(), b]).is_ok());
+        assert!(distinct_chains(&[a.clone(), a]).is_err());
+    }
+
+    #[test]
+    fn a_gate_in_column_one_has_no_negation_to_look_for() {
+        // no region at column 1 and nothing before it: open, not a panic
+        let chains = vec![("chain:x.p30".to_owned(), 30, branches(14, 5, 0))];
+        let w = witness(&list(gate(1)), &chains, None, |_, _| {
+            Some("protocolVersionIsBefore(v, V_19)".into())
+        });
+        assert_eq!(w.no_branch, 1);
+        assert_eq!((w.met, w.open), (0, 2));
     }
 
     #[test]
