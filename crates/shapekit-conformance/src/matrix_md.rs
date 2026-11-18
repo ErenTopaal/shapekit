@@ -3,7 +3,17 @@
 use std::fmt::Write as _;
 
 use crate::compare::ResultClass;
-use crate::runner::Matrix;
+use crate::runner::{EntryClass, Matrix};
+
+const ENTRY_ORDER: [EntryClass; 7] = [
+    EntryClass::Pass,
+    EntryClass::PassSomeUnsupported,
+    EntryClass::Reference,
+    EntryClass::DivergesFromNetwork,
+    EntryClass::DivergesFromPeers,
+    EntryClass::Unsupported,
+    EntryClass::Error,
+];
 
 const ORDER: [ResultClass; 6] = [
     ResultClass::Pass,
@@ -66,18 +76,18 @@ pub fn render(m: &Matrix) -> String {
     }
 
     let _ = writeln!(out, "\n## Summary (entries)\n");
-    let mut header = String::from("| testee |");
-    let mut rule = String::from("|---|");
-    for r in ORDER {
-        let _ = write!(header, " {r} |");
-        rule.push_str("---|");
+    let mut entry_header = String::from("| testee |");
+    let mut entry_rule = String::from("|---|");
+    for c in ENTRY_ORDER {
+        let _ = write!(entry_header, " {} |", c.label());
+        entry_rule.push_str("---|");
     }
-    let _ = writeln!(out, "{header}\n{rule}");
+    let _ = writeln!(out, "{entry_header}\n{entry_rule}");
     for t in &m.testees {
-        let counts = m.summary.get(&t.key);
+        let counts = m.entry_summary.get(&t.key);
         let mut line = format!("| {} |", t.key);
-        for r in ORDER {
-            let n = counts.and_then(|c| c.get(&r)).copied().unwrap_or(0);
+        for c in ENTRY_ORDER {
+            let n = counts.and_then(|x| x.get(&c)).copied().unwrap_or(0);
             let _ = write!(line, " {n} |");
         }
         let _ = writeln!(out, "{line}");
@@ -85,8 +95,14 @@ pub fn render(m: &Matrix) -> String {
 
     let _ = writeln!(
         out,
-        "\nAn entry counts as its worst check, so one op an SDK lacks (go has no `encode_json`) makes the whole entry `unsupported`. The check and per-op tables below count every check on its own.\n"
+        "\nAn entry counts as its worst check. An entry whose checks all pass apart from ops the SDK does not implement (go has no `encode_json`) is `pass (some checks unsupported)`; `unsupported` is an entry none of whose checks ran. The check and per-op tables below count every check on its own.\n"
     );
+    let mut header = String::from("| testee |");
+    let mut rule = String::from("|---|");
+    for r in ORDER {
+        let _ = write!(header, " {r} |");
+        rule.push_str("---|");
+    }
     let _ = writeln!(out, "## Summary (checks)\n");
     let _ = writeln!(out, "{header}\n{rule}");
     for t in &m.testees {

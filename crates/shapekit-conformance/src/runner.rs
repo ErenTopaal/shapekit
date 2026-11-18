@@ -93,6 +93,70 @@ impl Cell {
             self.result
         }
     }
+
+    /// The class an entry is shown under to people: like [`Cell::summary_class`], except that
+    /// an entry whose checks all passed apart from ops the testee does not implement is
+    /// `pass-some-unsupported`, not `unsupported`, which is kept for an entry no check of
+    /// which ran. Failures rank as before.
+    pub fn entry_class(&self) -> EntryClass {
+        match self.summary_class() {
+            ResultClass::Pass => EntryClass::Pass,
+            ResultClass::Reference => EntryClass::Reference,
+            ResultClass::Unsupported => {
+                let ran = [ResultClass::Pass, ResultClass::Reference]
+                    .iter()
+                    .filter_map(|r| self.counts.get(r))
+                    .sum::<usize>();
+                if ran > 0 {
+                    EntryClass::PassSomeUnsupported
+                } else {
+                    EntryClass::Unsupported
+                }
+            }
+            ResultClass::DivergesFromPeers => EntryClass::DivergesFromPeers,
+            ResultClass::DivergesFromNetwork => EntryClass::DivergesFromNetwork,
+            ResultClass::Error => EntryClass::Error,
+        }
+    }
+}
+
+/// How an entry is counted for people: the result classes, with an entry that passed every
+/// check its testee implements apart from one that ran nothing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum EntryClass {
+    Pass,
+    /// Every check that ran passed, and the testee does not implement the others' ops.
+    PassSomeUnsupported,
+    Reference,
+    /// No check ran: the testee implements none of the entry's ops, or the entry is newer
+    /// than its protocol.
+    Unsupported,
+    DivergesFromPeers,
+    DivergesFromNetwork,
+    Error,
+}
+
+impl EntryClass {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            EntryClass::Pass => "pass",
+            EntryClass::PassSomeUnsupported => "pass-some-unsupported",
+            EntryClass::Reference => "reference",
+            EntryClass::Unsupported => "unsupported",
+            EntryClass::DivergesFromPeers => "diverges-from-peers",
+            EntryClass::DivergesFromNetwork => "diverges-from-network",
+            EntryClass::Error => "error",
+        }
+    }
+
+    /// The words MATRIX.md and the run's output use.
+    pub fn label(self) -> &'static str {
+        match self {
+            EntryClass::PassSomeUnsupported => "pass (some checks unsupported)",
+            other => other.as_str(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -145,6 +209,11 @@ pub struct Matrix {
     /// check, so one op an sdk lacks makes the whole entry unsupported; `check_summary` and
     /// `op_summary` show what that hides.
     pub summary: BTreeMap<String, BTreeMap<ResultClass, usize>>,
+    /// Entry counts per testee, by `Cell::entry_class`: as `summary`, with the entries that
+    /// passed every check their testee implements counted apart from the unsupported ones.
+    /// Absent in matrices written before it was recorded.
+    #[serde(default)]
+    pub entry_summary: BTreeMap<String, BTreeMap<EntryClass, usize>>,
     /// Check counts per testee, by result.
     #[serde(default)]
     pub check_summary: BTreeMap<String, BTreeMap<ResultClass, usize>>,
@@ -633,12 +702,18 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
     }
 
     let mut summary: BTreeMap<String, BTreeMap<ResultClass, usize>> = BTreeMap::new();
+    let mut entry_summary: BTreeMap<String, BTreeMap<EntryClass, usize>> = BTreeMap::new();
     for row in &rows {
         for (key, cell) in &row.cells {
             *summary
                 .entry(key.clone())
                 .or_default()
                 .entry(cell.summary_class())
+                .or_insert(0) += 1;
+            *entry_summary
+                .entry(key.clone())
+                .or_default()
+                .entry(cell.entry_class())
                 .or_insert(0) += 1;
         }
     }
@@ -650,6 +725,7 @@ pub fn run(opts: &RunOptions) -> Result<RunOutcome> {
         ledger_decode_depth: shapekit_manifest::META_DEPTH,
         testees: testee_info,
         summary,
+        entry_summary,
         check_summary: op_summary
             .iter()
             .map(|(key, by_op)| {

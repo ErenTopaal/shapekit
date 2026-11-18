@@ -1348,3 +1348,37 @@ fn first_difference_points_at_the_change() {
         Some(("/w".into(), json!("(absent)"), json!(2)))
     );
 }
+
+#[test]
+fn an_entry_that_passes_what_ran_is_not_counted_unsupported() {
+    use shapekit_conformance::runner::{Cell, EntryClass};
+    let cell = |result: ResultClass, counts: &[(ResultClass, usize)]| Cell {
+        result,
+        known_issue: None,
+        counts: counts.iter().copied().collect(),
+        checks: Vec::new(),
+        reference_checks: Vec::new(),
+    };
+    let partly = cell(
+        ResultClass::Unsupported,
+        &[(ResultClass::Pass, 3), (ResultClass::Unsupported, 1)],
+    );
+    assert_eq!(partly.summary_class(), ResultClass::Unsupported);
+    assert_eq!(partly.entry_class(), EntryClass::PassSomeUnsupported);
+    assert_eq!(
+        partly.entry_class().label(),
+        "pass (some checks unsupported)"
+    );
+    let none = cell(ResultClass::Unsupported, &[(ResultClass::Unsupported, 2)]);
+    assert_eq!(none.entry_class(), EntryClass::Unsupported);
+    // a failure still ranks first, whatever else ran
+    let failed = cell(
+        ResultClass::DivergesFromNetwork,
+        &[
+            (ResultClass::Pass, 3),
+            (ResultClass::Unsupported, 1),
+            (ResultClass::DivergesFromNetwork, 1),
+        ],
+    );
+    assert_eq!(failed.entry_class(), EntryClass::DivergesFromNetwork);
+}

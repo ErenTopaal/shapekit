@@ -365,14 +365,19 @@ fn dispatch(cmd: ConformanceCommand) -> Result<bool> {
                     .collect::<Vec<_>>()
                     .join(", ")
             };
-            for (key, counts) in &outcome.matrix.summary {
+            for (key, counts) in &outcome.matrix.entry_summary {
                 let checks = outcome
                     .matrix
                     .check_summary
                     .get(key)
                     .map(line)
                     .unwrap_or_default();
-                println!("{key}: entries {}; checks {checks}", line(counts));
+                let entries = counts
+                    .iter()
+                    .map(|(c, n)| format!("{} {n}", c.label()))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                println!("{key}: entries {entries}; checks {checks}");
             }
             for (i, kib) in outcome.peak_rss_kib.iter().enumerate() {
                 println!("pass {}: runner peak rss {kib} KiB", i + 1);
