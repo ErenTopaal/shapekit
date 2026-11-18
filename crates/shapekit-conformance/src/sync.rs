@@ -536,7 +536,8 @@ const HEADER: &str = "\
 # go: one source (testees/go) built per version with an alternate module file
 # testees/go/versions/<version>.mod (and its .sum) through go's -modfile flag, outside the
 # go.work workspace, which -modfile cannot be combined with.
-# js: one compiled testee (testees/js/dist) is copied next to a per-version install of the
+# js: one testee, compiled in a copy of testees/js under target/testees/js/build so a run
+# never touches the source tree, is copied next to a per-version install of the
 # sdk under target/testees/js/<version>/, so node resolves @stellar/stellar-sdk to that
 # version. each install is `npm ci` from the package.json and lock file committed under
 # testees/js/versions/<version>/, so the sdk's own dependencies (js-xdr above all) are pinned
@@ -622,10 +623,46 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
             let src = format!("testees/js/versions/{v}");
             (
                 vec![
-                    s(
-                        "  { argv = [\"npm\", \"ci\", \"--no-audit\", \"--no-fund\"], dir = \"testees/js\" },",
+                    // the testee compiles in a copy under target/, so a run never rewrites
+                    // testees/js/node_modules or dist under anything else using the checkout
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[s("rm"), s("-rf"), s(JS_BUILD)])
                     ),
-                    s("  { argv = [\"npm\", \"run\", \"build\"], dir = \"testees/js\" },"),
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[s("mkdir"), s("-p"), s(JS_BUILD)])
+                    ),
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("cp"),
+                            s("testees/js/package.json"),
+                            s("testees/js/package-lock.json"),
+                            s("testees/js/tsconfig.json"),
+                            s("testees/js/.npmrc"),
+                            format!("{JS_BUILD}/"),
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {} }},",
+                        array(&[
+                            s("cp"),
+                            s("-R"),
+                            s("testees/js/src"),
+                            format!("{JS_BUILD}/src")
+                        ])
+                    ),
+                    format!(
+                        "  {{ argv = {}, dir = {} }},",
+                        array(&[s("npm"), s("ci"), s("--no-audit"), s("--no-fund")]),
+                        quote(JS_BUILD)
+                    ),
+                    format!(
+                        "  {{ argv = {}, dir = {} }},",
+                        array(&[s("npm"), s("run"), s("build")]),
+                        quote(JS_BUILD)
+                    ),
                     format!("  {{ argv = {} }},", array(&[s("rm"), s("-rf"), t.clone()])),
                     format!(
                         "  {{ argv = {} }},",
@@ -653,7 +690,12 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
                     ),
                     format!(
                         "  {{ argv = {} }},",
-                        array(&[s("cp"), s("-R"), s("testees/js/dist"), format!("{t}/dist")])
+                        array(&[
+                            s("cp"),
+                            s("-R"),
+                            format!("{JS_BUILD}/dist"),
+                            format!("{t}/dist")
+                        ])
                     ),
                 ],
                 vec![s("node"), format!("{t}/dist/main.js")],
@@ -918,6 +960,9 @@ fn build_lines(sdk: &str, v: &str) -> (Vec<String>, Vec<String>) {
         _ => unreachable!("only the sdks in SDKS are rendered"),
     }
 }
+
+/// Where the js testee compiles, a copy of `testees/js` outside the source tree.
+const JS_BUILD: &str = "target/testees/js/build";
 
 fn render_sdk(out: &mut String, name: &str, sdk: &Sdk, plan: &SdkPlan) {
     let _ = writeln!(out, "[sdk.{name}]");

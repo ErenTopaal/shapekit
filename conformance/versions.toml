@@ -50,7 +50,8 @@
 # go: one source (testees/go) built per version with an alternate module file
 # testees/go/versions/<version>.mod (and its .sum) through go's -modfile flag, outside the
 # go.work workspace, which -modfile cannot be combined with.
-# js: one compiled testee (testees/js/dist) is copied next to a per-version install of the
+# js: one testee, compiled in a copy of testees/js under target/testees/js/build so a run
+# never touches the source tree, is copied next to a per-version install of the
 # sdk under target/testees/js/<version>/, so node resolves @stellar/stellar-sdk to that
 # version. each install is `npm ci` from the package.json and lock file committed under
 # testees/js/versions/<version>/, so the sdk's own dependencies (js-xdr above all) are pinned
@@ -177,13 +178,17 @@ memory = { resource = "data", mib = 4096 }
 [[sdk.js.versions]]
 version = "16.3.0"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/16.3.0"] },
   { argv = ["mkdir", "-p", "target/testees/js/16.3.0"] },
   { argv = ["cp", "testees/js/versions/16.3.0/package.json", "testees/js/versions/16.3.0/package-lock.json", "target/testees/js/16.3.0/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.3.0" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.0/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/16.3.0/dist"] },
 ]
 command = ["node", "target/testees/js/16.3.0/dist/main.js"]
 max_protocol = 29
@@ -192,13 +197,17 @@ max_protocol = 29
 [[sdk.js.versions]]
 version = "16.3.1"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/16.3.1"] },
   { argv = ["mkdir", "-p", "target/testees/js/16.3.1"] },
   { argv = ["cp", "testees/js/versions/16.3.1/package.json", "testees/js/versions/16.3.1/package-lock.json", "target/testees/js/16.3.1/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.3.1" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.3.1/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/16.3.1/dist"] },
 ]
 command = ["node", "target/testees/js/16.3.1/dist/main.js"]
 max_protocol = 29
@@ -207,13 +216,17 @@ max_protocol = 29
 [[sdk.js.versions]]
 version = "16.4.1"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/16.4.1"] },
   { argv = ["mkdir", "-p", "target/testees/js/16.4.1"] },
   { argv = ["cp", "testees/js/versions/16.4.1/package.json", "testees/js/versions/16.4.1/package-lock.json", "target/testees/js/16.4.1/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/16.4.1" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/16.4.1/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/16.4.1/dist"] },
 ]
 command = ["node", "target/testees/js/16.4.1/dist/main.js"]
 max_protocol = 30
@@ -222,13 +235,17 @@ max_protocol = 30
 [[sdk.js.versions]]
 version = "17.2.0"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/17.2.0"] },
   { argv = ["mkdir", "-p", "target/testees/js/17.2.0"] },
   { argv = ["cp", "testees/js/versions/17.2.0/package.json", "testees/js/versions/17.2.0/package-lock.json", "target/testees/js/17.2.0/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.2.0" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.0/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/17.2.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.2.0/dist/main.js"]
 max_protocol = 29
@@ -237,13 +254,17 @@ max_protocol = 29
 [[sdk.js.versions]]
 version = "17.2.1"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/17.2.1"] },
   { argv = ["mkdir", "-p", "target/testees/js/17.2.1"] },
   { argv = ["cp", "testees/js/versions/17.2.1/package.json", "testees/js/versions/17.2.1/package-lock.json", "target/testees/js/17.2.1/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.2.1" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.2.1/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/17.2.1/dist"] },
 ]
 command = ["node", "target/testees/js/17.2.1/dist/main.js"]
 max_protocol = 29
@@ -252,13 +273,17 @@ max_protocol = 29
 [[sdk.js.versions]]
 version = "17.3.0"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/17.3.0"] },
   { argv = ["mkdir", "-p", "target/testees/js/17.3.0"] },
   { argv = ["cp", "testees/js/versions/17.3.0/package.json", "testees/js/versions/17.3.0/package-lock.json", "target/testees/js/17.3.0/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.3.0" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.3.0/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/17.3.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.3.0/dist/main.js"]
 max_protocol = 30
@@ -267,13 +292,17 @@ max_protocol = 30
 [[sdk.js.versions]]
 version = "17.4.0"
 build = [
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/17.4.0"] },
   { argv = ["mkdir", "-p", "target/testees/js/17.4.0"] },
   { argv = ["cp", "testees/js/versions/17.4.0/package.json", "testees/js/versions/17.4.0/package-lock.json", "target/testees/js/17.4.0/"] },
   { argv = ["npm", "ci", "--no-audit", "--no-fund", "--ignore-scripts"], dir = "target/testees/js/17.4.0" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/17.4.0/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/17.4.0/dist"] },
 ]
 command = ["node", "target/testees/js/17.4.0/dist/main.js"]
 max_protocol = 30
