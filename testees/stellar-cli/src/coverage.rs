@@ -18,7 +18,16 @@ pub fn dir() -> Option<&'static Path> {
             return None;
         }
         let d = std::env::temp_dir().join(format!("shapekit-cli-cov-{}", std::process::id()));
-        std::fs::create_dir_all(&d).ok()?;
+        // a directory left by an earlier process with the same pid holds stale counters
+        let _ = std::fs::remove_dir_all(&d);
+        // coverage was asked for: running without it would answer every snapshot unsupported
+        if let Err(e) = std::fs::create_dir_all(&d) {
+            eprintln!(
+                "SHAPEKIT_COVERAGE=1 but {} cannot be made: {e}",
+                d.display()
+            );
+            std::process::exit(1);
+        }
         Some(d)
     })
     .as_deref()

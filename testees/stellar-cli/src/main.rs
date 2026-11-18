@@ -46,6 +46,7 @@ fn main() -> ExitCode {
     if let Some(d) = coverage::dir() {
         let _ = std::fs::remove_dir_all(d);
     }
+    let _ = std::fs::remove_dir_all(config_home());
     code
 }
 
@@ -142,14 +143,45 @@ fn error(id: &str, class: &str, message: &str) -> Value {
     json!({"id": id, "status": "error", "error": {"class": class, "message": message}})
 }
 
+/// How long one run of the binary may take. The runner's per-request timeout for this testee
+/// is 30 s (conformance/versions.toml) and it kills only this process, so a hanging `stellar`
+/// is killed here first rather than left running after the testee is gone.
+const RUN_DEADLINE: std::time::Duration = std::time::Duration::from_secs(25);
+
+/// The config home every run of the binary gets: a directory of this process, so no config or
+/// cache of this machine's stellar-cli setup, or of anything else in the temp directory, is read
+/// or written. Removed when the testee exits.
+fn config_home() -> &'static std::path::Path {
+    static DIR: std::sync::OnceLock<std::path::PathBuf> = std::sync::OnceLock::new();
+    DIR.get_or_init(|| {
+        let d = std::env::temp_dir().join(format!("shapekit-cli-config-{}", std::process::id()));
+        // a directory left by an earlier process with the same pid is stale
+        let _ = std::fs::remove_dir_all(&d);
+        if let Err(e) = std::fs::create_dir_all(&d) {
+            eprintln!("creating {}: {e}", d.display());
+            std::process::exit(1);
+        }
+        d
+    })
+}
+
 /// Runs the binary with `args`, `input` on stdin. A non-zero exit with the cli's own error line
-/// is a refusal; a rust panic message or a death by signal is a crash.
+/// is a refusal; a rust panic message or a death by signal is a crash; a run past
+/// [`RUN_DEADLINE`] is killed and reported as the testee failing to answer.
 fn run(cli: &str, args: &[&str], input: &[u8]) -> Result<String, Outcome> {
+    run_with_deadline(cli, args, input, RUN_DEADLINE)
+}
+
+fn run_with_deadline(
+    cli: &str,
+    args: &[&str],
+    input: &[u8],
+    deadline: std::time::Duration,
+) -> Result<String, Outcome> {
     let mut child = Command::new(cli)
         .args(args)
-        // no config or cache of this machine's stellar-cli setup is read or written
-        .env("STELLAR_CONFIG_HOME", std::env::temp_dir())
-        .env("XDG_CONFIG_HOME", std::env::temp_dir())
+        .env("STELLAR_CONFIG_HOME", config_home())
+        .env("XDG_CONFIG_HOME", config_home())
         .env("STELLAR_NO_CACHE", "true")
         // a coverage build's binary adds its counters to this process's profile files
         .env(
@@ -166,20 +198,46 @@ fn run(cli: &str, args: &[&str], input: &[u8]) -> Result<String, Outcome> {
     let writer = std::thread::spawn(move || {
         let _ = stdin.write_all(&input);
     });
-    let output = child
-        .wait_with_output()
-        .map_err(|e| Outcome::Error("internal", format!("running {cli}: {e}")))?;
+    let read = |mut pipe: Box<dyn std::io::Read + Send>| {
+        std::thread::spawn(move || {
+            let mut buf = Vec::new();
+            let _ = pipe.read_to_end(&mut buf);
+            buf
+        })
+    };
+    let stdout = read(Box::new(child.stdout.take().expect("piped stdout")));
+    let stderr = read(Box::new(child.stderr.take().expect("piped stderr")));
+    let started = std::time::Instant::now();
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break status,
+            Ok(None) if started.elapsed() >= deadline => {
+                let _ = child.kill();
+                let _ = child.wait();
+                let _ = writer.join();
+                return Err(Outcome::Error(
+                    "internal",
+                    format!(
+                        "{cli} {} ran past {deadline:?} and was killed",
+                        args.join(" ")
+                    ),
+                ));
+            }
+            Ok(None) => std::thread::sleep(std::time::Duration::from_millis(5)),
+            Err(e) => return Err(Outcome::Error("internal", format!("running {cli}: {e}"))),
+        }
+    };
     let _ = writer.join();
-    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-    if output.status.success() {
-        return String::from_utf8(output.stdout)
+    let stdout = stdout.join().unwrap_or_default();
+    let stderr = String::from_utf8_lossy(&stderr.join().unwrap_or_default())
+        .trim()
+        .to_string();
+    if status.success() {
+        return String::from_utf8(stdout)
             .map_err(|e| Outcome::Error("internal", format!("the cli wrote non-utf-8: {e}")));
     }
-    if output.status.code().is_none() || stderr.contains("panicked at") {
-        return Err(Outcome::Error(
-            "panic",
-            format!("{}: {stderr}", output.status),
-        ));
+    if status.code().is_none() || stderr.contains("panicked at") {
+        return Err(Outcome::Error("panic", format!("{status}: {stderr}")));
     }
     Err(Outcome::Error("rejected", stderr))
 }
@@ -224,9 +282,22 @@ fn string<'a>(req: &'a Map<String, Value>, name: &str) -> Result<&'a str, Outcom
         .ok_or_else(|| bad(format!("{name} must be a string")))
 }
 
+/// An xdr member: checked to be standard base64 here, so bad base64 is the request's fault and
+/// not a refusal by the cli, then passed to the cli as the text it is.
+fn base64_member<'a>(
+    req: &'a Map<String, Value>,
+    name: &str,
+) -> Result<(&'a str, Vec<u8>), Outcome> {
+    let text = string(req, name)?;
+    let bytes = B64
+        .decode(text)
+        .map_err(|e| bad(format!("{name} is not standard base64: {e}")))?;
+    Ok((text, bytes))
+}
+
 fn decode_to_json(cli: &str, req: &Map<String, Value>) -> Result<String, Outcome> {
     let ty = string(req, "type")?;
-    let xdr = string(req, "xdr")?;
+    let (xdr, _) = base64_member(req, "xdr")?;
     run(
         cli,
         &[
@@ -437,6 +508,16 @@ fn strkey_encode(cli: &str, req: &Map<String, Value>) -> Outcome {
             if 36 + n > p.len() {
                 return refuse("length runs past the payload");
             }
+            // the command takes the key and the payload; padding that is not zero, or bytes
+            // after it, has no such form, and dropping them would repair the input
+            let padded = 36 + n + (4 - n % 4) % 4;
+            if p.len() != padded || p[36 + n..].iter().any(|&b| b != 0) {
+                return Outcome::Unsupported(
+                    "stellar strkey encode takes the key and the payload; a raw payload with padding \
+                     that is not zero or bytes after it has no such form"
+                        .into(),
+                );
+            }
             json!({"signed_payload_ed25519": {"ed25519": hex::encode(&p[..32]), "payload": hex::encode(&p[36..36 + n])}})
         }
         other => return bad(format!("unknown strkey kind {other}")),
@@ -448,12 +529,25 @@ fn strkey_encode(cli: &str, req: &Map<String, Value>) -> Outcome {
 }
 
 fn tx_hash(cli: &str, req: &Map<String, Value>) -> Outcome {
-    if req.get("inner").and_then(Value::as_bool) == Some(true) {
+    let (xdr, bytes) = match base64_member(req, "xdr") {
+        Ok(x) => x,
+        Err(o) => return o,
+    };
+    let Ok(pass) = string(req, "network_passphrase") else {
+        return bad("tx_hash needs network_passphrase");
+    };
+    let inner = match req.get("inner") {
+        None => false,
+        Some(Value::Bool(b)) => *b,
+        Some(_) => return bad("inner must be a boolean"),
+    };
+    if inner {
+        // ENVELOPE_TYPE_TX_FEE_BUMP is 5, the envelope's first four bytes
+        if bytes.get(..4) != Some(&[0, 0, 0, 5][..]) {
+            return bad("inner is only defined for a fee bump envelope");
+        }
         return Outcome::Unsupported("stellar tx hash hashes the outer transaction only".into());
     }
-    let (Ok(xdr), Ok(pass)) = (string(req, "xdr"), string(req, "network_passphrase")) else {
-        return bad("tx_hash needs xdr and network_passphrase");
-    };
     match run(
         cli,
         &["tx", "hash", "--network-passphrase", pass],
@@ -461,5 +555,84 @@ fn tx_hash(cli: &str, req: &Map<String, Value>) -> Outcome {
     ) {
         Ok(h) => Outcome::Ok(json!({"hash": h.trim()})),
         Err(o) => o,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_run_past_its_deadline_is_killed() {
+        let started = std::time::Instant::now();
+        let r = run_with_deadline("sleep", &["30"], b"", std::time::Duration::from_millis(200));
+        assert!(started.elapsed() < std::time::Duration::from_secs(10));
+        match r {
+            Err(Outcome::Error("internal", m)) => assert!(m.contains("was killed"), "{m}"),
+            _ => panic!("a hanging run must be killed"),
+        }
+    }
+
+    #[test]
+    fn runs_get_a_config_home_of_their_own() {
+        let out = run("sh", &["-c", "printf %s \"$STELLAR_CONFIG_HOME\""], b"")
+            .ok()
+            .unwrap();
+        assert_eq!(std::path::Path::new(&out), config_home());
+        assert!(config_home().is_dir());
+        assert_ne!(config_home(), std::env::temp_dir());
+    }
+
+    #[test]
+    fn tx_hash_members_are_checked_before_the_cli_runs() {
+        let req = |v: Value| v.as_object().unwrap().clone();
+        let class = |o: Outcome| match o {
+            Outcome::Error(c, _) => c,
+            Outcome::Unsupported(_) => "unsupported",
+            Outcome::Ok(_) => "ok",
+        };
+        let pass = "Test SDF Network ; September 2015";
+        // the cli is never started for these: a path that does not exist proves it
+        let cli = "/nonexistent/stellar";
+        assert_eq!(
+            class(tx_hash(
+                cli,
+                &req(json!({"xdr": "!!", "network_passphrase": pass}))
+            )),
+            "bad-request"
+        );
+        assert_eq!(
+            class(tx_hash(
+                cli,
+                &req(json!({"xdr": "AAAAAg==", "network_passphrase": pass, "inner": 1}))
+            )),
+            "bad-request"
+        );
+        assert_eq!(
+            class(tx_hash(
+                cli,
+                &req(json!({"xdr": "AAAAAg==", "network_passphrase": pass, "inner": true}))
+            )),
+            "bad-request"
+        );
+        assert_eq!(
+            class(tx_hash(
+                cli,
+                &req(json!({"xdr": "AAAABQ==", "network_passphrase": pass, "inner": true}))
+            )),
+            "unsupported"
+        );
+    }
+
+    #[test]
+    fn signed_payload_with_stray_bytes_is_not_repaired() {
+        let req = |v: Value| v.as_object().unwrap().clone();
+        let mut p = vec![7u8; 32];
+        p.extend_from_slice(&[0, 0, 0, 1, 9, 0, 0, 1]);
+        let o = strkey_encode(
+            "/nonexistent/stellar",
+            &req(json!({"kind": "signed_payload", "payload": B64.encode(&p)})),
+        );
+        assert!(matches!(o, Outcome::Unsupported(_)));
     }
 }
