@@ -23,9 +23,9 @@ pub struct GuidedFuzzArgs {
     /// Corpus files larger than this are not used as seeds.
     #[arg(long, default_value_t = 64 * 1024)]
     max_seed_bytes: u64,
-    /// Most raw bytes handed to `arbitrary` for one generated value.
-    #[arg(long, default_value_t = 4096)]
-    max_arbitrary_bytes: usize,
+    /// Most raw bytes handed to `arbitrary` for one generated value; at least 1.
+    #[arg(long, default_value_t = 4096, value_parser = clap::value_parser!(u32).range(1..))]
+    max_arbitrary_bytes: u32,
     /// report.json (and REPORT.md with --compare).
     #[arg(long, default_value = "target/guided-fuzz")]
     out: PathBuf,
@@ -63,7 +63,7 @@ pub fn run(args: GuidedFuzzArgs) -> Result<bool> {
         max_inputs: args.max_inputs,
         build: !args.no_build,
         max_seed_bytes: args.max_seed_bytes,
-        max_arbitrary_bytes: args.max_arbitrary_bytes,
+        max_arbitrary_bytes: args.max_arbitrary_bytes as usize,
     };
     let out = root.join(&args.out);
     std::fs::create_dir_all(&out).with_context(|| out.display().to_string())?;

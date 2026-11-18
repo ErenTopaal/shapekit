@@ -349,7 +349,7 @@ enum GenCommand {
         /// The recipe file, corpus/recipes/<family>/<name>.json.
         file: PathBuf,
         /// testnet, mainnet or both.
-        #[arg(long, default_value = "both")]
+        #[arg(long, default_value = "both", value_parser = ["testnet", "mainnet", "both"])]
         network: String,
         /// Chains recorded at once, each on its own core container.
         #[arg(long, default_value_t = 2, value_parser = clap::value_parser!(u16).range(1..=32))]
@@ -820,6 +820,64 @@ mod tests {
     #[test]
     fn cli_is_consistent() {
         Cli::command().debug_assert();
+    }
+
+    // zero bytes would reach a modulo by zero in the generator
+    #[test]
+    fn arbitrary_byte_bounds_are_positive() {
+        for cmd in ["fuzz", "guided-fuzz"] {
+            let parses = |n: &str| {
+                Cli::try_parse_from(["shapekit", cmd, "--max-arbitrary-bytes", n]).is_ok()
+            };
+            assert!(parses("1"), "{cmd}");
+            assert!(!parses("0"), "{cmd}");
+        }
+    }
+
+    // a misspelled network would select no chain and pass
+    #[test]
+    fn network_options_take_only_known_networks() {
+        let parses = |args: &[&str]| Cli::try_parse_from(args.iter().copied()).is_ok();
+        let base: [&[&str]; 4] = [
+            &[
+                "shapekit",
+                "harness",
+                "state",
+                "check",
+                "--run",
+                "r",
+                "--mapping",
+                "m",
+            ],
+            &[
+                "shapekit", "harness", "state", "infer", "--run", "r", "--write", "w",
+            ],
+            &[
+                "shapekit",
+                "harness",
+                "state",
+                "pair",
+                "--a",
+                "a",
+                "--b",
+                "b",
+                "--pair",
+                "p",
+                "--mapping",
+                "m",
+            ],
+            &["shapekit", "gen", "run-ir", "f.json"],
+        ];
+        for args in base {
+            assert!(
+                parses(&[args, &["--network", "mainnet"]].concat()),
+                "{args:?}"
+            );
+            assert!(
+                !parses(&[args, &["--network", "testnte"]].concat()),
+                "{args:?}"
+            );
+        }
     }
 
     // the user commands are the whole of `shapekit --help`; every internal command keeps its
