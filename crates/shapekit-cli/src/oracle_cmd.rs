@@ -65,6 +65,13 @@ pub fn check(file: &Path, passphrase: &str, start: StartState) -> Result<bool> {
             );
         }
     }
+    // an empty stream conserves trivially; passing it would claim a check that never ran
+    if ledgers == 0 {
+        bail!(
+            "{} holds no ledgers, so nothing was checked",
+            file.display()
+        );
+    }
     println!(
         "{}: {ledgers} ledgers, {txs} transactions conserve lumens, {checked} changes checked against state, {unchecked} unchecked",
         file.display()

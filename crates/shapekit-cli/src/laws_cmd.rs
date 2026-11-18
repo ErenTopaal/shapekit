@@ -10,7 +10,8 @@ use shapekit_laws::{Checker, Input, Report};
 #[derive(clap::Subcommand)]
 pub enum LawsCommand {
     /// Check every law on LedgerCloseMeta files, or on every LedgerCloseMeta entry of the
-    /// corpus. Exits 1 when a law fails.
+    /// corpus. Exits 1 when a law fails; with --corpus, when it fails on a recorded entry,
+    /// since synthetic entries are hand-made and their violations are listed but not failed.
     Check {
         /// LedgerCloseMeta files, checked in the order given; consecutive ledgers are also
         /// checked against each other, and a ledger that does not follow the one before it
@@ -19,11 +20,11 @@ pub enum LawsCommand {
         #[arg(long, num_args = 1.., required_unless_present = "corpus", conflicts_with = "corpus")]
         lcm: Vec<PathBuf>,
         /// The network passphrase the ledgers were closed under.
-        #[arg(long, required_unless_present = "corpus")]
+        #[arg(long, required_unless_present = "corpus", conflicts_with = "corpus")]
         passphrase: Option<String>,
         /// The files hold a LedgerCloseMetaBatch, as SEP-54 data lake objects do (implied for
         /// files ending in .zst).
-        #[arg(long)]
+        #[arg(long, conflicts_with = "corpus")]
         batch: bool,
         /// A corpus directory: check each variant of each LedgerCloseMeta entry under the
         /// passphrase the manifest gives for it.
@@ -184,6 +185,13 @@ fn check_corpus(dir: &Path, json: bool) -> Result<bool> {
             }
             total.merge(checker.report);
         }
+    }
+    // a corpus without a ledger entry checks no law, which must not read as every law holding
+    if checked_variants == 0 {
+        bail!(
+            "{} has no LedgerCloseMeta entry, so no law was checked",
+            manifest_path.display()
+        );
     }
     let unexplained = found.iter().filter(|v| !v.synthetic).count();
     if json {
