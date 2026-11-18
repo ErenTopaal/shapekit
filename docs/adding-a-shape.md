@@ -342,32 +342,55 @@ workflow runs it through the current version of each SDK and writes, per entry, 
 can be promoted. A divergence there is a finding to triage, so it is listed in the job
 summary and does not turn the nightly run red.
 
-An entry moves into the corpus with `shapekit corpus promote`:
+Entries move into the corpus with `shapekit corpus promote`. It needs a result from every
+SDK in `conformance/versions.toml`, so run each one over the entries first:
 
 ```sh
-for sdk in rust go js; do
-  shapekit conformance run --sdk $sdk --manifest candidate/manifest.json \
-    --entry <entry-id> --out target/candidate/$sdk
+for sdk in rust go js soroban python java dart php dotnet kmp stellar-cli; do
+  shapekit conformance run --sdk $sdk --all-versions --manifest candidate/manifest.json \
+    --entry <entry-id> --known-failures <a directory of empty lists> --out target/candidate/$sdk
 done
-shapekit corpus promote <entry-id> \
+shapekit corpus promote <entry-id> [<entry-id> ...] \
   --matrix target/candidate/rust/divergence-matrix.json \
-  --matrix target/candidate/go/divergence-matrix.json \
-  --matrix target/candidate/js/divergence-matrix.json
+  --matrix target/candidate/go/divergence-matrix.json  # and the other nine
 ```
 
-The command promotes the entry when the current version of every SDK in
-`conformance/versions.toml` passes it, or when every SDK that fails it has a finding in
-`findings/triage.toml` whose conformance matcher takes the failure and whose `draft` is a file
-under `findings/issues/`. Otherwise it lists each reason and leaves the entry where it is.
-`--dry-run` prints the decision without moving anything, and takes several entry ids at once,
-one decision each.
+The rule has two parts:
 
-On promotion the entry's files move from `candidate/` to `corpus/`, both manifests are
-rebuilt, and the corpus manifest must validate or nothing moves. Each accepted failure gets
-a line in `conformance/known-failures/<sdk>.txt` for the SDK's current version, pointing at
-the finding's issue link when it is filed and at its draft otherwise. The run you pass may
-cover more versions; failures on older versions still need their own lines. Then run
-`shapekit oracle run`, `shapekit coverage` and the conformance run for the corpus.
+- **rust, go and js.** Their current versions must pass the entry, or a finding in
+  `findings/triage.toml` must take each failure, with a `draft` that is a file under
+  `findings/issues/`.
+- **Every other failure** the matrices hold for the entry, at an older version of those three
+  or at any version of the other SDKs, must be attributed. A main finding takes it, or a
+  finding of `candidate/findings/triage.toml` holds it. For an SDK other than rust, go and js,
+  a record in `candidate/finding-candidates.toml` can attribute it instead: a `[[candidate]]`
+  whose `sdk` and `versions` name the SDK and version and whose `entries` patterns match the
+  entry, either a candidate defect or an explained exclusion. A failure of rust, go or js needs
+  a finding of one of the two triages, since their matrices are inputs of the main findings,
+  which would count a failure with only a record as unmapped.
+
+One unattributed failure refuses the entry. The command prints each reason with the SDK and
+version and leaves the entry in the lane. `--dry-run` prints every decision without moving
+anything. The command promotes the entries it accepts and exits with 1 when it refused any.
+
+An entry cut from a chain needs that chain under `corpus/chains`, where the harness replays
+it from. A chain of the lane's `candidate/recipes/chains.toml` moves with the first of its
+entries that is promoted. The chain directory goes to `corpus/chains/<chain>/`, its recipe
+IR file to the same path under `corpus/recipes/`, and its row to `corpus/recipes/chains.toml`.
+The other files of the recipe's directories, such as a run's `run.toml` or a pair's
+`pair.json`, are copied with it. Every entry of either lane that names the recipe, and every
+recipe witness of `registry/generated/gates.json`, is rewritten to its new path. The chains
+of `corpus/recipes/chains.toml` are registered recipes: `shapekit gen families` lists their
+families, `scripts/select-repro.sh` assigns their chains to them, and `shapekit gen
+verify-repro` records them again and compares each entry cut from them with the ledger of the
+regenerated chain.
+
+On promotion the entries' files move from `candidate/` to `corpus/`, both manifests are
+rebuilt, and the corpus manifest must validate or nothing moves. Each attributed failure gets
+a line in `conformance/known-failures/<sdk>.txt` for its version. The line points at the
+finding's issue link when it is filed, at its draft otherwise, or at
+`candidate/finding-candidates.toml` for a record. Then run `shapekit oracle run`,
+`shapekit coverage` and the conformance run for the corpus.
 
 Failures a new run reports that are triaged but not filed upstream yet are recorded the same
 way, apart from the main findings: `candidate/findings/triage.toml` holds their findings, the

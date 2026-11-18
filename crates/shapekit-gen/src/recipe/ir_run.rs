@@ -111,6 +111,9 @@ pub struct IrRecipe {
     ir: RecipeIr,
     /// The repository root, which `upload` paths are relative to.
     root: PathBuf,
+    /// The chain id and the family of the entries cut from the chain, for a recipe listed in
+    /// a lane's `recipes/chains.toml`.
+    recorded_as: Option<(String, String)>,
 }
 
 impl IrRecipe {
@@ -118,7 +121,15 @@ impl IrRecipe {
         Self {
             ir,
             root: root.to_path_buf(),
+            recorded_as: None,
         }
+    }
+
+    /// The recipe as a chain of a lane's `recipes/chains.toml`: recorded into `chain`, with
+    /// entries of `family` cut from it afterwards.
+    pub fn recorded_as(mut self, chain: &str, family: &str) -> Self {
+        self.recorded_as = Some((chain.to_owned(), family.to_owned()));
+        self
     }
 
     /// Reads and checks `path`; `root` is the repository root.
@@ -137,7 +148,21 @@ impl Recipe for IrRecipe {
     }
 
     fn family(&self) -> &str {
-        &self.ir.family
+        match &self.recorded_as {
+            Some((_, family)) => family,
+            None => &self.ir.family,
+        }
+    }
+
+    fn chain_id(&self) -> String {
+        match &self.recorded_as {
+            Some((chain, _)) => chain.clone(),
+            None => format!("{}.p{}", self.ir.id, self.ir.protocol),
+        }
+    }
+
+    fn entries_cut(&self) -> bool {
+        self.recorded_as.is_some()
     }
 
     fn protocol(&self) -> u32 {

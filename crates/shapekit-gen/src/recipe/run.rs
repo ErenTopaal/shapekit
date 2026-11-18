@@ -266,6 +266,17 @@ pub fn generate(recipes: &[&dyn Recipe], opts: &GenOptions<'_>) -> Result<GenRep
     let mut all_entries = Vec::new();
     for (i, caps) in &mut by_chain {
         let r = recipes[*i];
+        if r.entries_cut() {
+            // the family's entries of this chain were cut from it after recording and stay
+            // as they are; such a recipe captures nothing itself
+            let n: usize = caps.values().map(Vec::len).sum();
+            ensure!(
+                n == 0,
+                "chain {}: its entries are cut from it after recording, yet the recipe captured {n}",
+                chain_id(r)
+            );
+            continue;
+        }
         if r.below_protocol_valid() {
             for c in caps.values_mut().flatten() {
                 c.spec.flags.push(BELOW_PROTOCOL_VALID.to_owned());
@@ -446,6 +457,19 @@ pub fn verify_repro_on(
             continue;
         }
         let family = r.family();
+        if r.entries_cut() {
+            for (id, dir) in chain_entries(&opts.corpus, family, &cid)? {
+                entries_compared += 1;
+                diffs.extend(cut_entry_differences(
+                    &id,
+                    &dir,
+                    &opts.corpus,
+                    fresh.path(),
+                    &cid,
+                )?);
+            }
+            continue;
+        }
         let ours = chain_entries(&opts.corpus, family, &cid)?;
         let theirs = chain_entries(fresh.path(), family, &cid)?;
         let ids: BTreeSet<&String> = ours.keys().chain(theirs.keys()).collect();
@@ -501,6 +525,66 @@ pub fn verify_repro_on(
         chains_compared,
         entries_compared,
     })
+}
+
+/// A committed entry cut from a chain against the regenerated chain: each variant's bytes
+/// must be the regenerated lake's ledger at the entry's sequence under that passphrase.
+fn cut_entry_differences(
+    id: &str,
+    dir: &Path,
+    corpus: &Path,
+    fresh: &Path,
+    chain: &str,
+) -> Result<Vec<String>> {
+    let file = dir.join(ENTRY_FILE);
+    let entry: shapekit_manifest::Entry = serde_json::from_slice(
+        &std::fs::read(&file).with_context(|| format!("reading {}", file.display()))?,
+    )
+    .with_context(|| format!("parsing {}", file.display()))?;
+    let seq = entry
+        .source
+        .ledger_seq
+        .with_context(|| format!("{id} is cut from chain {chain} but names no ledger"))?;
+    let mut out = Vec::new();
+    for n in Network::BOTH {
+        let variant = match n {
+            Network::Testnet => entry.variants.testnet.as_ref(),
+            Network::Mainnet => entry.variants.mainnet.as_ref(),
+        };
+        let Some(variant) = variant else {
+            out.push(format!("{id}: no {} variant", n.name()));
+            continue;
+        };
+        let committed = std::fs::read(corpus.join(&variant.xdr_file))
+            .with_context(|| format!("reading {}", variant.xdr_file))?;
+        let lake_dir = fresh
+            .join(CHAINS_DIR)
+            .join(chain)
+            .join(n.name())
+            .join(LEDGERS_DIR);
+        let lake = shapekit_pack::Lake::open(&lake_dir)
+            .map_err(|e| anyhow!("{}: {e}", lake_dir.display()))?;
+        let mut regenerated = None;
+        for l in lake.ledgers() {
+            let l = l.map_err(|e| anyhow!("{}: {e}", lake_dir.display()))?;
+            if l.seq == seq {
+                regenerated = Some(l.xdr);
+                break;
+            }
+        }
+        match regenerated {
+            None => out.push(format!(
+                "{id}: the regenerated {} chain has no ledger {seq}",
+                n.name()
+            )),
+            Some(x) if x != committed => out.push(format!(
+                "{id}: {} bytes differ from ledger {seq} of the regenerated chain",
+                n.name()
+            )),
+            Some(_) => {}
+        }
+    }
+    Ok(out)
 }
 
 fn copy_dir(from: &Path, to: &Path) -> Result<()> {

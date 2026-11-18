@@ -22,7 +22,10 @@ pub fn load(path: &Path) -> Result<RecipeIr> {
     shapekit_contracts::load::<RecipeIr>(path).map_err(|e| anyhow!("{e}"))
 }
 
-/// Every `*.json` under `<corpus>/recipes/`, sorted.
+/// What a recipe pair keeps beside its two recipes: the entries it compares, not a recipe.
+pub const PAIR_FILE: &str = "pair.json";
+
+/// Every `*.json` under `<corpus>/recipes/` but a pair's [`PAIR_FILE`], sorted.
 pub fn files(corpus: &Path) -> Result<Vec<PathBuf>> {
     let dir = corpus.join(RECIPES_DIR);
     if !dir.exists() {
@@ -31,7 +34,10 @@ pub fn files(corpus: &Path) -> Result<Vec<PathBuf>> {
     let mut out = Vec::new();
     for e in WalkDir::new(&dir).sort_by_file_name() {
         let e = e.with_context(|| format!("walking {}", dir.display()))?;
-        if e.file_type().is_file() && e.path().extension().is_some_and(|x| x == "json") {
+        if e.file_type().is_file()
+            && e.path().extension().is_some_and(|x| x == "json")
+            && e.file_name() != PAIR_FILE
+        {
             out.push(e.into_path());
         }
     }

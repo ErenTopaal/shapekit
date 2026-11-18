@@ -21,7 +21,8 @@
 # line, {"include":[{"shard":"1","families":"a b"},...]}, plus a summary on stderr. the same
 # inputs always give the same output.
 #
-# --families prints the family list the selection works from, one per line. --check-chains
+# --families prints the family list the selection works from, one per line: the families of
+# the recipe files and those of the chains corpus/recipes/chains.toml lists. --check-chains
 # fails unless every directory under corpus/chains belongs to one of those families and every
 # family owns at least one chain. pr.yml runs both, and also passes the list to the cli, which
 # rejects a family no recipe records; together they keep this list equal to the recipes the
@@ -69,6 +70,20 @@ if [ "${#families[@]}" -eq 0 ]; then
   exit 1
 fi
 
+# chains recorded from recipe ir files, listed in corpus/recipes/chains.toml as chain<tab>family;
+# their families are recipe families too
+index=corpus/recipes/chains.toml
+mapfile -t indexed < <(
+  [ -f "$index" ] && awk -F' = ' '
+    /^\[\[chain\]\]/ { id = ""; fam = "" }
+    $1 == "id" { id = $2; gsub(/"/, "", id) }
+    $1 == "family" { fam = $2; gsub(/"/, "", fam); print id "\t" fam }
+  ' "$index"
+)
+mapfile -t families < <(
+  { printf '%s\n' "${families[@]}"; for entry in "${indexed[@]}"; do echo "${entry#*$'\t'}"; done; } | sort -u
+)
+
 # the family a recipe file belongs to, as file<tab>family, only for files whose recipes all
 # share the one FAMILY constant. a file with recipes of several families (old_protocols.rs
 # holds failed-tx, cap03 and cap26 recipes) has no entry, so a change to it selects every family
@@ -83,10 +98,17 @@ mapfile -t file_family < <(
   done
 )
 
-# the family a chain directory belongs to: the longest family name that prefixes it, followed
-# by a dot or a dash (cap67.unified-events-backfill.p22 is a cap67.unified-events chain)
+# the family a chain directory belongs to: its family in corpus/recipes/chains.toml, or else
+# the longest family name that prefixes it, followed by a dot or a dash
+# (cap67.unified-events-backfill.p22 is a cap67.unified-events chain)
 family_of_chain() {
-  local chain=$1 best="" f
+  local chain=$1 best="" f entry
+  for entry in "${indexed[@]}"; do
+    if [ "${entry%%$'\t'*}" = "$chain" ]; then
+      echo "${entry#*$'\t'}"
+      return
+    fi
+  done
   for f in "${families[@]}"; do
     case "$chain" in
       "$f".* | "$f"-*) if [ "${#f}" -gt "${#best}" ]; then best=$f; fi ;;
@@ -151,6 +173,16 @@ while IFS= read -r path || [ -n "$path" ]; do
     corpus/chains/*)
       chain=${path#corpus/chains/}
       f=$(family_of_chain "${chain%%/*}")
+      ;;
+    corpus/recipes/chains.toml)
+      all=true
+      why+=("$path")
+      ;;
+    corpus/recipes/*)
+      # a recipe ir file of a listed chain selects that chain's family
+      rel=${path#corpus/recipes/}
+      fam=${rel%%/*}
+      for entry in "${indexed[@]}"; do [ "${entry#*$'\t'}" = "$fam" ] && f=$fam; done
       ;;
     corpus/entries/*)
       fam=${path#corpus/entries/}

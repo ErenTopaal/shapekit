@@ -29,6 +29,7 @@ pub mod cap73;
 pub mod cap77;
 pub mod cap84;
 pub mod cap85;
+pub mod chains_index;
 mod ctx;
 pub mod events_max;
 pub mod failed_tx;
@@ -121,12 +122,24 @@ pub trait Recipe: Send + Sync {
     fn emit_soroban_transaction_meta_ext_v1(&self) -> bool {
         false
     }
+    /// The directory under `corpus/chains/`: `<recipe id>.p<protocol>` unless the recipe is
+    /// listed under another id in `corpus/recipes/chains.toml`.
+    fn chain_id(&self) -> String {
+        format!("{}.p{}", self.id(), self.protocol())
+    }
+    /// Whether the chain's entries are cut from its ledgers after recording (`shapekit
+    /// explore entries`) rather than captured while it runs. A regeneration then leaves the
+    /// family's entries alone and compares each with the ledger of the regenerated chain it
+    /// was cut from.
+    fn entries_cut(&self) -> bool {
+        false
+    }
     fn run(&self, ctx: &mut ChainCtx) -> anyhow::Result<()>;
 }
 
-/// `<recipe id>.p<protocol>`, the directory under `corpus/chains/`.
+/// The directory of the recipe's chain under `corpus/chains/`, [`Recipe::chain_id`].
 pub fn chain_id(recipe: &dyn Recipe) -> String {
-    format!("{}.p{}", recipe.id(), recipe.protocol())
+    recipe.chain_id()
 }
 
 /// Every recipe this build knows, one per chain.

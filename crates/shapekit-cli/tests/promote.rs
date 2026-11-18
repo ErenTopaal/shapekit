@@ -4,12 +4,13 @@
 //! pass it, go-stellar-sdk v0.9.0 diverges from the network on two cases (finding GO-1),
 //! soroban-sdk 29.0.1 has no reader for its strkey kind, stellar_flutter_sdk 3.12.0 and
 //! soneso/stellar-php-sdk 1.18.0 pass it, and the Python stellar-sdk 17.0.1 diverges on case 6
-//! (a trailing =), a candidate-lane defect no finding in findings/triage.toml takes, while
+//! (a trailing =), a candidate-lane defect recorded in candidate/finding-candidates.toml, while
 //! java-stellar-sdk 6.0.0 and kmp-stellar-sdk 1.18.0 pass it. stellar-dotnet-sdk 17.0.0
 //! diverges on cases 13 and 15 (NET-STRKEY) and stellar-cli 30.0.1 on case 7 (CLI-STRKEY-TRIM),
-//! both findings of the candidate lane. So with the real sdk set the entry stays a candidate;
-//! the test that promotes it first moves the findings of those three sdks into
-//! findings/triage.toml, as a promotion would need.
+//! both findings of candidate/findings/triage.toml. So with the real sdk set the entry is
+//! promoted: go's failure is a main finding, the other three are held by candidate findings or
+//! recorded. The chain tests use explorer entries of the pair chain pairs.muxed-payment.a, with
+//! matrices the test writes in which every sdk passes them.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -88,6 +89,7 @@ fn layout() -> tempfile::TempDir {
     )
     .unwrap();
     fs::copy(r.join("pins.toml"), d.join("pins.toml")).unwrap();
+    candidate_findings(d);
     fs::create_dir_all(d.join("conformance/known-failures")).unwrap();
     fs::copy(
         r.join("conformance/versions.toml"),
@@ -128,6 +130,22 @@ fn layout() -> tempfile::TempDir {
         assert!(out.status.success(), "{}", text(&out));
     }
     dir
+}
+
+/// The candidate lane's findings and records, as the repository has them.
+fn candidate_findings(d: &Path) {
+    let r = repo();
+    fs::create_dir_all(d.join("candidate/findings")).unwrap();
+    for f in [
+        "candidate/findings/triage.toml",
+        "candidate/finding-candidates.toml",
+    ] {
+        fs::copy(r.join(f), d.join(f)).unwrap();
+    }
+    copy_dir(
+        &r.join("candidate/findings/issues"),
+        &d.join("candidate/findings/issues"),
+    );
 }
 
 /// Puts findings into the layout's findings/triage.toml that take the entry's failures on python,
@@ -188,7 +206,7 @@ fn entries(d: &Path, lane: &str) -> usize {
 }
 
 #[test]
-fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
+fn a_gating_sdk_failure_no_finding_takes_keeps_the_entry_a_candidate() {
     let dir = layout();
     let d = dir.path();
     let triage = fs::read_to_string(d.join("findings/triage.toml")).unwrap();
@@ -203,9 +221,9 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
     let out = promote(d, &[], &FIXTURE_SDKS);
     assert_eq!(out.status.code(), Some(1), "{}", text(&out));
     assert!(
-        text(&out).contains(
-            "refused: go@v0.9.0 answers diverges-from-network and no finding in findings/triage.toml takes it"
-        ),
+        text(&out).contains(&format!(
+            "{ENTRY}: refused: go@v0.9.0 answers diverges-from-network; go is one of rust, go and js"
+        )),
         "{}",
         text(&out)
     );
@@ -218,16 +236,25 @@ fn a_failure_no_finding_takes_keeps_the_entry_a_candidate() {
 }
 
 #[test]
-fn candidate_lane_divergences_keep_the_entry_a_candidate() {
+fn other_sdk_failures_held_or_recorded_are_promoted() {
     let dir = layout();
     let d = dir.path();
     let out = promote(d, &[], &FIXTURE_SDKS);
-    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
-    for key in ["python@17.0.1", "dotnet@17.0.0", "stellar-cli@30.0.1"] {
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    for (key, how) in [
+        ("go@v0.9.0", "is finding GO-1"),
+        (
+            "python@17.0.1",
+            "is attributed in the candidate records (a candidate)",
+        ),
+        ("dotnet@17.0.0", "is held by candidate finding NET-STRKEY"),
+        (
+            "stellar-cli@30.0.1",
+            "is held by candidate finding CLI-STRKEY-TRIM",
+        ),
+    ] {
         assert!(
-            text(&out).contains(&format!(
-                "refused: {key} answers diverges-from-network and no finding in findings/triage.toml takes it"
-            )),
+            text(&out).contains(&format!("{ENTRY}: {key}: diverges-from-network {how}")),
             "{key}: {}",
             text(&out)
         );
@@ -235,6 +262,56 @@ fn candidate_lane_divergences_keep_the_entry_a_candidate() {
     for key in ["java@6.0.0", "kmp@1.18.0", "dart@3.12.0", "php@1.18.0"] {
         assert!(!text(&out).contains(key), "{key}: {}", text(&out));
     }
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (0, 1));
+    let known = |sdk: &str| {
+        fs::read_to_string(d.join(format!("conformance/known-failures/{sdk}.txt"))).unwrap()
+    };
+    assert!(
+        known("python").contains(&format!(
+            "{ENTRY} 17.0.1 diverges-from-network candidate/finding-candidates.toml case 6/strkey_decode"
+        )),
+        "{}",
+        known("python")
+    );
+    assert!(
+        known("dotnet").contains(&format!(
+            "{ENTRY} 17.0.0 diverges-from-network candidate/findings/issues/dotnet-{ENTRY}.md"
+        )),
+        "{}",
+        known("dotnet")
+    );
+    for lane in ["corpus", "candidate"] {
+        let file = format!("{lane}/manifest.json");
+        let out = shapekit(d, &["manifest", "validate", "--file", &file]);
+        assert!(out.status.success(), "{lane}: {}", text(&out));
+    }
+}
+
+#[test]
+fn an_unattributed_failure_of_another_sdk_keeps_the_entry_a_candidate() {
+    let dir = layout();
+    let d = dir.path();
+    // the python record of the entry's trailing = is the only thing that takes that failure
+    let records = fs::read_to_string(d.join("candidate/finding-candidates.toml")).unwrap();
+    let records = records.replace(
+        "entries = [\"cap23.claimable-balances.synth-strkey-b-invalid\", \"cap27.muxed-accounts.synth-strkey-m-invalid\"",
+        "entries = [\"cap27.muxed-accounts.synth-strkey-m-invalid\"",
+    );
+    fs::write(d.join("candidate/finding-candidates.toml"), records).unwrap();
+    let out = promote(d, &[], &FIXTURE_SDKS);
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        text(&out).contains(&format!(
+            "{ENTRY}: refused: python@17.0.1 answers diverges-from-network; no finding in findings/triage.toml or the candidate triage takes it and no record in candidate/finding-candidates.toml names it"
+        )),
+        "{}",
+        text(&out)
+    );
+    assert!(
+        text(&out).contains(&format!("{ENTRY} stays in the candidate lane")),
+        "{}",
+        text(&out)
+    );
     assert_eq!(entries(d, "corpus"), 0);
 }
 
@@ -275,12 +352,17 @@ fn every_sdk_needs_a_result() {
 }
 
 #[test]
-fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
+fn main_findings_take_a_failure_before_the_candidate_lane() {
     let dir = layout();
     let d = dir.path();
     triage_the_other_failures(d);
     let dry = promote(d, &["--dry-run"], &FIXTURE_SDKS);
     assert_eq!(dry.status.code(), Some(0), "{}", text(&dry));
+    assert!(
+        text(&dry).contains("is finding NET-STRKEY"),
+        "{}",
+        text(&dry)
+    );
     assert_eq!(entries(d, "corpus"), 0);
 
     let out = promote(d, &[], &FIXTURE_SDKS);
@@ -302,6 +384,13 @@ fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
         )),
         "{known}"
     );
+    let known = fs::read_to_string(d.join("conformance/known-failures/dotnet.txt")).unwrap();
+    assert!(
+        known.contains(&format!(
+            "{ENTRY} 17.0.0 diverges-from-network findings/issues/dotnet-{ENTRY}.md"
+        )),
+        "{known}"
+    );
     for lane in ["corpus", "candidate"] {
         let file = format!("{lane}/manifest.json");
         let out = shapekit(d, &["manifest", "validate", "--file", &file]);
@@ -311,35 +400,241 @@ fn a_triaged_failure_with_a_draft_is_promoted_with_its_known_failure() {
     assert_eq!(again.status.code(), Some(2), "{}", text(&again));
 }
 
-#[test]
-fn an_entry_whose_chain_is_not_in_the_corpus_stays_a_candidate() {
+const PAIR_ENTRIES: [&str; 3] = [
+    "explore.pairs.muxed-payment-a-l2",
+    "explore.pairs.muxed-payment-a-l64",
+    "explore.pairs.muxed-payment-a-l65",
+];
+
+/// The layout with both sides of the muxed-payment pair in the candidate lane: their chains,
+/// recipes, the pair's comparison and README, the lane's chain list naming the two chains,
+/// and every entry of side a; and a gate list with a witness of each side's recipe.
+fn pair_layout() -> tempfile::TempDir {
     let dir = layout();
     let d = dir.path();
     let r = repo();
-    let id = "cap01.bump-sequence.p30-bump-behind";
+    for side in ["a", "b"] {
+        let chain = format!("candidate/chains/pairs.muxed-payment.{side}");
+        copy_dir(&r.join(&chain), &d.join(&chain));
+    }
     copy_dir(
-        &r.join("corpus/entries/cap01.bump-sequence").join(id),
-        &d.join("candidate/entries/cap01.bump-sequence").join(id),
+        &r.join("candidate/recipes/explore.pairs/muxed-payment"),
+        &d.join("candidate/recipes/explore.pairs/muxed-payment"),
     );
+    fs::copy(
+        r.join("candidate/recipes/explore.pairs/README.md"),
+        d.join("candidate/recipes/explore.pairs/README.md"),
+    )
+    .unwrap();
+    fs::write(
+        d.join("candidate/recipes/chains.toml"),
+        "schema = 1\n\n[[chain]]\nid = \"pairs.muxed-payment.a\"\nfamily = \"explore.pairs\"\nrecipe = \"explore.pairs/muxed-payment/a.json\"\n\n[[chain]]\nid = \"pairs.muxed-payment.b\"\nfamily = \"explore.pairs\"\nrecipe = \"explore.pairs/muxed-payment/b.json\"\n",
+    )
+    .unwrap();
+    for id in PAIR_ENTRIES {
+        let e = format!("candidate/entries/explore.pairs/{id}");
+        copy_dir(&r.join(&e), &d.join(&e));
+    }
+    fs::create_dir_all(d.join("registry/generated")).unwrap();
+    fs::write(
+        d.join("registry/generated/gates.json"),
+        r#"{
+  "gates": [
+    {
+      "sides": [
+        {
+          "witnesses": [
+            "recipe:candidate/recipes/explore.pairs/muxed-payment/a.json@p30",
+            "recipe:candidate/recipes/explore.pairs/muxed-payment/b.json@p30"
+          ]
+        }
+      ]
+    }
+  ]
+}
+"#,
+    )
+    .unwrap();
     let out = shapekit(d, &["manifest", "build", "--corpus", "candidate"]);
     assert!(out.status.success(), "{}", text(&out));
-    let paths: Vec<String> = FIXTURE_SDKS.iter().map(|s| fixture(s)).collect();
-    let mut args = vec!["corpus", "promote", id, "--dry-run"];
-    for p in &paths {
-        args.push("--matrix");
-        args.push(p);
+    dir
+}
+
+/// A matrix in which the current version of every sdk passes each of `ids`.
+fn passing_matrix(d: &Path, ids: &[&str]) -> String {
+    let versions: toml::Table =
+        toml::from_str(&fs::read_to_string(repo().join("conformance/versions.toml")).unwrap())
+            .unwrap();
+    let mut cells = serde_json::Map::new();
+    for (sdk, def) in versions["sdk"].as_table().unwrap() {
+        let current = def["current"].as_str().unwrap();
+        cells.insert(
+            format!("{sdk}@{current}"),
+            serde_json::json!({"result": "pass"}),
+        );
     }
-    let out = shapekit(d, &args);
-    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
-    assert!(
-        text(&out).contains("its chain cap01.bump-sequence.p30 is not under corpus/chains"),
-        "{}",
-        text(&out)
-    );
+    let entries: Vec<_> = ids
+        .iter()
+        .map(|id| serde_json::json!({"id": id, "cells": cells}))
+        .collect();
+    let path = d.join("passing-matrix.json");
+    fs::write(
+        &path,
+        serde_json::to_string(&serde_json::json!({
+            "corpus_version": "test",
+            "testees": [],
+            "entries": entries,
+            "known_failure_problems": [],
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    path.display().to_string()
 }
 
 #[test]
-fn a_dry_run_decides_several_entries_with_one_load() {
+fn an_entry_whose_chain_is_not_listed_stays_a_candidate() {
+    let dir = pair_layout();
+    let d = dir.path();
+    fs::write(d.join("candidate/recipes/chains.toml"), "schema = 1\n").unwrap();
+    let matrix = passing_matrix(d, &PAIR_ENTRIES);
+    let out = shapekit(
+        d,
+        &["corpus", "promote", PAIR_ENTRIES[0], "--matrix", &matrix],
+    );
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        text(&out).contains(
+            "its chain pairs.muxed-payment.a is not under corpus/chains and candidate/recipes/chains.toml does not list it"
+        ),
+        "{}",
+        text(&out)
+    );
+    assert_eq!(entries(d, "corpus"), 0);
+}
+
+#[test]
+fn a_listed_chain_moves_with_its_first_promoted_entry() {
+    let dir = pair_layout();
+    let d = dir.path();
+    let matrix = passing_matrix(d, &PAIR_ENTRIES);
+    let out = shapekit(
+        d,
+        &[
+            "corpus",
+            "promote",
+            PAIR_ENTRIES[0],
+            PAIR_ENTRIES[1],
+            "--matrix",
+            &matrix,
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert!(
+        text(&out).contains("moved chain pairs.muxed-payment.a and recipe explore.pairs/muxed-payment/a.json into corpus"),
+        "{}",
+        text(&out)
+    );
+    // the layout's strkey entry stays in the lane beside the third pair entry
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (2, 2));
+    for (path, there) in [
+        (
+            "corpus/chains/pairs.muxed-payment.a/testnet/chain.json",
+            true,
+        ),
+        (
+            "corpus/chains/pairs.muxed-payment.a/mainnet/chain.json",
+            true,
+        ),
+        ("candidate/chains/pairs.muxed-payment.a", false),
+        (
+            "candidate/chains/pairs.muxed-payment.b/testnet/chain.json",
+            true,
+        ),
+        ("corpus/recipes/explore.pairs/muxed-payment/a.json", true),
+        (
+            "candidate/recipes/explore.pairs/muxed-payment/a.json",
+            false,
+        ),
+        ("candidate/recipes/explore.pairs/muxed-payment/b.json", true),
+        // the pair's comparison and the family's README are copied, and kept in the lane
+        // while side b is still there
+        ("corpus/recipes/explore.pairs/muxed-payment/pair.json", true),
+        (
+            "candidate/recipes/explore.pairs/muxed-payment/pair.json",
+            true,
+        ),
+        ("corpus/recipes/explore.pairs/README.md", true),
+        ("candidate/recipes/explore.pairs/README.md", true),
+    ] {
+        assert_eq!(d.join(path).exists(), there, "{path}");
+    }
+    let corpus_index = fs::read_to_string(d.join("corpus/recipes/chains.toml")).unwrap();
+    assert!(
+        corpus_index.contains("id = \"pairs.muxed-payment.a\"\nfamily = \"explore.pairs\"\nrecipe = \"explore.pairs/muxed-payment/a.json\""),
+        "{corpus_index}"
+    );
+    let candidate_index = fs::read_to_string(d.join("candidate/recipes/chains.toml")).unwrap();
+    assert!(
+        !candidate_index.contains("muxed-payment.a"),
+        "{candidate_index}"
+    );
+    assert!(
+        candidate_index.contains("muxed-payment.b"),
+        "{candidate_index}"
+    );
+    // the promoted entries and the one left in the lane name the recipe where it is now
+    for e in [
+        format!(
+            "corpus/entries/explore.pairs/{}/entry.json",
+            PAIR_ENTRIES[0]
+        ),
+        format!(
+            "candidate/entries/explore.pairs/{}/entry.json",
+            PAIR_ENTRIES[2]
+        ),
+    ] {
+        let entry: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(d.join(&e)).unwrap()).unwrap();
+        assert_eq!(
+            entry["source"]["recipe"], "corpus/recipes/explore.pairs/muxed-payment/a.json",
+            "{e}"
+        );
+        assert_eq!(
+            entry["source"]["recipe_ir"], "corpus/recipes/explore.pairs/muxed-payment/a.json",
+            "{e}"
+        );
+        let notes = entry["notes"].as_str().unwrap();
+        assert!(
+            notes.contains("corpus/recipes/explore.pairs/README.md")
+                && notes
+                    .contains("recorded from corpus/recipes/explore.pairs/muxed-payment/a.json"),
+            "{e}: {notes}"
+        );
+    }
+    let gates = fs::read_to_string(d.join("registry/generated/gates.json")).unwrap();
+    assert!(
+        gates.contains("\"recipe:candidate/recipes/explore.pairs/muxed-payment/b.json@p30\",\n            \"recipe:corpus/recipes/explore.pairs/muxed-payment/a.json@p30\""),
+        "{gates}"
+    );
+    for lane in ["corpus", "candidate"] {
+        let file = format!("{lane}/manifest.json");
+        let out = shapekit(d, &["manifest", "validate", "--file", &file]);
+        assert!(out.status.success(), "{lane}: {}", text(&out));
+    }
+
+    // the last entry of side a needs no move; side b's entries are not in this layout
+    let out = shapekit(
+        d,
+        &["corpus", "promote", PAIR_ENTRIES[2], "--matrix", &matrix],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert!(!text(&out).contains("moved chain"), "{}", text(&out));
+    assert_eq!((entries(d, "candidate"), entries(d, "corpus")), (1, 3));
+}
+
+#[test]
+fn a_dry_run_decides_several_entries_and_an_id_given_twice_is_an_error() {
     let dir = layout();
     let d = dir.path();
     let matrices: Vec<String> = FIXTURE_SDKS.iter().map(|s| fixture(s)).collect();
@@ -348,38 +643,10 @@ fn a_dry_run_decides_several_entries_with_one_load() {
         args.push("--matrix");
         args.push(p);
     }
-    let moving = shapekit(d, &args);
-    assert_eq!(moving.status.code(), Some(2), "{}", text(&moving));
-    assert!(
-        text(&moving).contains("several ids are for --dry-run"),
-        "{}",
-        text(&moving)
-    );
-
     args.push("--dry-run");
     let out = shapekit(d, &args);
-    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
-    assert_eq!(
-        text(&out)
-            .matches(&format!("{ENTRY} stays in the candidate lane"))
-            .count(),
-        2,
-        "{}",
-        text(&out)
-    );
-
-    triage_the_other_failures(d);
-    let out = shapekit(d, &args);
-    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
-    assert_eq!(
-        text(&out)
-            .matches(&format!("{ENTRY} can be promoted"))
-            .count(),
-        2,
-        "{}",
-        text(&out)
-    );
-    assert_eq!(entries(d, "corpus"), 0);
+    assert_eq!(out.status.code(), Some(2), "{}", text(&out));
+    assert!(text(&out).contains("is given twice"), "{}", text(&out));
 
     let mut unknown = args.clone();
     unknown[3] = "no.such.entry";
@@ -390,4 +657,16 @@ fn a_dry_run_decides_several_entries_with_one_load() {
         "{}",
         text(&out)
     );
+
+    args.remove(3);
+    let out = shapekit(d, &args);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert!(
+        text(&out).contains(&format!(
+            "{ENTRY} can be promoted\n1 of 1 can be promoted, 0 refused"
+        )),
+        "{}",
+        text(&out)
+    );
+    assert_eq!(entries(d, "corpus"), 0);
 }

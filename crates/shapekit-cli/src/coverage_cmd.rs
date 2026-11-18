@@ -29,8 +29,10 @@ pub enum CorpusCommand {
         #[arg(long, default_value = "dist")]
         out: PathBuf,
     },
-    /// Move an entry from the candidate lane into the corpus: every SDK's current version
-    /// passes it, or each failure is a triaged finding with a drafted issue.
+    /// Move entries from the candidate lane into the corpus, with the chains they are cut
+    /// from: the current versions of rust, go and js pass each, or a main finding with a
+    /// drafted issue takes the failure, and every other failure is attributed to a finding,
+    /// a candidate finding or a record of candidate/finding-candidates.toml.
     Promote(crate::promote_cmd::PromoteArgs),
 }
 

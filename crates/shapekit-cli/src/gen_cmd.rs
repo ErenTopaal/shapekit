@@ -6,7 +6,7 @@ use anyhow::{Context, Result, bail};
 use shapekit_core_driver::config::CoreImage;
 use shapekit_core_driver::keys::contract_strkey;
 use shapekit_core_driver::smoke::{self, MAINNET_PASSPHRASE, TESTNET_PASSPHRASE};
-use shapekit_gen::recipe::{self, GenOptions, GenReport, Network};
+use shapekit_gen::recipe::{self, GenOptions, GenReport, Network, Recipe};
 use shapekit_registry::Registry;
 
 use crate::{manifest_cmd, pins};
@@ -51,8 +51,8 @@ pub fn smoke(network: &str, out: &Path, pins: &Path) -> Result<bool> {
 
 /// Every recipe family, one per line, so scripts read the list from the binary instead of
 /// the source.
-pub fn families() -> Result<bool> {
-    let set: std::collections::BTreeSet<String> = recipe::all()
+pub fn families(corpus: &Path) -> Result<bool> {
+    let set: std::collections::BTreeSet<String> = registered(corpus)?
         .iter()
         .map(|r| r.family().to_owned())
         .collect();
@@ -69,8 +69,28 @@ pub struct GenPaths<'a> {
     pub pins: &'a Path,
 }
 
-fn selected(families: &[String]) -> Result<Vec<Box<dyn recipe::Recipe>>> {
-    let all = recipe::all();
+/// The recipes of this build and the chains `<corpus>/recipes/chains.toml` lists, recorded
+/// from their recipe IR files.
+fn registered(corpus: &Path) -> Result<Vec<Box<dyn recipe::Recipe>>> {
+    let mut all = recipe::all();
+    // upload paths in a recipe are relative to the repository root, the working directory
+    let root = std::env::current_dir().context("reading the working directory")?;
+    let index = recipe::chains_index::ChainsIndex::load(corpus)?;
+    for r in index.recipes(corpus, &root)? {
+        let id = r.chain_id();
+        if all.iter().any(|x| x.chain_id() == id) {
+            bail!(
+                "{} lists chain {id}, which a recipe of this build records",
+                recipe::chains_index::ChainsIndex::path(corpus).display()
+            );
+        }
+        all.push(Box::new(r));
+    }
+    Ok(all)
+}
+
+fn selected(corpus: &Path, families: &[String]) -> Result<Vec<Box<dyn recipe::Recipe>>> {
+    let all = registered(corpus)?;
     for f in families {
         if !all.iter().any(|r| r.family() == f) {
             bail!("no recipe records family {f}");
@@ -143,7 +163,7 @@ pub fn chains(families: &[String], network: &str, jobs: u16, paths: &GenPaths<'_
     };
     let registry = Registry::load(paths.registry)
         .with_context(|| format!("loading the registry in {}", paths.registry.display()))?;
-    let recipes = selected(families)?;
+    let recipes = selected(paths.corpus, families)?;
     let refs: Vec<&dyn recipe::Recipe> = recipes.iter().map(|r| r.as_ref()).collect();
     let opts = options(paths, &registry, networks, jobs)?;
     let report = recipe::generate(&refs, &opts)?;
@@ -160,7 +180,7 @@ pub fn chains(families: &[String], network: &str, jobs: u16, paths: &GenPaths<'_
 pub fn verify_repro(families: &[String], jobs: u16, paths: &GenPaths<'_>) -> Result<bool> {
     let registry = Registry::load(paths.registry)
         .with_context(|| format!("loading the registry in {}", paths.registry.display()))?;
-    let recipes = selected(families)?;
+    let recipes = selected(paths.corpus, families)?;
     let refs: Vec<&dyn recipe::Recipe> = recipes.iter().map(|r| r.as_ref()).collect();
     let opts = options(paths, &registry, Network::BOTH.to_vec(), jobs)?;
     let repro = recipe::verify_repro(&refs, &opts)?;

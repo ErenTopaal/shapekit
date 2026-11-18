@@ -266,8 +266,12 @@ enum SynthCommand {
 #[derive(Subcommand)]
 enum GenCommand {
     /// Print the family of every recipe `gen chains` can record, one per line, sorted and
-    /// without repeats.
-    Families,
+    /// without repeats: the recipes of this build and the chains of the corpus's
+    /// recipes/chains.toml.
+    Families {
+        #[arg(long, default_value = "corpus")]
+        corpus: PathBuf,
+    },
     /// Record the smoke chain on a standalone stellar-core from the core image in pins.toml:
     /// an upgrade to the protocol in the `PROTOCOL` constant of shapekit-core-driver's smoke
     /// module, testnet's Soroban settings, four funded accounts, a payment, a trustline and one
@@ -598,8 +602,8 @@ fn main() -> ExitCode {
             } => oracle_cmd::interpret(&file, &passphrase, framed),
         },
         Command::Gen {
-            command: GenCommand::Families,
-        } => gen_cmd::families(),
+            command: GenCommand::Families { corpus },
+        } => gen_cmd::families(&corpus),
         Command::Gen {
             command: GenCommand::Smoke { network, out, pins },
         } => gen_cmd::smoke(&network, &out, &pins),
