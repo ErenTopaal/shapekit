@@ -14,8 +14,18 @@ pub fn read(path: &Path) -> Result<(Vec<u8>, String)> {
     Ok((bytes, sha))
 }
 
+/// A harness report, of a whole run: one shard of a run (`harness run --shard`) holds only some
+/// chains, so it is refused until `shapekit harness merge` has put every shard together.
 pub fn harness_report(bytes: &[u8], path: &Path) -> Result<Report> {
-    serde_json::from_slice(bytes).with_context(|| format!("parsing {}", path.display()))
+    let r: Report =
+        serde_json::from_slice(bytes).with_context(|| format!("parsing {}", path.display()))?;
+    if let Some(s) = &r.shard {
+        anyhow::bail!(
+            "{} is shard {s} of a run; put every shard together with `shapekit harness merge` first",
+            path.display()
+        );
+    }
+    Ok(r)
 }
 
 /// The parts of `divergence-matrix.json` findings need. The matrix's check records hold
@@ -147,4 +157,23 @@ pub struct LintFinding {
 
 pub fn lint(bytes: &[u8], path: &Path) -> Result<LintResult> {
     serde_json::from_slice(bytes).with_context(|| format!("parsing {}", path.display()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_shard_report_is_not_an_input() {
+        let path = Path::new(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../findings/inputs/harness-stellar-etl-2b24ec89.json"
+        ));
+        let bytes = std::fs::read(path).unwrap();
+        assert!(harness_report(&bytes, path).is_ok());
+        let mut v: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        v["shard"] = "1/3".into();
+        let err = harness_report(&serde_json::to_vec(&v).unwrap(), path).unwrap_err();
+        assert!(format!("{err}").contains("shard 1/3"), "{err}");
+    }
 }

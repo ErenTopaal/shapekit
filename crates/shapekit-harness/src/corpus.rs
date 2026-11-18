@@ -129,3 +129,97 @@ pub fn select(corpus: &Path, filter: &Filter<'_>) -> Result<Selection> {
     }
     Ok(sel)
 }
+
+/// A `--shard` of a selection: `index` of `count`, 1-based. The selection's chains, sorted by
+/// name, are dealt out in turn, so a chain's networks stay in one shard, every chain is in
+/// exactly one shard, and the shards of one corpus hold chain counts that differ by one at most.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Shard {
+    pub index: u32,
+    pub count: u32,
+}
+
+impl std::str::FromStr for Shard {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Shard, String> {
+        let (i, n) = s
+            .split_once('/')
+            .ok_or_else(|| format!("{s:?} is not <index>/<count>, for example 2/4"))?;
+        let index: u32 = i
+            .parse()
+            .map_err(|_| format!("{i:?} is not a shard index"))?;
+        let count: u32 = n
+            .parse()
+            .map_err(|_| format!("{n:?} is not a shard count"))?;
+        if count == 0 || index == 0 || index > count {
+            return Err(format!(
+                "shard {index}/{count}: the index runs from 1 to the count"
+            ));
+        }
+        Ok(Shard { index, count })
+    }
+}
+
+/// Keeps the jobs of `shard`. The counts of entries without a chain or an oracle file stay
+/// those of the whole selection; `report::merge` takes them from the whole selection too.
+pub fn shard(sel: &mut Selection, shard: Shard) {
+    let mut chains: Vec<&str> = sel.jobs.iter().map(|j| j.chain.as_str()).collect();
+    chains.dedup();
+    let keep: std::collections::BTreeSet<String> = chains
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| *i as u32 % shard.count == shard.index - 1)
+        .map(|(_, c)| (*c).to_owned())
+        .collect();
+    sel.jobs.retain(|j| keep.contains(&j.chain));
+}
+
+#[cfg(test)]
+mod shard_tests {
+    use super::*;
+
+    fn job(chain: &str, network: &str) -> ChainJob {
+        ChainJob {
+            chain: chain.into(),
+            network: network.into(),
+            dir: PathBuf::new(),
+            entries: Vec::new(),
+            external: false,
+        }
+    }
+
+    #[test]
+    fn shards_partition_the_chains_and_keep_networks_together() {
+        let all = Selection {
+            jobs: ["a", "b", "c", "d", "e"]
+                .iter()
+                .flat_map(|c| [job(c, "mainnet"), job(c, "testnet")])
+                .collect(),
+            ..Selection::default()
+        };
+        let mut seen = Vec::new();
+        for index in 1..=3 {
+            let mut s = all.clone();
+            shard(&mut s, Shard { index, count: 3 });
+            let chains: std::collections::BTreeSet<_> =
+                s.jobs.iter().map(|j| j.chain.clone()).collect();
+            assert_eq!(
+                s.jobs.len(),
+                chains.len() * 2,
+                "both networks of a chain in one shard"
+            );
+            seen.extend(chains);
+        }
+        seen.sort();
+        assert_eq!(seen, ["a", "b", "c", "d", "e"]);
+    }
+
+    #[test]
+    fn a_shard_is_index_over_count() {
+        assert_eq!("2/4".parse::<Shard>(), Ok(Shard { index: 2, count: 4 }));
+        for bad in ["0/4", "5/4", "1/0", "4", "a/b"] {
+            assert!(bad.parse::<Shard>().is_err(), "{bad}");
+        }
+    }
+}

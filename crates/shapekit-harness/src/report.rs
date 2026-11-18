@@ -107,6 +107,10 @@ pub struct Report {
     /// The first round's chains and entries.
     pub chains: Vec<ChainResult>,
     pub entries: Vec<EntryRow>,
+    /// The `--shard` the run replayed, `<index>/<count>`; absent for a whole run and for a
+    /// report `merge` put together from every shard.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shard: Option<String>,
 }
 
 impl Report {
@@ -234,6 +238,142 @@ pub fn run(sel: &Selection, opts: &RunOptions, out: &Path, mem: &MemoryOptions) 
         },
         chains: first.chains,
         entries: first.entries,
+        shard: None,
+    })
+}
+
+/// One report from the reports of every shard of one run (`harness run --shard i/n`, each
+/// `i` once): the chains and entries of all of them, verdict totals added up, and the memory
+/// checks holding only where they hold in every shard. A round's seconds are the shards'
+/// added up, its peaks the largest shard's. The shards must come from one corpus, one
+/// adapter command, one target build and one round count.
+pub fn merge(mut shards: Vec<Report>) -> Result<Report> {
+    let first = shards.first().context("no report to merge")?.clone();
+    let mut seen = std::collections::BTreeSet::new();
+    let mut count = None;
+    for r in &shards {
+        let sh = r
+            .shard
+            .as_deref()
+            .with_context(|| format!("a report of {} chains is not a shard", r.chains.len()))?;
+        let (i, n) = sh
+            .split_once('/')
+            .and_then(|(i, n)| Some((i.parse::<u32>().ok()?, n.parse::<u32>().ok()?)))
+            .with_context(|| format!("shard {sh:?} is not <index>/<count>"))?;
+        if *count.get_or_insert(n) != n {
+            anyhow::bail!("shard {sh} is not one of {} shards", count.unwrap_or(n));
+        }
+        if !seen.insert(i) {
+            anyhow::bail!("shard {sh} is given twice");
+        }
+        let same = r.schema == first.schema
+            && r.shapekit_version == first.shapekit_version
+            && r.adapter_command == first.adapter_command
+            && r.describe == first.describe
+            && r.manifest_sha256 == first.manifest_sha256
+            && r.manifest_replay_digest == first.manifest_replay_digest
+            && r.memory_limit_bytes == first.memory_limit_bytes
+            && r.rounds.len() == first.rounds.len()
+            && r.totals.without_chain == first.totals.without_chain
+            && r.totals.without_oracle == first.totals.without_oracle;
+        if !same {
+            anyhow::bail!(
+                "shard {sh} is not of the same run as shard {}: the shapekit version, adapter, target, corpus, memory limit or round count differ",
+                first.shard.as_deref().unwrap_or("?")
+            );
+        }
+    }
+    let n = count.unwrap_or(0);
+    let missing: Vec<u32> = (1..=n).filter(|i| !seen.contains(i)).collect();
+    if !missing.is_empty() {
+        anyhow::bail!("shards {missing:?} of {n} are missing");
+    }
+    shards.sort_by_key(|r| r.shard.clone());
+
+    let mut rounds = first.rounds.clone();
+    for (k, round) in rounds.iter_mut().enumerate() {
+        let all: Vec<&Round> = shards.iter().map(|r| &r.rounds[k]).collect();
+        round.peak_rss_bytes = all.iter().map(|x| x.peak_rss_bytes).max().unwrap_or(0);
+        round.rss_after_bytes = all.iter().map(|x| x.rss_after_bytes).max().unwrap_or(0);
+        round.seconds = all.iter().map(|x| x.seconds).sum();
+        round.same_verdicts_as_first = all.iter().all(|x| x.same_verdicts_as_first);
+        round.chain_errors = all.iter().flat_map(|x| x.chain_errors.clone()).collect();
+        round.target_peak_memory_bytes = all
+            .iter()
+            .flat_map(|x| x.target_peak_memory_bytes.clone())
+            .collect();
+    }
+    let detail = |f: &dyn Fn(&Report) -> String| {
+        shards
+            .iter()
+            .map(|r| format!("shard {}: {}", r.shard.as_deref().unwrap_or("?"), f(r)))
+            .collect::<Vec<_>>()
+            .join("; ")
+    };
+    let memory = MemoryCheck {
+        slack_bytes: shards
+            .iter()
+            .map(|r| r.memory.slack_bytes)
+            .max()
+            .unwrap_or(0),
+        budget_bytes: first.memory.budget_bytes,
+        flat: shards.iter().all(|r| r.memory.flat),
+        within_budget: shards.iter().all(|r| r.memory.within_budget),
+        detail: detail(&|r| r.memory.detail.clone()),
+    };
+    let target_memory = if shards.iter().all(|r| r.target_memory.is_some()) {
+        let t: Vec<&TargetMemoryCheck> = shards
+            .iter()
+            .filter_map(|r| r.target_memory.as_ref())
+            .collect();
+        Some(TargetMemoryCheck {
+            limit_bytes: first.memory_limit_bytes,
+            peak_bytes: t.iter().filter_map(|x| x.peak_bytes).max(),
+            within_limit: t.iter().all(|x| x.within_limit),
+            flat: t.iter().all(|x| x.flat),
+            unreported: t.iter().flat_map(|x| x.unreported.clone()).collect(),
+            detail: detail(&|r| {
+                r.target_memory
+                    .as_ref()
+                    .map_or(String::new(), |t| t.detail.clone())
+            }),
+        })
+    } else {
+        None
+    };
+    let mut chains: Vec<ChainResult> = shards.iter().flat_map(|r| r.chains.clone()).collect();
+    chains.sort_by(|a, b| (&a.chain, &a.network).cmp(&(&b.chain, &b.network)));
+    for w in chains.windows(2) {
+        if (&w[0].chain, &w[0].network) == (&w[1].chain, &w[1].network) {
+            anyhow::bail!("chain {} ({}) is in two shards", w[0].chain, w[0].network);
+        }
+    }
+    // the entries in the order a whole run writes them: by chain, network, ledger, then id
+    let mut entries: Vec<EntryRow> = shards.iter().flat_map(|r| r.entries.clone()).collect();
+    entries.sort_by(|a, b| {
+        (&a.chain, &a.network, a.ledger, &a.entry).cmp(&(&b.chain, &b.network, b.ledger, &b.entry))
+    });
+    let mut totals = first.totals.clone();
+    totals.entries = entries.len();
+    totals.by_verdict.clear();
+    totals.by_reason.clear();
+    for r in &shards {
+        for (k, v) in &r.totals.by_verdict {
+            *totals.by_verdict.entry(k.clone()).or_default() += v;
+        }
+        for (k, v) in &r.totals.by_reason {
+            *totals.by_reason.entry(k.clone()).or_default() += v;
+        }
+    }
+    Ok(Report {
+        rounds,
+        memory,
+        target_memory,
+        totals,
+        chains,
+        entries,
+        shard: None,
+        ..first
     })
 }
 

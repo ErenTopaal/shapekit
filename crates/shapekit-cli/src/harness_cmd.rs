@@ -25,6 +25,9 @@ pub enum HarnessCommand {
     /// Run a reproductions table: pairs of target builds over named chains, with the verdicts
     /// named entries must get.
     Reproduce(ReproduceArgs),
+    /// Put the reports of every shard of one run (`harness run --shard <i>/<n>`, each shard
+    /// once) together into one harness-report.json and HARNESS.md, as one run would write them.
+    Merge(MergeArgs),
     /// Write an expectations file from a reviewed harness-report.json (--write), or compare a
     /// report with one (--check). `harness run --expect` does the comparison inline.
     Expect(ExpectArgs),
@@ -128,8 +131,26 @@ pub struct RunArgs {
     /// differs, an entry is missing or unlisted, or the target build is another one.
     #[arg(long)]
     pub(crate) expect: Option<PathBuf>,
+    /// Replay only this shard of the selection, `<index>/<count>` (1-based): the selected
+    /// chains, sorted by name, dealt out in turn, a chain's networks together. For a run split
+    /// across jobs; `harness merge` puts the shard reports together.
+    #[arg(long, value_name = "INDEX/COUNT")]
+    pub(crate) shard: Option<shapekit_harness::corpus::Shard>,
     #[command(flatten)]
     pub(crate) common: Common,
+}
+
+#[derive(Args)]
+pub struct MergeArgs {
+    /// The output directory of each shard's run, or its harness-report.json.
+    #[arg(required = true)]
+    pub(crate) reports: Vec<PathBuf>,
+    #[arg(long, default_value = "harness-out")]
+    pub(crate) out: PathBuf,
+    /// Expected verdicts, checked against the merged report as `harness run --expect` checks a
+    /// whole run.
+    #[arg(long)]
+    pub(crate) expect: Option<PathBuf>,
 }
 
 #[derive(Subcommand)]
@@ -744,19 +765,31 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 .as_deref()
                 .map(|p| expect::load(p).map(|w| (w, p.to_path_buf())))
                 .transpose()?;
+            if a.shard.is_some() && want.is_some() {
+                bail!(
+                    "--expect checks a whole run; check the merged report with `harness merge --expect`"
+                );
+            }
+            if a.shard.is_some() && !a.chain_dir.is_empty() {
+                bail!("--shard splits the corpus selection; it does not apply to --chain-dir");
+            }
             let networks: Vec<String> = match a.network.as_str() {
                 "both" => vec!["testnet".into(), "mainnet".into()],
                 n => vec![n.into()],
             };
             let sel = if a.chain_dir.is_empty() {
-                select(
+                let mut sel = select(
                     &a.common.corpus,
                     &Filter {
                         families: &a.family,
                         chains: &a.chain,
                         networks: &networks,
                     },
-                )?
+                )?;
+                if let Some(sh) = a.shard {
+                    shapekit_harness::corpus::shard(&mut sel, sh);
+                }
+                sel
             } else {
                 let mut sel = shapekit_harness::corpus::Selection {
                     manifest_sha256: "none: chains named with --chain-dir".into(),
@@ -791,7 +824,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                 bail!("the selection has no chain with an evaluable entry");
             }
             let opts = options(&a.common, a.adapter.command()?, a.out.join("logs"))?;
-            let rep = report::run(
+            let mut rep = report::run(
                 &sel,
                 &opts,
                 &a.out,
@@ -802,6 +835,7 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
                     budget_bytes: a.memory_budget,
                 },
             )?;
+            rep.shard = a.shard.map(|s| format!("{}/{}", s.index, s.count));
             let (json, md) = report::write(&rep, &a.out)?;
             for (k, v) in &rep.totals.by_verdict {
                 println!("{k}: {v}");
@@ -826,6 +860,38 @@ pub fn run(cmd: HarnessCommand) -> Result<bool> {
             Ok(rep.ok() && met)
         }
         HarnessCommand::Adapter(a) => serve_mapped(a),
+        HarnessCommand::Merge(a) => {
+            let want = a
+                .expect
+                .as_deref()
+                .map(|p| expect::load(p).map(|w| (w, p.to_path_buf())))
+                .transpose()?;
+            let mut shards = Vec::new();
+            for p in &a.reports {
+                let path = if p.is_dir() {
+                    p.join(report::REPORT_FILE)
+                } else {
+                    p.clone()
+                };
+                let bytes =
+                    std::fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
+                shards.push(
+                    serde_json::from_slice::<report::Report>(&bytes)
+                        .with_context(|| format!("parsing {}", path.display()))?,
+                );
+            }
+            let rep = report::merge(shards)?;
+            let (json, md) = report::write(&rep, &a.out)?;
+            for (k, v) in &rep.totals.by_verdict {
+                println!("{k}: {v}");
+            }
+            println!("wrote {} and {}", json.display(), md.display());
+            let met = match &want {
+                Some((w, path)) => report_expectations(&rep, w, path)?,
+                None => true,
+            };
+            Ok(rep.ok() && met)
+        }
         HarnessCommand::Reproduce(a) => {
             linux_docker_host(&a.common)?;
             let mut table = reproduce::load(&a.table)?;

@@ -111,6 +111,7 @@ pub fn run(cmd: CheckCommand) -> Result<bool> {
             memory_slack: 0.1,
             memory_budget: None,
             expect: a.expect,
+            shard: None,
             common: a.common,
         })),
     }
