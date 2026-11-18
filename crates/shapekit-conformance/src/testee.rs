@@ -323,6 +323,7 @@ impl Testee {
             r.child
                 .wait()
                 .with_context(|| format!("{}: reaping the testee", self.target.key()))?;
+            shapekit_process::cleanup::group_gone(r.child.id());
         }
         Ok(())
     }
@@ -339,10 +340,14 @@ impl Drop for Testee {
             let key = self.target.key();
             // drop cannot return an error, so a failure is reported where the run's output is
             if let Err(e) = kill_group(&r.child) {
-                eprintln!("{key}: stopping the testee: {e:#}");
+                eprintln!(
+                    "{key}: stopping the testee: {}",
+                    shapekit_process::error_text::chain(e.as_ref())
+                );
             }
-            if let Err(e) = r.child.wait() {
-                eprintln!("{key}: reaping the testee: {e}");
+            match r.child.wait() {
+                Ok(_) => shapekit_process::cleanup::group_gone(r.child.id()),
+                Err(e) => eprintln!("{key}: reaping the testee: {e}"),
             }
         }
     }
@@ -488,6 +493,8 @@ fn spawn(root: &Path, target: &Target) -> Result<Running> {
             program.display()
         )
     })?;
+    // a signal to shapekit does not reach a group of its own, so the signal thread kills it
+    shapekit_process::cleanup::group_started(child.id());
     let stdin = child.stdin.take().context("child stdin")?;
     let stdout = child.stdout.take().context("child stdout")?;
     let mut stderr_pipe = child.stderr.take().context("child stderr")?;
