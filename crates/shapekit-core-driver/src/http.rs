@@ -79,6 +79,15 @@ struct Idle {
     done: bool,
 }
 
+/// A request in flight, as far as the idle watcher is concerned; see [`CoreHttp::busy`].
+pub struct Busy<'a>(&'a CoreHttp);
+
+impl Drop for Busy<'_> {
+    fn drop(&mut self) {
+        self.0.leave();
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct CoreHttp {
     container: String,
@@ -135,6 +144,13 @@ impl CoreHttp {
                 .output();
             g.paused = false;
         }
+    }
+
+    /// Keeps the container running (unpaused, and not paused by the watcher) until the
+    /// guard is dropped, for waits that watch core's files rather than ask core over http.
+    pub fn busy(&self) -> Result<Busy<'_>, HttpError> {
+        self.enter()?;
+        Ok(Busy(self))
     }
 
     fn enter(&self) -> Result<(), HttpError> {
@@ -297,6 +313,21 @@ sys.stdout.buffer.write(str(r.status).encode() + b'\\n' + r.read())
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // the watcher pauses only a node with no request in flight, so a held guard keeps the
+    // node running until it is dropped
+    #[test]
+    fn a_busy_guard_counts_as_a_request_until_dropped() {
+        let http = CoreHttp::new("shapekit-test-no-such-container");
+        let busy = |h: &CoreHttp| h.idle.lock().unwrap().busy;
+        {
+            let _a = http.busy().unwrap();
+            let _b = http.busy().unwrap();
+            assert_eq!(busy(&http), 2);
+        }
+        assert_eq!(busy(&http), 0);
+        http.quiesce();
+    }
 
     #[test]
     fn encodes_base64_specials() {

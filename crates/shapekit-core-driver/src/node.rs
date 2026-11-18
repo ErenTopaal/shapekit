@@ -129,6 +129,12 @@ fn docker_ok(args: &[&str]) -> Result<String, NodeError> {
     Ok(String::from_utf8_lossy(&out.stdout).trim().to_owned())
 }
 
+/// Whether `e` is docker reporting that the container does not exist, which is what a
+/// release wants: `docker run` can fail before it creates the container it was named for.
+fn no_such_container(e: &NodeError) -> bool {
+    matches!(e, NodeError::Docker { stderr, .. } if stderr.contains("No such container"))
+}
+
 fn tail(s: &str, lines: usize) -> String {
     let all: Vec<&str> = s.lines().collect();
     let start = all.len().saturating_sub(lines);
@@ -166,10 +172,14 @@ impl DockerResources {
             // to shut down; on a running node this fails, which is fine
             let _ = docker(&["unpause", &c]);
             // stop first so core shuts down cleanly and flushes its stream
-            if let Err(e) = docker_ok(&["stop", "-t", "20", &c]) {
+            if let Err(e) = docker_ok(&["stop", "-t", "20", &c])
+                && !no_such_container(&e)
+            {
                 failures.push(e.to_string());
             }
-            if let Err(e) = docker_ok(&["rm", "-f", "-v", &c]) {
+            if let Err(e) = docker_ok(&["rm", "-f", "-v", &c])
+                && !no_such_container(&e)
+            {
                 failures.push(e.to_string());
             }
         }
@@ -450,8 +460,11 @@ impl CoreNode {
         let mut args = base(&["-d", "--name", &container]);
         args.push("run".into());
         let refs: Vec<&str> = args.iter().map(String::as_str).collect();
-        docker_ok(&refs)?;
+        // recorded before the run: docker can create the container and then fail to start it,
+        // and a container that exists must be removed; one that was never created is no
+        // error to release (see `no_such_container`)
         res.container = Some(container.clone());
+        docker_ok(&refs)?;
 
         let node = Self {
             cfg,
@@ -801,6 +814,9 @@ impl CoreNode {
 
     /// Waits until the archive has published `checkpoint`.
     pub fn wait_published(&self, checkpoint: u32, timeout: Duration) -> Result<(), NodeError> {
+        // the wait polls files, not core, so without this the idle watcher would pause the
+        // container mid publish and the wait would time out on a frozen node
+        let _busy = self.http.busy()?;
         let start = Instant::now();
         loop {
             let got = self.published_checkpoint()?;
@@ -1029,6 +1045,23 @@ mod tests {
         assert!(!image_missing(
             "permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock"
         ));
+    }
+
+    #[test]
+    fn a_container_that_was_never_created_needs_no_release() {
+        let docker_err = |stderr: &str| NodeError::Docker {
+            args: "rm -f -v x".into(),
+            code: Some(1),
+            stderr: stderr.into(),
+            stdout: String::new(),
+        };
+        // docker 29 wording
+        assert!(no_such_container(&docker_err(
+            "Error response from daemon: No such container: shapekit-node-1"
+        )));
+        assert!(!no_such_container(&docker_err(
+            "Cannot connect to the Docker daemon at unix:///var/run/docker.sock."
+        )));
     }
 
     #[test]

@@ -8,6 +8,7 @@
 //! offset so it can be polled while core is still appending, and only
 //! consumes a frame once all of its bytes are on disk.
 
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
@@ -88,6 +89,9 @@ pub fn decode_limits(len: usize) -> Limits {
 pub struct MetaStream {
     path: PathBuf,
     offset: u64,
+    /// Frames read from the file but not handed out yet: those a timed out
+    /// [`MetaStream::wait_for`] read, so the next read starts with them and sees no gap.
+    held: VecDeque<FramedLcm>,
 }
 
 impl MetaStream {
@@ -95,6 +99,7 @@ impl MetaStream {
         Self {
             path: path.into(),
             offset: 0,
+            held: VecDeque::new(),
         }
     }
 
@@ -102,7 +107,8 @@ impl MetaStream {
         &self.path
     }
 
-    /// Bytes consumed so far, always a frame boundary.
+    /// Bytes read from the file so far, always a frame boundary. Frames a timed out
+    /// [`MetaStream::wait_for`] read are counted, though they are still to be handed out.
     pub fn offset(&self) -> u64 {
         self.offset
     }
@@ -118,9 +124,17 @@ impl MetaStream {
         }
     }
 
-    /// Reads the next whole frame, or `None` if it is not fully written yet.
-    /// A missing file counts as empty, since core creates it lazily.
+    /// The next frame: one held back by a timed out wait, else the next whole frame in the
+    /// file, or `None` if it is not fully written yet. A missing file counts as empty, since
+    /// core creates it lazily.
     pub fn try_next(&mut self) -> Result<Option<FramedLcm>, MetaError> {
+        match self.held.pop_front() {
+            Some(f) => Ok(Some(f)),
+            None => self.read_frame(),
+        }
+    }
+
+    fn read_frame(&mut self) -> Result<Option<FramedLcm>, MetaError> {
         let mut f = match File::open(&self.path) {
             Ok(f) => f,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
@@ -183,27 +197,27 @@ impl MetaStream {
         Ok(out)
     }
 
-    /// Reads frames until one for `seq` has arrived, returning all frames read.
+    /// Reads frames until one for `seq` has arrived, returning every frame up to it. On a
+    /// timeout the frames read are kept, so a later call or [`MetaStream::try_next`] hands
+    /// them out first and the caller never sees a gap.
     pub fn wait_for(&mut self, seq: u32, timeout: Duration) -> Result<Vec<FramedLcm>, MetaError> {
         let start = Instant::now();
-        let mut out: Vec<FramedLcm> = Vec::new();
         loop {
-            while let Some(f) = self.try_next()? {
-                let done = f.ledger_seq >= seq;
-                out.push(f);
-                if done {
-                    return Ok(out);
+            if let Some(i) = self.held.iter().position(|f| f.ledger_seq >= seq) {
+                return Ok(self.held.drain(..=i).collect());
+            }
+            match self.read_frame()? {
+                Some(f) => self.held.push_back(f),
+                None if start.elapsed() > timeout => {
+                    return Err(MetaError::Timeout {
+                        path: self.shown(),
+                        seq,
+                        waited: timeout,
+                        last: self.held.back().map(|f| f.ledger_seq),
+                    });
                 }
+                None => std::thread::sleep(Duration::from_millis(20)),
             }
-            if start.elapsed() > timeout {
-                return Err(MetaError::Timeout {
-                    path: self.shown(),
-                    seq,
-                    waited: timeout,
-                    last: out.last().map(|f| f.ledger_seq),
-                });
-            }
-            std::thread::sleep(Duration::from_millis(20));
         }
     }
 }
@@ -295,6 +309,30 @@ mod tests {
         assert_eq!(got.len(), 1);
         assert_eq!(got[0].ledger_seq, 3);
         assert_eq!(read_all(&path).unwrap().len(), 2);
+    }
+
+    #[test]
+    fn a_timed_out_wait_keeps_the_frames_it_read() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("meta.xdr");
+        let mut f = File::create(&path).unwrap();
+        f.write_all(&frame(&lcm(2))).unwrap();
+        f.write_all(&frame(&lcm(3))).unwrap();
+        f.flush().unwrap();
+        let mut s = MetaStream::new(&path);
+        assert!(matches!(
+            s.wait_for(4, Duration::from_millis(50)),
+            Err(MetaError::Timeout { last: Some(3), .. })
+        ));
+        f.write_all(&frame(&lcm(4))).unwrap();
+        f.write_all(&frame(&lcm(5))).unwrap();
+        f.flush().unwrap();
+        let seqs = |v: Vec<FramedLcm>| v.iter().map(|f| f.ledger_seq).collect::<Vec<_>>();
+        assert_eq!(
+            seqs(s.wait_for(4, Duration::from_secs(1)).unwrap()),
+            [2, 3, 4]
+        );
+        assert_eq!(seqs(s.drain().unwrap()), [5]);
     }
 
     #[test]
