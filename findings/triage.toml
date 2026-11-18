@@ -92,6 +92,7 @@ adapter = "adapters/bin/etl-adapter --commit {version}"
 [[finding]]
 id = "WB-W3"
 title = "feature request: a state change reason for clawbacks, which are stored as BURN like a payment to the issuer"
+short = "A clawback is stored as a burn."
 component = "wallet-backend"
 severity = "wrong-data"
 status = "filed"
@@ -123,6 +124,7 @@ events = ["burn"]
 [[finding]]
 id = "WB-W1"
 title = "transaction participants from meta are never collected (participantsForMeta reads the TransactionMeta V0 arm)"
+short = "Accounts that only the transaction meta shows are never recorded as participants."
 component = "wallet-backend"
 severity = "data-loss"
 status = "duplicate-of"
@@ -138,6 +140,7 @@ problems = ["dropped", "extra"]
 [[finding]]
 id = "WB-W2"
 title = "question: BALANCE rows for claimable balance and liquidity pool transfers do not record the balance or pool"
+short = "A transfer to or from a claimable balance or liquidity pool loses its counterparty."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -194,6 +197,7 @@ events = ["mint"]
 [[finding]]
 id = "WB-W4"
 title = "a text, hash or return memo of a payment to a G address is stored nowhere"
+short = "A text, hash or return memo on a payment to a G address is lost."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -210,6 +214,7 @@ detail_contains = "to_muxed_id"
 [[finding]]
 id = "WB-W5"
 title = "contract deployments that no auth entry declares (factory deploys, Stellar Asset Contracts) record no contract creation"
+short = "A contract deployed without a matching auth entry gets no contract creation row."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -225,6 +230,7 @@ problems = ["dropped"]
 [[finding]]
 id = "WB-W6"
 title = "an XLM transfer through the native asset contract that creates the destination account records no account creation"
+short = "An account created by an XLM transfer through the native asset contract gets no account creation row."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -240,6 +246,7 @@ problems = ["dropped"]
 [[finding]]
 id = "WB-W7"
 title = "a pool-share trustline removed by an authorization revocation records no trustline removal"
+short = "A pool-share trustline removed by an authorization revocation gets no removal row."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -255,6 +262,7 @@ problems = ["dropped"]
 [[finding]]
 id = "WB-W8"
 title = "a pre-auth signer core removes in txChangesBefore is never recorded as removed (failed transactions, fee bumps)"
+short = "A pre-auth signer that core removes is never recorded as removed."
 component = "wallet-backend"
 severity = "data-loss"
 status = "filed"
@@ -270,12 +278,13 @@ problems = ["dropped"]
 [[finding]]
 id = "WB-W9"
 title = "question: CreateAccount writes a SIGNER ADD row for the new account's master key (Horizon parity); intended for state changes?"
+short = "Creating an account writes a signer row for the master key, which is not a signer entry."
 component = "wallet-backend"
 severity = "wrong-data"
 status = "filed"
 link = "https://github.com/stellar/wallet-backend/issues/819"
 draft = "findings/issues/wallet-backend-W9.md"
-cause = "Following Horizon's effects (the code says it was ported from them), account creation emits a signer-created state change for the master key, and set options treats the master key as a signer while its weight is above 0. The ledger has no signer entry: the master key's weight is byte 0 of the account's thresholds. Likely intended; the draft asks, and what it would cost consumers is that the row looks like a signer entry."
+cause = "Following Horizon's effects (the code says it was ported from them), account creation emits a signer-created state change for the master key, and set options treats the master key as a signer while its weight is above 0. The ledger has no signer entry: the master key's weight is byte 0 of the account's thresholds. The filed issue asks whether this is intended; a consumer reading the row takes it for a signer entry."
 
 [[finding.harness]]
 target = "wallet-backend"
@@ -287,6 +296,7 @@ problems = ["extra"]
 [[finding]]
 id = "WB-L1"
 title = "ContractDeployProcessor walks the declared auth invocation tree with no depth limit (indexerlint IDX002)"
+short = "The contract deploy processor walks the auth invocation tree with no depth limit."
 component = "wallet-backend"
 severity = "robustness"
 status = "filed"
@@ -307,6 +317,7 @@ function = "(*ContractDeployProcessor).ProcessOperation"
 [[finding]]
 id = "GO-1"
 title = "strkey.Decode, DecodeAny and IsValidClaimableBalance accept a claimable balance id whose type byte is not v0"
+short = "Claimable balance ids with an unknown type byte are accepted."
 component = "go-stellar-sdk"
 severity = "divergence"
 status = "filed"
@@ -321,6 +332,7 @@ entries = ["cap23.claimable-balances.synth-strkey-b-invalid"]
 [[finding]]
 id = "GO-2"
 title = "v0.7.1 strkey decoders accept payloads of the wrong length"
+short = "Strkeys with a payload of the wrong length are accepted (v0.7.1)."
 component = "go-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -335,6 +347,7 @@ entries = ["*.synth-strkey-*-invalid"]
 [[finding]]
 id = "GO-3"
 title = "v0.7.1 orders asset issuers by strkey text and derives a pool id for a pair of one asset with itself"
+short = "Asset issuers are ordered by text, and a pool of an asset with itself is accepted (v0.7.1)."
 component = "go-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -349,6 +362,7 @@ entries = ["cap38.liquidity-pools.synth-assets-*"]
 [[finding]]
 id = "GO-4"
 title = "xdr.DecodeOptions.MaxDepth counts fewer levels per nesting than stellar-xdr, so the sdk decodes envelopes nested deeper than core accepts"
+short = "Envelopes nested deeper than stellar-core accepts are decoded."
 component = "go-stellar-sdk"
 severity = "robustness"
 status = "filed"
@@ -368,6 +382,7 @@ entries = [
 [[finding]]
 id = "GO-5"
 title = "strkey decoders before v0.9.0 accept strkeys with carriage returns, newlines or 0xff bytes added"
+short = "Strkeys with added newlines, carriage returns or 0xff bytes are accepted (before v0.9.0)."
 component = "go-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -384,6 +399,7 @@ entries = ["*.synth-strkey-*-noncanonical-chars"]
 [[finding]]
 id = "JS-1766"
 title = "Asset.compare and scvSortedMap ordered by text instead of the network's byte order"
+short = "Asset issuers and map keys are ordered by text instead of by bytes."
 component = "js-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -403,6 +419,7 @@ entries = ["soroban.scval-shapes.synth-map-keys-*"]
 [[finding]]
 id = "JS-1789"
 title = "scValToNative merges map entries whose keys collide as object properties"
+short = "Map entries whose keys collide after conversion are silently merged."
 component = "js-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -417,6 +434,7 @@ entries = ["soroban.scval-shapes.synth-map-*"]
 [[finding]]
 id = "JS-1785"
 title = "textual muxed and offer ids accept non-canonical forms that encode another id"
+short = "Textual muxed and offer ids in non-canonical form decode to another id."
 component = "js-stellar-sdk"
 severity = "divergence"
 status = "duplicate-of"
@@ -431,6 +449,7 @@ entries = ["cap03.offer-liabilities.synth-textual-offer-id-*", "cap27.muxed-acco
 [[finding]]
 id = "JS-16X"
 title = "16.x lacks six fixes that 17.x has: map key order and collisions, textual ids, W addresses, decode depth, StrKey checks"
+short = "The 16.x line lacks six decoding fixes that 17.x has."
 component = "js-stellar-sdk"
 severity = "divergence"
 status = "filed"
@@ -467,6 +486,7 @@ entries = [
 [[finding]]
 id = "JS-DEPTH"
 title = "fromXdr decodes envelopes nested deeper than stellar-core accepts, and no maxDepth value matches core's limit"
+short = "Envelopes nested deeper than stellar-core accepts are decoded."
 component = "js-stellar-sdk"
 severity = "robustness"
 status = "filed"
@@ -490,10 +510,12 @@ entries = [
 [[finding]]
 id = "RS-1"
 title = "question: the XDR-JSON reader accepts 64-bit integer strings with a plus sign, \"-0\" or leading zeros"
+short = "The XDR-JSON reader accepts 64-bit integers written with a plus sign, -0 or leading zeros."
 component = "rs-stellar-xdr"
 severity = "divergence"
-status = "filed"
+status = "wont-fix"
 link = "https://github.com/stellar/rs-stellar-xdr/issues/627"
+reason = "answered upstream: rs-stellar-xdr#627 was closed on 2026-11-18 with the maintainer's reply that SEP-51 does not specify a leading + or leading zeros and accepting them is reasonable and harmless, so the crate keeps the behaviour"
 draft = "findings/issues/rust-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md"
 cause = "NumberOrString passes a JSON string to str::parse, so \"+16\", \"-0\" and \"016\" read as 16 and 0; the crate's own tests assert this, so the draft is a question. The failing checks are \"+16\" and \"-0\" in the non-canonical entry; negative ids such as \"-16\" are valid int64 values that core refuses only in doCheckValid, so they are in the negative entry, which accepts the exact id the crate reads."
 
@@ -504,6 +526,7 @@ entries = ["cap03.offer-liabilities.synth-textual-offer-id-noncanonical"]
 [[finding]]
 id = "RS-2"
 title = "the XDR-JSON reader stops at serde_json's recursion limit of 128, so values the crate writes as JSON cannot be read back"
+short = "XDR-JSON the crate writes for deeply nested values cannot be read back."
 component = "rs-stellar-xdr"
 severity = "divergence"
 status = "filed"
@@ -526,10 +549,12 @@ entries = [
 [[finding]]
 id = "RS-3"
 title = "bool decodes any u32 and reads everything but 1 as false, where core reads non-zero as true and go-stellar-sdk refuses"
+short = "A bool word other than 0 or 1 decodes as false."
 component = "rs-stellar-xdr"
 severity = "divergence"
-status = "filed"
-link = "https://github.com/stellar/rs-stellar-xdr/issues/629"
+status = "duplicate-of"
+link = "https://github.com/stellar/rs-stellar-xdr/issues/622"
+related = ["https://github.com/stellar/rs-stellar-xdr/issues/629"]
 draft = "findings/issues/fuzz-rust-bool-non-canonical.md"
 siblings = ["CORE-1"]
 cause = "impl ReadXdr for bool returns i == 1 for any u32, so the word 2 decodes as false and re-encodes as 0, where go-stellar-sdk and js-stellar-sdk refuse it and core's xdrpp reads it as true. The differential fuzzer found the same class through every fuzzed type that carries a bool (findings/fuzz/known-classes.txt)."
@@ -546,6 +571,7 @@ answers = ['{"json":{"bool":false}}', '{"xdr":"AAAAAAAAAAA="}']
 [[finding]]
 id = "CORE-1"
 title = "core (xdrpp) accepts a bool word other than 0 or 1 as true and hashes its own re-encoding with 1"
+short = "A bool word other than 0 or 1 is read as true."
 component = "stellar-core"
 severity = "robustness"
 status = "filed"
@@ -563,6 +589,7 @@ split = 3
 [[finding]]
 id = "WB-FLAGS-OP"
 title = "account and trustline flags rows follow the operation's parameters, also when the ledger's flags do not change"
+short = "Flags rows follow the operation's parameters even when the ledger's flags do not change."
 component = "wallet-backend"
 severity = "wrong-data"
 status = "wont-fix"

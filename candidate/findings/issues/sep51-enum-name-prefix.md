@@ -7,7 +7,7 @@ SEP-51 v2.0.1, read at [ced008c3](https://github.com/stellar/stellar-protocol/bl
 
 The Enum section ([lines 384-387](https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/ecosystem/sep-0051.md?plain=1#L384-L387)) says:
 
-> The XDR enum data type is represented in JSON with a string, derived from the name-identifier that corresponds to its value. The string is the name-identifier modified to be snake_case, and truncated removing any shared prefix if there are multiple identifiers in the enum.
+> The XDR enum data type ([RFC 4506 Section 4.3]) is represented in JSON with a string, derived from the name-identifier that corresponds to its value. The string is the name-identifier modified to be snake_case, and truncated removing any shared prefix if there are multiple identifiers in the enum.
 
 The Discriminated Union section ([lines 468-471](https://github.com/stellar/stellar-protocol/blob/ced008c3727005ca4a775f430fe6fe346c30f58f/ecosystem/sep-0051.md?plain=1#L468-L471)) names union arms the same way. The examples all use enums whose identifiers are upper case with underscores, such as `SCV_U32`, where the snake_case form and the shared prefix are clear. Three kinds of identifier in the Stellar XDR are not covered by them.
 
@@ -40,4 +40,4 @@ The text has no such exception. If one is intended, the Enum section does not sh
 
 ## Question
 
-For these three cases, which strings does SEP-51 intend? If stellar-xdr's choices are the intended ones (`i_pv4`, `tx_success`, `b8_bit`), could the Enum section say three things? How snake_case splits a mixed-case identifier, that a shared prefix is removed only up to an underscore, and that a name starting with a digit keeps a letter of the prefix. SDKs that implement SEP-51 currently arrive at different names for all three, and a reader built from one cannot read JSON written by another.
+For these three cases, which strings does SEP-51 intend? If stellar-xdr's choices are the intended ones (`i_pv4`, `tx_success`, `b8_bit`), could the Enum section say how snake_case splits a mixed-case identifier, that a shared prefix is removed only up to an underscore, and that a name starting with a digit keeps a letter of the prefix? SDKs that implement SEP-51 currently arrive at different names for all three, and a reader built from one cannot read JSON written by another.

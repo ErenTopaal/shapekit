@@ -12,28 +12,28 @@ cap23.claimable-balances.synth-strkey-b-invalid v0.8.0 diverges-from-network htt
 cap23.claimable-balances.synth-strkey-b-invalid v0.9.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6046 case 13/strkey_decode, case 15/strkey_decode
 # v0.7.1 strkey.DecodeAny does not check the payload length against the version byte (fixed in
 # v0.7.2, go-stellar-sdk#5977), so short, long and misshapen signed payload keys decode
-cap27.muxed-accounts.synth-strkey-g-invalid v0.7.1 diverges-from-network findings/issues/go-cap27.muxed-accounts.synth-strkey-g-invalid.md case 2/strkey_decode, case 3/strkey_decode, case 12/strkey_decode, case 13/strkey_decode, case 15/strkey_decode
-cap27.muxed-accounts.synth-strkey-m-invalid v0.7.1 diverges-from-network findings/issues/go-cap27.muxed-accounts.synth-strkey-m-invalid.md case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 16/strkey_decode
-cap27.muxed-accounts.synth-strkey-s-invalid v0.7.1 diverges-from-network findings/issues/go-cap27.muxed-accounts.synth-strkey-s-invalid.md case 2/strkey_decode, case 3/strkey_decode
-cap38.liquidity-pools.synth-strkey-l-invalid v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-strkey-l-invalid.md case 2/strkey_decode, case 3/strkey_decode
-cap40.signed-payload-signer.synth-strkey-p-invalid v0.7.1 diverges-from-network findings/issues/go-cap40.signed-payload-signer.synth-strkey-p-invalid.md case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 15/strkey_decode, case 16/strkey_decode, case 17/strkey_decode, case 18/strkey_decode, case 19/strkey_decode, case 20/strkey_decode, case 21/strkey_decode
-cap40.signed-payload-signer.synth-strkey-t-invalid v0.7.1 diverges-from-network findings/issues/go-cap40.signed-payload-signer.synth-strkey-t-invalid.md case 2/strkey_decode, case 3/strkey_decode
-cap40.signed-payload-signer.synth-strkey-x-invalid v0.7.1 diverges-from-network findings/issues/go-cap40.signed-payload-signer.synth-strkey-x-invalid.md case 2/strkey_decode, case 3/strkey_decode
-soroban.invoke-basics.synth-strkey-c-invalid v0.7.1 diverges-from-network findings/issues/go-soroban.invoke-basics.synth-strkey-c-invalid.md case 2/strkey_decode, case 3/strkey_decode
+cap27.muxed-accounts.synth-strkey-g-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode, case 12/strkey_decode, case 13/strkey_decode, case 15/strkey_decode
+cap27.muxed-accounts.synth-strkey-m-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 16/strkey_decode
+cap27.muxed-accounts.synth-strkey-s-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode
+cap38.liquidity-pools.synth-strkey-l-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode
+cap40.signed-payload-signer.synth-strkey-p-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode, case 13/strkey_decode, case 15/strkey_decode, case 16/strkey_decode, case 17/strkey_decode, case 18/strkey_decode, case 19/strkey_decode, case 20/strkey_decode, case 21/strkey_decode
+cap40.signed-payload-signer.synth-strkey-t-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode
+cap40.signed-payload-signer.synth-strkey-x-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode
+soroban.invoke-basics.synth-strkey-c-invalid v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5977 case 2/strkey_decode, case 3/strkey_decode
 # v0.7.1 xdr.Asset.LessThan compares issuers as strkey text instead of key bytes, and
 # xdr.NewPoolId accepts a pair of one asset with itself (both fixed in v0.7.2, go-stellar-sdk#5974)
-cap38.liquidity-pools.synth-assets-dotnet257 v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-dotnet257.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-equal v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-equal.md case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-js1766-issuers v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-js1766-issuers.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-py1246-testnet-pool v0.7.1 diverges-from-network findings/issues/go-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-dotnet257 v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5974 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-equal v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5974 case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-js1766-issuers v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5974 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool v0.7.1 diverges-from-network https://github.com/stellar/go-stellar-sdk/pull/5974 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 # xdr.DecodeOptions.MaxDepth spends about half the levels per nesting that rs-stellar-xdr's limit
 # does (a bare ScVal holds 499 ScVec levels at MaxDepth 1000), so at the depth core applies the
 # sdk decodes envelopes core refuses
 soroban.auth-trees.synth-auth-depth-494-over-cap * diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6047 any/decode_encode
-soroban.auth-trees.p30-declared-depth-493 v0.8.0 diverges-from-network findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md mainnet/decode_encode, testnet/decode_encode
-soroban.auth-trees.p30-declared-depth-493 v0.9.0 diverges-from-network findings/issues/go-soroban.auth-trees.p30-declared-depth-493.md mainnet/decode_encode, testnet/decode_encode
-soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network findings/issues/go-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network findings/issues/go-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md any/decode_encode
+soroban.auth-trees.p30-declared-depth-493 v0.8.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6047 mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.p30-declared-depth-493 v0.9.0 diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6047 mainnet/decode_encode, testnet/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap * diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6047 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap * diverges-from-network https://github.com/stellar/go-stellar-sdk/issues/6047 any/decode_encode
 # before v0.9.0 strkey.DecodeAny checks the canonical length on the raw input and then lets
 # go's base32 skip carriage returns and newlines and read 0xff as padding, so a valid strkey
 # with enough of those bytes added decodes to its own payload (fixed in v0.9.0,

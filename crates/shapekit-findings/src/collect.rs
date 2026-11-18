@@ -49,6 +49,8 @@ pub struct InputRef {
 pub struct FindingRecord {
     pub id: String,
     pub title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub short: Option<String>,
     pub component: String,
     pub severity: Severity,
     pub caps: Vec<String>,
@@ -879,6 +881,7 @@ fn record(
     FindingRecord {
         id: def.id.clone(),
         title: def.title.clone(),
+        short: def.short.clone(),
         component: def.component.clone(),
         severity: def.severity,
         caps: caps.into_iter().collect(),
@@ -1178,6 +1181,7 @@ mod tests {
         let r = FindingRecord {
             id: "GO-X".into(),
             title: "t".into(),
+            short: None,
             component: "go-stellar-sdk".into(),
             severity: Severity::Divergence,
             caps: vec![],

@@ -1,7 +1,7 @@
 <!-- repo: stellar/stellar-etl -->
 # Question: no `signer_removed` effect for a pre-auth signer core removes when its transaction applies
 
-Checked at [2b24ec89](https://github.com/stellar/stellar-etl/commit/2b24ec89ddce7fc0beb7795de982c93e6895eaf3) (v2.8.34).
+Checked at [2b24ec89](https://github.com/stellar/stellar-etl/commit/2b24ec89ddce7fc0beb7795de982c93e6895eaf3) (v2.8.34). `internal/transform/effects.go` is the same in v2.8.35, the latest release.
 
 ## What we see
 
@@ -17,7 +17,7 @@ The effects table has no `signer_removed` row for it.
 
 Is the effects table meant to describe only what operations do, or should a pre-auth signer that core consumes get `signer_removed`? If the omission is intended, a line in the effects documentation would let consumers know to read signer removals from the transaction-level ledger entry changes.
 
-## Reproduction
+## The ledger
 
 Testnet passphrase, standalone stellar-core 30.0.0:
 
@@ -25,3 +25,19 @@ Testnet passphrase, standalone stellar-core 30.0.0:
 - `cap15.fee-bump.p30`, ledger 85, transaction `6411ddc2788dc797d4775332e3199098e2a3a2213e5566ab78a160a839bf8afd` (a fee bump whose fee source is the inner source): the meta removes signer `TBSBDXOCPCG4PF6UO5JTFYYZSCMOFI5CEE7FKZVLPCQWBKBZX6FP3CEA` of `GBFARHLQRKXBMLQHQ7RTH67BBVFKVXYP555TSUTSVPTCVLUELTH2ULAX`.
 
 The effects export of these ledgers has no row for either removal.
+
+## Reproduce
+
+Each ledger is committed in [shapekit](https://github.com/ErenTopaal/shapekit) as a batch of a SEP-54 data lake (testnet passphrase, zstd, one ledger per batch):
+
+- ledger 67 of `classic.failed-tx.p30`: [`corpus/chains/classic.failed-tx.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFBC--67.xdr.zst`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/chains/classic.failed-tx.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFBC--67.xdr.zst)
+- ledger 85 of `cap15.fee-bump.p30`: [`corpus/chains/cap15.fee-bump.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFAA--85.xdr.zst`](https://github.com/ErenTopaal/shapekit/blob/v0.2.0/corpus/chains/cap15.fee-bump.p30/testnet/ledgers/FFFFFFFF--0-63999/FFFFFFAA--85.xdr.zst)
+
+From a checkout of the shapekit repository at tag `v0.2.0` (needs Go and Docker), this builds stellar-etl at the commit above, serves the lake to it through a local fake GCS server, runs its exports, `export_effects` among them, for every ledger and compares the rows with the ledger meta:
+
+```sh
+(cd adapters && go build -o bin/etl-adapter ./stellaretl/cmd/etl-adapter)
+shapekit harness run --chain classic.failed-tx.p30 --chain cap15.fee-bump.p30 --network testnet --adapter "adapters/bin/etl-adapter --commit 2b24ec89ddce7fc0beb7795de982c93e6895eaf3"
+```
+
+In `harness-out/HARNESS.md`, the Entries table lists the entries `classic.failed-tx.p30-pre-auth-failed-removes-signer` and `cap15.fee-bump.p30-fee-source-is-inner-source-pre-auth-signer-meta` with the verdict `dropped` and the detail `signer-removed is missing`.

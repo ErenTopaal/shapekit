@@ -157,6 +157,9 @@ pub struct LintMatch {
 pub struct FindingDef {
     pub id: String,
     pub title: String,
+    /// The defect in one plain sentence, for listings where the issue title is too long or
+    /// carries an upstream prefix; `findings check` refuses it empty.
+    pub short: Option<String>,
     /// The upstream project, for example `wallet-backend` or `go-stellar-sdk`.
     pub component: String,
     pub severity: Severity,

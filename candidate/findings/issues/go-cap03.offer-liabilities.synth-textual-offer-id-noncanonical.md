@@ -61,12 +61,41 @@ How the corpus entry was built and checked: non-canonical or out-of-range offer 
 
 Related: https://github.com/stellar/js-stellar-sdk/issues/1785
 
+## Reproduce with the SDK alone
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/stellar/go-stellar-sdk/protocols/horizon"
+)
+
+func main() {
+	for _, id := range []string{`"16"`, `"+16"`, `"-0"`} {
+		var o horizon.Offer
+		err := json.Unmarshal([]byte(`{"id":`+id+`}`), &o)
+		fmt.Printf("%s: ID=%d err=%v\n", id, o.ID, err)
+	}
+}
+```
+
+Output with v0.9.0:
+
+```
+"16": ID=16 err=<nil>
+"+16": ID=16 err=<nil>
+"-0": ID=0 err=<nil>
+```
+
 ## Why
 
-`horizon.Offer.ID` is an `int64` tagged `json:"id,string"`. `encoding/json` unquotes the string and reads it with `strconv.ParseInt`, which accepts an optional `+` or `-` sign, so `"+16"` reads as 16 and `"-0"` as 0. The field reads Horizon's own responses, which always carry the canonical text, so this is a question: is reading a non-canonical id here intended?
+[`horizon.Offer.ID`](https://github.com/stellar/go-stellar-sdk/blob/5410d3410e212331399d1518cc13150279969dac/protocols/horizon/main.go#L265) (v0.9.0) is an `int64` tagged `json:"id,string"`. `encoding/json` unquotes the string and reads it with `strconv.ParseInt`, which accepts an optional `+` or `-` sign, so `"+16"` reads as 16 and `"-0"` as 0. The field reads Horizon's own responses, which always carry the canonical text, so this is a question: is reading a non-canonical id here intended?
 
 ## Sibling issues
 
-- rs-stellar-xdr reads the same two strings the same way: https://github.com/stellar/rs-stellar-xdr/issues/627
+- rs-stellar-xdr reads the same two strings the same way. Asked in https://github.com/stellar/rs-stellar-xdr/issues/627, its maintainers answered that accepting a leading `+` and leading zeros is reasonable and harmless, and closed the question.
 
 shapekit vector: `cap03.offer-liabilities.synth-textual-offer-id-noncanonical`

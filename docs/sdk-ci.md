@@ -223,13 +223,17 @@ version = "17.4.0"
 build = [
   { argv = ["pnpm", "install", "--frozen-lockfile"], dir = "../sdk" },
   { argv = ["pnpm", "pack", "--out", "stellar-sdk-under-test.tgz"], dir = "../sdk" },
-  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "testees/js" },
-  { argv = ["npm", "run", "build"], dir = "testees/js" },
+  { argv = ["rm", "-rf", "target/testees/js/build"] },
+  { argv = ["mkdir", "-p", "target/testees/js/build"] },
+  { argv = ["cp", "testees/js/package.json", "testees/js/package-lock.json", "testees/js/tsconfig.json", "testees/js/.npmrc", "target/testees/js/build/"] },
+  { argv = ["cp", "-R", "testees/js/src", "target/testees/js/build/src"] },
+  { argv = ["npm", "ci", "--no-audit", "--no-fund"], dir = "target/testees/js/build" },
+  { argv = ["npm", "run", "build"], dir = "target/testees/js/build" },
   { argv = ["rm", "-rf", "target/testees/js/dev"] },
   { argv = ["mkdir", "-p", "target/testees/js/dev"] },
   { argv = ["cp", "../sdk/ci/shapekit/package.json", "target/testees/js/dev/package.json"] },
   { argv = ["npm", "install", "--no-audit", "--no-fund", "--ignore-scripts", "../../../../../sdk/stellar-sdk-under-test.tgz"], dir = "target/testees/js/dev" },
-  { argv = ["cp", "-R", "testees/js/dist", "target/testees/js/dev/dist"] },
+  { argv = ["cp", "-R", "target/testees/js/build/dist", "target/testees/js/dev/dist"] },
 ]
 command = ["node", "target/testees/js/dev/dist/main.js"]
 max_protocol = 30

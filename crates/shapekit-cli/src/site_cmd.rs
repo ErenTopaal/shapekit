@@ -1136,6 +1136,7 @@ fn findings_json(c: &Collection) -> Value {
             json!({
                 "id": f.id,
                 "title": f.title,
+                "short": f.short,
                 "component": f.component,
                 "severity": f.severity,
                 "status": f.status,

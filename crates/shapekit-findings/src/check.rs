@@ -81,6 +81,7 @@ pub fn check(
     written: Option<&Collection>,
     written_md: Option<&str>,
     up: &str,
+    triage: &str,
 ) -> Outcome {
     let mut out = Outcome::default();
     for o in &fresh.unmapped {
@@ -110,6 +111,12 @@ pub fn check(
             out.problems
                 .push(format!("{} names draft {d}, which does not exist", f.id));
         }
+        if f.short.as_deref().is_some_and(|s| s.trim().is_empty()) {
+            out.problems.push(format!(
+                "{} has an empty short; write the defect in one sentence or drop the field",
+                f.id
+            ));
+        }
         if let Some(m) = missing_decision(f) {
             if f.status == Status::Draft {
                 out.pending.push(f.id.clone());
@@ -131,7 +138,7 @@ pub fn check(
         None => out
             .problems
             .push("findings/FINDINGS.md is missing; run `shapekit findings collect`".into()),
-        Some(md) if md != crate::render::markdown(fresh, up) => out.problems.push(
+        Some(md) if md != crate::render::markdown(fresh, up, triage) => out.problems.push(
             "findings/FINDINGS.md differs from a fresh rendering of the inputs; run `shapekit findings collect`".into(),
         ),
         Some(_) => {}
@@ -151,6 +158,7 @@ mod tests {
         FindingRecord {
             id: id.into(),
             title: "t".into(),
+            short: None,
             component: "c".into(),
             severity: Severity::DataLoss,
             caps: vec![],
@@ -179,7 +187,7 @@ mod tests {
     }
 
     fn md(c: &Collection) -> String {
-        crate::render::markdown(c, "../")
+        crate::render::markdown(c, "../", "findings/triage.toml")
     }
 
     fn collection(findings: Vec<FindingRecord>) -> Collection {
@@ -229,14 +237,28 @@ mod tests {
                 Some("https://github.com/o/r/issues/1"),
             ),
         ]);
-        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../");
+        let out = check(
+            Path::new("."),
+            &c,
+            Some(&c),
+            Some(&md(&c)),
+            "../",
+            "findings/triage.toml",
+        );
         assert!(!out.ok);
         assert_eq!(out.pending, ["A"]);
         assert_eq!(out.problems.len(), 1, "{:?}", out.problems);
         assert!(out.only_drafts());
         let mut stale = c.clone();
         stale.summary.failures += 1;
-        let out = check(Path::new("."), &stale, Some(&c), Some(&md(&stale)), "../");
+        let out = check(
+            Path::new("."),
+            &stale,
+            Some(&c),
+            Some(&md(&stale)),
+            "../",
+            "findings/triage.toml",
+        );
         assert!(
             !out.only_drafts(),
             "a stale record is not a draft: {:?}",
@@ -251,21 +273,48 @@ mod tests {
         let filed = finding("F", Status::Filed, Some("http://example.org/1"));
         let c = collection(vec![private.clone(), wont, filed]);
         assert_eq!(
-            check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../")
-                .problems
-                .len(),
+            check(
+                Path::new("."),
+                &c,
+                Some(&c),
+                Some(&md(&c)),
+                "../",
+                "findings/triage.toml"
+            )
+            .problems
+            .len(),
             3,
             "../"
         );
         private.reference = Some("GHSA-xxxx".into());
         let c = collection(vec![private]);
-        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../").ok);
+        assert!(
+            check(
+                Path::new("."),
+                &c,
+                Some(&c),
+                Some(&md(&c)),
+                "../",
+                "findings/triage.toml"
+            )
+            .ok
+        );
     }
 
     #[test]
     fn unmapped_failures_and_a_stale_record_fail() {
         let mut c = collection(vec![finding("B", Status::DuplicateOf, Some("https://x/1"))]);
-        assert!(check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../").ok);
+        assert!(
+            check(
+                Path::new("."),
+                &c,
+                Some(&c),
+                Some(&md(&c)),
+                "../",
+                "findings/triage.toml"
+            )
+            .ok
+        );
         let written = c.clone();
         c.unmapped.push(Occurrence {
             source: "conformance".into(),
@@ -274,20 +323,93 @@ mod tests {
             at: "go@v0.8.0".into(),
             what: "diverges-from-network".into(),
         });
-        let out = check(Path::new("."), &c, Some(&written), Some(&md(&c)), "../");
+        let out = check(
+            Path::new("."),
+            &c,
+            Some(&written),
+            Some(&md(&c)),
+            "../",
+            "findings/triage.toml",
+        );
         assert_eq!(out.problems.len(), 2, "{:?}", out.problems);
-        assert!(!check(Path::new("."), &written, None, Some(&md(&written)), "../").ok);
-        assert!(!check(Path::new("."), &written, Some(&written), None, "../").ok);
+        assert!(
+            !check(
+                Path::new("."),
+                &written,
+                None,
+                Some(&md(&written)),
+                "../",
+                "findings/triage.toml"
+            )
+            .ok
+        );
+        assert!(
+            !check(
+                Path::new("."),
+                &written,
+                Some(&written),
+                None,
+                "../",
+                "findings/triage.toml"
+            )
+            .ok
+        );
         assert!(
             !check(
                 Path::new("."),
                 &written,
                 Some(&written),
                 Some("# stale\n"),
-                "../"
+                "../",
+                "findings/triage.toml"
             )
             .ok
         );
+    }
+
+    #[test]
+    fn an_empty_short_fails() {
+        let mut f = finding("A", Status::Filed, Some("https://x/1"));
+        f.short = Some("  ".into());
+        let c = collection(vec![f.clone()]);
+        let out = check(
+            Path::new("."),
+            &c,
+            Some(&c),
+            Some(&md(&c)),
+            "../",
+            "findings/triage.toml",
+        );
+        assert!(
+            out.problems.iter().any(|p| p.contains("empty short")),
+            "{:?}",
+            out.problems
+        );
+        f.short = Some("A clawback is stored as a burn.".into());
+        let c = collection(vec![f]);
+        assert!(
+            check(
+                Path::new("."),
+                &c,
+                Some(&c),
+                Some(&md(&c)),
+                "../",
+                "findings/triage.toml"
+            )
+            .ok
+        );
+    }
+
+    // the candidate lane renders its own FINDINGS.md, which must name its own triage file
+    #[test]
+    fn the_markdown_names_the_triage_it_was_collected_from() {
+        let c = collection(vec![]);
+        let lane = crate::render::markdown(&c, "../../", "candidate/findings/triage.toml");
+        assert!(
+            lane.contains("live in `candidate/findings/triage.toml`"),
+            "{lane}"
+        );
+        assert!(!md(&c).contains("candidate/"));
     }
 
     #[test]
@@ -295,7 +417,14 @@ mod tests {
         let mut f = finding("RS-3", Status::Filed, Some("https://x/1"));
         f.occurrences.clear();
         let c = collection(vec![f]);
-        let out = check(Path::new("."), &c, Some(&c), Some(&md(&c)), "../");
+        let out = check(
+            Path::new("."),
+            &c,
+            Some(&c),
+            Some(&md(&c)),
+            "../",
+            "findings/triage.toml",
+        );
         assert!(!out.ok);
         assert!(
             !out.only_drafts(),

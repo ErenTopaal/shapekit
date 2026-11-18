@@ -66,8 +66,8 @@ What 0.2.0 holds:
     `crates/shapekit-harness/expect/stellar-rpc.toml` says.
 
   Indexer checks need a Linux host with Docker; on macOS `check indexer` stops and says so.
-- Findings: 25 findings covering 891 failures, 0 unmapped, none pending filing
-  (`shapekit findings check`); 215 of the failures are held by candidate findings. The explorer
+- Findings: 25 findings covering 676 failures, 215 more held by candidate findings, 0
+  unmapped, none pending filing (`shapekit findings check`). The explorer
   ledgers add wallet-backend failures to WB-W1 (18), WB-W2 (52, now also mints into a
   claimable balance), WB-W3 (8), WB-W4 (4), WB-W5 (12) and WB-W9 (66). WB-FLAGS-OP is new,
   recorded as intended: flags rows follow the operation's parameters, also when the ledger's

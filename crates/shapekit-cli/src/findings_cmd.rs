@@ -37,6 +37,7 @@ pub enum FindingsCommand {
 
 #[derive(Args)]
 pub struct Common {
+    /// The findings triage: the inputs and the finding every failure maps to.
     #[arg(long, default_value = "findings/triage.toml")]
     triage: PathBuf,
     /// The repository root; input paths in the triage are relative to it.
@@ -45,6 +46,18 @@ pub struct Common {
     /// Where findings.json and FINDINGS.md live.
     #[arg(long, default_value = "findings")]
     out: PathBuf,
+}
+
+impl Common {
+    /// The triage path as FINDINGS.md names it: relative to the repository root when it lies
+    /// under it, as given otherwise.
+    fn triage_name(&self) -> String {
+        self.triage
+            .strip_prefix(&self.root)
+            .unwrap_or(&self.triage)
+            .display()
+            .to_string()
+    }
 }
 
 /// The failures candidate findings hold, when the triage names a candidate triage.
@@ -82,8 +95,11 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
             text.push('\n');
             std::fs::write(&json, text).with_context(|| format!("writing {}", json.display()))?;
             let md = c.out.join("FINDINGS.md");
-            std::fs::write(&md, render::markdown(&col, &render::root_prefix(&c.out)))
-                .with_context(|| format!("writing {}", md.display()))?;
+            std::fs::write(
+                &md,
+                render::markdown(&col, &render::root_prefix(&c.out), &c.triage_name()),
+            )
+            .with_context(|| format!("writing {}", md.display()))?;
             for (comp, by) in &col.summary.by_component {
                 let parts: Vec<String> = by.iter().map(|(k, v)| format!("{k} {v}")).collect();
                 println!("{comp}: {}", parts.join(", "));
@@ -148,6 +164,7 @@ pub fn run(cmd: FindingsCommand) -> Result<bool> {
                 written.as_ref(),
                 written_md.as_deref(),
                 &render::root_prefix(&c.out),
+                &c.triage_name(),
             );
             out.problems.extend(import::verify(&c.root, &t));
             out.ok = out.problems.is_empty() || (allow_draft && out.only_drafts());

@@ -36,68 +36,68 @@ soroban.invoke-basics.synth-strkey-c-invalid 16.4.1 diverges-from-network https:
 cap84.muxed-contract.synth-strkey-w-valid 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/strkey_decode, case 1/strkey_decode, case 2/strkey_decode, case 3/strkey_decode, case 4/strkey_decode, case 5/strkey_decode, case 6/strkey_decode
 #
 # js-stellar-sdk#1766: Asset.compare ordered issuers by strkey text (16.3.0, 17.2.0); pool ids follow
-cap38.liquidity-pools.synth-assets-dotnet257 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-dotnet257 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-dotnet257.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-js1766-issuers 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-js1766-issuers 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
-cap38.liquidity-pools.synth-assets-py1246-testnet-pool 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-py1246-testnet-pool.md case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-dotnet257 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-dotnet257 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-js1766-issuers 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-js1766-issuers 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
+cap38.liquidity-pools.synth-assets-py1246-testnet-pool 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/asset_order, case 1/asset_order, case 2/pool_id, case 3/pool_id
 # the same order check makes TransactionBuilder.fromXDR refuse a recorded testnet ledger's
 # ChangeTrust on a pool share, so the sdk has no hash for it
-cap38.liquidity-pools.testnet-5521432 16.3.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md testnet/tx_hash 3
-cap38.liquidity-pools.testnet-5521432 17.2.0 diverges-from-network findings/issues/js-cap38.liquidity-pools.synth-assets-js1766-issuers.md testnet/tx_hash 3
+cap38.liquidity-pools.testnet-5521432 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 testnet/tx_hash 3
+cap38.liquidity-pools.testnet-5521432 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 testnet/tx_hash 3
 #
 # js-stellar-sdk#1766: scvSortedMap ordered keys by their native form (17.2.0; never fixed on 16.x)
 soroban.scval-shapes.synth-map-keys-addresses 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
 soroban.scval-shapes.synth-map-keys-addresses 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
 soroban.scval-shapes.synth-map-keys-addresses 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
-soroban.scval-shapes.synth-map-keys-addresses 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-addresses.md case 0/map_sort
-soroban.scval-shapes.synth-map-keys-bytes 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-bytes.md case 0/map_sort
+soroban.scval-shapes.synth-map-keys-addresses 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/map_sort
+soroban.scval-shapes.synth-map-keys-bytes 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/map_sort
 soroban.scval-shapes.synth-map-keys-mixed-types 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
 soroban.scval-shapes.synth-map-keys-mixed-types 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
 soroban.scval-shapes.synth-map-keys-mixed-types 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/map_sort
-soroban.scval-shapes.synth-map-keys-mixed-types 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-keys-mixed-types.md case 0/map_sort
+soroban.scval-shapes.synth-map-keys-mixed-types 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/pull/1766 case 0/map_sort
 #
 # js-stellar-sdk#1789: scValToNative merges map keys that collide as object keys (up to 17.2.1;
 # only 16.x loses an entry of the bytes-and-string map)
 soroban.scval-shapes.synth-map-address-and-string 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-address-and-string 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-address-and-string 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-address-and-string 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md case 0/to_native
-soroban.scval-shapes.synth-map-address-and-string 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-address-and-string.md case 0/to_native
+soroban.scval-shapes.synth-map-address-and-string 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-address-and-string 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-bool-and-text 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-bool-and-text 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-bool-and-text 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-bool-and-text 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md case 0/to_native
-soroban.scval-shapes.synth-map-bool-and-text 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-bool-and-text.md case 0/to_native
+soroban.scval-shapes.synth-map-bool-and-text 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-bool-and-text 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-bytes-and-string 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-bytes-and-string 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-bytes-and-string 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-js1789-u32-symbol 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-js1789-u32-symbol 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-js1789-u32-symbol 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md case 0/to_native
-soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-js1789-u32-symbol.md case 0/to_native
+soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-js1789-u32-symbol 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-numeric-types 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-numeric-types 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-numeric-types 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-numeric-types 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md case 0/to_native
-soroban.scval-shapes.synth-map-numeric-types 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-numeric-types.md case 0/to_native
+soroban.scval-shapes.synth-map-numeric-types 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-numeric-types 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-u32-string-symbol 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-u32-string-symbol 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-u32-string-symbol 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-u32-string-symbol 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md case 0/to_native
-soroban.scval-shapes.synth-map-u32-string-symbol 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-u32-string-symbol.md case 0/to_native
+soroban.scval-shapes.synth-map-u32-string-symbol 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-u32-string-symbol 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-vec-and-string 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-vec-and-string 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-vec-and-string 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-vec-and-string 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md case 0/to_native
-soroban.scval-shapes.synth-map-vec-and-string 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-vec-and-string.md case 0/to_native
+soroban.scval-shapes.synth-map-vec-and-string 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-vec-and-string 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 soroban.scval-shapes.synth-map-void-and-text 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-void-and-text 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
 soroban.scval-shapes.synth-map-void-and-text 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 0/to_native
-soroban.scval-shapes.synth-map-void-and-text 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md case 0/to_native
-soroban.scval-shapes.synth-map-void-and-text 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-map-void-and-text.md case 0/to_native
+soroban.scval-shapes.synth-map-void-and-text 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
+soroban.scval-shapes.synth-map-void-and-text 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1789 case 0/to_native
 #
 # js-stellar-sdk#1785: ids in non-canonical text or unsafe numbers, fixed in 17.3.0. from 17.3.0
 # the offer entries pass; the muxed non-canonical entry passes its text cases there and is
@@ -107,18 +107,18 @@ soroban.scval-shapes.synth-map-void-and-text 17.2.1 diverges-from-network findin
 cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
 cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
 cap03.offer-liabilities.synth-textual-offer-id-noncanonical 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
-cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-noncanonical.md case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
+cap03.offer-liabilities.synth-textual-offer-id-noncanonical 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 11/id_parse, case 12/id_parse, case 13/id_parse
 cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse
 cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse
 cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 3/id_parse
-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.0 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md case 3/id_parse
-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.1 diverges-from-network findings/issues/js-cap03.offer-liabilities.synth-textual-offer-id-implementation-defined.md case 3/id_parse
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 3/id_parse
+cap03.offer-liabilities.synth-textual-offer-id-implementation-defined 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 3/id_parse
 cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
 cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.3.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
 cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 16.4.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.0 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.1 diverges-from-network findings/issues/js-cap27.muxed-accounts.synth-textual-muxed-id-noncanonical.md case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
+cap27.muxed-accounts.synth-textual-muxed-id-noncanonical 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1785 case 1/id_parse, case 2/id_parse, case 3/id_parse, case 4/id_parse, case 5/id_parse, case 6/id_parse, case 7/id_parse, case 8/id_parse, case 9/id_parse, case 10/id_parse, case 12/id_parse
 #
 # 16.x js-xdr 4 stops at 200 nested types, below depths the network accepts
 soroban.auth-trees.synth-auth-depth-493-deepest-accepted 16.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1907 any/decode_encode, any/decode_json
@@ -151,13 +151,13 @@ soroban.auth-trees.synth-auth-depth-494-over-cap 17.2.0 diverges-from-network ht
 soroban.auth-trees.synth-auth-depth-494-over-cap 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
 soroban.auth-trees.synth-auth-depth-494-over-cap 17.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
 soroban.auth-trees.synth-auth-depth-494-over-cap 17.4.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
-soroban.auth-trees.p30-declared-depth-493 17.3.0 diverges-from-network findings/issues/js-soroban.auth-trees.p30-declared-depth-493.md mainnet/decode_encode, testnet/decode_encode
-soroban.auth-trees.p30-declared-depth-493 17.4.0 diverges-from-network findings/issues/js-soroban.auth-trees.p30-declared-depth-493.md mainnet/decode_encode, testnet/decode_encode
-soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.4.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scmap-depth-198-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.1 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.3.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md any/decode_encode
-soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.4.0 diverges-from-network findings/issues/js-soroban.scval-shapes.synth-scvec-depth-247-over-cap.md any/decode_encode
+soroban.auth-trees.p30-declared-depth-493 17.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 mainnet/decode_encode, testnet/decode_encode
+soroban.auth-trees.p30-declared-depth-493 17.4.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 mainnet/decode_encode, testnet/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scmap-depth-198-over-cap 17.4.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.2.1 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.3.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
+soroban.scval-shapes.synth-scvec-depth-247-over-cap 17.4.0 diverges-from-network https://github.com/stellar/js-stellar-sdk/issues/1908 any/decode_encode
