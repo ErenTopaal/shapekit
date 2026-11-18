@@ -3,12 +3,14 @@
 The shapekit.org website is built from `site/`: the documentation under `/docs` and a
 dashboard over the committed results under `/dashboard`. The dashboard shows which shape
 families and CAPs the corpus covers, which SDK version diverges on which entry, what the
-wallet-backend reference run found, the findings list, and a page for every corpus entry. The site root redirects to `/docs`
-(`site/src/routes/home.tsx`).
+wallet-backend reference run found, the findings list, and a page for every corpus entry. The site root is a landing
+page (`site/src/routes/home.tsx`) that reads every number it shows from the same data files at build time
+(`site/src/landing/stats.ts`).
 
 Every page is prerendered to a static HTML file at build time, so the site needs no server-side
 code: any static file server can host it. It has no analytics, no cookies and no third-party
-requests. Fonts (IBM Plex Sans and IBM Plex Mono) are bundled, docs search runs in the browser
+requests. Fonts are bundled: IBM Plex Sans and IBM Plex Mono for the docs and the dashboard, and Plus Jakarta
+Sans and Instrument Serif for the landing page, docs search runs in the browser
 over an index file the build writes, and the only thing kept in the browser is the colour theme
 choice, in `localStorage` under `shapekit-theme`. The production server sends a content
 security policy that only allows the site's own origin, so a third-party request would fail.
@@ -28,7 +30,7 @@ support TypeScript 7; oxlint covers the React, hooks and accessibility rules ins
 
 | Route | What it is | Prerendered as |
 |---|---|---|
-| `/` | redirect to `/docs` (the router with JavaScript, a meta refresh in `<noscript>` without it) | `index.html` |
+| `/` | the landing page; an old dashboard link of the form `/#/sdk` is redirected to `/dashboard/sdk` | `index.html` |
 | `/docs`, `/docs/<group>/<page>` | one page per document, see below | `docs/.../index.html` |
 | `/api/search.json` | the docs search index, downloaded by the search dialog | `api/search.json` |
 | `/llms.txt`, `/llms-full.txt` | the docs for llms: an index of every page, and every page's markdown in one file | `llms.txt`, `llms-full.txt` |
