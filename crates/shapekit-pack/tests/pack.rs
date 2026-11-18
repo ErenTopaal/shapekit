@@ -352,6 +352,22 @@ fn archive_at_a_checkpoint() {
     );
 }
 
+/// The output directory gets the mode a plain directory creation gives, so a container
+/// running as another user can read it.
+#[cfg(unix)]
+#[test]
+fn archive_at_output_follows_the_umask() {
+    use std::os::unix::fs::PermissionsExt;
+    let tar = fixture().join("archive.tar");
+    let tmp = tempfile::tempdir().unwrap();
+    let plain = tmp.path().join("plain");
+    std::fs::create_dir(&plain).unwrap();
+    let out = tmp.path().join("63");
+    archive_at(&tar, 63, &out).unwrap();
+    let mode = |p: &Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o7777;
+    assert_eq!(mode(&out), mode(&plain));
+}
+
 /// An archive lacking a bucket its state references fails, and leaves neither the output
 /// directory nor a staging directory behind.
 #[test]

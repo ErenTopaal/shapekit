@@ -348,9 +348,14 @@ impl ArchiveIndex {
 /// Materialises in `out` (which must not exist) the archive as it stood when `checkpoint`
 /// was its newest: every file of that checkpoint and the ones before it, every bucket their
 /// states reference, and `.well-known/stellar-history.json` equal to that checkpoint's
-/// state. Returns the files written, relative to `out`. The files are written to a
-/// directory beside `out` and moved to `out` only once all of them are there, so a failure
-/// part way (a bucket the archive lacks, a bad member) leaves no `out` behind.
+/// state. Returns the files written, relative to `out`.
+///
+/// The files are written to a directory beside `out` and moved to `out` in one rename only
+/// once all of them are there, so a failure part way (a bucket the archive lacks, a bad
+/// member) leaves no `out` behind. The rename never replaces what is at `out`, not even an
+/// empty directory made there after the check above. Missing parent directories of `out`
+/// are created first and stay if it fails. `out` gets the mode a plain directory creation
+/// gives (0777 less the umask), so another user, such as a container, can read it.
 pub fn archive_at(tar_path: &Path, checkpoint: u32, out: &Path) -> Result<Vec<String>, PackError> {
     if out.exists() {
         return Err(PackError::Format(format!(
@@ -363,14 +368,21 @@ pub fn archive_at(tar_path: &Path, checkpoint: u32, out: &Path) -> Result<Vec<St
         _ => Path::new("."),
     };
     std::fs::create_dir_all(parent).map_err(io_err(parent))?;
-    let stage = tempfile::Builder::new()
-        .prefix(".archive-at-")
-        .tempdir_in(parent)
-        .map_err(io_err(parent))?;
+    // a scratch directory is recorded, so a signal removes it too. tempfile creates
+    // directories (unlike files) with the default mode, 0777 less the umask, which is the
+    // mode `out` keeps after the rename
+    let stage =
+        shapekit_process::scratch::scratch_in(parent, ".archive-at-").map_err(io_err(parent))?;
     let written = write_archive_at(tar_path, checkpoint, stage.path())?;
-    std::fs::rename(stage.path(), out).map_err(io_err(out))?;
-    // the directory now lives at `out`; there is nothing left for the guard to remove
-    let _ = stage.keep();
+    shapekit_process::rename::no_replace(stage.path(), out).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::AlreadyExists {
+            PackError::Format(format!("{} already exists", out.display()))
+        } else {
+            io_err(out)(e)
+        }
+    })?;
+    // the directory now lives at `out`: neither a drop nor a signal may remove it
+    stage.keep();
     Ok(written)
 }
 
