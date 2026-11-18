@@ -8,8 +8,8 @@
 //! recorded: same return value, ledger writes, contract events and success
 //! hash, or the same failure code), differs, unverified (the host ran but
 //! core's result code cannot confirm it ran there too), not run by core, or
-//! skipped (inputs the replay cannot rebuild exactly). Exits 0 only if the
-//! chain has at least one invocation and none differs. Built with `-C instrument-coverage`
+//! skipped (inputs the replay cannot rebuild exactly). Exits 0 only if at
+//! least one invocation ran on the host and was compared, and none differs. Built with `-C instrument-coverage`
 //! by `twin/host-cov.sh`, the run also leaves the host's coverage profile.
 
 use std::path::PathBuf;
@@ -17,7 +17,7 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use shapekit_core_driver::meta::read_all;
-use shapekit_twin::host_cov::{CoreResult, HOST_VERSION, Verdict, replay};
+use shapekit_twin::host_cov::{CoreResult, HOST_VERSION, Verdict, passes, replay};
 use stellar_xdr::{Limits, WriteXdr};
 
 fn main() -> ExitCode {
@@ -120,6 +120,5 @@ fn run() -> Result<bool> {
     }
     let summary: Vec<String> = counts.iter().map(|(k, v)| format!("{v} {k}")).collect();
     println!("{} invocations: {}", checks.len(), summary.join(", "));
-    let all = !counts.contains_key("DIFFERS");
-    Ok(all)
+    Ok(passes(&checks))
 }

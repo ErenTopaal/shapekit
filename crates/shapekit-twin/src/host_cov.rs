@@ -352,6 +352,23 @@ pub struct InvocationCheck {
     pub verdict: Verdict,
 }
 
+/// Whether a replay passes: at least one invocation ran on the host and was
+/// compared with core's result, and none differs. A chain whose every
+/// invocation was skipped or never reached the host shows nothing about the
+/// host, so it does not pass.
+pub fn passes(checks: &[InvocationCheck]) -> bool {
+    let compared = checks.iter().any(|c| {
+        matches!(
+            c.verdict,
+            Verdict::Verified | Verdict::Differs(_) | Verdict::Unverified(_)
+        )
+    });
+    compared
+        && !checks
+            .iter()
+            .any(|c| matches!(c.verdict, Verdict::Differs(_)))
+}
+
 fn lcm_v2(lcm: &LedgerCloseMeta) -> Option<&LedgerCloseMetaV2> {
     match lcm {
         LedgerCloseMeta::V2(m) => Some(m),
@@ -857,6 +874,15 @@ impl Call {
             self.cpu,
             self.mem,
         )?;
+        // the footprint keys that held an entry before the call: core erases only those
+        let mut existed = std::collections::BTreeSet::new();
+        for buf in self.entries.iter().filter_map(|(b, _)| b.as_ref()) {
+            existed.insert(
+                LedgerEntry::from_xdr(buf, Limits::none())?
+                    .to_key()
+                    .to_xdr(Limits::none())?,
+            );
+        }
         let mut diagnostics = Vec::new();
         // an Err here is a failed call, as in core's run_invoke_and_build_output
         let res = e2e_invoke::invoke_host_function(
@@ -895,7 +921,7 @@ impl Call {
                 success: true,
                 error: None,
                 return_value: Some(ScVal::from_xdr(&b, Limits::none())?),
-                writes: host_writes(&out.ledger_changes, seq)?,
+                writes: host_writes(&out.ledger_changes, seq, &existed)?,
                 events: out
                     .encoded_contract_events
                     .iter()
@@ -996,21 +1022,34 @@ fn judge(
 
 /// Writes the host's output implies. Core stamps every written entry with
 /// the ledger it closes in; a TTL change only becomes a write when it
-/// extends the TTL.
-fn host_writes(changes: &[HostChange], seq: u32) -> Result<BTreeMap<String, Write>, HostCovError> {
+/// extends the TTL. A read-write key without a new value is erased only when
+/// it held an entry before the call (`existed`, keys as XDR), and erasing a
+/// contract entry erases its TTL entry with it, as core's
+/// `recordStorageChanges` does.
+fn host_writes(
+    changes: &[HostChange],
+    seq: u32,
+    existed: &std::collections::BTreeSet<Vec<u8>>,
+) -> Result<BTreeMap<String, Write>, HostCovError> {
     let mut out = BTreeMap::new();
     for c in changes {
         let key = LedgerKey::from_xdr(&c.encoded_key, Limits::none())?;
         if !c.read_only {
-            let w = match &c.encoded_new_value {
+            match &c.encoded_new_value {
                 Some(v) => {
                     let mut e = LedgerEntry::from_xdr(v, Limits::none())?;
                     e.last_modified_ledger_seq = seq;
-                    Write::Upsert(Box::new(e))
+                    out.insert(hex::encode(key_bytes(&key)?), Write::Upsert(Box::new(e)));
                 }
-                None => Write::Delete,
-            };
-            out.insert(hex::encode(key_bytes(&key)?), w);
+                None if existed.contains(&c.encoded_key) => {
+                    out.insert(hex::encode(key_bytes(&key)?), Write::Delete);
+                    if is_soroban_entry(&key) {
+                        out.insert(hex::encode(key_bytes(&ttl_key(&key)?)?), Write::Delete);
+                    }
+                }
+                // absent before and after: nothing to erase
+                None => {}
+            }
         }
         if let Some(t) = &c.ttl_change
             && t.new_live_until_ledger > t.old_live_until_ledger
@@ -1070,6 +1109,70 @@ mod tests {
         h.update([0, 0, 0, 0, 0, 0, 1, 2]);
         let want: [u8; 32] = h.finalize().into();
         assert_eq!(sub_sha256(&seed, 258), want);
+    }
+
+    fn data_key(byte: u8) -> LedgerKey {
+        LedgerKey::ContractData(stellar_xdr::LedgerKeyContractData {
+            contract: stellar_xdr::ScAddress::Contract(stellar_xdr::ContractId(stellar_xdr::Hash(
+                [byte; 32],
+            ))),
+            key: stellar_xdr::ScVal::U32(1),
+            durability: stellar_xdr::ContractDataDurability::Persistent,
+        })
+    }
+
+    fn removed(key: &LedgerKey) -> HostChange {
+        HostChange {
+            read_only: false,
+            encoded_key: key.to_xdr(Limits::none()).unwrap(),
+            ..Default::default()
+        }
+    }
+
+    fn check(verdict: Verdict) -> InvocationCheck {
+        InvocationCheck {
+            ledger: 3,
+            tx_index: 0,
+            tx_hash: [0; 32],
+            core: CoreResult::Trapped,
+            host: None,
+            meta_return: None,
+            meta_writes: BTreeMap::new(),
+            meta_events: Vec::new(),
+            verdict,
+        }
+    }
+
+    #[test]
+    fn a_replay_passes_only_when_something_was_compared_and_nothing_differs() {
+        assert!(!passes(&[]));
+        assert!(!passes(&[
+            check(Verdict::Skipped("x".into())),
+            check(Verdict::NotRunByCore)
+        ]));
+        assert!(passes(&[
+            check(Verdict::Skipped("x".into())),
+            check(Verdict::Verified)
+        ]));
+        assert!(!passes(&[
+            check(Verdict::Verified),
+            check(Verdict::Differs("x".into()))
+        ]));
+    }
+
+    #[test]
+    fn only_entries_that_existed_are_erased_and_their_ttl_with_them() {
+        let (gone, never) = (data_key(1), data_key(2));
+        let existed = std::collections::BTreeSet::from([gone.to_xdr(Limits::none()).unwrap()]);
+        let w = host_writes(&[removed(&gone), removed(&never)], 9, &existed).unwrap();
+        let hex_of = |k: &LedgerKey| hex::encode(key_bytes(k).unwrap());
+        assert_eq!(
+            w,
+            BTreeMap::from([
+                (hex_of(&gone), Write::Delete),
+                (hex_of(&ttl_key(&gone).unwrap()), Write::Delete),
+            ])
+        );
     }
 
     fn account(byte: u8, balance: i64) -> LedgerEntry {
