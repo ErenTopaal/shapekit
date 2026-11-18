@@ -253,6 +253,17 @@ fn a_chain_id_under_both_corpus_and_candidate_is_ambiguous() {
     );
 }
 
+// chains that cannot be listed are an error, not an empty list that compares nothing
+#[test]
+fn an_unreadable_chains_directory_is_an_error() {
+    let dir = layout(&[], LISTED);
+    let root = dir.path();
+    fs::create_dir_all(root.join("candidate")).unwrap();
+    fs::write(root.join("candidate/chains"), "not a directory").unwrap();
+    let err = ledger::build(root, &root.join("corpus"), &root.join("registry")).unwrap_err();
+    assert!(err.to_string().contains("candidate/chains"), "{err}");
+}
+
 #[test]
 fn a_witness_naming_a_moved_recipe_or_chain_is_a_problem() {
     let dir = layout(

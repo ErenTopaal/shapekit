@@ -41,7 +41,22 @@ fn laws_check_of_a_corpus_without_ledgers() {
     let out = shapekit(&["laws", "check", "--corpus", tmp.path().to_str().unwrap()]);
     assert_eq!(out.status.code(), Some(2), "{}", stderr(&out));
     assert!(
-        stderr(&out).contains("no LedgerCloseMeta entry"),
+        stderr(&out).contains("no LedgerCloseMeta entry with a variant"),
+        "{}",
+        stderr(&out)
+    );
+    // an entry whose variants are empty checks no law either
+    let empty = tmp.path().join("empty");
+    std::fs::create_dir(&empty).unwrap();
+    std::fs::write(
+        empty.join("manifest.json"),
+        r#"{"entries":[{"id":"x","xdr_type":"LedgerCloseMeta","variants":{}}]}"#,
+    )
+    .unwrap();
+    let out = shapekit(&["laws", "check", "--corpus", empty.to_str().unwrap()]);
+    assert_eq!(out.status.code(), Some(2), "{}", stderr(&out));
+    assert!(
+        stderr(&out).contains("no LedgerCloseMeta entry with a variant"),
         "{}",
         stderr(&out)
     );

@@ -265,7 +265,7 @@ fn unquote_go(s: &str) -> Result<Vec<u8>> {
 /// Seeds in the shared input format, one file each.
 fn write_seeds(cfg: &NativeConfig, dir: &Path) -> Result<usize> {
     std::fs::create_dir_all(dir)?;
-    let seeds = crate::load_seeds(&cfg.root.join("corpus"), &FuzzType::ALL, cfg.max_seed_bytes)?;
+    let seeds = crate::load_seeds(&cfg.root.join("corpus"), FuzzType::ALL, cfg.max_seed_bytes)?;
     let mut n = 0;
     for (ty, list) in seeds {
         let sel = FuzzType::ALL

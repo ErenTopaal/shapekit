@@ -186,10 +186,12 @@ fn check_corpus(dir: &Path, json: bool) -> Result<bool> {
             total.merge(checker.report);
         }
     }
-    // a corpus without a ledger entry checks no law, which must not read as every law holding
+    // a corpus without a ledger variant checks no law, which must not read as every law
+    // holding; that is the case with no LedgerCloseMeta entry and with entries whose variants
+    // are empty
     if checked_variants == 0 {
         bail!(
-            "{} has no LedgerCloseMeta entry, so no law was checked",
+            "{} has no LedgerCloseMeta entry with a variant to check, so no law was checked",
             manifest_path.display()
         );
     }
