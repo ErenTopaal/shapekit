@@ -266,7 +266,15 @@ jobs:
         run: |
           shapekit corpus pack --out "$RUNNER_TEMP/dist"
           cat "$RUNNER_TEMP/dist/SHA256SUMS"
+      - name: findings check, no drafts tolerated
+        run: shapekit findings check
       - run: scripts/check-no-em-dash.sh
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.13.1
+      - name: relative links and anchors of the tracked markdown
+        # offline: an external site being down must not fail a pull request
+        run: node scripts/check-links.ts --offline
 
   repro-select:
     runs-on: ubuntu-24.04
